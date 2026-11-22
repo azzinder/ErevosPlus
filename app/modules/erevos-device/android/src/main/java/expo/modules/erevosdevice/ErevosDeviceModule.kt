@@ -263,6 +263,15 @@ class ErevosDeviceModule : Module() {
       MoveNet.place(app)
     }
 
+    // An app moved out ends its process as its screen is left (components/moved-out.tsx): only then,
+    // never with a move not made.
+    Function("endProcess") {
+      val app = context?.applicationContext ?: return@Function false
+      if (!java.io.File(app.filesDir, "moved-out.json").exists()) return@Function false
+      android.os.Process.killProcess(android.os.Process.myPid())
+      true
+    }
+
     Function("moveDropNet") {
       val app = context?.applicationContext ?: return@Function false
       MoveNet.drop(app)

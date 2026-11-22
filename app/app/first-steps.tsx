@@ -14,7 +14,7 @@ import { Button, Card, Page, Row, SectionTitle, Text, TextButton } from '../comp
 import { loadCloudBackup } from '../lib/backup-cloud';
 import { loadAutoBackup } from '../lib/backup-folder';
 import { backgroundState } from '../lib/background';
-import { findMoves, takeMove, type FoundMove } from '../lib/edition-move';
+import { findMoves, moveErrorText, takeMove, type FoundMove } from '../lib/edition-move';
 import { plural, t } from '../lib/i18n';
 import type { Module } from '../lib/modules';
 import { myNameAt, setMyNameAt } from '../lib/my-name';
@@ -153,7 +153,7 @@ export default function FirstSteps() {
     try {
       await takeMove(found, (done, all) => setTaking(Math.floor((done * 100) / Math.max(1, all))));
     } catch (error) {
-      setMoveError(t('It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.', { error: error instanceof Error ? error.message : String(error), edition: updateEditionName(found.from) }));
+      setMoveError(moveErrorText(error, updateEditionName(found.from)));
       return;
     } finally {
       setTaking(null);

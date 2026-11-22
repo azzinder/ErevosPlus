@@ -93,6 +93,8 @@ type Device = {
   moveTakeNet?(pkg: string): Promise<number>;
   /** Puts in place what a move carried: false when an engine is open here, and it goes in place at the next start. */
   movePlaceNet?(): Promise<boolean>;
+  /** Ends this app's process (an app moved out, left: lib/move-state.ts), so no engine runs on in it. */
+  endProcess?(): void;
   /** Deletes what a move carried and did not put in place. */
   moveDropNet?(): boolean;
   /** Whether what a move carried waits for the next start to go in place. */

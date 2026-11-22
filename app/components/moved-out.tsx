@@ -3,15 +3,16 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import Constants from 'expo-constants';
-import { useState } from 'react';
-import { Linking, ScrollView, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AppState, Linking, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ask } from '../lib/alert';
-import { cancelMove, declineMove, openEdition, takeMove, type FoundMove } from '../lib/edition-move';
+import { cancelMove, declineMove, moveErrorText, openEdition, takeMove, type FoundMove } from '../lib/edition-move';
 import { t } from '../lib/i18n';
 import { wipeNow } from '../lib/panic';
 import { holdReceiver } from '../lib/receiver';
+import { device } from '../modules/erevos-device';
 import { channelPage } from '../lib/updates';
 import { channelsOf, isTestVersion, updateEditionName, type UpdateEdition } from '../lib/update-channel';
 import { Logo } from '../lock/gate';
@@ -51,6 +52,18 @@ function Page({ children }: { children: React.ReactNode }) {
 export function MovedOut({ to, taken, onChanged }: { to: UpdateEdition; taken: boolean; onChanged: () => void }) {
   const name = updateEditionName(to);
   const [note, setNote] = useState('');
+
+  // As this app moved out, the engines of the networks that cannot stop by themselves (Signal's,
+  // Session's) may still run in its process: what they take in meanwhile is kept in their own
+  // folders, which go with the move (MoveNet.kt reads them only from a process started after it).
+  // So that nothing runs here longer, the process ends as soon as this screen is left; opened
+  // again, it starts with no engine, as none opens in an app moved out.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'background') device?.endProcess?.();
+    });
+    return () => subscription.remove();
+  }, []);
 
   const open = () => {
     if (!openEdition(to)) setNote(t('{edition} is not on this phone yet. Install it from its download page, then open it.', { edition: name }));
@@ -142,7 +155,7 @@ export function MoveFound({ move, onDone, onLater }: { move: FoundMove; onDone: 
                 onDone();
               }, (e: unknown) => {
                 setTaking(null);
-                setError(t('It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.', { error: e instanceof Error ? e.message : String(e), edition: name }));
+                setError(moveErrorText(e, name));
               }),
           );
         },

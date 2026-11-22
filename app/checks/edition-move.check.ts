@@ -168,9 +168,22 @@ test("Erevos+'s bridge (app.erevos) moves to app.erevos.plus, end to end, and no
 
 test('a move taken is told to the edition moved from at the next start, should it fail then', () => {
   const move = readFileSync('lib/edition-move.ts', 'utf8');
-  assert.match(move, /if \(!placed \|\| !\(await device!\.moveDone!\(move\.pkg\)\.catch\(\(\) => false\)\)\) keepFile\(DONE_DUE, move\.pkg\)/);
-  // Nor while what the engines carried waits for the next start to go in place.
-  assert.match(move, /if \(device\?\.moveNetPending\?\.\(\)\) return;/);
+  assert.match(move, /if \(!\(await device!\.moveDone!\(move\.pkg\)\.catch\(\(\) => false\)\)\) keepFile\(DONE_DUE, move\.pkg\)/);
+  // Told as soon as the backup restored, even with the engines' part still to go in place, so the
+  // edition moved from never sees its move go stale and opens again (review Δ2).
+  assert.ok(move.indexOf('moveDone!(move.pkg)') > move.indexOf('movePlaceNet!()'));
+  assert.doesNotMatch(move, /!placed \|\|/);
+  // What could not go in place is put there as Erevos starts, before any space opens, and Erevos says why should it not go (Δ3).
+  const layout2 = readFileSync('app/_layout.tsx', 'utf8');
+  assert.ok(layout2.indexOf('await placeCarried()') > 0 && layout2.indexOf('await placeCarried()') < layout2.indexOf('waitingMove()'));
+  assert.match(move, /t\('Try again'\), onPress: \(\) => void placeCarried\(\)/);
+  // The engines' part not taken: its own words, about the accounts Backups would leave behind (Δ3).
+  assert.match(move, /throw new CarryError/);
+  for (const screen of ['components/moved-out.tsx', 'app/first-steps.tsx']) assert.match(readFileSync(screen, 'utf8'), /moveErrorText\(/, screen);
+  // An app moved out ends its process as its screen is left, so no engine runs on there (Δ1).
+  assert.match(readFileSync('components/moved-out.tsx', 'utf8'), /if \(state === 'background'\) device\?\.endProcess\?\.\(\)/);
+  const deviceKt = readFileSync('modules/erevos-device/android/src/main/java/expo/modules/erevosdevice/ErevosDeviceModule.kt', 'utf8');
+  assert.match(deviceKt, /Function\("endProcess"\) \{[^}]*moved-out\.json"\)\.exists\(\)\) return@Function false/);
   const layout = readFileSync('app/_layout.tsx', 'utf8');
   assert.match(layout, /void tellMoveTaken\(\)/);
   // Nothing is received while a move is taken before the lock.

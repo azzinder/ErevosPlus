@@ -48,7 +48,9 @@ import kotlin.concurrent.thread
  * and none of them changes as it goes. An older process is ended instead, and asked again. The edition
  * moved to writes it beside its own (move-net-in), only where its own manifest says it carries the
  * same, and puts it in place once the backup was restored, before any engine of its own opened: at
- * once when none did in this process yet, else at its next start. The stream ends with `end`, so a
+ * once when none did in this process yet, else at its next start (or as lib/edition-move.ts
+ * placeCarried asks again). The edition moved from is told the move was taken as the backup restored:
+ * all of it is here by then. The stream ends with `end`, so a
  * cut one is never put in place.
  */
 internal object MoveNet {
