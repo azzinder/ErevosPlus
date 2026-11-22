@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 
+import type { AccountTor } from '../lib/account-tor';
 import { t } from '../lib/i18n';
 import { isXmppId, XmppRegisterError } from '../lib/xmpp';
 import { xmppRegister } from '../lib/xmpp-store';
@@ -16,7 +17,8 @@ import { Button, Card, Field, Input, Row, Text } from './ui';
 // accounts only on its website, says so, and gives its page when it named one: the account is made
 // there, and signed in to here with Sign in.
 
-export function XmppRegister() {
+/** `tor`: the new account's Tor choice from the start (lib/account-tor.ts). */
+export function XmppRegister({ tor = 'never' }: { tor?: AccountTor }) {
   const [jid, setJid] = useState('');
   const [password, setPassword] = useState('');
   const [server, setServer] = useState('');
@@ -29,7 +31,7 @@ export function XmppRegister() {
     setNote('');
     setPage(null);
     try {
-      await xmppRegister(jid.trim().toLowerCase(), password, server);
+      await xmppRegister(jid.trim().toLowerCase(), password, server, tor);
       setPassword('');
     } catch (error) {
       setNote(error instanceof Error ? error.message : String(error));

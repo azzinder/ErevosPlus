@@ -53,7 +53,11 @@ import {
   type MatrixMessage,
   type MatrixRoom,
   type MatrixState,
+  type MatrixTor,
+  roomsThroughTor,
+  matrixWayOf,
 } from './matrix';
+import { ACCOUNT_TOR_DEFAULT, accountThroughTor, accountTorOf } from './account-tor';
 import { formattedOf } from './matrix-html';
 import { backUpKeys, recoveryInfo, restoreLocked, setUpRecovery, takeGiven, unlockRecovery, type Unlocked } from './matrix-backup';
 import { fetchFile, fetchPicture, sendFile, sendSticker, uploadPicture, type OutgoingFile, type OutgoingSticker } from './matrix-media';
@@ -119,6 +123,8 @@ type Live = {
   heard: ReturnType<typeof hearing>;
   /** Whether its push while closed (lib/matrix-push.ts) was looked at this run. */
   pushChecked: boolean;
+  /** The Tor way chosen before signing in, which the account then keeps (MatrixState.tor): in memory only. */
+  tor?: MatrixTor;
 };
 
 let live: Live | null = null;
@@ -140,6 +146,58 @@ export function matrixNow(where: NetworkWhere = 'space'): { loaded: boolean; sta
   const it = where === 'place' ? places.shown() : live;
   return { loaded: it?.loaded ?? false, state: it?.state ?? null, problem: it?.problem ?? '' };
 }
+
+/** How the account `where` reaches its homeserver (lib/account-tor.ts): its own way once signed in, or the one chosen for signing in; Off unless chosen. */
+export function matrixTorWay(where: NetworkWhere = 'space'): MatrixTor {
+  const it = where === 'place' ? places.shown() : live;
+  return accountTorOf(it?.state ? it.state.tor : it?.tor);
+}
+
+/** Whether a room of the account `where` goes «Through Tor», which makes the whole account go only through Tor. */
+export function matrixRoomsThroughTor(where: NetworkWhere = 'space'): boolean {
+  const it = where === 'place' ? places.shown() : live;
+  return !!it?.state && roomsThroughTor(it.state);
+}
+
+/**
+ * Sets how the account on the screen reaches its homeserver: from its next request on, the sync
+ * too. Before signing in, how the sign-in goes, and the account then keeps it.
+ */
+export function matrixSetTor(way: MatrixTor): Promise<void> {
+  const it = acting();
+  if (!it || it.stopped) return Promise.reject(new Error(t('There is no Matrix account in this space.')));
+  if (!it.state) {
+    if (way === ACCOUNT_TOR_DEFAULT) delete it.tor;
+    else it.tor = way;
+    told();
+    return Promise.resolve();
+  }
+  const signed = it as Live & { state: MatrixState };
+  return changeAccount(signed, async () => {
+    if (way === ACCOUNT_TOR_DEFAULT) delete signed.state.tor;
+    else signed.state.tor = way;
+  });
+}
+
+/** Whether the account on the screen (lib/network-place.ts) sends through Tor now, `files` for photos and files: its way, or Always while a room of it goes «Through Tor». */
+export function matrixActingThroughTor(files = false): boolean {
+  const it = acting();
+  return accountThroughTor(it?.state ? matrixWayOf(it.state) : accountTorOf(it?.tor), files);
+}
+
+/** A room's «Through Tor»: on, the whole account goes only through Tor while it is (lib/matrix.ts matrixWayOf). */
+export function matrixSetRoomTor(roomId: string, on: boolean): Promise<void> {
+  const it = need();
+  return changeAccount(it, async () => {
+    const room = it.state.rooms[roomId];
+    if (!room) return;
+    if (on) room.tor = true;
+    else delete room.tor;
+  });
+}
+
+// The Tor way an account signing in goes by: the one chosen on its screen.
+const signingTor = (it: Live): MatrixTor | undefined => it.tor;
 
 /** The account the screen on top acts on. */
 function acting(): Live | null {
@@ -481,8 +539,8 @@ export async function matrixSignIn(who: string, password: string, server = ''): 
   const it = acting();
   if (!it || it.stopped) throw new Error(t('There is no Matrix account in this space.'));
   try {
-    const homeserver = await findHomeserver(server.trim() || who);
-    const state = await signIn(homeserver, who, password);
+    const homeserver = await findHomeserver(server.trim() || who, signingTor(it));
+    const state = await signIn(homeserver, who, password, signingTor(it));
     state.restored = await lastRestore();
     await changeAccount(it, async () => {
       it.state = state;
@@ -506,9 +564,10 @@ const SSO_LASTS = 10 * 60_000;
 
 /** The ways the homeserver of `whoOrServer` lets one sign in. */
 export async function matrixLoginWays(whoOrServer: string): Promise<LoginWays & { homeserver: string }> {
+  const tor = acting()?.tor;
   try {
-    const homeserver = await findHomeserver(whoOrServer);
-    return { homeserver, ...(await loginWays(homeserver)) };
+    const homeserver = await findHomeserver(whoOrServer, tor);
+    return { homeserver, ...(await loginWays(homeserver, tor)) };
   } catch (error) {
     throw new Error(reason(error));
   }
@@ -538,7 +597,7 @@ export async function matrixSsoFinish(mark: string, token: string): Promise<void
   sso = null;
   if (it.state) throw new Error(t('This space is signed in to Matrix already.'));
   try {
-    const state = await signInWithToken(under.homeserver, token);
+    const state = await signInWithToken(under.homeserver, token, signingTor(it));
     state.restored = await lastRestore();
     await changeAccount(it, async () => {
       it.state = state;
@@ -582,7 +641,7 @@ export async function matrixTake(space: number, given: GivenMatrix, place?: Plac
   if (!it.state && given.token) {
     let state: MatrixState;
     try {
-      state = await signInWithToken(given.homeserver, given.token);
+      state = await signInWithToken(given.homeserver, given.token, signingTor(it));
     } catch {
       // A token too old, or one the homeserver did not take: signed in to by hand.
       return { state: 'wait' };
@@ -900,8 +959,8 @@ export async function matrixRegister(server: string, name: string, password: str
   if (!it || it.stopped) throw new Error(t('There is no Matrix account in this space.'));
   if (it.state) throw new Error(t('This space is signed in to Matrix already.'));
   try {
-    const homeserver = await findHomeserver(server);
-    const made = await register(homeserver, name.trim(), password, auth);
+    const homeserver = await findHomeserver(server, signingTor(it));
+    const made = await register(homeserver, name.trim(), password, auth, signingTor(it));
     if ('ask' in made) return { ask: made.ask, homeserver };
     const state = made.state;
     state.restored = await lastRestore();

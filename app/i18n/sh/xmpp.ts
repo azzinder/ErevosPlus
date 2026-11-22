@@ -44,8 +44,6 @@ export const xmpp: Record<string, string> = {
   "Locked: this message could not be opened on this device.": "Zaključano: ova poruka se nije mogla otvoriti na ovom uređaju.",
   "not encrypted": "nije šifrovano",
   "Chat with people on XMPP, who use Conversations, Monal, Gajim, Dino or another XMPP app. Messages are encrypted with OMEMO, but these chats are not anonymous: the XMPP server sees who talks with whom, and when.": "Razgovarajte s ljudima na XMPP-u, koji koriste Conversations, Monal, Gajim, Dino ili drugu XMPP aplikaciju. Poruke se šifriraju OMEMO-om, ali ovi razgovori nisu anonimni: XMPP server vidi ko s kim razgovara, i kada.",
-  "Through Tor: the XMPP server does not see your address.": "Preko Tora: XMPP server ne vidi vašu adresu.",
-  "Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.": "Trenutno ne preko Tora: XMPP server vidi vašu adresu. Tor je u Postavke → Relay i mreže → Tor.",
   "XMPP address": "XMPP adresa",
   "Only when the server is not the one in your address, or cannot be found. A name, name:port or a wss:// address.": "Samo kad server nije onaj iz vaše adrese ili se ne može naći. Ime, ime:port ili wss:// adresa.",
   "Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.": "Erevos se prijavljuje kao novi uređaj računa i drži prijavu šifrovanom samo u ovom prostoru.",
@@ -143,4 +141,8 @@ export const xmpp: Record<string, string> = {
     "Vaš relay još ne prima XMPP obavijesti: treba ga ažurirati.",
   "Your XMPP server does not send notices to apps that are away.":
     "Vaš XMPP server ne šalje obavijesti aplikacijama koje nisu uključene.",
+  "Always through Tor":
+    "Uvijek preko Tora",
+  "This XMPP account goes only through Tor, which this server address cannot.":
+    "Ovaj XMPP račun ide samo preko Tora, što ova adresa servera ne može.",
 };

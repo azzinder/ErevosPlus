@@ -313,3 +313,14 @@ test('a bare web name with a known ending is a link too, as Telegram and Signal 
   assert.deepEqual(urls('photo.jpg and notes.txt, v1.2'), []);
   assert.deepEqual(urls('https://example.org/a.com'), ['https://example.org/a.com']);
 });
+
+test('a very long run of names, dots and dashes is read in one go, with no pattern inside a pattern (it closed the app on Hermes)', () => {
+  const source = readFileSync(join(import.meta.dirname, '../lib/links.ts'), 'utf8');
+  assert.ok(!/new RegExp|\)\+|\)\*/.test(source.replace(/\/\/.*$/gm, '')), 'no repeating group in lib/links.ts');
+  const long = `${'a.'.repeat(100_000)}com ${'x-'.repeat(50_000)} https://${'y'.repeat(50_000)} ${'('.repeat(20_000)}`;
+  const started = Date.now();
+  const found = urls(long);
+  assert.ok(Date.now() - started < 2000);
+  assert.deepEqual(found, [`https://${'y'.repeat(50_000)}`]);
+  assert.deepEqual(urls(`(${'ab-cd.'.repeat(30)}gr) and «t.me/x»`), [`https://${'ab-cd.'.repeat(30)}gr`, 'https://t.me/x']);
+});

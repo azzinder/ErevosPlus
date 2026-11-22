@@ -12,7 +12,7 @@ import { test } from 'node:test';
 
 import { ALWAYS, type ChatNotify } from '../lock/chat-notify';
 import { chatNotify } from '../lib/chat-notices';
-import { addNetwork, hearing, isNetworkChat, networkNotify, networkUnreadAt, onNetworkMessage, onNetworkRead, unreadChange } from '../lib/network-notices';
+import { addNetwork, hearing, isNetworkChat, networkNotify, networkUnreadAt, onNetworkMessage, onNetworkRead, onPlaceNetworkMessage, unreadChange } from '../lib/network-notices';
 import { NoticeCount } from '../lib/notice-count';
 
 test('what went up came, what went down or went was read', () => {
@@ -104,6 +104,31 @@ test("a muted network chat is left out of the number, and its own notifications 
   assert.equal(networkUnreadAt().size, 2);
   addNetwork('nostr:', { unread: () => new Map(), notifyOf: () => null });
   addNetwork('matrix:', { unread: () => new Map(), notifyOf: () => null });
+});
+
+test("a hidden place's own Matrix room, muted, tells of nothing; the others tell only their place", () => {
+  const notify: Record<string, ChatNotify> = { 'matrix:!quiet:example.org': { until: ALWAYS }, 'matrix:!once:example.org': { until: 1 } };
+  const told: [number, number, string, number][] = [];
+  const space: string[] = [];
+  const stopPlace = onPlaceNetworkMessage((s, pocket, where, times) => told.push([s, pocket, where, times]));
+  const stopCame = onNetworkMessage((where) => space.push(where));
+  const heard = hearing({ space: 2, pocket: 3 }, (where) => notify[where] ?? null);
+  heard.hear(new Map());
+  heard.hear(
+    new Map([
+      ['matrix:!quiet:example.org', 4],
+      ['matrix:!once:example.org', 1],
+      ['matrix:!loud:example.org', 2],
+    ]),
+  );
+  assert.deepEqual(told, [
+    [2, 3, 'matrix:!once:example.org', 1],
+    [2, 3, 'matrix:!loud:example.org', 2],
+  ]);
+  // Nothing of it reaches the open space's notices.
+  assert.deepEqual(space, []);
+  stopPlace();
+  stopCame();
 });
 
 test("the Android notice counts network chats as the space's own, also as Erevos leaves the screen", () => {

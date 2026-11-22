@@ -7,9 +7,10 @@ import { closeMatrixPlaces, followMatrixPlaces } from './matrix-store';
 import { closeNostrDmPlaces, followNostrDmPlaces } from './nostr-dm-store';
 import { onPlacesChange, receivingPlaces } from './place-receiver';
 import type { PlaceKey } from './place-lives';
+import { closeTelegramPlaces, followTelegramPlaces } from './telegram-store';
 import { closeXmppPlaces, followXmppPlaces } from './xmpp-store';
 
-// A hidden place's own accounts on Matrix, XMPP and Nostr (docs/matrix.md, docs/xmpp.md,
+// A hidden place's own accounts on Matrix, XMPP, Nostr and Telegram (the ErevosGram build) (docs/matrix.md, docs/xmpp.md,
 // docs/nostr-chats.md): each kept in the place's own value of its network's file, sealed with the
 // place's key (lock/xmpp-data.ts and the others), apart from the space's, which never sees them.
 // They run while the place's hidden chats are open, beside the space's; and as its hidden chats
@@ -37,11 +38,13 @@ export function watchPlaceNetworks(): () => void {
     followMatrixPlaces(space, wanted, shown);
     followXmppPlaces(space, wanted, shown);
     followNostrDmPlaces(space, wanted, shown);
+    followTelegramPlaces(space, wanted, shown);
   };
   const closeAll = () => {
     closeMatrixPlaces();
     closeXmppPlaces();
     closeNostrDmPlaces();
+    closeTelegramPlaces();
   };
   follow();
   const stopOpen = onHiddenPlaceChange(follow);

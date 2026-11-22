@@ -14,4 +14,13 @@ export const nostrMore: Record<string, string> = {
   'Your vote is public: anyone can see what you chose.': 'Seu voto é público: qualquer pessoa pode ver o que você escolheu.',
   '{n} vote': '{n} voto',
   '{n} votes': '{n} votos',
+  'Through Tor: on': 'Pelo Tor: ligado',
+  'What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.':
+    'O que você envia aqui, a busca de onde a pessoa lê e as fotos e arquivos desta conversa passam só pelo Tor, em circuitos próprios, seja qual for o modo Tor do espaço; nunca sem Tor. O que chega para você segue a sua conta Nostr, cujos relays são lidos uma vez para todas as conversas dela.',
+  'Not through Tor now: the Nostr relays see your address.':
+    'Agora não vai pelo Tor: os relays Nostr veem o seu endereço.',
+  'Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.':
+    'Agora não vai pelo Tor: os relays Nostr veem o seu endereço. O Tor desta conta fica em Configurações → Relay e redes → Conversas Nostr.',
+  'A chat can also go through Tor by itself, on circuits of its own: «Through Tor» at its foot. It does, whatever is chosen here.':
+    'Uma conversa também pode ir pelo Tor sozinha, em circuitos próprios: «Pelo Tor» no pé da conversa. Ela vai assim, seja qual for a escolha aqui.',
 };

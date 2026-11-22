@@ -13,6 +13,8 @@
 // module; `lite` is the plain Erevos, with only Erevos's own chats, the Phone, the SMS and the
 // Collection, its core built without the other networks. Same package: one or the other is on a
 // phone, and moving between them keeps everything. Kept in `extra.edition` (lib/edition.ts).
+// EREVOS_TELEGRAM=1 puts Telegram into Erevos+ (docs/erevosgram.md): the same package with Telegram
+// (modules/erevos-telegram), marked in `extra.edition` so Check for updates takes its own APK.
 const INSTALL_PACKAGES = 'android.permission.REQUEST_INSTALL_PACKAGES';
 
 module.exports = ({ config }) => {
@@ -22,6 +24,9 @@ module.exports = ({ config }) => {
   const fdroid = distribution === 'fdroid';
   const edition = process.env.EREVOS_EDITION || 'plus';
   if (edition !== 'plus' && edition !== 'lite') throw new Error(`EREVOS_EDITION is "${edition}": only "plus" and "lite" are known`);
+  const erevosgram = process.env.EREVOS_TELEGRAM === '1';
+  if (erevosgram && fdroid) throw new Error('The F-Droid build has no Telegram: EREVOS_TELEGRAM and EREVOS_DISTRIBUTION=fdroid do not go together');
+  if (erevosgram && edition === 'lite') throw new Error('The plain Erevos has no Telegram: EREVOS_TELEGRAM and EREVOS_EDITION=lite do not go together');
   return {
     ...config,
     // The name under the icon is the edition's: Erevos+, or Erevos for the plain one.
@@ -37,7 +42,7 @@ module.exports = ({ config }) => {
           }
         : {}),
     },
-    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(edition === 'lite' ? { edition } : {}) },
-    plugins: [...(config.plugins || []), './plugins/with-release-signing', './plugins/with-native-programs', './plugins/with-unshrunk-release', './plugins/with-no-gms-entry', './plugins/with-launcher-icons', './plugins/with-movable-views', './plugins/with-latest-intent', './plugins/with-notices'],
+    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(erevosgram ? { edition: 'erevosgram' } : edition === 'lite' ? { edition } : {}) },
+    plugins: [...(config.plugins || []), './plugins/with-release-signing', './plugins/with-native-programs', './plugins/with-unshrunk-release', './plugins/with-no-gms-entry', './plugins/with-launcher-icons', './plugins/with-movable-views', './plugins/with-latest-intent', './plugins/with-notices', ...(edition === 'plus' ? ['./plugins/with-session-maven'] : [])],
   };
 };

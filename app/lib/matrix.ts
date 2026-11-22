@@ -70,7 +70,8 @@ import {
 } from './matrix-parts';
 import { creatorsOf, powerOfContent, type MatrixPower } from './matrix-power';
 import { fetchCapped, HTTP_MOST, HttpTooLargeError } from './net-http';
-import { throughTor, torFor } from './relay';
+import { ensureTor } from './tor';
+import { ACCOUNT_TOR_DEFAULT, accountNeverStraight, accountThroughTor, AccountTorError, accountTorOf, effectiveTor, type AccountTor } from './account-tor';
 import { editionName } from './edition';
 
 /** The olm and megolm algorithms, as Matrix names them. */
@@ -157,6 +158,8 @@ export type MatrixRoom = {
   name: string;
   /** Members by their Matrix ID: 'join' or 'invite', with their display name. */
   members: Record<string, { membership: 'join' | 'invite'; name?: string; avatar?: string }>;
+  /** «Through Tor»: on, the whole account goes only through Tor while it is (matrixWayOf). */
+  tor?: true;
   /** Its picture (m.room.avatar), an mxc:// address; members' are theirs (avatar_url). */
   avatar?: string;
   encrypted: boolean;
@@ -276,7 +279,30 @@ export type MatrixState = {
   writing?: ChatWriting;
   /** Those the account blocks (m.ignored_user_list), as the homeserver last said (lib/matrix-rules.ts). */
   ignored?: string[];
+  /** How this account goes through Tor (lib/account-tor.ts): absent, Off, as every account starts. */
+  tor?: MatrixTor;
 };
+
+/**
+ * How one Matrix account reaches its homeserver, as every account of another network does
+ * (lib/account-tor.ts): 'never' (Off, the default), 'space', or 'always'. A room «Through Tor»
+ * (MatrixRoom.tor) makes the whole account 'always' while it is: the account syncs on one
+ * connection, which would tell the homeserver the phone's address whatever one room's sends did.
+ */
+export type MatrixTor = AccountTor;
+
+/** What a request needs to reach a homeserver: where it is, the account's token once signed in, its Tor way, and its rooms (one «Through Tor» makes it 'always'). */
+export type MatrixServer = { homeserver: string; accessToken?: string; tor?: MatrixTor; rooms?: Record<string, Pick<MatrixRoom, 'tor'>> };
+
+/** Whether a room of the account goes «Through Tor». */
+export function roomsThroughTor(state: { rooms?: Record<string, Pick<MatrixRoom, 'tor'>> }): boolean {
+  return Object.values(state.rooms ?? {}).some((room) => room.tor === true);
+}
+
+/** The Tor way an account's requests go by now: its own, or 'always' while a room of it goes «Through Tor». */
+export function matrixWayOf(state: MatrixServer): MatrixTor {
+  return effectiveTor(accountTorOf(state.tor), roomsThroughTor(state));
+}
 
 // The homeserver's answer to one request.
 export type MatrixAnswer = { status: number; json: Json; bytes?: Uint8Array };
@@ -292,6 +318,8 @@ export type MatrixRequest = {
   raw?: boolean;
   /** The most bytes the answer may have, HTTP_MOST unless less (lib/net-http.ts). */
   most?: number;
+  /** The account's Tor way now (matrixWayOf): Off when absent. */
+  tor?: MatrixTor;
 };
 export type MatrixHttp = (request: MatrixRequest) => Promise<MatrixAnswer>;
 
@@ -334,30 +362,39 @@ async function viaTor(asked: MatrixRequest): Promise<MatrixAnswer> {
 }
 
 /**
- * The way the space goes through Tor (lib/tor.ts) is Matrix's too: with 'all', every request
- * goes through Tor, and none without it; with 'messages', each goes through Tor while it is
- * ready, photos and files too, and straight when it is not, as Erevos's own messages do; with
- * 'off', straight. The checks put a homeserver of their own here.
+ * How a request goes, by the account's Tor way (lib/account-tor.ts): Off, straight; As the space,
+ * as the space's way says, files and media through Tor only with Everything, and straight while
+ * Tor is not ready with Messages; Always, or the space's Everything, only through Tor, Tor started
+ * for it when the space's way did not, and never straight. The checks put a homeserver of their
+ * own here.
  */
 export const defaultMatrixHttp: MatrixHttp = async (asked) => {
-  const tor = canTorHttp() && torFor(false);
-  if (!tor) {
-    if (throughTor()) throw new Error(t('Tor is not ready.'));
-    return straight(asked);
+  const way = accountTorOf(asked.tor);
+  const files = !!asked.bytes || !!asked.raw;
+  const never = accountNeverStraight(way);
+  if (!never && !accountThroughTor(way, files)) return straight(asked);
+  if (never) {
+    if (!canTorHttp()) throw new AccountTorError();
+    try {
+      await ensureTor();
+    } catch {
+      throw new AccountTorError();
+    }
+    return viaTor(asked);
   }
   try {
     return await viaTor(asked);
   } catch (error) {
-    if (throughTor() || error instanceof HttpTooLargeError) throw error;
+    if (error instanceof HttpTooLargeError) throw error;
     return straight(asked);
   }
 };
 
 let http: MatrixHttp = defaultMatrixHttp;
 
-/** Whether Matrix goes through Tor now, as the space's Tor way and Tor's state say. */
-export function matrixThroughTor(): boolean {
-  return canTorHttp() && torFor(false);
+/** Whether an account with Tor way `tor` sends its messages through Tor now. */
+export function matrixThroughTor(tor: MatrixTor = ACCOUNT_TOR_DEFAULT): boolean {
+  return accountThroughTor(tor);
 }
 
 export function setMatrixHttp(next: MatrixHttp): void {
@@ -388,13 +425,13 @@ export const enc = encodeURIComponent;
 export const txn = () => `erevos${Date.now()}${toHex(randomBytes(6))}`;
 
 /** One request to the Client-Server API (v3), its JSON answered or the refusal thrown. */
-export async function call(state: Pick<MatrixState, 'homeserver' | 'accessToken'> | { homeserver: string; accessToken?: string }, method: MatrixRequest['method'], path: string, body?: unknown): Promise<Json> {
-  return answered(await http({ method, url: `${state.homeserver}/_matrix/client/v3${path}`, body, token: state.accessToken || undefined }));
+export async function call(state: MatrixServer, method: MatrixRequest['method'], path: string, body?: unknown): Promise<Json> {
+  return answered(await http({ method, url: `${state.homeserver}/_matrix/client/v3${path}`, body, token: state.accessToken || undefined, tor: matrixWayOf(state) }));
 }
 
 /** One request to the Client-Server API, its answer as it is, a refusal too: for asks that take more steps (lib/matrix-account.ts). */
-export async function callAnswer(state: { homeserver: string; accessToken?: string }, method: MatrixRequest['method'], path: string, body?: unknown): Promise<MatrixAnswer> {
-  return http({ method, url: `${state.homeserver}/_matrix/client/v3${path}`, body, token: state.accessToken || undefined });
+export async function callAnswer(state: MatrixServer, method: MatrixRequest['method'], path: string, body?: unknown): Promise<MatrixAnswer> {
+  return http({ method, url: `${state.homeserver}/_matrix/client/v3${path}`, body, token: state.accessToken || undefined, tor: matrixWayOf(state) });
 }
 
 /** Throws the homeserver's refusal, as `call` does, or answers what it said. */
@@ -403,13 +440,13 @@ export function answeredJson(answer: MatrixAnswer): Json {
 }
 
 /** One request to a part of the Client-Server API still unstable, under the MSC that names it. */
-async function unstable(state: Pick<MatrixState, 'homeserver' | 'accessToken'>, feature: string, method: MatrixRequest['method'], path: string, body?: unknown): Promise<Json> {
-  return answered(await http({ method, url: `${state.homeserver}/_matrix/client/unstable/${feature}${path}`, body, token: state.accessToken }));
+async function unstable(state: MatrixServer, feature: string, method: MatrixRequest['method'], path: string, body?: unknown): Promise<Json> {
+  return answered(await http({ method, url: `${state.homeserver}/_matrix/client/unstable/${feature}${path}`, body, token: state.accessToken, tor: matrixWayOf(state) }));
 }
 
 /** One request as it is (lib/matrix-media.ts), the homeserver's refusal thrown. */
-export async function request(state: Pick<MatrixState, 'homeserver' | 'accessToken'>, asked: Omit<MatrixRequest, 'token'>): Promise<MatrixAnswer> {
-  const answer = await http({ ...asked, token: state.accessToken });
+export async function request(state: MatrixServer, asked: Omit<MatrixRequest, 'token' | 'tor'>): Promise<MatrixAnswer> {
+  const answer = await http({ ...asked, token: state.accessToken, tor: matrixWayOf(state) });
   answered(answer);
   return answer;
 }
@@ -425,12 +462,12 @@ export function isMatrixId(id: string): boolean {
 }
 
 /** The homeserver of a server name or Matrix ID, as its /.well-known/matrix/client says, or the server itself. */
-export async function findHomeserver(nameOrId: string): Promise<string> {
+export async function findHomeserver(nameOrId: string, tor?: MatrixTor): Promise<string> {
   const given = nameOrId.trim();
   const server = isMatrixId(given) ? given.slice(given.indexOf(':') + 1) : given.replace(/^https?:\/\//, '').replace(/\/+$/, '');
   if (!server) throw new Error(t('Write a Matrix server or a Matrix ID, such as @name:matrix.org.'));
   try {
-    const answer = await http({ method: 'GET', url: `https://${server}/.well-known/matrix/client` });
+    const answer = await http({ method: 'GET', url: `https://${server}/.well-known/matrix/client`, tor });
     const base = (answer.json['m.homeserver'] as Json | undefined)?.base_url;
     if (answer.status === 200 && typeof base === 'string' && /^https:\/\//.test(base)) return base.replace(/\/+$/, '');
   } catch {
@@ -449,22 +486,22 @@ function userPart(nameOrId: string): string {
  * cross-signing keys yet, it makes them and signs this device with them, with the same password,
  * so other people's apps trust this device as the account's own.
  */
-export async function signIn(homeserver: string, user: string, password: string): Promise<MatrixState> {
+export async function signIn(homeserver: string, user: string, password: string, tor?: MatrixTor): Promise<MatrixState> {
   const identifier = { type: 'm.id.user', user: userPart(user) };
-  const login = await call({ homeserver }, 'POST', '/login', {
+  const login = await call({ homeserver, tor }, 'POST', '/login', {
     type: 'm.login.password',
     identifier,
     password,
     initial_device_display_name: editionName(),
   });
-  return newDevice(homeserver, login, { type: 'm.login.password', identifier, password });
+  return newDevice(homeserver, login, { type: 'm.login.password', identifier, password }, tor);
 }
 
 /** The ways a homeserver lets one sign in: a password, and single sign-on with its providers. */
 export type LoginWays = { password: boolean; sso: { id: string; name: string }[] | null };
 
-export async function loginWays(homeserver: string): Promise<LoginWays> {
-  const flows = (((await call({ homeserver }, 'GET', '/login')).flows as Json[] | undefined) ?? []).filter((f) => f && typeof f === 'object');
+export async function loginWays(homeserver: string, tor?: MatrixTor): Promise<LoginWays> {
+  const flows = (((await call({ homeserver, tor }, 'GET', '/login')).flows as Json[] | undefined) ?? []).filter((f) => f && typeof f === 'object');
   const sso = flows.find((f) => f.type === 'm.login.sso');
   const providers = Array.isArray(sso?.identity_providers) ? (sso!.identity_providers as Json[]) : [];
   return {
@@ -491,13 +528,13 @@ export function ssoLink(homeserver: string, back: string, idp?: string): string 
  * Cross-signing keys are made only when the server takes them without asking again (spec 1.11),
  * as there is no password to give; otherwise a check by emoji or the Security Key does it later.
  */
-export async function signInWithToken(homeserver: string, token: string): Promise<MatrixState> {
-  const login = await call({ homeserver }, 'POST', '/login', { type: 'm.login.token', token, initial_device_display_name: editionName() });
-  return newDevice(homeserver, login, null);
+export async function signInWithToken(homeserver: string, token: string, tor?: MatrixTor): Promise<MatrixState> {
+  const login = await call({ homeserver, tor }, 'POST', '/login', { type: 'm.login.token', token, initial_device_display_name: editionName() });
+  return newDevice(homeserver, login, null, tor);
 }
 
 /** The account a sign-in or a new account gave (`login`), as a new device of it with its keys published (lib/matrix-account.ts makes accounts). */
-export async function newDevice(homeserver: string, login: Json, auth: Json | null): Promise<MatrixState> {
+export async function newDevice(homeserver: string, login: Json, auth: Json | null, tor?: MatrixTor): Promise<MatrixState> {
   const { account } = await core<{ account: Json }>('account_new', {});
   const state: MatrixState = {
     homeserver,
@@ -512,6 +549,7 @@ export async function newDevice(homeserver: string, login: Json, auth: Json | nu
     inbound: {},
     outbound: {},
     seen: {},
+    ...(tor && tor !== ACCOUNT_TOR_DEFAULT ? { tor } : {}),
   };
   const keys = await core<{ device_keys: Json }>('device_keys', { account, user_id: state.userId, device_id: state.deviceId });
   await call(state, 'POST', '/keys/upload', { device_keys: keys.device_keys });
@@ -560,7 +598,7 @@ async function setUpCrossSigning(state: MatrixState, deviceKeys: Json, auth: Jso
     user_signing_key: await byMaster(keyOf('user_signing', userSigning)),
   };
   // The server asks for the password again: the first try only opens a session for it.
-  const first = await http({ method: 'POST', url: `${state.homeserver}/_matrix/client/v3/keys/device_signing/upload`, body, token: state.accessToken });
+  const first = await http({ method: 'POST', url: `${state.homeserver}/_matrix/client/v3/keys/device_signing/upload`, body, token: state.accessToken, tor: matrixWayOf(state) });
   if (first.status === 401) {
     if (!auth) return;
     await call(state, 'POST', '/keys/device_signing/upload', { ...body, auth: { ...auth, session: first.json.session } });
@@ -1953,7 +1991,7 @@ export async function rtcTransports(state: MatrixState): Promise<Json[]> {
     // None listed: the .well-known then.
   }
   const server = state.userId.slice(state.userId.indexOf(':') + 1);
-  const answer = await http({ method: 'GET', url: `https://${server}/.well-known/matrix/client` });
+  const answer = await http({ method: 'GET', url: `https://${server}/.well-known/matrix/client`, tor: matrixWayOf(state) });
   const foci = answer.status === 200 ? answer.json['org.matrix.msc4143.rtc_foci'] : undefined;
   return Array.isArray(foci) ? (foci as Json[]) : [];
 }

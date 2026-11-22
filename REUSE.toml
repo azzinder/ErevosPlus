@@ -25,6 +25,57 @@ precedence = "override"
 SPDX-FileCopyrightText = "The Nostr NIPs contributors"
 SPDX-License-Identifier = "LicenseRef-Nostr-NIPs"
 
+# Erevos+: ErevosMessenger under messenger/ (docs/editions.md).
+[[annotations]]
+path = [
+  "messenger/LICENSE", "messenger/NOTICE", "messenger/android/gradle.properties",
+  "messenger/android/app/src/main/assets/erevos-stickers/*.webp",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 azzinder"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+# libsignal-service-rs, vendored for Signal over Tor (messenger/signal/vendor/README-erevos.md).
+[[annotations]]
+path = "messenger/signal/vendor/libsignal-service-rs/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Whisperfish and libsignal-service-rs contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# presage's own crate, vendored for the same reason (messenger/signal/vendor/README-erevos.md).
+[[annotations]]
+path = "messenger/signal/vendor/presage/**"
+precedence = "override"
+SPDX-FileCopyrightText = "Gabriel Féron and the presage contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# presage's rusqlite fork, vendored so it builds for Android (messenger/signal/vendor/README-erevos.md).
+[[annotations]]
+path = ["messenger/signal/vendor/libsqlite3-sys/**", "messenger/signal/vendor/sqlcipher-crypto-provider/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "The rusqlite developers"
+SPDX-License-Identifier = "MIT"
+
+# SQLCipher's amalgamation inside it.
+[[annotations]]
+path = "messenger/signal/vendor/libsqlite3-sys/sqlcipher/**"
+precedence = "override"
+SPDX-FileCopyrightText = "Zetetic, LLC"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+# SQLite itself (public domain), for sqlx's build-time macros.
+[[annotations]]
+path = "messenger/signal/vendor/libsqlite3-sys/sqlite3/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The SQLite authors"
+SPDX-License-Identifier = "blessing"
+
+# Session's word list and its seed nodes' certificates, from session-android (messenger/NOTICE).
+[[annotations]]
+path = "messenger/android/app/src/main/assets/session/*"
+precedence = "override"
+SPDX-FileCopyrightText = "The Session Foundation and session-android contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
 [[annotations]]
 path = ["scripts/licence-texts/**", "app/public/NOTICES.txt"]
 precedence = "override"

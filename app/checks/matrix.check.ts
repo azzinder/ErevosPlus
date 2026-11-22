@@ -37,6 +37,7 @@ import {
   isMatrixId,
   loadEarlier,
   matrixThroughTor,
+  matrixWayOf,
   matrixTyping,
   markRead as matrixMarkRead,
   newSinceRead,
@@ -971,10 +972,16 @@ test('restored from a backup, the account is let go of, never signed out, and si
   }
 });
 
-test("Matrix goes through Tor as the space's Tor way says", async () => {
+test("a Matrix account goes through Tor only as its own choice says: Off unless chosen, a room «Through Tor» makes it Always", async () => {
   const sent: { head: Json; body: string }[] = [];
   const fake = {
     torRequest: async () => new Uint8Array(0),
+    torStart: async () => undefined,
+    torStatus: async () => '{}',
+    torStop: async () => undefined,
+    torOpen: async () => new Uint8Array(0),
+    torCall: async () => new Uint8Array(0),
+    torClose: async () => undefined,
     torHttp: async (head: string, body: Uint8Array) => {
       sent.push({ head: JSON.parse(head) as Json, body: new TextDecoder().decode(body) });
       return new Uint8Array([0x01, 0x91, ...new TextEncoder().encode('{"errcode":"M_FORBIDDEN"}')]);
@@ -983,24 +990,36 @@ test("Matrix goes through Tor as the space's Tor way says", async () => {
   setCore(fake);
   setThroughTor('all');
   try {
-    const answer = await defaultMatrixHttp({ method: 'POST', url: `${HS}/_matrix/client/v3/login`, body: { a: 1 }, token: 'tok' });
+    // As the space, with Everything: through Tor.
+    const answer = await defaultMatrixHttp({ method: 'POST', url: `${HS}/_matrix/client/v3/login`, body: { a: 1 }, token: 'tok', tor: 'space' });
     assert.deepEqual(answer, { status: 401, json: { errcode: 'M_FORBIDDEN' } });
     assert.equal(sent.length, 1);
     assert.deepEqual(sent[0].head, { method: 'POST', url: `${HS}/_matrix/client/v3/login`, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer tok' } });
     assert.equal(sent[0].body, '{"a":1}');
-    assert.ok(matrixThroughTor());
-    // With the way 'messages' and Tor not ready yet, it goes straight, as Erevos's own messages do.
-    setThroughTor('messages');
+    assert.ok(matrixThroughTor('space'));
+    // Off, the default, whatever the space: not through Tor.
     assert.equal(matrixThroughTor(), false);
-    // With no Tor in the build, the way 'all' sends nothing.
+    assert.equal(matrixWayOf({ homeserver: HS }), 'never');
+    // With the way 'messages' and Tor not ready yet, As the space goes straight; Always still through Tor.
+    setThroughTor('messages');
+    assert.equal(matrixThroughTor('space'), false);
+    assert.ok(matrixThroughTor('always'));
+    await defaultMatrixHttp({ method: 'GET', url: `${HS}/y`, tor: 'always' });
+    assert.equal(sent.length, 2);
+    // A room «Through Tor» makes the whole account Always, whatever it chose.
+    assert.equal(matrixWayOf({ homeserver: HS, tor: 'never', rooms: { '!a': {}, '!b': { tor: true } } }), 'always');
+    assert.equal(matrixWayOf({ homeserver: HS, tor: 'space', rooms: { '!a': {} } }), 'space');
+    // With no Tor in the build, Always and the space's Everything send nothing, never straight.
     setCore({} as Core);
+    await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x`, tor: 'always' }), /Tor is not ready/);
     setThroughTor('all');
-    await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x` }), /Tor is not ready/);
+    await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x`, tor: 'space' }), /Tor is not ready/);
   } finally {
     setThroughTor('off');
     setCore(wasmCore);
   }
 });
+
 
 test("a room read here stays read until someone else writes after it, whatever the homeserver's count said before it heard", () => {
   const me = '@me:example.org';

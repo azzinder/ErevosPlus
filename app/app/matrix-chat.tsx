@@ -21,6 +21,9 @@ import { ChatHistory, HistoryButtons, useHistoryTools } from '../components/chat
 import { HeldBubbles, keepForLater, LaterSheet, RemindSheet, remindPlace, useKeptDraft, type RemindOf } from '../components/chat-writing';
 import { useChatProtect } from '../components/chat-protect';
 import { askDelete, ChatTimer, useGoneAt, useVanishOnce, VanishStrip } from '../components/chat-rules';
+import { ChatTorSwitch } from '../components/account-tor';
+import { hiddenKeep, ipGate } from '../components/ip-warning';
+import { accountThroughTor } from '../lib/account-tor';
 import { hiddenOnScreen, NetworkChatNotify, useNetworkChatShown } from '../components/network-chat-notify';
 import { CarryButtons, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
 import { OwnName } from '../components/own-name';
@@ -48,7 +51,7 @@ import { t } from '../lib/i18n';
 import { firstLink, fitPreview, previewWay } from '../lib/link-preview';
 import { CAN_PREVIEW, makePreview } from '../lib/make-preview';
 import { mentionsIn, namesFor, typingMention, withMention, type Nameable } from '../lib/mentions';
-import { directOther, isMatrixId, MATRIX_TYPING_SHOWS, matrixPresence, matrixTyping, onMatrixTyping, OWN_ROOM_NAME, readByAll, readersOf, shownRoomName, type MatrixMessage } from '../lib/matrix';
+import { directOther, isMatrixId, matrixWayOf, MATRIX_TYPING_SHOWS, matrixPresence, matrixTyping, onMatrixTyping, OWN_ROOM_NAME, readByAll, readersOf, shownRoomName, type MatrixMessage } from '../lib/matrix';
 import { presenceText } from '../lib/net-presence';
 import { startMatrixCall } from '../lib/matrix-calls';
 import { pollOver, pollShown } from '../lib/matrix-parts';
@@ -84,6 +87,7 @@ import {
   matrixSetGuard,
   matrixSetLook,
   matrixSetNotify,
+  matrixSetRoomTor,
   matrixSetOwnName,
   matrixStickerPlace,
   matrixTyped,
@@ -344,9 +348,20 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
 
   const fail = (error: unknown) => setNote(errorText(error));
 
+  // Before what this chat sends goes without Tor (photos and files counted, lib/account-tor.ts): said
+  // once (lib/ip-warning.ts), with the room's «Through Tor» as the way not to show the address, which
+  // makes the whole account go only through Tor.
+  // A hidden place's account keeps its warnings with its hidden chats, never in the space's data.
+  const ipKeep = () => (where !== 'space' ? { keep: hiddenKeep() } : {});
+  const sendGate = async (): Promise<boolean> => {
+    if (!roomId || !state || accountThroughTor(matrixWayOf(state), true)) return true;
+    return ipGate({ network: 'Matrix', act: 'send', of: `matrix:${roomId}`, own: true, ...ipKeep() }, { label: t('Through Tor'), run: () => matrixSetRoomTor(roomId, true) });
+  };
+
   async function sendPicked(pick: () => Promise<OutgoingFile | null>) {
     if (!roomId || sending) return;
     setNote('');
+    if (!(await sendGate())) return;
     setSending(true);
     try {
       const file = await pick();
@@ -368,7 +383,14 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const sharedTo = hidden === '1' || !roomId ? null : `matrix:${roomId}`;
   const sharedText = useSharedWords(sharedTo);
   const sharedWords = useRef(sharedText);
-  useSharedFiles(room ? sharedTo : null, (file) => matrixSendFile(roomId ?? '', file), fail, setSending);
+  useSharedFiles(
+    room ? sharedTo : null,
+    async (file) => {
+      if (await sendGate()) await matrixSendFile(roomId ?? '', file);
+    },
+    fail,
+    setSending,
+  );
 
   if (guard.gate) return guard.gate;
   if (!state || !room || !roomId) {
@@ -414,9 +436,10 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         .filter(([who, m]) => who !== me && m.membership === 'join')
         .map(([who, m]) => ({ identity: who, name: m.name || who.slice(1, who.indexOf(':')) }));
 
-  function send(text: string): boolean {
+  async function send(text: string): Promise<boolean> {
     if (!roomId) return false;
     setNote('');
+    if (!changed && !(await sendGate())) return false;
     if (changed) {
       if (text === changed.text) {
         stopEditing();
@@ -459,6 +482,8 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     const way = where === 'space' && CAN_PREVIEW ? previewWay(previews, previewsTor, throughTor()) : 'none';
     const link = way !== 'none' ? firstLink(text) : null;
     if (!link) return null;
+    // Fetched straight, the link's site sees this phone's address: said once, the preview left out if not gone on.
+    if (way === 'straight' && !(await ipGate({ network: 'Matrix', act: 'preview', of: link.slice(0, 120), ...ipKeep() }))) return null;
     setNote(t('Making the link’s preview…'));
     const made = await makePreview(link, way === 'tor');
     setNote('');
@@ -468,12 +493,14 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function sendPoll(poll: Poll) {
     if (!roomId) return;
     setPolling(false);
+    if (!(await sendGate())) return;
     matrixPoll(roomId, poll).catch(fail);
   }
 
-  function sendPlace(place: Place) {
+  async function sendPlace(place: Place) {
     if (!roomId) return;
     setPlacing(false);
+    if (!(await sendGate())) return;
     matrixLocation(roomId, place, thread).catch(fail);
   }
 
@@ -496,6 +523,8 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function call(video: boolean) {
     if (!roomId || !state) return;
     setNote('');
+    // Calls never go through Tor: said before each kind, once for the room.
+    if (!(await ipGate({ network: 'Matrix', act: 'call', of: `matrix:${roomId}`, ...ipKeep() }))) return;
     if (!(await callPermissions(video))) {
       setNote(video ? t('A video call needs the camera and the microphone.') : t('A call needs the microphone.'));
       return;
@@ -599,7 +628,12 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     if (copyable(message)) actions.push({ title: t('Copy'), onPress: () => void copy(message.text) });
     // One of ours that did not go goes again in its place, or is forgotten: it never reached the room.
     if (message.state === 'failed') {
-      actions.push({ title: t('Send again'), onPress: () => roomId && void matrixSendAgain(roomId, message.id, mentionsIn(message.text, nameable)).catch(fail) });
+      actions.push({ title: t('Send again'), onPress: () =>
+          roomId &&
+          void sendGate()
+            .then((go) => (go ? matrixSendAgain(roomId, message.id, mentionsIn(message.text, nameable)) : undefined))
+            .catch(fail),
+      });
       actions.push({ title: t('Delete'), danger: true, onPress: () => roomId && void matrixDropUnsent(roomId, message.id).catch(fail) });
     }
     if (!message.state) {
@@ -853,7 +887,9 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         onClose={() => setStickering(false)}
         onPick={(sticker) => {
           setStickering(false);
-          matrixSendSticker(roomId, sticker, thread).catch(fail);
+          void sendGate()
+            .then((go) => (go ? matrixSendSticker(roomId, sticker, thread) : undefined))
+            .catch(fail);
         }}
       />
       <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={shownRoomName(room)} chat={lookChat} />
@@ -903,6 +939,8 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
             </Row>
           ) : null}
           {!room.invitedBy ? <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} /> : null}
+          {/* «Through Tor»: Matrix has one connection for the account, so on, the whole account goes only through Tor (lib/matrix.ts matrixWayOf). */}
+          {!room.invitedBy && !thread ? <ChatTorSwitch network="Matrix" on={room.tor === true} onChange={(on) => void matrixSetRoomTor(roomId, on).catch(fail)} /> : null}
           {/* A name of our own for it, on this device only: nobody is told. */}
           {!room.invitedBy && !thread ? (
             <OwnName
@@ -936,7 +974,7 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       </Sheet>
       <PollSheet visible={polling} onClose={() => setPolling(false)} onSend={(poll) => void sendPoll(poll)} />
       <RemindSheet of={reminding} where={where} onClose={() => setReminding(null)} say={setNote} />
-      <PlaceSheet visible={placing} onClose={() => setPlacing(false)} onSend={sendPlace} said={t('Everyone in this chat can see it.')} />
+      <PlaceSheet visible={placing} onClose={() => setPlacing(false)} onSend={(place) => void sendPlace(place)} said={t('Everyone in this chat can see it.')} />
       <Sheet visible={readersFor !== null} onClose={() => setReadersFor(null)} title={t('Who read it')}>
         {readersFor && byId.get(readersFor) ? readersShown(byId.get(readersFor)!) : null}
       </Sheet>
@@ -955,8 +993,10 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
                   setForwarding(null);
                   // One after another, in the thread's order.
                   void (async () => {
+                    if (!(await sendGate())) return false;
                     for (const id of ids) await matrixForward(roomId, id, other.id);
-                  })().then(() => setNote(t('Forwarded to {name}.', { name: other.name })), fail);
+                    return true;
+                  })().then((went) => went && setNote(t('Forwarded to {name}.', { name: other.name })), fail);
                 }}
               />
             ))}
@@ -1086,7 +1126,7 @@ function Field({
   editing: boolean;
   saving: boolean;
   members: Nameable[];
-  onSend: (text: string) => boolean;
+  onSend: (text: string) => boolean | Promise<boolean>;
   onTyped: (text: string) => void;
   onSent: () => void;
   later: { where: NetworkWhere; hold: (text: string, at: number) => Promise<boolean> };
@@ -1094,9 +1134,9 @@ function Field({
   const [text, setText] = useState(initial);
   const [choosingLater, setChoosingLater] = useState(false);
   const typed = text.trim();
-  const go = () => {
+  const go = async () => {
     if (!typed || saving) return;
-    if (onSend(typed)) {
+    if (await onSend(typed)) {
       setText('');
       onSent();
     }

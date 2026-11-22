@@ -44,8 +44,6 @@ export const xmpp: Record<string, string> = {
   "Locked: this message could not be opened on this device.": "Bloqueada: esta mensagem não pôde ser aberta neste dispositivo.",
   "not encrypted": "sem criptografia",
   "Chat with people on XMPP, who use Conversations, Monal, Gajim, Dino or another XMPP app. Messages are encrypted with OMEMO, but these chats are not anonymous: the XMPP server sees who talks with whom, and when.": "Converse com pessoas no XMPP, que usam o Conversations, o Monal, o Gajim, o Dino ou outro app XMPP. As mensagens são criptografadas com OMEMO, mas essas conversas não são anônimas: o servidor XMPP vê quem fala com quem, e quando.",
-  "Through Tor: the XMPP server does not see your address.": "Pelo Tor: o servidor XMPP não vê o seu endereço.",
-  "Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.": "Agora não pelo Tor: o servidor XMPP vê o seu endereço. O Tor fica em Configurações → Relay e redes → Tor.",
   "XMPP address": "Endereço XMPP",
   "Only when the server is not the one in your address, or cannot be found. A name, name:port or a wss:// address.": "Só quando o servidor não é o do seu endereço, ou não é encontrado. Um nome, nome:porta ou um endereço wss://.",
   "Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.": "O Erevos entra como um novo dispositivo da conta, e guarda o login criptografado só neste espaço.",
@@ -143,4 +141,8 @@ export const xmpp: Record<string, string> = {
     "O seu relay ainda não aceita avisos do XMPP: precisa ser atualizado.",
   "Your XMPP server does not send notices to apps that are away.":
     "O seu servidor XMPP não envia avisos a apps que não estão ativos.",
+  "Always through Tor":
+    "Sempre pelo Tor",
+  "This XMPP account goes only through Tor, which this server address cannot.":
+    "Esta conta XMPP passa só pelo Tor, o que este endereço de servidor não permite.",
 };

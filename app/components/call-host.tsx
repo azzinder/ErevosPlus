@@ -21,7 +21,7 @@ import { sha256Bytes, toHex, utf8Encode } from '../lib/crypto';
 import { learnSpaceNames, spaceCalls } from '../lib/space-calls';
 import { onSpaceGroupCall, spaceGroupCalls } from '../lib/space-groups';
 import { rtc } from '../lib/webrtc';
-import { watchMatrixVoip } from '../lib/matrix-voip';
+import { MATRIX_VOIP_PREFIX, matrixPlaceVoip, watchMatrixVoip } from '../lib/matrix-voip';
 import { takeHeldXmppCall, watchXmppCalls, xmppCalls, xmppPlaceCalls, XMPP_PREFIX } from '../lib/xmpp-calls';
 import { xmppGroupCalls } from '../lib/xmpp-muji';
 import { elementCall } from '../lib/element-call-window';
@@ -32,7 +32,7 @@ import { t } from '../lib/i18n';
 import { ipGoneOn, ipSaid, ipWarningText, type IpWarning } from '../lib/ip-warning';
 import { forgetPublicMedia } from '../lib/public-fetch';
 import { CallScreen } from './call-screen';
-import { callIpWarning } from './ip-warning';
+import { callIpWarning, hiddenKeep, ipGate } from './ip-warning';
 import { GroupCallScreen } from './group-call-screen';
 import { MatrixRingScreen } from './matrix-ring';
 
@@ -279,6 +279,10 @@ export function CallHost() {
     const room = matrixNow(matrix.place ? 'place' : 'space').state?.rooms[matrix.roomId];
     // Element Call starts with the camera on, or off, as answered.
     const answerMatrix = (video: boolean) => {
+      // Calls never go through Tor: said once for the room before the first answered (lib/ip-warning.ts); not gone on, it keeps ringing.
+      void ipGate({ network: 'Matrix', act: 'call', of: `matrix:${matrix.roomId}`, ...(matrix.place ? { keep: hiddenKeep() } : {}) }).then((go) => go && answerMatrixNow(video));
+    };
+    const answerMatrixNow = (video: boolean) => {
       void callPermissions(video).then((granted) => {
         if (!granted) {
           declineMatrixCall(matrix);
@@ -307,6 +311,15 @@ export function CallHost() {
 
   // With the camera, or voice only: a voice call answered with it asks for video once it connects.
   function answer(video: boolean) {
+    // An older Matrix call (lib/matrix-voip.ts): never through Tor, said once for the room first.
+    if (call.peer.startsWith(MATRIX_VOIP_PREFIX)) {
+      void ipGate({ network: 'Matrix', act: 'call', of: `matrix:${call.peer.slice(MATRIX_VOIP_PREFIX.length)}`, ...(shown?.place === matrixPlaceVoip ? { keep: hiddenKeep() } : {}) }).then((go) => go && answerNow(video));
+      return;
+    }
+    answerNow(video);
+  }
+
+  function answerNow(video: boolean) {
     void callPermissions(video).then((granted) => {
       if (!granted) {
         call.decline();

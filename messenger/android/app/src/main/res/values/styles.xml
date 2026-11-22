@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 azzinder
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<resources>
+    <!-- The screens are drawn edge to edge (Compose handles the insets); the
+         window itself only shows for a moment before the first frame. -->
+    <style name="Phase0" parent="@android:style/Theme.Material.Light.NoActionBar" />
+</resources>

@@ -130,6 +130,7 @@ export default function ForgetMe() {
             {report.nostr.skipped === 'core' ? <Text tone="muted">{t('Nostr was not asked: this build of Erevos cannot.')}</Text> : null}
             {report.matrix !== undefined ? <Text>{report.matrix ? t('Signed out of Matrix.') : t('Could not sign out of Matrix.')}</Text> : null}
             {report.xmpp !== undefined ? <Text>{report.xmpp ? t('Signed out of XMPP.') : t('Could not sign out of XMPP.')}</Text> : null}
+            {report.telegram !== undefined ? <Text>{report.telegram ? t('Signed out of Telegram.') : t('Could not sign out of Telegram.')}</Text> : null}
             {report.nostrAccount === 'vanished' ? <Text>{t('The Nostr account made here was asked to vanish and is forgotten here.')}</Text> : null}
             {report.nostrAccount === 'failed' ? <Text>{t('The Nostr account could not be asked to vanish: it stays.')}</Text> : null}
             {report.nostrAccount === 'brought' ? <Text tone="muted">{t('The Nostr account you brought from another app is left as it is: it is used elsewhere.')}</Text> : null}

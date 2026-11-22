@@ -72,7 +72,8 @@ env:
 
 jobs:
   # Decides whether to build at all and the build's number, then opens the draft release the jobs
-  # hand their files to.
+  # hand their files to. Only in Erevos's own repository: in ErevosPlus (Erevos+), whose releases
+  # erevosgram.yml makes, this file comes with each merge of Erevos's main and does nothing.
   version:
     if: github.repository == 'azzinder/Erevos'
     runs-on: ubuntu-latest

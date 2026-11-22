@@ -19,10 +19,13 @@ import { SHELL } from './shell';
 // are there again when it is on again. On the device, outside every space, as the icons and the
 // phone app are, and read before the password, as the Phone may open without it.
 
-export type Module = 'erevos' | 'phone' | 'sms' | 'nostr' | 'matrix' | 'xmpp' | 'collection';
+export type Module = 'erevos' | 'phone' | 'sms' | 'nostr' | 'matrix' | 'xmpp' | 'telegram' | 'messenger' | 'signal' | 'session' | 'collection';
 
 /** Every module, in the order the setup and Settings show them. */
-export const MODULES: readonly Module[] = ['erevos', 'phone', 'sms', 'nostr', 'matrix', 'xmpp', 'collection'];
+export const MODULES: readonly Module[] = ['erevos', 'phone', 'sms', 'nostr', 'matrix', 'xmpp', 'telegram', 'messenger', 'signal', 'session', 'collection'];
+
+/** Messenger, Signal and Session: their engines are one module of the app (modules/erevos-messenger). */
+export const MSG_MODULES = ['messenger', 'signal', 'session'] as const;
 
 const KEY = 'erevos.modules';
 
@@ -36,6 +39,26 @@ function platform(): string {
   }
 }
 
+// Telegram is only in a build with TDLib, for Android (modules/erevos-telegram, docs/erevosgram.md):
+// asked only when React Native is there, so the checks, in plain Node, can load this file.
+function telegramBuild(): boolean {
+  try {
+    return (require('../modules/erevos-telegram') as typeof import('../modules/erevos-telegram')).telegramNative !== null;
+  } catch {
+    return false;
+  }
+}
+
+// Messenger, Signal and Session are only in a build with their engines: Erevos+ for Android
+// (modules/erevos-messenger). Asked only when React Native is there, as Telegram is.
+function messengerBuild(): boolean {
+  try {
+    return (require('../modules/erevos-messenger') as typeof import('../modules/erevos-messenger')).messengerNative !== null;
+  } catch {
+    return false;
+  }
+}
+
 /** The modules of `edition` (lib/edition.ts): every one in Erevos+, Erevos's own chats, the Phone,
  *  the SMS and the Collection in the plain Erevos. */
 export function editionModules(edition: Edition = EDITION): Module[] {
@@ -43,13 +66,16 @@ export function editionModules(edition: Edition = EDITION): Module[] {
 }
 
 /**
- * The modules this device can run, of this build's edition (lib/edition.ts): the phone and the SMS
- * only on Android; the Collection on Android and in the web build: in the desktop app and on
- * Sailfish OS (`shell` 'electron' or 'sailfish') its chunks are files in the shell's own folder,
- * in a plain browser they are kept in the browser's storage (lib/web-store.ts), as much as it gives.
+ * The modules this device can run, of this build's edition (lib/edition.ts): Telegram only in a
+ * build with it (Erevos+ for Android with TDLib); the phone and the SMS only on Android; the
+ * Collection on Android and in the web build: in the desktop app and on Sailfish OS (`shell`
+ * 'electron' or 'sailfish') its chunks are files in the shell's own folder, in a plain browser they
+ * are kept in the browser's storage (lib/web-store.ts), as much as it gives.
  */
-export function modulesHere(os: string = platform(), _shell: typeof SHELL = SHELL, edition: Edition = EDITION): Module[] {
+export function modulesHere(os: string = platform(), _shell: typeof SHELL = SHELL, telegram: boolean = os === 'android' && telegramBuild(), edition: Edition = EDITION): Module[] {
   return editionModules(edition).filter((m) => {
+    if (m === 'telegram') return os === 'android' && telegram;
+    if (m === 'messenger' || m === 'signal' || m === 'session') return os === 'android' && messengerBuild();
     if (m === 'phone' || m === 'sms') return os === 'android';
     if (m === 'collection') return os === 'android' || os === 'web';
     return true;
@@ -201,6 +227,10 @@ const SCREENS: Record<Module, readonly string[]> = {
   nostr: ['nostr-chats', 'nostr-chat', 'nostr-posts', 'public-post'],
   matrix: ['matrix', 'matrix-chat', 'matrix-sso'],
   xmpp: ['xmpp', 'xmpp-chat'],
+  telegram: ['telegram', 'telegram-chat'],
+  messenger: ['messenger', 'messenger-chat'],
+  signal: ['signal', 'signal-chat'],
+  session: ['session', 'session-chat'],
   collection: ['collection', 'collection-settings', 'collection-send'],
 };
 
@@ -218,7 +248,7 @@ export function turnedOn(before: Iterable<Module>, after: Iterable<Module>): Mod
 // Which modules need each of the permissions check's items (lib/permission-checks.ts), so the
 // setup and the check after a new version ask only for what the modules on use. The messages'
 // ones are for every module that brings messages in the background; Erevos's calls for its own.
-const MESSAGES: readonly Module[] = ['erevos', 'nostr', 'matrix', 'xmpp'];
+const MESSAGES: readonly Module[] = ['erevos', 'nostr', 'matrix', 'xmpp', 'messenger', 'signal', 'session'];
 const NEEDS: Record<CheckId, readonly Module[] | 'any'> = {
   notices: 'any',
   calls: ['erevos', 'matrix', 'xmpp'],

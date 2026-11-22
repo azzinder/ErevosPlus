@@ -128,7 +128,8 @@ import { GroupsWhereProvider, type GroupsWhere } from '../components/groups-at';
 import { NewGroupForm } from '../components/new-group';
 import { armPlaceReminders, myNotes, onNotesChanged, type Note, type NotesAt } from '../lib/myself';
 import { dropChat, type ChatListPlace } from '../lib/chat-list';
-import { buildInbox, groupRows, matrixInboxRows, mergeRows, nostrInboxRows, xmppInboxRows, type InboxGroup, type InboxRow } from '../lib/inbox';
+import { buildInbox, groupRows, matrixInboxRows, mergeRows, nostrInboxRows, telegramInboxRows, telegramKeptRows, xmppInboxRows, type InboxGroup, type InboxRow } from '../lib/inbox';
+import { onTelegramChange, telegramKeptChats, telegramNow, telegramShown } from '../lib/telegram-store';
 import { matrixNow, onMatrixChange } from '../lib/matrix-store';
 import { nostrDmNow, onNostrDmChange } from '../lib/nostr-dm-store';
 import { onXmppChange, xmppNow } from '../lib/xmpp-store';
@@ -6110,12 +6111,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   useEffect(() => {
     if (!hiddenKey) return;
     const tick = () => setPlaceNetTick((n) => n + 1);
-    const stops = [onMatrixChange(tick), onXmppChange(tick), onNostrDmChange(tick)];
+    const stops = [onMatrixChange(tick), onXmppChange(tick), onNostrDmChange(tick), onTelegramChange(tick)];
     return () => stops.forEach((stop) => stop());
   }, [hiddenKey]);
   const placeMatrix = hiddenKey ? matrixNow('place').state : null;
   const placeXmpp = hiddenKey ? xmppNow('place').state : null;
   const placeNostr = hiddenKey ? nostrDmNow('place').state : null;
+  const placeTelegram = hiddenKey ? telegramNow('place').state : null;
   // Hidden chats listed as home lists the space's (app/index.tsx), their groups and their networks'
   // chats among them: the newest first, with what was said last and how many are not read. None is
   // locked with a PIN of its own in them.
@@ -6139,8 +6141,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     if (placeMatrix) all = mergeRows(all, matrixInboxRows(placeMatrix));
     if (placeXmpp) all = mergeRows(all, xmppInboxRows(placeXmpp));
     if (placeNostr) all = mergeRows(all, nostrInboxRows(placeNostr));
+    if (placeTelegram) all = mergeRows(all, telegramInboxRows(placeTelegram, (m) => telegramShown(m.chatId, m, 'place')));
+    // And the chats of the space's own Telegram kept here (telegramHideChat).
+    const kept = hiddenKey ? telegramKeptChats() : [];
+    const spaceTelegram = kept.length ? telegramNow('space').state : null;
+    if (spaceTelegram) all = mergeRows(all, telegramKeptRows(spaceTelegram, kept, (m) => telegramShown(m.chatId, m, 'space')));
     return all;
-  }, [hiddenKey, shownContacts, messages, archive, archiveTick, now, placeGroupList, placeMatrix, placeXmpp, placeNostr, placeNetTick]);
+  }, [hiddenKey, shownContacts, messages, archive, archiveTick, now, placeGroupList, placeMatrix, placeXmpp, placeNostr, placeTelegram, placeNetTick]);
   // The order of these chats' list, or of the space's, kept where they are (lib/chat-list.ts): in
   // hidden chats, pinned ones at the top and archived ones apart, as home has the space's.
   const chatListPlace = useMemo<ChatListPlace>(() => {

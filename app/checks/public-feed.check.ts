@@ -18,7 +18,7 @@ import type { NostrEvent } from '../lib/nostr-dm-net';
 import type { FeedPost } from '../lib/nostr-feed';
 import type { MatrixRoom, MatrixState } from '../lib/matrix';
 import type { HttpAnswer, HttpMethod } from '../lib/net-http';
-import { fetchesByItself, publicCard, publicPhoto, setPublicHttp } from '../lib/public-fetch';
+import { fetchesByItself, publicCard, publicPhoto, setPublicHttp, setPublicIpAsk } from '../lib/public-fetch';
 import { isPublicRoom, matrixFeed, mergeFeed, roomServer } from '../lib/public-feed';
 import { fetchable, imageType, mediaIn, siteOf } from '../lib/public-media';
 
@@ -166,6 +166,41 @@ test('photos are fetched by themselves, through Tor only, or when tapped, as the
     assert.equal(await publicCard('https://site.example/missing', 'always', 'show'), null);
     await assert.rejects(publicCard('https://site.example/page2', 'tap', 'show'));
   } finally {
+    setPublicHttp(null);
+  }
+});
+
+test('a photo or card fetched without Tor waits for the warning about the address, said once', async () => {
+  const asked: string[] = [];
+  let through = false;
+  let answer = false;
+  let asks = 0;
+  const way = (name: string) => async (_method: HttpMethod, url: string): Promise<HttpAnswer> => {
+    asked.push(`${name} ${url}`);
+    return { status: 200, bytes: JPEG };
+  };
+  setPublicHttp({ http: way('net'), tor: way('tor'), through: () => through });
+  setPublicIpAsk(async () => {
+    asks += 1;
+    return answer;
+  });
+  try {
+    // Turned down: nothing fetched; by itself it does not ask again, a tap does.
+    await assert.rejects(publicPhoto('https://p.example/1.jpg', 'always', 'show'));
+    await assert.rejects(publicPhoto('https://p.example/2.jpg', 'always', 'show'));
+    assert.equal(asks, 1);
+    assert.deepEqual(asked, []);
+    answer = true;
+    await publicPhoto('https://p.example/2.jpg', 'always', 'tap');
+    assert.equal(asks, 2);
+    assert.deepEqual(asked, ['net https://p.example/2.jpg']);
+    // Through Tor, nothing is asked.
+    through = true;
+    await publicPhoto('https://p.example/3.jpg', 'always', 'show');
+    await publicPhoto('https://p.example/4.jpg', 'tor', 'show');
+    assert.equal(asks, 2);
+  } finally {
+    setPublicIpAsk(null);
     setPublicHttp(null);
   }
 });

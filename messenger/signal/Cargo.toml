@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2026 azzinder
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "erevos-signal"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+publish = false
+description = "Signal for the Erevos messenger app: presage (libsignal) behind one JSON call, for Android over JNI"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# presage and its store, pinned to one commit (2026-11-05).
+presage = { git = "https://github.com/whisperfish/presage", rev = "4b81740", features = ["cdsi"] }
+presage-store-sqlite = { git = "https://github.com/whisperfish/presage", rev = "4b81740", default-features = false }
+# The store is encrypted with SQLCipher, its crypto in Rust (no OpenSSL, which would clash with
+# the BoringSSL that Signal's contact discovery brings).
+libsqlite3-sys = { version = "0.36.0", features = ["bundled-sqlcipher-custom-crypto"] }
+
+# Group changes (src/groups.rs): the same versions libsignal-service uses.
+rand = "0.9"
+http = "1"
+tokio = { version = "1.48", features = ["rt-multi-thread", "sync", "time", "macros", "fs"] }
+futures = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+uuid = "1"
+url = "2"
+mime_guess = "2"
+jni = { version = "0.21", default-features = false }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "std"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+panic = "unwind"
+
+# unoptimized ML-KEM can stack-overflow when decrypting PQXDH prekey messages
+[profile.dev.package.libcrux-ml-kem]
+opt-level = 3
+
+[patch.crates-io]
+# presage's own rusqlite fork (rev 2a42b3354c9194700d08aa070f70a131a470e7dc),
+# kept here with one fix so it builds for Android: see vendor/README-erevos.md.
+libsqlite3-sys = { path = "vendor/libsqlite3-sys" }
+
+# Signal over Tor: libsignal-service-rs at presage's own commit (7a75267), with one proxy for all its
+# connections (vendor/README-erevos.md).
+[patch."https://github.com/whisperfish/libsignal-service-rs"]
+libsignal-service = { path = "vendor/libsignal-service-rs" }
+
+# And presage's own crate at 4b81740, so that link previews go the same way.
+[patch."https://github.com/whisperfish/presage"]
+presage = { path = "vendor/presage" }

@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 -->
 
-<!-- The red launcher icon's background layer, from top to bottom (mipmap-anydpi-v26/erevos_launcher_red.xml). -->
+<!-- Erevos+: the default launcher icon's background layer, purple to blue from the top left (mipmap-anydpi-v26/erevos_launcher_red.xml). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-  <gradient android:angle="270" android:startColor="#ff6a4d" android:centerColor="#ec3013" android:endColor="#ae1800" />
+  <gradient android:angle="315" android:startColor="#946def" android:centerColor="#655ee0" android:endColor="#3450d7" />
 </shape>

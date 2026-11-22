@@ -20,6 +20,8 @@ import { spaceGroups } from '../lib/space-groups';
 import { loadSpaceStars, starChatNow, type SpaceStars } from '../lib/starred-networks';
 import { latestFirst, starredNow, type StarredRow } from '../lib/stars';
 import { onXmppChange, runXmpp } from '../lib/xmpp-store';
+import { telegramStarredMessages } from '../lib/telegram-store';
+import { telegramLine } from '../lib/telegram-view';
 import { forgetStars, onStarsChange, spaceStarPlace } from '../lock/stars-data';
 
 // The starred messages of the open space's chats, the latest first, from the home screen's menu: its
@@ -28,7 +30,8 @@ import { forgetStars, onStarsChange, spaceStarPlace } from '../lock/stars-data';
 // starred, or not, from its menu in the chat (held down), on this device only. A starred message
 // deleted, or of a chat left, goes from among them; one only older than what its chat keeps stays,
 // and its chat opens where it was. Hidden chats' starred messages, and those of a hidden place's own
-// accounts, are in each chat's details.
+// accounts, are in each chat's details. The space's Telegram chats' follow, asked of Telegram (lib/telegram-store.ts
+// telegramStarredMessages), but for those locked with their PIN or kept in hidden chats.
 
 const CONTACT_PREFIX = 'contact:';
 
@@ -39,6 +42,31 @@ export default function StarredScreen() {
   const [kept, setKept] = useState<SpaceStars | null>(null);
   // Counts the changes of the chats on other networks, so their names and messages follow.
   const [, setChanged] = useState(0);
+  // And the space's Telegram's (the ErevosGram build), asked of Telegram as the screen shows.
+  const [telegram, setTelegram] = useState<StarredRow[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void telegramStarredMessages().then(
+        (list) =>
+          active &&
+          setTelegram(
+            list.map(({ chat, message }) => ({
+              key: `telegram|${message.chatId}|${message.id}`,
+              name: `${chat} · Telegram`,
+              line: telegramLine(message),
+              at: message.date * 1000,
+              href: `/telegram-chat?id=${message.chatId}&at=${message.id}`,
+            })),
+          ),
+        () => undefined,
+      );
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -127,7 +155,7 @@ export default function StarredScreen() {
     void forgetStars(place, others.gone).catch(() => undefined);
   }, [goneKey]);
 
-  const rows = found && others ? latestFirst([...found, ...others.rows]) : null;
+  const rows = found && others ? latestFirst([...found, ...others.rows, ...telegram]) : null;
   const now = Date.now();
 
   return (

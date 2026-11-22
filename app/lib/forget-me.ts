@@ -15,6 +15,7 @@ import { loadPublicGroupData } from '../lock/public-group-data';
 import { placeQueues, spaceQueues } from '../lock/queues-data';
 import { hiddenHolder } from '../lock/sealed-file';
 import { loadHiddenData, loadSpaceData, updateHiddenData, updateSpaceData, type SpaceData } from '../lock/space-data';
+import { loadTelegram } from '../lock/telegram-data';
 import { loadXmpp } from '../lock/xmpp-data';
 import { dropFile, onRelay } from './attachments';
 import { canNostrChat } from './core';
@@ -29,6 +30,7 @@ import { deleteQueue, dropLater, fromHex, isQueueNotFound, listInvites, relaySto
 import { serverQueues, type KeptPlace, type ServerQueue } from './server-queues';
 import { spaceChats } from './space-chats';
 import { restartSpaceRunning } from './space-running';
+import { telegramLeave } from './telegram-store';
 import { xmppSignOut } from './xmpp-store';
 
 // "Delete me from everywhere" (app/forget-me.tsx): what the servers keep for the open space is
@@ -52,7 +54,8 @@ import { xmppSignOut } from './xmpp-store';
 //    Relays need not do as asked: the screen says so.
 // 6. only when chosen: the space's Matrix and XMPP accounts signed out (the accounts stay on their
 //    servers, which are theirs), and the space's Nostr account made here asked to vanish too and
-//    forgotten here. One brought from another app is left alone: it is used elsewhere.
+//    forgotten here. One brought from another app is left alone: it is used elsewhere. In the
+//    ErevosGram build, its Telegram signed out too, and TDLib's folder deleted from the phone.
 //
 // What failed is said, and the same can run again: what was deleted is gone already. Nothing
 // deleted is forgotten here, so it runs again until done. The space then stays stopped until
@@ -74,6 +77,7 @@ export type ForgetReport = {
   /** With the accounts chosen: whether each was signed out (true), failed (false), or there was none (missing). */
   matrix?: boolean;
   xmpp?: boolean;
+  telegram?: boolean;
   nostrAccount?: 'vanished' | 'brought' | 'failed';
   /** The relays some queue could not be deleted on, to say. */
   unreached: string[];
@@ -292,6 +296,7 @@ export async function forgetMe(accounts: boolean): Promise<ForgetReport> {
 async function signOutAccounts(space: number, key: Uint8Array, report: ForgetReport): Promise<void> {
   if (await loadMatrix(space, key).catch(() => null)) report.matrix = await whileClearing(() => matrixSignOut()).then(() => true, () => false);
   if (await loadXmpp(space, key).catch(() => null)) report.xmpp = await whileClearing(() => xmppSignOut()).then(() => true, () => false);
+  if ((await loadTelegram(space, key).catch(() => null))?.account) report.telegram = await telegramLeave(true).then(() => true, () => false);
   const nostr = await loadNostrDm(space, key).catch(() => null);
   if (!nostr) return;
   if (!nostr.madeHere) {

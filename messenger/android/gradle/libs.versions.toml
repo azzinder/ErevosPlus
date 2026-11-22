@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 azzinder
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[versions]
+libsession = "1.1.0-58-gc5c6c89"
+agp = "8.10.1"
+kotlin = "2.0.21"
+coreKtx = "1.15.0"
+activityCompose = "1.9.3"
+lifecycle = "2.8.7"
+composeBom = "2024.12.01"
+coroutines = "1.9.0"
+webkit = "1.12.1"
+zxing = "3.5.3"
+# WebRTC for Session calls: the build the official Session app uses.
+webrtc = "144.7559.14"
+
+[libraries]
+libsession-util-android = { group = "org.sessionfoundation", name = "libsession-util-android", version.ref = "libsession" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+# QR codes (linking Signal to another phone).
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+webrtc = { group = "io.github.webrtc-sdk", name = "android", version.ref = "webrtc" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

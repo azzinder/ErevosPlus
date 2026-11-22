@@ -4,6 +4,7 @@
 
 import { device } from '../modules/erevos-device';
 import { secureGet, secureSet } from './secure';
+import { webPagesSecure } from './web-pages';
 
 // Keeping Erevos's screen out of screenshots, screen recordings and the recent apps preview
 // (Android's FLAG_SECURE, modules/erevos-device). Without it, the last screen shown stays as a
@@ -32,6 +33,8 @@ export function keepPrivate(why: 'lock' | 'hidden' | 'chat' | 'collection' | 'sh
   if (now) reasons.set(why, now);
   else reasons.delete(why);
   device?.setSecure?.(reasons.size > 0);
+  // Messenger in its case and Facebook, on screens of their own, are kept out with it.
+  webPagesSecure(reasons.size > 0);
 }
 
 /** Whether a space with a password lock keeps the screen private: on unless turned off. */

@@ -8,7 +8,7 @@ import { Linking, Platform, Text as NativeText, type StyleProp, type TextStyle }
 import { ask } from '../lib/alert';
 import { t } from '../lib/i18n';
 import { IP_GUIDE, ipWarningText } from '../lib/ip-warning';
-import { splitLinks } from '../lib/links';
+import { splitLinks, type TextPart } from '../lib/links';
 import { hasStyle, styleText, type Look, type StyledPart } from '../lib/text-style';
 
 import { openGuideLink } from './guide';
@@ -46,11 +46,16 @@ function lookStyle(look: Look, shown: boolean): TextStyle {
   return style;
 }
 
+/** A chat's own way with links: more of them found in the words (`more`, as Telegram's @names), and
+ *  where a tapped one goes (`open`), in place of asking and opening it in the browser. */
+export type LinkWays = { more?: (parts: TextPart[]) => TextPart[]; open?: (url: string) => void };
+
 // Words with their web addresses underlined and tappable.
-function withLinks(text: string, key: string, style: StyleProp<TextStyle>, tappable: boolean) {
-  return splitLinks(text).map((part, i) =>
+function withLinks(text: string, key: string, style: StyleProp<TextStyle>, tappable: boolean, ways: LinkWays = {}) {
+  const found = splitLinks(text);
+  return (ways.more ? ways.more(found) : found).map((part, i) =>
     part.url && tappable ? (
-      <NativeText key={`${key}-${i}`} style={[{ textDecorationLine: 'underline' }, style]} onPress={() => openLink(part.url!)} accessibilityRole="link">
+      <NativeText key={`${key}-${i}`} style={[{ textDecorationLine: 'underline' }, style]} onPress={() => (ways.open ?? openLink)(part.url!)} accessibilityRole="link">
         {part.text}
       </NativeText>
     ) : style ? (
@@ -71,13 +76,32 @@ function withLinks(text: string, key: string, style: StyleProp<TextStyle>, tappa
  * runs a message came with already made (a Matrix message's HTML, lib/matrix-html.ts), in place of
  * reading the marks of `text`.
  */
-export function LinkedText({ text, style, parts }: { text: string; style?: StyleProp<TextStyle>; parts?: StyledPart[] }) {
+export function LinkedText({ text, style, parts, ways }: { text: string; style?: StyleProp<TextStyle>; parts?: StyledPart[]; ways?: LinkWays }) {
   const [shown, setShown] = useState<number[]>([]);
   // Edited words hide again: their hidden parts may be others.
   useEffect(() => setShown([]), [text, parts]);
+  // Words that cannot be read for links and marks are shown as they came, never closing the app;
+  // what may be hidden stays hidden.
+  try {
+    return look(text, style, parts, ways, shown, setShown);
+  } catch {
+    if (parts) return <>{parts.map((part) => (part.spoiler === undefined ? part.text : '▒▒▒')).join('')}</>;
+    return <>{text.includes('||') ? '▒▒▒' : text}</>;
+  }
+}
+
+function look(
+  text: string,
+  style: StyleProp<TextStyle> | undefined,
+  parts: StyledPart[] | undefined,
+  ways: LinkWays | undefined,
+  shown: number[],
+  setShown: (change: (was: number[]) => number[]) => void,
+) {
   if (!parts && !hasStyle(text)) {
-    if (splitLinks(text).every((piece) => !piece.url)) return <>{text}</>;
-    return <>{withLinks(text, 'w', style, true)}</>;
+    const found = splitLinks(text);
+    if ((ways?.more ? ways.more(found) : found).every((piece) => !piece.url)) return <>{text}</>;
+    return <>{withLinks(text, 'w', style, true, ways)}</>;
   }
   return (
     <>
@@ -94,7 +118,7 @@ export function LinkedText({ text, style, parts }: { text: string; style?: Style
         }
         return (
           <NativeText key={i} style={look}>
-            {withLinks(part.text, String(i), undefined, true)}
+            {withLinks(part.text, String(i), undefined, true, ways)}
           </NativeText>
         );
       })}

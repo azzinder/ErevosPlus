@@ -12,7 +12,7 @@ update and keeps everything.
 
 | Edition | `EREVOS_EDITION` | Modules |
 |---|---|---|
-| **Erevos+** | `plus` (default) | Erevos, Phone, SMS, Collection, Nostr, Matrix, XMPP, and the other networks as they come in (Telegram, Messenger, Signal, Session) |
+| **Erevos+** | `plus` (default) | Erevos, Phone, SMS, Collection, Nostr, Matrix, XMPP, Telegram (with TDLib: `EREVOS_TELEGRAM=1`, docs/erevosgram.md), Messenger, Signal, Session |
 | **Erevos** | `lite` | Erevos, Phone, SMS, Collection |
 
 ## What the edition changes
@@ -26,6 +26,14 @@ update and keeps everything.
   `networks` feature. `app/modules/erevos-core/android/build.gradle` builds it without them when
   `EREVOS_EDITION=lite`; asked anyway, they answer that they are in Erevos+. Nostr for Erevos's own
   messages (relays carrying sealed packets) is in both.
+
+- Messenger, Signal and Session: `messenger/` (from azzinder/erevos-messenger, with its history) holds their
+  engines; `app/modules/erevos-messenger` builds them (Go with gomobile, Rust with cargo-ndk, Session's Kotlin over
+  libsession-util-android) and compiles the engines' Kotlin straight from `messenger/android`, so its test app and
+  Erevos+ carry the same engines. The plain Erevos takes the module's stub. In the app: `lib/messenger.ts` (state,
+  64-bit keys kept as text), `lib/messenger-store.ts`, `components/msg-account.tsx`, `components/msg-chat.tsx`. Their
+  accounts are the phone's and show in its first space (space 0).
+- Telegram: `app/modules/erevos-telegram`, only with `EREVOS_TELEGRAM=1`, which the plain Erevos refuses.
 
 ## In a browser
 

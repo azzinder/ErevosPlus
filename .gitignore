@@ -1,2 +1,6 @@
 target/
 *.keystore
+
+# TDLib for the ErevosGram build (scripts/build-tdlib.sh)
+/tdlib/
+/third-party/

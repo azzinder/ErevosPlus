@@ -1,0 +1,48 @@
+#!/bin/sh -e
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+echo "$SCRIPT_DIR"
+cd "$SCRIPT_DIR" || { echo "fatal error" >&2; exit 1; }
+cargo clean -p libsqlite3-sys
+mkdir -p "$SCRIPT_DIR/../target" "$SCRIPT_DIR/sqlcipher"
+export SQLCIPHER_LIB_DIR="$SCRIPT_DIR/sqlcipher"
+export SQLCIPHER_INCLUDE_DIR="$SQLCIPHER_LIB_DIR"
+
+SQLCIPHER_VERSION="4.10.0"
+# Download and generate sqlcipher amalgamation
+mkdir -p $SCRIPT_DIR/sqlcipher.src
+[ -e "v${SQLCIPHER_VERSION}.tar.gz" ] || curl -sfL -O "https://github.com/sqlcipher/sqlcipher/archive/v${SQLCIPHER_VERSION}.tar.gz"
+tar xzf "v${SQLCIPHER_VERSION}.tar.gz" --strip-components=1 -C "$SCRIPT_DIR/sqlcipher.src"
+cd "$SCRIPT_DIR/sqlcipher.src"
+./configure
+make sqlite3.c
+cp sqlite3.c src/sqlcipher.h sqlite3.h sqlite3ext.h "$SCRIPT_DIR/sqlcipher/"
+# The `sqlcipher_codec_pragma` fails to parse correctly, even with
+# ```rust
+# let bindings = bindings
+#   .blocklist_item("sqlcipher_codec_pragma")
+#   .blocklist_type("Parse");
+# ```
+# This `sed` comments out that specific function.
+sed -i 's#int sqlcipher_codec_pragma#//int sqlcipher_codec_pragma#' "$SCRIPT_DIR/sqlcipher/sqlcipher.h"
+cd "$SCRIPT_DIR"
+# SQLCipher versions 4.10 and older call `ctx_free` at one point
+# with a direct pointer (`void *`), not `void **`, despite what the
+# public header declares. This is fixed in commit c89bab0b4 (SQLCipher ≥ 4.10).
+# ctx_free.patch backports this change to 4.10.0 in the amalgamation.
+patch < ctx_free.patch
+rm -rf "v${SQLCIPHER_VERSION}.tar.gz" sqlcipher.src
+
+# Regenerate bindgen file for sqlcipher
+rm -f "$SQLCIPHER_LIB_DIR/bindgen_bundled_version.rs"
+
+# cargo update
+find "$SCRIPT_DIR/../target" -type f -name bindgen.rs -exec rm {} \;
+env LIBSQLITE3_SYS_BUNDLING=1 cargo build --features "sqlcipher buildtime_bindgen session"
+find "$SCRIPT_DIR/../target" -type f -name bindgen.rs -exec mv {} "$SQLCIPHER_LIB_DIR/bindgen_bundled_version.rs" \;
+
+# Sanity checks
+cd "$SCRIPT_DIR/.." || { echo "fatal error" >&2; exit 1; }
+cargo update --quiet
+cargo test --features "backup blob chrono functions limits load_extension serde_json trace vtab bundled-sqlcipher-vendored-openssl"
+printf '    \e[35;1mFinished\e[0m bundled-sqlcipher-vendored-openssl/sqlcipher tests\n'

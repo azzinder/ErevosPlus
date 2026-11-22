@@ -22,14 +22,24 @@ export type Changes = { forYou: string[]; underTheHood: string[] };
 export type WhatsNew = Changes & { version: string };
 
 export const NEXT: Changes = {
-  forYou: [],
+  forYou: [
+    mark("**Messenger in its case tells you of new messages**: in Erevos+, when you use Messenger in its case, Erevos now tells you of its new messages as it does of other chats, even if you never opened the case. A chat with messages not read shows on home until it is read, and tapping it opens it in the case; while the case is open, Erevos tells of nothing, as the page shows it. See [Messenger](#messenger)."),
+    mark("**Messenger in its case wears your whole look**: in Erevos+, Meta's own Messenger page in its case now takes your look: its colours, dark or light as Erevos is, the shape of your bubbles (round, square or a line), your text size, your style's letters, and what lies behind your screens (a wallpaper, Neon's grid, Paper's lines and the others), and it changes with your look even while it is open. A photo of your own stays in Erevos: there the page shows a soft gradient instead. Where Meta changes its page, parts of it may keep Meta's look. See [Messenger](#messenger)."),
+    mark("**Messenger in its case asks for the PIN once**: in Erevos+, what Meta's page keeps now stays in the case between openings, apart from every other page, so Meta knows your phone again and no longer asks for the PIN of your encrypted chats each time you open it. It goes when you sign out of Messenger, or when another account opens the case. See [Messenger](#messenger)."),
+  ],
   underTheHood: [],
 };
 
 export const VERSIONS: WhatsNew[] = [
   {
-    version: '7.2.0-rc.2',
+    version: '7.3.0-rc.2',
     forYou: [
+      mark("**Messenger chats you read stay read**: a Messenger chat you marked read right after Erevos+ started, while Messenger was still connecting, no longer comes back as unread; a chat whose last message is yours, sent from Messenger's own app or the web, is read; and encrypted chats you read in Messenger's app or on the web are read here too."),
+      mark("**Messenger in its case fits the phone, and Facebook's feed is a tap away**: in Erevos+, Messenger in its case is now laid out at the phone's width, so it reads without zooming in, and shows under Erevos's own bar, in its colours, with **←** back to Erevos and **Facebook** to see Facebook's feed in the same page. Facebook also has a card of its own in the **Services** window, beside Messenger. See [Messenger](#messenger)."),
+      mark("**See yourself in a video call**: once their picture comes, yours stays in a small window in the top corner, on both phones; before, it vanished, and each side saw only the other. See [Chat through a relay](#relay)."),
+      mark("**Phones nearby are off until you turn them on**: Erevos no longer looks for phones nearby by itself, with Bluetooth, Wi-Fi Aware or on the same Wi-Fi, as on the same Wi-Fi it held a call back for up to a minute before it rang. Turn on **Look for phones nearby** under **Nearby, with no internet**, on **New chat**, to chat and call with no internet. See [Chat with a nearby phone](#nearby)."),
+      mark("**Ways at a glance**: **Settings** → **Relay and networks** → **Ways** shows each way your messages go out by, the relay, Nostr, the phones nearby, LoRa, SMS and Tor, with how each is now and a line under it: full when it works, faint when it reaches no one now, dashed when it is off. Above them, how many of your messages wait to go, an orange dot for each. Only the space that is open shows, never hidden chats. See [How Erevos picks the path](#paths)."),
+      mark("**LoRa makes up for lost pieces, and long texts go shorter**: a text sent by LoRa in several pieces now goes with spare pieces, one for each four, so it comes whole even when a piece or two are lost on the air; older Erevos reads it as before. And long texts are packed, with nothing lost, before they are encrypted, when that makes them go in fewer bytes, to contacts whose Erevos unpacks them. See [Over a LoRa radio](#lora)."),
       mark("**The day stands out in every chat**: over the first message of each day, groups and Chat with myself too, the day shows in bold between two lines: **Today**, **Yesterday**, the weekday within the last week, and before that the weekday and date. See [Chat through a relay](#relay)."),
       mark("**The microphone writes, if you like**: tap the microphone beside the message field and choose **Speak to write**, and from then on holding it writes what you say into the field, until you choose **Voice message** again. The choice stays for every chat. See [Chat through a relay](#relay)."),
       mark("**Ways on home**: once a relay is set, the line under the top bar of home is **Ways**, with a dot for each way your messages go out by and how many of them wait; a tap opens **Ways**. See [How Erevos picks the path](#paths)."),
@@ -37,36 +47,37 @@ export const VERSIONS: WhatsNew[] = [
     underTheHood: [],
   },
   {
-    version: '7.2.0-rc.1',
+    version: '7.3.0-beta.4',
     forYou: [
-      mark("**Answer a hidden contact's call with no PIN**: where hidden chats receive while closed, **Answer** on the ringing screen takes their contact's call at once, on a call screen with no name and no face, and the hidden chats stay closed; the small sign and the PIN still open them. See [Hidden chats](#hidden)."),
-      mark("**Speak to write**: tap **+** beside the message field, then **Speak to write**, and speak, and your words are written into the field, to change before you send them. It uses the speech model of **In words**, so all of it is done on your phone, and neither your voice nor its words leave it. On Android. See [Chat through a relay](#relay)."),
-      mark("**See yourself in a video call**: once their picture comes, yours stays in a small window in the top corner, on both phones; before, it vanished, and each side saw only the other. See [Chat through a relay](#relay)."),
-      mark("**Phones nearby are off until you turn them on**: Erevos no longer looks for phones nearby by itself, with Bluetooth, Wi-Fi Aware or on the same Wi-Fi, as on the same Wi-Fi it held a call back for up to a minute before it rang. Turn on **Look for phones nearby** under **Nearby, with no internet**, on **New chat**, to chat and call with no internet. See [Chat with a nearby phone](#nearby)."),
-      mark("**Ways at a glance**: **Settings** → **Relay and networks** → **Ways** shows each way your messages go out by, the relay, Nostr, the phones nearby, LoRa, SMS and Tor, with how each is now and a line under it: full when it works, faint when it reaches no one now, dashed when it is off. Above them, how many of your messages wait to go, an orange dot for each. Only the space that is open shows, never hidden chats. See [How Erevos picks the path](#paths)."),
-      mark("**LoRa makes up for lost pieces, and long texts go shorter**: a text sent by LoRa in several pieces now goes with spare pieces, one for each four, so it comes whole even when a piece or two are lost on the air; older Erevos reads it as before. And long texts are packed, with nothing lost, before they are encrypted, when that makes them go in fewer bytes, to contacts whose Erevos unpacks them. See [Over a LoRa radio](#lora)."),
-    ],
-    underTheHood: [],
-  },
-  {
-    version: '7.2.0-beta.4',
-    forYou: [
+      mark("**Messenger in its case**: in Erevos+, Messenger can now be used in its case instead of by Erevos: Meta's own Messenger page, as on a computer, closed in by Erevos with the same sign-in. Only Meta's sites load in it, links out open in your browser without Facebook's tracking marks, nothing of the sign-in stays in it once closed, and calls work in it. Choose it on the Messenger screen under **How Messenger is used here**; its chats are then not in Erevos's lists and Erevos does not notify of them. Through Tor, if Messenger goes through Tor, and then without calls."),
       mark("**The keypad lists the contacts it finds, and shows its letters**: on the Phone's **Keypad**, the contacts what you type finds are listed in the room over the number, all of them, not one at a time; and each key shows its letters in the app's language, ΑΒΓ in Greek, ABC in the others. See [Phone](#phone)."),
       mark("**New chat asks whether they have Erevos**: over your QR code on **New chat**, choose **Has Erevos already** or **New to Erevos**. The first is your QR code as before, and says that it works only when both phones have a relay; the second shows an invite, which brings in someone new, or someone whose phone has no relay. New chat remembers your choice. See [Chat through a relay](#relay)."),
       mark("**Open a file with another app**: a file in a chat, a PDF say, has **Open** too, not only **Save**: the phone's app for it reads it from Erevos's memory, with no copy left on the phone. Erevos asks first, and never opens web pages, drawings or app packages that way. See [Chat through a relay](#relay)."),
       mark("**Shared chats say how far they are, on both phones**: chats a contact shared from a relay your Erevos does not take from by itself show **Coming, 40%** once you tap them, and their phone says it is taking them; if they did not come, both phones say so and yours buzzes twice. See [Chat through a relay](#relay)."),
       mark("**Calls connect again**: a call that rang no longer stays at **Connecting** on both phones; each phone now waits for its own addresses before it calls or answers. See [Chat through a relay](#relay)."),
+      mark("**Answer a hidden contact's call with no PIN**: where hidden chats receive while closed, **Answer** on the ringing screen takes their contact's call at once, on a call screen with no name and no face, and the hidden chats stay closed; the small sign and the PIN still open them. See [Hidden chats](#hidden)."),
     ],
     underTheHood: [],
   },
   {
-    version: '7.2.0-beta.3',
+    version: '7.3.0-beta.3',
     forYou: [
+      mark("**Matrix rooms with very long messages open**: a message with a very long run of names, dots or dashes, as some public Matrix rooms have, no longer closes Erevos+ as its chat shows it."),
+      mark("**Messenger chats you read stay read**: a Messenger chat you marked read, or wrote in, no longer comes back as unread when Messenger sends it again, after Erevos+ reconnects or starts."),
+      mark("**Chats stay where you read**: in Telegram, Matrix, XMPP and Nostr chats, the chat no longer moves by itself to other messages as older ones load above it; it stays at the last message, or where you were reading."),
       mark("**A phone beside you no longer slows Erevos**: with another Erevos phone near you on the same Wi-Fi, Erevos no longer links to it over Wi-Fi Aware too, which took your phone's Wi-Fi away for moments and slowed your messages and the relay, as if the other phone were far away; and a link to a phone nearby that stopped carrying anything is let go at once, not used on. See [Chat with a nearby phone](#nearby)."),
       mark("**Calls start sooner and sound steadier**: a call through the call relay no longer waits up to 5 seconds on each phone for every way to the relay, only for the first that works; while it goes on, Erevos looks for phones nearby less often, which took the phone's Wi-Fi away for moments and made gaps in the sound; and in a video call, their picture is no longer put aside when their sound came apart from it. See [Chat through a relay](#relay)."),
       mark("**Contacts as you dial**: on the Phone's **Keypad**, a contact whose number holds the digits you type, or whose name starts with them on the keys' letters (2 for ABC and ΑΒΓ), shows over the keys: tap it to call. See [Phone](#phone)."),
       mark("**Chats open at once**: a chat no longer waits, showing your contact as encrypted, for Erevos to finish what it was doing with the relay in the background; it is ready to use as it opens, and holding a message opens its menu, at most a moment later while Erevos says it is still reading what came. See [Chat through a relay](#relay)."),
       mark("**Pair with a code with no relay yet**: on a phone with no relay yet, **New chat** now has **Pair with a code** too, under your QR code, and opens straight on **Start with an invite** without first showing the screen of a phone with a relay. See [Chat through a relay](#relay)."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '7.3.0-beta.2',
+    forYou: [
+      mark("**Erevos+ says its own name, with an icon of its own**: the app and its guide now say Erevos+ everywhere, and its icon is Erevos's mark on a purple tile. Where it speaks of the plain Erevos, it still says Erevos."),
+      mark("**Signal: one chat for each person, with their name**: in Erevos+, a Signal chat shows the person's name, what you send from the phone Erevos+ is linked to shows in the chat of the one you sent it to, and someone who first wrote to your phone number keeps one chat with you on their phone too."),
     ],
     underTheHood: [],
   },
@@ -108,6 +119,29 @@ export const VERSIONS: WhatsNew[] = [
       mark("**Post-quantum, all the way**: between two phones on this Erevos, every message of a chat is now also locked with a fresh ML-KEM key, a new one every few dozen messages, not only at the start. So someone who records your messages today and has a quantum computer one day still cannot read them. By itself, with nothing to turn on; not in groups."),
       mark("**Video calls take about half the data**: a video call over the internet goes through the call relay, so that neither side sees the other's address; its picture is now held to 1 Mbps, which on a phone looks much the same. A call on the same network is not held back."),
     ],
+  },
+  {
+    version: '7.1.2',
+    forYou: [
+      mark("**Chats you have read stay read, on every network**: in Erevos+, Messenger, Signal, Session, Telegram, Matrix, XMPP and Nostr chats you have read no longer notify you again of messages already read, after a restart, a reconnect or when a chat opens. Signal's reads go both ways with the phone it is linked to, and a Nostr chat you answer from another app is read here too."),
+      mark("**The guide tells of Messenger, Signal and Session**: in Erevos+, the user guide has a section for each, on signing in, chats, groups, calls, notifications, Tor and signing out. See [Messenger](#messenger), [Signal](#signal) and [Session](#session)."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '7.1.1',
+    forYou: [
+      mark("**Matrix warns before your internet address can be seen**: once per chat before the first message, photo or file that can go without Tor, with **Through Tor** to fix it or **Go on**; before a chat's first call, made or answered, as calls never go through Tor; before joining a group without Tor, with **Always through Tor** to fix it; and before a link's preview fetched straight. Only your own Matrix server sees the address: photos and files from other servers come through it. See [Who sees your internet address](#ip)."),
+      mark("**Tor for your XMPP account, and per chat**: on Android, the XMPP screen, and the one before signing in, chooses **Off** (the default), **As the space** or **Always through Tor** for the account: its connection, the look for its server and its files, never straight when it must not. **Through Tor** under any XMPP chat or group, off by default, sends the whole account only through Tor while on, as one connection carries all its chats. Calls do not go through Tor. Before you send while the account does not go through Tor, before a call and before a file from another server, Erevos says once that your internet address can be seen, and how not to. See [XMPP](#xmpp)."),
+      mark("**Telegram warns before your internet address can be seen**: once in each Telegram chat, before the first message, file, sticker, voice message, poll or forward while the account does not go through Tor, with **Through Tor** for that chat to fix it, **Guide** or **Go on**; before every Telegram call, made or answered, as calls never go through Tor; and before joining a group or channel by its link. See [Who sees your internet address](#ip)."),
+      mark("**Tor for Messenger and Signal, and per chat**: in Erevos+, the Messenger and Signal screens, and the ones before signing in, choose **Off** (the default), **As the space** or **Always through Tor** for the account. With it, everything of the account goes through Tor, its pictures and files too, and Messenger's sign-in page and Signal's registering, captcha and linking as well: never straight when it must not. **Through Tor** under any of their chats, off by default, sends the whole account only through Tor while on, as each has one connection. Calls do not go through Tor."),
+      mark("**Matrix: Tor as every account has it, and links that open**: the Matrix screen, before signing in too, has **Off** (the default, now for accounts signed in before too), **As the space** and **Always through Tor**; and each chat has **Through Tor**, which makes the whole account go only through Tor, as Matrix has one connection. Calls never go through Tor. A link in a Matrix message whose words do not say where it goes now says it after them, and opens with a tap. See [Matrix](#matrix)."),
+      mark("**Nostr: Tor as every account, and per chat**: on Android, the **Nostr chats** screen, before a key is made or brought too, has **Off** (the default, also for keys from before), **As the space** and **Always through Tor** for the account: its relays, look-ups and file servers, never straight when it must not (Always, or the space's Everything). **Through Tor** at the foot of a Nostr chat, off by default, sends that chat alone only through Tor, on circuits of its own, whatever the account says; what comes to you follows the account. See [Chats with other Nostr apps](#nostr-chats)."),
+      mark("**Telegram: Tor as every account, and per chat**: on Android, **Tor for this Telegram account**, in Telegram's settings and before signing in, has **Off** (the default), **As the space** and **Always through Tor**, as every account of another network. With Always, or while the space sends Everything through Tor, Telegram is reached only through Tor, signing in too, and never straight, not even when Tor cannot connect. **Through Tor** in a Telegram chat's info sends that chat only through Tor, and with it the whole account, which has one connection. Calls do not go through Tor. See [Telegram (ErevosGram)](#telegram)."),
+      mark("**Messenger signs in on facebook.com, and opens Facebook**: in Erevos+, Messenger now signs in on Facebook's own page. **Open Facebook** on the Messenger screen shows Facebook itself with the same sign-in: its Messenger links come back to Erevos's chats, and other links open in your browser without Facebook's tracking marks and never through Tor, so the site sees your internet address. An account signed in on messenger.com before signs out and in again once to open Facebook."),
+      mark("**Messenger, Signal and Session chats send more, and stay read**: in Erevos+, **+** in their chats sends a photo from your photos or the camera, a file or a sticker, and the microphone records a voice message. Your own messages show their words, where before some came empty; tapping a person with no Messenger chat yet opens a new one; and chats you mark read no longer come back unread."),
+    ],
+    underTheHood: [],
   },
   {
     version: '7.0.2',
@@ -822,11 +856,11 @@ export function whatsNewFor(running: string, edition: Edition = EDITION): (Chang
   return edition === 'lite' ? all.map(({ forYou, underTheHood, ...rest }) => ({ ...rest, forYou: forYou.filter(inLite), underTheHood: underTheHood.filter(inLite) })) : asPlus(all);
 }
 
-// Erevos+ tells its releases as its own: a release of the plain Erevos alone (x.0.y after 7.0.0,
-// docs/editions.md) is not listed in it, and what it brought shows under the Erevos+ release that
+// Erevos+ tells its releases as its own: a release of the plain Erevos alone (after 7.0.0, an even
+// minor number: 7.0.y, 7.2.0-beta.1, while Erevos+ has the odd ones, docs/editions.md) is not listed in it, and what it brought shows under the Erevos+ release that
 // came after it, but what only the plain Erevos is about (ONLY_LITE). With no Erevos+ release after
 // it yet, it stays as it is.
-const PLAIN_RELEASE = /^\d+\.0\.[1-9]\d*$/;
+const PLAIN_RELEASE = /^\d+\.\d*[02468]\.\d+(?:-[0-9A-Za-z.]+)?$/;
 const ONLY_LITE = /only (?:of )?what Erevos has\b/;
 // The last release before there were two editions: older ones are the history of both.
 const FIRST_TWO = '7.0.0';

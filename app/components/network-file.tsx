@@ -46,13 +46,15 @@ type FileProps = {
   onMenu?: () => void;
   /** Told how long a sound lasts, once it was fetched and its file says, to keep it. */
   onDuration?: (ms: number) => void;
+  /** A photo is fetched and shown at once, as Telegram's are, not on a tap. */
+  auto?: boolean;
 };
 
 export function NetworkFile(props: FileProps) {
   return isCardFile(props.name, props.type) ? <ContactFile name={props.name} fetch={props.fetch} /> : <FileShown {...props} />;
 }
 
-function FileShown({ name, type, size, dim, duration, fetch, onMenu, onDuration }: FileProps) {
+function FileShown({ name, type, size, dim, duration, fetch, onMenu, onDuration, auto }: FileProps) {
   const [bytes, setBytes] = useState<Uint8Array | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
@@ -71,6 +73,9 @@ function FileShown({ name, type, size, dim, duration, fetch, onMenu, onDuration 
     },
     [],
   );
+  useEffect(() => {
+    if (auto && image) void get();
+  }, []);
 
   async function get(): Promise<Uint8Array | null> {
     if (bytes) return bytes;

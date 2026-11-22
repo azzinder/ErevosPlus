@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
+import { accountTorOf, effectiveTor, type AccountTor } from './account-tor';
 import { sha1 } from '@noble/hashes/legacy.js';
 
 import type { ChatNotify } from '../lock/chat-notify';
@@ -154,6 +155,8 @@ export type XmppMessage = {
 
 export type XmppChat = {
   jid: string;
+  /** «Through Tor» for this chat: the whole account then goes only through Tor (one connection carries every chat). Off when missing. */
+  tor?: true;
   messages: XmppMessage[];
   unread: number;
   lastAt: number;
@@ -225,8 +228,15 @@ export type XmppState = {
   writing?: ChatWriting;
   /** Contacts the account appears offline to (lib/xmpp-rules.ts), by bare address in small letters. */
   unseenBy?: string[];
+  /** The account's Tor choice (lib/account-tor.ts): Off when missing; `true`, as the first switch
+   *  kept it, is Always. A chat «Through Tor» makes it Always while on (xmppTorWay). Calls never go through Tor. */
+  tor?: AccountTor | true;
 };
 
+/** The Tor choice that counts for the account now: its own, or Always while any of its chats goes «Through Tor». */
+export function xmppTorWay(state: Pick<XmppState, 'tor' | 'chats'>): AccountTor {
+  return effectiveTor(accountTorOf(state.tor), Object.values(state.chats).some((chat) => chat.tor === true));
+}
 
 // They live in lib/xmpp-base, which lib/xmpp-muc takes without taking this file.
 export { bare, domainOf, isXmppId, newXmppId, NS, XmppError };
@@ -258,10 +268,10 @@ export class XmppConnection {
   }
 
   /** Connects, signs in and binds a resource. */
-  static async open(state: Pick<XmppState, 'jid' | 'password' | 'resource' | 'server'>, connect: typeof connectXmpp = connectXmpp): Promise<XmppConnection> {
+  static async open(state: Pick<XmppState, 'jid' | 'password' | 'resource' | 'server' | 'tor'> & { chats?: XmppState['chats'] }, connect: typeof connectXmpp = connectXmpp): Promise<XmppConnection> {
     const domain = domainOf(state.jid);
     const local = state.jid.slice(0, state.jid.indexOf('@'));
-    const link = await connect(domain, state.server);
+    const link = await connect(domain, state.server, xmppTorWay({ tor: state.tor, chats: state.chats ?? {} }));
     try {
       await link.open(domain);
       let features = await expect(link, 'features');
@@ -443,14 +453,14 @@ function stanzaError(stanza: XmlElement): XmppError {
 
 // ---- signing in ----
 
-/** Signs in for the first time: answers the account, with this device's new OMEMO keys. */
-export async function signInXmpp(jid: string, password: string, server?: XmppServer, connect?: typeof connectXmpp): Promise<{ state: XmppState; connection: XmppConnection }> {
+/** Signs in for the first time: answers the account, with this device's new OMEMO keys; `tor`, its Tor choice from the start. */
+export async function signInXmpp(jid: string, password: string, server?: XmppServer, connect?: typeof connectXmpp, tor: AccountTor = 'never'): Promise<{ state: XmppState; connection: XmppConnection }> {
   const account = bare(jid.trim());
   if (!isXmppId(account)) throw new XmppError(t('Write an XMPP address, such as name@example.org.'));
   const resource = `Erevos.${toHex(randomBytes(3))}`;
-  const connection = await XmppConnection.open({ jid: account, password, resource, server }, connect);
+  const connection = await XmppConnection.open({ jid: account, password, resource, server, tor }, connect);
   try {
-    const state: XmppState = { jid: account, password, resource, server, omemo: await newOwnOmemo(), people: {}, chats: {}, roster: {}, requests: [], seen: [] };
+    const state: XmppState = { jid: account, password, resource, server, omemo: await newOwnOmemo(), people: {}, chats: {}, roster: {}, requests: [], seen: [], tor };
     return { state, connection };
   } catch (error) {
     connection.close();
@@ -476,13 +486,13 @@ export class XmppRegisterError extends XmppError {
  * asks for more than a name and a password, such as a captcha, or makes accounts only on its
  * website, is said so, with its page when it names one.
  */
-export async function registerXmpp(jid: string, password: string, server?: XmppServer, connect: typeof connectXmpp = connectXmpp): Promise<{ state: XmppState; connection: XmppConnection }> {
+export async function registerXmpp(jid: string, password: string, server?: XmppServer, connect: typeof connectXmpp = connectXmpp, tor: AccountTor = 'never'): Promise<{ state: XmppState; connection: XmppConnection }> {
   const account = bare(jid.trim());
   if (!isXmppId(account)) throw new XmppError(t('Write an XMPP address, such as name@example.org.'));
   if (password.length < 8) throw new XmppError(t('Choose a password of at least 8 characters.'));
   const domain = domainOf(account);
   const local = account.slice(0, account.indexOf('@'));
-  const link = await connect(domain, server);
+  const link = await connect(domain, server, tor);
   try {
     if (!link.secure) throw new XmppError(t('The XMPP server offers no safe way to sign in.'));
     await link.open(domain);
@@ -530,7 +540,7 @@ export async function registerXmpp(jid: string, password: string, server?: XmppS
   } finally {
     link.close();
   }
-  return signInXmpp(account, password, server, connect);
+  return signInXmpp(account, password, server, connect, tor);
 }
 
 /** Gives the account a new password (XEP-0077): the server takes it at once, and the next sign-in needs it. */

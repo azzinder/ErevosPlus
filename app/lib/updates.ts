@@ -71,8 +71,12 @@ export function isReleaseFile(url: string): boolean {
   return parsed.protocol === 'https:' && parsed.host === 'github.com' && parsed.pathname.startsWith(`/${RELEASES_REPO}/releases/download/`);
 }
 
-/** version.json, checked; null if it is not a release this app understands. */
-export function parseRelease(text: string): Release | null {
+/**
+ * version.json, checked; null if it is not a release this app understands. `apkOf` names the APK
+ * that updates this build: `apk`, or `erevosgram` for the ErevosGram build (docs/erevosgram.md),
+ * which the plain APK would otherwise replace with an Erevos without Telegram.
+ */
+export function parseRelease(text: string, apkOf: 'apk' | 'erevosgram' = 'apk'): Release | null {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -90,7 +94,7 @@ export function parseRelease(text: string): Release | null {
   else if (typeof d.version === 'string' && buildOf(d.version) === build) version = d.version;
   else return null;
   const date = typeof d.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.date) ? d.date : '';
-  const apk = d.apk as Record<string, unknown> | undefined;
+  const apk = d[apkOf] as Record<string, unknown> | undefined;
   const apkOk =
     !!apk &&
     typeof apk.url === 'string' &&
@@ -137,11 +141,11 @@ export function isNewer(release: Release, currentBuild: number): boolean {
 }
 
 /** The latest release, or null when there is none yet. Throws when it cannot be reached. */
-export async function fetchLatestRelease(fetchImpl: typeof fetch = fetch): Promise<Release | null> {
+export async function fetchLatestRelease(fetchImpl: typeof fetch = fetch, apkOf: 'apk' | 'erevosgram' = 'apk'): Promise<Release | null> {
   const res = await fetchImpl(LATEST_URL, { headers: { 'Cache-Control': 'no-cache' } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(t('GitHub answered {status}.', { status: res.status }));
-  return parseRelease(await res.text());
+  return parseRelease(await res.text(), apkOf);
 }
 
 // The release's file for each package of the computer's shell (desktop/main.js system()), as the

@@ -72,7 +72,7 @@ sur le travail open source d’autres personnes. Voici les principales parties, 
   l’app.
 
 La liste complète, chaque paquet avec sa licence, est dans le fichier \`CREDITS.md\` qui vient avec le code source
-d’Erevos.
+d’{=Erevos}.
 
 **Pourquoi :** parce que leurs auteurs ont donné leur travail librement et ont demandé à être nommés, et parce que tu
 dois pouvoir voir de quoi Erevos est fait.
@@ -344,7 +344,7 @@ Dans les autres langues, les deux portent le nom dans cette langue et en anglais
 
 Erevos est fait de parties, ses modules : **Erevos** lui-même (ses propres discussions, groupes et appels, chiffrés de
 bout en bout, avec les discussions masquées), le **Téléphone**{- et}{+,} les **SMS**{+, et les discussions avec des apps **Nostr**,
-**Matrix** et **XMPP**}. La **Collection** (tes photos et tes fichiers, chiffrés) est aussi un module. Le Téléphone et les SMS n’existent que sur Android, la Collection sur Android, dans l’application de bureau, dans l’app web et sur Sailfish OS. N’importe lesquels peuvent être activés,
+**Matrix** et **XMPP**, et **Telegram**, **Messenger**, **Signal** et **Session**}. La **Collection** (tes photos et tes fichiers, chiffrés) est aussi un module. Le Téléphone et les SMS n’existent que sur Android, la Collection sur Android, dans l’application de bureau, dans l’app web et sur Sailfish OS. N’importe lesquels peuvent être activés,
 Erevos lui-même aussi, un ou plusieurs, au moins un : **Réglages** → **Général** → **Modules** active ou désactive
 chacun à tout moment.
 
@@ -363,7 +363,7 @@ comme avant, jusqu’à ce que tu les changes.
 
 - **Le nom :** ce n’est pas un nom d’utilisateur : personne ne le cherche, et il n’a pas besoin d’être unique. Il part,
   chiffré, seulement vers ceux que tu ajoutes, et **Mon nom**, sous Réglages → Confidentialité et sécurité, le change.
-- **Venir d’un autre téléphone :** sur Android, **J’ai déjà Erevos sur un autre téléphone** saute le nom et les modules,
+- **Venir d’un autre téléphone :** sur Android, **J’ai déjà {=Erevos} sur un autre téléphone** saute le nom et les modules,
   qui viennent avec la sauvegarde. L’espace s’ouvre, **Ouvrir les sauvegardes** la restaure (voir [Passer à un nouveau
   téléphone](#new-phone)), puis suivent les écrans des modules qu’elle apporte, puis l’empreinte et le dossier des
   sauvegardes automatiques, qui restent propres à chaque téléphone. **Je n’ai pas encore de sauvegarde** dit comment en
@@ -390,13 +390,13 @@ comme avant, jusqu’à ce que tu les changes.
 - **Gardé sur le téléphone :** le choix vaut pour ce téléphone, le même dans chaque espace, et il est gardé en dehors
   des espaces, comme les icônes, puisque le Téléphone peut s’ouvrir sans le mot de passe.
 
-**Pourquoi :** tout le monde ne veut pas tout. Quelqu’un qui utilise Erevos seulement comme téléphone, ou seulement pour
+**Pourquoi :** tout le monde ne veut pas tout. Quelqu’un qui utilise {=Erevos} seulement comme téléphone, ou seulement pour
 Nostr, obtient une app qui ne fait que cela, et un téléphone qui n’attend pas en arrière-plan des messages qui ne
 viennent jamais.
 
 ## Discuter avec un téléphone à proximité {#nearby}
 
-Tant qu’un espace est ouvert, sur n’importe quel écran, Erevos cherche d’autres téléphones Erevos autour de lui, par
+Tant qu’un espace est ouvert, sur n’importe quel écran, Erevos cherche d’autres téléphones {=Erevos} autour de lui, par
 Bluetooth et, là où le téléphone l’a, par Wi-Fi Aware, et sur le Wi-Fi où il se trouve, téléphones comme ordinateurs. Ni
 internet, ni SIM, ni réseau Wi-Fi ne sont nécessaires. Il porte les messages à tes contacts, chiffrés de bout en bout
 comme ceux qui passent par le relais.
@@ -431,10 +431,10 @@ passe par le relais.
   est là, pas à qui elle est. Le pare-feu d’un ordinateur doit laisser entrer le port 47905 (UDP et TCP). Pour
   l’arrêter, désactive **Trouver Erevos sur le même Wi-Fi** sous **À proximité, sans internet**, dans **Nouvelle
   discussion**.
-- **Un Wi-Fi à eux (Android 10 et plus récent) :** sans Wi-Fi commun, deux téléphones Erevos proches l’un de l’autre
+- **Un Wi-Fi à eux (Android 10 et plus récent) :** sans Wi-Fi commun, deux téléphones {=Erevos} proches l’un de l’autre
   créent un petit Wi-Fi à eux (Wi-Fi Direct) et se parlent par lui comme sur le même Wi-Fi : plus rapide que le
   Bluetooth, et un appel passe par lui sans internet. Il ne demande rien ; chaque téléphone reste aussi sur son propre
-  Wi-Fi là où il le peut. Toute personne à proximité peut savoir qu’un téléphone Erevos est là, et pourrait rejoindre ce
+  Wi-Fi là où il le peut. Toute personne à proximité peut savoir qu’un téléphone {=Erevos} est là, et pourrait rejoindre ce
   petit Wi-Fi, n’y obtenant que des octets scellés. Il faut que **Trouver Erevos sur le même Wi-Fi** soit activé ; pour
   arrêter celui-ci seul, désactive **Créer un Wi-Fi avec les téléphones à proximité** en dessous.
 - **Sur un téléphone Samsung,** **Chercher avec Wi-Fi Aware** et **Créer un Wi-Fi avec les téléphones à proximité** sont
@@ -447,7 +447,7 @@ passe par le relais.
   copie qui arrive en second n’est pas affichée de nouveau. Si le relais est injoignable, c’est la copie à proximité qui
   compte.
 - **Transportés par d’autres téléphones :** quand le relais est injoignable et que ton contact n’est pas proche, les
-  téléphones Erevos à proximité prennent aussi ton message, scellé pour le relais de ton contact. Chacun le garde, trois
+  téléphones {=Erevos} à proximité prennent aussi ton message, scellé pour le relais de ton contact. Chacun le garde, trois
   jours au plus, le donne à deux autres téléphones au plus qu’il croise, et le remet à ce relais par son propre relais
   dès qu’il le peut ; le tien fait de même. Ils ne peuvent pas le lire, ni savoir de qui il vient ni à qui il va : ils
   ne voient que l’adresse du relais. Il reste quand Erevos se ferme, scellé sur le téléphone. Les tiens restent dans ton
@@ -490,10 +490,10 @@ messages ressemblent à ceux de l’espace. Elles ne portent jamais les messages
 passent jamais par LoRa ni par SMS.
 
 **Un Bluetooth qu’on ne peut pas suivre :** ce que votre téléphone émet en Bluetooth pour que d’autres le trouvent dit
-seulement qu’un téléphone avec Erevos est proche, avec un nombre aléatoire qui change toutes les neuf à douze minutes,
+seulement qu’un téléphone avec {=Erevos} est proche, avec un nombre aléatoire qui change toutes les neuf à douze minutes,
 et sous Android 8 et plus depuis une adresse qui change avec lui. Quelqu’un qui écoute à un endroit puis à un autre ne
 peut donc pas savoir que c’est le même téléphone, du moins par Erevos. Les liaisons établies le restent. Les téléphones
-avec un Erevos plus ancien trouvent le vôtre, et le vôtre les trouve, comme avant.
+avec un {=Erevos} plus ancien trouvent le vôtre, et le vôtre les trouve, comme avant.
 
 ## Par une radio LoRa {#lora}
 
@@ -560,7 +560,7 @@ personne n’a besoin de ton numéro de téléphone ou de ton e-mail pour te joi
 1. Sur l’écran d’accueil, appuie sur **Nouvelle discussion**. Tant qu’il manque quelque chose, **Comment tu te connectes maintenant** dit en haut en
    mots simples comment tes contacts te joignent : par ton relais, par Nostr sans relais, ou seulement à proximité ; quand
    tout fonctionne, il n’est pas affiché. Avec un relais, un champ tout en haut trouve un contact par son nom ou ajoute
-   un lien collé dedans, et en dessous viennent **Ton code QR**, avec **A déjà Erevos** et **Nouveau sur Erevos** au-dessus, et des lignes pour **Ton lien
+   un lien collé dedans, et en dessous viennent **Ton code QR**, avec **A déjà {=Erevos}** et **Nouveau sur {=Erevos}** au-dessus, et des lignes pour **Ton lien
    de contact** et d’autres ; un téléphone qui n’a pas encore de relais commence par **Commence par une invitation**.
    Les réglages propres du relais sont sous **Pour les utilisateurs avancés**,
    en bas ; **Réglages** → **Relais et réseaux** → **Relais** ouvre Nouvelle discussion avec ceux-ci ouverts.
@@ -575,8 +575,8 @@ personne n’a besoin de ton numéro de téléphone ou de ton e-mail pour te joi
    l’ajoute aussi, relié au contact que tu choisis, dont la discussion prend le nom.
    Le code est court, donc n’importe quel appareil photo le lit. Qui le scanne répond avec son propre lien de contact, puis ce téléphone lui écrit en premier. Le code est nouveau à chaque ouverture de Nouvelle discussion, et vaut une fois : le premier qui le scanne devient un contact aussitôt ; qui le scanne ensuite, ou prend le lien que tu partages, écrit d’abord une demande de message. **Grand code QR, sans internet** montre à la place le code entier, qui marche à proximité sans internet, et **Petit code QR** revient en arrière. **Partager**, en dessous, envoie un lien court que toute application laisse toucher ; sur Android, il ouvre Erevos, qui demande avant de le prendre. Pour ajouter quelqu’un avec son code QR de contact, ton téléphone a d’abord besoin d’un relais.
    Ce code QR ne marche que si les deux téléphones ont un relais, comme le dit la carte. Pour quelqu’un qui n’a pas
-   encore Erevos, ou dont le téléphone n’a pas de relais, choisis plutôt **Nouveau sur Erevos**, au-dessus : la carte
-   montre **Invitation à Erevos**, une invitation avec laquelle son téléphone rejoint ton relais, comme dans Inviter
+   encore {=Erevos}, ou dont le téléphone n’a pas de relais, choisis plutôt **Nouveau sur {=Erevos}**, au-dessus : la carte
+   montre **Invitation à {=Erevos}**, une invitation avec laquelle son téléphone rejoint ton relais, comme dans Inviter
    quelqu’un de nouveau, plus bas. Nouvelle discussion montre ce que tu as choisi la dernière fois.
    Il en va de même par contact : tant que le petit code de contact s’affiche et que le NFC est activé sur Android,
    l’autre téléphone le prend si tu poses son dos contre le dos du tien. Cela ne marche que lorsqu’Erevos est au premier
@@ -641,7 +641,7 @@ téléphone sur ce relais, si bien que celui qui fait tourner le relais peut ret
   le téléphone ne peut plus utiliser le relais, tandis que les téléphones qu’il a invités gardent le leur. S’il a jamais
   eu le jeton du relais, il faut aussi changer ce jeton, pour qu’il ne puisse pas revenir avec. Les téléphones qui ont
   leur propre jeton continuent comme avant : seul un téléphone où l’ancien jeton est encore tapé (pas ouvert depuis, ou
-  avec un Erevos plus ancien) a besoin du nouveau.
+  avec un {=Erevos} plus ancien) a besoin du nouveau.
 - **Les discussions masquées** gardent le jeton du relais tapé pour elles : l’échanger au même moment que celui de
   l’espace montrerait au relais qu’elles sont celles de ce téléphone. Quand le jeton du relais change, tape le nouveau
   sous leur **Pour les utilisateurs avancés**.
@@ -652,11 +652,11 @@ qu’un jeton parti là où il ne devait pas ne peut pas remplir son fichier de 
 
 ### Inviter quelqu’un de nouveau
 
-Un code QR ou un lien fait entrer quelqu’un de nouveau : son téléphone rejoint Erevos sur ton relais, avec un accès à
+Un code QR ou un lien fait entrer quelqu’un de nouveau : son téléphone rejoint {=Erevos} sur ton relais, avec un accès à
 lui, sans rien taper, et vous êtes aussitôt contacts l’un de l’autre, sans demande de message.
 
 - **Pour inviter :** sur l’écran d’accueil, appuie sur **Inviter** à côté de la ligne du relais ou, sur **Nouvelle
-  discussion**, choisis **Nouveau sur Erevos** au-dessus du code QR. Le code QR s’affiche tout de suite : quand Erevos
+  discussion**, choisis **Nouveau sur {=Erevos}** au-dessus du code QR. Le code QR s’affiche tout de suite : quand {=Erevos}
   est sur son téléphone, la personne le scanne avec l’appareil photo et ouvre le lien dans Erevos, ou appuie sur
   **Partager l’invitation** et envoie-lui le lien. En dessous, tu peux taper pour qui c’est (son nom dans tes
   discussions) et **Ton nom, pour cette personne**, ou laisser les deux vides. Rouverte tant que personne ne l’a prise
@@ -665,12 +665,12 @@ lui, sans rien taper, et vous êtes aussitôt contacts l’un de l’autre, sans
   l’invitation du relais finit plus tôt. Celui qui la prend en premier l’a, donc donne-la à cette personne seulement.
   Sur un téléphone Android dont le NFC est activé, tu peux aussi la lui donner par contact : pose le dos de son
   téléphone contre le dos du tien pendant que le code s’affiche, et son téléphone ouvre le lien tout seul, dans Erevos
-  s’il est installé, sinon sur la page web d’Erevos, qui propose Erevos. Si le NFC est désactivé, la fenêtre te dit de
+  s’il est installé, sinon sur la page web d’Erevos, qui propose {=Erevos}. Si le NFC est désactivé, la fenêtre te dit de
   l’activer dans les réglages d’Android.
 - **Pour rejoindre :** sur un téléphone qui n’a pas encore de relais, **Nouvelle discussion** commence par **Commence
   par une invitation**. Appuie sur **Scanner son code QR** et photographie l’invitation sur son écran, ou appuie sur
   **Depuis une photo de son code QR**, ou colle le lien dans le champ là et appuie sur **Rejoindre** ; la scanner avec
-  l’appareil photo et ouvrir le lien dans Erevos marche aussi. Le lien ouvre **… t’invite sur Erevos** : appuie sur
+  l’appareil photo et ouvrir le lien dans Erevos marche aussi. Le lien ouvre **… t’invite sur {=Erevos}** : appuie sur
   **Rejoindre** seulement s’il vient de cette personne. Erevos prend un accès à lui sur son relais et une file
   d’attente là-bas, l’ajoute et dit **Bienvenue sur Erevos**. Son premier message prévient le téléphone de la personne,
   qui ajoute aussitôt celui-ci comme contact, nommé comme elle l’a tapé.
@@ -697,9 +697,9 @@ lui, sans rien taper, et vous êtes aussitôt contacts l’un de l’autre, sans
 - **Ce qui est gardé :** ton téléphone garde le secret de chaque invitation et le nom de la personne, scellés dans
   l’espace, jusqu’à ce qu’elle soit utilisée ou que ses 7 jours se terminent, 20 au plus à la fois. Rien de tout cela
   n’est sur le relais, sauf l’invitation au relais.
-- **Par SMS, à quelqu’un qui n’a pas encore Erevos :** sur Android, la fiche d’un contact qui n’est pas dans Erevos a
+- **Par SMS, à quelqu’un qui n’a pas encore {=Erevos} :** sur Android, la fiche d’un contact qui n’est pas dans Erevos a
   **Inviter par SMS**. Ce bouton écrit un SMS à son premier numéro avec un lien court, dans l’app SMS (celle d’Erevos
-  quand c’est l’app SMS du téléphone), que tu envoies ou non. La page du lien sur le serveur web de LPHL propose Erevos
+  quand c’est l’app SMS du téléphone), que tu envoies ou non. La page du lien sur le serveur web de LPHL propose {=Erevos}
   à la personne (l’app Android, ou l’app web sur un iPhone) puis y ouvre l’invitation ; dans l’app web sur un iPhone,
   elle colle le lien sous **J’ai une invitation**. Elle appuie sur **Rejoindre** : son téléphone rejoint ton relais
   comme ci-dessus et répond au tien par lui, ce qui l’ajoute, reliée à ce numéro et nommée comme sur la fiche. Son
@@ -785,7 +785,7 @@ obtenir un jeton à eux, sans rien à taper dans Erevos.
 - **Pour te connecter :** tape l’adresse du relais sous **Relais**. Quand le relais le propose, **Se connecter avec
   LPHL** apparaît sous le **Jeton**. Appuie dessus : le navigateur ouvre la page de connexion, où tu tapes ton nom et
   ton mot de passe, qu’Erevos ne voit jamais. La page du relais montre alors six chiffres. Sur Android, appuie là sur
-  **Ouvrir Erevos** et Erevos termine la connexion tout seul ; sinon, tape-les comme décrit ensuite. De retour dans
+  **Ouvrir {=Erevos}** et Erevos termine la connexion tout seul ; sinon, tape-les comme décrit ensuite. De retour dans
   Erevos, qui te place directement dans **Code de la page**, tape-les là et appuie sur **Terminer la connexion** : le
   téléphone garde son jeton avec l’adresse du relais dans cet espace seulement, et y crée ta file d’attente. Ne tape
   le code que dans Erevos sur ton propre téléphone et ne le donne à personne, même si on te le demande : qui le tape
@@ -845,7 +845,7 @@ seulement d’après ce qu’il a vu lui-même, et rien n’est envoyé. S’il 
 peut-être entre vous : ne faites pas confiance à cette discussion. **Choisir une photo de son code** vérifie à la
 place une photo de son code que vous avez déjà. La marque **Vérifié en personne**, avec le jour, reste jusqu’à ce que
 vous touchiez **Retirer la marque**. Elle reste sur ce téléphone, suit la discussion quand elle entre dans les
-discussions masquées ou en sort, et n’est pas transmise à vos appareils associés. Un code d’un Erevos plus récent le
+discussions masquées ou en sort, et n’est pas transmise à vos appareils associés. Un code d’un {=Erevos} plus récent le
 dit : mettez Erevos à jour, puis refaites la photo.
 
 **Pourquoi :** le code ne contient qu’un hash de vos deux clés, dans un ordre qui distingue les deux téléphones : une
@@ -885,7 +885,7 @@ groupe discret destiné à toi seul, chiffré de bout en bout comme le reste du 
 quelques secondes après (avec les autres arrivés entre-temps, en un seul), et qu’il a été lu, dès que le groupe
 s’affiche à l’écran. Maintiens un de tes messages et choisis **Qui l’a lu** pour voir qui l’a lu et quand, sur le
 téléphone de qui il est arrivé et quand, et qui n’a encore fait ni l’un ni l’autre, sous **Pas encore**. Un membre
-dont l’Erevos est plus ancien que ces marques ne dit rien, donc il reste sous **Pas encore** et le message reste à
+dont l’{=Erevos} est plus ancien que ces marques ne dit rien, donc il reste sous **Pas encore** et le message reste à
 **✓**. Les groupes publics n’ont pas de marques. Un ordinateur associé à ce téléphone montre les mêmes marques.
 
 - **Envoi… :** au moment où tu appuies sur Envoyer, le téléphone vibre brièvement, le champ se vide et le message
@@ -1114,7 +1114,7 @@ contacts (voir [Sur un iPhone](#iphone)).
   relais perdait la file que nomme ton lien, tu obtiendrais un nouveau lien de la même façon, mais ceux que tu as donnés
   avant cesseraient aussitôt de fonctionner.
 - **Lien pour un site web**, à côté, dans les discussions de l’espace, te donne un lien à mettre sur une page web, comme
-  ta page de contact, avec le nom que tu choisis. Il ouvre une page qui propose Erevos à qui ne l’a pas encore, sur
+  ta page de contact, avec le nom que tu choisis. Il ouvre une page qui propose {=Erevos} à qui ne l’a pas encore, sur
   Android, un iPhone ou un ordinateur, puis t’ajoute. Quiconque le voit peut t’écrire, donc ce qu’on envoie arrive comme
   demande de message, que tu acceptes, refuses ou bloques. Il ne donne aucune place sur ton relais et vaut tant que ton
   lien de contact vaut : **Nouveau lien de contact** l’annule aussi.
@@ -1221,11 +1221,11 @@ téléphone le dit (**✓✓✓**). Chaque message dit quand il disparaît. L’
 la prochaine fois qu’il regarde le relais, et l’un ou l’autre téléphone peut le changer : le dernier changement
 l’emporte. Les messages déjà dans la discussion restent.
 
-- **Jusqu’à ce qu’il soit lu**, un message éphémère reste sur les deux téléphones, scellé comme le reste. Si son Erevos
+- **Jusqu’à ce qu’il soit lu**, un message éphémère reste sur les deux téléphones, scellé comme le reste. Si son {=Erevos}
   ne dit jamais l’avoir lu, ta copie reste.
 - **Tant qu’Erevos est fermé :** un message dont l’heure est venue est supprimé à la prochaine ouverture de la
   discussion. D’ici là, il reste sur le téléphone, scellé comme le reste.
-- **Pas une garantie :** son Erevos les supprime, mais une app modifiée, une capture d’écran ou une copie peut encore
+- **Pas une garantie :** son {=Erevos} les supprime, mais une app modifiée, une capture d’écran ou une copie peut encore
   les garder.
 
 ### Bloquer les captures d’écran
@@ -1234,7 +1234,7 @@ Ouvre une discussion, touche son nom puis **Bloquer les captures d’écran** : 
 
 **Pourquoi :** ce que tu écris reste entre vous deux, sauf si quelqu’un cherche exprès à le copier.
 
-- **Seulement sous Android :** Erevos sur un iPhone, sur un ordinateur, dans un navigateur ou sous Sailfish ne peut pas bloquer les captures d’écran, et la discussion le dit là.
+- **Seulement sous Android :** {=Erevos} sur un iPhone, sur un ordinateur, dans un navigateur ou sous Sailfish ne peut pas bloquer les captures d’écran, et la discussion le dit là.
 - **Pas une garantie :** une photo de l’écran prise avec un autre appareil, ou une appli modifiée, la garde quand même.
 
 ### Notifications de cette discussion
@@ -1407,7 +1407,7 @@ stickers) :
   la carte dit seulement ce qui a été demandé. Seulement avec un contact, jamais en caché. Un Erevos plus ancien montre le
   montant en texte.
 
-**Pourquoi :** un pack de stickers chargé depuis internet dirait à un serveur que ce téléphone a Erevos, donc les
+**Pourquoi :** un pack de stickers chargé depuis internet dirait à un serveur que ce téléphone a {=Erevos}, donc les
 stickers sont intégrés et seuls leurs noms voyagent. Les tiens sont listés dans une seule valeur scellée de même taille
 pour chaque espace et emplacement masqué, utilisé ou non, si bien qu’une liste utilisée ressemble à une liste qui ne
 l’est pas : elle en contient 100. Un lieu n’est envoyé que depuis Android : sur un ordinateur ou dans l’app web, le
@@ -1431,7 +1431,7 @@ aucun site choisi par quelqu’un d’autre, et ne montre rien de lui-même à c
   plus lent, et cela attend pendant le démarrage de Tor ; une page qui te renvoie ailleurs, ou qui n’accepte pas Tor,
   n’a pas d’aperçu. Tant que tout dans l’espace passe par Tor (**Tout** sous Tor), les aperçus ne sont faits qu’avec
   **Par Tor** activé.
-- Erevos sur un ordinateur n’en fait aucun, mais affiche quand même ceux qui arrivent.
+- {=Erevos} sur un ordinateur n’en fait aucun, mais affiche quand même ceux qui arrivent.
 - **Par LoRa**, qui ne prend que peu, un message part sans son aperçu plutôt que d’attendre, et n’en garde aucun ici.
 - Un aperçu est ce que la page dit d’elle-même, vrai ou non. Un Erevos d’avant cela affiche le lien sans aperçu.
 
@@ -1439,7 +1439,7 @@ aucun site choisi par quelqu’un d’autre, et ne montre rien de lui-même à c
 
 Dans la discussion d’un contact, appuie sur le combiné vert en haut pour un appel vocal, ou sur la caméra bleue à côté
 pour un appel vidéo. La première fois, Android demande si Erevos peut utiliser le micro, et la caméra pour la vidéo. Son
-téléphone sonne tant qu’Erevos y est ouvert, sur n’importe quel écran de l’espace : il appuie sur **Répondre** ou
+téléphone sonne tant qu’{=Erevos} y est ouvert, sur n’importe quel écran de l’espace : il appuie sur **Répondre** ou
 **Refuser**. Pendant l’appel, tu peux couper le micro, passer au haut-parleur, désactiver ta caméra, basculer entre la
 caméra avant et arrière, et **Raccrocher**. Chaque appel laisse une ligne dans la discussion, comme sa durée, ou un
 appel manqué.
@@ -1622,7 +1622,7 @@ message est arrivé, ou sonnent sans nom, si tu le leur permets.
 ## Discussions de groupe {#groups}
 
 Depuis le menu de l’écran d’accueil, **Nouveau groupe** : donne-lui un nom, coche les contacts à inviter, et appuie sur
-**Créer le groupe**. Tu en es l’admin. Le téléphone de chaque contact répond tout seul la prochaine fois qu’Erevos y est
+**Créer le groupe**. Tu en es l’admin. Le téléphone de chaque contact répond tout seul la prochaine fois qu’{=Erevos} y est
 ouvert, et rejoint le groupe : celui-ci s’affiche alors sur son écran d’accueil, avec une note disant qui l’a ajouté. Un
 téléphone ne rejoint qu’un groupe dont l’admin est le contact qui le lui a demandé, et un admin ne fait entrer un
 contact qu’en tant que lui-même, jamais en tant que quelqu’un d’autre. Les groupes passent par le relais, il doit donc
@@ -1639,7 +1639,7 @@ l’admin, et seul l’admin ajoute ou retire des membres.
   téléphone, la demande s’affiche une fois, en haut du groupe, et il appuie sur **Envoyer** ou **Ne pas envoyer** ; s’il
   appuie sur **Ne pas envoyer**, tu n’en es pas informé. Une fois qu’il l’a envoyé, vous êtes contacts l’un de l’autre,
   avec votre propre discussion, et **Nom** lui donne un nom, comme sous tout contact qui n’en a pas encore. L’absence de
-  réponse peut signifier qu’il n’a pas encore ouvert le groupe, a dit non, a un Erevos plus ancien, ou t’a toujours
+  réponse peut signifier qu’il n’a pas encore ouvert le groupe, a dit non, a un {=Erevos} plus ancien, ou t’a toujours
   comme contact, ce qui ne lui montre rien ; au bout d’une semaine, tu peux redemander. Une fois que vous êtes contacts
   l’un de l’autre, dans n’importe quel groupe ou par un lien de contact, ce qui a été demandé dans vos autres groupes
   disparaît, et sa demande ne s’affiche plus. Un membre retiré du groupe ne demande plus rien. Si deux membres montrent
@@ -1661,7 +1661,7 @@ l’admin, et seul l’admin ajoute ou retire des membres.
 - **Description :** l’admin du groupe l’écrit dans la liste des membres, sous **Description**, et appuie sur
   **Enregistrer**. Chaque membre la lit, y compris ceux qui rejoignent plus tard. Un changement venu de quelqu’un
   d’autre est ignoré.
-- **Partir :** **Quitter le groupe** le demande à l’admin, dont le téléphone te retire la prochaine fois qu’Erevos y est
+- **Partir :** **Quitter le groupe** le demande à l’admin, dont le téléphone te retire la prochaine fois qu’{=Erevos} y est
   ouvert. Le bouton propre de l’admin est **Fermer le groupe** : il retire tous les membres.
 - **Un seul admin :** un groupe privé a un admin, celui qui l’a créé. **Pourquoi :** les changements du groupe doivent
   venir dans un seul ordre, et avec MLS aucun serveur ne les met en ordre, si bien que deux admins pourraient changer le
@@ -1686,7 +1686,7 @@ l’admin, et seul l’admin ajoute ou retire des membres.
   - **Le relais le garde 14 jours,** chiffré, car il ne peut pas savoir quand chaque membre l’a pris.
   - **Par le relais seulement,** même quand les membres sont proches.
   - **Un membre qui rejoint plus tard** ne reçoit pas ce qui est venu avant, comme pour les mots. Un membre dont
-    l’Erevos est d’avant cette version n’en voit rien.
+    l’{=Erevos} est d’avant cette version n’en voit rien.
   - **Sur le téléphone**, chacun est gardé en morceaux, scellé, comme dans la discussion d’un contact. Supprimer le
     groupe ici les supprime.
 - **Le menu d’un message,** par appui long, comme dans la discussion d’un contact : les réactions, **Répondre**,
@@ -1700,7 +1700,7 @@ l’admin, et seul l’admin ajoute ou retire des membres.
   quand ils sont activés, partent avec les tiens. Dans la feuille des membres, ou l’écran propre d’un groupe public,
   **Rechercher dans cette discussion** parcourt les messages du groupe et **Exporter la discussion** les écrit dans un
   fichier, et **Médias, liens et fichiers** liste les photos, vidéos, messages vocaux, musiques, fichiers et liens du groupe, chaque sorte à part, comme dans la discussion d’un contact (voir plus haut), chacun menant à son message ; **Messages avec étoile** et la recherche de l’écran d’accueil incluent aussi les groupes. Un membre dont
-  l’Erevos est d’avant cette version voit les mots, l’emoji d’un sticker, les coordonnées d’un lieu et la question d’un
+  l’{=Erevos} est d’avant cette version voit les mots, l’emoji d’un sticker, les coordonnées d’un lieu et la question d’un
   sondage, et rien des réactions, épingles, modifications et suppressions. **Sélectionner** choisit plusieurs messages à
   copier, transférer ou supprimer ensemble, un sondage à toi a **Terminer le sondage**, et **+** a aussi **Carte de
   contact**. **Pour tout le monde** n’est proposé à la suppression que si tout ce que tu as choisi est à toi.
@@ -1753,10 +1753,10 @@ et aucun relais n’apprend qui en fait partie.
   jours** ou **Après 7 jours**. Quand son temps est écoulé, l’Erevos de chaque membre le supprime, chacun selon
   l’horloge de son propre téléphone, avec ses messages, photos et fichiers, la prochaine fois qu’il est ouvert, et son
   lien ne fonctionne plus. Sa fin est fixée à la création du groupe et ne change jamais. L’écran du groupe lui-même
-  indique quand il prend fin. Un membre sur un Erevos plus ancien le garde, et d’ici là chacun a pu en garder une
+  indique quand il prend fin. Un membre sur un {=Erevos} plus ancien le garde, et d’ici là chacun a pu en garder une
   copie ou une capture d’écran.
 - **Jusqu’à 100 membres,** car tout le groupe doit tenir dans l’unique message qui fait entrer quelqu’un.
-- **Chaque téléphone d’un groupe public a besoin de cette version d’Erevos.** Les groupes faits à partir de contacts
+- **Chaque téléphone d’un groupe public a besoin de cette version d’{=Erevos}.** Les groupes faits à partir de contacts
   fonctionnent comme avant.
 
 **Pourquoi :** seul le téléphone du propriétaire change le groupe et fait entrer les gens, si bien que les changements
@@ -1787,11 +1787,11 @@ Quand tu envoies un message, Erevos choisit le chemin tout seul :
 
 1. **Son téléphone est proche** (le haut de la discussion indique **À proximité**) : il part par la liaison à proximité,
    et aussi par le relais quand il y en a un.
-2. **Sinon, avec un relais :** il passe par le relais, et un message court part aussi vers les téléphones Erevos reliés
+2. **Sinon, avec un relais :** il passe par le relais, et un message court part aussi vers les téléphones {=Erevos} reliés
    à proximité, si bien que le sien peut répondre à proximité s’il est l’un d’eux. Si le relais est injoignable, c’est
    cette copie qui compte, et ces téléphones la portent aussi au relais de ton contact, comme dans [Discuter avec un
    téléphone à proximité](#nearby).
-3. **Sinon, sans relais,** il va vers les téléphones Erevos reliés à proximité, comme à l’étape 2.
+3. **Sinon, sans relais,** il va vers les téléphones {=Erevos} reliés à proximité, comme à l’étape 2.
 4. **Et par LoRa,** quand une radio est configurée et que le relais n’a pas pu prendre un texte, comme dans [Par une
    radio LoRa](#lora). Sans aucun moyen, le message attend, marqué **En attente**, et part tout seul dès qu’il y en a
    un, comme dans [Envoyé, arrivé et lu](#relay) ; une ligne sous la discussion dit pourquoi.
@@ -1807,9 +1807,9 @@ envoies.
 | --- | --- |
 | **Envoyé à proximité, chiffré de bout en bout.** | Rien : son téléphone est proche et l’a reçu. |
 | **Envoyé par le relais, chiffré de bout en bout.** | Rien : il est en route. |
-| **Envoyé aux téléphones Erevos à proximité, chiffré de bout en bout, car le relais était injoignable.** | Il n’arrive que si l’un d’eux est le sien : attends **✓✓**, ou vérifie le relais. |
+| **Envoyé aux téléphones {=Erevos} à proximité, chiffré de bout en bout, car le relais était injoignable.** | Il n’arrive que si l’un d’eux est le sien : attends **✓✓**, ou vérifie le relais. |
 | **… Si le sien n’en fait pas partie, ils le remettent à son relais dès qu’ils ont internet, et ce téléphone aussi.** | Rien : il arrive dès que l’un d’eux, ou ce téléphone, atteint internet. Attends **✓✓**. |
-| **Envoyé par LoRa, chiffré de bout en bout, car le relais était injoignable.** | Il arrive si son Erevos a une radio sur le même mesh, à portée : attends **✓✓**, ou vérifie le relais. |
+| **Envoyé par LoRa, chiffré de bout en bout, car le relais était injoignable.** | Il arrive si son {=Erevos} a une radio sur le même mesh, à portée : attends **✓✓**, ou vérifie le relais. |
 | **Envoyé par SMS, chiffré de bout en bout, car rien d’autre ne pouvait le prendre.** | Rien : ça coûte des SMS, et l’opérateur voit que tu as écrit à son numéro. **✓✓** arrive dès que le relais ou Nostr sont joignables. |
 | **En attente. Le relais est injoignable (ou Il n’y a pas de relais), et son téléphone n’est pas à proximité.** | Rien : il part tout seul dès que le relais ou son téléphone à proximité peut le recevoir, puis affiche **✓**. Sans relais, remplis son adresse, comme dans [Discuter par un relais](#relay), ou approche-toi de son téléphone. |
 | **En attente. Il est trop long pour LoRa.** | Rien : il part dès que le relais ou son téléphone à proximité peut le recevoir. Ou envoie-le en parties plus courtes. |
@@ -1902,7 +1902,7 @@ confiance. C’est facultatif.
 **Plus d’un :** **Ajouter un autre relais d’attache** en donne jusqu’à deux de plus, chacun avec sa propre file, par
 exemple un à la maison et un chez un ami. Vos contacts les essaient dans l’ordre affiché, et Erevos prend ce qui arrive
 sur chacun. Votre lien de contact ne nomme les autres que tant qu’il reste assez court pour un code QR ; le reste
-parvient à vos contacts avec votre prochain message. Un contact avec un Erevos plus ancien n’utilise que le premier.
+parvient à vos contacts avec votre prochain message. Un contact avec un {=Erevos} plus ancien n’utilise que le premier.
 
 ## Par Tor {#tor}
 
@@ -1944,7 +1944,7 @@ messages vocaux, qui sont gros, passent en direct et donc plus vite.
   toutes les quelques secondes, et rien n’arrive au téléphone.
 - **Ce qu’il ne couvre pas :** les appels, dont le son et l’image passent directement entre les téléphones ou par le
   relais d’appel ; les téléphones à proximité et les SMS, qui n’utilisent pas internet.
-- **Sur Android seulement :** Erevos sur un ordinateur et l’app web n’ont pas encore Tor, donc là, tout passe en direct.
+- **Sur Android seulement :** {=Erevos} sur un ordinateur et l’app web n’ont pas encore Tor, donc là, tout passe en direct.
 
 > Avec **Messages**, un message n’attend jamais Tor : un message que Tor n’a pas pu porter au relais part aussitôt en
 > direct, de même que les messages pendant que Tor démarre, ou pendant une minute après qu’il n’a pas pu joindre le
@@ -1977,7 +1977,7 @@ par Tor.
 ## Par Nostr {#nostr}
 
 Sous **Réglages** → **Relais et réseaux** → **Nostr**, **Les textes par Nostr** est sur **Activé** tant que tu ne le
-changes pas. Alors ce que tu écris à un contact dont l’Erevos lit aussi sur Nostr passe d’abord par tes relais : ton
+changes pas. Alors ce que tu écris à un contact dont l’{=Erevos} lit aussi sur Nostr passe d’abord par tes relais : ton
 relais, puis les relais d’attache de ton contact, puis ton relais d’attache ; et par des relais Nostr publics seulement
 quand aucun ne l’a pris. Chaque espace a son propre choix, et ses propres relais Nostr.
 
@@ -2038,13 +2038,13 @@ Un téléphone sans relais, sans invitation et sans compte LPHL peut quand même
 code QR disent où il lit sur Nostr, et cela suffit pour parler.
 
 - **Pour commencer :** dans **Nouvelle discussion**, appuie sur **Commencer sans relais**, puis sur **Afficher mon code
-  QR** ou **Partager mon lien de contact**, et donne-le à quelqu’un qui utilise Erevos. Celui qui l’ajoute t’écrit par
+  QR** ou **Partager mon lien de contact**, et donne-le à quelqu’un qui utilise {=Erevos}. Celui qui l’ajoute t’écrit par
   Nostr, et apparaît comme une demande de message, que tu acceptes. Tu peux aussi ajouter son lien ou son code
   QR, de la même façon.
 - **Ce qui passe :** les textes, stickers, réactions, modifications, et les marques qu’un message est arrivé ou a été lu, tout par Nostr ; et les photos, fichiers et messages vocaux. Un message vocal passe en wraps comme un texte. Une photo jusqu’à 3 Mo passe en morceaux de 32 Ko, un wrap chacun, envoyés avant le message qui la propose ; l’autre téléphone les garde, chiffrés avec le reste de l’espace ou des discussions masquées pour lesquels ils sont venus, jusqu’à ce que tous soient arrivés, quatre jours au plus. Une photo plus grande, une vidéo ou tout autre fichier, jusqu’à 20 Mo, passe en un seul blob, chiffré sur le téléphone, vers un serveur de fichiers Blossom (blossom.primal.net, blossom.band ou nostr.download), via Tor comme le dit le choix Tor de l’espace (en direct avec **Rien**) : le serveur ne garde que ce qu’il ne peut pas lire. Les appels et les groupes ont besoin d’un relais, ou de l’autre téléphone à proximité. Les discussions masquées fonctionnent ainsi aussi, par Nostr seulement (voir [Discussions masquées](#hidden)).
 - **Quand il n’arrive pas :** les relais Nostr gardent un texte deux jours. Tant que le téléphone de ton contact n’a pas
   dit qu’il est arrivé, Erevos le lui redonne une fois par jour, pendant deux semaines.
-- **Un relais tout seul :** quand ton contact a un relais qui lui permet d’inviter, son Erevos envoie tout seul au tien
+- **Un relais tout seul :** quand ton contact a un relais qui lui permet d’inviter, son {=Erevos} envoie tout seul au tien
   une invitation à celui-ci, une fois, dans la discussion, que vous vous soyez rencontrés par Nostr ou à proximité, par
   Bluetooth, Wi-Fi ou un code QR. Ton téléphone la prend tout seul, et à partir de là les photos, messages vocaux et
   appels fonctionnent aussi, avec tout le monde. Elle compte comme l’une de ses invitations. Quelqu’un dont tu n’as pas
@@ -2064,11 +2064,32 @@ ne montre pas ce que tu écris. Qui se connecte à ton téléphone la voit, sauf
 - **Ton relais et les relais de tes contacts :** ils la voient. Pour la cacher, active Tor pour l’espace (**Réglages**
   → **Relais et réseaux** → **Tor**) ou **Par Tor** dans les **Détails** d’une discussion. Voir [Par Tor](#tor).
 
+- [+] **XMPP :** ton serveur XMPP la voit tant qu’Erevos est connecté, sauf si le compte passe par Tor ; les serveurs de tes
+  contacts et de tes groupes non, car ton serveur leur porte tes messages. Erevos prévient avant que tu envoies dans une
+  discussion tant que le compte ne passe pas par Tor (avec **Par Tor** pour cette discussion comme solution), avant
+  chaque appel, et avant de récupérer un fichier sur un autre serveur que le tien. Voir [XMPP](#xmpp).
+
 - **Les relais Nostr publics et les serveurs de fichiers Nostr :** ils la voient, sauf si la connexion passe par Tor.
   Active **Nostr par Tor** sous **Réglages** → **Relais et réseaux** → **Nostr**, ou **Par Tor** pour une discussion.
   Voir [Par Nostr](#nostr).
 - **S’associer par un code :** les deux téléphones se retrouvent sur ces mêmes relais Nostr publics, donc sans Nostr via
   Tor ils voient l’adresse, mais pas le code ni les liens de contact. Erevos le dit avant la première fois.
+
+- [+] **Matrix :** seul ton propre serveur Matrix la voit, pas les serveurs de tes contacts : les photos et fichiers
+  d’autres serveurs te parviennent aussi par le tien. Choisis **Tor pour ce compte Matrix** sur l’écran Matrix, ou
+  active **Par Tor** sous les boutons d’une discussion, qui fait passer tout le compte par Tor. Voir [Matrix](#matrix).
+- [+] **Telegram :** les serveurs de Telegram la voient, sauf si le compte passe par Tor : choisis **Toujours par Tor**
+  dans **Tor pour ce compte Telegram**, dans les réglages Telegram, ou active **Par Tor** dans les infos d'une
+  discussion, ce qui fait passer tout le compte par Tor. Voir [Telegram](#telegram).
+- [+] **Les discussions avec d’autres applis Nostr et le fil Public :** leurs relais et serveurs de fichiers la voient,
+  sauf si le compte passe par Tor (**Tor** sur l’écran **Discussions Nostr**) ou si **Via Tor** de la discussion est
+  activé. Publier, aimer ou voter dans le fil Public, et ses photos et aperçus de liens sans Tor, la montrent aussi.
+  Voir [Discussions avec d’autres applis Nostr](#nostr-chats).
+- [+] **Messenger, Signal et Session** (Erevos+) : leurs propres serveurs la voient (ceux de Meta, de Signal, ou le
+  premier nœud Session), pas tes contacts, sauf si le compte passe par Tor : choisis **Toujours par Tor** sous **Tor
+  pour ce compte …** sur son écran, ou active **Par Tor** dans une discussion, ce qui fait passer tout le compte par
+  Tor. La connexion, le captcha de Signal, les images de Messenger et **Ouvrir Facebook** passent de la même façon. Erevos prévient avant
+  que tu envoies dans une discussion tant que le compte ne passe pas par Tor, et avant chaque appel. Voir [Messenger](#messenger), [Signal](#signal) et [Session](#session).
 
 - **Les appels :** ils ne passent jamais par Tor. Le relais d’appel, le tien ou celui de ton contact, voit l’adresse,
   mais pas ce qui se dit. Un appel entre téléphones proches sur le même réseau reste sur ce réseau.
@@ -2141,10 +2162,13 @@ Element : aucun pont ne se met entre les deux.
   vodozemac). Une discussion non chiffrée le dit.
 - **Pas anonyme :** le serveur Matrix voit ton compte, qui parle avec qui et quand, et, sans Tor, d’où. Dans une
   discussion avec des personnes sur d’autres serveurs, ces serveurs le voient aussi.
-- **Par Tor :** sur Android, Matrix suit le choix de cet espace sous **Réglages** → **Relais et réseaux** → **Tor**.
-  Avec **Messages**, tout, les photos aussi, passe par Tor dès que Tor est prêt, et en direct tant que Tor démarre ou
-  quand il échoue ; avec **Tout**, seulement par Tor ; avec **Rien**, en direct. L’écran Matrix dit par où il passe en
-  ce moment.
+- **Par Tor :** sur Android, l’écran Matrix, avant la connexion aussi, a le choix Tor qu’a chaque compte :
+  **Désactivé** (par défaut) passe en direct, et le serveur Matrix voit ton adresse ; **Comme l’espace** suit
+  **Réglages** → **Relais et réseaux** → **Tor** : avec **Messages**, par Tor dès qu’il est prêt et en direct pendant
+  qu’il démarre, photos et fichiers en direct ; avec **Tout**, tout uniquement par Tor ; **Toujours par Tor** fait
+  passer ce compte uniquement par Tor, la connexion aussi, et rien sans lui. Tor utilise les ponts de l’espace.
+  **Par Tor** d’une discussion, sous ses boutons, fait passer tout le compte uniquement par Tor tant qu’il est activé :
+  Matrix a une connexion pour toutes les discussions d’un compte. Les appels ne passent jamais par Tor.
 - **Messages d’avant :** un message envoyé avant qu’Erevos se connecte, ou dont la clé n’est pas encore arrivée,
   s’affiche verrouillé.
 - **Photos et fichiers :** **Photo** et **Fichier** les envoient, jusqu’à 50 Mo, chiffrés sur le téléphone avant
@@ -2456,11 +2480,18 @@ XMPP, comme ces apps : aucun pont ne se met entre les deux.
   de ses groupes s’affiche comme manqué.
 - **Pas anonyme :** le serveur XMPP voit ton compte, tes contacts, qui parle avec qui et quand, et, sans Tor, d’où. Le
   serveur de l’autre personne voit la même chose de ses discussions avec toi.
-- **Par Tor :** sur Android, XMPP suit le choix de cet espace sous **Réglages** → **Relais et réseaux** → **Tor** : avec
-  **Messages**, il passe par Tor dès que Tor est prêt, et en direct tant que Tor démarre ou quand il échoue ; avec
-  **Tout**, seulement par Tor ; avec **Rien**, en direct. L’écran XMPP dit par où il passe en ce moment. Là où Erevos ne
-  peut pas ouvrir de connexion propre (l’appli web, un ordinateur), il utilise le WebSocket du serveur, en direct, et un
-  serveur sans WebSocket n’est pas joignable.
+- **Par Tor :** sur Android, l’écran XMPP, et celui d’avant la connexion, choisit le Tor du compte : **Désactivé** (par
+  défaut : en direct, et le serveur voit ton adresse), **Comme l’espace** (comme le dit le choix de cet espace sous
+  **Réglages** → **Relais et réseaux** → **Tor** : avec **Messages** par Tor dès que Tor est prêt, les fichiers en
+  direct ; avec **Tout** seulement par Tor, fichiers compris ; avec **Rien** en direct) ou **Toujours par Tor**
+  (seulement par Tor, quoi que fasse l’espace, à la connexion aussi, et rien ne part tant que Tor ne peut pas se
+  connecter). Sa connexion, la recherche de son serveur et ses fichiers suivent ce choix ; Tor utilise les ponts de
+  l’espace. Les appels ne passent jamais par Tor, et aucun aperçu de lien n’est fait tant que le compte ne doit pas
+  passer en direct. Là où Erevos ne peut pas ouvrir de connexion à lui (l’app web, un ordinateur), il utilise le
+  WebSocket du serveur, en direct, et un serveur qui n’en a pas ne peut être atteint.
+- **Une discussion par Tor :** **Par Tor** sous une discussion ou un groupe, désactivé tant que tu ne l’actives pas,
+  l’envoie seulement par Tor. Une seule connexion au serveur porte toutes les discussions du compte, donc tant qu’une
+  discussion l’a activé, tout le compte passe seulement par Tor, quel que soit son choix, et l’écran XMPP le dit.
 - **Notifications :** un message qui arrive affiche une notification et compte dans le nombre sur l’icône d’Erevos,
   comme dans les discussions d’Erevos lui-même, tant que cet espace est ouvert ; sur un ordinateur, tant qu’Erevos
   tourne. Sur Android, **Notifications**, en bas d’une discussion, la met en sourdine ou lui donne un son à elle ; une
@@ -2661,10 +2692,17 @@ discussions propres à Erevos.
 - **Pas anonyme :** ta clé est la même pour tous ceux à qui tu écris, et quiconque a un npub peut lui écrire. Les relais
   où arrivent tes messages voient ta clé les lire et, sans Tor, d’où. Seule la connexion qui lit tes relais leur dit qui
   lit, quand un relais le demande (NIP-42) ; l’envoi et la recherche de personnes, jamais.
-- **Par Tor :** sur Android, les discussions Nostr suivent le choix de cet espace sous **Réglages** → **Relais et
-  réseaux** → **Tor** : avec **Messages**, elles passent par Tor dès que Tor est prêt, et en direct tant que Tor démarre
-  ou quand il échoue ; avec **Tout**, seulement par Tor ; avec **Rien**, en direct. L’écran dit par où elles passent en
-  ce moment. Dans l’appli web et sur un ordinateur, elles passent en direct.
+- **Par Tor :** sur Android, **Tor** sur cet écran choisit comment ce compte Nostr joint ses relais et ses serveurs de
+  fichiers, comme le compte de chaque réseau : **Désactivé**, par défaut pour une nouvelle clé, en direct ; **Comme
+  l’espace**, comme le dit le choix de l’espace sous **Réglages** → **Relais et réseaux** → **Tor** (avec **Messages**
+  via Tor dès que Tor est prêt, avec **Tout** uniquement via Tor) ; **Toujours par Tor**, uniquement via Tor, démarré
+  pour lui, jamais en direct. Une clé d’avant ce choix commence aussi sur **Désactivé**. L’écran dit par où elles passent. Dans
+  l’appli web et sur un ordinateur, elles passent en direct.
+  **Via Tor**, au bas d’une discussion, envoie cette seule discussion uniquement par Tor, quel que soit le mode de
+  l’espace, sur des circuits à elle, pour qu’aucune sortie Tor ne porte ses messages avec ceux d’une autre : ce que tu y
+  envoies, la recherche de l’endroit où ils lisent, et ses photos et fichiers ; sans Tor, rien n’en part. Ce qui
+  t’arrive suit toujours le mode de l’espace, car une seule connexion lit tes messages pour toutes les discussions.
+  C’est gardé sur ce téléphone seulement.
 - **Notifications :** un message qui arrive affiche une notification et compte dans le nombre sur l’icône d’Erevos,
   comme dans les discussions d’Erevos lui-même, tant que cet espace est ouvert ; sur un ordinateur, tant qu’Erevos
   tourne. Sur Android, **Notifications**, en bas d’une discussion, la met en sourdine ou lui donne un son à elle ; une
@@ -2705,6 +2743,78 @@ avec qui.
   Photographie le code que montre leur appli (nostr:npub…) : la discussion est marquée vérifiée quand c’est la clé de
   cette discussion. Rien n’est envoyé.
 
+## Telegram {#telegram}
+
+Uniquement dans Erevos+, sur Android, un espace peut se connecter à votre compte Telegram et discuter avec des personnes sur Telegram, dans **Réglages** → **Relais et réseaux** → **Telegram**. Erevos n’est pas fait par Telegram et utilise l’API de Telegram. Les conversations rejoignent la liste de l’écran d’accueil, marquées **Telegram**, avec leur propre pastille.
+
+- **Connexion :** touchez **Se connecter à Telegram**, indiquez votre numéro de téléphone avec l’indicatif du pays, puis le code que Telegram envoie : à son application sur vos autres appareils, par SMS ou par appel ; **Renvoyer le code** le redemande. Si votre compte a un mot de passe en deux étapes, Erevos le demande et affiche votre indice. Si Telegram veut que vous confirmiez sur un autre appareil, Erevos affiche le lien à y ouvrir. Un nouveau compte Telegram ou la connexion par e-mail, Erevos ne sait pas encore : faites-le une fois dans l’application Telegram officielle. Ce que Telegram garde sur ce téléphone reste chiffré dans cet espace.
+- **Conversations normales :** Telegram peut les lire. Une conversation Telegram ordinaire n’est chiffrée qu’entre vous et les serveurs de Telegram, et les groupes et canaux ne sont jamais chiffrés de bout en bout. Une conversation privée le dit en haut : **Telegram peut lire cette conversation**.
+- **Chiffrement ErevosGram :** dans une conversation privée, **Chiffrement ErevosGram** envoie une invitation à l’autre personne. Si elle utilise {=Erevos} ou l’application ErevosGram et touche **Accepter**, la conversation devient **Chiffrée de bout en bout (ErevosGram)** : ce que vous écrivez tous les deux est scellé avec le protocole propre d’Erevos avant d’arriver chez Telegram, qui ne voit qu’un texte qu’il ne peut pas lire. Quand c’est elle qui vous invite, la conversation affiche **Ils veulent le chiffrement ErevosGram**, avec **Accepter** et **Refuser**. C’est le code propre d’Erevos, non audité. Ce qui a été écrit avant reste lisible par Telegram.
+- **Numéro de sécurité :** touchez le cadenas en haut d’une conversation chiffrée pour voir son numéro de sécurité. Comparez-le avec celui de leur téléphone, par un autre moyen que Telegram, et touchez **Marquer comme vérifiée** quand les deux sont identiques. Si leurs clés changent, la conversation vous avertit : comparez de nouveau avant de lui faire confiance.
+- **Appels :** dans une conversation privée, le bouton d’appel en haut lance un appel vocal Telegram, et un appel entrant s’affiche sur n’importe quel écran avec **Répondre** et **Refuser**. L’appel est assuré par Telegram lui-même, chiffré de bout en bout par le chiffrement d’appel propre à Telegram. Comparez les quatre émojis de votre écran avec ceux de l’autre téléphone : s’ils sont identiques, personne n’écoute. **Appel vidéo**, à côté, en lance un avec ta caméra allumée ; un appel vidéo sonne avec **Répondre en vidéo** à côté de **Répondre**. Pendant tout appel, **Caméra** allume ou éteint ta caméra et **Changer** passe de l'avant à l'arrière ; l'image de l'autre remplit l'écran tant que sa caméra est allumée.
+- **Discussions et Réglages :** l’écran Telegram montre tes discussions en lignes, comme l’écran d’accueil, et en apporte d’autres quand tu descends. **Réglages**, à côté du titre, contient **Publicités dans les canaux**, **Dossiers Telegram**, les **Clés ErevosGram** et **Quitter Telegram sur ce téléphone** ; **Discussions** là, ou Retour, revient à la liste.
+- **Apporter les clés de l’appli ErevosGram :** sur l’écran Telegram, **Apporter les clés de l’appli ErevosGram**. Dans l’appli ErevosGram, exportez les clés, ce qui écrit erevosgram-keys.txt et affiche un code de 20 caractères ; collez la ligne du fichier dans Erevos et saisissez le code. Les conversations chiffrées là-bas s’ouvrent ici. N’utilisez plus ensuite l’appli ErevosGram pour ces conversations. Si cet espace a déjà des clés ErevosGram, leur remplacement est demandé à part et les conversations chiffrées ici jusque-là ne s’ouvrent plus.
+- **Publicités dans les canaux :** désactivées tant que vous n’activez pas **Publicités dans les canaux** sur l’écran Telegram. Telegram demande aux applis d’afficher ses publicités dans les grands canaux publics ; activé, un canal peut afficher en haut une petite carte marquée **Publicité**, que vous pouvez fermer.
+- **Dossiers :** les dossiers que vous avez créés dans Telegram s’affichent comme des pastilles sur l’écran Telegram, entre **Discussions** et **Archiver**. Sous **Dossiers Telegram**, activez ceux que vous voulez : chacun s’affiche comme son propre onglet là et sur l’écran d’accueil. Dès qu’un dossier est activé, seules les discussions de ces dossiers notifient. Dans Telegram, les dossiers restent tels quels.
+- **Infos de la discussion :** touchez le nom d’une discussion pour voir quand la personne était en ligne pour la dernière fois, son nom, son numéro et sa bio, ou la description, les membres et les liens d’un groupe. Vous pouvez y mettre la discussion en sourdine, l’épingler, l’archiver, la marquer comme lue ou non lue, la placer dans vos dossiers Telegram (Telegram les change sur tous vos appareils), faire effacer les nouveaux messages d’eux-mêmes après un jour, une semaine ou un mois, bloquer la personne, effacer l’historique, et supprimer la discussion ou quitter le groupe ou le canal.
+- **Envoyer des photos et des fichiers :** **Joindre**, à côté de **Envoyer**, propose **Photo**, **Appareil photo** et **Fichier**. Ce que vous avez tapé part dessous comme son texte. Le chiffrement ErevosGram ne couvre que le texte : dans une discussion chiffrée, Erevos demande d’abord, car Telegram peut lire les photos et les fichiers.
+- **Modifier, transférer, chercher :** maintenez un de vos messages et touchez **Modifier** pour changer son texte (pas dans une discussion chiffrée), ou maintenez un message ordinaire et touchez **Transférer** pour l’envoyer à une autre discussion. **Rechercher**, en haut d’une discussion, parcourt ses messages.
+- **Messages vocaux :** quand rien n'est écrit, le micro à côté d'**Envoyer** enregistre tant que vous le tenez ; relâchez pour envoyer, glissez vers la gauche pour annuler. Comme un fichier, un message vocal n'est pas couvert par le chiffrement ErevosGram : dans une discussion chiffrée, Erevos demande d'abord.
+- **Réactions :** maintenez un message et touchez **Réagir** pour choisir un emoji. Les réactions s'affichent sous le message ; touchez-en une pour donner ou retirer la vôtre.
+- **Sondages et stickers :** dans un groupe ou un canal, **Joindre** → **Sondage** demande une question, de deux à dix options, et si les votes sont anonymes et si plusieurs réponses sont permises. Touchez une option pour voter (**Voter**, si plusieurs sont permises) ; **Retirer le vote** le reprend, et **Clore le sondage**, dans le menu de votre propre sondage, y met fin. **Joindre** → **Sticker** en envoie un de vos paquets.
+- **Fils :** un message qui a des réponses affiche leur nombre ; touchez-le pour les lire et en écrire une. **Répondre dans le fil**, dans le menu d'un message, ouvre ou rejoint un fil dans un groupe ou un canal.
+- **Message épinglé :** un message épinglé s'affiche dans une barre en haut de la discussion ; touchez-la pour y aller. **Épingler** et **Désépingler** sont dans le menu du message ; dans une discussion privée, vous choisissez entre **Pour les deux** et **Seulement pour moi**.
+- **Plusieurs messages :** **Sélectionner**, dans le menu d'un message, permet d'en toucher d'autres, puis de les **Copier**, **Transférer** ou **Supprimer** ensemble. Les messages chiffrés ne peuvent pas être transférés et sont laissés de côté.
+- **Membres et administrateurs :** dans un groupe ou un canal, les infos de la discussion listent les **Membres**, marqués **Propriétaire** ou **Administrateur** ; touchez-en un pour lui écrire. Le propriétaire et les administrateurs peuvent **Modifier** le titre et la description et **Retirer** un membre.
+- **Plus dans les groupes et les discussions :** avec le droit d'ajouter des admins, **Nommer admin** à côté d'un membre choisit ce qu'il peut faire, et **Droits** à côté d'un admin le change ou, avec **Retirer l'admin**, le rend simple membre. **Ajouter un membre** ajoute un de tes contacts, ou n'importe qui par son @nom ; si ses paramètres de confidentialité refusent, envoie-lui le lien d'invitation. **Joindre** → **Sondage** peut créer un **Quiz** : touche la case à côté de la bonne réponse et ajoute une explication si tu veux ; dès que quelqu'un répond, la bonne réponse s'affiche avec ✅. Les stickers animés bougent dans la discussion. **Joindre** → **Sticker Erevos** envoie un des stickers d'Erevos ; Telegram le reçoit comme un sticker image fixe. Une réaction avec un emoji personnalisé montre son image. Avec plusieurs messages épinglés, la barre du haut les montre un par un : chaque toucher va à l'un et passe au précédent. Un fil a **Joindre**, le micro et un menu de message, comme une discussion. Sur l'écran d'accueil, dans l'onglet Telegram ou l'un de ses dossiers, le menu propose **Tout marquer comme lu**. Les photos s’affichent d’elles-mêmes dans la discussion et les GIF y tournent ; une vidéo montre son image avec ▶ et sa durée, et un appui la lit en plein écran, avec le son. Le nom et les boutons de la discussion restent en haut pendant que vous faites défiler. **Verrouiller par un code PIN**, dans les infos d’une discussion, la verrouille comme une discussion Erevos : elle demande son code à chaque ouverture, et l’accueil n’en montre aucun mot. **Déplacer dans les discussions masquées**, au même endroit, garde la discussion dans les discussions cachées qu’ouvre leur code PIN : elle quitte les listes et les compteurs de cet espace et n’apparaît plus que là ; **Remettre dans mes discussions** la ramène. Telegram l’a toujours, sur tous vos appareils. Sous **+** dans une discussion Telegram, **Photo cachée** envoie une photo floutée jusqu'à ce qu'on la touche, et celles que vous recevez s'affichent de la même façon. **Position** et **Carte de contact** sous **+** envoient un lieu ou l'un de vos contacts dans une discussion Telegram, comme les applis de Telegram les affichent ; Telegram peut lire les deux, et une carte ne part qu'avec un numéro de téléphone. **Envoyer plus tard** sous **+** dans une discussion Telegram envoie ce qui est tapé à l'heure choisie : Telegram le garde et l'envoie alors, même téléphone éteint, et **partiront plus tard** au-dessus du champ de message les liste, avec **Envoyer maintenant** et **Supprimer**. Pas dans une discussion avec le chiffrement ErevosGram. Dans une discussion Telegram, le bouton de recherche montre aussi ses **Médias, liens et fichiers** : **Photos**, **Vidéos**, **Messages vocaux**, **Fichiers** ou **Liens**, chaque type à part, tous depuis Telegram et pas seulement ceux de ce téléphone ; touchez-en un pour y aller dans la discussion. Avec **Aperçus des liens** activés dans les Réglages, le premier lien d'un message envoyé dans une discussion Telegram part avec l'aperçu qu'en font les serveurs de Telegram, comme dans les applis de Telegram ; les aperçus reçus s'affichent sous le texte, sans leur image, et demandent avant d'ouvrir le lien. **Bloquer les captures d’écran** dans les infos d’une discussion Telegram la garde hors des captures et de l’aperçu des applis récentes sur ce téléphone, sous Android ; Telegram ne peut pas demander la même chose à l’autre côté. Une discussion Telegram ouverte avec son PIN, ou gardée dans les discussions cachées, en reste aussi à l’écart, comme une discussion Erevos. **Notifications** dans les infos d'une discussion Telegram lui donne son propre son et sa sonnerie sur ce téléphone, ou la rend muette ici un moment, comme pour une discussion Erevos ; **Mettre les notifications en sourdine** au-dessus la rend muette dans Telegram, sur tous vos appareils. Dans une discussion Telegram, ce qui a été tapé et laissé revient quand elle s’ouvre à nouveau : Telegram le garde comme brouillon sur tous vos appareils, sauf dans une discussion avec le chiffrement ErevosGram, où seul ce téléphone le garde tant qu’Erevos tourne. Un message qui n’a pas pu partir a **Renvoyer** et **Supprimer** dans son menu, et le bouton de recherche a **Aller à un jour**. Maintenez une photo, une vidéo ou un fichier dans une discussion Telegram et choisissez **Enregistrer dans la Collection** pour y garder une copie chiffrée ; celle d'une discussion cachée va dans leur Collection. **Envoyer à**, depuis le Partage d'une autre appli, liste aussi les discussions Telegram de l'espace, sauf celles verrouillées par un PIN, gardées dans les discussions cachées, ou les canaux : le texte va dans le champ de message, et une photo ou un fichier jusqu'à 100 Mo part aussitôt. Dans une discussion Telegram, un @nom se touche, et un lien t.me (une personne, un groupe ou canal, un message, une invitation) s'ouvre dans le Telegram d'Erevos, en demandant avant de rejoindre une discussion par invitation ; les autres liens demandent avant de s'ouvrir dans le navigateur. **Tor pour ce compte Telegram**, dans les réglages Telegram et avant la connexion, propose **Désactivé** (au départ), **Comme l’espace** et **Toujours par Tor**, comme tout compte d'un autre réseau : avec Toujours, ou tant que l'espace fait tout passer par Tor, Telegram n'est joint que par Tor, sur ses propres circuits, à la connexion aussi, et jamais en direct, même quand Tor ne peut pas se connecter ; le compte de chaque lieu caché choisit pour lui-même. **Par Tor** dans les infos d'une discussion Telegram fait passer cette discussion uniquement par Tor : Telegram a une seule connexion pour toutes les discussions d'un compte, donc tout le compte passe par Tor tant qu'il est activé. Plus lent, et les appels ne passent pas par Tor.
+- **Chercher par @nom :** en haut de l'écran Telegram, écrivez un nom dans **Chercher par @nom** pour ouvrir la discussion avec cette personne ou ce canal.
+- **Discussions masquées :** chaque lieu masqué peut avoir un compte Telegram à lui, qui n’apparaît nulle part en dehors de ses discussions masquées. Voir [Discussions masquées](#hidden).
+- **Quitter :** **Quitter Telegram sur ce téléphone**, en bas de l’écran Telegram, vous demande de choisir : **Se déconnecter aussi chez Telegram** retire ce téléphone de vos appareils chez Telegram, et **Seulement l’oublier ici** le laisse listé là-bas jusqu’à ce que vous le retiriez dans l’application Telegram. Dans les deux cas, Erevos supprime ce que Telegram gardait sur ce téléphone et les clés ErevosGram : les conversations chiffrées ne peuvent plus être lues.
+- **Photos et fichiers :** une photo, un message vocal, une vidéo ou un fichier n’est récupéré chez Telegram que lorsque vous le demandez, puis affiché ou enregistré. Les messages vocaux et les vidéos s’affichent pour l’instant comme des fichiers.
+
+## Messenger {#messenger}
+
+Uniquement dans Erevos+, sur Android, Erevos peut se connecter à ton compte Facebook Messenger et discuter avec des personnes sur Messenger, dans **Réglages** → **Relais et réseaux** → **Messenger**, ou depuis sa carte sur l’écran d’accueil. Erevos parle lui-même avec les serveurs de Meta, sans pont entre les deux ; il n’est pas fait par Meta. Le compte appartient au téléphone, pas à un espace : ses discussions rejoignent la liste d’accueil du premier espace, marquées **Messenger**, avec une carte à part. Active ou désactive Messenger dans **Réglages** → **Général** → **Modules**.
+
+- **Connexion :** **Se connecter à Messenger** ouvre la page de connexion de Facebook elle-même. Connecte-toi comme sur facebook.com, avec le code ou la vérification que Facebook demande, et Erevos garde la connexion, chiffrée, sur ce téléphone. Si Messenger y met fin plus tard, l’écran Messenger affiche **Messenger te demande de te reconnecter.**
+- **Ce que Meta peut lire :** sous le nom d’une discussion, Erevos dit si elle est chiffrée de bout en bout. Meta ne peut pas lire une discussion chiffrée de bout en bout, mais sait qui parle avec qui et quand ; toute autre discussion, Meta peut la lire.
+- **Discussions :** l’écran Messenger liste tes discussions, les plus récentes d’abord. **Nouvelle discussion** trouve des personnes par leur nom : écris-le, touche **Rechercher**, puis touche la personne pour commencer.
+- **Écrire :** **+** à côté de la zone de message propose **Photo**, **Appareil photo**, **Fichier** (jusqu’à 100 Mo) et **Sticker**. Quand rien n’est écrit, maintiens le micro pour enregistrer un message vocal. Maintiens un message pour son menu : une réaction, **Répondre**, **Copier** et **Supprimer**, avec **Supprimer pour tout le monde** pour tes propres messages et **Supprimer pour moi** pour n’importe lequel. Les réponses, réactions, modifications et suppressions s’affichent dès qu’elles arrivent. Les appels de Messenger ne sont pas dans Erevos.
+- **Ouvrir Facebook :** sur l’écran Messenger, **Ouvrir Facebook** montre la page de Facebook elle-même avec la même connexion. Les liens Messenger qui s’y trouvent reviennent dans Erevos ; les autres liens s’ouvrent dans ton navigateur, sans les marques de suivi de Facebook et jamais par Tor, si bien que ce site voit ton adresse internet. Si l’écran te demande d’abord de te déconnecter puis de te reconnecter, fais-le une fois : Messenger se connecte maintenant sur facebook.com. Facebook a aussi sa propre carte dans la fenêtre **Services** de l’écran d’accueil, à côté de Messenger, qui l’ouvre tout de suite.
+- **Messenger dans son étui :** sur l’écran Messenger, sous **Comment Messenger est utilisé ici**, avec **Par Erevos** (le choix par défaut) Erevos parle Messenger lui-même, et **Dans son étui** montre à la place la page Messenger de Meta elle-même, comme sur un ordinateur, enfermée par Erevos avec la même connexion ; **Ouvrir Messenger** l’ouvre. Seuls les sites de Meta s’y chargent, les liens vers l’extérieur s’ouvrent dans ton navigateur sans les marques de suivi de Facebook, et ce que garde la page de Meta reste dans l’étui seul, à part de toute autre page, pour qu’elle reconnaisse ton téléphone et ne demande pas à chaque fois le code PIN de tes discussions chiffrées ; cela s’efface quand tu te déconnectes de Messenger ou qu’un autre compte l’ouvre. Les appels y marchent, mais pas par Tor : si Messenger passe par Tor, la page passe seulement par Tor, sans appels, et les liens vers l’extérieur ne s’ouvrent pas. Erevos t’avertit quand même des nouveaux messages, même si l’étui n’a jamais été ouvert : une discussion avec des messages non lus apparaît sur l’accueil jusqu’à sa lecture, et un appui l’ouvre dans l’étui ; tant que l’étui est ouvert, Erevos n’avertit de rien, puisque la page le montre. Les verrous de discussion, les discussions masquées et la Collection ne s’appliquent pas à ses discussions. Elle se ferme dès que l’espace se verrouille ou se ferme, et avec le bouton de panique, et elle reste hors des captures d’écran et de l’aperçu des applis récentes chaque fois que l’écran d’Erevos lui-même l’est ; la page Facebook aussi. Elle s’affiche sous la barre d’Erevos, aux couleurs d’Erevos : **←** revient à Erevos, et **Facebook** dans la barre montre le fil de Facebook dans la même page, avec **Messenger** pour revenir. La page est mise à la largeur du téléphone, pour se lire sans zoomer. La page de Meta elle-même prend toute ton apparence : ses couleurs, sombre ou claire comme Erevos, la forme de tes bulles, ta taille de texte, les lettres de ton style et ce qui se trouve derrière tes écrans, et elle change avec elle même ouverte ; une photo à toi reste dans Erevos, et la page montre un dégradé doux à la place. Là où Meta change sa page, certaines parties peuvent garder l’apparence de Meta.
+- **Notifications et lecture :** les nouveaux messages te notifient et comptent sur l’icône d’Erevos, comme ceux des autres discussions. Ouvrir une discussion la marque lue, et elle le reste jusqu’à ce que quelqu’un écrive de nouveau, même avant que Messenger ne le sache. Chaque discussion a ses propres **Notifications** sous sa zone de message : en sourdine, ou avec un son à elle.
+- **Par Tor :** **Tor pour ce compte Messenger**, sur l’écran Messenger et aussi avant la connexion, est **Désactivé** par défaut, et les serveurs de Meta voient ton adresse internet ; **Comme l’espace** suit **Réglages** → **Relais et réseaux** → **Tor** ; **Toujours par Tor** envoie le compte, sa connexion et ses images uniquement par Tor. **Par Tor** sous une discussion envoie tout le compte par Tor, car Messenger n’a qu’une connexion pour toutes ses discussions. Meta peut demander une confirmation, ou verrouiller un temps, un compte qui se connecte par Tor. Voir [Qui voit ton adresse internet](#ip).
+- **Déconnexion :** **Se déconnecter de Messenger sur ce téléphone** retire ses discussions d’Erevos ; tu peux te reconnecter. Les sauvegardes gardent les notifications de chaque discussion et le choix de Tor, pas la connexion : après une restauration, reconnecte-toi.
+
+## Signal {#signal}
+
+Uniquement dans Erevos+, sur Android, Erevos peut tenir ton compte Signal et discuter avec des personnes sur Signal, dans **Réglages** → **Relais et réseaux** → **Signal**, ou depuis sa carte sur l’écran d’accueil. Erevos parle le protocole propre de Signal avec les serveurs de Signal, et chaque discussion est chiffrée de bout en bout ; il n’est pas fait par Signal. Le compte appartient au téléphone, pas à un espace : ses discussions rejoignent la liste d’accueil du premier espace, marquées **Signal**, avec une carte à part. Active ou désactive Signal dans **Réglages** → **Général** → **Modules**.
+
+- **Deux façons d’entrer :** **Nouveau compte Signal avec mon numéro** fait d’Erevos le Signal de ce numéro, et l’application Signal d’un autre téléphone avec le même numéro s’arrête alors. **Lier au Signal d'un autre téléphone** laisse ton Signal où il est et ajoute Erevos comme un de ses appareils liés.
+- **Un nouveau compte :** écris ton numéro avec l’indicatif du pays, comme +33 6…, et choisis si le code arrive par SMS ou, avec **Le code arrive par appel**, par un appel. Signal te demande d’abord de résoudre un captcha sur sa propre page. Écris ensuite le code que Signal a envoyé, et le nom que les autres voient sur Signal (le nom de famille est facultatif).
+- **Lier :** sur l’autre téléphone, dans Signal : Paramètres → Appareils liés → Lier un nouvel appareil, et scanne le code qu’Erevos affiche. Les nouveaux messages arrivent alors sur les deux.
+- **Discussions et groupes :** l’écran Signal liste tes discussions et groupes, les plus récents d’abord. **Nouvelle discussion** trouve une personne par numéro de téléphone ou par nom ; touche-la pour commencer. Les groupes où tu es fonctionnent comme des discussions ; les nouveaux groupes se créent dans l’application Signal.
+- **Écrire :** **+** propose **Photo**, **Appareil photo**, **Fichier** (jusqu’à 100 Mo) et **Sticker** ; quand rien n’est écrit, maintiens le micro pour un message vocal. Maintiens un message pour une réaction, **Répondre**, **Copier** et **Supprimer**, avec **Supprimer pour tout le monde** pour tes propres messages et **Supprimer pour moi** pour n’importe lequel.
+- **Appels :** dans une discussion avec une personne, **Appel vocal** et **Appel vidéo** l’appellent sur Signal, chiffrés de bout en bout. Un appel Signal entrant s’affiche par-dessus n’importe quel écran, avec **Répondre**, **Répondre en vidéo** et **Refuser**. Les appels ne passent pas par Tor, et Erevos te prévient avant chacun.
+- **Notifications et lecture :** comme pour Messenger, les nouveaux messages te notifient et comptent sur l’icône, une discussion lue ici reste lue, et chaque discussion a ses propres **Notifications**, avec une sonnerie à elle pour les appels.
+- **Par Tor :** **Tor pour ce compte Signal**, aussi avant la connexion, fonctionne comme pour Messenger : **Désactivé** par défaut, donc les serveurs de Signal voient ton adresse internet. Avec **Toujours par Tor**, l’inscription, son captcha et la liaison passent aussi par Tor. **Par Tor** sous une discussion envoie tout le compte par Tor.
+- **Déconnexion :** **Se déconnecter de Signal sur ce téléphone** retire ses discussions d’Erevos. Les sauvegardes gardent les notifications de chaque discussion et le choix de Tor, pas le compte : après une restauration, inscris-toi ou lie de nouveau.
+
+## Session {#session}
+
+Uniquement dans Erevos+, sur Android, Erevos peut tenir un compte Session et discuter avec des personnes sur Session, dans **Réglages** → **Relais et réseaux** → **Session**, ou depuis sa carte sur l’écran d’accueil. Session ne demande ni numéro de téléphone ni e-mail : le compte, ce sont 13 mots de récupération, et ses messages passent chiffrés de bout en bout par le routage en oignon des nœuds de Session. Erevos n’est pas fait par Session. Le compte appartient au téléphone, pas à un espace : ses discussions rejoignent la liste d’accueil du premier espace, marquées **Session**, avec une carte à part. Active ou désactive Session dans **Réglages** → **Général** → **Modules**.
+
+- **Un nouveau compte :** touche **Nouveau compte Session**, écris ton nom sur Session et touche **Créer le compte**. Erevos affiche **Tes 13 mots de récupération** : note-les, garde-les en lieu sûr et touche **Je les ai notés**. Ce sont le seul moyen de récupérer le compte, et quiconque les a peut lire tes discussions.
+- **Un compte que tu as déjà :** **Récupérer un compte avec ses 13 mots** prend les mots, séparés par des espaces, et ton nom ; touche ensuite **Le récupérer**.
+- **Ton identifiant Session :** l’écran Session l’affiche, avec **Copier**. Les autres commencent une discussion avec toi grâce à lui.
+- **Discussions :** **Nouvelle discussion** prend un identifiant Session ou un nom ONS, et **Ouvrir** commence la discussion.
+- **Groupes :** **Nouveau groupe Session** crée un groupe à partir d’un nom et des personnes que tu choisis parmi tes discussions Session. Elles reçoivent une invitation et rejoignent le groupe en l’acceptant, et tu en es l’admin. Dans un groupe, son bouton montre les **Membres** ; un admin peut **Ajouter des personnes**, **Renommer** le groupe, et **Nommer admin** ou **Retirer du groupe** quelqu’un qui n’est pas admin. **Quitter le groupe** le quitte, et y revenir demande une nouvelle invitation.
+- **Écrire :** **+** propose **Photo**, **Appareil photo**, **Fichier** (jusqu’à 10 Mo) et **Sticker** ; quand rien n’est écrit, maintiens le micro pour un message vocal. Maintiens un message pour une réaction, **Répondre**, **Copier** et **Supprimer**.
+- **Appels :** dans une discussion avec une personne, **Appel vocal** et **Appel vidéo** l’appellent sur Session. Session fait sonner ses appels lui-même, sans bruit pour une discussion en sourdine. Les appels ne passent pas par Tor, et Erevos te prévient avant chacun.
+- **Notifications et lecture :** comme pour Messenger et Signal, avec les **Notifications** propres à chaque discussion et une sonnerie à elle pour les appels.
+- **Par Tor :** **Tor pour ce compte Session** fonctionne comme pour Messenger et Signal, **Désactivé** par défaut. Le routage en oignon de Session cache déjà ton adresse internet aux personnes à qui tu écris ; le premier nœud Session la voit, sauf si le compte passe par Tor.
+- **Déconnexion :** **Se déconnecter de Session sur ce téléphone** demande d’abord, car sans tes 13 mots de récupération le compte ne peut pas revenir. Les sauvegardes ne gardent pas le compte : après une restauration, récupère-le avec ses mots.
+
 ## SMS {#sms}
 
 Sur Android, Erevos peut être l’app SMS du téléphone : sous **Réglages** → **Téléphone et SMS** → **SMS** → **Erevos
@@ -2735,7 +2845,7 @@ Erevos dans une seule liste.
   droite → **Autoriser les paramètres restreints**, et autorise les SMS sous **Autorisations**. Les discussions envoyées
   en RCS (« chat » dans Google Messages) restent dans cette app et ne s’affichent pas. **Erevos comme app SMS** dit
   combien de conversations SMS Erevos lit, ou pourquoi il n’a pas pu les lire.
-- **Écrire à quelqu’un qui a Erevos :** cela passe par Erevos, chiffré de bout en bout, dès que son numéro est associé à
+- **Écrire à quelqu’un qui a {=Erevos} :** cela passe par Erevos, chiffré de bout en bout, dès que son numéro est associé à
   son contact. Associe-le à la main dans la conversation SMS, ou laisse une invitation cachée le trouver. À partir de
   là, sa conversation SMS ouvre sa discussion.
 - **Ses SMS dans la discussion :** les SMS et MMS avec son numéro, ceux d’avant et ceux qui arrivent, s’affichent parmi
@@ -2754,15 +2864,15 @@ Erevos dans une seule liste.
   chronomètre activé, ou un message auquel tu réponds, Erevos le dit quand il demande.
 - **Invitations cachées :** avec le premier SMS à un numéro qui n’est pas un contact, Erevos envoie aussi une courte
   invitation cachée. Aucune ne part vers le numéro d’un contact Erevos, associé ou sur sa fiche de contact. Un
-  téléphone sans Erevos n’affiche rien ; un téléphone avec Erevos répond par le relais et les deux deviennent
+  téléphone sans {=Erevos} n’affiche rien ; un téléphone avec {=Erevos} répond par le relais et les deux deviennent
   contacts. Il ne répond de lui-même qu’à un numéro qu’il connaît, dans tes contacts ou un numéro auquel tu as écrit
   par SMS ; pour tout autre, il demande d’abord, **Une invitation par SMS**, car l’expéditeur d’un SMS peut être
   inventé. Chaque numéro est sollicité une fois par mois au plus, et **Désactiver les invitations**, sous **Réglages**
   → **Téléphone et SMS** → **SMS** → **Trouver Erevos derrière un numéro**, les arrête.
 
-**Pourquoi :** pour que deux téléphones Erevos se trouvent à partir d’un simple numéro de téléphone, sans serveur qui
+**Pourquoi :** pour que deux téléphones {=Erevos} se trouvent à partir d’un simple numéro de téléphone, sans serveur qui
 connaît les numéros. L’invitation est un SMS de données, que les apps de messagerie n’affichent pas, si bien qu’un
-téléphone sans Erevos n’affiche rien.
+téléphone sans {=Erevos} n’affiche rien.
 
 - **Tous les autres :** un SMS ordinaire, marqué SMS. L’opérateur téléphonique peut le lire, comme il lit tout SMS.
 - **✓ et ✓✓✓ :** un SMS à toi affiche ✓ dès qu’il est parti, et ✓✓✓ dès que l’accusé de réception du réseau dit qu’il
@@ -2840,7 +2950,7 @@ ne marche**.
   (400 grecques), ni le tout premier message à un nouveau contact, qui porte les clés. Ceux-là attendent, marqués
   **En attente**, comme dans [Comment Erevos choisit le chemin](#paths). Les discussions cachées ne passent jamais
   par SMS.
-- **Les deux téléphones** ont besoin d’Erevos comme app SMS, et du numéro du contact lié à sa discussion. Ces SMS sont
+- **Les deux téléphones** ont besoin d’{=Erevos} comme app SMS, et du numéro du contact lié à sa discussion. Ces SMS sont
   des SMS de données cachés pour Erevos, qu’aucune app SMS n’affiche, et rien n’en reste dans les SMS du téléphone.
 - **Par où il est passé :** reste appuyé sur le message : son menu dit **Envoyé par SMS** ou **Arrivé par SMS**.
   **✓✓** arrive dès que le relais ou Nostr sont de nouveau joignables : aucun SMS ne repart tout seul.
@@ -3088,7 +3198,7 @@ derrière le verrou d’Erevos : avec un mot de passe, une fois que tu l’as ta
   longue note ou beaucoup d’adresses sont laissées de côté pour tenir). Quiconque le voit peut le lire. **Lire le code
   QR d’un contact** dans le menu en lit un sur une photo que tu prends ou choisis, ici sur le téléphone, et commence
   avec lui un nouveau contact, enregistré seulement quand tu l’enregistres. Le code QR Erevos de quelqu’un en commence
-  un avec son ID Erevos.
+  un avec son ID {=Erevos}.
 - **Doublons :** **Trouver les doublons** dans le menu liste les contacts qui semblent être la même personne gardée deux
   fois : le même nom (ses mots dans n’importe quel ordre), numéro ou e-mail. **Fusionner** garde le plus complet d’entre
   eux, avec chaque numéro, e-mail et adresse des autres, leurs notes, et leur photo, sonnerie, étoile et groupes quand
@@ -3118,17 +3228,17 @@ derrière le verrou d’Erevos : avec un mot de passe, une fois que tu l’as ta
   pendant que tu la choisis ou la prends. Leur menu n’a que ce qui est à elles : **Importer depuis un fichier .vcf**
   garde les contacts d’un fichier avec elles, scellés, jamais dans les contacts du téléphone ; **Enregistrer en fichier
   .vcf** enregistre ceux qui sont affichés, ou un seul depuis sa fiche, dans un dossier que tu choisis (hors d’Erevos et
-  non chiffré) ; **Lire le code QR d’un contact** commence un de leurs contacts. Un ID Erevos tapé ou lu là ajoute la
+  non chiffré) ; **Lire le code QR d’un contact** commence un de leurs contacts. Un ID {=Erevos} tapé ou lu là ajoute la
   personne aux discussions masquées, jamais à celles de l’espace. En appeler un par l’app de téléphone ferme les
   discussions masquées dès qu’Erevos est absent plus de 30 secondes, et s’affiche dans son historique des appels.
-- **ID Erevos :** l’ID Erevos d’un contact est le lien de contact que montre son Erevos, sous **Copier mon lien de
-  contact** ou en tant que son code QR. Sur la fiche d’un contact, ou sous **ID Erevos** quand tu en écris un, colle-le,
+- **ID {=Erevos} :** l’ID {=Erevos} d’un contact est le lien de contact que montre son {=Erevos}, sous **Copier mon lien de
+  contact** ou en tant que son code QR. Sur la fiche d’un contact, ou sous **ID {=Erevos}** quand tu en écris un, colle-le,
   ou lis-le avec **Photographier le code QR** ou **Choisir une photo du code QR** : **Ajouter à Erevos** (ou
   **Enregistrer**) ajoute la personne à tes discussions Erevos, qui s’ouvrent avec elle, et y associe le contact, et la
   discussion prend le nom du contact si elle n’en a pas à elle. Un contact qui est un contact Erevos montre le début de
-  sa clé comme **ID Erevos**.
+  sa clé comme **ID {=Erevos}**.
 - **Contacts Erevos :** un contact qui est la même personne que l’un des contacts Erevos de tes discussions s’affiche
-  comme une seule fiche avec lui : par un numéro associé à lui dans Erevos, par son ID Erevos, ou avec **Choisir dans
+  comme une seule fiche avec lui : par un numéro associé à lui dans Erevos, par son ID {=Erevos}, ou avec **Choisir dans
   mes discussions Erevos** sur sa fiche, une association scellée dans l’espace, jamais dans les contacts d’Android
   (**Pas ce contact Erevos** l’annule). La fiche a alors **Message**, **Appeler** et **Vidéo**, chiffrés de bout en bout
   par Erevos au lieu de passer par l’opérateur téléphonique. Un contact des discussions qui n’est aucun contact a sa
@@ -3421,7 +3531,7 @@ supprimerait ce que contiennent les emplacements retirés.
   aucune une fois qu’il se ferme. Qu’un de tes messages leur soit arrivé ou ait été lu, la saisie et les nouvelles clés
   n’en déclenchent aucune, pas plus qu’un appel qui a sonné (voir **Faire sonner les appels quand elles sont
   fermées**) ; un appel qui n’a pas sonné compte comme un message. Un message ou une suppression que d’autres téléphones
-  Erevos ont transporté jusqu’au relais (voir **Transportés par d’autres téléphones** dans [Discuter avec un téléphone à
+  {=Erevos} ont transporté jusqu’au relais (voir **Transportés par d’autres téléphones** dans [Discuter avec un téléphone à
   proximité](#nearby)) ne peut pas dire ce qu’il transporte, car les téléphones qui le transportent ne doivent pas le
   savoir : il compte comme un message, si bien qu’une suppression affiche aussi « New message », et le premier message
   d’une discussion peut compter pour deux ; et un message envoyé sans son sonne comme d’habitude (voir **Envoyer sans
@@ -3520,7 +3630,7 @@ La Collection est un endroit chiffré pour tes photos, tes fichiers et tes dossi
 - **Musique, vidéos et PDF :** un PDF se lit page par page dans Erevos (Android 11 et plus récent), déchiffré en mémoire seulement. La musique et les vidéos se lisent directement depuis leurs morceaux chiffrés, jamais depuis une copie : une vidéo en plein écran, la musique avec les suivantes du dossier, qui continue écran éteint, avec lecture, pause, suivant et précédent dans la notification et sur l’écran de verrouillage du téléphone, et seulement cela là. La liste continue une fois l’espace verrouillé, sauf si **Arrêter la lecture quand l’espace se verrouille** est activé dans les réglages de la Collection ; **Arrêter** et le bouton de panique y mettent fin. La notification indique seulement **Lecture en cours**, sauf si **Afficher le titre dans la notification** est activé. **Ouvrir avec une autre application** transmet le fichier à mesure qu’il est déchiffré, sans copie sur le téléphone, jusqu’à ce que tu quittes la Collection ; l’autre application peut en garder une à elle.
 - **Originaux de la galerie :** avec **Supprimer l’original de la galerie après l’importation** activé, une photo ou une vidéo choisie dans les fichiers du téléphone est supprimée de la galerie dès qu’elle est dans la Collection, après qu’Android t’a demandé de confirmer. Il faut Android 11 ou plus récent. Une photo de l’appareil photo ne va jamais dans la galerie.
 - **Dans l’application de bureau :** sous Linux, macOS et Windows la Collection marche aussi, ses fichiers chiffrés dans le dossier propre d’Erevos sur l’ordinateur. **+** apporte un fichier de l’ordinateur, chiffré morceau par morceau ; il n’y a pas d’appareil photo. Photos, textes, PDF (dans la visionneuse PDF intégrée), musique et vidéos s’ouvrent seulement dans la mémoire d’Erevos, jamais en copie non chiffrée sur le disque, jusqu’à 1 Go chacun, et musique et vidéos de toute taille, lues morceau par morceau depuis leurs morceaux chiffrés pendant la lecture ; le fichier se ferme, et la musique ou une vidéo s’arrête, quand l’espace se verrouille ou avec le bouton de panique. **Enregistrer sur l’ordinateur** demande d’abord, comme sur le téléphone ; **Ouvrir avec une autre application** n’y est pas.
-- **Dans un navigateur et sur Sailfish OS :** l’app web, sur l’écran d’accueil d’un iPhone aussi, et Erevos sur Sailfish OS ont aussi la Collection. **+** apporte un fichier avec le sélecteur du navigateur, lu et chiffré morceau par morceau, si bien qu’un gros fichier n’est jamais tenu en entier ; ses morceaux sont gardés dans le stockage du navigateur, ou sur Sailfish OS dans le dossier propre d’Erevos. Un navigateur ne donne à un site qu’une place limitée : quand elle manque, rien du fichier n’est gardé, et Erevos le dit. Photos, textes, musique et vidéos s’ouvrent seulement en mémoire, jusqu’à 256 Mo chacun, et se ferment quand l’espace se verrouille ; un PDF n’y est pas affiché : enregistre-le pour le lire avec une autre application. **Enregistrer sur cet appareil** (sur Sailfish OS **Enregistrer sur le téléphone**) demande d’abord ; dans un navigateur il prend jusqu’à 256 Mo, tandis que Sailfish OS écrit dans Téléchargements un fichier de toute taille morceau par morceau. Dans un navigateur, le serveur WebDAV doit laisser entrer l’app web, comme pour les sauvegardes ; Sailfish OS n’a pas de copie sur WebDAV.
+- **Dans un navigateur et sur Sailfish OS :** l’app web, sur l’écran d’accueil d’un iPhone aussi, et {=Erevos} sur Sailfish OS ont aussi la Collection. **+** apporte un fichier avec le sélecteur du navigateur, lu et chiffré morceau par morceau, si bien qu’un gros fichier n’est jamais tenu en entier ; ses morceaux sont gardés dans le stockage du navigateur, ou sur Sailfish OS dans le dossier propre d’Erevos. Un navigateur ne donne à un site qu’une place limitée : quand elle manque, rien du fichier n’est gardé, et Erevos le dit. Photos, textes, musique et vidéos s’ouvrent seulement en mémoire, jusqu’à 256 Mo chacun, et se ferment quand l’espace se verrouille ; un PDF n’y est pas affiché : enregistre-le pour le lire avec une autre application. **Enregistrer sur cet appareil** (sur Sailfish OS **Enregistrer sur le téléphone**) demande d’abord ; dans un navigateur il prend jusqu’à 256 Mo, tandis que Sailfish OS écrit dans Téléchargements un fichier de toute taille morceau par morceau. Dans un navigateur, le serveur WebDAV doit laisser entrer l’app web, comme pour les sauvegardes ; Sailfish OS n’a pas de copie sur WebDAV.
 - **Formats :** sur Android, MP3, AAC et M4A, FLAC, Ogg et Opus, WAV, AMR, MP4, MKV, WebM et 3GP se lisent, même un fichier arrivé sans type, reconnu à la fin de son nom, comme arrivent souvent les fichiers d’autres applis. Dans l’appli de bureau et dans un navigateur, ce que le navigateur en lit : ni 3GP ni AMR.
 - **L’écran de lecture :** touchez la barre de la musique en cours en bas de la Collection, ou **En cours de lecture** sous un fichier de musique, pour sa pochette, son titre, son artiste et son album tels que le fichier les donne (sinon son nom), une barre à toucher ou faire glisser vers un autre point, précédent, lecture ou pause et suivant, **Aléatoire**, **Répéter** (la liste, ou le seul fichier) et la vitesse, de 0.5× à 2×, et la liste, celui en cours marqué : touchez-en un autre pour le lire. Une vidéo, ou une musique de 10 minutes ou plus, reprend là où vous l’avez laissée : le point est gardé dans le catalogue de la Collection, chiffré avec lui, nulle part ailleurs sur le téléphone, et pour cet appareil seulement. La notification et l’écran de verrouillage montrent le titre, l’artiste et la pochette seulement avec **Afficher le titre dans la notification** activé ; sinon seulement **Lecture en cours**.
 - **Sous-titres :** un fichier .srt ou .vtt dans le même dossier qu’une vidéo, à son nom (film.mkv et film.srt, ou film.en.srt), s’affiche comme ses sous-titres, lu depuis ses morceaux chiffrés comme la vidéo ; **Sous-titres activés** en haut les masque, puis les réaffiche.
@@ -3530,7 +3640,7 @@ La Collection est un endroit chiffré pour tes photos, tes fichiers et tes dossi
 - **Une liste toute prête d’un pays :** **Ajouter une station** ajoute aussi, avec **Ajouter les stations de ce pays**, les stations les plus écoutées de Radio Browser dans le pays choisi, jusqu’à 100, chacune avec un lien https. Radio Browser est interrogé une fois, quand tu appuies, et voit l’adresse IP de ton appareil, sauf si **Par Tor** est activé dans **Listes radio et TV**.
 - **Une playlist de plusieurs stations :** un lien de playlist (.m3u, .pls) qui nomme plusieurs stations les ajoute toutes, et **Importer un fichier de playlist** ajoute les stations d’un fichier .m3u ou .pls de ton appareil, lu là et envoyé nulle part. Seules les stations avec un lien https sont ajoutées (500 au plus d’une liste), et Erevos dit combien ont été laissées de côté.
 - **Quand un flux coupe :** si le serveur d’une station, ou un proxy sur le chemin, termine le flux, ou que le réseau disparaît un instant, Erevos redemande la station tout seul après 1, 2, 4… secondes (30 au plus), tant que tu veux l’écouter, sur Android, sur un ordinateur et dans un navigateur. Après 12 essais de suite, il s’arrête et le dit.
-- **TV :** l’onglet **TV** garde des chaînes de télé, chacune par son lien https, dans les groupes que leur donne leur liste, avec une rangée pour afficher un groupe et une recherche par nom. Un appui lit une chaîne en plein écran, comme une vidéo, avec le même **Arrêter la lecture quand l’espace se verrouille** et le bouton panique ; il n’y a pas de guide des programmes. Elle se lit sur Android, dans l’application de bureau et dans un navigateur ; là, un flux HLS se lit avec hls.js, et seulement si son serveur laisse l’application web le lire.
+- **TV :** l’onglet **TV** garde des chaînes de télé, chacune par son lien https, dans les groupes que leur donne leur liste, avec une rangée pour afficher un groupe et une recherche par nom. Un appui lit une chaîne en plein écran, comme une vidéo, avec le même **Arrêter la lecture quand l’espace se verrouille** et le bouton de panique ; il n’y a pas de guide des programmes. Elle se lit sur Android, dans l’application de bureau et dans un navigateur ; là, un flux HLS se lit avec hls.js, et seulement si son serveur laisse l’application web le lire.
 - **Ajouter des chaînes :** **+** dans **TV** ajoute une liste par son lien (.m3u), lue une fois à l’ajout, un fichier de liste de votre appareil (**Importer un fichier de liste (.m3u)**), lu là et envoyé nulle part, ou une chaîne par son lien. Seules les chaînes avec un lien https sont ajoutées, chaque lien une fois, jusqu’à 15 000 dans chaque Collection, et Erevos dit combien ont été laissées de côté. Appuyez longuement sur une chaîne pour la renommer, la supprimer ou supprimer tout son groupe, ou envoyer son nom et son lien avec **Envoyer à une discussion** ; le menu d’une station de radio a aussi **Envoyer à une discussion**.
 - **iptv-org :** **Ajouter des chaînes** propose iptv-org (github.com/iptv-org/iptv), une liste publique de chaînes gratuites : **iptv-org par pays**, la région de votre appareil d’abord, ou **iptv-org : toutes les chaînes**, plus de 10 000. Son serveur voit l’adresse IP de votre appareil quand la liste est récupérée, et chaque chaîne pendant sa lecture, sauf si **Lire par Tor** est activé. Avec **Par Tor** activé sous **Listes radio et TV**, plus bas, la liste est récupérée par Tor, donc son serveur ne voit pas ton adresse IP ; chaque chaîne la voit toujours pendant sa lecture, sauf si **Lire par Tor** est activé aussi.
 - **Ce que voit une chaîne :** sauf si **Lire par Tor** est activé, plus bas, la chaîne, et qui fait tourner son serveur, voit l’adresse IP de votre appareil pendant la lecture, comme tout site, et Erevos le dit avant que la première soit lue. Les logos ne s’affichent qu’avec **Afficher les logos des chaînes** activé dans les réglages de la Collection, car le serveur de chaque logo voit aussi votre adresse IP ; sinon, une icône de télé. Les chaînes sont gardées chiffrées avec la Collection.
@@ -3625,8 +3735,8 @@ sous **Réglages** → **Données et appareils** → **Sauvegardes**.
   qu’elles étaient alors. Les messages arrivés après la sauvegarde et déjà lus n’y sont pas. Une conversation qui a
   continué après la sauvegarde n’ouvrirait plus les nouveaux messages, si bien que chaque discussion restaurée, celle
   de l’espace et celle de chaque lieu caché à son ouverture, ouvre d’elle-même et sans bruit une nouvelle conversation
-  avec chaque contact, à partir des clés les plus récentes qu’il lui a données, et son Erevos continue dedans. Avec un
-  contact dont l’Erevos est plus ancien, demande-lui de nouveau son lien de contact. Avant
+  avec chaque contact, à partir des clés les plus récentes qu’il lui a données, et son {=Erevos} continue dedans. Avec un
+  contact dont l’{=Erevos} est plus ancien, demande-lui de nouveau son lien de contact. Avant
   qu’une discussion restaurée écrive de nouveau, ses conversations sautent au-delà des clés qu’elles ont pu utiliser
   depuis la sauvegarde, si bien qu’aucune clé ne scelle jamais deux messages : une clé qui en scellerait deux
   permettrait à celui qui a gardé les deux paquets de les lire ensemble. Dans un groupe, un membre restauré demande à
@@ -3694,7 +3804,7 @@ sous **Réglages** → **Données et appareils** → **Sauvegardes**.
   Un SMS pour plus tard dont l’heure est venue avant la restauration ne part pas tout seul, car le téléphone d’où vient
   la sauvegarde l’a peut-être envoyé : il s’affiche comme non envoyé, et un appui dessus l’envoie ou le supprime. Celui
   dont l’heure est encore à venir part à son heure. Un Erevos plus ancien n’ouvre pas une sauvegarde qui les contient ;
-  une sauvegarde faite par un Erevos plus ancien se restaure comme toujours, sans eux.
+  une sauvegarde faite par un {=Erevos} plus ancien se restaure comme toujours, sans eux.
 - **Ce qui ne revient jamais :** ce qui appartient au téléphone lui-même ne vient avec aucune sauvegarde, donc une
   restauration sur un autre téléphone ne peut pas l’apporter : l’empreinte ou le visage, dont Android garde la clé dans
   la puce de ce téléphone ; les dossiers où Erevos peut écrire, comme celui des sauvegardes automatiques, où Android ne
@@ -3715,7 +3825,7 @@ sous **Réglages** → **Données et appareils** → **Sauvegardes**.
   scanner, garde ses discussions et reçoit ce qui est venu depuis ; les messages arrivés sur l’ancien téléphone après
   la sauvegarde restent sur lui seul. Une fois associé de nouveau, ni l’ancien téléphone ni quiconque a la même
   sauvegarde ne l’atteint. Une demande vaut 14 jours, et les appareils d’un lieu caché sont demandés depuis
-  l’intérieur de ce lieu. Un appareil avec un Erevos plus ancien ne montre aucune demande : appuie dessus sur
+  l’intérieur de ce lieu. Un appareil avec un {=Erevos} plus ancien ne montre aucune demande : appuie dessus sur
   **Dissocier cet appareil**, puis associe-le comme la première fois, voir [Appareils associés](#devices). Les
   contacts qui ont cette version cessent d’écrire à tes ordinateurs jusqu’à ce qu’ils soient associés de nouveau : le téléphone leur donne une nouvelle liste de ses appareils qui n’en nomme aucun. Si l’horloge de ce
   téléphone retarde sur celle du téléphone perdu, cette liste disparaît dès qu’ils lui écrivent, et les détails de leur
@@ -3725,7 +3835,7 @@ sous **Réglages** → **Données et appareils** → **Sauvegardes**.
   cet ordinateur au téléphone : les discussions que le téléphone a encore restent, avec ce qui est arrivé depuis, et les
   autres disparaissent. Sur le téléphone, dissocie l’appareil qu’il était avant. Fais les sauvegardes sur le téléphone.
 - **Versions :** une sauvegarde ne s’ouvre que dans un Erevos aussi récent que celui qui l’a faite, ou plus. Une
-  sauvegarde faite par un Erevos plus récent est refusée, sans rien changer : mets d’abord Erevos à jour vers la
+  sauvegarde faite par un {=Erevos} plus récent est refusée, sans rien changer : mets d’abord Erevos à jour vers la
   dernière version. Un Erevos d’avant la 6.0.0 dit d’une sauvegarde de la 6.0.0 ou plus récente que ce n’est pas une
   sauvegarde Erevos : mets-le à jour aussi.
 
@@ -3736,7 +3846,7 @@ Le mot de passe de vos sauvegardes peut aller à des amis en morceaux, dans **R�
 et touchez **Donner les morceaux**. Avec les sauvegardes automatiques activées, Erevos vérifie que le mot de passe que
 vous tapez est bien le leur. Avec un serveur dans **Aussi vers un serveur**, les morceaux peuvent contenir aussi son
 adresse, son nom d’utilisateur et son mot de passe, pour qu’on puisse y trouver et ouvrir les sauvegardes avec eux.
-Chaque contact reçoit un message qui dit ce que c’est, et son Erevos garde le morceau à part de la conversation, dans
+Chaque contact reçoit un message qui dit ce que c’est, et son {=Erevos} garde le morceau à part de la conversation, dans
 **Morceaux que vous gardez pour des amis**.
 
 1. **Pour le récupérer :** demandez leurs morceaux à assez d’entre eux. Chacun touche **Afficher le code** à côté du
@@ -3758,7 +3868,7 @@ Chaque contact reçoit un message qui dit ce que c’est, et son Erevos garde le
 - **Ce que cela ne peut empêcher :** assez d’amis ensemble peuvent ouvrir vos sauvegardes s’ils obtiennent aussi le
   fichier : choisissez des personnes qui ne se connaissent pas toutes. Quelqu’un peut se faire passer pour vous, depuis
   un nouveau numéro ou un nouveau compte, pour obtenir les morceaux : un ami ne devrait rendre le sien qu’à vous en
-  personne, ou dans la conversation qu’il a déjà avec vous. Un ami dont l’Erevos est plus ancien que cette version voit
+  personne, ou dans la conversation qu’il a déjà avec vous. Un ami dont l’{=Erevos} est plus ancien que cette version voit
   le message mais ne garde aucun morceau.
 
 **Pourquoi :** une sauvegarde n’est pas plus sûre que son mot de passe, et un mot de passe fort se perd facilement.
@@ -3771,7 +3881,7 @@ masquées, contacts, messages, photos, fichiers et Collection, ses comptes et re
 panique et tes réglages. Aucun serveur n’en garde une copie pour toi, donc rien ne passe tout seul : la sauvegarde le
 porte, scellée avec son mot de passe.
 
-1. **Sur le nouveau téléphone, installe Erevos :** la même version que sur l’ancien, ou une plus récente, car un Erevos
+1. **Sur le nouveau téléphone, installe {=Erevos} :** la même version que sur l’ancien, ou une plus récente, car un {=Erevos}
    plus ancien refuse une sauvegarde faite par un plus récent. Sans internet, l’ancien téléphone peut te le donner,
    voir [Erevos vers un téléphone proche](#give-app).
 2. **Sur l’ancien téléphone, prépare-le :** pour que les SMS du téléphone passent aussi, active **Inclure les SMS dans
@@ -3786,7 +3896,7 @@ porte, scellée avec son mot de passe.
 4. **Apporte-la :** copie la sauvegarde et chaque fichier dont le nom commence comme le sien, tous dans un dossier, sur
    le nouveau téléphone, par câble, carte mémoire ou app cloud. Une sauvegarde sur ton serveur n’a pas besoin d’être
    copiée.
-5. **Sur le nouveau téléphone, restaure :** au premier démarrage, appuie sur **J’ai déjà Erevos sur un autre téléphone**
+5. **Sur le nouveau téléphone, restaure :** au premier démarrage, appuie sur **J’ai déjà {=Erevos} sur un autre téléphone**
    (ou passe le premier démarrage). Sur Android, pour les SMS, laisse Erevos être aussi l’app SMS là-bas. Puis, sous
    **Réglages** → **Données et appareils** → **Sauvegardes**, appuie sur **Restaurer une sauvegarde** et choisis le
    fichier, ou sur **Restaurer depuis un serveur** et donne l’adresse, le nom d’utilisateur et le mot de passe du
@@ -3814,7 +3924,7 @@ porte, scellée avec son mot de passe.
 - **Appareils associés :** sur le nouveau téléphone, sous **Réglages** → **Données et appareils** → **Appareils
   associés**, appuie sur **Demander une nouvelle association** pour chaque ordinateur ou navigateur qui est encore à
   toi, puis sur **Associer de nouveau** dessus : il garde ses discussions, sans code à scanner. Les appareils d’un
-  lieu caché depuis l’intérieur de ce lieu. Un appareil avec un Erevos plus ancien : appuie dessus sur **Dissocier cet
+  lieu caché depuis l’intérieur de ce lieu. Un appareil avec un {=Erevos} plus ancien : appuie dessus sur **Dissocier cet
   appareil**, puis associe-le au nouveau téléphone comme la première fois. Voir [Sauvegardes](#backup).
 - **La Collection :** elle vient dans les fichiers de la sauvegarde. Une laissée hors des sauvegardes vient seulement de
   son serveur WebDAV, chaque fichier à son ouverture ; une sans l’un ni l’autre reste sur l’ancien téléphone, et
@@ -4023,7 +4133,7 @@ discussions importées avec cette personne partent ensemble, quelle que soit leu
 photo, vidéo, message vocal et fichier gardé, à elle seule, chiffrés de bout en bout par ton relais, et la discussion
 dit que tu l’as partagée.
 
-- **De son côté**, il n’y a rien à faire : son Erevos garde aussitôt les messages, dit dans la discussion qui les a
+- **De son côté**, il n’y a rien à faire : son {=Erevos} garde aussitôt les messages, dit dans la discussion qui les a
   partagés, d’où et combien, et les montre avant les nouveaux, en lecture seule, comme une discussion importée. Les
   photos et fichiers arrivent ensuite à mesure, et sous cette ligne s’affiche combien sont arrivés, **Fichiers : 3 sur
   10**. Les côtés sont inversés : ce que tu as écrit apparaît comme venant de toi, à sa gauche, et dans une discussion à
@@ -4043,7 +4153,7 @@ dit que tu l’as partagée.
   en 12 jours est remis sur le relais avant d’expirer. Un fichier supprimé de ce téléphone depuis est nommé comme resté
   en arrière.
 - **Où il en est** s’affiche sous ta ligne dans la discussion, **Partage, 40 %**. Touche-la pour **Arrêter le partage**
-  : ce qui attend sur le relais en est retiré, et son Erevos supprime ce qui est arrivé. Si cette personne supprime les
+  : ce qui attend sur le relais en est retiré, et son {=Erevos} supprime ce qui est arrivé. Si cette personne supprime les
   discussions, ça s’arrête de la même façon.
 - **Depuis un relais où leur Erevos ne prend pas de lui-même**, les discussions attendent de leur côté un appui sur leur
   ligne ; elle dit alors où elles en sont, **Réception, 40%**, et ta ligne dit **Partage · son téléphone le récupère**.
@@ -4244,7 +4354,7 @@ Les discussions arrivent alors sur l’ordinateur, et après elles les messages 
   réagissent, et les changements qu’ils font aux contacts ; celui qui a manqué le premier message d’un autre en reçoit
   un nouveau un jour ou plus après. Un ordinateur resté éteint plus longtemps que le relais ne garde les messages (14
   jours), ou qui a manqué le premier message d’un contact pour lui, reçoit quand même ce que ce contact écrit ensuite :
-  son Erevos recommence avec lui un jour ou plus après, puis de moins en moins souvent, jusqu’à ce qu’il réponde. Après
+  son {=Erevos} recommence avec lui un jour ou plus après, puis de moins en moins souvent, jusqu’à ce qu’il réponde. Après
   qu’un contact t’a supprimé et ajouté de nouveau, l’ordinateur recommence aussi avec ses appareils.
 - Les **photos et fichiers** qui arrivent restent sur le relais jusqu’à ce que le téléphone et l’ordinateur les aient
   pris tous les deux ; ensuite le téléphone les y supprime. Ceux que l’ordinateur ne prend jamais partent quand il est
@@ -4295,7 +4405,7 @@ Les discussions arrivent alors sur l’ordinateur, et après elles les messages 
   voient rien de nouveau : toi, comme avant, dont les messages de groupe arrivent dans une autre file d’attente. Le
   déplacement demande les deux allumés et le relais, et les groupes publics restent sur le téléphone (quitte-les
   d’abord). Pour dissocier cet ordinateur, ramène d’abord les groupes sur le téléphone. S’il est perdu, dissocie-le quand même : les
-  groupes apparaissent alors comme quittés sur le téléphone. Un ordinateur avec un Erevos plus ancien ne peut pas les garder.
+  groupes apparaissent alors comme quittés sur le téléphone. Un ordinateur avec un {=Erevos} plus ancien ne peut pas les garder.
 - **Les discussions masquées et les seconds mots de passe** ne partent jamais avec l’association de l’espace : chacun
   s’associe à part, depuis l’intérieur. Pour un emplacement de discussions masquées : sur l’ordinateur, ouvre cet
   emplacement avec son PIN, neuf et vide comme le laisse un nouveau PIN, et donne-lui sa propre file d’attente sur le
@@ -4320,7 +4430,7 @@ Les discussions arrivent alors sur l’ordinateur, et après elles les messages 
   téléphone du contact éteint, et pour le contact elles ressemblent aux discussions d’un téléphone qui n’a jamais
   associé d’appareil. Une discussion déplacée dans les discussions masquées sur le téléphone quitte l’ordinateur.
   Déplacée dans les discussions masquées, ou hors d’elles vers tes discussions, une discussion n’écrit qu’au téléphone
-  du contact, comme le fait un Erevos plus ancien, jusqu’à ce qu’elle retourne là où elle a été créée : son Erevos est
+  du contact, comme le fait un {=Erevos} plus ancien, jusqu’à ce qu’elle retourne là où elle a été créée : son {=Erevos} est
   prévenu d’abord, pour que ses appareils cessent d’écrire aux tiens, et il peut en déduire que la discussion a cessé de
   connaître les appareils associés : si elle lui avait donné la liste de tes appareils, qu’elle est partie dans les
   discussions masquées. Un espace qu’ouvre un second mot de passe ne s’associe que de l’intérieur, à des appareils à
@@ -4403,8 +4513,8 @@ reçoit l’ordre, pourrait envoyer du code modifié. Erevos ne prend pas ce cod
   depuis l’écran d’accueil). Quand des messages arrivent, ou qu’un appel sonne, ton relais envoie un push par Apple, et
   Erevos affiche combien de messages sont arrivés depuis la dernière fois que tu l’as ouvert (**3 nouveaux messages**),
   ou **Appel** quand seul un appel a sonné, dans la langue de l’app, rien de plus. Le nombre est chiffré pour ton
-  iPhone : Apple voit quand quelque chose arrive pour ton iPhone, et qu’il utilise Erevos, jamais quoi ni de qui. Avec
-  un relais ou l’Erevos d’un expéditeur antérieur à la version 2.0.0, ou un message que d’autres téléphones ont porté
+  iPhone : Apple voit quand quelque chose arrive pour ton iPhone, et qu’il utilise {=Erevos}, jamais quoi ni de qui. Avec
+  un relais ou l’{=Erevos} d’un expéditeur antérieur à la version 2.0.0, ou un message que d’autres téléphones ont porté
   jusqu’au relais, il n’y a pas de nombre : Erevos affiche **Nouveau message**, ou **Nouveaux messages** une fois que
   d’autres sont arrivés, jusqu’à ce que tu l’ouvres. Elles sont propres à chaque espace, jamais pour les discussions
   masquées, et ton relais doit être configuré pour les envoyer. Elles arrivent aussi pour la file d’attente propre à
@@ -4486,7 +4596,7 @@ messages et ses réglages scellés de la même façon.
 ## Mises à jour {#updates}
 
 Erevos ne demande les mises à jour à GitHub que quand tu appuies sur le bouton, comme dans Fasouli : une
-vérification régulière dirait à GitHub, chaque jour, que ce téléphone ou cet ordinateur a Erevos. Sur Android, il te
+vérification régulière dirait à GitHub, chaque jour, que ce téléphone ou cet ordinateur a {=Erevos}. Sur Android, il te
 prévient aussi quand une nouvelle version sort, sans demander à GitHub, comme le dit **Prévenu quand une nouvelle
 version sort** plus bas. Pour mettre à jour :
 
@@ -4599,12 +4709,12 @@ voir [Sauvegardes](#backup). Une mise à jour garde tout, mais une sauvegarde co
   dans l’appli.
 - **Android, la première fois depuis la page des versions :** un Erevos compilé sur un ordinateur pour des tests est
   signé avec une autre clé, et Android refuse de s’installer par-dessus (**Application non installée**). Fais une
-  sauvegarde, désinstalle Erevos, installe celui de la page des versions et restaure la sauvegarde. Après cela, chaque
+  sauvegarde, désinstalle {=Erevos}, installe celui de la page des versions et restaure la sauvegarde. Après cela, chaque
   mise à jour s’installe par-dessus.
-- **Erevos depuis F-Droid**, une fois qu’il y sera, est mis à jour par F-Droid : ses **Mises à jour** montrent la
+- **{=Erevos} depuis F-Droid**, une fois qu’il y sera, est mis à jour par F-Droid : ses **Mises à jour** montrent la
   version et le disent, sans **Rechercher des mises à jour**. F-Droid le signe avec une clé à lui, donc Android
   n’installe ni celui-ci par-dessus l’Erevos de la page des versions, ni celui-là par-dessus lui. Pour passer de l’un à
-  l’autre : fais une sauvegarde, désinstalle Erevos, installe l’autre et restaure la sauvegarde.
+  l’autre : fais une sauvegarde, désinstalle {=Erevos}, installe l’autre et restaure la sauvegarde.
 - **Jamais plus ancien :** n’installe pas une version plus ancienne par-dessus une plus récente. Ses données peuvent
   être sous une forme que l’ancienne ne sait pas lire. Restaure plutôt une sauvegarde faite avec cette version plus
   ancienne.
@@ -4613,18 +4723,18 @@ voir [Sauvegardes](#backup). Une mise à jour garde tout, mais une sauvegarde co
 
 ## Erevos vers un téléphone proche {#give-app}
 
-Sans internet, un téléphone Android avec Erevos peut le donner à un téléphone à côté, dans **Réglages** → **Général**
+Sans internet, un téléphone Android avec {=Erevos} peut le donner à un téléphone à côté, dans **Réglages** → **Général**
 → **Donner Erevos à un téléphone proche** (aussi dans **Mises à jour**). Les deux téléphones doivent être sur le même
 Wi-Fi, ou l’autre sur le point d’accès de celui-ci : activez d’abord le point d’accès dans les réglages d’Android.
 
 1. **Sur le téléphone qui donne :** touchez **Démarrer**. Un code QR s’affiche, avec la taille du paquet, et dessous
    les adresses à taper plutôt dans un navigateur.
-2. **Sur un téléphone sans Erevos :** scannez le code avec son appareil photo. Son navigateur ouvre une page, servie
-   par le téléphone qui donne, avec **Télécharger Erevos** : téléchargez-le et ouvrez le fichier, et Android
+2. **Sur un téléphone sans {=Erevos} :** scannez le code avec son appareil photo. Son navigateur ouvre une page, servie
+   par le téléphone qui donne, avec **Télécharger {=Erevos}** : téléchargez-le et ouvrez le fichier, et Android
    l’installe. La première fois, Android demande d’autoriser l’installation d’apps depuis ce navigateur. La page
    montre le SHA-256 du paquet et celui de son certificat : ils doivent être ceux que montre le téléphone qui donne
    sous **À comparer**.
-3. **Sur un téléphone avec un Erevos plus ancien :** ouvrez plutôt **Réglages** → **Général** → **Mises à jour** →
+3. **Sur un téléphone avec un {=Erevos} plus ancien :** ouvrez plutôt **Réglages** → **Général** → **Mises à jour** →
    **Depuis un téléphone proche** et photographiez le code. Erevos télécharge le paquet et n’ouvre l’installateur
    d’Android que si son SHA-256 est celui du code, que c’est Erevos, signé du même certificat que l’Erevos qui s’y
    trouve, et plus récent.
@@ -4635,9 +4745,9 @@ Wi-Fi, ou l’autre sur le point d’accès de celui-ci : activez d’abord le p
 - **Ce qu’il ne peut vérifier pour vous :** le navigateur ne fait que télécharger. Un téléphone avec un Erevos modifié
   montrerait son propre certificat ; dès que vous avez internet, comparez donc le certificat avec celui du site ou de
   la page des versions d’Erevos. Erevos lui-même, dans **Mises à jour**, refuse un paquet signé autrement.
-- **Pas depuis un magasin :** un Erevos installé en plusieurs parties, comme le font certains magasins, ne peut pas
-  être donné en entier et le dit. L’Erevos de F-Droid est signé par F-Droid : il peut aller vers un téléphone sans
-  Erevos, ou par-dessus l’Erevos de F-Droid via le navigateur, mais un Erevos de la page des versions le refuse dans
+- **Pas depuis un magasin :** un {=Erevos} installé en plusieurs parties, comme le font certains magasins, ne peut pas
+  être donné en entier et le dit. L’{=Erevos} de F-Droid est signé par F-Droid : il peut aller vers un téléphone sans
+  {=Erevos}, ou par-dessus l’Erevos de F-Droid via le navigateur, mais un Erevos de la page des versions le refuse dans
   **Mises à jour**, comme le ferait Android. L’Erevos de F-Droid ne prend rien dans **Mises à jour** : F-Droid le met à
   jour.
 - Android seulement. Quiconque sur le même réseau voit le code peut aussi télécharger Erevos ; il n’y a rien d’autre à
@@ -4671,7 +4781,7 @@ Erevos dit clairement ce qu’il protège et ce qu’il ne protège pas, pour l�
 | **Compte, numéro de téléphone, e-mail** | Aucun n’est nécessaire. Les contacts sont des paires de files d’attente à sens unique sur un relais. | |
 | **Les contacts et leurs noms, clés, réglages de relais, apparence** | Scellés sur le téléphone avec la clé de chaque espace. | |
 | **Messages par un relais** | Chiffrés de bout en bout : PQXDH avec ML-KEM-768 pour commencer, puis le double ratchet. Le relais ne peut pas les lire, et une fois que les deux téléphones ont reçu un message l’un de l’autre, il ne peut pas non plus les distinguer par conversation : chacun est scellé une fois de plus pour le téléphone auquel il va. Il voit lesquels sont des messages que quelqu’un lit, lesquels sont des échanges entre téléphones, et lesquels sont des appels qui sonnent, comme chacun le dit. Pas encore audité. | Un audit externe. |
-| **Messages vers un téléphone à proximité** | Chiffrés de bout en bout, comme par le relais. Qui écoute à proximité peut savoir que des téléphones Erevos sont proches l’un de l’autre, et quand et combien ils envoient ; sur le même Wi-Fi, quiconque s’y trouve le peut aussi, et par Wi-Fi Direct, quiconque rejoint le Wi-Fi propre aux téléphones. Tant que le téléphone de ton contact n’est pas connu, les autres téléphones Erevos reliés à proximité reçoivent tes messages courts, scellés. | |
+| **Messages vers un téléphone à proximité** | Chiffrés de bout en bout, comme par le relais. Qui écoute à proximité peut savoir que des téléphones {=Erevos} sont proches l’un de l’autre, et quand et combien ils envoient ; sur le même Wi-Fi, quiconque s’y trouve le peut aussi, et par Wi-Fi Direct, quiconque rejoint le Wi-Fi propre aux téléphones. Tant que le téléphone de ton contact n’est pas connu, les autres téléphones {=Erevos} reliés à proximité reçoivent tes messages courts, scellés. | |
 | **Messages portés par d’autres téléphones** | Scellés deux fois : de bout en bout pour ton contact, et pour son relais. Un téléphone qui en porte un voit vers quel relais il va, quand, et sa taille ; pas de qui il vient ni pour qui il est. Son relais voit vers quel relais il va, et ce relais voit le relais du porteur, pas son téléphone. Gardés scellés sur le téléphone, trois jours au plus : ceux des autres dans un fichier du téléphone, dont la taille montre à peu près combien il y en a ; les tiens dans ton espace, scellés avec sa clé. Les discussions masquées ne sont jamais portées. | |
 | **Messages par LoRa** | Chiffrés de bout en bout, comme par le relais. Quiconque a une radio, à des kilomètres, peut savoir que la tienne émet, quand et combien, et son signal peut être suivi jusqu’à l’endroit où elle se trouve. Erevos empêche ta radio de dire son nom et où elle est (rôle Client hidden, GPS coupé, pas de position fixe) sauf si tu le permets ; elle répond quand même à une radio qui demande son nom. Chaque Erevos sur le mesh reçoit tes messages LoRa, scellés. | Régler le nom de la radio depuis Erevos. |
 | **Messages par SMS, quand rien d’autre ne marche** | Chiffrés de bout en bout, comme par le relais, dans des SMS de données cachés. Désactivé sauf si tu l’actives. L’opérateur voit quel numéro a écrit à quel autre, quand, et combien de SMS ; jamais ce qui a été écrit. Chacun coûte ce que coûte un SMS. | |
@@ -4705,7 +4815,7 @@ Ce que garde le serveur derrière Erevos (lphl.nekten.eu), et ce qui lui a été
 version, donc elle est signée avec la version, comme l’appli.
 
 **Demandes des autorités.** À la date de cette version : aucune. Aucune autorité, aucun tribunal ni aucune entreprise
-n’a demandé de données sur quiconque utilise Erevos, et personne n’a été prié de garder le silence sur une telle
+n’a demandé de données sur quiconque utilise {=Erevos}, et personne n’a été prié de garder le silence sur une telle
 demande. Si ce paragraphe disparaît un jour, ou ne dit plus « aucune », prends-le comme un signe. **Pourquoi :** une
 demande accompagnée d’un ordre de garder le silence ne peut pas être dite, mais une phrase qui cesse d’être écrite peut
 se remarquer. Cela ne fonctionne que tant qu’elle est renouvelée : chaque version la redit.
@@ -4777,7 +4887,7 @@ ont été largement utilisés pour écrire le code et les textes, toujours sur l
 d’azzinder.
 
 Les parties faites par d’autres gardent leurs propres auteurs et leurs propres licences, voir
-[Fait avec l’open source des autres](#about). Les textes complets viennent avec le code source d’Erevos :
+[Fait avec l’open source des autres](#about). Les textes complets viennent avec le code source d’{=Erevos} :
 \`AUTHORS.md\`, \`CREDITS.md\` et le dossier \`LICENSES\`. Chaque copie d’Erevos contient aussi le fichier \`NOTICES.txt\`, avec la licence d’Erevos, \`AUTHORS.md\` et chaque paquet dont Erevos est fait, chacun avec le texte de sa licence : dans l’app Android, dans le dossier des apps pour ordinateur et Sailfish, et dans l’app web à l’adresse \`/NOTICES.txt\`. La licence elle-même est sur
 [gnu.org](https://www.gnu.org/licenses/agpl-3.0.html).
 
@@ -4844,8 +4954,8 @@ nouveau mot de passe avec **Changer le mot de passe**.
 
 ### Un code de contact n’a pas été ajouté.
 
-Un contact sur un autre relais a besoin d’un lien avec la clé de ce relais, ce qu’ont les liens d’un Erevos à jour : la
-ligne sous la discussion nomme ce relais. Un code d’un Erevos plus ancien n’a pas de clés et est refusé : demandes-en un
+Un contact sur un autre relais a besoin d’un lien avec la clé de ce relais, ce qu’ont les liens d’un {=Erevos} à jour : la
+ligne sous la discussion nomme ce relais. Un code d’un {=Erevos} plus ancien n’a pas de clés et est refusé : demandes-en un
 nouveau.
 
 ### Le relais peut-il lire mes messages ?

@@ -105,6 +105,17 @@ the message reacted to and `k` its kind; `+` shows as 👍 and `-` as 👎. Each
 One that comes before its message (wraps come in any order) is kept, up to 200, and put on the message
 as it comes.
 
+## A chat through Tor by itself
+
+A chat's **Through Tor** (`NostrDmChat.tor`, on this device only) sends everything of that chat
+through Tor, whatever the space's Tor way, and never straight: its wraps to their inbox relays and
+our own copy, the look-up of where they read (kind 10050), and its Blossom uploads and downloads.
+These go on connections of the chat's own (`outTo(…, via)`, the chat's key as `via`), and the core
+puts them on circuits of their own: `torTextOpen` takes `url` and the chat after a line break,
+`torHttp`'s head a `chat` field (`crates/erevos-tor` `text_open_on` / `http_on`, isolation per
+chat and host). Tor is started for it when the space's way did not (`ensureTor`). Reading the
+inbox is one connection for all chats, so what comes follows the space's way; the switch says so.
+
 ## How it is built
 
 - `crates/erevos-nostr/src/chat.rs`: one JSON request in, one JSON answer out (`op`: `keys_new`,

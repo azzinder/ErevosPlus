@@ -51,6 +51,30 @@ export function fetchesByItself(mode: PublicImages): boolean {
 // The way a fetch goes: tapped, or 'always', as the space's Tor way says; 'tor', only through Tor.
 const wayOf = (mode: PublicImages, why: FetchWhy): Http => (why === 'tap' || mode === 'always' ? http : torHttp);
 
+// Before a fetch that can show this phone's address (not through Tor now): asked by the screen
+// (components/public-feed.tsx, lib/ip-warning.ts), once for all; turned down, the feed fetches
+// nothing by itself again until a tap asks once more.
+let ipAsk: (() => Promise<boolean>) | null = null;
+let asking: Promise<boolean> | null = null;
+let declined = false;
+
+/** How the screen asks before the address can be seen; null asks nothing (the checks). */
+export function setPublicIpAsk(next: (() => Promise<boolean>) | null): void {
+  ipAsk = next;
+  declined = false;
+}
+
+async function mayShowAddress(mode: PublicImages, why: FetchWhy): Promise<boolean> {
+  if (wayOf(mode, why) !== http || tor() || !ipAsk) return true;
+  if (declined && why === 'show') return false;
+  asking ??= ipAsk().finally(() => {
+    asking = null;
+  });
+  const ok = await asking;
+  declined = !ok;
+  return ok;
+}
+
 const photos = pictureCache(HELD_MOST);
 
 /** A photo for the feed: its bytes and their kind, fetched once while Erevos runs. */
@@ -58,6 +82,8 @@ export async function publicPhoto(url: string, mode: PublicImages, why: FetchWhy
   if (!fetchable(url)) throw new Error('Not fetched');
   if (why === 'show' && !fetchesByItself(mode)) throw new Error('Not fetched');
   const get = wayOf(mode, why);
+  // Asked before, not inside: one turned down is not held as failed, so a tap fetches it.
+  if (!(await mayShowAddress(mode, why))) throw new Error('Not fetched');
   const bytes = await photos.get(url, async () => {
     const answer = await get('GET', url, { Accept: 'image/avif, image/webp, image/jpeg, image/png, image/gif' }, undefined, IMAGE_MOST);
     if (answer.status < 200 || answer.status >= 300) throw new Error(`HTTP ${answer.status}`);
@@ -85,6 +111,7 @@ export function publicCard(url: string, mode: PublicImages, why: FetchWhy): Prom
   if (why === 'show' && !fetchesByItself(mode)) return Promise.reject(new Error('Not fetched'));
   const get = wayOf(mode, why);
   const going = (async (): Promise<LinkCard | null> => {
+    if (!(await mayShowAddress(mode, why))) throw new Error('Not fetched');
     const answer = await get('GET', url, { Accept: 'text/html, application/xhtml+xml' }, undefined, MAX_PAGE * 4);
     if (answer.status < 200 || answer.status >= 300) return null;
     const head = utf8Decode(answer.bytes.subarray(0, MAX_PAGE));

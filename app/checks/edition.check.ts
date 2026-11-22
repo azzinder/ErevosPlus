@@ -14,8 +14,10 @@ import { randomBytes } from '../lib/crypto';
 import { editionNote } from '../lib/edition-notice';
 import { newNostrDm } from '../lib/nostr-dm';
 import { whatsNewFor } from '../lib/whats-new';
-import { asEdition, editionName, guideNamed, named } from '../lib/edition';
-import { tFor } from '../lib/i18n';
+import { asEdition, editionName, guideNamed, named, unmarkKept } from '../lib/edition';
+import { KEEPS_EREVOS, KEEPS_SOME } from '../lib/edition-keeps';
+import { EL } from '../i18n/el/index';
+import { setLang, tFor } from '../lib/i18n';
 import { saveNostrDm } from '../lock/nostr-dm-data';
 import { useWasmCore } from './wasm-core';
 import { blobs, files } from './files-memory';
@@ -105,4 +107,44 @@ test('the app says Erevos+ in its own words when the checks do not ask for the p
     flags.__EREVOS_PLAIN_NAMES__ = was;
   }
   assert.equal(tFor('plus', 'Open Erevos'), 'Open Erevos');
+});
+
+test("Erevos+ keeps «Erevos» where it speaks of the other person's app or of what both editions share", async () => {
+  // Each kept text is one of the app's, with the name in it: none is left over from words that changed.
+  for (const text of KEEPS_EREVOS) {
+    assert.ok(text in EL, text);
+    assert.match(text, /(?<![\w/.-])Erevos(?![\w+/-])/, text);
+  }
+  for (const [text, keep] of KEEPS_SOME) {
+    assert.ok(text in EL && !KEEPS_EREVOS.has(text), text);
+    assert.equal(text.match(/(?<![\w/.-])Erevos(?![\w+/-])(?!\.\w)/g)?.length, keep.length, text);
+    assert.ok(keep.includes(true) && keep.includes(false), text);
+  }
+  const flags = globalThis as { __EREVOS_PLAIN_NAMES__?: boolean };
+  const was = flags.__EREVOS_PLAIN_NAMES__;
+  try {
+    flags.__EREVOS_PLAIN_NAMES__ = false;
+    const theirs = 'Asked, joining once Erevos is open on their phone: {names}';
+    assert.ok(KEEPS_EREVOS.has(theirs));
+    assert.equal(tFor('plus', theirs, { names: 'Ann' }), 'Asked, joining once Erevos is open on their phone: Ann');
+    assert.equal(tFor('plus', 'Open Erevos'), 'Open Erevos+');
+    // A text of both: only this app's «Erevos» says Erevos+, in English and in a translation with as many.
+    const both = '{number} has Erevos. Messages to that number now go through Erevos, end-to-end encrypted.';
+    assert.deepEqual(KEEPS_SOME.get(both), [true, false]);
+    assert.equal(tFor('plus', both, { number: '+30' }), '+30 has Erevos. Messages to that number now go through Erevos+, end-to-end encrypted.');
+    await setLang('el');
+    const greek = tFor('plus', both, { number: '+30' });
+    assert.equal((greek.match(/Erevos\+/g) ?? []).length, 1, greek);
+    assert.ok(greek.indexOf('Erevos+') > greek.indexOf('Erevos '), greek);
+  } finally {
+    await setLang('en');
+    flags.__EREVOS_PLAIN_NAMES__ = was;
+  }
+  // The guide: a marked «Erevos» stays, the others in the same paragraph are Erevos+'s, and no mark shows.
+  assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'plus'), 'Erevos+ looks for other Erevos phones.');
+  assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'lite'), 'Erevos looks for other Erevos phones.');
+  assert.equal(unmarkKept('a {=Erevos} b'), 'a Erevos b');
+  for (const lang of ['de', 'el', 'en', 'es', 'fr', 'it', 'pt', 'sh'] as const) {
+    for (const section of guideFor(lang, 'plus')) assert.doesNotMatch(JSON.stringify(section), /\{=/, `${lang} ${section.id}`);
+  }
 });

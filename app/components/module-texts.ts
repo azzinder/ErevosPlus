@@ -25,6 +25,14 @@ export function moduleName(module: Module): string {
       return 'Matrix';
     case 'xmpp':
       return 'XMPP';
+    case 'telegram':
+      return 'Telegram';
+    case 'messenger':
+      return 'Messenger';
+    case 'signal':
+      return 'Signal';
+    case 'session':
+      return 'Session';
     case 'collection':
       return t('Collection');
   }
@@ -50,6 +58,14 @@ export function moduleAbout(module: Module): string {
       return t('Chats in Matrix rooms, with Element and the other Matrix apps.');
     case 'xmpp':
       return t('Chats with XMPP apps, such as Conversations.');
+    case 'telegram':
+      return t('Your Telegram chats, through Telegram. Telegram can read them, unless both of you use ErevosGram encryption. Not made by Telegram.');
+    case 'messenger':
+      return t('Your Facebook Messenger chats, spoken by Erevos itself with Meta\'s servers, with no server in between. Meta can read those that are not end-to-end encrypted. Not made by Meta.');
+    case 'signal':
+      return t('Your Signal chats: a new account with your phone number, or this phone linked to the Signal of another one. Not made by Signal.');
+    case 'session':
+      return t('Your Session chats: no phone number, only an account of 13 recovery words, through the onion routing of Session\'s nodes. Not made by Session.');
     case 'collection':
       return t('An encrypted place in every space and hidden place for photos, files and folders.');
   }
@@ -69,6 +85,10 @@ export function moduleOffNote(module: Module): string {
     case 'nostr':
     case 'matrix':
     case 'xmpp':
+    case 'telegram':
+    case 'messenger':
+    case 'signal':
+    case 'session':
       return t('Its chats leave the list, and their messages do not come while it is off. Nothing is deleted: the account and the chats are there again when you turn it on.');
   }
 }

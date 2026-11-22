@@ -12,6 +12,8 @@ import { MatrixDevices } from '../components/matrix-devices';
 import { MatrixFind, MatrixNewChat } from '../components/matrix-find';
 import { lineOf } from '../components/matrix-message';
 import { MatrixRegister } from '../components/matrix-register';
+import { AccountTorChoice } from '../components/account-tor';
+import { matrixJoinGate } from '../components/matrix-ip';
 import { MatrixVerifyCard } from '../components/matrix-verify-card';
 import { OwnPicture } from '../components/network-picture';
 import { SayOnlineSwitch, SayTypingSwitch } from '../components/say-typing';
@@ -19,11 +21,11 @@ import { pickAvatar } from '../lib/pick-avatar';
 import { Button, Card, Chip, Field, Input, Page, Row, SectionTitle, Sheet, Text } from '../components/ui';
 import { ask } from '../lib/alert';
 import { doorIsOpen } from '../lib/closed-notices';
-import { canMatrix, canTor } from '../lib/core';
+import { canMatrix } from '../lib/core';
 import { lockedChat } from '../lib/chat-protect';
 import { t } from '../lib/i18n';
 import { matrixInboxRows } from '../lib/inbox';
-import { isMatrixId, matrixThroughTor, roomList, shownRoomName, type MatrixRoom, type MatrixState } from '../lib/matrix';
+import { isMatrixId, roomList, shownRoomName, type MatrixRoom, type MatrixState } from '../lib/matrix';
 import { refreshIgnored, setIgnored } from '../lib/matrix-rules';
 import { sortedRooms } from '../lib/matrix-rooms';
 import {
@@ -50,6 +52,9 @@ import {
   matrixVerifications,
   matrixVerify,
   onMatrixChange,
+  matrixRoomsThroughTor,
+  matrixSetTor,
+  matrixTorWay,
   runMatrix,
 } from '../lib/matrix-store';
 import { useNetworkWhere, whereParams } from '../lib/network-place';
@@ -141,14 +146,9 @@ export default function MatrixScreen() {
     </Text>
   );
 
-  // Matrix follows the space's Tor way (lib/matrix.ts): the server sees this phone's address only without it.
-  const tor = canTor() ? (
-    <Text variant="caption" tone="muted">
-      {matrixThroughTor()
-        ? t('Through Tor: the Matrix server does not see your address.')
-        : t('Not through Tor now: the Matrix server sees your address. Tor is under Settings → Relay and networks → Tor.')}
-    </Text>
-  ) : null;
+  // The account's Tor (lib/account-tor.ts), Off unless chosen, before signing in too: the server
+  // sees this phone's address only without Tor. A room «Through Tor» makes it Always.
+  const tor = <AccountTorChoice network="Matrix" way={matrixTorWay(where)} chatsThroughTor={matrixRoomsThroughTor(where)} onChange={(way) => void run(() => matrixSetTor(way))} />;
 
   const { loaded, state, problem } = now;
   if (!loaded) {
@@ -310,6 +310,7 @@ export default function MatrixScreen() {
             disabled={busy || !/^[#!][^\s:]+:[^\s]+$/.test(address.trim())}
             onPress={() =>
               void run(async () => {
+                if (!(await matrixJoinGate(address.trim()))) return;
                 const id = await matrixJoin(address.trim());
                 setAddress('');
                 router.push({ pathname: '/matrix-chat', params: { room: id, ...whereParams(where) } });
@@ -377,7 +378,11 @@ export default function MatrixScreen() {
           room={room}
           onOpen={() => openRoom(room.id)}
           onMore={() => setOptionsFor(room.id)}
-          onJoin={() => void run(() => matrixJoin(room.id))}
+          onJoin={() =>
+            void run(async () => {
+              if (await matrixJoinGate(room.id)) await matrixJoin(room.id);
+            })
+          }
           onDecline={() => void run(() => matrixLeave(room.id))}
         />
       ))}

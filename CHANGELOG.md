@@ -14,15 +14,31 @@ On main, not released yet:
 
 ### For you
 
+- Erevos+: Messenger in its case tells of new messages, as the maintainer chose: the engine now runs in the case's way too (`lib/messenger-store.ts` `startOne`, `msgSetMessengerWay`), only to hear what comes, even if the case was never opened. A chat with messages not read shows on home until it is read (`msgCaseOnly`, `app/index.tsx`), and tapping it opens it in the case at that chat (`components/chat-row.tsx`); while the case shows, nothing is told (`counted` skips while `caseOpen`), as the page shows it. Requested by the maintainer.
+- Erevos+: Messenger in its case wears Erevos's whole look on Meta's page itself, not only in its bar (`lib/messenger-case-look.ts` `messengerCaseLook`, sent with the bar's colours through `webPagesLook` and painted by `WebPages.dress`/`repaint`): Erevos's colours over Meta's own CSS variables, Meta's dark or light set as Erevos is (`__fb-dark-mode`/`__fb-light-mode`), the accent on buttons and on our own messages (deepened until Meta's white words read on it); the look's text size (the web view's `textZoom`); the bubbles' shape, square, line or lit (Meta's bubbles found by their fill and marked `erevos-mine`/`erevos-theirs`); the style's own letters (Inter, Inter Tight: `lib/messenger-case-fonts.ts`, served to the page from the phone at `__erevos/font/`, never fetched) or the look's serif or monospace; and what lies behind the screens as CSS layers (`caseBackdrop`: Nocturne's glow, the glass's wallpaper and haze, Neon's grid, Matrix's rain, Paper's lines, Aurora's light, the wallpapers), the page's grounds see-through over it. A photo of one's own stays in Erevos (a gradient of the accent instead). An open case takes a changed look at once. Only colours go into the page's CSS. Variable names Meta does not use do nothing, so parts Meta draws otherwise keep Meta's look. Requested by the maintainer.
+- Erevos+: Messenger in its case asks for the PIN of the encrypted chats once, not at every opening: the case's page now has a web view profile of its own (`MessengerCaseActivity` `kept`, androidx.webkit `ProfileStore`, feature `MULTI_PROFILE`), apart from every other page, whose storage and cookies stay between openings; before, all of it was wiped as the case closed, so Meta saw a new computer each time. It is wiped when Messenger signs out (the `logout` op, or signed out on the page) and when another account (`c_user`) opens the case. Where the web view has no profiles, nothing stays, as before. Requested by the maintainer.
+
 ### Under the hood
 
-## 7.2.0-rc.2 (2026-11-21)
+## 7.3.0-rc.2 (2026-11-21)
+
+Erevos+ with what Erevos has up to 7.2.0-rc.2 (5fb3341f), for Android 8.0 or newer (64-bit). It installs over
+Erevos+ 7.3.0-beta.4 and over Erevos, and keeps everything. There is no Erevos+ 7.3.0-rc.1: this one goes in step with
+Erevos 7.2.0-rc.2.
 
 ### For you
 
+- Messenger chats you mark read stay read (#19): read while Messenger was still connecting (just after Erevos+ starts) they are now kept read and Meta is told once connected; a chat whose last message is yours, sent from Messenger's app or the web, is read; and encrypted chats you read in Messenger's app or on the web are read here too. Reported by the maintainer on Erevos+ 7.3.0-beta.4.
+- Erevos+: Messenger in its case fits the phone and shows inside Erevos (FABLE! findings on 7.3.0-beta.4, from the maintainer's Pixel 8 Pro): the page is laid out at the phone's width (`width=device-width`) instead of 900, which a phone squeezed into about 410 so that all was too small; it shows under Erevos's own bar in the theme's colours (`WebPages.framed`, colours from `lib/web-pages.ts` `webPagesLook`), with **←** back to Erevos and **Facebook** to swap to Facebook's feed in the same page and sign-in (and **Messenger** back). The Facebook page wears the same bar. Facebook also has a card of its own in the home **Services** window (`components/services.tsx` `pages`), beside Messenger, when Messenger is signed in on facebook.com. Requested by the maintainer, who chose both places for the feed. The bar's name and its Facebook/Messenger button follow the page wherever it goes (its own links, Back), not only the button's tap (`doUpdateVisitedHistory`; FABLE! F1 on 80076a66).
 - The day stands out in every chat: over the first message of each day, in chats, groups (which showed only the time of each message, and now show the day too) and Chat with myself, the day shows in bold on its own chip between two lines (`components/chat-thread-lines.tsx` `DayMark`), as **Today**, **Yesterday**, the weekday within the last week, and before that the weekday and date, with the year once it is another year's (`lib/day-mark.ts`, in the app's language; `checks/day-mark.check.ts`). It took the place of the faint `YYYY-MM-DD`. Requested by the maintainer, from his chosen mockup («Α»).
 - The microphone beside the message field can write instead of record: a tap on it opens a menu, **Voice message** or **Speak to write**, ticked as chosen, and what is chosen stays for every chat and group on the device (`lib/mic-mode.ts`, key `erevos.mic`), until chosen again. Held, it then records as before, or opens **Speak to write** listening; it shows the microphone with lines while it writes. A press is a tap until it is held a quarter of a second (`MIC_TAP_MS`), so a voice message starts that much later. With Talkie on, or where nothing can be written out, the microphone only records, with no menu, as before. **Speak to write** under **+** is gone (`components/composer.tsx`). Requested by the maintainer, from his chosen mockup («Γ» with «Α»'s menu).
 - **Ways on home**: once a relay is set, the line under the top bar of home is **Ways**, with a dot for each way out of the space (full when it works, faint when it reaches no one now, a ring of dashes when it is off; Tor, which covers others, has none) and, in orange, how many of the space's own messages wait to go; a tap opens **Ways** (`app/index.tsx`, `lib/ways-read.ts` `useWays`, read every 10 seconds and as a way changes, only while home shows). It took the place of «Relay ready · end-to-end encrypted»; before a relay is set, the line says what it still needs, as before. What the Ways screen reads moved to `lib/ways-read.ts`. Requested by the maintainer, from his chosen mockup («Α»).
+- Phones nearby are off until turned on: a new switch, **Look for phones nearby**, under **Nearby, with no internet** on **New chat**, starts or stops Bluetooth, Wi-Fi Aware, the same Wi-Fi and Wi-Fi Direct together (`lib/nearby-links.ts` `setNearbyKept`, key `erevos.nearby`, off unless 'on'; the switches under it show only when it is on, and **Ways** says it looks for no phone nearby). A LoRa radio set stays linked either way. With the links on, two phones on the same Wi-Fi took up to a minute for a call to ring (a Pixel's log, 2026-11-20: the Bluetooth advertiser restarted every half second meanwhile); with them off it rang at once. Requested by the maintainer, for 7.2.0-rc.1.
+- With phones nearby off, Erevos now says so where it sends the owner to them: the **Nearby phones** row of the home menu reads that they are off and opens the switch, as do **Ways** and the note after a contact is added only nearby (`lib/nearby-links.ts` `nearbyOn`, `/chat?setup=nearby`). Found by the review of 01a2bb53.
+- In a video call, our own picture stays in the small window in the top corner once theirs comes, on both phones (`components/call-screen.tsx`): it went to no size at all as it moved from the whole screen to the corner (Android's RTCView, resized, drew it 0×0, a Pixel's log 2026-11-20), so each side saw only the other. Each picture is now made anew as it moves; their picture too, as it comes, and the tiles of a group call as they change size. Our picture stays over theirs with the back camera as well, and in a browser its sound stays muted then. Reported by the maintainer (#20).
+- **Ways**, under **Settings** → **Relay and networks**, shows every way the open space's messages go out by on one screen, a card each: the relay (it answers, or cannot be reached now, with its home relay), Nostr (how many of its relays read now), the phones nearby (how many, by which radios, and how many messages of others this phone carries), LoRa, SMS (for how many contacts) and Tor, each with a line under it, full when it works, faint when it is on but reaches no one now, dashed when it is off, and a tap to its settings. Above them, how many of the space's own messages wait to go, an orange dot for each (`app/ways.tsx`, `lib/ways.ts`). When a relay last answered, or could not be reached, is kept in memory for it (`lib/relay.ts` `relayHeard`). Only the space open shows, never its hidden chats nor whether it has any. Requested by the maintainer, from his approved mockup, after a look at MeshSat's home screen.
+- **LoRa spare pieces**: a text sent over LoRa in 2 to 16 pieces now goes with spare pieces after them, one for each four pieces, at most four (`E2` frames, `lib/lora.ts`), made by a Reed-Solomon erasure code over GF(256) with a Cauchy matrix (`lib/fec.ts`): any k of the k + m pieces that come give back the text, so one or two pieces lost on the air no longer lose it. The data pieces stay `E1` as before, so an older Erevos reads them as it did and leaves the spares; the cost is about a quarter more air time for texts of several pieces. A single-piece text has no spares. Requested by the maintainer, after a look at MeshSat.
+- **Long texts packed before they are encrypted**: a message's plaintext is deflated (`lib/packing.ts`, marker byte `0x01`) when that moves it to a smaller padding bucket (256, 1024, 4096, 16384 bytes), so the gain is for long texts; short ones go as before. Only to contacts whose messages say `zp: 1` (every message now says so; `Contact.packs`), never through a second relay nor to linked devices, which get plain JSON. Unpacking stops at 64 KiB. Requested by the maintainer, after a look at MeshSat.
 
 ### Under the hood
 
@@ -30,41 +46,41 @@ On main, not released yet:
 - On the web and the computer, a packet that made the core panic no longer stops it for every message after: the core runs there as WebAssembly, where a panic cannot be caught as on Android (`crates/erevos-ffi/src/android.rs` `guarded`) and stops it with a trap. Each call is now guarded (`lib/core-guard.ts`, used by `lib/crypto-setup.ts`): after a trap the core is set up again from the same module (`__wbg_reset_state`, made by wasm-bindgen's `--experimental-reset-state-function`, in `scripts/build-web-core.mjs` and `checks/build-core.mjs`), which loses nothing, as it keeps nothing between calls, and that call fails with a plain error, as a damaged packet does elsewhere (`checks/core-guard.check.ts`). No packet that does it is known.
 - No incoming bytes make the core panic: `crates/erevos-ffi/src/no_panic.rs` gives every call that reads what another phone, a relay, a group, Nostr, a pairing or an imported file sent random bytes, and good packets cut short, grown, with bits turned or a length made huge, 400 each in every `cargo test` (`EREVOS_NO_PANIC_ROUNDS` for more; 6000 each found none). A group's own state is left out: it comes only from the phone's own sealed storage, where OpenMLS's memory storage unwraps what it reads. Requested by the maintainer, after a look at Kryfo 0.6.3.
 
-## 7.2.0-rc.1 (2026-11-20)
+## 7.3.0-beta.4 (2026-11-19)
+
+Erevos+ with what Erevos has up to 7.2.0-beta.4 and after it (65f62d48), for Android 8.0 or newer (64-bit). It
+installs over Erevos+ 7.3.0-beta.3 and over Erevos, and keeps everything.
 
 ### For you
 
-- Phones nearby are off until turned on: a new switch, **Look for phones nearby**, under **Nearby, with no internet** on **New chat**, starts or stops Bluetooth, Wi-Fi Aware, the same Wi-Fi and Wi-Fi Direct together (`lib/nearby-links.ts` `setNearbyKept`, key `erevos.nearby`, off unless 'on'; the switches under it show only when it is on, and **Ways** says it looks for no phone nearby). A LoRa radio set stays linked either way. With the links on, two phones on the same Wi-Fi took up to a minute for a call to ring (a Pixel's log, 2026-11-20: the Bluetooth advertiser restarted every half second meanwhile); with them off it rang at once. Requested by the maintainer, for 7.2.0-rc.1.
-- With phones nearby off, Erevos now says so where it sends the owner to them: the **Nearby phones** row of the home menu reads that they are off and opens the switch, as do **Ways** and the note after a contact is added only nearby (`lib/nearby-links.ts` `nearbyOn`, `/chat?setup=nearby`). Found by the review of 01a2bb53.
-- In a video call, our own picture stays in the small window in the top corner once theirs comes, on both phones (`components/call-screen.tsx`): it went to no size at all as it moved from the whole screen to the corner (Android's RTCView, resized, drew it 0×0, a Pixel's log 2026-11-20), so each side saw only the other. Each picture is now made anew as it moves; their picture too, as it comes, and the tiles of a group call as they change size. Our picture stays over theirs with the back camera as well, and in a browser its sound stays muted then. Reported by the maintainer (#20).
-- **Ways**, under **Settings** → **Relay and networks**, shows every way the open space's messages go out by on one screen, a card each: the relay (it answers, or cannot be reached now, with its home relay), Nostr (how many of its relays read now), the phones nearby (how many, by which radios, and how many messages of others this phone carries), LoRa, SMS (for how many contacts) and Tor, each with a line under it, full when it works, faint when it is on but reaches no one now, dashed when it is off, and a tap to its settings. Above them, how many of the space's own messages wait to go, an orange dot for each (`app/ways.tsx`, `lib/ways.ts`). When a relay last answered, or could not be reached, is kept in memory for it (`lib/relay.ts` `relayHeard`). Only the space open shows, never its hidden chats nor whether it has any. Requested by the maintainer, from his approved mockup, after a look at MeshSat's home screen.
-- **LoRa spare pieces**: a text sent over LoRa in 2 to 16 pieces now goes with spare pieces after them, one for each four pieces, at most four (`E2` frames, `lib/lora.ts`), made by a Reed-Solomon erasure code over GF(256) with a Cauchy matrix (`lib/fec.ts`): any k of the k + m pieces that come give back the text, so one or two pieces lost on the air no longer lose it. The data pieces stay `E1` as before, so an older Erevos reads them as it did and leaves the spares; the cost is about a quarter more air time for texts of several pieces. A single-piece text has no spares. Requested by the maintainer, after a look at MeshSat.
-- **Long texts packed before they are encrypted**: a message's plaintext is deflated (`lib/packing.ts`, marker byte `0x01`) when that moves it to a smaller padding bucket (256, 1024, 4096, 16384 bytes), so the gain is for long texts; short ones go as before. Only to contacts whose messages say `zp: 1` (every message now says so; `Contact.packs`), never through a second relay nor to linked devices, which get plain JSON. Unpacking stops at 64 KiB. Requested by the maintainer, after a look at MeshSat.
-- **Speak to write**: under **+** in every chat and group bar (a row above the attachments, so the bar keeps one microphone, for voice messages), listens until **Done** (two minutes at most) and writes the words into the field, after what is there, to change before sending (`components/dictate-sheet.tsx`, `components/composer.tsx`, `DictateIcon`). It uses the Whisper model of **In words** (`lib/speech.ts`), downloaded once on the owner's word, and runs on the phone; the sound is dropped once written out, or on **Cancel**, which shows while it writes out too, with a line that a long one takes up to a minute or two. Shown only where voice messages can be written out (Android with the core's speech). Requested by the maintainer.
-- After **Answer** with no PIN on a hidden contact's call, the nameless call screen shows at once, saying **Connecting…**, with **End**, until the call comes (`components/hidden-ring-screen.tsx` `HiddenCallWaiting`): only the backdrop showed, with no way to tell whether it took, up to 75 seconds when the caller had hung up. **End** closes the hidden chats at once. Found by the review of 83d03391.
+- A file in a chat (a PDF, say) can now be opened with another app, not only saved: Open in the file's view in Erevos's own chats and next to the file in Telegram, Matrix, XMPP, Nostr, Signal, Session and Messenger chats. The other app reads it through a link of Erevos's own that holds it in memory only, forgotten when the next file is opened or the space locks (`lib/open-with.ts`, `modules/erevos-collection`). Reported by the maintainer on Erevos+ 7.3.0-beta.3.
+- A Telegram, Matrix, XMPP or Nostr chat opens at its end again, not somewhere in its middle (`components/network-thread.tsx`): until the thread is moved by hand it keeps following its end, also when Android moves the view by itself as what is in it gets shorter (a photo drawn smaller than the room kept for it); and older messages asked for at the very start, before the chat had gone to its end, no longer keep it at its oldest ones. Reported by the maintainer on Erevos+ 7.3.0-beta.3 (Pixel 8 Pro).
+- Erevos+: Messenger in its case: on the Messenger screen, **How Messenger is used here** chooses Erevos's own engine (as before, the default) or the case, Meta's own facebook.com/messages page, as on a computer, in a web view closed in by Erevos with the engine's sign-in. Only Meta's sites load in it; links out open in the browser without Facebook's tracking marks; the sign-in is given to the page only while it shows, and the cookies it ends with go back to the engine; calls work in it (microphone and camera asked for). Through Tor when Messenger goes through Tor, never straight, and then with no calls. In the case the engine stays off: its chats are not in Erevos's lists and are not notified. Requested by the maintainer.
+- Erevos+: Messenger in its case, Facebook's page and a service's sign-in page close as the space locks or closes and with the panic button, and keep out of screenshots and the recent apps preview whenever Erevos's own screen does (`WebPages.kt` in modules/erevos-messenger, `lib/web-pages.ts`); what such a page left in the web view when Android ended Erevos with it open goes as the engines open; only Meta's own pages in the case get the microphone and camera; and the guide tells of the case, in all its languages. From the review of e4599e20.
 - A hidden contact's call, where the hidden chats receive while closed, is answered with **Answer** and no PIN: the call shows no name and no face, and the hidden chats run only for it, out of sight, and close as it ends (`components/hidden-ring-screen.tsx`, `app/chat.tsx` `callOnly`, `CallPlace.nameless`). The small sign and the PIN still open them and answer there. Hidden chats that only ring while closed have no key before the PIN, so there **Answer** still asks for it. Requested by the maintainer, who chose no name.
-
-### Under the hood
-
-## 7.2.0-beta.4 (2026-11-19)
-
-### For you
-
+- After **Answer** with no PIN on a hidden contact's call, the nameless call screen shows at once, saying **Connecting…**, with **End**, until the call comes (`components/hidden-ring-screen.tsx` `HiddenCallWaiting`): only the backdrop showed, with no way to tell whether it took, up to 75 seconds when the caller had hung up. **End** closes the hidden chats at once. Found by the review of 83d03391.
 - **New chat** asks over your QR code whether the other person has Erevos: **Has Erevos already** shows your QR code as before, saying it works only when both phones have a relay; **New to Erevos** shows an invite on the card itself, with **Share the invite** and **New QR code**, which brings in someone new or someone whose phone has no relay. The choice is kept on the phone. It replaces the **No Erevos yet?** row (`components/connect-cards.tsx` `MyQrCard`, `components/welcome-invite.tsx` `inline`, `app/chat.tsx`). Requested by the maintainer, from his approved mockup.
 - The Phone's **Keypad** lists the contacts what is typed finds in the room over the number (`app/phone.tsx` `listHits`, `hitList`), all of them, scrolling if more; where the keys at full size leave no row there (a small screen), the line over the keys shows the first and **N more** as before. Each key 2–9 shows its letters in the app's language, Greek for Greek, Latin for the others (`lib/phone.ts` `keyLetters`), the same a name is found by. Requested by the maintainer.
 - A call that rang at last no longer stays at **Connecting** on both phones: Android's WebRTC 155 said it had found every address to try before it had looked at the phone's networks, so the offer and the answer went with none, and neither phone had anything to try. They now wait for the addresses, at most 5 seconds as before (`lib/call.ts` `describedSdp`, for group calls too). Reported by the maintainer.
 - Imported chats a contact shares with you, from a relay your Erevos does not take from by itself, show how far they have come once you tap their line (**Coming, 40%**), and **Did not come · tap to try again** if they could not be taken, where the line went on asking for a tap with nothing to show (`lib/share-rounds.ts` `keepPack`, `app/chat.tsx`). The phone also gives two short buzzes when they, or a photo or file you tapped, did not come (`lib/haptics.ts` `failed`), and, as for a file, says first that taking them from there without Tor shows that server your internet address. Reported and requested by the maintainer on two Pixels.
 - The phone that shared imported chats says so too as the other phone takes them after a tap there: **Sharing · their phone is taking it**, or **it did not come to their phone; they can tap it to try again** (a quiet signal, `taking` in `lib/chat-parts.ts`, kept by `lib/share-rounds.ts` `takingCame`; an Erevos from before takes no notice). Requested by the maintainer.
-- A Telegram, Matrix, XMPP or Nostr chat opens at its end again, not somewhere in its middle (`components/network-thread.tsx`): until the thread is moved by hand it keeps following its end, also when Android moves the view by itself as what is in it gets shorter (a photo drawn smaller than the room kept for it); and older messages asked for at the very start, before the chat had gone to its end, no longer keep it at its oldest ones. Reported by the maintainer on Erevos+ 7.3.0-beta.3 (Pixel 8 Pro).
-- A file in a chat (a PDF, say) can now be opened with another app, not only saved: **Open** in the file's view, and next to the file in the other networks' chats where the edition has them. The other app reads it through a link of Erevos's own that holds it in memory only, forgotten when the next file is opened or the space locks; no copy is written to the phone (`lib/open-with.ts`, `modules/erevos-collection`). Reported by the maintainer.
 - Fixes from the review of e71025a7: **Open** goes by the file's name when it says what the file is (an «invoice.pdf» said by its sender to be a web page opens as a PDF, not in the browser), never hands web pages, drawings or app packages to another app (they could reach the internet outside Tor, or install), and asks first each time, as the Collection does (`lib/open-type.ts`, `lib/open-with.ts`, `checks/open-type.check.ts`); in the web and desktop apps a Telegram, Matrix, XMPP or Nostr chat read away from its end no longer jumps to it as older messages load, where no drag is ever told (`components/network-thread.tsx`); the sharer's **their phone is taking it** goes back after 15 minutes with no word, and a miss said in the same moment wins (`lib/share-rounds.ts` `TAKING_STALE`); the guide, in 8 languages, and What's new tell of **Open**, of the shared chats' lines on both phones and of the calls that stayed at **Connecting**. Reported by the review.
+
 ### Under the hood
 
+- `MessengerCaseActivity` (modules/erevos-messenger, `messengerCase`), `messengerWay` kept sealed with the first space in `lock/msg-own-data.ts`, `msgSetMessengerWay` and `openMessengerCase` in `lib/messenger-store.ts`. A sign-in from before, made on messenger.com, is asked to sign in again before the case opens.
 - The Rust check passes again with Rust 1.99's clippy (`crates/erevos-core/src/voice_shift.rs`): `is_multiple_of(2)` and `as_chunks::<2>()` in place of `% 2` and `chunks_exact(2)`, the same samples. Reported by the maintainer.
-## 7.2.0-beta.3 (2026-11-18)
+
+## 7.3.0-beta.3 (2026-11-18)
+
+Erevos+ with what Erevos has up to 7.2.0-beta.3, for Android 8.0 or newer (64-bit). It installs over Erevos+ 7.3.0-beta.2
+and over Erevos, and keeps everything.
 
 ### For you
 
+- Erevos+: a message with a very long run of names, dots or dashes (as one in a public Matrix room) no longer closes the app as its chat shows it (`lib/links.ts` `splitLinks`): its web addresses are found one character at a time, with no repeating pattern inside another, which ran Hermes's pattern matcher out of room ("Maximum regex stack depth reached"). Should a message's words still not read, they show as they came, what is hidden staying hidden (`components/linked-text.tsx`). Reported by the maintainer on Pixel 10 Pro with Erevos+ 7.3.0-beta.2.
+- A Telegram, Matrix, XMPP or Nostr chat that opened at its last message no longer moves by itself to other messages as older ones come in above (`components/network-thread.tsx`): read away from its end, what was in view stays, moved down by as much as they take, as the Matrix chat already did; a short thread, all of it in view, counts as read at its end, so it stays there as the older messages come. Reported by the maintainer on Erevos+ 7.3.0-beta.2 (Telegram).
+- Erevos+: a Messenger chat marked read stays read (`messenger/core` `readHere`, `unreadAfter`): the engine keeps on the phone up to when each chat was read here, marked read or written in, and a chat Meta sends again with an older read mark (an encrypted chat's is not moved by marking it read; a reconnect or a restart sends every chat again) or a message sent again from before is no longer unread. Reported by the maintainer on 7.3.0-beta.2.
 - The web, computer and Sailfish apps no longer say a fingerprint or face can unlock Erevos, which only Android offers: Settings → Privacy and security → Lock and second password reads «Password and second password» there (`lib/settings.ts`), and the first steps leave the fingerprint out where it cannot be turned on (`app/first-steps.tsx`). Reported by the maintainer in the Erevos+ web app.
 - A call through the call relay sends its description soon after its first address relayed over UDP (`lib/call.ts` `describedSdp`, `RELAYED_GRACE_MS` 300 ms), not after every address or GATHER_MS (5 s) on each phone, as when the relay over TCP was slow to answer. While such a call is connected, the nearby links are quiet as in the background (`lib/nearby-links.ts`): Wi-Fi Aware, Wi-Fi Direct and Bluetooth looking took the Wi-Fi off its network for moments, likely the gaps heard in the sound; a call direct on the same network keeps them. Their stream shown keeps their picture when their sound comes in a stream of its own (`theirStream`). Reported by the maintainer on Pixel 10 Pro and Pixel 9 Pro; not yet tried on the phones.
 - A chat opened while the receiver's look at the relay was under way shows what that look took as soon as it ends (`app/chat.tsx` `showWhole`, `lib/shown-anew.ts`): since the chat no longer waits for it (`relayFree`), a message, mark or reaction it took went into the history but not into the open chat, and showed only when the chat opened again. Found by the review of main 26eabc8b. A call through the call relay that could not connect forgets the call relay's credentials kept (`forgetCallRelays`), so the next call asks anew, as after a new secret there or with this phone's clock far off. What's new no longer says a held message opens its menu from the start: for a moment it may say Erevos is still reading.
@@ -76,14 +92,47 @@ On main, not released yet:
 - A chat opens at once (`app/chat.tsx` `relayFree`): it no longer waits for the look at the relay that the receiver beside the other screens had under way (`holdReceiver`, `holdPlace`), which sent what waited, receipts, Nostr copies and more, and could take tens of seconds on a slow relay or Tor, while the contact showed as encrypted and holding a message did nothing. The receiver still stops at its next step; only the chat's own looks at the relay and at Nostr wait for that, so no message is taken by both. A message held before the chats are in hand opens its menu once they are, saying meanwhile that Erevos is still reading (`menuWaiting`). The Myself chat's menu is a menu of its own each time too (`components/myself-chat.tsx`), as contacts' chats have been since 7.2.0-beta.2.
 
 - New chat on a phone with no relay yet has **Pair with a code** too, under its QR code (`app/chat.tsx`): the phones meet on public Nostr relays and trade contact links, which needs no relay of one's own; it was left out of the newcomer's screen. New chat also no longer shows the screen of a phone with a relay for a moment before the newcomer's (`loaded`).
-
-- A Telegram, Matrix, XMPP or Nostr chat that opened at its last message no longer moves by itself to other messages as older ones come in above (`components/network-thread.tsx`): read away from its end, what was in view stays, moved down by as much as they take, as the Matrix chat already did; a short thread, all of it in view, counts as read at its end, so it stays there as the older messages come. Reported by the maintainer on Erevos+ 7.3.0-beta.2 (Telegram).
 ### Under the hood
 
+- A text that speaks both of Erevos+ and of the other person's Erevos names each as it is: Erevos+ for this app, Erevos
+  for theirs or for what both editions share (`lib/edition-keeps.ts` `KEEPS_SOME`, `lib/edition.ts` `namedFor`), where
+  before the whole text kept «Erevos». A translation with another count of the name keeps it as written.
 - The release's APK build stops after 50 minutes (`.github/workflows/release.yml`): on 7.2.0-beta.2 the F-Droid APK hung in its last packaging step for close to two hours, which held back the whole release; now the release comes out after at most about an hour, without the APK that hung. The Erevos+ build (`.github/workflows/erevosgram.yml`) stops a hung APK build after 90 minutes instead of 180.
 - Calls run on react-native-webrtc 155.0.1 (was 124.0.8): the same JavaScript, and on Android Google's WebRTC M155 built by Jitsi (`org.jitsi:webrtc` 155) in place of M124, about two years newer in its sound, video and network handling, with small fixes in screen sharing and codec choice. Tor runs on arti 0.48 (was 0.47, `crates/erevos-tor`); Rust crates are updated within their versions (`cargo update`, OpenMLS 0.9.2 among them); Expo 58.0.26 (was 58.0.21) with its modules, React 19.3.0, reanimated 4.7.1, worklets 0.13.0 and svg 15.16.0 (the versions Expo 58.0.26 expects, as `expo install --check` asks), quick-crypto 1.1.10, safe-area-context 5.11.1, hls.js 1.7.4 and element-call-embedded 0.28.2, for their fixes. `cargo test --workspace` and `cargo audit` pass as before; calls and Tor are still to be tried on the phones. CREDITS.md and NOTICES.txt anew. Requested by the maintainer.
 - No file of the app takes itself back through others any more, which Metro warned of at every start on the DELL (`Require cycle`): `lib/i18n.ts` takes `lib/secure.ts` only when it reads or keeps the language, `toBase64Url`/`fromBase64Url` live in `lib/crypto.ts` (for `lib/device-list.ts`), and what `lib/xmpp-muc.ts` needs of `lib/xmpp.ts` is in the new `lib/xmpp-base.ts`; `checks/import-cycles.check.ts` keeps it so. The swipe back (`components/swipe-back.tsx`) asks expo-router whether there is a screen before as the finger moves, not while drawing, where it may be out of date; and the keyboard's margin (`components/keyboard.tsx`) gives Reanimated its list of what it reads only on the web, where it is wanted. Reported by the maintainer.
 - Speech and translation run on candle 0.11.1 (`crates/erevos-speech`, was 0.9.1). It takes zip 9.7, so the seven zip 1.3.1 advisories no longer need letting through `cargo audit` and are gone from `.cargo/audit.toml`. It also brings the tokenizers crate, built without its C++ (fancy-regex, esaxx-rs without `cpp`): Erevos does not call it, so only the app's size grows a little. The speech checks pass and the Android build checks; how fast voice messages are written out and translated on a phone is still to be tried on the Pixel. CREDITS.md and NOTICES.txt anew. Requested by the maintainer.
+
+## 7.3.0-beta.2 (2026-11-17)
+
+Erevos+ with what Erevos has up to 7.2.0-beta.2, for Android 8.0 or newer (64-bit). It installs over Erevos+ 7.1.2
+and over Erevos, and keeps everything.
+
+### For you
+
+- **Erevos+ says its own name, with an icon of its own**: the app and its guide say Erevos+ everywhere (`lib/edition.ts`
+  `named`, `asEdition`, `guideNamed`), and its icon is Erevos's mark on a purple tile (`brand/`). Where a text speaks of
+  the plain Erevos, or of whose Erevos is, it still says Erevos; a release of the plain Erevos is told with Erevos's
+  name (`app/updates.tsx`, `app/index.tsx`).
+- **Signal: one chat for each person, with their name**: what we send from the phone Erevos+ is linked to goes to the
+  chat of the one it went to, not to a chat with ourselves (`thread_of_content`); a person's name comes from the
+  profile key their message carries, and is asked again after a failure; someone who wrote to our phone number gets
+  our PNI signature with our answers, so their Signal keeps one chat with us (vendored presage
+  `send_message_signed`, `pni-signature.json`).
+
+### Under the hood
+
+- The plain Erevos has the even minor numbers from 7.2 on (7.2.0-beta.1) and Erevos+ the odd ones: Erevos+'s What's
+  new tells a plain release under its own next one (`lib/whats-new.ts` `PLAIN_RELEASE`), and the home screen's notice
+  of a plain release says Erevos's name.
+- The checks read the app's words with Erevos's own names (`checks/register.mjs`, `lib/edition.ts` `ownNames`), and
+  `checks/edition.check.ts` checks Erevos+'s naming apart.
+- Texts that speak of the other person's app, of what both editions share (the Erevos ID, invites, phones nearby) or of
+  Erevos's website and releases keep «Erevos» in Erevos+ too: a list of those texts (`lib/edition-keeps.ts`) and, in
+  the guide, each such «Erevos» marked `{=Erevos}` (`guide/*.ts`, `lib/edition.ts` `unmarkKept`).
+- The check of a place's sealed stars looks only for texts the sealed file can never hold by chance
+  (`checks/stars.check.ts`).
+- `cargo audit` passes again (`.cargo/audit.toml`): the five zip 1.3.1 advisories (RUSTSEC-2025-0168, RUSTSEC-2026-0367, -0368, -0369, -0429) are let through for now, since zip comes only from candle-core 0.9.1 for .npz and PyTorch files, which never call `extract()`, and speech and translation load only GGUF models checked by SHA-256. Taken out with the move to candle 0.11.
+- The release's APK build stops after 50 minutes (`.github/workflows/release.yml`): on 7.2.0-beta.2 the F-Droid APK hung in its last packaging step for close to two hours, which held back the whole release; now the release comes out after at most about an hour, without the APK that hung. The Erevos+ build (`.github/workflows/erevosgram.yml`) stops a hung APK build after 90 minutes instead of 180.
 
 ## 7.2.0-beta.2 (2026-11-17)
 
@@ -110,6 +159,8 @@ On main, not released yet:
 - New chat looks the same every time it opens: the two big buttons at the top, **How you connect now** only while something is missing, and **Your contact link** and **Invite someone** as rows, with no second Show my QR code.
 - One scan is all: where your relay lets your phone invite, **Show your QR code** shows an invite, so a phone new to Erevos joins your relay by itself as it scans it, and you are contacts at once. A relay's queue is made by itself, with no **Create my relay queue** to tap, and **How you connect now** says what is missing in plain words.
 - The bar at the top stays where it is: on the home screen (the list scrolls under it) and in SMS, Matrix, XMPP and Nostr chats (`useNetworkThread` `withArrows(content, top)`), as in Erevos's own chats. Under the field of a Matrix or XMPP chat only **+** (Attach and more) and the microphone; the chat's settings are under **⋯** at the top.
+- Signal, Session and Messenger chats keep their name, calls and **⋯** at the top while the chat scrolls (Erevos+, `components/msg-chat.tsx`); a chat's **Notifications** and **Through Tor** are under **⋯**.
+- **Encrypted Matrix chats notify again** (Erevos+): a message from someone else that comes after the chat was last read counts here, even when the homeserver's own count says nothing of it, as it cannot read encrypted messages and many accounts' rules count none in groups (`freshFromOthers`).
 - A message request shows only its words until you accept it: its photos and files wait, not taken (`app/chat.tsx` `strangers`), and its links show no preview.
 - A photo sent as a file (JPEG, PNG, GIF, WebP, up to 64 MB) goes without where and when it was taken and the phone (`lib/photo.ts` `cleanImage`, `cleanGif`, `cleanWebp`), and a GIF sent as a photo without its comments and XMP. A HEIC or AVIF file, or a photo larger than that, is sent only once the owner says so in a pop-up (`lib/photo-place.ts`).
 - A word of care over a message request's first messages (`lib/scam-shield.ts`): asks for a code, PIN, password or money, promises easy money, or a name like a contact's, in all 8 languages, looked for on the phone only; nothing is blocked.
@@ -135,12 +186,125 @@ On main, not released yet:
 - Erevos+ says its own name everywhere: every text and notice, the guide, the home screen's filter, the launcher's icon names and the web app's notices say **Erevos+** (`lib/edition.ts` `asEdition`, `guideNamed`, in `t()` and `plural()`), except where the words speak of the plain Erevos beside Erevos+, and the licence's "Erevos, by azzinder". The plain Erevos is unchanged.
 - Erevos+ says its own name and tells its releases as its own (`lib/edition.ts` `named`, `lib/whats-new.ts` `asPlus`): the plain Erevos's releases after 7.0.0 show in Erevos+ under its next release, and Erevos+'s own icons and marks are its own files of the same names. The plain Erevos shows nothing new.
 - Video calls over the internet send at most 1 Mbps a picture (`RELAY_VIDEO_BITRATE`): every such call goes through the call relay, so the relay carries about half as much; on a phone the picture looks much the same. Calls direct on the same network are not held back.
-- Erevos+ can have a web app of its own: `pwa/build.mjs --edition plus` makes `erevosplus-web` for erevosplus-web.lphl.nekten.eu, with Element Call at erevosplus-call, kept on the server in `/var/www/erevosplus-web` (`deploy/web/install.sh`), apart from the plain Erevos's. The worker takes only releases of its own web app, so the two never replace each other (`pwa/sw.js`, `docs/editions.md`). `scripts/reproduce-web.sh` builds a web app again in the edition it was made as.
 - A burner group ends on each phone by that phone's own clock: the owner's phone closes it for nobody else, so one whose clock runs ahead ends it early only for itself (`PublicGroups.endDue`); when it ends is taken only from the rules a phone first reads as it joins, never from a later change.
 - Pairing with a code: a 'wrong', or a 'done' whose tag does not hold, which whoever watches the meeting place can write too, no longer ends it on the phone that typed the code; it waits 10 seconds more for the shower's 'done' (`lib/pair-code.ts` `pairGrace`).
 - A photo to see once of ours whose arrival mark came before it was kept leaves no encrypted chunks behind on the phone (`lock/history.ts` `add`).
 - The speech and translation models are opened anew after a call that failed midway, instead of refusing every call until Erevos restarts (`crates/erevos-ffi` `SPEECH`, `TRANSLATORS`, `clear_poison`).
 - Greek says «από άκρη σε άκρη» everywhere; the guide and the burner group's texts in Portuguese are in Brazilian Portuguese where they had slipped.
+
+## 7.1.2 (2026-11-14)
+
+Erevos+ with what Erevos has up to 7.0.2, for Android 8.0 or newer (64-bit). It installs over Erevos+ 7.1.1 and Erevos, and keeps everything.
+
+### For you
+
+- **Chats you have read stay read, on every network** (Erevos+): Messenger, Signal, Session, Telegram, Matrix, XMPP and Nostr chats you have read no longer notify you again of messages already read: not after a restart or a reconnect, not when a chat opens, and not when a service hands out old messages again. Signal's reads go both ways with the phone it is linked to, and a Nostr chat you answer from another app, such as Amethyst, is read here too. A read in the official Session app does not reach Erevos yet.
+- Erevos+'s user guide has sections of their own for **Messenger**, **Signal** and **Session**, in all 8 languages: how to sign in or make an account, chats, groups, calls, notifications, Tor and signing out. The **Telegram** section now speaks of Erevos+ instead of the old ErevosGram build, and the plain Erevos's guide leaves all four out.
+- The plain Erevos's user guide no longer speaks of Matrix, XMPP and the chats with other Nostr apps: the guide's sources mark what only Erevos+ says (`{+…}`, `{-…}`, `- [+]`, `editionSource`), and Erevos+'s guide reads as before.
+- New chat starts with two big buttons, **Scan their QR code** and **Show your QR code**, with the rest under them (`MeetWays`).
+- The panic button is first, in red, in the home screen's **⋯** menu, and holding down the lock on the home screen opens it.
+
+### Under the hood
+
+- Erevos+ can have a web app of its own: `pwa/build.mjs --edition plus` makes `erevosplus-web` for erevosplus-web.lphl.nekten.eu, with Element Call at erevosplus-call, kept on the server in `/var/www/erevosplus-web` (`deploy/web/install.sh`), apart from the plain Erevos's. The worker takes only releases of its own web app, so the two never replace each other (`pwa/sw.js`, `docs/editions.md`). `scripts/reproduce-web.sh` builds a web app again in the edition it was made as.
+- Read marks per network: `lib/messenger-store.ts` counts as new no message at or before a chat's read mark, its shown last message or the engine's start; Signal's engine keeps reads across restarts and sends and takes read syncs with the account's other devices; Session's keeps the read as a time (`readMs`) written at once, and remembers deleted, unsent and expired messages so a swarm handing them out again adds nothing; Telegram, XMPP (`readAt`), Nostr (`addMessage`) and Matrix (`newSinceRead`) no longer count what was read, caught up with or sent again.
+
+## 7.1.1 (2026-11-14)
+
+Erevos+'s first stable release, for Android 8.0 or newer (64-bit): everything from 7.1.0-beta.5 and 7.1.0-beta.6,
+what came after them, and what Erevos has up to 7.0.1, in one. It installs over Erevos and keeps everything.
+
+### For you
+
+- **Tor for Messenger and Signal, and per chat** (Erevos+): the Messenger and Signal screens, before signing in
+  too, choose **Off** (the default), **As the space** or **Always through Tor**. Everything of the account goes the
+  way chosen, its pictures and files too, and Messenger's sign-in page and Signal's registering, captcha and linking
+  as well (through a local bridge into Tor, with the page's peer connections removed): never straight when it must
+  not. **Through Tor** under any of their chats, off by default, sends the whole account only through Tor while on.
+  Calls do not go through Tor. Signal kept with the earlier switch on stays Always.
+- **Tor for your XMPP account, and per chat**: on Android, the XMPP screen, and the one before signing in, chooses
+  **Off** (the default), **As the space** or **Always through Tor** for the account: its connection, the look for its
+  server (SRV over DNS-over-HTTPS) and its files, never straight when it must not (Always, or the space's Everything).
+  **Through Tor** under any XMPP chat or group, off by default, sends the whole account only through Tor while on, as
+  one server connection carries all its chats. Calls do not go through Tor, and no link preview is made while the
+  account must not go straight. An account kept with the earlier switch on stays Always.
+  Before sending while the account does not go through Tor (with **Through Tor** for the chat as the fix), before
+  every call and before fetching a file from a server other than your own, Erevos warns once that your internet
+  address can be seen.
+- **Nostr: Tor as every account, and per chat**: on Android, the **Nostr chats** screen, before a key is made or
+  brought too, chooses **Off** (the default, also for keys from before), **As the space** or **Always through Tor**
+  for the account: its relays, look-ups, NIP-05 names and file servers, never straight when it must not (Always, or
+  the space's Everything). **Through Tor** at the foot of a Nostr chat, off by default, sends that chat alone only
+  through Tor, on circuits of its own (its messages, the look-up of where they read, its photos and files), whatever
+  the account says; what comes to you follows the account, as one connection reads its inbox for all chats.
+- **Telegram: Tor as every account, and per chat**: on Android, **Tor for this Telegram account**, in Telegram's
+  settings and before signing in, has **Off** (the default), **As the space** and **Always through Tor**, as every
+  account of another network. With Always, or while the space sends Everything through Tor, Telegram is reached only
+  through Tor, signing in too, and never straight, not even when Tor cannot connect. **Through Tor** in a Telegram
+  chat's info sends that chat only through Tor, and with it the whole account, which has one connection. Calls do not
+  go through Tor. The old Telegram **Through Tor** switch, if it was on, is now **Always through Tor**.
+- **Erevos+ and Erevos**: one app in two editions from the same code. **Erevos+** has every service: Erevos's own
+  chats, the Phone, SMS, the Collection, Nostr, Matrix, XMPP, Telegram (ErevosGram), and now **Messenger**,
+  **Signal** and **Session**. **Erevos** has only Erevos's own chats, the Phone, SMS and the Collection, and none of
+  the other services' code is in it. Both are the same app on the phone: moving from one to the other keeps
+  everything, and what the plain Erevos does not have waits, untouched, for Erevos+. The name under the icon is the
+  edition's: **Erevos+** or **Erevos**.
+- **Messenger, Signal and Session in Erevos+**, each a module with its own part on home: Messenger signs in on
+  facebook.com's own page and keeps only its session, never the password; Signal makes a new account with your
+  number (after Signal's captcha and its code) or links to Signal on another phone with a QR code; Session makes an
+  account of 13 recovery words or brings one back with them. Their chats show with Erevos's own: text, photos and
+  files, answers, reactions, deleting for you or for everyone. They are the phone's accounts and show in its first
+  space.
+- **Messenger opens Facebook too** (Erevos+): **Open Facebook** on the Messenger screen shows Facebook itself
+  (m.facebook.com) with the same sign-in, given to the page only while it shows and taken away when it closes. Its
+  Messenger links come back to Erevos's chats; other links open in your browser, out of Facebook's link wrapper and
+  without its tracking marks (fbclid, utm_* and Facebook's own), and never through Tor, so the site sees your internet
+  address. Only Meta's own hosts load inside. An account signed in on messenger.com before signs out and in again once
+  to open Facebook.
+- **Messenger, Signal and Session chats send more, and stay read** (Erevos+): **+** sends a photo from your photos or
+  the camera, a file or a sticker, and the microphone records a voice message. Your own messages show their words,
+  where before some came empty; tapping a person with no Messenger chat yet opens a new one; and chats you mark read
+  no longer come back unread when the service sends their messages again.
+- **Session calls and groups in Erevos+**: 📞 and 🎥 in a one-to-one Session chat call that person, as the official
+  Session apps do (through Session's own servers for calls), on a screen of their own that rings over the lock screen,
+  with mute, speaker, camera on or off and flip; a missed call leaves a notification. **New Session group** on the
+  Session page makes a group with you as its admin: the people you pick get an invitation and join when they accept
+  it. **Group** in a Session group's chat shows its members, who is admin and who is still invited; an admin renames
+  it, invites more people, removes someone or makes them admin; anyone can leave. Invitations to Session groups
+  and their messages come in as well.
+- **Tor for Session in Erevos+**: the Session page has **Tor for this Session account**, Off (the default), As the space
+  or Always through Tor, and each Session chat has **Through Tor**, off by default. Through Tor, all Session sends
+  (its onion requests, files, signing up and bringing an account back) go through Erevos's Tor first, so not even the
+  first Session node sees your address; with Always, or a chat set Through Tor, Session sends nothing rather than go
+  straight while Tor cannot connect. Calls do not go through Tor.
+- **Signal calls in Erevos+**: 📞 **Voice call** and 🎥 **Video call** in a Signal chat with one person, and Signal
+  calls ring in Erevos, with the official Signal apps on the other side too. They are Signal's own calls, made with
+  RingRTC, Signal's calling library, end-to-end encrypted as in Signal; they always go through Signal's relays, so the
+  other phone never learns your address. Answer, Decline, Mute, Speaker, Camera and Switch, as in Erevos's other calls.
+  Group calls are not here yet.
+- **Matrix warns before your internet address can be seen**: once per chat before the first message, photo or file
+  that can go without Tor, with **Through Tor** to fix it; before a chat's first call, made or answered, as calls never
+  go through Tor; before joining a group without Tor, with **Always through Tor** to fix it; and before a link's
+  preview fetched straight. Only your own Matrix server sees the address: media from other servers comes through it.
+- **Matrix: Tor as every account has it, and links that open**: the Matrix screen, before signing in too, has
+  **Off** (the default, now also for accounts signed in before), **As the space** and **Always through Tor**, as every
+  account of another network has; each chat has **Through Tor**, which makes the whole account go only through Tor
+  (Matrix has one connection for all its chats). Calls never go through Tor. A link in a Matrix message whose words do
+  not say where it goes now says it after them, and opens with a tap.
+- **Matrix on the shared account Tor** (lib/account-tor.ts): MatrixTor is AccountTor, Off by default; every request,
+  sign-in, look-ups, media and files, goes by matrixWayOf (a room's «Through Tor» makes it 'always'), never straight
+  with 'always' or the space's Everything; Tor's HTTP in the core, started through lib/tor.ts ensureTor when needed.
+
+### Under the hood
+
+- **Telegram never goes straight as it starts through Tor**: the way into Tor now goes to TDLib with its first
+  parameters, before it connects at all, so a first start or sign-in with Tor never reaches Telegram straight; when Tor
+  cannot be had, Telegram waits rather than going straight. The account follows the space's Tor setting as it changes.
+- **Matrix account's own Tor way** (lib/matrix.ts MatrixTor, MatrixState.tor): 'always' starts Tor through
+  lib/tor.ts ensureTor when the space's way did not and never goes straight; 'never' goes straight. No core change:
+  the core's Tor HTTP (crates/erevos-tor) was already there. A hidden place's own account has its own way too.
+- **Checks**: a muted room of a hidden place's own Matrix account tells of nothing (checks/network-notices.check.ts);
+  Matrix HTML links whose words do not open where they go (checks/chat-carry.check.ts).
 
 ## 7.0.2 (2026-11-14)
 

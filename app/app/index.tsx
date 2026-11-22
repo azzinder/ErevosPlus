@@ -34,14 +34,18 @@ import { lang, mark, plural, t, tFor } from '../lib/i18n';
 import { armReminders, myNotes, onNotesChanged, writeNote, type Note } from '../lib/myself';
 import { CURRENT_BUILD } from '../lib/release-look';
 import { loadNotice, onNotice, shownRelease, type Told } from '../lib/release-notice';
-import { buildInbox, filterInbox, groupRows, inboxParts, matrixInboxRows, mergeRows, nostrInboxRows, rowOn, showsIn, shownName, tabUnread, xmppInboxRows, type InboxGroup, type InboxRow, type InboxShow, type InboxSms } from '../lib/inbox';
+import { MSG_SERVICES, SERVICE_NAMES } from '../lib/messenger';
+import { facebookWay, messengerNow, msgCaseOnly, msgMessengerWay, onMessengerChange, openFacebook, openMessengerCase } from '../lib/messenger-store';
+import { buildInbox, filterInbox, groupRows, inboxParts, matrixInboxRows, mergeRows, msgInboxRows, nostrInboxRows, rowOn, showsIn, shownName, tabUnread, telegramInboxRows, tgFolderOf, xmppInboxRows, type InboxGroup, type InboxRow, type InboxShow, type InboxSms } from '../lib/inbox';
 import { askReadAll, toReadIn } from '../lib/read-all';
-import { moduleOn, onModulesChange, useModules } from '../lib/modules';
-import { arrangeServices, hideService, moveService, servicePart, startOn, startPart, useServiceOrder } from '../lib/service-order';
+import { moduleOn, onModulesChange, useModules, type Module } from '../lib/modules';
+import { arrangeServices, hideService, inAllMessages, moveService, startOn, startPart, useServiceOrder } from '../lib/service-order';
 import { matrixLearnJoins, matrixNow, onMatrixChange } from '../lib/matrix-store';
 import { directOther, matrixPresence } from '../lib/matrix';
 import { nearbyOn } from '../lib/nearby-links';
 import { isOn } from '../lib/net-presence';
+import { onTelegramChange, telegramAwayChats, telegramHomeFolders, telegramLockedChats, telegramNow, telegramShown } from '../lib/telegram-store';
+import type { TgFolder } from '../lib/telegram';
 import { xmppOnline } from '../lib/xmpp';
 import { onXmppChange, xmppNow } from '../lib/xmpp-store';
 import { nostrDmNow, onNostrDmChange } from '../lib/nostr-dm-store';
@@ -126,8 +130,16 @@ const trashLooked = new Set<number>();
 // space has a Nostr key or a public Matrix room.
 // Erevos's widget and its icons in the launcher open on one of them (erevos://?show=sms), again
 // each time they are tapped (`opened`, app/_layout.tsx).
-const showOf = (show: unknown): InboxShow => (show === 'sms' || show === 'erevos' || show === 'matrix' || show === 'xmpp' || show === 'nostr' || show === 'public' ? show : 'all');
-const SHOW_LABELS: Record<InboxShow, () => string> = { all: () => t('All messages'), sms: () => t('SMS'), erevos: () => editionName(), matrix: () => 'Matrix', xmpp: () => 'XMPP', nostr: () => 'Nostr', public: () => t('Public') };
+// A Telegram folder chosen for home (lib/telegram-store.ts telegramHomeFolders) is a part of its own, `tg:` and its id.
+const showOf = (show: unknown): InboxShow =>
+  show === 'sms' || show === 'erevos' || show === 'matrix' || show === 'xmpp' || show === 'nostr' || show === 'telegram' || show === 'messenger' || show === 'signal' || show === 'session' || show === 'public' || (typeof show === 'string' && /^tg:-?\d{1,15}$/.test(show)) ? (show as InboxShow) : 'all';
+const SHOW_LABELS: Record<Exclude<InboxShow, `tg:${number}`>, () => string> = { all: () => t('All messages'), sms: () => t('SMS'), erevos: () => editionName(), matrix: () => 'Matrix', xmpp: () => 'XMPP', nostr: () => 'Nostr', telegram: () => 'Telegram', messenger: () => 'Messenger', signal: () => 'Signal', session: () => 'Session', public: () => t('Public') };
+// A Telegram folder's chip has the folder's name, as Telegram has it.
+const showLabel = (show: InboxShow, folders: readonly TgFolder[]): string => {
+  const folder = tgFolderOf(show);
+  if (folder === null) return SHOW_LABELS[show as keyof typeof SHOW_LABELS]();
+  return folders.find((f) => f.id === folder)?.name || 'Telegram';
+};
 
 // A section's title in the list of chats: Unread, then Recent (components/services.tsx ListSection).
 type Section = { section: 'unread' | 'recent' };
@@ -158,7 +170,7 @@ function Home() {
   const phoneOn = modules.has('phone');
   const collectionOn = modules.has('collection');
   // Whether any module that brings messages is on: with none (the Phone alone), there is no list.
-  const messagesOn = erevosOn || modules.has('sms') || modules.has('nostr') || modules.has('matrix') || modules.has('xmpp');
+  const messagesOn = erevosOn || modules.has('sms') || modules.has('nostr') || modules.has('matrix') || modules.has('xmpp') || modules.has('telegram') || MSG_SERVICES.some((m) => modules.has(m));
   const [rows, setRows] = useState<InboxRow[] | null>(null);
   const [relay, setRelay] = useState<Relay>('none');
   const [query, setQuery] = useState('');
@@ -170,7 +182,19 @@ function Home() {
   const [chosenShow, setShow] = useState<InboxShow>(showOf(linked ? params.show : start));
   // A part whose module is off (an icon or the widget may still name it) shows all.
   // The public feed is of the Nostr and the Matrix parts: with both off it shows all too.
-  const show: InboxShow = chosenShow === 'all' || (chosenShow === 'public' ? modules.has('nostr') || modules.has('matrix') : modules.has(chosenShow)) ? chosenShow : 'all';
+  // A Telegram folder no longer chosen (or gone from the account) shows Telegram's part.
+  const chosenFolder = tgFolderOf(chosenShow);
+  const homeFolders = modules.has('telegram') ? telegramHomeFolders() : [];
+  const show: InboxShow =
+    chosenFolder !== null
+      ? homeFolders.includes(chosenFolder)
+        ? chosenShow
+        : modules.has('telegram')
+          ? 'telegram'
+          : 'all'
+      : chosenShow === 'all' || (chosenShow === 'public' ? modules.has('nostr') || modules.has('matrix') : modules.has(chosenShow as Module))
+        ? chosenShow
+        : 'all';
   useEffect(() => {
     setShow(showOf(linked ? params.show : start));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- a link, or the icon again; the part chosen to open on below
@@ -544,7 +568,14 @@ function Home() {
   useEffect(() => onXmppChange(() => setXmppTick((n) => n + 1)), []);
   const [nostrTick, setNostrTick] = useState(0);
   useEffect(() => onNostrDmChange(() => setNostrTick((n) => n + 1)), []);
+  const [telegramTick, setTelegramTick] = useState(0);
+  useEffect(() => onTelegramChange(() => setTelegramTick((n) => n + 1)), []);
+  const [msgTick, setMsgTick] = useState(0);
+  useEffect(() => onMessengerChange(() => setMsgTick((n) => n + 1)), []);
+  // Messenger, Signal and Session are the phone's, shown in its first space (lib/messenger-store.ts).
+  const msgHere = openSpace()?.space === 0;
   const matrix = modules.has('matrix') ? matrixNow().state : null;
+  const telegram = modules.has('telegram') ? telegramNow().state : null;
   const xmpp = modules.has('xmpp') ? xmppNow().state : null;
   const nostrAccount = nostrDmNow();
   const nostr = modules.has('nostr') ? nostrAccount.state : null;
@@ -555,8 +586,13 @@ function Home() {
     if (matrix) all = mergeRows(all, matrixInboxRows(matrix));
     if (xmpp) all = mergeRows(all, xmppInboxRows(xmpp));
     if (nostr) all = mergeRows(all, nostrInboxRows(nostr));
+    if (telegram) all = mergeRows(all, telegramInboxRows(telegram, (m) => telegramShown(m.chatId, m), 'main', telegramHomeFolders(), telegramLockedChats(), telegramAwayChats()));
+    // Messenger in its case: only its chats with messages not read, which open in the case.
+    if (msgHere)
+      for (const service of MSG_SERVICES)
+        if (modules.has(service)) all = mergeRows(all, msgInboxRows(service, messengerNow(service)).filter((row) => !msgCaseOnly(service) || row.unread > 0));
     return all;
-  }, [rows, modules, matrix, matrixTick, xmpp, xmppTick, nostr, nostrTick]);
+  }, [rows, modules, matrix, matrixTick, xmpp, xmppTick, nostr, nostrTick, telegram, telegramTick, msgHere, msgTick]);
   // The space's order of its chats (lib/chat-list.ts): pinned ones at the top of the list, archived
   // ones out of it, under Archived with the archived SMS conversations, until a message comes from them.
   const here = openSpace();
@@ -586,7 +622,7 @@ function Home() {
   const serviceOrder = useServiceOrder();
   const allRows = useMemo(() => {
     if (!everyRow || serviceOrder.hidden.length === 0) return everyRow;
-    return everyRow.filter((row) => !serviceOrder.hidden.includes(servicePart(row)));
+    return everyRow.filter((row) => inAllMessages(row, serviceOrder.hidden));
   }, [everyRow, serviceOrder]);
   const shown = useMemo(() => {
     if (archiveOn) return filterInbox(archivedRows, query);
@@ -616,7 +652,12 @@ function Home() {
     matrix: modules.has('matrix'),
     xmpp: modules.has('xmpp'),
     nostr: modules.has('nostr'),
+    telegram: modules.has('telegram'),
+    messenger: msgHere && modules.has('messenger'),
+    signal: msgHere && modules.has('signal'),
+    session: msgHere && modules.has('session'),
     feed: !!nostr || publicRooms,
+    tgFolders: homeFolders,
   });
   // The parts in the order chosen in the Services window, those hidden there left out (lib/service-order.ts):
   // a hidden part's chats still show under All messages. One opened by an icon or the widget shows even so.
@@ -628,7 +669,7 @@ function Home() {
   // Erevos chat, or, with Erevos off, the first other part on, a new SMS last. None without chats,
   // and none on the Public part, which has New post instead, for a space with a Nostr key.
   const newChat: Href | 'sms' | null =
-    show === 'public' ? null : show === 'matrix' ? '/matrix' : show === 'xmpp' ? '/xmpp' : show === 'nostr' ? '/nostr-chats' : show === 'sms' && !erevosOn ? 'sms' : erevosOn ? '/chat?setup=1' : modules.has('matrix') ? '/matrix' : modules.has('xmpp') ? '/xmpp' : modules.has('nostr') ? '/nostr-chats' : modules.has('sms') ? 'sms' : null;
+    show === 'public' ? null : show === 'matrix' ? '/matrix' : show === 'xmpp' ? '/xmpp' : show === 'nostr' ? '/nostr-chats' : show === 'telegram' || tgFolderOf(show) !== null ? '/telegram' : show === 'messenger' || show === 'signal' || show === 'session' ? `/${show}` : show === 'sms' && !erevosOn ? 'sms' : erevosOn ? '/chat?setup=1' : modules.has('matrix') ? '/matrix' : modules.has('xmpp') ? '/xmpp' : modules.has('nostr') ? '/nostr-chats' : modules.has('telegram') ? '/telegram' : modules.has('sms') ? 'sms' : null;
   // New post, on the Public part, for a space with a Nostr key: its public posts are signed with it.
   const newPost = show === 'public' && !!nostr;
   const [writingSms, setWritingSms] = useState(false);
@@ -638,7 +679,7 @@ function Home() {
   // inbox's relays read. The SMS and the public feed have none to show.
   const services: Service[] = tabs.map((tab) => ({
     key: tab,
-    label: SHOW_LABELS[tab](),
+    label: showLabel(tab, telegram?.folders ?? []),
     count: tabUnread((tab === 'all' ? allRows : everyRow) ?? [], tab),
     link: linkOf(tab),
   }));
@@ -652,8 +693,39 @@ function Home() {
       return now.online ? 'on' : now.problem ? 'off' : null;
     }
     if (tab === 'nostr') return nostrAccount.reading > 0 ? 'on' : nostrAccount.problem ? 'off' : null;
+    if (tab === 'messenger' || tab === 'signal' || tab === 'session') {
+      const now = messengerNow(tab);
+      return !now.signedIn ? null : now.connected || tab !== 'messenger' ? (now.signInAgain ? 'off' : 'on') : now.status ? 'off' : null;
+    }
     return null;
   }
+  // Erevos+: Facebook's feed, a card of its own in the Services window, with Messenger's sign-in
+  // (lib/messenger-store.ts openFacebook); a Messenger link followed there opens that chat here.
+  const messengerIn = parts.includes('messenger') && messengerNow('messenger').signedIn && !messengerNow('messenger').signInAgain;
+  const [facebookHere, setFacebookHere] = useState(false);
+  useEffect(() => {
+    if (!messengerIn) return setFacebookHere(false);
+    let live = true;
+    void facebookWay().then((w) => live && setFacebookHere(w === 'facebook'), () => undefined);
+    return () => {
+      live = false;
+    };
+  }, [messengerIn]);
+  const pages = facebookHere
+    ? [
+        {
+          key: 'facebook',
+          label: 'Facebook',
+          onOpen: () =>
+            void openFacebook().then(
+              (key) => {
+                if (key) router.push({ pathname: '/messenger-chat', params: { key } });
+              },
+              (e: unknown) => ask(t('Not done'), e instanceof Error ? e.message : String(e), [{ text: t('OK') }]),
+            ),
+        },
+      ]
+    : [];
   // Every chat of the part shown read at once, asked first, as each would be opened.
   const readAll = unreadShown.length > 0 ? () => askReadAll(ask, unreadShown, { sms: smsListed.current, onOwnRead: () => reload.current() }, () => reload.current()) : undefined;
   // Names, once there are SMS conversations: they unlock the names of their numbers.
@@ -827,10 +899,11 @@ function Home() {
       ) : null}
       {/* The services: one button, which opens them all in a window (components/services.tsx), so
           however many there are, the list starts at once under it. */}
-      {mixed || arranged.hidden.length > 0 ? (
+      {mixed || arranged.hidden.length > 0 || pages.length > 0 ? (
         <Services
           services={services}
-          hidden={arranged.hidden.map((key) => ({ key, label: SHOW_LABELS[key]() }))}
+          hidden={arranged.hidden.map((key) => ({ key, label: showLabel(key, telegram?.folders ?? []) }))}
+          pages={pages}
           current={show}
           onPick={(key) => setShow(key as InboxShow)}
           onAdd={() => router.push('/modules')}
@@ -926,6 +999,36 @@ function Home() {
               <Text tone="muted" style={styles.emptyText}>
                 {t('No Nostr chats yet.')}
               </Text>
+            ) : tgFolderOf(show) !== null ? (
+              <Text tone="muted" style={styles.emptyText}>
+                {t('No chats in this folder yet.')}
+              </Text>
+            ) : show === 'messenger' || show === 'signal' || show === 'session' ? (
+              <View style={styles.empty}>
+                <Text tone="muted" style={styles.emptyText}>
+                  {show === 'messenger' && messengerNow(show).signedIn && msgMessengerWay() === 'case'
+                    ? t('Messenger opens in its case: Meta’s own page, closed in by Erevos.')
+                    : messengerNow(show).signedIn
+                      ? t('No chats yet.')
+                      : t('Not signed in to {service} on this phone.', { service: SERVICE_NAMES[show] })}
+                </Text>
+                <Button
+                  title={t('Open {service}', { service: SERVICE_NAMES[show] })}
+                  compact
+                  onPress={() =>
+                    show === 'messenger' && messengerNow(show).signedIn && !messengerNow(show).signInAgain && msgMessengerWay() === 'case'
+                      ? void openMessengerCase().catch(() => router.push('/messenger'))
+                      : router.push(`/${show}`)
+                  }
+                />
+              </View>
+            ) : show === 'telegram' ? (
+              <View style={styles.empty}>
+                <Text tone="muted" style={styles.emptyText}>
+                  {t('No Telegram chats yet.')}
+                </Text>
+                <Button title={t('Open Telegram')} compact onPress={() => router.push('/telegram')} />
+              </View>
             ) : show === 'sms' ? (
               // The SMS chip shows while the SMS are on, also before Erevos is the SMS app, which
               // alone may read them: Settings → Phone and SMS → SMS makes it that.
@@ -1188,7 +1291,7 @@ function ReleaseRow({ release }: { release: Told & { seen: boolean } }) {
   const styles = useStyles(makeStyles);
   const { colors } = useTheme();
   // A release of the plain Erevos (7.0.x), told in Erevos+ whose Updates chose it, says Erevos's name.
-  const of: Edition = /^\d+\.0\.\d/.test(release.name) ? 'lite' : EDITION;
+  const of: Edition = /^\d+\.\d*[02468]\.\d/.test(release.name) ? 'lite' : EDITION;
   const said = tFor(of, 'Erevos {name} is out. Tap to see what is new and update.', { name: release.name });
   return (
     <Pressable

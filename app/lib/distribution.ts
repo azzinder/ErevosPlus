@@ -8,3 +8,7 @@ import Constants from 'expo-constants';
 // updated by F-Droid: Updates shows its version and says so, and never asks GitHub or downloads a
 // package.
 export const FDROID = Constants.expoConfig?.extra?.distribution === 'fdroid';
+
+// The ErevosGram build (EREVOS_TELEGRAM=1, docs/erevosgram.md): the same app with Telegram. Check
+// for updates takes the release's ErevosGram APK, never the plain one, which would take Telegram away.
+export const EREVOSGRAM = Constants.expoConfig?.extra?.edition === 'erevosgram';

@@ -108,8 +108,18 @@ test('what Element and the others send shows with its look, and what an answer q
     ['yes', 'bold'],
     [' :blob:', ''],
   ]);
-  // HTML with no look shows its body as it is.
-  assert.equal(partsOfHtml('<p>just <a href="https://example.org">words</a></p>'), null);
+  // HTML with no look shows its body as it is; but a link whose words do not say where it goes is
+  // read, for the body may be its words alone (FluffyChat), and where it goes is said after them.
+  assert.equal(partsOfHtml('<p>just <a href="https://example.org">https://example.org</a></p>'), null);
+  assert.deepEqual(read('<p>just <a href="https://example.org">words</a></p>'), [['just words (https://example.org)', '']]);
+  // A bare address with a known ending ("example.org") is tappable and opens there (lib/links.ts): enough.
+  assert.equal(partsOfHtml('see <a href="https://example.org/">example.org</a>'), null);
+  // One that does not open as one ("example.invalid") is not.
+  assert.deepEqual(read('see <a href="https://example.invalid/">example.invalid</a>'), [['see example.invalid (https://example.invalid/)', '']]);
+  // Nor words that open somewhere else than the link: what it opens is always said.
+  assert.deepEqual(read('see <a href="https://example.org/">www.example.org</a>'), [['see www.example.org (https://example.org/)', '']]);
+  assert.deepEqual(read('<a href="https://evil.example">https://bank.example</a>'), [['https://bank.example (https://evil.example)', '']]);
+  assert.equal(partsOfHtml('see <a href="https://www.example.org/">www.example.org</a>'), null);
   assert.equal(styledOf({ msgtype: 'm.text', body: '*x*' }), null);
   assert.deepEqual(looks(styledOf({ msgtype: 'm.text', body: '**x**', format: HTML_FORMAT, formatted_body: '<strong>x</strong>' })), [['x', 'bold']]);
   assert.equal(styledOf({ msgtype: 'm.text', body: 'x', format: 'text/markdown', formatted_body: '<strong>x</strong>' }), null);

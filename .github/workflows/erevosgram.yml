@@ -3,12 +3,15 @@
 # Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 name: erevosgram
+# Each run's title ends in its build number, which release.yml reads so its own never collides.
+run-name: Erevos+ ${{ inputs.version }}, build ${{ inputs.build }}
 
 # The ErevosGram build of Erevos for Android (docs/erevosgram.md): the same app, package and
 # release key, with Telegram (app/modules/erevos-telegram: TDLib, built here from source by
 # scripts/build-tdlib.sh, and NTgCalls for calls). Only by hand: Actions, erevosgram, Run workflow,
 # with the version and build number it is to have; a build number above the phone's own installs
-# over it. The APK is kept as the run's artifact for three days; it goes into no release.
+# over it. The APK is kept as the run's artifact for three days. With publish on, it also goes out as an
+# Erevos+ release (the publish job below); off, it goes into no release.
 #
 # Its Telegram API id and hash are the secrets EREVOS_TG_API_ID and EREVOS_TG_API_HASH, never in
 # the repository. TDLib's build is kept in the cache by its commit, so only the first run is long.
@@ -17,11 +20,15 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The version it shows, e.g. 7.1.0-EGram-beta1.
+        description: The version it shows, e.g. 7.1.0-beta.5 (Erevos+) or 7.1.0-EGram-beta1.
         required: true
       build:
         description: Its build number, above the one on the phone.
         required: true
+      publish:
+        description: Publish it as an Erevos+ release (7.1.0, or 7.1.1-beta.1 for a beta) in the public download repository, for Updates. Off, it is only a test APK.
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -42,6 +49,7 @@ jobs:
       EREVOS_VERSION: ${{ inputs.version }}
       EREVOS_BUILD: ${{ inputs.build }}
       EREVOS_TELEGRAM: "1"
+      EREVOS_PUBLISH: ${{ inputs.publish }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
@@ -53,12 +61,41 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           EREVOS_TG_API_ID: ${{ secrets.EREVOS_TG_API_ID }}
           EREVOS_TG_API_HASH: ${{ secrets.EREVOS_TG_API_HASH }}
+          RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           # A release's name, or an ErevosGram test's own: 7.1.0-EGram-beta1.
           if [[ ! "$EREVOS_VERSION" =~ ^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*|-EGram-(alpha|beta|rc)[1-9][0-9]*)?$ ]]; then
             echo "::error::Not a version: $EREVOS_VERSION"; exit 1
           fi
           [[ "$EREVOS_BUILD" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Not a build number: $EREVOS_BUILD"; exit 1; }
+          # Above every build out already, Erevos's and Erevos+'s (their releases' build-<n> tags and
+          # version.json), so that the two editions, one package, never share a number: here and in
+          # the public download repository, where Erevos's own releases (azzinder/Erevos) go too.
+          # 83: the highest build made before Erevos+ moved to this repository (7.3.0-rc.2), whose
+          # own releases stay in the earlier one.
+          highest=83
+          for repo in "$GH_REPO" azzinder/erevos-releases; do
+            for tag in $(gh api "repos/$repo/releases?per_page=100" --jq '.[].tag_name'); do
+              n=""
+              if [[ "$tag" =~ ^build-([0-9]+)$ ]]; then n=${BASH_REMATCH[1]}
+              elif [[ "$tag" =~ ^v[0-9] ]]; then n=$(gh release download "$tag" --repo "$repo" -p version.json -O - 2>/dev/null | jq -r '.build // empty' || true); fi
+              if [[ "$n" =~ ^[0-9]+$ ]] && [ "$n" -gt "$highest" ]; then highest=$n; fi
+            done
+          done
+          [ "$highest" -gt 0 ] || { echo "::error::No build out could be read"; exit 1; }
+          if [ "$EREVOS_BUILD" -le "$highest" ]; then
+            echo "::error::Build $EREVOS_BUILD is not above $highest, the highest build already out: choose $((highest + 1)) or more."; exit 1
+          fi
+          # A release goes out only from main (the Erevos+ line), under a release's own name.
+          if [ "$EREVOS_PUBLISH" = true ]; then
+            [ "$GITHUB_REF_NAME" = main ] || { echo "::error::Erevos+ releases go out only from main, not from $GITHUB_REF_NAME"; exit 1; }
+            [[ "$EREVOS_VERSION" =~ ^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*)?$ ]] \
+              || { echo "::error::$EREVOS_VERSION is a test APK's name, not a release's"; exit 1; }
+            # Checked here, not only when it publishes: without it the whole build would go for nothing.
+            [ -n "$RELEASES_TOKEN" ] || { echo "::error::The secret RELEASES_TOKEN is missing"; exit 1; }
+          fi
           for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD EREVOS_TG_API_ID EREVOS_TG_API_HASH; do
             [ -n "${!name}" ] || { echo "::error::The secret $name is missing."; exit 1; }
           done
@@ -111,6 +148,18 @@ jobs:
         with:
           go-version-file: transports/go.mod
           cache-dependency-path: transports/go.sum
+
+      # Erevos+'s Messenger, Signal and Session (app/modules/erevos-messenger/android/build.gradle):
+      # Messenger's Go engine through gomobile (its Go version from messenger/go.mod, fetched by Go
+      # itself), and Signal's Rust engine, which needs protoc.
+      - name: Tools for Messenger's and Signal's engines
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20261011034528-197770444867
+          go install golang.org/x/mobile/cmd/gobind@v0.0.0-20261011034528-197770444867
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME" "$(go env GOPATH)/bin/gomobile" init
 
       - name: Generate the Android project
         working-directory: app
@@ -172,3 +221,125 @@ jobs:
           name: erevosgram-android
           path: erevosgram-android.apk
           retention-days: 3
+
+  # Erevos+'s web app (pwa/, docs/editions.md "In a browser"): from the same commit, in its own web
+  # app erevosplus-web for erevosplus-web.lphl.nekten.eu, with Element Call at erevosplus-call. Not
+  # signed: the release key stays on the release computer, which signs and serves it with
+  # deploy/web/publish.sh <version> <user@server> erevosplus-web.lphl.nekten.eu. Kept as the run's
+  # artifact, and with publish on it goes out in the release beside the APK.
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      EREVOS_VERSION: ${{ inputs.version }}
+      EREVOS_BUILD: ${{ inputs.build }}
+      EREVOS_EDITION: plus
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable, 2026-10-21
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+      - run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Build the web app with its core
+        working-directory: app
+        run: |
+          npm ci
+          node scripts/build-web-core.mjs
+          npx expo export --clear --platform web --output-dir ../web-build
+          test -f ../web-build/core/erevos_ffi_bg.wasm
+          cd ..
+          # A release's name is its label, which the release computer checks; a test's own name
+          # (7.1.0-EGram-beta1) is none.
+          label=
+          if [[ "$EREVOS_VERSION" =~ ^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*)?$ ]]; then label="--label $EREVOS_VERSION"; fi
+          node pwa/build.mjs web-build erevos-web --edition plus $label
+          node -e "const r = JSON.parse(require('fs').readFileSync('erevos-web/release.json')); if (r.app !== 'erevosplus-web' || !r.origins) process.exit(1)" \
+            || { echo "::error::The web app is not Erevos+'s"; exit 1; }
+          tar -czf erevos-web.tar.gz -C erevos-web .
+          sha256sum erevos-web.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erevosplus-web
+          path: erevos-web.tar.gz
+          retention-days: 3
+
+  # An Erevos+ release (publish on): the APK as a GitHub release, v<version>, here and in the public
+  # download repository, titled "Erevos+ …" and never the latest, so that Erevos's own releases
+  # (release.yml) stay what an Erevos that did not choose Erevos+ takes. Its channel's release there
+  # (channel-plus, or channel-plus-beta for a beta: app/lib/update-channel.ts) gets its version.json,
+  # which Updates reads. It installs once the release computer signed it:
+  # deploy/web/publish-android.sh <version> <user@server>.
+  publish:
+    needs: [apk, web]
+    if: ${{ inputs.publish }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      EREVOS_VERSION: ${{ inputs.version }}
+      EREVOS_BUILD: ${{ inputs.build }}
+      RELEASES_REPO: azzinder/erevos-releases
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: erevosgram-android
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: erevosplus-web
+      - name: Make the release's files
+        run: |
+          mkdir files
+          mv erevosgram-android.apk files/erevos-plus-android.apk
+          mv erevos-web.tar.gz files/erevos-web.tar.gz
+          (cd files && sha256sum erevos-plus-android.apk erevos-web.tar.gz > SHA256SUMS && cat SHA256SUMS)
+          if [[ "$EREVOS_VERSION" =~ -(alpha|beta)\. ]]; then CHANNEL=plus-beta; PRE=--prerelease; else CHANNEL=plus; PRE=; fi
+          { echo "CHANNEL=$CHANNEL"; echo "PRE=$PRE"; } >> "$GITHUB_ENV"
+          APK=$(jq -n --arg url "https://github.com/$RELEASES_REPO/releases/download/v$EREVOS_VERSION/erevos-plus-android.apk" \
+            --argjson size "$(stat -c %s files/erevos-plus-android.apk)" --arg sha256 "$(sha256sum files/erevos-plus-android.apk | cut -d' ' -f1)" \
+            '{url: $url, size: $size, sha256: $sha256}')
+          jq -n --arg name "$EREVOS_VERSION" --argjson build "$EREVOS_BUILD" --arg date "$(TZ=Europe/Athens date +%F)" \
+            --arg commit "${GITHUB_SHA::7}" --arg channel "$CHANNEL" --argjson apk "$APK" \
+            '{name: $name, build: $build, date: $date, commit: $commit, channel: $channel, apk: $apk}' > files/version.json
+          cat files/version.json
+          cat > notes.md <<NOTES
+          **Erevos+ $EREVOS_VERSION**, $(TZ=Europe/Athens date +%-d/%-m/%Y), from commit ${GITHUB_SHA::7}$( [ -n "$PRE" ] && echo ", a beta: for trying, it may have problems").
+
+          - **Android** 8.0 or newer (64-bit): in Erevos or Erevos+, Updates → Next update: Erevos+ → Check for updates → Install. Or open this page on the phone and tap erevos-plus-android.apk. It installs over Erevos and keeps everything.
+
+          - **Web app** (any browser, iPhone too): https://erevosplus-web.lphl.nekten.eu, once signed on the release computer. erevos-web.tar.gz is that web app, not signed yet.
+
+          Erevos+ is Erevos with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr. SHA256SUMS lists the file's SHA-256: \`sha256sum -c SHA256SUMS\`.
+          NOTES
+          cat notes.md
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "v$EREVOS_VERSION" files/* --target "$GITHUB_SHA" --title "Erevos+ $EREVOS_VERSION" --notes-file notes.md --latest=false $PRE
+          # The five newest Erevos+ releases stay; Erevos's own (release.yml) are not touched.
+          gh release list --limit 100 --exclude-drafts --json tagName,name --jq '[.[] | select(.name | startswith("Erevos+"))][5:][].tagName' |
+            xargs -r -n1 gh release delete --cleanup-tag --yes
+      - name: Publish to the public download repository
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          [ -n "$GH_TOKEN" ] || { echo "::error::The secret RELEASES_TOKEN is missing"; exit 1; }
+          gh release create "v$EREVOS_VERSION" files/* --repo "$RELEASES_REPO" --title "Erevos+ $EREVOS_VERSION" --notes-file notes.md --latest=false $PRE
+          if ! gh release view "channel-$CHANNEL" --repo "$RELEASES_REPO" > /dev/null 2>&1; then
+            gh release create "channel-$CHANNEL" --repo "$RELEASES_REPO" --title "$([ "$CHANNEL" = plus ] && echo "Erevos+" || echo "Erevos+ betas")" \
+              --prerelease --latest=false --notes "The newest $([ "$CHANNEL" = plus ] && echo "Erevos+" || echo "Erevos+ beta"), for Updates. Its files are in the release this version.json names."
+          fi
+          gh release upload "channel-$CHANNEL" files/version.json --repo "$RELEASES_REPO" --clobber
+          # The five newest Erevos+ releases stay there too; its channels' releases and Erevos's own are not touched.
+          gh release list --repo "$RELEASES_REPO" --limit 100 --exclude-drafts --json tagName,name \
+            --jq '[.[] | select(.name | startswith("Erevos+")) | select(.tagName | startswith("channel-") | not)][5:][].tagName' |
+            xargs -r -n1 gh release delete --repo "$RELEASES_REPO" --cleanup-tag --yes

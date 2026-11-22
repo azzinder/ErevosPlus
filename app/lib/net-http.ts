@@ -6,6 +6,8 @@ import { canTorHttp, torHttp } from './core';
 import { t } from './i18n';
 import { streamingFetch } from './net-fetch';
 import { throughTor, torFor, torForChat } from './relay';
+import { accountNeverStraight, accountThroughTor, type AccountTor } from './account-tor';
+import { ensureTor } from './tor';
 
 // HTTPS for the other networks' files (lib/nostr-files.ts, lib/xmpp-files.ts), the relay's Matrix
 // push gateway (lib/matrix-push.ts) and backups to a server (lib/backup-cloud.ts): through Tor as
@@ -132,6 +134,44 @@ export const torOnlyHttp: Http = async (method, url, headers, body, most = HTTP_
   if (!netThroughTor()) throw new Error(t('Tor is not ready.'));
   return viaTor(method, url, headers, body, Math.min(most, HTTP_MOST));
 };
+
+/**
+ * A chat's own way (one sent through Tor by itself, Nostr's chat.tor, lib/nostr-dm-store.ts):
+ * through Tor only, whatever the space's Tor way, on circuits of that chat's own, so no exit
+ * carries its requests and another's. Tor is started for it when the way did not; never straight.
+ */
+export function chatTorHttp(chat: string): Http {
+  return async (method, url, headers, body, most = HTTP_MOST) => {
+    if (!canTorHttp()) throw new Error(t('Tor is not ready.'));
+    await ensureTor();
+    const cap = Math.min(most, HTTP_MOST);
+    const answer = await torHttp(JSON.stringify({ method, url, headers, chat }), body ?? new Uint8Array(0));
+    if (answer.length - 2 > cap) throw new HttpTooLargeError(cap);
+    return { status: (answer[0] << 8) | answer[1], bytes: answer.slice(2) };
+  };
+}
+
+/**
+ * An account's own way (lib/account-tor.ts), for a network whose requests go one by one (Nostr's
+ * file servers): straight with 'never'; with 'space', as the space's Tor way says for words, so
+ * files go with the messages (`files` for files that go as the space's way says for files); with
+ * 'always', only through Tor, started for it, never straight.
+ */
+export function accountHttp(choice: AccountTor, files = false): Http {
+  return async (method, url, headers, body, most = HTTP_MOST) => {
+    const cap = Math.min(most, HTTP_MOST);
+    const never = accountNeverStraight(choice);
+    if (!accountThroughTor(choice, files) && !never) return straight(method, url, headers, body, cap);
+    try {
+      if (!canTorHttp()) throw new Error(t('Tor is not ready.'));
+      if (choice === 'always') await ensureTor();
+      return await viaTor(method, url, headers, body, cap);
+    } catch (error) {
+      if (never || error instanceof HttpTooLargeError) throw error;
+      return straight(method, url, headers, body, cap);
+    }
+  };
+}
 
 /**
  * As netHttp for a chat that goes only through Tor (lib/relay.ts setTorChats), whatever the

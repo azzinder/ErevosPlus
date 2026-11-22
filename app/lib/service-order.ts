@@ -121,3 +121,13 @@ export function startOn(key: string): Promise<void> {
 export function servicePart(row: { sms: string; network?: string }): string {
   return row.network ?? (row.sms !== '' ? 'sms' : 'erevos');
 }
+
+/**
+ * Whether a chat shows under All messages while the services in `hidden` are hidden: not when its
+ * service is, unless it is a Telegram chat in one of the account's folders chosen for home whose
+ * tab still shows (`tg:` and its id), which stands as a service of its own.
+ */
+export function inAllMessages(row: { sms: string; network?: string; tgFolders?: number[] }, hidden: readonly string[]): boolean {
+  if (!hidden.includes(servicePart(row))) return true;
+  return !!row.tgFolders?.some((id) => !hidden.includes(`tg:${id}`));
+}

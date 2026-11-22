@@ -1,6 +1,10 @@
-# Erevos brand
+# Erevos+ brand
 
-The Erevos mark (a white L with a red speech bubble holding a keyhole), as artwork:
+The Erevos+ mark is Erevos's (a white L with a red speech bubble holding a keyhole); what sets Erevos+ apart is
+its app icon's tile, purple to blue from the top left (`#946def` → `#655ee0` → `#3450d7`), where Erevos's is dark,
+and the name **Erevos+** in the lockups and the app. The files keep Erevos's names, so the code that takes them is
+the same in both editions. The launcher's default icon (the `red` alias) is the purple one in Erevos+; the other
+colours are Erevos's.
 
 - `erevos-app-icon-dark.svg`, `erevos-app-icon-light.svg`: the app icon, on its dark or light tile.
 - `erevos-mark-on-dark.svg`, `erevos-mark-on-light.svg`: the mark alone, for a dark or light background.

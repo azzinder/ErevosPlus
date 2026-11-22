@@ -1,0 +1,7 @@
+android/app/libs/*.aar
+android/app/libs/*.jar
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/jniLibs/

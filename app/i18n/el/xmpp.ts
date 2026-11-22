@@ -44,8 +44,6 @@ export const xmpp: Record<string, string> = {
   "Locked: this message could not be opened on this device.": "Κλειδωμένο: αυτό το μήνυμα δεν μπόρεσε να ανοιχτεί σε αυτή τη συσκευή.",
   "not encrypted": "χωρίς κρυπτογράφηση",
   "Chat with people on XMPP, who use Conversations, Monal, Gajim, Dino or another XMPP app. Messages are encrypted with OMEMO, but these chats are not anonymous: the XMPP server sees who talks with whom, and when.": "Συνομίλησε με ανθρώπους στο XMPP, που χρησιμοποιούν το Conversations, το Monal, το Gajim, το Dino ή άλλη εφαρμογή XMPP. Τα μηνύματα κρυπτογραφούνται με OMEMO, αλλά αυτές οι συνομιλίες δεν είναι ανώνυμες: ο server XMPP βλέπει ποιος μιλά με ποιον, και πότε.",
-  "Through Tor: the XMPP server does not see your address.": "Μέσω Tor: ο server XMPP δεν βλέπει τη διεύθυνσή σου.",
-  "Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.": "Όχι μέσω Tor τώρα: ο server XMPP βλέπει τη διεύθυνσή σου. Το Tor είναι στις Ρυθμίσεις → Relay και δίκτυα → Tor.",
   "XMPP address": "Διεύθυνση XMPP",
   "Only when the server is not the one in your address, or cannot be found. A name, name:port or a wss:// address.": "Μόνο όταν ο server δεν είναι αυτός της διεύθυνσής σου ή δεν βρίσκεται. Ένα όνομα, όνομα:θύρα ή διεύθυνση wss://.",
   "Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.": "Το Erevos συνδέεται ως νέα συσκευή του λογαριασμού και κρατά τη σύνδεση κρυπτογραφημένη μόνο σε αυτόν τον χώρο.",
@@ -143,4 +141,8 @@ export const xmpp: Record<string, string> = {
     "Το relay σου δεν δέχεται ακόμα ειδοποιήσεις του XMPP: χρειάζεται ενημέρωση.",
   "Your XMPP server does not send notices to apps that are away.":
     "Ο server του XMPP δεν στέλνει ειδοποιήσεις σε εφαρμογές που λείπουν.",
+  "Always through Tor":
+    "Πάντα μέσω Tor",
+  "This XMPP account goes only through Tor, which this server address cannot.":
+    "Αυτός ο λογαριασμός XMPP περνά μόνο μέσω Tor, κάτι που αυτή η διεύθυνση server δεν μπορεί.",
 };

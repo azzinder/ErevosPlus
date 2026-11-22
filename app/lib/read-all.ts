@@ -10,11 +10,14 @@ import { iconNumberChanged } from './icon-number';
 import { showsIn, type InboxRow, type InboxShow, type InboxSms } from './inbox';
 import { lookNow } from './look-now';
 import { matrixRead } from './matrix-store';
+import type { MsgService } from './messenger';
+import { msgReadChat } from './messenger-store';
 import { readElsewhere } from './notice-count';
 import { nostrDmRead } from './nostr-dm-store';
 import { sameNumber } from './sms-invite';
 import { spaceChats } from './space-chats';
 import { spaceGroupsAt } from './space-groups';
+import { telegramReadChat } from './telegram-store';
 import { xmppRead } from './xmpp-store';
 
 // Mark all as read: the ⋮ menu of the home screen, for the part of the list it shows (app/index.tsx),
@@ -35,6 +38,9 @@ import { xmppRead } from './xmpp-store';
 //   linked device, the phone, which tells them.
 // - An SMS conversation of the list (not the Archive, Spam or Trash): read on the phone, or through
 //   the phone on a linked device given its SMS (modules/erevos-sms markSmsRead, lib/sms-mirror.ts).
+// - A Telegram chat (the ErevosGram build): read as Telegram's own apps mark a chat read, up to its
+//   last message, its mentions and reactions too, and no more marked unread by hand
+//   (lib/telegram-store.ts telegramReadChat); Telegram tells the others.
 // - A Matrix room, an XMPP chat or a Nostr chat: read in its store, which sends what the network
 //   sends then (Matrix's read receipt, XMPP's chat marker; NIP-17 has none). Invitations, and
 //   someone asking to add the account, are no chats to read: they stay until they are answered.
@@ -62,7 +68,9 @@ export type ReadKind =
   | { kind: 'sms'; address: string }
   | { kind: 'matrix'; room: string }
   | { kind: 'xmpp'; jid: string }
-  | { kind: 'nostr'; key: string };
+  | { kind: 'nostr'; key: string }
+  | { kind: 'telegram'; chat: number }
+  | { kind: 'msg'; service: MsgService; key: string };
 
 const after = (identity: string, prefix: string) => identity.slice(prefix.length);
 
@@ -70,6 +78,8 @@ export function kindOf(row: ReadRow): ReadKind {
   if (row.network === 'matrix') return { kind: 'matrix', room: after(row.identity, 'matrix:') };
   if (row.network === 'xmpp') return { kind: 'xmpp', jid: after(row.identity, 'xmpp:') };
   if (row.network === 'nostr') return { kind: 'nostr', key: after(row.identity, 'nostr:') };
+  if (row.network === 'telegram') return { kind: 'telegram', chat: Number(after(row.identity, 'telegram:')) };
+  if (row.network === 'messenger' || row.network === 'signal' || row.network === 'session') return { kind: 'msg', service: row.network, key: after(row.identity, `${row.network}:`) };
   if (row.sms) return { kind: 'sms', address: row.sms };
   if (row.identity.startsWith('group:')) return { kind: 'group', id: after(row.identity, 'group:') };
   return { kind: 'contact', identity: row.identity };
@@ -86,6 +96,10 @@ export type ReadWays = {
   matrix(room: string): Promise<void>;
   xmpp(jid: string): Promise<void>;
   nostr(key: string): Promise<void>;
+  /** A Telegram chat, in the ErevosGram build. */
+  telegram?(chat: number): Promise<void>;
+  /** A Messenger, Signal or Session chat, in Erevos+. */
+  msg?(service: MsgService, key: string): Promise<void>;
 };
 
 const APP_WAYS: ReadWays = {
@@ -96,6 +110,8 @@ const APP_WAYS: ReadWays = {
   matrix: matrixRead,
   xmpp: xmppRead,
   nostr: nostrDmRead,
+  telegram: telegramReadChat,
+  msg: msgReadChat,
 };
 
 export type ReadAllOptions = {
@@ -197,7 +213,7 @@ export async function readAll(rows: readonly ReadRow[], { sms = [], onOwnRead, w
   })();
 
   // Each store says itself which of its chats have fewer not read (lib/network-notices.ts).
-  const networks = [each(of('matrix'), (k) => ways.matrix(k.room)), each(of('xmpp'), (k) => ways.xmpp(k.jid)), each(of('nostr'), (k) => ways.nostr(k.key))].map((done) =>
+  const networks = [each(of('matrix'), (k) => ways.matrix(k.room)), each(of('xmpp'), (k) => ways.xmpp(k.jid)), each(of('nostr'), (k) => ways.nostr(k.key)), each(of('telegram'), (k) => (ways.telegram ? ways.telegram(k.chat) : Promise.reject(new Error('no Telegram')))), each(of('msg'), (k) => (ways.msg ? ways.msg(k.service, k.key) : Promise.reject(new Error('no Erevos+'))))].map((done) =>
     done.then((list) => count(list.length)),
   );
 

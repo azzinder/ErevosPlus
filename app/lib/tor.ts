@@ -11,7 +11,7 @@
 // bridges (lib/bridges.ts), and then only through them.
 
 import { autoRoutes, bridgeLines, NO_BRIDGES, routeLines, type Bridges, type NetKind, type TorRoute } from './bridges';
-import { canTor, tor } from './core';
+import { canTor, canTorSocks, tor, torSocksDoor } from './core';
 import { onNetworkChange } from './network-change';
 import { setThroughTor, setTorReady, setTorStarter, type TorWay } from './relay';
 
@@ -222,4 +222,19 @@ export async function torStatus(): Promise<TorStatus | null> {
   } catch {
     return { text: raw, ready: false };
   }
+}
+
+/**
+ * The address of the SOCKS5 door into Tor (crates/erevos-tor socks) for an engine that speaks to
+ * its network itself (Signal's, Telegram's), as socks5h://name:password@127.0.0.1:port, so the
+ * exit looks up the names. `name` names its circuits: two names never share an exit. Starts Tor
+ * when the space's way did not. Null in a build without it.
+ */
+export async function torSocks(name: string): Promise<{ url: string; host: string; port: number; user: string; password: string } | null> {
+  if (!canTor() || !canTorSocks()) return null;
+  if (!/^[a-z0-9-]{1,40}$/.test(name)) throw new Error(`not a name for Tor's circuits: ${name}`);
+  await ensureTor();
+  const door = JSON.parse(await torSocksDoor()) as { port?: unknown; password?: unknown };
+  if (typeof door.port !== 'number' || typeof door.password !== 'string') throw new Error('Tor gave no door');
+  return { url: `socks5h://${name}:${door.password}@127.0.0.1:${door.port}`, host: '127.0.0.1', port: door.port, user: name, password: door.password };
 }

@@ -20,6 +20,10 @@ import { readByAll, roomAvatar, shownRoomName, type MatrixState } from './matrix
 import type { Module } from './modules';
 import { nameOf as nostrNameOf, npubOf, shortNpub, type NostrDmState } from './nostr-dm';
 import { bare, nameOf, type XmppState } from './xmpp';
+import { MSG_SERVICES, threadList, type MsgService, type MsgState } from './messenger';
+import { chatList, type TgChat, type TgList, type TgMessage, type TgState } from './telegram';
+import type { Shown } from './telegram-seal';
+import { telegramLine, unopened } from './telegram-view';
 import { draftPart } from './chat-writing';
 import { sameNumber } from './sms-invite';
 import { voiceDuration } from './voice';
@@ -89,8 +93,14 @@ export type InboxRow = {
   locked?: boolean;
   /** Muted now (lock/chat-notify.ts): its messages make no sound and no notice. */
   muted?: boolean;
-  /** The network of a chat that is not Erevos's nor an SMS: a Matrix room (`matrix:` and its id in `identity`), an XMPP person (`xmpp:` and their address) or someone on another Nostr app (`nostr:` and their key in hex). */
-  network?: 'matrix' | 'xmpp' | 'nostr';
+  /** The network of a chat that is not Erevos's nor an SMS: a Matrix room (`matrix:` and its id in `identity`), an XMPP person (`xmpp:` and their address) someone on another Nostr app (`nostr:` and their key in hex) or a Telegram chat (`telegram:` and its number), or a Messenger, Signal or Session chat (its service, `:` and its key). */
+  network?: 'matrix' | 'xmpp' | 'nostr' | 'telegram' | MsgService;
+  /** A Telegram chat's folders among those chosen to show on home (their ids). */
+  tgFolders?: number[];
+  /** A Telegram chat that is in a chosen folder but not in Telegram's main list: it shows only in its folders. */
+  tgFolderOnly?: true;
+  /** A chat of the space's own Telegram kept in these hidden chats (telegramHideChat): it opens as the space's. */
+  tgKept?: true;
   /** A Matrix room we are only invited to, or an XMPP person who asked to add us. */
   invited?: boolean;
   /** A Matrix room's picture, or its person's in a chat with one: an mxc:// address (lib/matrix.ts roomAvatar). */
@@ -167,7 +177,17 @@ function preview(message: Pick<InboxMessage, 'text' | 'voice' | 'file'> | undefi
 }
 
 /** Which of the list shows (app/index.tsx): all of it, the SMS, the Erevos chats, or one other network's. */
-export type InboxShow = 'all' | 'sms' | 'erevos' | 'matrix' | 'xmpp' | 'nostr' | 'public';
+export type InboxShow = 'all' | 'sms' | 'erevos' | 'matrix' | 'xmpp' | 'nostr' | 'telegram' | MsgService | 'public' | TgFolderShow;
+
+/** One of the account's Telegram folders chosen to show on home (lib/telegram-store.ts), by its id. */
+export type TgFolderShow = `tg:${number}`;
+
+/** The Telegram folder a part of the list is, or null. */
+export function tgFolderOf(show: InboxShow): number | null {
+  if (!show.startsWith('tg:')) return null;
+  const id = Number(show.slice(3));
+  return Number.isSafeInteger(id) ? id : null;
+}
 
 /**
  * Whether a row shows in that part of the list. The SMS are the SMS conversations, and the chats
@@ -176,10 +196,15 @@ export type InboxShow = 'all' | 'sms' | 'erevos' | 'matrix' | 'xmpp' | 'nostr' |
  * Matrix rooms, the XMPP chats the XMPP people, and the Nostr chats the people on other Nostr apps.
  * The public feed (components/public-feed.tsx) is no row of the list: none shows in it.
  */
-export function showsIn(row: Pick<InboxRow, 'sms' | 'lastSms' | 'network'>, show: InboxShow): boolean {
+export function showsIn(row: Pick<InboxRow, 'sms' | 'lastSms' | 'network' | 'tgFolders' | 'tgFolderOnly'>, show: InboxShow): boolean {
+  const folder = tgFolderOf(show);
+  if (folder !== null) return !!row.tgFolders?.includes(folder);
+  // A Telegram chat that is only in a chosen folder (not in Telegram's main list) shows there and
+  // under All messages, not under Telegram, which is its main list.
+  if (row.tgFolderOnly) return show === 'all';
   if (show === 'sms') return row.sms !== '' || row.lastSms;
   if (show === 'erevos') return row.sms === '' && !row.network;
-  if (show === 'matrix' || show === 'xmpp' || show === 'nostr') return row.network === show;
+  if (show === 'matrix' || show === 'xmpp' || show === 'nostr' || show === 'telegram' || show === 'messenger' || show === 'signal' || show === 'session') return row.network === show;
   if (show === 'public') return false;
   return true;
 }
@@ -200,13 +225,13 @@ export function rowOn(row: Pick<InboxRow, 'sms' | 'network'>, on: ReadonlySet<Mo
  * on Erevos's icon leaves them out (lib/unread.ts); the groups are rows (groupRows) that carry
  * their `muted`, and show under the Erevos chats and all.
  */
-export function tabUnread(rows: Pick<InboxRow, 'unread' | 'muted' | 'sms' | 'lastSms' | 'network'>[], show: InboxShow): number {
+export function tabUnread(rows: Pick<InboxRow, 'unread' | 'muted' | 'sms' | 'lastSms' | 'network' | 'tgFolders' | 'tgFolderOnly'>[], show: InboxShow): number {
   return rows.reduce((sum, row) => (row.muted || !showsIn(row, show) ? sum : sum + row.unread), 0);
 }
 
 /** Which parts of the list are on (`on`): their modules (lib/modules.ts), and the public feed's
  *  (`feed`) when the space has a Nostr key or a public Matrix room. */
-export type InboxPartsOn = { erevos?: boolean; sms?: boolean; matrix?: boolean; xmpp?: boolean; nostr?: boolean; feed?: boolean };
+export type InboxPartsOn = { erevos?: boolean; sms?: boolean; matrix?: boolean; xmpp?: boolean; nostr?: boolean; telegram?: boolean; messenger?: boolean; signal?: boolean; session?: boolean; feed?: boolean; tgFolders?: readonly number[] };
 
 /** The parts of the list (each one shows as a chip on home once there are two): each one whose
  *  module is on, even with no chat yet, so a chip chosen and left, or one an icon opened, is there
@@ -219,6 +244,10 @@ export function inboxParts(rows: InboxRow[], on: InboxPartsOn = {}): InboxShow[]
   if (on.xmpp || rows.some((row) => row.network === 'xmpp')) parts.push('xmpp');
   if (on.feed) parts.push('public');
   if (on.nostr || rows.some((row) => row.network === 'nostr')) parts.push('nostr');
+  if (on.telegram || rows.some((row) => row.network === 'telegram')) parts.push('telegram');
+  // Each Telegram folder chosen to show on home, after Telegram, in the account's order.
+  for (const id of on.tgFolders ?? []) parts.push(`tg:${id}`);
+  for (const service of MSG_SERVICES) if (on[service] || rows.some((row) => row.network === service)) parts.push(service);
   return parts;
 }
 
@@ -352,6 +381,79 @@ export function xmppInboxRows(state: XmppState, now = Date.now()): InboxRow[] {
     });
   }
   return rows;
+}
+
+/** A Telegram account's chats as rows (lib/telegram-store.ts): those of its main list, or of `list`
+ *  (app/telegram.tsx); with the main list, also those of the folders chosen to show on home (`folders`,
+ *  by id), each row saying which of them it is in. `shown` says what an ErevosGram packet carried
+ *  (telegramShown); a packet never shows as its own text. */
+export function telegramInboxRows(state: TgState, shown: (m: TgMessage) => Shown | null = unopened, list: TgList = 'main', folders: readonly number[] = [], locked: ReadonlySet<number> = new Set(), away: ReadonlySet<number> = new Set()): InboxRow[] {
+  const chats = new Map<number, TgChat>();
+  for (const chat of chatList(state, list)) chats.set(chat.id, chat);
+  if (list === 'main') for (const id of folders) for (const chat of chatList(state, id)) chats.set(chat.id, chat);
+  // Those kept in hidden chats show only there (telegramKeptRows).
+  for (const id of away) chats.delete(id);
+  return [...chats.values()].map((chat) => telegramRow(chat, shown, folders, locked.has(chat.id)));
+}
+
+/** The chats of the space's Telegram kept in the open hidden chats (`ids`), as their rows there. */
+export function telegramKeptRows(state: TgState, ids: readonly number[], shown: (m: TgMessage) => Shown | null = unopened): InboxRow[] {
+  return ids.flatMap((id) => {
+    const chat = state.chats[id];
+    // Named apart from a chat of the place's own account with the same number.
+    return chat ? [{ ...telegramRow(chat, shown, [], false), identity: `telegram-kept:${id}`, tgKept: true as const }] : [];
+  });
+}
+
+function telegramRow(chat: TgChat, shown: (m: TgMessage) => Shown | null, folders: readonly number[], locked: boolean): InboxRow {
+  const last = chat.last;
+  const mine = !!last?.outgoing;
+  const inFolders = folders.filter((id) => chat.folders?.[id] !== undefined);
+  return {
+    identity: `telegram:${chat.id}`,
+    name: chat.title,
+    last: last ? telegramLine(last, shown(last)) : '',
+    mine,
+    mark: !mine || !last ? 0 : last.sending ? -1 : last.id <= chat.readOutbox ? 2 : 0,
+    at: (last?.date ?? 0) * 1000,
+    unread: chat.unread || (chat.markedUnread ? 1 : 0),
+    timer: 0,
+    imported: false,
+    avatar: null,
+    sms: '',
+    lastSms: false,
+    network: 'telegram',
+    ...(chat.muted ? { muted: true } : {}),
+    ...(inFolders.length ? { tgFolders: inFolders } : {}),
+    ...(chat.main === undefined ? { tgFolderOnly: true as const } : {}),
+    // A chat locked with its PIN says only that it moved, and how many came, as a contact's does.
+    ...(locked ? { last: '', mine: false, mark: 0, locked: true } : {}),
+  };
+}
+
+/** A Messenger, Signal or Session account's chats as rows (lib/messenger-store.ts). The engines
+ *  say only whether a chat has something not read, so it counts one. */
+export function msgInboxRows(service: MsgService, state: MsgState, locked: ReadonlySet<string> = new Set()): InboxRow[] {
+  return threadList(state).map((chat): InboxRow => {
+    const last = state.messages[chat.key]?.at(-1);
+    const mine = !!last?.mine && last.ms >= chat.lastMs;
+    return {
+      identity: `${service}:${chat.key}`,
+      name: chat.name,
+      last: chat.snippet,
+      mine,
+      mark: 0,
+      at: chat.lastMs,
+      unread: chat.unread ? 1 : 0,
+      timer: 0,
+      imported: false,
+      avatar: null,
+      sms: '',
+      lastSms: false,
+      network: service,
+      ...(locked.has(chat.key) ? { last: '', mine: false, locked: true } : {}),
+    };
+  });
 }
 
 /** The marks of a Nostr message we sent: waiting while it goes (or failed), then one tick once a

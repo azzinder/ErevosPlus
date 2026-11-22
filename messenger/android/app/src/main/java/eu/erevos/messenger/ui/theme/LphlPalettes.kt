@@ -1,0 +1,176 @@
+// SPDX-FileCopyrightText: 2026 azzinder
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package eu.erevos.messenger.ui.theme
+
+import eu.erevos.messenger.PaletteChoice
+
+/**
+ * The twelve LPHL palettes, value for value from Erevos' lphl-palettes.ts: for light and for dark,
+ * the background, the text, the accent (and the accent for filled areas with the text on it), the
+ * danger colour, and nine steps (100 to 900) of neutrals and of the accent. Colours are 0xRRGGBB.
+ */
+internal class LphlMode(
+    val bg: Int,
+    val text: Int,
+    val accent: Int,
+    val accentField: Int,
+    val onAccent: Int,
+    val danger: Int,
+    /** Steps 100, 200 ... 900. */
+    val neutral: IntArray,
+    val accentRamp: IntArray,
+) {
+    fun neutral(step: Int): Int = neutral[step / 100 - 1]
+    fun ramp(step: Int): Int = accentRamp[step / 100 - 1]
+}
+
+internal class LphlPalette(val light: LphlMode, val dark: LphlMode)
+
+internal val LPHL_PALETTES: Map<PaletteChoice, LphlPalette> = mapOf(
+    PaletteChoice.HOUSE to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xFF9900, accentField = 0xFF9900, onAccent = 0x16211A, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xFFF0D7, 0xFFDCAB, 0xFFC274, 0xFE9E27, 0xDF7C00, 0xC16500, 0x9A4B00, 0x6F3200, 0x4D2400),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xFF9900, accentField = 0xFF9900, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x4D2400, 0x6F3200, 0x9A4B00, 0xC16500, 0xDF7C00, 0xFE9E27, 0xFFC274, 0xFFDCAB, 0xFFF0D7),
+        ),
+    ),
+    PaletteChoice.THERMAIKOS to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x2F7FC4, accentField = 0x26679F, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xE5F8FF, 0xC6EDFF, 0xA1DAFF, 0x74BEFF, 0x509EE5, 0x3B85C7, 0x26679F, 0x134873, 0x113250),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0x58A9E8, accentField = 0x58A9E8, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x10334D, 0x12496F, 0x24689A, 0x3A87C0, 0x4E9FDE, 0x73BFFC, 0xA0DBFF, 0xC6EDFF, 0xE5F8FF),
+        ),
+    ),
+    PaletteChoice.VARDARIS to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x17827F, accentField = 0x1F716E, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xE5FAF9, 0xC7F2EF, 0xA0E3DF, 0x72C9C5, 0x4BAAA6, 0x35908D, 0x1F716E, 0x0C4F4E, 0x0E3736),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0x46BDB6, accentField = 0x46BDB6, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x023936, 0x00514D, 0x00736E, 0x14938D, 0x31ADA6, 0x60CCC5, 0x95E5DF, 0xC0F4EF, 0xE2FBF9),
+        ),
+    ),
+    PaletteChoice.KIPOS to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x4A8B2C, accentField = 0x3E7326, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xEAFBE4, 0xD1F4C5, 0xB2E59F, 0x8BCC72, 0x6AAC4F, 0x55933A, 0x3E7326, 0x275114, 0x1D3811),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0x7CC456, accentField = 0x7CC456, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x1C3909, 0x255204, 0x3B7415, 0x52942A, 0x67AE3F, 0x89CD66, 0xB0E796, 0xD0F5BF, 0xE9FCE1),
+        ),
+    ),
+    PaletteChoice.KERAMIDI to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xB4502A, accentField = 0x9A4829, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xFFEEE4, 0xFFD9C5, 0xFFBD9F, 0xFF9874, 0xDF7751, 0xC1613E, 0x9A4829, 0x6F2F17, 0x4D2212),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xE08055, accentField = 0xE08055, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x4B2412, 0x6C3216, 0x964B28, 0xBD653C, 0xDB7B50, 0xFA9C73, 0xFFC09F, 0xFFDBC4, 0xFFEFE3),
+        ),
+    ),
+    PaletteChoice.LYCHNARI to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xA8751A, accentField = 0x835A0E, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xFFF3E0, 0xFFE3BD, 0xF6CD92, 0xE0AD61, 0xC28D39, 0xA67624, 0x835A0E, 0x5E3E00, 0x412C07),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xF2C230, accentField = 0xF2C230, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x402D00, 0x5D4000, 0x825D00, 0xA47900, 0xBF9100, 0xDEB126, 0xF4D074, 0xFDE6AB, 0xFFF4D8),
+        ),
+    ),
+    PaletteChoice.VESPERI to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x6B4FA8, accentField = 0x6B4FA8, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xF6F1FF, 0xEBDFFF, 0xD9C7FF, 0xBEA6FF, 0xA085E3, 0x876EC5, 0x69539E, 0x4A3872, 0x33284F),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xA78CDD, accentField = 0xA78CDD, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x34294A, 0x4B3A6B, 0x6B5595, 0x8970BA, 0xA287D8, 0xC1A7F6, 0xDCC8FF, 0xEDE0FF, 0xF7F1FF),
+        ),
+    ),
+    PaletteChoice.MODERNIST to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xEC3013, accentField = 0xB71B01, onAccent = 0xEDEFEA, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xFFE8DE, 0xFFCCB9, 0xFFA68D, 0xFF765A, 0xFF4C31, 0xE4351B, 0xB71B01, 0x850500, 0x5C0E04),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xFF6A4D, accentField = 0xFF6A4D, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x56180D, 0x7C1E0C, 0xAB341D, 0xD54B31, 0xF66245, 0xFF8669, 0xFFB098, 0xFFD2C0, 0xFFEBE1),
+        ),
+    ),
+    PaletteChoice.RODAKINI to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xF0A07A, accentField = 0xF0A07A, onAccent = 0x16211A, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xFFF0E6, 0xFFDECA, 0xFFC4A7, 0xEFA27E, 0xCF825D, 0xB36B49, 0x8E5133, 0x66371F, 0x472717),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xF7BFA2, accentField = 0xF7BFA2, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x402B1F, 0x5C3C2B, 0x825842, 0xA4735A, 0xBF8B6F, 0xDEAA8F, 0xF4CAB4, 0xFEE1D2, 0xFFF2EA),
+        ),
+    ),
+    PaletteChoice.FISTIKI to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x9DC489, accentField = 0x9DC489, onAccent = 0x16211A, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xEFF9EA, 0xDBEFD1, 0xC1DFB2, 0x9FC48C, 0x7FA56C, 0x698C57, 0x4F6D3F, 0x364D29, 0x26361E),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xBCD9AC, accentField = 0xBCD9AC, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x293423, 0x3A4B31, 0x556B49, 0x708962, 0x87A277, 0xA6C197, 0xC6DCBB, 0xDFEDD7, 0xF0F8EC),
+        ),
+    ),
+    PaletteChoice.GALAZIO to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0x92B9DD, accentField = 0x92B9DD, onAccent = 0x16211A, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xECF7FF, 0xD7EBFE, 0xBAD8F4, 0x97BCDE, 0x779DC0, 0x6184A4, 0x486782, 0x30485D, 0x223240),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xB3D1EA, accentField = 0xB3D1EA, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x26323C, 0x364756, 0x506679, 0x69849A, 0x809CB4, 0x9FBBD3, 0xC1D8EA, 0xDBEAF7, 0xEFF6FD),
+        ),
+    ),
+    PaletteChoice.LILA to LphlPalette(
+        light = LphlMode(
+            bg = 0xEDEFEA, text = 0x16211A, accent = 0xB4A2D6, accentField = 0xB4A2D6, onAccent = 0x16211A, danger = 0x9E1C14,
+            neutral = intArrayOf(0xF2F6F4, 0xE3EAE5, 0xCCD7D0, 0xAEBBB3, 0x8E9C94, 0x77847C, 0x5B6660, 0x3F4742, 0x2C322E),
+            accentRamp = intArrayOf(0xF7F2FF, 0xECE3FE, 0xDACCF5, 0xBEADDF, 0xA08EC1, 0x8776A5, 0x695B83, 0x4A3E5D, 0x332C41),
+        ),
+        dark = LphlMode(
+            bg = 0x141A16, text = 0xE6E9E3, accent = 0xCDC0E6, accentField = 0xCDC0E6, onAccent = 0x141A16, danger = 0xFF8A7A,
+            neutral = intArrayOf(0x30312E, 0x444642, 0x626460, 0x7F817C, 0x979994, 0xB6B8B3, 0xD3D5D1, 0xE7E8E5, 0xF5F5F4),
+            accentRamp = intArrayOf(0x322D3C, 0x484056, 0x675D7A, 0x85799B, 0x9E91B5, 0xBDB0D4, 0xD8CFEB, 0xEBE4F8, 0xF6F3FD),
+        ),
+    ),
+)

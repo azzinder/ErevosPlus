@@ -10,6 +10,7 @@ import { dropCollectionMemory } from './collection-memory';
 import { stopCollectionServers } from './collection-webdav';
 import { t } from './i18n';
 import { SHELL, shellFetch } from './shell';
+import { closeWebPages } from './web-pages';
 import { webWipe } from './web-store';
 
 export type { PanicResponder, PanicState };
@@ -102,6 +103,7 @@ export function panicFolderChanged(folder: string): void {
  */
 export async function wipeNow(backupsIn = ''): Promise<void> {
   collectionNative?.panic();
+  closeWebPages();
   dropCollectionMemory();
   stopCollectionServers();
   if (CAN_PANIC_APP && device?.wipeNow?.()) return;

@@ -12,7 +12,7 @@ import { t } from '../lib/i18n';
 import { useNetworkWhere } from '../lib/network-place';
 import { nameOf, npubOf, personName, shortMentions, shortNpub, type NostrPost } from '../lib/nostr-dm';
 import { nostrChatsThroughTor } from '../lib/nostr-dm-net';
-import { nostrDmNow, nostrDmPosts, onNostrDmChange, runNostrDm } from '../lib/nostr-dm-store';
+import { nostrDmNow, nostrDmPosts, nostrDmTor, onNostrDmChange, runNostrDm } from '../lib/nostr-dm-store';
 import { space } from '../theme/colors';
 
 // The public posts of someone a Nostr chat is with (app/nostr-chat.tsx), newest first, read only:
@@ -93,9 +93,9 @@ export default function NostrPostsScreen() {
       </Text>
       {canTor() ? (
         <Text variant="caption" tone="faint">
-          {nostrChatsThroughTor()
+          {nostrChatsThroughTor(nostrDmTor(where))
             ? t('Through Tor: the Nostr relays do not see your address.')
-            : t('Not through Tor now: the Nostr relays see your address. Tor is under Settings → Relay and networks → Tor.')}
+            : t('Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.')}
         </Text>
       ) : null}
 

@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 -->
 
-<!-- Android 8 and later: a full icon in the launcher's own shape, the mark over the red background. The
+<!-- Android 8 and later: a full icon in the launcher's own shape, the mark over Erevos+'s purple background. The
      PNG of the same name in mipmap-*dpi is for older Android. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
   <background android:drawable="@drawable/erevos_launcher_bg_red" />

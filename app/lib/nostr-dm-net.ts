@@ -6,7 +6,8 @@ import { canNostr, canTorHttp, nostrCore, torHttp } from './core';
 import { utf8Decode } from './crypto';
 import { t } from './i18n';
 import { fetchCapped } from './net-http';
-import { throughTor, torFor } from './relay';
+import { accountNeverStraight, accountThroughTor, type AccountTor } from './account-tor';
+import { ensureTor } from './tor';
 
 // How Erevos reaches Nostr relays for the chats with other Nostr apps (lib/nostr-dm.ts,
 // docs/nostr-chats.md): through Tor on Android, on the core's own connection (crates/erevos-tor, as
@@ -29,7 +30,8 @@ export type NostrLink = {
   close(): void;
 };
 
-export type NostrOpen = (url: string) => Promise<NostrLink>;
+/** `chat`: a chat's own circuits through Tor (openNostrLink), when given. */
+export type NostrOpen = (url: string, chat?: string, choice?: AccountTor) => Promise<NostrLink>;
 
 let opener: NostrOpen | null = null;
 
@@ -53,9 +55,10 @@ function parsed(frame: string): unknown[] | null {
   }
 }
 
-async function torLink(url: string): Promise<NostrLink> {
+async function torLink(url: string, chat?: string): Promise<NostrLink> {
   const core = nostrCore();
-  const id = await core.torTextOpen(url);
+  // A chat's name after a line break: circuits of that chat's own (crates/erevos-ffi text_open).
+  const id = await core.torTextOpen(chat ? `${url}\n${chat}` : url);
   return {
     tor: true,
     async send(frame) {
@@ -161,25 +164,51 @@ export function openNostrStraight(url: string): Promise<NostrLink> {
   return opener ? opener(url) : socketLink(url);
 }
 
-/** Whether the relays are reached through Tor now: on Android, while the space's Tor way says so. */
-export function nostrChatsThroughTor(): boolean {
-  return canNostr() && torFor(false);
+/** Whether the relays are reached through Tor now, on Android, as the account's Tor choice says
+ *  (lib/account-tor.ts): 'space' (the way of the space's own Nostr, lib/nostr.ts) as the space's Tor way says. */
+export function nostrChatsThroughTor(choice: AccountTor = 'space'): boolean {
+  return canNostr() && accountThroughTor(choice);
 }
 
-/** A connection to the relay at `url`: through Tor when the space's way says so and Tor is ready,
- *  only through Tor with the way Everything, straight otherwise. */
-export async function openNostrLink(url: string): Promise<NostrLink> {
-  if (opener) return opener(url);
-  if (nostrChatsThroughTor()) {
-    try {
-      return await torLink(url);
-    } catch (error) {
-      if (throughTor()) throw error;
-    }
-  } else if (throughTor()) {
-    throw new Error(t('Tor is not ready.'));
+/** How a connection goes with the account's choice now: through Tor, or straight should Tor
+ *  fail ('tor'); only through Tor ('tor only'); or straight. */
+export function nostrWay(choice: AccountTor): 'tor' | 'tor only' | 'straight' {
+  if (accountNeverStraight(choice)) return 'tor only';
+  return nostrChatsThroughTor(choice) ? 'tor' : 'straight';
+}
+
+/** A connection to the relay at `url`, as the account's Tor `choice` says (nostrWay); for the
+ *  chat `chat`, through Tor only on its own circuits. */
+export async function openNostrLink(url: string, chat?: string, choice: AccountTor = 'space'): Promise<NostrLink> {
+  if (opener) return opener(url, chat, choice);
+  if (chat) return chatTorLink(url, chat);
+  const way = nostrWay(choice);
+  if (way === 'straight') return socketLink(url);
+  try {
+    if (!canNostr()) throw new Error(t('Tor is not ready.'));
+    // Always: Tor started for it when the space's way did not.
+    if (choice === 'always') await ensureTor();
+    return await torLink(url);
+  } catch (error) {
+    if (way === 'tor only') throw error;
   }
   return socketLink(url);
+}
+
+/** Whether this build reaches relays through Tor at all (Android): a chat sent through Tor by itself needs it. */
+export function canNostrTor(): boolean {
+  return canNostr();
+}
+
+/**
+ * A connection for one chat sent through Tor by itself (NostrDmChat.tor): through Tor only,
+ * whatever the space's Tor way, on circuits of the chat's own, so no exit carries its messages and
+ * another's. Tor is started for it when the way did not; never straight, so it fails without Tor.
+ */
+async function chatTorLink(url: string, chat: string): Promise<NostrLink> {
+  if (!canNostr()) throw new Error(t('Tor is not ready.'));
+  await ensureTor();
+  return torLink(url, chat);
 }
 
 /** Asks a relay to keep it from now on. */
@@ -209,10 +238,11 @@ export class NostrRelay {
     this.auth = auth;
   }
 
-  /** Connects: `auth` for a connection that reads the space's messages, null for one that only sends or looks up. */
-  static async open(url: string, auth: NostrAuth | null): Promise<NostrRelay> {
+  /** Connects: `auth` for a connection that reads the space's messages, null for one that only sends or looks up;
+   *  `chat` for one of a chat's own, through Tor only (openNostrLink). */
+  static async open(url: string, auth: NostrAuth | null, chat?: string, choice: AccountTor = 'space'): Promise<NostrRelay> {
     const relay = new NostrRelay(url, auth);
-    relay.link = await openNostrLink(url);
+    relay.link = await openNostrLink(url, chat, choice);
     void relay.pump();
     return relay;
   }
@@ -418,19 +448,21 @@ const NIP05_MOST = 1024 * 1024;
 
 /** A NIP-05 name's key and the relays it names, as its domain's /.well-known/nostr.json says:
  *  through Tor as relays are, straight otherwise. */
-export async function lookUpNip05(name: string): Promise<{ public: string; relays: string[] } | null> {
+export async function lookUpNip05(name: string, choice: AccountTor = 'space'): Promise<{ public: string; relays: string[] } | null> {
   const match = /^([a-z0-9._-]+)@([a-z0-9.-]+\.[a-z]{2,})$/i.exec(name.trim());
   if (!match) return null;
   const [, local, domain] = match;
   const url = `https://${domain.toLowerCase()}/.well-known/nostr.json?name=${encodeURIComponent(local.toLowerCase())}`;
   let text: string;
-  if (canTorHttp() && torFor(false)) {
+  const way = nostrWay(choice);
+  if (canTorHttp() && way !== 'straight') {
+    if (choice === 'always') await ensureTor();
     const answer = await torHttp(JSON.stringify({ method: 'GET', url, headers: { Accept: 'application/json' } }), new Uint8Array(0));
     const status = (answer[0] << 8) | answer[1];
     if (status !== 200 || answer.length - 2 > NIP05_MOST) return null;
     text = utf8Decode(answer.slice(2));
   } else {
-    if (throughTor()) throw new Error(t('Tor is not ready.'));
+    if (way === 'tor only') throw new Error(t('Tor is not ready.'));
     // Read as it comes, and stopped once it is too large (lib/net-http.ts): a domain answers what it likes.
     const { response, bytes } = await fetchCapped(url, { headers: { Accept: 'application/json' } }, NIP05_MOST);
     if (!response.ok) return null;

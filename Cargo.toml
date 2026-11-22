@@ -5,6 +5,8 @@
 [workspace]
 resolver = "2"
 members = ["crates/erevos-core", "crates/erevos-ffi", "crates/erevos-speech", "crates/erevos-group", "crates/erevos-import", "crates/erevos-matrix", "crates/erevos-nostr", "crates/erevos-relay", "crates/erevos-tor", "crates/erevos-xmpp"]
+# Signal (presage) is its own workspace, with its own lock and patches: built by messenger/.
+exclude = ["messenger/signal"]
 
 [workspace.package]
 edition = "2021"

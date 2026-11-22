@@ -163,9 +163,12 @@ t('a place’s stars are kept sealed, the space’s and each hidden place’s ap
   await starMessage(hidden, star({ service: 'nostr', account: 'aa', chat: 'bb', id: 'n1', line: 'Κρυφό' }), true);
   assert.deepEqual((await loadStars(space)).map((s) => s.id), ['$one']);
   assert.deepEqual((await loadStars(hidden)).map((s) => s.line), ['Κρυφό']);
-  // Nothing of them shows in the file, nor opens with another key.
+  // Nothing of them shows in the file, nor opens with another key. Each looked-for text holds a
+  // space, «!», «:» or Greek, which the sealed text never does, so a chance run of letters in it
+  // (16 KB a place) cannot look like one.
   const sealed = files.get(FILE) ?? '';
-  assert.ok(sealed.length > 0 && !sealed.includes('Coffee') && !sealed.includes('room'));
+  assert.ok(sealed.length > 0);
+  for (const plain of ['Coffee at five', '!room:example.org', '@ann:example.org', 'Κρυφό']) assert.ok(!sealed.includes(plain), plain);
   assert.deepEqual(await loadStars({ ...space, key: randomBytes(32) }), []);
   assert.deepEqual(await loadStars(place(hiddenHolder(2))), []);
 });

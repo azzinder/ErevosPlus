@@ -12,6 +12,7 @@ import { findMessages, spacesOf, type FoundRoom } from '../lib/matrix-rooms';
 import { matrixJoin, matrixPublicRooms, matrixSearchPeople, matrixSpaceRooms } from '../lib/matrix-store';
 import { space } from '../theme/colors';
 
+import { matrixJoinGate } from './matrix-ip';
 import { lineOf } from './matrix-message';
 import { Button, Card, Chip, Input, Row, SectionTitle, Text } from './ui';
 
@@ -79,7 +80,10 @@ export function MatrixFind({ state, busy, open, run }: { state: MatrixState; bus
     });
 
   // Joins, by the address when it has one, and opens it.
-  const join = (room: FoundRoom) => void run(async () => open(await matrixJoin(room.alias ?? room.id)));
+  const join = (room: FoundRoom) =>
+    void run(async () => {
+      if (await matrixJoinGate(room.alias ?? room.id)) open(await matrixJoin(room.alias ?? room.id));
+    });
 
   return (
     <>

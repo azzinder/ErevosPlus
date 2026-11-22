@@ -5,7 +5,8 @@
 import { fromBase64, randomBytes, toBase64, toHex } from './crypto';
 import { t } from './i18n';
 import { mimeOfName } from './matrix-media';
-import { HttpTooLargeError, netHttp, type Http } from './net-http';
+import type { AccountTor } from './account-tor';
+import { accountHttp, HttpTooLargeError, netHttp, type Http } from './net-http';
 import { omemoCall } from './xmpp-omemo';
 import { child, children, el, textOf, type XmlElement } from './xmpp-xml';
 
@@ -163,14 +164,18 @@ export function setXmppHttp(next: Http | null): void {
   http = next ?? netHttp;
 }
 
+// How files of an account go, as its Tor choice says for files (lib/account-tor.ts): a check's own way stays.
+const httpFor = (way: AccountTor): Http => (http === netHttp ? accountHttp(way, true) : http);
+
 /** Headers a slot may give for the upload, and no others (XEP-0363 §4). */
 const SLOT_HEADERS = new Set(['authorization', 'cookie', 'expires']);
 
 /**
  * Puts `bytes` on the server through its upload service, as `name` of `type`, and answers where to
  * fetch it from. Encrypted first when `encrypt`: the answer then carries its key, for the link.
+ * `way`: the account's Tor choice as it counts now (lib/account-tor.ts effectiveTor).
  */
-export async function uploadXmppFile(connection: XmppAsk, service: XmppUpload, picked: { bytes: Uint8Array; name: string; type: string }, encrypt: boolean): Promise<XmppFile> {
+export async function uploadXmppFile(connection: XmppAsk, service: XmppUpload, picked: { bytes: Uint8Array; name: string; type: string }, encrypt: boolean, way: AccountTor = 'never'): Promise<XmppFile> {
   let body = picked.bytes;
   let fragment: string | undefined;
   if (encrypt) {
@@ -200,15 +205,27 @@ export async function uploadXmppFile(connection: XmppAsk, service: XmppUpload, p
     const name = header.attrs.name ?? '';
     if (SLOT_HEADERS.has(name.toLowerCase())) headers[name] = textOf(header).replace(/[\r\n]/g, '').trim();
   }
-  const answer = await http('PUT', putUrl, headers, body);
+  const answer = await httpFor(way)('PUT', putUrl, headers, body);
   if (answer.status !== 200 && answer.status !== 201) throw new Error(t('The XMPP server did not take the file ({status}).', { status: String(answer.status) }));
   return { url: getUrl, ...(fragment ? { fragment } : {}), name: picked.name, type: picked.type, size: picked.bytes.length };
 }
 
-/** Fetches a file a message names and opens it: throws when it cannot be had, or does not open. */
-export async function downloadXmppFile(file: XmppFile): Promise<Uint8Array> {
+/** Whether a file is on the account's own server (its domain, or a host under it), which sees this phone's address anyway while connected. */
+export function fileOfOwnServer(file: Pick<XmppFile, 'url'>, account: string): boolean {
+  let host: string;
+  try {
+    host = new URL(file.url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  const domain = account.slice(account.indexOf('@') + 1).toLowerCase();
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+/** Fetches a file a message names and opens it: throws when it cannot be had, or does not open. `way`: the account's Tor choice. */
+export async function downloadXmppFile(file: XmppFile, way: AccountTor = 'never'): Promise<Uint8Array> {
   // A server that sends more than that is stopped (lib/net-http.ts).
-  const answer = await http('GET', file.url, {}, undefined, XMPP_FILE_MOST + 16).catch((error: unknown) => {
+  const answer = await httpFor(way)('GET', file.url, {}, undefined, XMPP_FILE_MOST + 16).catch((error: unknown) => {
     if (error instanceof HttpTooLargeError) throw new Error(t('This file is larger than Erevos opens.'));
     throw error;
   });

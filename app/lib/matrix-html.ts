@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
+import { splitLinks } from './links';
 import { MOST_STYLED, styleText, type Look, type StyledPart } from './text-style';
 
 // How a Matrix message looks, both ways (Matrix's HTML, org.matrix.custom.html in formatted_body).
@@ -144,6 +145,9 @@ export function partsOfHtml(html: string): StyledPart[] | null {
   let preStart = false;
   let spoilers = 0;
   let tooMany = false;
+  // Whether it said where a link goes that its words do not: then its runs show, not the body,
+  // which may not say it (a link's words alone, as FluffyChat and others send).
+  let linked = false;
 
   const push = (text: string, look: Look, spoiler?: number) => {
     if (!text) return;
@@ -238,9 +242,13 @@ export function partsOfHtml(html: string): StyledPart[] | null {
       // matrix.to's, which names a person, a room or a message the words already name.
       const href = (frame.href ?? '').trim();
       const label = (frame.label ?? '').trim();
-      const same = label === href || `${label}/` === href || label === href.replace(/^https?:\/\//i, '');
+      // The words say it only when they are themselves a web address that opens where it goes:
+      // "example.invalid" for https://example.invalid is not tappable (lib/links.ts: no known ending), so it is said after them.
+      const found = splitLinks(label);
+      const same = found.length === 1 && found[0].url !== undefined && [href, href.replace(/\/$/, '')].includes(found[0].url);
       if (/^https?:\/\/[^\s/?#]+[^\s]*$/i.test(href) && href.length <= 2000 && !/^https:\/\/matrix\.to\//i.test(href) && !same) {
         words(label ? ` (${href})` : href, true);
+        linked = true;
       }
     }
   };
@@ -305,5 +313,5 @@ export function partsOfHtml(html: string): StyledPart[] | null {
     last.text = last.text.replace(/\s+$/, '');
     if (!last.text) parts.pop();
   }
-  return parts.some((part) => Object.keys(part.look).length > 0) ? parts : null;
+  return linked || parts.some((part) => Object.keys(part.look).length > 0) ? parts : null;
 }

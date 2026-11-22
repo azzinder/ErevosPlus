@@ -57,6 +57,9 @@ use tor_rtcompat::PreferredRuntime;
 
 pub type Result<T> = std::result::Result<T, String>;
 
+mod socks;
+pub use socks::{socks_close, socks_open, Door};
+
 /// How long a connection or a reply may take through Tor before it is given up.
 const WAIT: Duration = Duration::from_secs(90);
 
@@ -457,8 +460,17 @@ const TEXT_BACKLOG: usize = 256;
 /// Opens a connection to the Nostr relay at `url` through Tor. Returns its
 /// handle for [`text_send`], [`text_next`] and [`text_close`].
 pub fn text_open(url: &str) -> Result<u64> {
+    text_open_on(url, None)
+}
+
+/// [`text_open`], on circuits of their own for `chat` when given: a chat the user sends through Tor
+/// on its own (app/lib/nostr-dm-net.ts), whose connections share no exit with the others'.
+pub fn text_open_on(url: &str, chat: Option<&str>) -> Result<u64> {
     let tor = client()?;
-    let host = parse(url)?.host;
+    let host = match chat {
+        Some(chat) => format!("chat {chat} {}", parse(url)?.host),
+        None => parse(url)?.host,
+    };
     let way = nostr_way(&host);
     let url = url.to_string();
     let runtime = runtime()?;
@@ -570,6 +582,11 @@ const HTTP_WAIT: Duration = Duration::from_secs(600);
 /// go as they are, but for Host, Connection and Content-Length, set here. Answers the status and
 /// the body.
 pub fn http(method: &str, url: &str, headers: &[(String, String)], body: &[u8]) -> Result<(u16, Vec<u8>)> {
+    http_on(method, url, headers, body, None)
+}
+
+/// [`http`], on circuits of their own for `chat` when given, as [`text_open_on`].
+pub fn http_on(method: &str, url: &str, headers: &[(String, String)], body: &[u8], chat: Option<&str>) -> Result<(u16, Vec<u8>)> {
     let (tls, rest) = match (url.strip_prefix("https://"), url.strip_prefix("http://")) {
         (Some(rest), _) => (true, rest),
         (None, Some(rest)) => (false, rest),
@@ -605,7 +622,10 @@ pub fn http(method: &str, url: &str, headers: &[(String, String)], body: &[u8]) 
     }
     head.push_str("\r\n");
     let tor = client()?;
-    let key = format!("matrix {}", address.host);
+    let key = match chat {
+        Some(chat) => format!("chat {chat} {}", address.host),
+        None => format!("matrix {}", address.host),
+    };
     let way = nostr_way(&key);
     let body = body.to_vec();
     runtime()?

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
+import { EDITION } from './edition';
 import { secureGet, secureSet } from './secure';
 
 // Which releases Updates offers (Settings → General → Updates): of which edition, Erevos or
@@ -22,8 +23,8 @@ export type UpdateEdition = 'erevos' | 'plus';
 export type ChannelName = 'erevos' | 'erevos-beta' | 'plus' | 'plus-beta';
 export const CHANNELS: readonly ChannelName[] = ['erevos', 'erevos-beta', 'plus', 'plus-beta'];
 
-/** The edition of this build: the plain Erevos. */
-export const INSTALLED_EDITION: UpdateEdition = 'erevos';
+/** The edition of this build (lib/edition.ts): Erevos+, or the plain Erevos. */
+export const INSTALLED_EDITION: UpdateEdition = EDITION === 'plus' ? 'plus' : 'erevos';
 
 /** Whether `version` (2.1.0, 7.0.1-beta.2) is a beta or an alpha. The release candidates before 7.0.0 were the regular line, so they are not. */
 export function isTestVersion(version: string): boolean {

@@ -64,6 +64,17 @@ export function ensureStyleFonts(style: StyleName): Promise<void> {
   return p;
 }
 
+/**
+ * A style's own font files with the weight each stands for (regular 400, semibold 600, bold 700),
+ * for a page that is not the app's (Messenger in its case, lib/messenger-case-look.ts); null for a
+ * style in the system's or the platform's letters.
+ */
+export function styleFontFiles(style: StyleName): { weight: number; source: FontSource }[] | null {
+  if (!isOwn(style)) return null;
+  const { fonts, sources } = FACES[style];
+  return ([[400, fonts.regular], [600, fonts.semibold], [700, fonts.bold]] as const).map(([weight, name]) => ({ weight, source: sources[name] }));
+}
+
 /** A style's fonts for the shape tokens (applyStyle): null until they are loaded, as an unknown name would show every text in the regular weight. */
 export function styleFonts(style: StyleName): Fonts | null {
   return isOwn(style) && ready.has(style) ? FACES[style].fonts : null;

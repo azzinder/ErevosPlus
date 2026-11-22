@@ -104,6 +104,9 @@ export interface Core {
   torStart?(bridges: string): Promise<void>;
   torStatus?(): Promise<string>;
   torStop?(): Promise<void>;
+  /** The SOCKS5 door into Tor for Signal's and Telegram's engines (lib/tor.ts torSocks), as JSON {port, password}: missing in a build from before it. */
+  torSocks?(): Promise<string>;
+  torSocksClose?(): Promise<void>;
   torRequest?(url: string, token: string, message: Uint8Array): Promise<Uint8Array>;
   torOpen?(url: string, token: string): Promise<Uint8Array>;
   torCall?(id: Uint8Array, message: Uint8Array): Promise<Uint8Array>;
@@ -232,6 +235,18 @@ export function relaySeal(relayKey: Uint8Array, senderId: Uint8Array, message: U
 /** Whether this build can reach relays through Tor. */
 export function canTor(): boolean {
   return typeof core?.torRequest === 'function';
+}
+
+/** Whether this build has the SOCKS5 door into Tor (lib/tor.ts torSocks). */
+export function canTorSocks(): boolean {
+  return typeof core?.torSocks === 'function';
+}
+
+/** Opens the SOCKS5 door into Tor, or gives the one open: {port, password} as JSON. */
+export function torSocksDoor(): Promise<string> {
+  const it = need();
+  if (!it.torSocks) throw new NoCoreError();
+  return it.torSocks();
 }
 
 /** The core's Tor calls, or an error saying this build has none. */

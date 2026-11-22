@@ -36,18 +36,19 @@ const tell = () => listeners.forEach((listener) => listener());
 /**
  * For a network screen: the account it shows, the hidden place's when `hidden`. While it shows it
  * is on top, so what is done there goes to that account; one of the hidden chats' screens is counted
- * among theirs, to go with them as they close (lib/hidden-contacts.ts).
+ * among theirs, to go with them as they close (lib/hidden-contacts.ts). `kept`: a chat of the space's
+ * own account kept in the hidden chats: the space's account, on a screen of the hidden chats'.
  */
-export function useNetworkWhere(hidden: boolean): NetworkWhere {
-  const where: NetworkWhere = hidden ? 'place' : 'space';
+export function useNetworkWhere(hidden: boolean, kept = false): NetworkWhere {
+  const where: NetworkWhere = hidden && !kept ? 'place' : 'space';
   useEffect(() => {
-    const left = where === 'place' ? enterHiddenScreen() : undefined;
+    const left = where === 'place' || kept ? enterHiddenScreen() : undefined;
     const gone = showWhere(where);
     return () => {
       left?.();
       gone();
     };
-  }, [where]);
+  }, [where, kept]);
   return where;
 }
 
@@ -64,7 +65,11 @@ export function showWhere(where: NetworkWhere): () => void {
   };
 }
 
-/** The route params that open another network screen for the same account. */
-export function whereParams(where: NetworkWhere): { hidden?: string } {
-  return where === 'place' ? { hidden: '1' } : {};
+/**
+ * The route params that open another network screen for the same account. `kept`: a chat of the
+ * space's own account kept in the open hidden chats (lib/telegram-store.ts telegramHideChat), whose
+ * screens use the space's account but are counted among the hidden chats', to go with them.
+ */
+export function whereParams(where: NetworkWhere, kept = false): { hidden?: string; kept?: string } {
+  return kept ? { kept: '1' } : where === 'place' ? { hidden: '1' } : {};
 }

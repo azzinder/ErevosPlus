@@ -1,0 +1,113 @@
+// SPDX-FileCopyrightText: 2026 azzinder
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'expo.modules.erevostelegram'
+version = '0.0.1'
+
+// Telegram is only in the ErevosGram build (docs/erevosgram.md): EREVOS_TELEGRAM=1 when the app is
+// built, or -PerevosTelegram=1. Every other build, the F-Droid one too, takes src/stub: a module
+// that says Telegram is not here, with no TDLib, no Telegram code and no Telegram keys in the APK.
+// The ErevosGram build takes src/full and TDLib from tdlib/ at the top of the repository, built by
+// scripts/build-tdlib.sh; its Telegram API id and hash come from EREVOS_TG_API_ID and
+// EREVOS_TG_API_HASH (secrets, never in the repository).
+def telegram = (System.getenv('EREVOS_TELEGRAM') ?: findProperty('erevosTelegram') ?: '') == '1'
+def repoRoot = file('../../../..')
+def tdlib = new File(repoRoot, 'tdlib')
+def secret = { String name -> System.getenv(name) ?: (findProperty(name) ?: '') }
+
+// Telegram calls (Calls.kt): NTgCalls 3.0.5 from Maven Central, unchanged, with src/calls, in a room
+// of their own. Their classes go, as dex, into the asset tgcalls.jar and never into the app's dex,
+// where org.jitsi:webrtc already has classes of the same names; their native libraries go with the
+// app's. Only in the ErevosGram build.
+def ntgcallsVersion = '3.0.5'
+def tgcallsOut = layout.buildDirectory.dir('tgcalls')
+configurations {
+  tgcalls { transitive = false }
+}
+dependencies {
+  if (telegram) tgcalls "io.github.pytgcalls:ntgcalls:${ntgcallsVersion}@aar"
+  // The camera and drawing of video calls (CallVideo.kt) use the app's own WebRTC, which
+  // react-native-webrtc already puts in the app: only compiled against here.
+  if (telegram) compileOnly 'org.jitsi:webrtc:155.+'
+  // Stickers that move (StickerView.kt): Telegram's .tgs ones are Lottie animations.
+  if (telegram) implementation 'com.airbnb.android:lottie:6.6.10'
+}
+
+android {
+  namespace 'expo.modules.erevostelegram'
+
+  defaultConfig {
+    versionCode 1
+    versionName '0.0.1'
+    buildConfigField 'int', 'TG_API_ID', (telegram ? (secret('EREVOS_TG_API_ID') ?: '0') : '0')
+    buildConfigField 'String', 'TG_API_HASH', "\"${telegram ? secret('EREVOS_TG_API_HASH') : ''}\""
+  }
+  buildFeatures {
+    buildConfig true
+  }
+  sourceSets {
+    main {
+      java.srcDirs = telegram ? ['src/full/java', new File(tdlib, 'java')] : ['src/stub/java']
+      if (telegram) {
+        jniLibs.srcDirs = [new File(tdlib, 'libs'), tgcallsOut.get().dir('aar/jni').asFile]
+        assets.srcDirs += [tgcallsOut.get().dir('assets').asFile]
+      }
+    }
+  }
+}
+
+if (telegram) {
+  def unpack = tasks.register('tgcallsUnpack', Sync) {
+    from { zipTree(configurations.tgcalls.singleFile) }
+    include 'classes.jar', 'libs/*.jar', 'jni/**'
+    into tgcallsOut.map { it.dir('aar') }
+  }
+  def compileCalls = tasks.register('tgcallsCompile', JavaCompile) {
+    dependsOn unpack
+    source = fileTree('src/calls/java')
+    destinationDirectory = tgcallsOut.map { it.dir('classes') }
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+    // android.jar on the classpath, not the boot classpath: javac ignores -bootclasspath for
+    // Java 9 and later targets, and the JDK's own java.* stay ahead of android.jar's.
+    classpath = files(android.bootClasspath, tgcallsOut.map { it.file('aar/classes.jar') }, tgcallsOut.map { it.dir('aar/libs').asFileTree })
+  }
+  // d8 takes jars and class files, not a folder of classes: Engine goes into a jar first.
+  def callsJar = tasks.register('tgcallsJar', Jar) {
+    from compileCalls
+    archiveFileName = 'engine.jar'
+    destinationDirectory = tgcallsOut
+  }
+  // d8 of the build tools, as the app's own dex is made; the result is a jar of classes.dex.
+  def dex = tasks.register('tgcallsDex', Exec) {
+    dependsOn callsJar
+    def out = tgcallsOut.map { it.file('assets/tgcalls.jar') }
+    inputs.files(callsJar, unpack)
+    outputs.file(out)
+    doFirst {
+      def aar = tgcallsOut.get().dir('aar').asFile
+      def d8 = new File(android.sdkDirectory, "build-tools/${android.buildToolsVersion}/d8")
+      def jars = [new File(aar, 'classes.jar')] + (new File(aar, 'libs').listFiles()?.findAll { it.name.endsWith('.jar') } ?: [])
+      out.get().asFile.parentFile.mkdirs()
+      commandLine([d8.absolutePath, '--release', '--min-api', "${android.defaultConfig.minSdkVersion?.apiLevel ?: 24}",
+        '--output', out.get().asFile.absolutePath] +
+        android.bootClasspath.collectMany { ['--lib', it.absolutePath] } +
+        jars*.absolutePath + [tgcallsOut.get().file('engine.jar').asFile.absolutePath])
+    }
+  }
+  tasks.named('preBuild') {
+    dependsOn dex
+    doFirst {
+      if (!new File(tdlib, 'java/org/drinkless/tdlib/JsonClient.java').exists()) {
+        throw new GradleException('TDLib is missing: run scripts/build-tdlib.sh first (the ErevosGram build).')
+      }
+      if (!(secret('EREVOS_TG_API_ID') ==~ /[1-9][0-9]*/) || secret('EREVOS_TG_API_HASH').isEmpty()) {
+        throw new GradleException('EREVOS_TG_API_ID and EREVOS_TG_API_HASH are missing (the ErevosGram build).')
+      }
+    }
+  }
+}

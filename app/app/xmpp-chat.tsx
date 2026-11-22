@@ -9,6 +9,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KeyboardAwareScrollView } from '../components/keyboard';
 import { LinkedText } from '../components/linked-text';
+import { ChatTorSwitch } from '../components/account-tor';
+import { accountNeverStraight, accountThroughTor } from '../lib/account-tor';
+import { hiddenKeep, ipGate } from '../components/ip-warning';
+import { IpStop } from '../lib/ip-warning';
+import { canXmppTor } from '../lib/xmpp-net';
 import { StarredHere, useKeep } from '../components/keep-actions';
 import { Missing, ReactionChips } from '../components/matrix-message';
 import { MicButton, RecordingLine, useVoiceCapture } from '../components/matrix-voice';
@@ -55,18 +60,18 @@ import { t } from '../lib/i18n';
 import { mimeOfName } from '../lib/matrix-media';
 import type { Nameable } from '../lib/mentions';
 import { cardFile, withNick } from '../lib/message-carry';
-import { useNetworkWhere } from '../lib/network-place';
+import { actingWhere, useNetworkWhere } from '../lib/network-place';
 import { pickFile } from '../lib/pick-file';
 import { pickPhoto } from '../lib/pick-photo';
 import { useSharedFiles, useSharedWords } from '../lib/shared-here';
 import { pickVideo } from '../lib/pick-video';
 import { stickerMeta } from '../lib/own-stickers';
 import { rtc } from '../lib/webrtc';
-import { forwardable, isBlocked, isXmppId, nameOf, onXmppTyping, plainIn, TYPING_SHOWS, XMPP_CONTACT_NAME, xmppChatList, xmppDevices, xmppPresence, xmppTyping, type XmppMessage, type XmppState } from '../lib/xmpp';
+import { forwardable, isBlocked, isXmppId, nameOf, onXmppTyping, plainIn, TYPING_SHOWS, XMPP_CONTACT_NAME, xmppChatList, xmppDevices, xmppPresence, xmppTorWay, xmppTyping, type XmppMessage, type XmppState } from '../lib/xmpp';
 import { presenceText } from '../lib/net-presence';
 import { pinsShown, reactionsShown } from '../lib/xmpp-actions';
 import { startXmppCall } from '../lib/xmpp-calls';
-import { isSound, shownType, XMPP_FILE_MOST } from '../lib/xmpp-files';
+import { fileOfOwnServer, isSound, shownType, XMPP_FILE_MOST, type XmppFile } from '../lib/xmpp-files';
 import { DESCRIPTION_LONGEST, groupPeople, rankOf, type XmppRoom } from '../lib/xmpp-muc';
 import { xmppGroupCalls, xmppPlaceGroupCalls } from '../lib/xmpp-muji';
 import { fingerprint, NoOmemoError } from '../lib/xmpp-omemo';
@@ -111,6 +116,8 @@ import {
   xmppWriting,
   type XmppOutgoingFile,
   type XmppSticker,
+  xmppActingTor,
+  xmppSetChatTor,
 } from '../lib/xmpp-store';
 import { checkedChatNotify } from '../lock/chat-notify';
 import { openOwnSticker, type OwnSticker } from '../lock/sticker-data';
@@ -361,14 +368,34 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   }
 
   const fail = (error: unknown) => setNote(error instanceof Error ? error.message : String(error));
+  // A hidden place's account keeps its warnings in its own hidden data, never the space's.
+  const ipKeep = where !== 'space' ? { keep: hiddenKeep() } : {};
+
+  // Before sending in the chat `to` while the account does not go through Tor now: its server sees
+  // this phone's internet address then (lib/ip-warning.ts), said once a chat. The way not to:
+  // «Through Tor» for that chat, where Erevos has Tor.
+  const sendGate = (to: string) =>
+    !state || accountThroughTor(xmppTorWay(state), true)
+      ? Promise.resolve(true)
+      : ipGate({ network: 'XMPP', act: 'send', of: `xmpp:${to}`, own: true, ...ipKeep }, canXmppTor() ? { label: t('Account through Tor'), run: () => throughTorNow(to) } : undefined);
+  // Turns «Through Tor» on for the chat `to`, then waits, a minute at most, for the account to be
+  // connected again, now through Tor, so what was being sent goes that way.
+  async function throughTorNow(to: string) {
+    await xmppSetChatTor(to, true);
+    for (let waited = 0; waited < 60_000 && !xmppNow(where).online; waited += 500) await new Promise((resolve) => setTimeout(resolve, 500));
+  }
 
   // The preview of the first link in words typed: only in a chat without encryption (the preview
   // would tell the servers what the link is), when this phone makes them; only through Tor with
-  // their own Tor switch on, else never while the space sends everything through Tor.
+  // their own Tor switch on, else never while the space, or the account, sends everything through Tor.
   async function previewOf(text: string) {
     const way = where === 'space' && CAN_PREVIEW && chat && plainIn(chat) ? previewWay(previews, previewsTor, throughTor()) : 'none';
+    // An account that goes only through Tor makes previews only through Tor too.
+    if (way === 'straight' && state && accountNeverStraight(xmppTorWay(state))) return null;
     const link = way !== 'none' ? firstLink(text) : null;
     if (!link) return null;
+    // Made straight, the site sees this phone's address: said first; not gone on, it goes without one.
+    if (way === 'straight' && !(await ipGate({ network: 'XMPP', act: 'preview', of: 'xmpp', ...ipKeep }))) return null;
     setNote(t('Making the link’s preview…'));
     const made = await makePreview(link, way === 'tor');
     setNote('');
@@ -379,6 +406,11 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function send(text: string, to?: string, lasts = 0) {
     if (!jid) return;
     setNote('');
+    // Not gone on: the words come back in the field, not lost.
+    if (!(await sendGate(jid))) {
+      setDraft((typed) => (typed.trim() ? typed : text));
+      return;
+    }
     try {
       const before = lasts ? await xmppAct(async (s) => idsIn(s, jid)) : null;
       await (to ? xmppReply(jid, text, to) : xmppSend(jid, text, to ? null : await previewOf(text)));
@@ -419,6 +451,7 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function sendOut(held: { file: XmppOutgoingFile } | { sticker: XmppSticker }) {
     if (!jid) return;
     setNote('');
+    if (!(await sendGate(jid))) return;
     setSending(true);
     try {
       await ('sticker' in held ? xmppSendSticker(jid, held.sticker) : xmppSendFile(jid, held.file));
@@ -549,8 +582,12 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     setForwarding(null);
     selection.clear();
     if (!messages.length || !state) return;
-    setNote(t('Forwarding…'));
-    xmppForward(to, messages).then(() => setNote(t('Forwarded to {name}.', { name: nameOf(state, to) })), fail);
+    void (async () => {
+      if (!(await sendGate(to))) return;
+      setNote(t('Forwarding…'));
+      await xmppForward(to, messages);
+      setNote(t('Forwarded to {name}.', { name: nameOf(state, to) }));
+    })().catch(fail);
   }
 
   // Whether a message can be deleted for everyone: one of ours, which in a group the room named.
@@ -562,7 +599,7 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     const actions: MenuAction[] = [];
     if (notSent(message)) {
       if (copyable(message)) actions.push({ title: t('Copy'), onPress: () => void copy(message.text) });
-      actions.push({ title: t('Send again'), onPress: () => jid && void xmppSendAgain(jid, message.id).catch(fail) });
+      actions.push({ title: t('Send again'), onPress: () => jid && void sendGate(jid).then((go) => (go ? xmppSendAgain(jid, message.id) : undefined)).catch(fail) });
       actions.push({ title: t('Delete'), danger: true, onPress: () => jid && void xmppDropUnsent(jid, message.id).catch(fail) });
       return actions;
     }
@@ -599,8 +636,8 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     actions.push(
       ...keep.actions({
         star: message.locked ? null : { id: message.id, at: message.at, mine: message.mine, line: lineOf(message) },
-        sticker: file && shownType(file).startsWith('image/') ? () => xmppFile(file) : null,
-        file: file ? { name: file.name, mime: shownType(file), fetch: () => xmppFile(file) } : null,
+        sticker: file && shownType(file).startsWith('image/') ? () => fetchFile(file) : null,
+        file: file ? { name: file.name, mime: shownType(file), fetch: () => fetchFile(file) } : null,
         remote: true,
       }),
     );
@@ -632,6 +669,8 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       setNote(t('There is a call already.'));
       return;
     }
+    // A call never goes through Tor: the call relay sees this phone's address.
+    if (!(await ipGate({ network: 'XMPP', act: 'call', of: `xmpp:${jid}`, ...ipKeep }))) return;
     if (!(await callPermissions(video))) {
       setNote(video ? t('A video call needs the camera and the microphone.') : t('A call needs the microphone.'));
       return;
@@ -650,6 +689,7 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     const calls = where === 'place' ? xmppPlaceGroupCalls : xmppGroupCalls;
     const going = groupCallGoingOn(jid);
     const video = going ? going.video : asked;
+    if (!(await ipGate({ network: 'XMPP', act: 'call', of: `xmpp:${jid}`, ...ipKeep }))) return;
     if (!(await callPermissions(video))) {
       setNote(video ? t('A video call needs the camera and the microphone.') : t('A call needs the microphone.'));
       return;
@@ -995,6 +1035,8 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
                 />
               </Row>
               <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} />
+              {/* «Through Tor» for this chat or group: one connection carries the account's chats, so the whole account then goes only through Tor. Off unless turned on. */}
+              {canXmppTor() ? <ChatTorSwitch network="XMPP" on={chat?.tor === true} disabled={!state} onChange={(on) => void xmppSetChatTor(jid, on).catch(fail)} /> : null}
               {/* A contact's name of our own: their item's in the account's contacts, which its other apps show too. */}
               {!room && state.roster[jid] ? (
                 <OwnName
@@ -1379,6 +1421,27 @@ function Members({ state, jid, room, fail }: { state: XmppState; jid: string; ro
 /** The message an answer is to, as the answer quotes it, and going to it. */
 type Answer = { name: string; line: string; onPress: () => void };
 
+/**
+ * A file a message names, fetched: from a server other than the account's own (the sender's HTTP
+ * upload host) and not through Tor, that server sees this phone's internet address, so that is said
+ * first, once a server (lib/ip-warning.ts); not gone on, it is not fetched.
+ */
+async function fetchFile(file: XmppFile): Promise<Uint8Array> {
+  const account = xmppActingTor();
+  if (account && !accountThroughTor(account.way, true) && !fileOfOwnServer(file, account.jid)) {
+    let host = '';
+    try {
+      host = new URL(file.url).hostname.toLowerCase();
+    } catch {
+      // Named by the whole address then.
+    }
+    const keep = actingWhere() === 'place' ? { keep: hiddenKeep() } : {};
+    // Not gone on: not fetched, and nothing more said (the file shows as before).
+    if (!(await ipGate({ network: 'XMPP', act: 'file', of: `xmpp-file:${host || file.url.slice(0, 120)}`, ...keep }))) throw new IpStop();
+  }
+  return xmppFile(file);
+}
+
 function Bubble({ message, group, me, answered, chosen, onPress, onReact, onMenu, onDuration, onLayout, starred }: {
   message: XmppMessage;
   group: boolean;
@@ -1456,7 +1519,7 @@ function Bubble({ message, group, me, answered, chosen, onPress, onReact, onMenu
             <Text tone="muted">{t('Locked: this message could not be opened on this device.')}</Text>
           ) : file ? (
             // A sound shows as a voice message, as the other apps send one.
-            <NetworkFile name={file.name} type={shownType(file)} size={file.size} duration={file.duration} fetch={() => xmppFile(file)} onMenu={onMenu} onDuration={onDuration} />
+            <NetworkFile name={file.name} type={shownType(file)} size={file.size} duration={file.duration} fetch={() => fetchFile(file)} onMenu={onMenu} onDuration={onDuration} />
           ) : (
             // Not selectable when it has a menu: holding the words opens it, which can copy them.
             <>

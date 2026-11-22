@@ -44,8 +44,6 @@ export const xmpp: Record<string, string> = {
   "Locked: this message could not be opened on this device.": "Gesperrt: Diese Nachricht ließ sich auf diesem Gerät nicht öffnen.",
   "not encrypted": "nicht verschlüsselt",
   "Chat with people on XMPP, who use Conversations, Monal, Gajim, Dino or another XMPP app. Messages are encrypted with OMEMO, but these chats are not anonymous: the XMPP server sees who talks with whom, and when.": "Chatte mit Menschen auf XMPP, die Conversations, Monal, Gajim, Dino oder eine andere XMPP-App nutzen. Nachrichten werden mit OMEMO verschlüsselt, aber diese Chats sind nicht anonym: Der XMPP-Server sieht, wer mit wem spricht und wann.",
-  "Through Tor: the XMPP server does not see your address.": "Über Tor: Der XMPP-Server sieht deine Adresse nicht.",
-  "Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.": "Gerade nicht über Tor: Der XMPP-Server sieht deine Adresse. Tor findest du unter Einstellungen → Relay und Netze → Tor.",
   "XMPP address": "XMPP-Adresse",
   "Only when the server is not the one in your address, or cannot be found. A name, name:port or a wss:// address.": "Nur wenn der Server nicht der in deiner Adresse ist oder nicht gefunden wird. Ein Name, Name:Port oder eine wss://-Adresse.",
   "Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.": "Erevos meldet sich als neues Gerät des Kontos an und hält die Anmeldung nur in diesem Bereich verschlüsselt.",
@@ -143,4 +141,8 @@ export const xmpp: Record<string, string> = {
     "Dein Relay nimmt noch keine XMPP-Meldungen an: Es braucht ein Update.",
   "Your XMPP server does not send notices to apps that are away.":
     "Dein XMPP-Server schickt keine Meldungen an Apps, die gerade nicht laufen.",
+  "Always through Tor":
+    "Immer über Tor",
+  "This XMPP account goes only through Tor, which this server address cannot.":
+    "Dieses XMPP-Konto geht nur über Tor, was mit dieser Serveradresse nicht geht.",
 };

@@ -1,0 +1,193 @@
+// SPDX-FileCopyrightText: 2026 azzinder
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'expo.modules.erevosmessenger'
+version = '0.0.1'
+
+// Messenger, Signal and Session are in Erevos+ (docs/editions.md), not in the plain Erevos
+// (EREVOS_EDITION=lite), which takes src/stub: a module that says they are not here, with none of
+// their code in the APK. Erevos+ takes src/full and the engines from messenger/ at the top of the
+// repository:
+// - Messenger's engine (Go, messenger/core) through gomobile bind: its classes.jar and its .so;
+// - Signal's (Rust, messenger/signal, presage) through cargo-ndk, as liberevos_signal.so;
+// - Session's (Kotlin) over libsession-util-android, from its makers' own Maven repository.
+def full = (System.getenv('EREVOS_EDITION') ?: 'plus') != 'lite'
+def repoRoot = file('../../../..')
+def messenger = new File(repoRoot, 'messenger')
+def engines = layout.buildDirectory.dir('engines')
+
+repositories {
+  maven {
+    url 'https://oxen.rocks/session-foundation/libsession-util-android/maven'
+    content { includeGroup 'org.sessionfoundation' }
+  }
+}
+
+android {
+  namespace 'expo.modules.erevosmessenger'
+  // The app's NDK, which the engines' builds below are given (android.ndkDirectory), as erevos-core's.
+  if (rootProject.hasProperty('ndkVersion')) {
+    ndkVersion rootProject.ext.ndkVersion
+  }
+
+  defaultConfig {
+    versionCode 1
+    versionName '0.0.1'
+  }
+  sourceSets {
+    main {
+      java.srcDirs = full ? ['src/full/java', engines.get().dir('kotlin').asFile] : ['src/stub/java']
+      if (full) {
+        manifest.srcFile 'src/full/AndroidManifest.xml'
+        jniLibs.srcDirs = [engines.get().dir('jni').asFile]
+        assets.srcDirs += [engines.get().dir('assets').asFile]
+      }
+    }
+  }
+}
+
+if (full) {
+  // libsession-util-android is built with a newer Kotlin than the app's.
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions.freeCompilerArgs.add('-Xskip-metadata-version-check')
+  }
+
+  // The engines' Kotlin, as messenger/android has it, without its screens (eu.erevos.messenger.engine):
+  // compiled here from there, so both apps carry the same engines.
+  def kotlinSrc = new File(messenger, 'android/app/src/main/java')
+  def engineKotlin = tasks.register('messengerKotlin', Sync) {
+    from(kotlinSrc) {
+      include 'eu/erevos/messenger/engine/**', 'eu/erevos/messenger/signal/Signal.kt', 'eu/erevos/messenger/session/Session.kt',
+        'eu/erevos/messenger/session/SessionNet.kt', 'eu/erevos/messenger/session/SessionKeys.kt', 'eu/erevos/messenger/KeyWrap.kt',
+        // Session's calls and their screen (plain views, no Compose).
+        'eu/erevos/messenger/calls/SessionCalls.kt', 'eu/erevos/messenger/calls/SessionCallActivity.kt'
+    }
+    into engines.map { it.dir('kotlin') }
+  }
+  // Session's word list and the certificates of its seed nodes.
+  def engineAssets = tasks.register('messengerAssets', Sync) {
+    from(new File(messenger, 'android/app/src/main/assets/session'))
+    into engines.map { it.dir('assets/session') }
+  }
+
+  dependencies {
+    implementation files(engines.map { it.file('core/classes.jar') })
+    // The same version messenger/android uses (messenger/android/gradle/libs.versions.toml).
+    implementation 'org.sessionfoundation:libsession-util-android:1.1.0-58-gc5c6c89'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    // Signal's captcha only through Tor (WebSignInActivity): the web view's proxy, set from the app.
+    implementation 'androidx.webkit:webkit:1.12.1'
+    // Session calls (messenger/.../calls) use the app's own WebRTC, which react-native-webrtc
+    // already puts in the app (org.jitsi:webrtc, the same org.webrtc classes): only compiled
+    // against here. messenger/android's own app takes io.github.webrtc-sdk instead; both cannot be
+    // in one APK.
+    compileOnly 'org.jitsi:webrtc:155.+'
+  }
+
+  // gomobile and gobind as .github/workflows/erevosgram.yml installs them, on the PATH or in GOPATH/bin.
+  def goBin = new File(System.getenv('GOPATH') ?: "${System.getProperty('user.home')}/go", 'bin')
+  def gomobile = new File(goBin, 'gomobile').canExecute() ? new File(goBin, 'gomobile').path : 'gomobile'
+  def bind = tasks.register('messengerCore', Exec) {
+    description = 'Builds Messenger\'s engine (messenger/core, Go) with gomobile bind.'
+    def aar = engines.map { it.file('core.aar') }
+    inputs.dir(new File(messenger, 'core'))
+    inputs.files(new File(messenger, 'go.mod'), new File(messenger, 'go.sum'))
+    outputs.file(aar)
+    workingDir messenger
+    environment 'ANDROID_NDK_HOME', android.ndkDirectory.path
+    commandLine gomobile, 'bind', '-target=android/arm64', '-androidapi', '26', '-ldflags=-s -w', '-trimpath', '-o', aar.get().asFile.path, './core'
+  }
+  def unpack = tasks.register('messengerCoreUnpack', Sync) {
+    dependsOn bind
+    from { zipTree(engines.get().file('core.aar')) }
+    include 'classes.jar', 'jni/**'
+    into engines.map { it.dir('core') }
+  }
+  def jniCore = tasks.register('messengerCoreJni', Copy) {
+    dependsOn unpack
+    from { engines.get().dir('core/jni') }
+    into engines.map { it.dir('jni') }
+  }
+
+  def cargoHome = System.getenv('CARGO_HOME') ?: "${System.getProperty('user.home')}/.cargo"
+  def cargo = new File(cargoHome, 'bin/cargo').canExecute() ? "${cargoHome}/bin/cargo" : 'cargo'
+  def signal = tasks.register('messengerSignal', Exec) {
+    description = 'Builds Signal\'s engine (messenger/signal, Rust) with cargo-ndk, as liberevos_signal.so.'
+    inputs.dir(new File(messenger, 'signal/src'))
+    inputs.files(new File(messenger, 'signal/Cargo.toml'), new File(messenger, 'signal/Cargo.lock'))
+    outputs.dir(engines.map { it.dir('signal') })
+    workingDir new File(messenger, 'signal')
+    environment 'ANDROID_NDK_HOME', android.ndkDirectory.path
+    commandLine cargo, 'ndk', '-t', 'arm64-v8a', '-P', '26', '-o', engines.get().dir('signal').asFile.path, 'build', '--release'
+  }
+  def jniSignal = tasks.register('messengerSignalJni', Copy) {
+    dependsOn signal
+    from { engines.get().dir('signal') }
+    into engines.map { it.dir('jni') }
+  }
+
+  // Signal's calls (SignalCalls.kt): RingRTC, Signal's own calling library, from Maven Central,
+  // unchanged, with src/ringrtc (Engine.java), in a room of their own. RingRTC brings its own WebRTC
+  // (org.webrtc.* in libs/libwebrtc.jar, and libringrtc_rffi.so), and the app already has
+  // org.jitsi:webrtc, with classes of the same names: so these classes go, as dex, into the asset
+  // ringrtc.jar, never into the app's dex, as the Telegram calls do (modules/erevos-telegram).
+  // Their native libraries go with the app's, for arm64 as the engines are; the app's build strips
+  // their debug symbols as it does its own.
+  def ringrtcVersion = '2.61.0'
+  configurations {
+    ringrtc { transitive = false }
+  }
+  dependencies {
+    ringrtc "org.signal:ringrtc-android:${ringrtcVersion}@aar"
+  }
+  def ringrtcOut = engines.map { it.dir('ringrtc') }
+  def ringrtcUnpack = tasks.register('ringrtcUnpack', Sync) {
+    from { zipTree(configurations.ringrtc.singleFile) }
+    include 'classes.jar', 'libs/*.jar', 'jni/arm64-v8a/**'
+    into ringrtcOut.map { it.dir('aar') }
+  }
+  def ringrtcCompile = tasks.register('ringrtcCompile', JavaCompile) {
+    dependsOn ringrtcUnpack
+    source = fileTree('src/ringrtc/java')
+    destinationDirectory = ringrtcOut.map { it.dir('classes') }
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+    // android.jar on the classpath, not the boot classpath: javac ignores -bootclasspath for
+    // Java 9 and later targets, and the JDK's own java.* stay ahead of android.jar's.
+    classpath = files(ringrtcOut.map { it.file('aar/classes.jar') }, ringrtcOut.map { it.dir('aar/libs').asFileTree }, android.bootClasspath)
+  }
+  def ringrtcJar = tasks.register('ringrtcJar', Jar) {
+    from ringrtcCompile
+    archiveFileName = 'engine.jar'
+    destinationDirectory = ringrtcOut
+  }
+  // d8 of the build tools, as the app's own dex is made; the result is a jar of classes.dex.
+  def ringrtcDex = tasks.register('ringrtcDex', Exec) {
+    dependsOn ringrtcJar
+    def out = engines.map { it.file('assets/ringrtc.jar') }
+    inputs.files(ringrtcJar, ringrtcUnpack)
+    outputs.file(out)
+    doFirst {
+      def aar = ringrtcOut.get().dir('aar').asFile
+      def d8 = new File(android.sdkDirectory, "build-tools/${android.buildToolsVersion}/d8")
+      def jars = [new File(aar, 'classes.jar')] + (new File(aar, 'libs').listFiles()?.findAll { it.name.endsWith('.jar') } ?: [])
+      out.get().asFile.parentFile.mkdirs()
+      commandLine([d8.absolutePath, '--release', '--min-api', "${android.defaultConfig.minSdkVersion?.apiLevel ?: 26}",
+        '--output', out.get().asFile.absolutePath] +
+        android.bootClasspath.collectMany { ['--lib', it.absolutePath] } +
+        jars*.absolutePath + [ringrtcOut.get().file('engine.jar').asFile.absolutePath])
+    }
+  }
+  def jniRingrtc = tasks.register('ringrtcJni', Copy) {
+    dependsOn ringrtcUnpack
+    from { ringrtcOut.get().dir('aar/jni') }
+    into engines.map { it.dir('jni') }
+  }
+  // engineAssets keeps only Session's folder in assets/session: ringrtc.jar sits next to it.
+
+  tasks.named('preBuild') { dependsOn engineKotlin, engineAssets, jniCore, jniSignal, ringrtcDex, jniRingrtc }
+}

@@ -16,7 +16,8 @@ import { mutedNow, type ChatNotify } from '../lock/chat-notify';
 // number leaves it out. Kept apart from React Native, so the checks run in Node.
 
 // And on a linked device, the phone's SMS (lib/sms-mirror.ts): `sms:` and the conversation's address.
-export const NETWORK_PREFIXES = ['matrix:', 'xmpp:', 'nostr:', 'sms:'] as const;
+// In Erevos+, Messenger, Signal and Session (lib/messenger-store.ts): the service, `:` and the chat's key.
+export const NETWORK_PREFIXES = ['matrix:', 'xmpp:', 'nostr:', 'telegram:', 'sms:', 'messenger:', 'signal:', 'session:'] as const;
 
 /** Whether `where` is a chat on another network. */
 export const isNetworkChat = (where: string): boolean => NETWORK_PREFIXES.some((prefix) => where.startsWith(prefix));

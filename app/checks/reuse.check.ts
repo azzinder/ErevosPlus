@@ -19,10 +19,10 @@ import { test } from 'node:test';
 const REPO = join(import.meta.dirname, '..', '..');
 const toml = readFileSync(join(REPO, 'REUSE.toml'), 'utf8');
 
-/** The path globs of REUSE.toml, as regular expressions (** = any folders, * = within one name). */
+/** The path globs of REUSE.toml, as regular expressions (** = any folders, a last /** all within, * = within one name). */
 const globs = [...toml.matchAll(/^path\s*=\s*(\[[^\]]*\]|"[^"]*")/gm)]
   .flatMap((m) => [...m[1].matchAll(/"([^"]+)"/g)].map((g) => g[1]))
-  .map((g) => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '\0').replace(/\*/g, '[^/]*').replace(/\0/g, '(?:.*/)?') + '$'));
+  .map((g) => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '\0').replace(/\*\*/g, '\u0001').replace(/\*/g, '[^/]*').replace(/\0/g, '(?:.*/)?').replace(/\u0001/g, '.*') + '$'));
 
 const files = execFileSync('git', ['ls-files', '-z'], { cwd: REPO, encoding: 'utf8' })
   .split('\0')

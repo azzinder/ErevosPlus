@@ -12,6 +12,7 @@ import { XmppAccount } from '../components/xmpp-account';
 import { XmppFind } from '../components/xmpp-find';
 import { XmppRegister } from '../components/xmpp-register';
 import { SayTypingSwitch } from '../components/say-typing';
+import { AccountTorChoice } from '../components/account-tor';
 import { pickAvatar } from '../lib/pick-avatar';
 import { Button, Card, Chip, Field, Input, Page, Row, SectionTitle, Text } from '../components/ui';
 import { ask } from '../lib/alert';
@@ -26,9 +27,10 @@ import { askReadAll, toRead } from '../lib/read-all';
 import { onTorReady } from '../lib/relay';
 import { isXmppId, nameOf, xmppChatList, type XmppChat, type XmppState } from '../lib/xmpp';
 import { isSound } from '../lib/xmpp-files';
-import { xmppThroughTor } from '../lib/xmpp-net';
+import type { AccountTor } from '../lib/account-tor';
+import { canXmppTor } from '../lib/xmpp-net';
 import { fingerprint } from '../lib/xmpp-omemo';
-import { onXmppChange, runXmpp, xmppAddContact, xmppBlock, xmppCreateGroup, xmppDecline, xmppDeclineInvite, xmppJoinGroup, xmppNow, xmppPushOn, xmppSetAvatar, xmppSetPush, xmppSetSayTyping, xmppSignIn, xmppSignOut } from '../lib/xmpp-store';
+import { onXmppChange, runXmpp, xmppAddContact, xmppBlock, xmppCreateGroup, xmppDecline, xmppDeclineInvite, xmppJoinGroup, xmppNow, xmppPushOn, xmppSetAvatar, xmppSetPush, xmppSetSayTyping, xmppSetTor, xmppSignIn, xmppSignOut, xmppTor } from '../lib/xmpp-store';
 import { radius, space } from '../theme/colors';
 import { useColors } from '../theme/context';
 
@@ -48,6 +50,8 @@ export default function XmppScreen() {
   const [who, setWho] = useState('');
   const [password, setPassword] = useState('');
   const [server, setServer] = useState('');
+  // Before signing in: the new account's Tor choice from the start (lib/account-tor.ts), Off unless chosen.
+  const [newTor, setNewTor] = useState<AccountTor>('never');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [newId, setNewId] = useState('');
@@ -101,13 +105,17 @@ export default function XmppScreen() {
     </Text>
   );
 
-  // XMPP follows the space's Tor way (lib/xmpp-net.ts): the server sees this phone's address only without it.
-  const tor = canTor() ? (
-    <Text variant="caption" tone="muted">
-      {xmppThroughTor()
-        ? t('Through Tor: the XMPP server does not see your address.')
-        : t('Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.')}
-    </Text>
+  // The account's Tor (lib/account-tor.ts): its choice, Off unless chosen, which a chat «Through Tor»
+  // makes Always while on; on the web, which has no socket of its own, it says only that it does not.
+  const torNow = xmppTor(where);
+  const tor = canXmppTor() ? (
+    <AccountTorChoice
+      network="XMPP"
+      way={now.state ? torNow.own : newTor}
+      chatsThroughTor={now.state ? torNow.chats : false}
+      disabled={busy}
+      onChange={(way) => (now.state ? void run(() => xmppSetTor(way)) : setNewTor(way))}
+    />
   ) : null;
 
   const { loaded, state, problem, online } = now;
@@ -143,7 +151,7 @@ export default function XmppScreen() {
             disabled={busy || !isXmppId(who) || !password}
             onPress={() =>
               void run(async () => {
-                await xmppSignIn(who.trim(), password, server);
+                await xmppSignIn(who.trim(), password, server, newTor);
                 setPassword('');
               })
             }
@@ -154,8 +162,8 @@ export default function XmppScreen() {
               : t('Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.')}
           </Text>
         </Card>
-        <XmppRegister />
-        {tor}
+        {tor ? <Card>{tor}</Card> : null}
+        <XmppRegister tor={newTor} />
         {note || problem ? <Text tone="muted">{note || problem}</Text> : null}
       </Page>
     );
@@ -182,7 +190,6 @@ export default function XmppScreen() {
       <Text variant="caption" tone="muted">
         {t('Not anonymous: the XMPP server sees who talks with whom, and when.')}
       </Text>
-      {tor}
 
       {state.requests.length ? <SectionTitle title={t('Asks to add you')} /> : null}
       {state.requests.map((jid) => (
@@ -380,6 +387,8 @@ export default function XmppScreen() {
       <Card>
         <SayTypingSwitch on={!!state.sayTyping} server="XMPP" onChange={(on) => void run(() => xmppSetSayTyping(on))} />
       </Card>
+
+      {tor ? <Card>{tor}</Card> : null}
 
       {state.blocked?.length ? (
         <>

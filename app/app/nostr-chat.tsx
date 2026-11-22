@@ -62,6 +62,7 @@ import {
   nostrDmSetGuard,
   nostrDmSetLook,
   nostrDmSetNotify,
+  nostrDmSetTor,
   nostrDmSetSubject,
   nostrDmStickerPlace,
   nostrDmUnreact,
@@ -71,6 +72,10 @@ import {
   runNostrDm,
   type NostrOutgoingFile,
 } from '../lib/nostr-dm-store';
+import { canNostrTor, nostrChatsThroughTor } from '../lib/nostr-dm-net';
+import { accountTorOf } from '../lib/account-tor';
+import { hiddenKeep, ipGate } from '../components/ip-warning';
+import { IpStop } from '../lib/ip-warning';
 import { NOSTR_FILE_MOST, type NostrDmFile } from '../lib/nostr-files';
 import { stickerMeta } from '../lib/own-stickers';
 import { pickFile, TooLargeError } from '../lib/pick-file';
@@ -255,7 +260,32 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     for (const person of members ?? [key]) nostrDmFreshen(person);
   }, [key, !!chat, members?.join()]);
 
-  const fail = (error: unknown) => setNote(error instanceof Error ? error.message : String(error));
+  // Not going on at a warning (IpStop) failed nothing, so nothing is said of it.
+  const fail = (error: unknown) => {
+    if (!(error instanceof IpStop)) setNote(error instanceof Error ? error.message : String(error));
+  };
+  // A hidden place's warnings are kept with its hidden chats, never in the space's data.
+  const ipKeep = () => (where !== 'space' ? { keep: hiddenKeep() } : {});
+
+  // Whether what goes now goes through Tor: the chat by itself, or the account's way.
+  const throughTorNow = (to = key) => {
+    const s = nostrDmNow(where).state;
+    return !!to && !!s && ((!!s.chats[to]?.tor && canNostrTor()) || nostrChatsThroughTor(accountTorOf(s.tor)));
+  };
+  // Before what is sent can show this phone's address (lib/ip-warning.ts): said once, with the
+  // chat's «Through Tor» as the way not to, where there is Tor.
+  async function mayGo(to = key): Promise<boolean> {
+    if (!to) return false;
+    if (throughTorNow(to)) return true;
+    return ipGate({ network: 'Nostr', act: 'send', of: `nostr:${to}`, ...ipKeep() }, canNostrTor() ? { label: t('Through Tor for this chat'), run: () => nostrDmSetTor(to, true) } : undefined);
+  }
+  // Before a file of theirs is fetched from the server they chose without Tor: said once for the chat.
+  async function fetchTheirs(file: NostrDmFile, mine: boolean): Promise<Uint8Array> {
+    if (!mine && key && !throughTorNow() && !(await ipGate({ network: 'Nostr', act: 'file', of: `nostr:${key}`, ...ipKeep() }, canNostrTor() ? { label: t('Through Tor for this chat'), run: () => nostrDmSetTor(key, true) } : undefined))) {
+      throw new IpStop();
+    }
+    return nostrDmFile(file, key);
+  }
 
   // A photo, file or voice message goes as an answer too, to the message chosen while it is still there.
   async function sendPicked(pick: () => Promise<NostrOutgoingFile | null>) {
@@ -265,6 +295,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   // Sends what was picked, a file or a sticker, answering the message chosen to answer.
   async function sendWith<T>(pick: () => Promise<T | null>, send: (key: string, picked: T, replyTo?: string) => Promise<void>) {
     if (!key || sending) return;
+    if (!(await mayGo())) return;
     setNote('');
     setSending(true);
     try {
@@ -281,7 +312,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   }
 
   const voice = useVoiceCapture({ send: (audio, ms) => sendPicked(async () => voiceFile(audio, ms)), say: setNote });
-  useSharedFiles(chat ? sharedTo : null, (file) => nostrDmSendFile(key ?? '', { bytes: file.bytes, name: file.name, mime: file.mime, ...(file.w && file.h ? { dim: `${file.w}x${file.h}` } : {}) }), fail, setSending);
+  useSharedFiles(chat ? sharedTo : null, async (file) => (await mayGo()) && nostrDmSendFile(key ?? '', { bytes: file.bytes, name: file.name, mime: file.mime, ...(file.w && file.h ? { dim: `${file.w}x${file.h}` } : {}) }), fail, setSending);
 
   if (guard.gate) return guard.gate;
   if (!state || !key || !chat) {
@@ -300,9 +331,10 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
 
   // What is typed goes as a new message, or as an answer to the one chosen; in a group, those
   // named with @ go as nostr:npub1… (NIP-27).
-  function send() {
+  async function send() {
     const text = draft.trim();
     if (!text || !key) return;
+    if (!(await mayGo())) return;
     setDraft('');
     kept.sent();
     setNote('');
@@ -315,6 +347,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     setChoosingLater(false);
     const text = draft.trim();
     if (!text || !key) return;
+    if (!(await mayGo())) return;
     if (await keepForLater(nostrDmWriting(where), { chat: key, text, at, ...(answered ? { replyTo: answered.id } : {}) }, setNote)) {
       setDraft('');
       kept.sent();
@@ -334,9 +367,9 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     });
   // A contact card goes as a .vcf file, as a file does (kind 15); a place as its geo: address and a map's link in the words.
   const sendCard = (card: string) => sendPicked(async () => cardFile(card));
-  function sendPlace(place: Place) {
+  async function sendPlace(place: Place) {
     setPlacing(false);
-    if (key) nostrDmSend(key, placeWords(place)).catch(fail);
+    if (key && (await mayGo())) nostrDmSend(key, placeWords(place)).catch(fail);
   }
   const sendAnyFile = () =>
     sendPicked(async () => {
@@ -355,7 +388,10 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
 
   // A reaction chosen: ours again takes it back, another one goes in its place.
   const mineOn = (message: NostrDmMessage) => message.reactions?.[state.public];
-  const react = (message: NostrDmMessage, emoji: string) => (emoji === mineOn(message) ? nostrDmUnreact(key, message.id) : nostrDmReact(key, message.id, emoji)).catch(fail);
+  const react = async (message: NostrDmMessage, emoji: string) => {
+    if (!(await mayGo())) return;
+    await (emoji === mineOn(message) ? nostrDmUnreact(key, message.id) : nostrDmReact(key, message.id, emoji)).catch(fail);
+  };
 
   async function copy(text: string) {
     setNote((await copyText(text)) ? t('Copied. Any app that reads the clipboard can read it now.') : t('Not copied.'));
@@ -391,9 +427,10 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     void copy(chosen.length === 1 ? chosen[0].text : chosen.map((m) => `${whoOf(m)}: ${m.text}`).join('\n'));
   }
 
-  function forwardTo(to: string, toName: string) {
+  async function forwardTo(to: string, toName: string) {
     const ids = forwarding ?? [];
     setForwarding(null);
+    if (!(await mayGo(to))) return;
     selection.clear();
     setNote(t('Sending…'));
     nostrDmForward(key!, ids, to).then(() => setNote(t('Forwarded to {name}.', { name: toName })), fail);
@@ -426,8 +463,8 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     actions.push(
       ...keep.actions({
         star: message.state !== 'failed' ? { id: message.id, at: message.at, mine: message.mine, line: lineOf(message) } : null,
-        sticker: file && file.type.startsWith('image/') ? () => nostrDmFile(file) : null,
-        file: file ? { name: keptName(file.name, file.type), mime: file.type, fetch: () => nostrDmFile(file) } : null,
+        sticker: file && file.type.startsWith('image/') ? () => fetchTheirs(file, message.mine) : null,
+        file: file ? { name: keptName(file.name, file.type), mime: file.type, fetch: () => fetchTheirs(file, message.mine) } : null,
         remote: true,
       }),
     );
@@ -532,6 +569,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       <View style={{ gap: space.md }} {...threadProps}>
         {shownList.map((message) => (
           <Bubble
+            fetchFile={(file) => fetchTheirs(file, message.mine)}
             key={message.id}
             state={state}
             message={message}
@@ -568,7 +606,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           accessibilityLabel={t('Message')}
         />
         {/* Held down: what is typed goes later. */}
-        <Button title={t('Send')} compact disabled={!draft.trim()} onPress={send} onLongPress={draft.trim() ? () => setChoosingLater(true) : undefined} />
+        <Button title={t('Send')} compact disabled={!draft.trim()} onPress={() => void send()} onLongPress={draft.trim() ? () => setChoosingLater(true) : undefined} />
       </Row>
       {voice.recording ? null : (
         <Row wrap>
@@ -603,6 +641,14 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       {note ? <Text tone="muted">{note}</Text> : null}
       <Row wrap>
         <NetworkChatNotify notify={checkedChatNotify(chat.notify)} hidden={where !== 'space'} calls={false} onChange={(next) => nostrDmSetNotify(key, next)} />
+        {canNostrTor() && !self ? (
+          <Button
+            title={chat.tor ? t('Through Tor: on') : t('Through Tor')}
+            kind="secondary"
+            compact
+            onPress={() => void nostrDmSetTor(key, !chat.tor).catch(fail)}
+          />
+        ) : null}
         <Button title={t('Chat look')} kind="secondary" compact onPress={() => setStyling(true)} />
         <StarredHere stars={keep.stars} who={name} onGo={(id) => (byId.has(id) ? goTo(id) : setNote(t('That message is not on this phone.')))} />
         {guard.buttons}
@@ -612,6 +658,11 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           onChoose={(after) => void nostrDmAct(async (s) => setTimerIn(s, key, after)).catch(fail)}
         />
       </Row>
+      {chat.tor && canNostrTor() && !self ? (
+        <Text variant="caption" tone="faint">
+          {t('What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.')}
+        </Text>
+      ) : null}
       <HistoryButtons tools={history} exportable={where === 'space'} />
       <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={name} chat={lookChat} />
       <PlaceSheet visible={placing && shown} onClose={() => setPlacing(false)} onSend={sendPlace} said={t('Everyone in this chat can see it.')} />
@@ -702,7 +753,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       <Sheet visible={forwarding !== null && shown} onClose={() => setForwarding(null)} title={t('Forward to')}>
         <ScrollView nestedScrollEnabled style={{ maxHeight: 380 }} contentContainerStyle={{ gap: space.xs }} keyboardShouldPersistTaps="handled">
           {others.map((other) => (
-            <Button key={other.key} title={chatName(other.key)} kind="secondary" onPress={() => forwardTo(other.key, chatName(other.key))} />
+            <Button key={other.key} title={chatName(other.key)} kind="secondary" onPress={() => void forwardTo(other.key, chatName(other.key))} />
           ))}
         </ScrollView>
       </Sheet>
@@ -743,8 +794,10 @@ function checkSaid(found: NostrCheck): string {
   return t('That QR code is not a code to check a contact by.');
 }
 
-function Bubble({ state, message, group, people, answered, onRetry, onMenu, onSign, chosen, onChoose, onLayout, starred }: {
+function Bubble({ state, fetchFile, message, group, people, answered, onRetry, onMenu, onSign, chosen, onChoose, onLayout, starred }: {
   state: NostrDmState;
+  /** Fetches its file: the chat's way, after saying when its server may see this phone's address. */
+  fetchFile: (file: NostrDmFile) => Promise<Uint8Array>;
   message: NostrDmMessage;
   group: boolean;
   /** Who its words may name (nostr:npub1…), shown by their names. */
@@ -797,9 +850,9 @@ function Bubble({ state, message, group, people, answered, onRetry, onMenu, onSi
         {message.replyTo ? answered ? <Quote name={answered.name} line={answered.line} onPress={answered.onPress} /> : <Missing /> : null}
         {file ? (
           isVoice(file) ? (
-            <VoiceClip type={file.type} duration={file.duration} fetch={() => nostrDmFile(file)} />
+            <VoiceClip type={file.type} duration={file.duration} fetch={() => fetchFile(file)} />
           ) : (
-            <NetworkFile name={file.name ?? (file.type.startsWith('image/') ? t('Photo') : t('File'))} type={file.type} size={file.size} dim={file.dim} fetch={() => nostrDmFile(file)} onMenu={onChoose ?? onMenu} />
+            <NetworkFile name={file.name ?? (file.type.startsWith('image/') ? t('Photo') : t('File'))} type={file.type} size={file.size} dim={file.dim} fetch={() => fetchFile(file)} onMenu={onChoose ?? onMenu} />
           )
         ) : message.file ? (
           <Text tone="muted">{t('A file: Erevos cannot open files sent this way yet.')}</Text>

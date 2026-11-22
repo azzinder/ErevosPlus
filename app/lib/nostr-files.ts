@@ -162,9 +162,11 @@ export async function uploadBlob(
   sealed: Uint8Array,
   sign: (kind: number, tags: string[][], content: string) => Promise<unknown>,
   now = Date.now(),
-  torChat = false,
+  way: boolean | Http = false,
 ): Promise<string> {
-  const via = wayOf(torChat);
+  // A chat or account's own way (net-http chatTorHttp, accountHttp) when given; with `true`, of an
+  // Erevos chat that goes only through Tor. The checks' own way stays theirs.
+  const via = typeof way === 'function' ? (http === netHttp ? way : http) : wayOf(way);
   const hash = toHex(sha256Bytes(sealed));
   const said: string[] = [];
   for (const server of servers) {
@@ -207,10 +209,11 @@ export const NOSTR_BLOB_MOST = NOSTR_FILE_MOST + 64 * 1024;
 
 /** Fetches a file's encrypted bytes from where the message says, NOSTR_BLOB_MOST at most; with
  *  `onlyTor`, through Tor or not at all, never straight when Tor fails (a file taken by itself,
- *  lib/attachments.ts takesItself); with `torChat`, of a chat that goes only through Tor, through
- *  Tor whatever the space's way. The checks' own way (setNostrHttp) stays theirs. */
-export async function downloadBlob(url: string, onlyTor = false, torChat = false): Promise<Uint8Array> {
-  const answer = await (torChat ? wayOf(true) : onlyTor && http === netHttp ? torOnlyHttp : http)('GET', url, {}, undefined, NOSTR_BLOB_MOST);
+ *  lib/attachments.ts takesItself); with `way` true, of a chat that goes only through Tor, through
+ *  Tor whatever the space's way; or a chat or account's own way. The checks' own way (setNostrHttp)
+ *  stays theirs. */
+export async function downloadBlob(url: string, onlyTor = false, way: boolean | Http = false): Promise<Uint8Array> {
+  const answer = await (typeof way === 'function' ? (http === netHttp ? way : http) : way ? wayOf(true) : onlyTor && http === netHttp ? torOnlyHttp : http)('GET', url, {}, undefined, NOSTR_BLOB_MOST);
   if (answer.status < 200 || answer.status >= 300) throw new Error(t('The file could not be fetched ({status}).', { status: String(answer.status) }));
   return answer.bytes;
 }

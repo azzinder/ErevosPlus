@@ -13,7 +13,7 @@ import { ask } from '../lib/alert';
 import { tap } from '../lib/haptics';
 import { EDITION, editionName, type Edition } from '../lib/edition';
 import { t, tFor } from '../lib/i18n';
-import { FDROID } from '../lib/distribution';
+import { EREVOSGRAM, FDROID } from '../lib/distribution';
 import { CAN_GIVE, CAN_TAKE, takeFromNearby } from '../lib/give-app';
 import { canInstall, clearDownloads, downloadAndInstall } from '../lib/install-update';
 import { readNearbyLink } from '../lib/nearby-link';
@@ -199,7 +199,7 @@ export default function UpdatesScreen() {
     let release: Release | ChannelRelease | null;
     try {
       // On Android, the channel chosen; on a computer and Sailfish OS, Erevos's own releases.
-      release = channel ? await fetchChannelRelease(channel) : await fetchLatestRelease(latestFrom);
+      release = channel ? await fetchChannelRelease(channel) : await fetchLatestRelease(latestFrom, EREVOSGRAM ? 'erevosgram' : 'apk');
     } catch {
       setNote(t('GitHub could not be reached. Check the internet connection and try again.'));
       return;

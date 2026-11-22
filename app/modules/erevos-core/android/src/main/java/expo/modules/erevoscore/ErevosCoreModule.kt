@@ -144,6 +144,9 @@ class ErevosCoreModule : Module() {
     }
     AsyncFunction("torStatus") { tor { ErevosCoreNative.torStatus() } }
     AsyncFunction("torStop") { tor { ErevosCoreNative.torStop() } }
+    // The SOCKS5 door into Tor for Signal's and Telegram's engines: {"port", "password"} as JSON.
+    AsyncFunction("torSocks") { tor { ErevosCoreNative.torSocks() } }
+    AsyncFunction("torSocksClose") { tor { ErevosCoreNative.torSocksClose() } }
     // What waits on the network goes off the queue every module's calls share (torIo).
     AsyncFunction("torRequest") Coroutine { url: String, token: String, message: ByteArray ->
       torIo { ErevosCoreNative.torRequest(url.toByteArray(), token.toByteArray(), message) }
@@ -280,6 +283,8 @@ internal object ErevosCoreNative {
   @JvmStatic external fun torStart(stateDir: ByteArray, cacheDir: ByteArray, bridges: ByteArray, transports: ByteArray): ByteArray
   @JvmStatic external fun torStatus(): String
   @JvmStatic external fun torStop()
+  @JvmStatic external fun torSocks(): String
+  @JvmStatic external fun torSocksClose()
   @JvmStatic external fun torRequest(url: ByteArray, token: ByteArray, message: ByteArray): ByteArray
   @JvmStatic external fun torHttp(head: ByteArray, body: ByteArray): ByteArray
   @JvmStatic external fun torOpen(url: ByteArray, token: ByteArray): ByteArray

@@ -43,6 +43,12 @@ function signOf(key: string, label: string): { color: string; glyph: string } {
       return { color: '#2AABEE', glyph: 'T' };
     case 'messenger':
       return { color: '#7B5CFF', glyph: 'M' };
+    case 'signal':
+      return { color: '#3A76F0', glyph: 'S' };
+    case 'session':
+      return { color: '#00A36C', glyph: 'S' };
+    case 'facebook':
+      return { color: '#1877F2', glyph: 'f' };
     default:
       return { color: '#2A2520', glyph: (label.trim()[0] ?? '?').toUpperCase() };
   }
@@ -92,12 +98,14 @@ const count99 = (n: number) => (n > 99 ? '99+' : String(n));
 /**
  * The button and its window. `current` is the part shown; `onPick` shows another; `onAdd` opens
  * where services are turned on (Settings → General → Modules); `onReadAll`, when the part shown
- * has messages not read, marks them read (lib/read-all.ts).
+ * has messages not read, marks them read (lib/read-all.ts). `pages` are cards that open a page of
+ * their own rather than a part of the list (Erevos+: Facebook's feed), after the services.
  */
-export function Services({ services, hidden = [], current, onPick, onAdd, onReadAll, onMove, onHide, start = 'all', onStart }: {
+export function Services({ services, hidden = [], pages = [], current, onPick, onAdd, onReadAll, onMove, onHide, start = 'all', onStart }: {
   services: Service[];
   /** The services hidden from home (lib/service-order.ts), offered at the window's foot to show again. */
   hidden?: Pick<Service, 'key' | 'label'>[];
+  pages?: { key: string; label: string; onOpen: () => void }[];
   current: string;
   onPick: (key: string) => void;
   onAdd: () => void;
@@ -156,7 +164,7 @@ export function Services({ services, hidden = [], current, onPick, onAdd, onRead
   const heldOne = heldAt >= 0 ? movable[heldAt] : held === 'all' ? (services.find((s) => s.key === 'all') ?? null) : null;
   // Four to a row on a phone; on a wide screen the window is no wider than 520.
   const panel = Math.min(width - space.md * 2, 520);
-  const rows = Math.ceil((services.length + 1) / 4);
+  const rows = Math.ceil((services.length + pages.length + 1) / 4);
   const tall = 64 + rows * 98 + 44 + (hidden.length ? 56 : 0) + (heldOne ? 56 : 0);
   const top = at && at + tall < height - insets.bottom ? at : Math.max(insets.top + space.lg, (height - tall) / 2);
 
@@ -241,6 +249,24 @@ export function Services({ services, hidden = [], current, onPick, onAdd, onRead
                 </View>
               );
             })}
+            {pages.map((p) => (
+              <View key={p.key} style={styles.cell}>
+                <Pressable
+                  onPress={() => {
+                    close();
+                    p.onOpen();
+                  }}
+                  accessibilityRole="link"
+                  accessibilityLabel={p.label}
+                  style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+                >
+                  <ServiceSign service={p} size={36} />
+                  <Text variant="caption" numberOfLines={2} style={styles.cardLabel} color={colors.text}>
+                    {p.label}
+                  </Text>
+                </Pressable>
+              </View>
+            ))}
             <View style={styles.cell}>
               <Pressable
                 onPress={() => {

@@ -14,4 +14,13 @@ export const nostrMore: Record<string, string> = {
   'Your vote is public: anyone can see what you chose.': 'Η ψήφος σου είναι δημόσια: οποιοσδήποτε βλέπει τι διάλεξες.',
   '{n} vote': '{n} ψήφος',
   '{n} votes': '{n} ψήφοι',
+  'Through Tor: on': 'Μέσω Tor: ενεργό',
+  'What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.':
+    'Ό,τι στέλνεις εδώ, η αναζήτηση του πού διαβάζουν και οι φωτογραφίες και τα αρχεία αυτής της συνομιλίας περνούν μόνο μέσω Tor, σε δικά τους κυκλώματα, όποιος κι αν είναι ο τρόπος Tor του χώρου· ποτέ χωρίς Tor. Ό,τι έρχεται σε σένα ακολουθεί τον λογαριασμό σου στο Nostr, που τα relays του διαβάζονται μία φορά για όλες τις συνομιλίες του.',
+  'Not through Tor now: the Nostr relays see your address.':
+    'Όχι μέσω Tor τώρα: τα relays του Nostr βλέπουν τη διεύθυνσή σου.',
+  'Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.':
+    'Όχι μέσω Tor τώρα: τα relays του Nostr βλέπουν τη διεύθυνσή σου. Το Tor αυτού του λογαριασμού είναι στις Ρυθμίσεις → Relay και δίκτυα → Συνομιλίες Nostr.',
+  'A chat can also go through Tor by itself, on circuits of its own: «Through Tor» at its foot. It does, whatever is chosen here.':
+    'Μια συνομιλία μπορεί επίσης να περνά μόνη της μέσω Tor, σε δικά της κυκλώματα: «Μέσω Tor» στο κάτω μέρος της. Τότε περνά έτσι, ό,τι κι αν επιλέξεις εδώ.',
 };

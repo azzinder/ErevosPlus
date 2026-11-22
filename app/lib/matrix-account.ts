@@ -14,7 +14,7 @@
 // account is then made on the homeserver's website, and signed in to here.
 
 import { t } from './i18n';
-import { answeredJson, callAnswer, call, enc, MatrixError, newDevice, request, type Json, type MatrixAnswer, type MatrixState } from './matrix';
+import { answeredJson, callAnswer, call, enc, MatrixError, newDevice, request, type Json, type MatrixAnswer, type MatrixServer, type MatrixState, type MatrixTor } from './matrix';
 import { editionName } from './edition';
 
 /** A step the homeserver asks for before it does what was asked. */
@@ -105,8 +105,8 @@ export function isAccountName(name: string): boolean {
 }
 
 /** Whether the homeserver takes this name for a new account: false when it is someone's already. */
-export async function nameFree(homeserver: string, name: string): Promise<boolean> {
-  const answer = await callAnswer({ homeserver }, 'GET', `/register/available?username=${enc(name)}`);
+export async function nameFree(homeserver: string, name: string, tor?: MatrixTor): Promise<boolean> {
+  const answer = await callAnswer({ homeserver, tor }, 'GET', `/register/available?username=${enc(name)}`);
   if (answer.status === 200) return answer.json.available === true;
   if (answer.json.errcode === 'M_USER_IN_USE') return false;
   answeredJson(answer);
@@ -118,10 +118,10 @@ export async function nameFree(homeserver: string, name: string): Promise<boolea
  * keys and cross-signing keys, as signing in does; or answers what the homeserver asks for first.
  * A homeserver that makes accounts only on its own website says so.
  */
-export async function register(homeserver: string, name: string, password: string, auth?: Json): Promise<{ state: MatrixState } | { ask: AuthAsk }> {
+export async function register(homeserver: string, name: string, password: string, auth?: Json, tor?: MatrixTor): Promise<{ state: MatrixState } | { ask: AuthAsk }> {
   if (!isAccountName(name)) throw new Error(t('A Matrix name has only small letters, digits and . _ = - / +'));
   if (password.length < 8) throw new Error(t('Choose a password of at least 8 characters.'));
-  const asked = (given?: Json) => callAnswer({ homeserver }, 'POST', '/register?kind=user', { username: name, password, initial_device_display_name: editionName(), ...(given ? { auth: given } : {}) });
+  const asked = (given?: Json) => callAnswer({ homeserver, tor }, 'POST', '/register?kind=user', { username: name, password, initial_device_display_name: editionName(), ...(given ? { auth: given } : {}) });
   let done: { json: Json } | { ask: AuthAsk };
   try {
     done = await interactive(homeserver, asked, auth);
@@ -134,7 +134,7 @@ export async function register(homeserver: string, name: string, password: strin
   }
   if ('ask' in done) return done;
   if (typeof done.json.access_token !== 'string') throw new Error(t('The account was made, but the server did not sign it in. Sign in with it here.'));
-  const state = await newDevice(homeserver, done.json, { type: 'm.login.password', identifier: { type: 'm.id.user', user: name }, password });
+  const state = await newDevice(homeserver, done.json, { type: 'm.login.password', identifier: { type: 'm.id.user', user: name }, password }, tor);
   return { state };
 }
 
@@ -184,7 +184,7 @@ export async function signOutDevices(state: MatrixState, ids: string[], auth?: J
  * this phone's own (lib/linked-accounts.ts), so it signs in with no password: only when the
  * homeserver gives one without asking for the password again, as few do. Null otherwise.
  */
-export async function loginToken(state: Pick<MatrixState, 'homeserver' | 'accessToken'>): Promise<string | null> {
+export async function loginToken(state: MatrixServer): Promise<string | null> {
   try {
     const answer = await request(state, { method: 'POST', url: `${state.homeserver}/_matrix/client/v1/login/get_token`, body: {} });
     const token = answer.json.login_token;

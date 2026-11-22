@@ -528,7 +528,8 @@ pub mod tor {
     }
 
     /// One HTTP request through Tor (a Matrix homeserver's): `head` is JSON, `{"method", "url",
-    /// "headers": {name: value}}`. Answers the status in 2 bytes, big-endian, then the body.
+    /// "headers": {name: value}, "chat"?}` (a chat's name for circuits of its own). Answers the status
+    /// in 2 bytes, big-endian, then the body.
     pub fn http(head: &[u8], body: &[u8]) -> Result<Vec<u8>> {
         let head: serde_json::Value = serde_json::from_slice(head).map_err(|e| e.to_string())?;
         let field = |name: &str| head.get(name).and_then(serde_json::Value::as_str).ok_or_else(|| format!("no {name}"));
@@ -537,15 +538,22 @@ pub mod tor {
             .and_then(serde_json::Value::as_object)
             .map(|all| all.iter().filter_map(|(k, v)| Some((k.clone(), v.as_str()?.to_string()))).collect())
             .unwrap_or_default();
-        let (status, mut answer) = erevos_tor::http(field("method")?, field("url")?, &headers, body)?;
+        let chat = head.get("chat").and_then(serde_json::Value::as_str).filter(|chat| !chat.is_empty());
+        let (status, mut answer) = erevos_tor::http_on(field("method")?, field("url")?, &headers, body, chat)?;
         let mut out = status.to_be_bytes().to_vec();
         out.append(&mut answer);
         Ok(out)
     }
 
-    /// A Nostr relay's connection through Tor, for text frames: its handle.
+    /// A Nostr relay's connection through Tor, for text frames: its handle. `url`, or `url` and a
+    /// chat's name after a line break, for circuits of that chat's own.
     pub fn text_open(url: &[u8]) -> Result<Vec<u8>> {
-        Ok(erevos_tor::text_open(text(url)?)?.to_be_bytes().to_vec())
+        let (url, chat) = match text(url)?.split_once('\n') {
+            Some((url, chat)) if !chat.is_empty() => (url, Some(chat)),
+            Some((url, _)) => (url, None),
+            None => (text(url)?, None),
+        };
+        Ok(erevos_tor::text_open_on(url, chat)?.to_be_bytes().to_vec())
     }
 
     pub fn text_send(id: &[u8], frame: &[u8]) -> Result<Vec<u8>> {
@@ -607,6 +615,17 @@ pub mod tor {
 
     pub fn stop() {
         erevos_tor::stop();
+    }
+
+    /// The SOCKS5 door into Tor for Signal's and Telegram's engines (erevos_tor::socks_open), as
+    /// JSON: {"port": ..., "password": ...}. Each engine names its own circuits by its user name.
+    pub fn socks_open() -> Result<String> {
+        let door = erevos_tor::socks_open()?;
+        Ok(serde_json::json!({ "port": door.port, "password": door.password }).to_string())
+    }
+
+    pub fn socks_close() {
+        erevos_tor::socks_close();
     }
 }
 

@@ -16,6 +16,7 @@ import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { after, before, test } from 'node:test';
 
+import { ALWAYS } from '../lock/chat-notify';
 import { setCurrentSpace } from '../lock/keys';
 import { loadMatrix } from '../lock/matrix-data';
 import { loadNostrDm } from '../lock/nostr-dm-data';
@@ -28,8 +29,9 @@ import { followMatrixPlaces, matrixJoin, matrixNow, matrixSignIn, matrixUnread, 
 import { networkUnreadAt, onNetworkMessage, onPlaceNetworkMessage } from '../lib/network-notices';
 import { actingWhere, showWhere } from '../lib/network-place';
 import { DEFAULT_INBOX, LOOKUP_RELAYS, npubOf } from '../lib/nostr-dm';
-import { setNostrOpen } from '../lib/nostr-dm-net';
-import { nostrDmMake, nostrDmNow, nostrDmSend, nostrDmSetInbox, nostrDmStart, nostrDmUnread, runNostrDm, stopNostrDm } from '../lib/nostr-dm-store';
+import { nostrWay, setNostrOpen } from '../lib/nostr-dm-net';
+import { setThroughTor } from '../lib/relay';
+import { nostrDmMake, nostrDmNow, nostrDmSend, nostrDmSetInbox, nostrDmSetAccountTor, nostrDmSetNotify, nostrDmSetTor, nostrDmTor, nostrDmStart, nostrDmUnread, runNostrDm, stopNostrDm } from '../lib/nostr-dm-store';
 import { watchPlaceNetworks } from '../lib/place-networks';
 import { sendXmppText } from '../lib/xmpp';
 import { followXmppPlaces, runXmpp, setXmppConnect, stopXmpp, xmppNow, xmppSend, xmppSignIn, xmppUnread } from '../lib/xmpp-store';
@@ -212,7 +214,12 @@ test('Matrix: a hidden place has its own account, apart from the space’s, tell
 test('Nostr: a hidden place has its own key, apart from the space’s, telling nothing outside', { skip: !coreReady }, async () => {
   const relays = new Map<string, FakeRelay>();
   for (const url of new Set([...LOOKUP_RELAYS, ...DEFAULT_INBOX, 'wss://inbox.space.example', 'wss://inbox.place.example'])) relays.set(url, new FakeRelay(url));
-  setNostrOpen(async (url) => {
+  // Which connections went on a chat's own way (lib/nostr-dm-net.ts openNostrLink).
+  const opened: [string, string | undefined][] = [];
+  const choices: string[] = [];
+  setNostrOpen(async (url, chat, choice) => {
+    opened.push([url, chat]);
+    choices.push(choice ?? '');
     const found = relays.get(url);
     if (!found) throw new Error(`No relay at ${url}`);
     return found.link();
@@ -223,6 +230,8 @@ test('Nostr: a hidden place has its own key, apart from the space’s, telling n
   const placeKey = randomBytes(32);
   const came: [string, number][] = [];
   const stopCame = onNetworkMessage((where, times) => came.push([where, times]));
+  const placeCame: string[] = [];
+  const stopPlaceCame = onPlaceNetworkMessage((_space, _pocket, where) => placeCame.push(where));
   setCurrentSpace(1, spaceKey);
   const stopWatching = watchPlaceNetworks();
   try {
@@ -231,6 +240,16 @@ test('Nostr: a hidden place has its own key, apart from the space’s, telling n
     await nostrDmMake();
     await nostrDmSetInbox(['wss://inbox.space.example']);
     const space = nostrDmNow().state!.public;
+    // A new key goes through no Tor until its owner chooses (lib/account-tor.ts).
+    assert.equal(nostrDmNow().state!.tor, 'never');
+    assert.equal(nostrDmTor(), 'never');
+    assert.ok(choices.length > 0 && !choices.some((choice) => choice !== 'never'));
+    // Chosen, its connections open again that way.
+    const was = choices.length;
+    await nostrDmSetAccountTor('space');
+    await until(() => choices.length > was, 'the inbox read again');
+    assert.ok(choices.slice(was).every((choice) => choice === 'space'));
+    await nostrDmSetAccountTor('never');
 
     setOpenHiddenPlace(hiddenPlace(1, 3, placeKey));
     await until(() => nostrDmNow('place').loaded, 'the place’s account to load');
@@ -264,6 +283,29 @@ test('Nostr: a hidden place has its own key, apart from the space’s, telling n
     assert.equal(came.length, 1);
     assert.equal(nostrDmUnread(), 0);
     assert.deepEqual([...networkUnreadAt().keys()], []);
+    await until(() => placeCame.length === 1, 'the place’s own notice');
+    assert.deepEqual(placeCame, [`nostr:${space}`]);
+
+    // Muted in the place, its chat tells of nothing more; its messages still come.
+    await inPlace(() => nostrDmSetNotify(space, { until: ALWAYS }));
+    await nostrDmSend(place, 'σιωπηλά');
+    await until(() => nostrDmNow('place').state?.chats[space]?.messages.some((m) => m.text === 'σιωπηλά') === true, 'the muted message');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.deepEqual(placeCame, [`nostr:${space}`]);
+
+    // Sent through Tor by itself: what goes to them, on the chat's own connections; nothing else of the space's is.
+    assert.ok(opened.every(([, chat]) => chat === undefined));
+    await nostrDmSetTor(place, true);
+    assert.equal(nostrDmNow().state?.chats[place]?.tor, true);
+    const before = opened.length;
+    await nostrDmSend(place, 'μέσω Tor');
+    await until(() => nostrDmNow('place').state?.chats[space]?.messages.some((m) => m.text === 'μέσω Tor') === true, 'the message through Tor');
+    const now = opened.slice(before);
+    assert.ok(now.some(([url, chat]) => url === 'wss://inbox.place.example' && chat === place), 'their inbox, on the chat’s own way');
+    assert.ok(now.some(([url, chat]) => url === 'wss://inbox.space.example' && chat === place), 'our own copy, on the chat’s own way');
+    assert.ok(now.every(([, chat]) => chat === place));
+    await nostrDmSetTor(place, false);
+    assert.equal(nostrDmNow().state?.chats[place]?.tor, undefined);
 
     setOpenHiddenPlace(null);
     assert.equal(nostrDmNow('place').state, null);
@@ -272,6 +314,7 @@ test('Nostr: a hidden place has its own key, apart from the space’s, telling n
     setOpenHiddenPlace(null);
     stopWatching();
     stopCame();
+    stopPlaceCame();
     stopNostrDm();
     setNostrOpen(null);
     setCurrentSpace(null);
@@ -375,5 +418,21 @@ test('Matrix: a place that receives while closed keeps syncing, and what comes t
     stopMatrix();
     setCurrentSpace(null);
     setMatrixHttp(defaultMatrixHttp);
+  }
+});
+
+test('Nostr: how an account reaches its relays, as its own Tor choice says', () => {
+  try {
+    setThroughTor('off');
+    assert.equal(nostrWay('never'), 'straight');
+    assert.equal(nostrWay('space'), 'straight');
+    assert.equal(nostrWay('always'), 'tor only');
+    setThroughTor('all');
+    // Off is off, whatever the space does; As the space never goes straight with Everything.
+    assert.equal(nostrWay('never'), 'straight');
+    assert.equal(nostrWay('space'), 'tor only');
+    assert.equal(nostrWay('always'), 'tor only');
+  } finally {
+    setThroughTor('off');
   }
 });

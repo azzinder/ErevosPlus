@@ -6,9 +6,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { AccountTorChoice } from '../components/account-tor';
 import { BlockedList } from '../components/chat-rules';
 import { QrCode } from '../components/QrCode';
 import { Button, Card, Chip, Field, Input, Page, Row, SectionTitle, Text } from '../components/ui';
+import { ACCOUNT_TOR_DEFAULT, accountTorOf, type AccountTor } from '../lib/account-tor';
 import { ask } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { canNostrChat, canTor } from '../lib/core';
@@ -28,6 +30,7 @@ import {
   nostrDmNow,
   nostrDmSetFileServers,
   nostrDmSetInbox,
+  nostrDmSetAccountTor,
   nostrDmSetName,
   nostrDmStart,
   onNostrDmChange,
@@ -63,6 +66,8 @@ export default function NostrChatsScreen() {
   const [nsec, setNsec] = useState('');
   const [someone, setSomeone] = useState('');
   const [qr, setQr] = useState(false);
+  // The Tor choice before the key exists: it goes with the key made or brought.
+  const [torFirst, setTorFirst] = useState<AccountTor>(ACCOUNT_TOR_DEFAULT);
 
   useEffect(() => {
     runNostrDm();
@@ -109,16 +114,28 @@ export default function NostrChatsScreen() {
     </Text>
   );
 
-  // The relays see this phone's address only without Tor (lib/nostr-dm-net.ts).
-  const tor = canTor() ? (
-    <Text variant="caption" tone="muted">
-      {nostrChatsThroughTor()
-        ? t('Through Tor: the Nostr relays do not see your address.')
-        : t('Not through Tor now: the Nostr relays see your address. Tor is under Settings → Relay and networks → Tor.')}
-    </Text>
-  ) : null;
-
   const { loaded, state, problem, reading } = now;
+  // The account's own Tor (lib/account-tor.ts): Off unless chosen; a chat's «Through Tor» goes its
+  // own way whatever is chosen here. Before the key exists, chosen for it.
+  const torWay: AccountTor = state ? accountTorOf(state.tor) : torFirst;
+  const tor = canTor() ? (
+    <View style={{ gap: space.xs }}>
+      <AccountTorChoice
+        network="Nostr"
+        way={torWay}
+        disabled={busy}
+        onChange={(next) => (state ? void run(() => nostrDmSetAccountTor(next)) : setTorFirst(next))}
+      />
+      <Text variant="caption" tone="muted">
+        {nostrChatsThroughTor(torWay)
+          ? t('Through Tor: the Nostr relays do not see your address.')
+          : t('Not through Tor now: the Nostr relays see your address.')}
+      </Text>
+      <Text variant="caption" tone="faint">
+        {t('A chat can also go through Tor by itself, on circuits of its own: «Through Tor» at its foot. It does, whatever is chosen here.')}
+      </Text>
+    </View>
+  ) : null;
   if (!loaded) {
     return (
       <Page>
@@ -135,13 +152,14 @@ export default function NostrChatsScreen() {
         <Text variant="title">{t('Nostr chats')}</Text>
         {own}
         {about}
+        {tor}
         <Card>
           <Text tone="muted">
             {place
               ? t('Erevos makes these hidden chats a Nostr key of their own. People write to it with its npub, which you give them.')
               : t('Erevos makes this space a Nostr key of its own. People write to it with its npub, which you give them.')}
           </Text>
-          <Button title={t('Make a Nostr key')} loading={busy} disabled={busy} onPress={() => void run(nostrDmMake)} />
+          <Button title={t('Make a Nostr key')} loading={busy} disabled={busy} onPress={() => void run(() => nostrDmMake(torFirst))} />
         </Card>
         <SectionTitle title={t('Or bring a key from another Nostr app')} />
         <Card>
@@ -154,7 +172,7 @@ export default function NostrChatsScreen() {
             disabled={busy || !nsec.trim()}
             onPress={() =>
               void run(async () => {
-                await nostrDmBring(nsec.trim());
+                await nostrDmBring(nsec.trim(), torFirst);
                 setNsec('');
               })
             }
@@ -165,7 +183,6 @@ export default function NostrChatsScreen() {
               : t('It is kept encrypted in this space only. Erevos then reads the messages its relays still keep. The other app keeps working with it too.')}
           </Text>
         </Card>
-        {tor}
         {note || problem ? <Text tone="muted">{note || problem}</Text> : null}
       </Page>
     );

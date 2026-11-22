@@ -11,6 +11,7 @@ import { emojiUrlOf, isEmojiCode } from './nostr-emoji';
 import { fileOfRumor, type NostrDmFile } from './nostr-files';
 import { isNostrRelay } from '../lock/e2e-data';
 import type { ChatNotify } from '../lock/chat-notify';
+import type { AccountTor } from './account-tor';
 import type { ChatPin } from '../lock/chat-pin';
 import type { Look } from '../theme/look';
 import { checkedRules, withOne, type ChatRules } from './chat-rules';
@@ -113,6 +114,9 @@ export type NostrDmChat = {
   hints?: string[];
   /** Its own notifications (lock/chat-notify.ts), kept on this device only. */
   notify?: ChatNotify;
+  /** Sent through Tor by itself (lib/nostr-dm-store.ts nostrDmSetTor): what goes to them, their
+   *  look-ups and its files, on circuits of its own, whatever the space's Tor way; on this device only. */
+  tor?: true;
   /** Its own look (theme/look.ts), kept on this device only; missing while it takes the space's. */
   look?: Look;
   /** The PIN it opens with, as kept, and its screenshots blocked (lib/chat-protect.ts), on this device only. */
@@ -127,6 +131,8 @@ export type NostrDmChat = {
 };
 
 export type NostrDmState = {
+  /** Its own Tor choice (lib/account-tor.ts): Off when missing, as for an account from before it. */
+  tor?: AccountTor;
   /** The space's Nostr key, hex. */
   secret: string;
   public: string;

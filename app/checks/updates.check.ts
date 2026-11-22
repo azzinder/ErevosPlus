@@ -98,6 +98,12 @@ test('the F-Droid build may not install packages, and knows F-Droid updates it; 
     // A misspelt one fails the build rather than making the release build by mistake.
     process.env.EREVOS_DISTRIBUTION = 'f-droid';
     assert.throws(() => config({ config: appJson() }), /only "fdroid"/);
+    // The ErevosGram build is marked, and never the F-Droid one.
+    delete process.env.EREVOS_DISTRIBUTION;
+    process.env.EREVOS_TELEGRAM = '1';
+    assert.equal(config({ config: appJson() }).extra.edition, 'erevosgram');
+    process.env.EREVOS_DISTRIBUTION = 'fdroid';
+    assert.throws(() => config({ config: appJson() }), /no Telegram/);
   } finally {
     process.env = env;
   }
@@ -166,6 +172,9 @@ test('a package from anywhere else, or without its SHA-256, is not offered', () 
 });
 
 test('only a newer build of a release is offered, never to a build from a computer', () => {
+  // The ErevosGram build takes only its own APK.
+  assert.equal(parseRelease(json(), 'erevosgram')?.apk, null);
+  assert.equal(parseRelease(json({ erevosgram: { url: url('erevosgram-android.apk'), size: 9, sha256: SHA } }), 'erevosgram')?.apk?.url, url('erevosgram-android.apk'));
   const release = parseRelease(json())!;
   assert.equal(buildOf('0.1.7'), 7);
   assert.equal(buildOf('0.0.1'), 0);

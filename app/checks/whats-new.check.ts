@@ -98,6 +98,8 @@ test("Erevos+ tells the plain Erevos's releases under its own next one, as its o
   const v = (version: string | null, forYou: string[]) => ({ version, forYou, underTheHood: [] as string[] });
   const list = [v('7.1.2', ['plus two']), v('7.0.2', ['both two', '**The guide tells only of what Erevos has**: in Erevos.']), v('7.1.1', ['plus one']), v('7.0.1', ['both one']), v('7.0.0', ['seven'])];
   assert.deepEqual(asPlusForCheck(list), [v('7.1.2', ['plus two', 'both two']), v('7.1.1', ['plus one', 'both one']), v('7.0.0', ['seven'])]);
+  // From 7.2 on the plain Erevos has the even minor numbers and Erevos+ the odd ones, betas too.
+  assert.deepEqual(asPlusForCheck([v('7.3.0-beta.1', ['plus three']), v('7.2.0-beta.1', ['both three']), v('7.1.2', ['plus two'])]), [v('7.3.0-beta.1', ['plus three', 'both three']), v('7.1.2', ['plus two'])]);
   // With no Erevos+ release after them, the plain ones stay as they are.
   assert.deepEqual(asPlusForCheck([v('7.0.2', ['a']), v('7.0.1', ['b'])]), [v('7.0.2', ['a']), v('7.0.1', ['b'])]);
   assert.deepEqual(asPlusForCheck([v(null, ['n']), v('7.0.1', ['b'])]), [v(null, ['n']), v('7.0.1', ['b'])]);

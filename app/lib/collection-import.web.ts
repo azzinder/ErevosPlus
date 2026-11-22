@@ -102,6 +102,9 @@ async function keepSource(place: CollectionPlace, folder: string, file: { name: 
   return addToCollection(place, file.source, { name: file.name, mime: file.mime, kind: photo ? 'photo' : 'file', w: size?.w, h: size?.h }, { folder, thumb, progress });
 }
 
+/** Telegram's files are not on the web. */
+export const importFromPath = (_place: CollectionPlace, _path: string, _name: string, _mime: string, _folder = '', _progress?: Progress): Promise<CollectionItem> => unavailable();
+
 export const importShared = (_place: CollectionPlace, _shared: SharedFile, _folder: string, _progress?: Progress): Promise<CollectionItem> => unavailable();
 
 /** Copies a photo, video, sound or file of a chat on another network, or of an MMS, into the Collection, from its bytes, as on the phone. */

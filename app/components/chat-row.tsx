@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { press } from '../lib/haptics';
+import { SERVICE_NAMES } from '../lib/messenger';
+import { msgCaseOnly, openMessengerCase } from '../lib/messenger-store';
 import { t } from '../lib/i18n';
 import { rowTime, shownName, type InboxRow } from '../lib/inbox';
 import { laterLabel } from '../lib/later';
@@ -21,6 +23,9 @@ import { NetworkPicture } from './network-picture';
 import { font, Text } from './ui';
 
 const MARKS = ['✓', '✓✓', '✓✓✓'];
+
+// A name's first letter or digit, in capitals; empty for a name with none (only symbols, say).
+const initial = (name: string) => (name.match(/[\p{L}\p{N}]/u)?.[0] ?? '').toLocaleUpperCase();
 
 /** A chat's row in a list of chats, as home has it (app/index.tsx) and hidden chats too
  *  (app/chat.tsx): tapped, it opens its chat, or does `onOpen` where one is given. In hidden chats
@@ -61,7 +66,10 @@ export function ChatRow({
       onPress={
         onOpen ??
         (() =>
-          router.push(
+          // Messenger in its case: the chat opens there (its screen here, if the case cannot open).
+          row.network === 'messenger' && msgCaseOnly('messenger')
+            ? void openMessengerCase(row.identity.slice('messenger:'.length)).catch(() => router.push('/messenger'))
+            : router.push(
             row.sms
               ? `/sms?to=${encodeURIComponent(row.sms)}`
               : row.network === 'matrix'
@@ -72,7 +80,13 @@ export function ChatRow({
                   ? row.invited
                     ? `/xmpp${placeOnly}`
                     : `/xmpp-chat?jid=${encodeURIComponent(row.identity.slice('xmpp:'.length))}${place}`
-                  : row.network === 'nostr'
+                  : row.network === 'telegram'
+                    ? row.tgKept
+                      ? `/telegram-chat?id=${encodeURIComponent(row.identity.slice('telegram-kept:'.length))}&kept=1`
+                      : `/telegram-chat?id=${encodeURIComponent(row.identity.slice('telegram:'.length))}${place}`
+                    : row.network === 'messenger' || row.network === 'signal' || row.network === 'session'
+                    ? `/${row.network}-chat?key=${encodeURIComponent(row.identity.slice(row.network.length + 1))}`
+                    : row.network === 'nostr'
                     ? `/nostr-chat?key=${row.identity.slice('nostr:'.length)}${place}`
                     : row.identity.startsWith('group:')
                       ? `/group?id=${row.identity.slice(6)}`
@@ -96,9 +110,16 @@ export function ChatRow({
         />
       ) : row.sms || row.network ? (
         <View style={styles.smsFace}>
-          <Text variant="label" tone="muted">
-            {row.sms ? 'SMS' : row.network === 'nostr' ? 'nostr' : '[m]'}
-          </Text>
+          {(row.network === 'telegram' || row.network === 'messenger' || row.network === 'signal' || row.network === 'session') && initial(name) ? (
+            // A Telegram, Messenger, Signal or Session chat's face is its name's first letter, so its rows tell apart at a glance.
+            <Text variant="title" tone="muted">
+              {initial(name)}
+            </Text>
+          ) : (
+            <Text variant="label" tone="muted">
+              {row.sms ? 'SMS' : row.network === 'nostr' ? 'nostr' : row.network === 'telegram' ? 'TG' : '[m]'}
+            </Text>
+          )}
         </View>
       ) : (
         <View>
@@ -136,6 +157,14 @@ export function ChatRow({
             ) : row.network === 'xmpp' ? (
               <Text variant="caption" color={colors.success}>
                 XMPP
+              </Text>
+            ) : row.network === 'telegram' ? (
+              <Text variant="caption" color={colors.success}>
+                Telegram
+              </Text>
+            ) : row.network === 'messenger' || row.network === 'signal' || row.network === 'session' ? (
+              <Text variant="caption" color={colors.success}>
+                {SERVICE_NAMES[row.network]}
               </Text>
             ) : row.network === 'nostr' ? (
               <Text variant="caption" color={colors.success}>

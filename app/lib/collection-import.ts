@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { File, Paths } from 'expo-file-system';
+import { File, FileMode, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -222,6 +222,22 @@ export async function importShared(place: CollectionPlace, shared: SharedFile, f
     return await keepSource(place, folder, { name: read.name, mime: read.mime, source: read.source, w: photo ? read.w : undefined, h: photo ? read.h : undefined }, progress);
   } finally {
     read.close();
+  }
+}
+
+/** Brings a file another network keeps on this phone (a Telegram file TDLib downloaded, `path`) into the Collection, encrypted with a key of its own. */
+export async function importFromPath(place: CollectionPlace, path: string, name: string, mime: string, folder = '', progress?: Progress): Promise<CollectionItem> {
+  const file = new File(path.startsWith('file://') ? path : `file://${path}`);
+  if (file.size > MAX_COLLECTION_FILE) throw new CollectionFileTooLargeError();
+  const handle = file.open(FileMode.ReadOnly);
+  try {
+    const read = async (at: number, length: number) => {
+      if (handle.offset !== at) handle.offset = at;
+      return handle.readBytes(length);
+    };
+    return await keepSource(place, folder, { name: cleanFileName(name), mime: cleanMime(mime), source: { size: file.size, read } }, progress);
+  } finally {
+    handle.close();
   }
 }
 

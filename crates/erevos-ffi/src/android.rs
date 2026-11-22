@@ -173,6 +173,27 @@ pub extern "system" fn Java_expo_modules_erevoscore_ErevosCoreNative_torStatus<'
 
 #[cfg(feature = "tor")]
 #[no_mangle]
+pub extern "system" fn Java_expo_modules_erevoscore_ErevosCoreNative_torSocks<'a>(mut env: JNIEnv<'a>, _class: JClass<'a>) -> jstring {
+    match guarded(crate::tor::socks_open).and_then(|text| env.new_string(text).map_err(|e| e.to_string())) {
+        Ok(text) => text.into_raw(),
+        Err(message) => {
+            throw(&mut env, message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+#[cfg(feature = "tor")]
+#[no_mangle]
+pub extern "system" fn Java_expo_modules_erevoscore_ErevosCoreNative_torSocksClose<'a>(_env: JNIEnv<'a>, _class: JClass<'a>) {
+    let _ = guarded(|| {
+        crate::tor::socks_close();
+        Ok(())
+    });
+}
+
+#[cfg(feature = "tor")]
+#[no_mangle]
 pub extern "system" fn Java_expo_modules_erevoscore_ErevosCoreNative_torStop<'a>(_env: JNIEnv<'a>, _class: JClass<'a>) {
     let _ = guarded(|| {
         crate::tor::stop();

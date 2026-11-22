@@ -9,6 +9,8 @@ import { AppState, Linking, Platform, View } from 'react-native';
 
 import { AlertHost } from '../components/alert-host';
 import { CallHost, watchCalls } from '../components/call-host';
+import { SignalCallHost } from '../components/signal-call';
+import { TelegramCallHost } from '../components/telegram-call';
 import { HiddenRingHost } from '../components/hidden-ring-screen';
 import { ScreenBackdrop, useBackdropSpec } from '../components/backdrop';
 import { KeyboardProvider } from '../components/keyboard';
@@ -24,7 +26,7 @@ import { forgetLinks } from '../lib/devices';
 import { endGroupCall } from '../lib/group-calls';
 import { hiddenAnswerEndsAt, hiddenRingHoldsLock, onHiddenRingingChange } from '../lib/hidden-ring';
 import { tellShareTexts } from '../lib/share-texts';
-import { loadLang, t, useLang, type Lang } from '../lib/i18n';
+import { lang as currentLang, loadLang, t, useLang, type Lang } from '../lib/i18n';
 import { iconNumberOn, onIconNumberChange } from '../lib/icon-number';
 import { startIntegrityAlarm } from '../lib/integrity';
 import { startNearbyLinks } from '../lib/nearby-links';
@@ -64,13 +66,18 @@ import { nostrOf, setNostr } from '../lib/nostr';
 import { runMatrix, stopMatrix } from '../lib/matrix-store';
 import { forgetSigns } from '../lib/unread-signs';
 import { runXmpp, stopXmpp } from '../lib/xmpp-store';
+import { runTelegram, setTelegramNative, stopTelegram } from '../lib/telegram-store';
+import { telegramNative } from '../modules/erevos-telegram';
+import { messengerNative } from '../modules/erevos-messenger';
+import type { MsgService } from '../lib/messenger';
+import { messengerInFront, setMessengerNative, startMessenger, stopMessenger } from '../lib/messenger-store';
 import { runNostrDm, stopNostrDm } from '../lib/nostr-dm-store';
 import { startLinkedAccounts } from '../lib/linked-accounts';
 // Gives the phone's SMS to the space's linked devices, once turned on (lib/sms-share.ts sets its hand in lib/devices.ts).
 import '../lib/sms-share';
 import { startChunkChannel } from '../lib/chunk-channel';
 import { followModuleIcons } from '../lib/module-icons';
-import { loadModules, moduleOn, modulesChosen, onModulesChange, screenModule, setModules, useModules } from '../lib/modules';
+import { loadModules, moduleOn, MSG_MODULES, modulesChosen, onModulesChange, screenModule, setModules, useModules } from '../lib/modules';
 import { keepSetupAfter } from '../lib/setup-after';
 import { watchPlaceNetworks } from '../lib/place-networks';
 import { forgetTextInvite } from '../lib/text-invite';
@@ -84,12 +91,15 @@ import { currentSpace, loadOpenKey, setCurrentSpace } from '../lock/keys';
 import { firstSpaceKey, firstStart, loadSpaceData, updateCurrentSpaceData, updateSpaceData } from '../lock/space-data';
 import { ModuleOff } from '../components/module-off';
 import { Setup, type SetupChoice } from '../components/setup';
-import { space as gap } from '../theme/colors';
+import { radius, shape, space as gap } from '../theme/colors';
 import { ThemeProvider, useTheme } from '../theme/context';
 import { ensureStyleFonts } from '../theme/fonts';
 import { loadSettingsShared, lookFrom, lookToShare, onSettingCame, onSettingNow, settingChanged, shareLanguage } from '../lib/sync/settings';
-import { DEFAULT_LOOK, loadLockScreenLook, saveLockScreenLook, type Look } from '../theme/look';
+import { DEFAULT_LOOK, loadLockScreenLook, saveLockScreenLook, TEXT_SCALE, type Look } from '../theme/look';
 import { keepPrivate, loadScreenPrivacy } from '../lib/screen-privacy';
+import { closeWebPages, webPagesLook } from '../lib/web-pages';
+import { useCaseFonts } from '../lib/messenger-case-fonts';
+import { messengerCaseLook } from '../lib/messenger-case-look';
 import { collectionLockAfter, collectionLocked } from '../lib/collection-play';
 import { collectionServerOpened, stopCollectionServers } from '../lib/collection-webdav';
 import { sweepPendingChunks } from '../lib/pending-chunks';
@@ -290,6 +300,7 @@ export default function RootLayout() {
       setSpaceGated(true);
       clearKnownNames();
       collectionLocked();
+      closeWebPages();
       stopCollectionServers();
       lockingKeepsLink();
       // Asked for again with only the SMS or the Contacts open: the password then opens all.
@@ -576,11 +587,36 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
   /** What the first start's setup chose. */
   onSetup: (choice: SetupChoice) => void;
 }) {
-  const { colors, scheme } = useTheme();
+  const { colors, scheme, look } = useTheme();
   const spec = useBackdropSpec();
   // A screen of a module that is off shows that it is off instead (lib/modules.ts).
   const modules = useModules();
   const bar = <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+  // Erevos+'s web pages (Messenger in its case, Facebook) wear the same colours in their bar, and
+  // Meta's page in the case the whole look: its colours, dark or light, letters, text size, bubbles
+  // and what lies behind the screens (lib/messenger-case-look.ts).
+  const caseFonts = useCaseFonts(look.style, look.font);
+  // The backdrop is made anew each render: the page is told again only when it changes.
+  const specKey = JSON.stringify(spec);
+  useEffect(
+    () =>
+      webPagesLook({
+        bar: colors.surface,
+        text: colors.text,
+        accent: colors.primary,
+        dark: scheme === 'dark',
+        page: messengerCaseLook(colors, scheme, shape.face ?? shape.family, {
+          textScale: TEXT_SCALE[look.textSize],
+          bubbles: look.bubbles,
+          squareCorner: radius.sm === 0 ? 0 : 4,
+          glow: shape.glow,
+          backdrop: spec,
+          fonts: caseFonts,
+        }),
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [colors, scheme, look.textSize, look.bubbles, specKey, caseFonts],
+  );
 
   if (error) {
     return (
@@ -621,6 +657,9 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
         <Locked lang={lang} config={phase.config} onUnlock={onUnlock} />
         {/* A call to the space behind the password screen shows over it, a hidden one too. */}
         {phase.behind !== undefined ? <CallHost key={`call-${phase.behind}`} /> : null}
+        {phase.behind !== undefined ? <TelegramCallHost key={`telegram-call-${phase.behind}`} /> : null}
+        {/* Signal's calls are the phone's, not a space's: they show over the password screen too. */}
+        <SignalCallHost />
         {phase.behind !== undefined ? <HiddenRingHost key={`ring-${phase.behind}`} locked /> : null}
         <AlertHost />
         {bar}
@@ -684,6 +723,8 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
       <OpenLink key={`link-${phase.space}-${lang}`} />
       <Receiver space={phase.space} />
       <CallHost key={`call-${phase.space}`} />
+      <TelegramCallHost key={`telegram-call-${phase.space}`} />
+      <SignalCallHost />
       <HiddenRingHost key={`ring-${phase.space}`} />
       <AlertHost />
       {bar}
@@ -695,7 +736,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
 const HEADERLESS = new Set(['index', 'chat', 'group', 'myself', 'collection', 'first-steps']);
 
 // The chats' screens, which each draw their backdrop in the chat's own look (above).
-const OWN_LOOK = new Set(['chat', 'group', 'myself', 'matrix-chat', 'xmpp-chat', 'nostr-chat', 'sms']);
+const OWN_LOOK = new Set(['chat', 'group', 'myself', 'matrix-chat', 'xmpp-chat', 'nostr-chat', 'sms', 'telegram-chat', 'messenger-chat', 'signal-chat', 'session-chat']);
 
 // How long before Erevos goes to the background a call made on the locked Phone may be, for it to
 // be what took Erevos there.
@@ -837,7 +878,9 @@ function Receiver({ space }: { space: number }) {
       // Only what the modules on use runs (lib/modules.ts): Erevos's own chats and calls, its
       // phone's names, the SMS sent for later, and the Matrix, XMPP and Nostr chats.
       const erevos = moduleOn('erevos');
-      const chats = erevos || moduleOn('nostr') || moduleOn('matrix') || moduleOn('xmpp');
+      // Messenger, Signal and Session are the phone's: they run with its first space (lib/messenger-store.ts).
+      const msg = space === 0 ? MSG_MODULES.filter((m) => moduleOn(m)) : [];
+      const chats = erevos || moduleOn('nostr') || moduleOn('matrix') || moduleOn('xmpp') || moduleOn('telegram') || msg.length > 0;
       // A stopped space (lib/forget-me.ts) waits at no relay: its queues there are gone.
       const relays = !erevos ? [] : relayStopped() ? [watchStoppedPlaces()] : [startReceiver(), startPlaceReceiver(), startPublicDoors(), startShellWatch()];
       return [
@@ -852,6 +895,8 @@ function Receiver({ space }: { space: number }) {
         ...(erevos || moduleOn('matrix') || moduleOn('xmpp') ? [watchCalls()] : []),
         ...(moduleOn('matrix') ? [startMatrix()] : []),
         ...(moduleOn('xmpp') ? [startXmpp()] : []),
+        ...(moduleOn('telegram') ? [startTelegram()] : []),
+        ...(msg.length ? [startMsgServices(msg)] : []),
         ...(moduleOn('nostr') ? [startNostrChats()] : []),
         // What the Matrix, XMPP and Nostr chats hold to send later goes at its time (lib/chat-later.ts).
         ...(moduleOn('matrix') || moduleOn('xmpp') || moduleOn('nostr') ? [startChatLater()] : []),
@@ -862,6 +907,30 @@ function Receiver({ space }: { space: number }) {
   }, [space]);
   return null;
 }
+
+// The open space's Telegram runs while the space stays open, once it signed in (the ErevosGram
+// build, lib/telegram-store.ts).
+function startTelegram(): () => void {
+  runTelegram();
+  return stopTelegram;
+}
+
+// TDLib, in the ErevosGram build only (modules/erevos-telegram); null in every other.
+setTelegramNative(telegramNative, currentLang);
+
+// Messenger, Signal and Session run while the first space stays open (Erevos+ for Android,
+// lib/messenger-store.ts), behind the password screen too: they stop only as the space closes.
+function startMsgServices(on: readonly MsgService[]): () => void {
+  void startMessenger(on);
+  const shown = AppState.addEventListener('change', (state) => messengerInFront(state === 'active'));
+  return () => {
+    shown.remove();
+    void stopMessenger();
+  };
+}
+
+// The engines, in Erevos+ for Android only (modules/erevos-messenger); null in every other.
+setMessengerNative(messengerNative);
 
 // The open space's Matrix account syncs while the space stays open (lib/matrix-store.ts).
 function startMatrix(): () => void {
@@ -915,6 +984,7 @@ function followAppShown(): () => void {
 // what was read of it go.
 function closeSpace(): void {
   collectionLocked();
+  closeWebPages();
   stopCollectionServers();
   stopSpaceRunning();
   setCurrentSpace(null);

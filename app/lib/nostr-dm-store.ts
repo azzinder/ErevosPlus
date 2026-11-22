@@ -73,6 +73,8 @@ import { lookUpNip05, NostrRelay, type NostrEvent } from './nostr-dm-net';
 import { onRulesTick } from './chat-rules';
 import { goesAtIn, nostrRulesDue, sweepNostrRules, timerOf } from './nostr-rules';
 import { emojiTag } from './nostr-emoji';
+import { accountTorOf, type AccountTor } from './account-tor';
+import { accountHttp, chatTorHttp } from './net-http';
 import { downloadBlob, FILE_SERVERS, fileTags, NOSTR_FILE_MOST, openFile, sealFile, uploadBlob, type NostrDmFile } from './nostr-files';
 import { FEED_AT_ONCE, feedPage, feedPeople, feedRelays, tallyReactions, type FeedAnswer, type FeedPost, type PostReaction } from './nostr-feed';
 import { POLL_KIND, POLL_RELAYS_MOST, pollCount, pollOf, pollOpen, pollTags, VOTE_KIND, voteTags, type PollCount } from './nostr-polls';
@@ -235,25 +237,30 @@ export function nostrDmAct<T>(use: (state: NostrDmState) => Promise<T>): Promise
 // Connections that only send or look up, by relay, kept a minute after their last use.
 const IDLE_CLOSE = 60_000;
 
-function outTo(it: Live, url: string): Promise<NostrRelay> {
+// A chat sent through Tor by itself (NostrDmChat.tor) has connections of its own, on circuits of
+// its own (lib/nostr-dm-net.ts chatTorLink): `via` names it, its key. Reading the space's inbox
+// stays shared, so what comes follows the account's way.
+function outTo(it: Live, url: string, via?: string): Promise<NostrRelay> {
   const out = it.out;
-  let held = out.get(url);
+  const choice = choiceOf(it.state);
+  const at = via ? `${via}\n${url}` : url;
+  let held = out.get(at);
   if (held) {
     if (held.idle) clearTimeout(held.idle);
     held.idle = null;
   } else {
-    held = { relay: NostrRelay.open(url, null), idle: null };
+    held = { relay: NostrRelay.open(url, null, via, choice), idle: null };
     const it = held;
-    out.set(url, it);
+    out.set(at, it);
     it.relay.then(
-      (relay) => relay.onEnd(() => out.get(url) === it && out.delete(url)),
-      () => out.get(url) === it && out.delete(url),
+      (relay) => relay.onEnd(() => out.get(at) === it && out.delete(at)),
+      () => out.get(at) === it && out.delete(at),
     );
   }
   const used = held;
   used.idle = setTimeout(() => {
-    if (out.get(url) !== used) return;
-    out.delete(url);
+    if (out.get(at) !== used) return;
+    out.delete(at);
     void used.relay.then((relay) => relay.close()).catch(() => undefined);
   }, IDLE_CLOSE);
   return held.relay;
@@ -268,12 +275,12 @@ function closeOut(it: Live): void {
   }
 }
 
-/** Sends `event` to each relay; answers how many took it. */
-async function publish(it: Live, urls: string[], event: NostrEvent): Promise<number> {
+/** Sends `event` to each relay, on a chat's own connections with `via`; answers how many took it. */
+async function publish(it: Live, urls: string[], event: NostrEvent, via?: string): Promise<number> {
   const took = await Promise.all(
     [...new Set(urls)].map(async (url) => {
       try {
-        return (await (await outTo(it, url)).publish(event)).ok;
+        return (await (await outTo(it, url, via)).publish(event)).ok;
       } catch {
         return false;
       }
@@ -283,16 +290,16 @@ async function publish(it: Live, urls: string[], event: NostrEvent): Promise<num
 }
 
 /** What these relays have for `filters`, together. */
-async function lookUp(it: Live, urls: string[], filters: Record<string, unknown>[], ms = 8000): Promise<NostrEvent[]> {
-  return (await lookUpAnswered(it, urls, filters, ms)).events;
+async function lookUp(it: Live, urls: string[], filters: Record<string, unknown>[], ms = 8000, via?: string): Promise<NostrEvent[]> {
+  return (await lookUpAnswered(it, urls, filters, ms, via)).events;
 }
 
 /** As lookUp, and whether any relay answered at all: none found, or none to ask, are not the same. */
-async function lookUpAnswered(it: Live, urls: string[], filters: Record<string, unknown>[], ms = 8000): Promise<{ events: NostrEvent[]; answered: boolean }> {
+async function lookUpAnswered(it: Live, urls: string[], filters: Record<string, unknown>[], ms = 8000, via?: string): Promise<{ events: NostrEvent[]; answered: boolean }> {
   const found = await Promise.all(
     [...new Set(urls)].map(async (url) => {
       try {
-        return await (await outTo(it, url)).query(filters, ms);
+        return await (await outTo(it, url, via)).query(filters, ms);
       } catch {
         return null;
       }
@@ -359,7 +366,7 @@ async function read(it: Live, url: string, inboxAt: number): Promise<void> {
   while (stillOpen(it) && it.state && it.inboxAt === inboxAt) {
     const state = it.state;
     try {
-      const relay = await NostrRelay.open(url, (where, challenge) => authEvent(state, where, challenge));
+      const relay = await NostrRelay.open(url, (where, challenge) => authEvent(state, where, challenge), undefined, choiceOf(state));
       if (!stillOpen(it) || it.inboxAt !== inboxAt) {
         relay.close();
         return;
@@ -527,7 +534,7 @@ async function catchUp(it: Live, state: NostrDmState, urls: string[]): Promise<v
     urls.map(async (url) => {
       let relay: NostrRelay | null = null;
       try {
-        relay = await NostrRelay.open(url, (where, challenge) => authEvent(state, where, challenge));
+        relay = await NostrRelay.open(url, (where, challenge) => authEvent(state, where, challenge), undefined, choiceOf(state));
         const { events } = await relay.ask([{ kinds: [1059], '#p': [state.public], limit: 1000 }], CATCH_UP_WAIT);
         if (!events.length || it.state !== state || !stillOpen(it)) return;
         await changeAccount(
@@ -659,18 +666,18 @@ async function begin(it: Live, state: NostrDmState): Promise<void> {
   startReading(it);
 }
 
-/** Makes the open space a Nostr key of its own. */
-export async function nostrDmMake(): Promise<void> {
+/** Makes the open space a Nostr key of its own, its Tor `tor` (Off unless chosen). */
+export async function nostrDmMake(tor: AccountTor = 'never'): Promise<void> {
   const it = opened();
-  await begin(it, await newNostrDm());
+  await begin(it, { ...(await newNostrDm()), tor });
 }
 
 /** Brings a key from another Nostr app: its nsec. */
-export async function nostrDmBring(nsec: string): Promise<void> {
+export async function nostrDmBring(nsec: string, tor: AccountTor = 'never'): Promise<void> {
   const it = opened();
   const written = await readKey(nsec);
   if (written.type !== 'nsec' || !written.secret) throw new Error(t('Write the key that starts with nsec1, from the app that has it.'));
-  await begin(it, await newNostrDm(written.secret));
+  await begin(it, { ...(await newNostrDm(written.secret)), tor });
 }
 
 // The space's own account, or with `place` that hidden place's own while it runs
@@ -753,12 +760,12 @@ export async function nostrDmSetName(name: string): Promise<void> {
   await tell(it);
 }
 
-/** Where `key` reads (their kind 10050), as looked up now, and their name. */
-async function lookUpPerson(it: Live & { state: NostrDmState }, key: string): Promise<string[] | null> {
+/** Where `key` reads (their kind 10050), as looked up now, and their name; on a chat's own connections with `via`. */
+async function lookUpPerson(it: Live & { state: NostrDmState }, key: string, via = torWayOf(it.state, key)): Promise<string[] | null> {
   const state = it.state;
   const chat = state.chats[key];
   const where = [...state.inbox, ...LOOKUP_RELAYS, ...(chat?.hints ?? [])];
-  const events = await lookUp(it, where, [{ kinds: [10050, 0], authors: [key] }]);
+  const events = await lookUp(it, where, [{ kinds: [10050, 0], authors: [key] }], 8000, via);
   const relays = await inboxOf(key, events);
   const name = await nameIn(key, events);
   await changeAccount(it, async () => {
@@ -773,7 +780,7 @@ async function lookUpPerson(it: Live & { state: NostrDmState }, key: string): Pr
 }
 
 /** Where `key` reads: as looked up in the last six hours, or looked up now, or as last known. */
-async function relaysOf(it: Live & { state: NostrDmState }, key: string): Promise<string[] | null> {
+async function relaysOf(it: Live & { state: NostrDmState }, key: string, via?: string): Promise<string[] | null> {
   const state = it.state;
   if (key === state.public) return state.inbox;
   const person = state.people[key];
@@ -781,7 +788,35 @@ async function relaysOf(it: Live & { state: NostrDmState }, key: string): Promis
   const known = person?.relays ?? state.chats[key]?.relays;
   const knownAt = person?.relaysAt ?? state.chats[key]?.relaysAt ?? 0;
   if (known && knownAt > seconds() - 6 * 3600) return known;
-  return (await lookUpPerson(it, key).catch(() => null)) ?? known ?? null;
+  return (await lookUpPerson(it, key, via).catch(() => null)) ?? known ?? null;
+}
+
+/** The account's own Tor choice (lib/account-tor.ts): Off for a new one unless chosen. */
+function choiceOf(state: NostrDmState | null | undefined): AccountTor {
+  return accountTorOf(state?.tor);
+}
+
+/** The account's Tor choice, of the open space's or the open hidden place's, as the screens show it. */
+export function nostrDmTor(where: NetworkWhere = 'space'): AccountTor {
+  return choiceOf(nostrDmNow(where).state);
+}
+
+/**
+ * Changes the account's Tor choice: its connections close and open again the new way, its inbox
+ * read again. A chat sent through Tor by itself stays so, whatever is chosen here.
+ */
+export async function nostrDmSetAccountTor(tor: AccountTor): Promise<void> {
+  const it = need();
+  await changeAccount(it, async () => {
+    it.state.tor = tor;
+  });
+  closeOut(it);
+  startReading(it);
+}
+
+/** The chat `key`'s own way through Tor (outTo's `via`) while it is sent through Tor by itself. */
+function torWayOf(state: NostrDmState, key: string): string | undefined {
+  return state.chats[key]?.tor ? key : undefined;
 }
 
 /** Starts a chat with someone written as an npub, an nprofile or a name@domain (NIP-05); answers their key. */
@@ -790,7 +825,7 @@ export async function nostrDmStart(written: string, name = ''): Promise<string> 
   const text = written.trim();
   let found: { public: string; relays: string[] } | null;
   if (/^[^@\s]+@[^@\s]+$/.test(text) && !text.startsWith('npub') && !text.startsWith('nprofile')) {
-    found = await lookUpNip05(text).catch((error: unknown) => {
+    found = await lookUpNip05(text, choiceOf(it.state)).catch((error: unknown) => {
       // Tor not ready says so; a name that cannot be reached is one with no key.
       if (error instanceof Error && error.message === t('Tor is not ready.')) throw error;
       return null;
@@ -1256,7 +1291,7 @@ export async function nostrDmWritePost(text: string, photos: PublicPhoto[] = [],
   const urls: string[] = [];
   for (const photo of photos) {
     if (photo.bytes.length > NOSTR_FILE_MOST) throw new NostrFileTooLargeError();
-    const url = await uploadBlob(it.state.files?.length ? it.state.files : FILE_SERVERS, photo.bytes, (kind, signTags, content) => signedOnce(kind, signTags, content));
+    const url = await uploadBlob(it.state.files?.length ? it.state.files : FILE_SERVERS, photo.bytes, (kind, signTags, content) => signedOnce(kind, signTags, content), Date.now(), accountHttp(choiceOf(it.state)));
     urls.push(url);
     tags.push(['imeta', `url ${url}`, `m ${photo.mime}`, ...(photo.w && photo.h ? [`dim ${photo.w}x${photo.h}`] : []), `x ${toHex(sha256Bytes(photo.bytes))}`]);
   }
@@ -1435,7 +1470,9 @@ async function sendTo(
 ): Promise<string> {
   const state = it.state;
   const readers = readersOf(state, key);
-  const where = await Promise.all(readers.map(async (reader) => [reader, await relaysOf(it, reader)] as const));
+  // A chat sent through Tor by itself: all it sends and looks up, on its own connections.
+  const via = torWayOf(state, key);
+  const where = await Promise.all(readers.map(async (reader) => [reader, await relaysOf(it, reader, via)] as const));
   const reachable = where.filter(([, relays]) => relays?.length) as (readonly [string, string[]])[];
   if (readers.length && !reachable.length) {
     throw new Error(
@@ -1458,8 +1495,8 @@ async function sendTo(
   });
   // Our own copy, for the space's other apps with this key (in notes to oneself, the message
   // itself); then each reader's, which say whether it went.
-  const tookOurs = publish(it, state.inbox, ours);
-  const took = readers.length ? (await Promise.all(reachable.map(([reader, relays]) => publish(it, relays, made.wraps[reader])))).filter((n) => n > 0).length : await tookOurs;
+  const tookOurs = publish(it, state.inbox, ours, via);
+  const took = readers.length ? (await Promise.all(reachable.map(([reader, relays]) => publish(it, relays, made.wraps[reader], via)))).filter((n) => n > 0).length : await tookOurs;
   const chat = state.chats[key];
   const told = made.subject !== undefined && took > 0 && (chat?.subject ?? '') === made.subject;
   if (message || told) {
@@ -1545,7 +1582,8 @@ export async function nostrDmSendFile(key: string, picked: NostrOutgoingFile, re
 async function sendPicked(it: Live & { state: NostrDmState }, key: string, picked: NostrOutgoingFile, replyTo?: string): Promise<string> {
   if (picked.bytes.length > NOSTR_FILE_MOST) throw new NostrFileTooLargeError();
   const { sealed, file } = await sealFile(picked.bytes, picked.mime, picked.name, picked.dim, picked.durationMs);
-  const url = await uploadBlob(it.state.files?.length ? it.state.files : FILE_SERVERS, sealed, (kind, tags, content) => signedOnce(kind, tags, content));
+  const via = torWayOf(it.state, key);
+  const url = await uploadBlob(it.state.files?.length ? it.state.files : FILE_SERVERS, sealed, (kind, tags, content) => signedOnce(kind, tags, content), Date.now(), via ? chatTorHttp(via) : accountHttp(choiceOf(it.state)));
   return sendFile(it, key, { ...file, url }, replyTo);
 }
 
@@ -1656,7 +1694,7 @@ export async function nostrDmForward(from: string, ids: string[], to: string): P
     const file = message.file;
     let id: string;
     if (typeof file === 'object') {
-      const bytes = await nostrDmFile(file);
+      const bytes = await nostrDmFile(file, from);
       id = await sendPicked(it, to, { bytes, name: file.name ?? '', mime: file.type, ...(file.dim ? { dim: file.dim } : {}), ...(file.duration ? { durationMs: file.duration } : {}) });
     } else id = await nostrDmSend(to, message.text);
     await changeAccount(it, async () => {
@@ -1725,9 +1763,23 @@ export function nostrDmSetFileServers(servers: string[]): Promise<void> {
 // Files fetched while Erevos runs, so one looked at again is not fetched again (lib/file-cache.ts).
 const fetched = fileCache(40 * 1024 * 1024);
 
-/** A message's photo or file, fetched from its server and opened, or kept from before. */
-export function nostrDmFile(file: NostrDmFile): Promise<Uint8Array> {
-  return fetched.get(file.url, async () => openFile(file, await downloadBlob(file.url)));
+/** A message's photo or file, fetched from its server and opened, or kept from before; for the
+ *  chat `key` sent through Tor by itself, on its own way. */
+export function nostrDmFile(file: NostrDmFile, key?: string): Promise<Uint8Array> {
+  const state = acting()?.state;
+  const via = key && state ? torWayOf(state, key) : undefined;
+  return fetched.get(file.url, async () => openFile(file, await downloadBlob(file.url, false, via ? chatTorHttp(via) : accountHttp(choiceOf(state)))));
+}
+
+/** Sends the chat `key` through Tor by itself, on circuits of its own, whatever the space's Tor
+ *  way (on), or as the space's way says again (off). What comes follows the account: its inbox is read once for all. */
+export function nostrDmSetTor(key: string, on: boolean): Promise<void> {
+  const it = need();
+  return changeAccount(it, async () => {
+    const chat = chatOf(it.state, key);
+    if (on) chat.tor = true;
+    else delete chat.tor;
+  });
 }
 
 /** A chat's own notifications (lock/chat-notify.ts), or the app's again with null. */

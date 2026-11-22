@@ -14,14 +14,16 @@ import { NOSTR_FILE_MOST } from './nostr-files';
 import type { SharedSource } from './share-in';
 import { XMPP_FILE_MOST } from './xmpp-files';
 import { onXmppChange, xmppNow } from './xmpp-store';
+import { chatList, TELEGRAM_MOST } from './telegram';
+import { onTelegramChange, telegramAwayChats, telegramLockedChats, telegramNow } from './telegram-store';
 
-// Send to (app/share.tsx) reaches the chats of the space's own Matrix, XMPP and Nostr accounts
+// Send to (app/share.tsx) reaches the chats of the space's own Matrix, XMPP, Nostr and Telegram accounts
 // too, never a hidden place's. The chat picked opens with the words in its message field, to read
 // and send there, as an Erevos chat does; a photo or file is handed to it in memory
 // (lib/share-in.ts handShared) and goes as soon as it opens, read whole first, as each of these
 // networks sends a file from memory, and only up to the size that network takes (lib/shared-here.ts).
 
-export type Network = 'matrix' | 'xmpp' | 'nostr';
+export type Network = 'matrix' | 'xmpp' | 'nostr' | 'telegram';
 
 /** A chat on a network, as Send to lists it: `to` is its row's identity (`matrix:` and the room's id, `xmpp:` and an address, `nostr:` and a key). */
 export type NetworkTarget = { key: string; name: string; kind: Network; at: number; to: string; open: string };
@@ -30,7 +32,7 @@ export type NetworkTarget = { key: string; name: string; kind: Network; at: numb
 export type NetworkFile = { name: string; mime: string; bytes: Uint8Array; w?: number; h?: number };
 
 /** The largest file a chat on each network sends. */
-export const NETWORK_MOST: Record<Network, number> = { matrix: MATRIX_MOST, xmpp: XMPP_FILE_MOST, nostr: NOSTR_FILE_MOST };
+export const NETWORK_MOST: Record<Network, number> = { matrix: MATRIX_MOST, xmpp: XMPP_FILE_MOST, nostr: NOSTR_FILE_MOST, telegram: TELEGRAM_MOST };
 
 // Read a megabyte at a time.
 const PIECE = 1024 * 1024;
@@ -39,6 +41,7 @@ const PIECE = 1024 * 1024;
 export function tooLargeFor(network: Network): Error {
   if (network === 'matrix') return new MatrixFileTooLargeError();
   if (network === 'nostr') return new NostrFileTooLargeError();
+  if (network === 'telegram') return new Error(t('That file is too large for Telegram.'));
   return new Error(t('Files up to {size} MB go in XMPP chats.', { size: String(Math.floor(XMPP_FILE_MOST / (1024 * 1024))) }));
 }
 
@@ -46,16 +49,30 @@ export function tooLargeFor(network: Network): Error {
 export function networkOf(to: string): Network | null {
   const at = to.indexOf(':');
   const network = at > 0 ? to.slice(0, at) : '';
-  return network === 'matrix' || network === 'xmpp' || network === 'nostr' ? network : null;
+  return network === 'matrix' || network === 'xmpp' || network === 'nostr' || network === 'telegram' ? network : null;
 }
 
 /** A row of the home screen's list as Send to offers it: a chat of a network, not one only invited to; null for any other. */
 export function networkTarget(row: InboxRow): NetworkTarget | null {
-  if (!row.network || row.invited || networkOf(row.identity) !== row.network) return null;
+  if (!row.network || row.network === 'telegram' || row.invited || networkOf(row.identity) !== row.network) return null;
   const id = row.identity.slice(row.network.length + 1);
   if (!id) return null;
   const open = row.network === 'matrix' ? `/matrix-chat?room=${encodeURIComponent(id)}` : row.network === 'xmpp' ? `/xmpp-chat?jid=${encodeURIComponent(id)}` : `/nostr-chat?key=${encodeURIComponent(id)}`;
   return { key: row.identity, name: row.name || shownName(row), kind: row.network, at: row.at, to: row.identity, open };
+}
+
+/**
+ * The space's Telegram chats (the ErevosGram build) as Send to lists them: those of its main list,
+ * but for one locked with its PIN or kept in hidden chats, and channels, where most may not write.
+ */
+export function telegramTargets(): NetworkTarget[] {
+  const state = telegramNow('space').state;
+  if (!state || state.auth.kind !== 'ready') return [];
+  const locked = telegramLockedChats('space');
+  const away = telegramAwayChats();
+  return chatList(state, 'main')
+    .filter((c) => !locked.has(c.id) && !away.has(c.id) && c.type !== 'channel')
+    .map((c) => ({ key: `telegram:${c.id}`, name: c.title, kind: 'telegram' as const, at: (c.last?.date ?? 0) * 1000, to: `telegram:${c.id}`, open: `/telegram-chat?id=${c.id}` }));
 }
 
 /**
@@ -82,19 +99,21 @@ export function useNetworkTargets(on: ReadonlySet<Module>): NetworkTarget[] {
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const again = () => setTick((n) => n + 1);
-    const stops = [onMatrixChange(again), onXmppChange(again), onNostrDmChange(again)];
+    const stops = [onMatrixChange(again), onXmppChange(again), onNostrDmChange(again), onTelegramChange(again)];
     return () => stops.forEach((stop) => stop());
   }, []);
   const matrix = on.has('matrix');
   const xmpp = on.has('xmpp');
   const nostr = on.has('nostr');
+  const telegram = on.has('telegram');
   return useMemo(() => {
     const matrixState = matrix ? matrixNow('space').state : null;
     const xmppState = xmpp ? xmppNow('space').state : null;
     const nostrState = nostr ? nostrDmNow('space').state : null;
     const rows = [...(matrixState ? matrixInboxRows(matrixState) : []), ...(xmppState ? xmppInboxRows(xmppState) : []), ...(nostrState ? nostrInboxRows(nostrState) : [])];
-    return rows.map(networkTarget).filter((target): target is NetworkTarget => target !== null);
-  }, [tick, matrix, xmpp, nostr]);
+    const found = rows.map(networkTarget).filter((target): target is NetworkTarget => target !== null);
+    return telegram ? [...found, ...telegramTargets()] : found;
+  }, [tick, matrix, xmpp, nostr, telegram]);
 }
 
 /**

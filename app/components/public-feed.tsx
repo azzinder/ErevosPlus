@@ -16,7 +16,7 @@ import type { MatrixFile, MatrixState } from '../lib/matrix';
 import { matrixFile, matrixLearnJoins, matrixNow, matrixReact, matrixReply, onMatrixChange } from '../lib/matrix-store';
 import { netThroughTor } from '../lib/net-http';
 import { npubOf, shortMentions, shortNpub } from '../lib/nostr-dm';
-import { nostrChatsThroughTor } from '../lib/nostr-dm-net';
+import { canNostrTor, nostrChatsThroughTor } from '../lib/nostr-dm-net';
 import type { NostrEvent } from '../lib/nostr-dm-net';
 import {
   nostrDmDoneWith,
@@ -38,13 +38,16 @@ import {
   sayFeedReport,
   sayFollowsReport,
   type PublicPhoto,
+  nostrDmSetAccountTor,
+  nostrDmTor,
 } from '../lib/nostr-dm-store';
 import { EMOJI_MOST, emojiOf, withEmoji } from '../lib/nostr-emoji';
 import { morePosts, withoutMine, withReaction, type FeedPost, type PostReaction } from '../lib/nostr-feed';
 import { POLL_LASTS, pollOpen, withMyVote, type PollCount } from '../lib/nostr-polls';
 import { CAN_TAKE_PHOTOS, pickPhoto } from '../lib/pick-photo';
 import { photoUri, releaseUri } from '../lib/photo-uri';
-import { publicCard, publicPhoto, fetchesByItself, type FetchWhy, type LinkCard } from '../lib/public-fetch';
+import { publicCard, publicPhoto, fetchesByItself, setPublicIpAsk, type FetchWhy, type LinkCard } from '../lib/public-fetch';
+import { ipGate } from './ip-warning';
 import { matrixFeed, mergeFeed, type PublicItem, type PublicShow } from '../lib/public-feed';
 import { mediaIn, siteOf, type PublicImage, type PublicImages } from '../lib/public-media';
 import { saveBytes } from '../lib/save-file';
@@ -242,7 +245,8 @@ export function usePublicActions(names: Record<string, string>, shown: boolean, 
     onLike: (event) => {
       if (liking.has(event.id)) return;
       liking.add(event.id);
-      void (nostrDmDoneWith(event.id).liked ? nostrDmUnlike(event) : nostrDmLike(event))
+      void mayPost()
+        .then((go) => (go ? (nostrDmDoneWith(event.id).liked ? nostrDmUnlike(event) : nostrDmLike(event)) : undefined))
         .catch(fail)
         .finally(() => liking.delete(event.id));
     },
@@ -268,6 +272,7 @@ export function usePublicActions(names: Record<string, string>, shown: boolean, 
     setMenu(null);
     if (!(await confirm(t('Take back this post?'), t('The relays that keep it are asked to drop it. Copies that others made may stay.'), t('Take back')))) return;
     try {
+      if (!(await mayPost())) return;
       await nostrDmTakeBack(event);
       posted?.();
     } catch (error) {
@@ -445,6 +450,8 @@ function WriteSheet({ writing, onClose, onDone }: { writing: Writing | null; onC
       if (writing.roomId && writing.eventId) {
         if (!text.trim()) throw new Error(t('Write something first.'));
         await matrixReply(writing.roomId, text.trim(), writing.eventId);
+      } else if (!(await mayPost())) {
+        return;
       } else if (poll) {
         await nostrDmWritePoll(text, options, multiple, Math.floor(Date.now() / 1000) + lasts);
       } else {
@@ -540,6 +547,16 @@ function lastsLabel(seconds: number): string {
   return days % 7 === 0 ? plural(days / 7, '{n} week', '{n} weeks') : plural(days, '{n} day', '{n} days');
 }
 
+/**
+ * Before what the space's Nostr key posts, likes, votes on or takes back can show this phone's
+ * address to the relays (lib/ip-warning.ts): unless the account goes through Tor now, said once,
+ * with Always through Tor for the account as the way not to, where there is Tor.
+ */
+async function mayPost(): Promise<boolean> {
+  if (nostrChatsThroughTor(nostrDmTor())) return true;
+  return ipGate({ network: 'Nostr', act: 'send', of: 'public posts' }, canNostrTor() ? { label: t('Always through Tor'), run: () => nostrDmSetAccountTor('always') } : undefined);
+}
+
 /** The sheet of how photos and link cards are fetched (SpaceData.publicImages, publicCards). */
 function PhotosSheet({ visible, images, cards, onClose, onChange }: { visible: boolean; images: PublicImages; cards: boolean; onClose: () => void; onChange: (next: { images?: PublicImages; cards?: boolean }) => void }) {
   const colors = useColors();
@@ -607,6 +624,11 @@ export function usePublicFeed(account: NostrAccount, matrixOn: boolean, shown: b
   const [said, setSaid] = useState('');
   const [filter, setFilter] = useState<PublicShow>('all');
   const [matrixTick, setMatrixTick] = useState(0);
+  // A photo or card fetched without Tor shows this phone's address to its site: said once before (lib/ip-warning.ts).
+  useEffect(() => {
+    setPublicIpAsk(() => ipGate({ network: 'Nostr', act: 'preview', of: 'public feed' }));
+    return () => setPublicIpAsk(null);
+  }, []);
   const [nostrTick, setNostrTick] = useState(0);
   const current = useRef(feed);
   current.current = feed;
@@ -689,9 +711,9 @@ export function usePublicFeed(account: NostrAccount, matrixOn: boolean, shown: b
       </Text>
       {canTor() && nostrOn ? (
         <Text variant="caption" tone="faint">
-          {nostrChatsThroughTor()
+          {nostrChatsThroughTor(nostrDmTor())
             ? t('Through Tor: the Nostr relays do not see your address.')
-            : t('Not through Tor now: the Nostr relays see your address. Tor is under Settings → Relay and networks → Tor.')}
+            : t('Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.')}
         </Text>
       ) : null}
       <Row wrap style={{ paddingTop: space.xs }}>
@@ -1033,6 +1055,7 @@ function PollBox({ poll, event, atOnce }: { poll: NonNullable<FeedPost['poll']>;
     setBusy(true);
     setSaid('');
     try {
+      if (voted && !(await mayPost())) return;
       if (voted) await nostrDmVote(event, voted);
       const got = await nostrDmPollCount(event);
       // Just voted: so it shows, whether or not the relays asked have the vote yet.
@@ -1133,6 +1156,7 @@ export function PostReactions({ post, reactions, mode, onChange }: { post: Nostr
     setSaid('');
     try {
       const had = reactions.find((r) => r.sign === sign);
+      if (!(await mayPost())) return;
       if (had?.mine.length) {
         await nostrDmTakeBackReactions(post, had.mine);
         onChange(withoutMine(reactions, sign));

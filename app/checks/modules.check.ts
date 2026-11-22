@@ -48,6 +48,17 @@ test('the phone and the SMS only on Android, the Collection on Android and in th
     assert.deepEqual([...(parseModules('["phone","collection","erevos"]', modulesHere('web', shell)) ?? [])], ['erevos', 'collection']);
 });
 
+test('Telegram only in the ErevosGram build for Android, before the Collection', () => {
+  assert.deepEqual(modulesHere('android', null, true), ['erevos', 'phone', 'sms', 'nostr', 'matrix', 'xmpp', 'telegram', 'collection']);
+  assert.deepEqual(modulesHere('android', null, false), ANDROID);
+  assert.deepEqual(modulesHere('web', 'electron', true), ['erevos', 'nostr', 'matrix', 'xmpp', 'collection']);
+  assert.equal(screenModule('telegram-chat'), 'telegram');
+  // Telegram alone is a way to chat.
+  assert.deepEqual([...(parseModules(JSON.stringify({ on: ['telegram'], known: MODULES }), modulesHere('android', null, true)) ?? [])], ['telegram']);
+  // A choice from before Telegram came: Telegram is on in the ErevosGram build, as every newer module is.
+  assert.deepEqual([...(parseModules(JSON.stringify({ on: ['erevos'], known: ['erevos', 'phone', 'sms', 'nostr', 'matrix', 'xmpp', 'collection'] }), modulesHere('android', null, true)) ?? [])], ['erevos', 'telegram']);
+});
+
 test('nothing kept, or nothing usable, is every module on', () => {
   assert.equal(parseModules(null, ANDROID), null);
   assert.equal(parseModules('', ANDROID), null);
@@ -222,11 +233,11 @@ test('each permission is asked on the first screen whose module needs it; later 
 test('the plain Erevos has only Erevos, the Phone, the SMS and the Collection; moving to Erevos+ turns the others on', () => {
   assert.deepEqual(editionModules('lite'), ['erevos', 'phone', 'sms', 'collection']);
   assert.deepEqual(editionModules('plus'), MODULES);
-  assert.deepEqual(modulesHere('android', null, 'lite'), ['erevos', 'phone', 'sms', 'collection']);
-  assert.deepEqual(modulesHere('web', null, 'lite'), ['erevos', 'collection']);
-  assert.deepEqual(modulesHere('ios', null, 'lite'), ['erevos']);
+  assert.deepEqual(modulesHere('android', null, false, 'lite'), ['erevos', 'phone', 'sms', 'collection']);
+  assert.deepEqual(modulesHere('web', null, false, 'lite'), ['erevos', 'collection']);
+  assert.deepEqual(modulesHere('ios', null, false, 'lite'), ['erevos']);
   // A choice made in Erevos+ read in the plain Erevos: only its own modules.
-  const LITE_HERE = modulesHere('android', null, 'lite');
+  const LITE_HERE = modulesHere('android', null, false, 'lite');
   assert.deepEqual([...(parseModules('{"on":["erevos","sms","matrix"],"known":["erevos","phone","sms","nostr","matrix","xmpp","collection"]}', LITE_HERE) ?? [])], ['erevos', 'sms']);
   // A choice made in the plain Erevos (SMS off) read in Erevos+: SMS stays off, the networks it
   // did not have are on.

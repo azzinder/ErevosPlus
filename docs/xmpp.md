@@ -37,6 +37,13 @@ is what is written, once OMEMO encrypts it.
   it uses the server's WebSocket (RFC 7395), found in its `/.well-known/host-meta` (XEP-0156). A
   server written on the sign-in screen (host, host:port, or a `wss://` address) is used as given.
   With the Tor way Messages, a server Tor cannot reach is tried straight; with Everything, never.
+  Each account has a Tor choice of its own (`XmppState.tor`, lib/account-tor.ts): **Off** by default
+  (straight), **As the space** (the space's way above), or **Always** (only through Tor, Tor started
+  for it with lib/tor.ts `ensureTor`). A chat's **Through Tor** (`XmppChat.tor`) makes the whole
+  account Always while on (`xmppTorWay`), as one connection carries every chat. When it must not go
+  straight (Always, or As the space with Everything) the connection, the SRV look-up and its files
+  (lib/net-http.ts `accountHttp`) never do, and a WebSocket server is refused. The earlier switch's
+  kept `true` reads as Always. Calls stay outside Tor.
 - `app/lib/xmpp-xml.ts` reads the stream in pieces cut anywhere; `app/lib/xmpp-sasl.ts` signs in
   with SCRAM-SHA-256 or SCRAM-SHA-1 (RFC 5802, RFC 7677), which also proves the server knows the
   password, or with PLAIN only inside TLS.

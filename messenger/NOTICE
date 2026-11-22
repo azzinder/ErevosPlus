@@ -1,0 +1,12 @@
+Erevos Messenger uses code from mautrix-meta (https://github.com/mautrix/meta),
+Copyright (C) Tulir Asokan and contributors, under the GNU AGPL v3 or later.
+
+The Signal part uses presage (https://github.com/whisperfish/presage) and
+libsignal-service-rs, under the GNU AGPL v3, and libsignal by Signal Messenger
+under the GNU AGPL v3.
+
+The Session part uses libsession-util and libsession-util-android
+(https://github.com/session-foundation), under the GNU GPL v3, and follows the
+protocol code of session-android (GPL v3). The word list in
+android/app/src/main/assets/session/english.txt and the seed node certificates
+next to it come from session-android.

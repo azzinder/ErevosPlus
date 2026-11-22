@@ -164,7 +164,7 @@ export function SendTo({ pay }: { pay?: Pay | null }) {
   // The Collection takes a photo or file shared in, on the phone, when it is on.
   const toCollection = !!file && !fromCollection && CAN_COLLECT && Platform.OS !== 'web' && modules.has('collection');
   const kindOf = (target: Target) =>
-    target.kind === 'group' ? t('Group') : target.kind === 'sms' ? t('SMS') : target.kind === 'matrix' ? 'Matrix' : target.kind === 'xmpp' ? 'XMPP' : target.kind === 'nostr' ? 'Nostr' : t('Erevos chat');
+    target.kind === 'group' ? t('Group') : target.kind === 'sms' ? t('SMS') : target.kind === 'matrix' ? 'Matrix' : target.kind === 'xmpp' ? 'XMPP' : target.kind === 'nostr' ? 'Nostr' : target.kind === 'telegram' ? 'Telegram' : t('Erevos chat');
 
   async function choose(target: Target) {
     if (asked) {

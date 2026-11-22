@@ -44,8 +44,6 @@ export const xmpp: Record<string, string> = {
   "Locked: this message could not be opened on this device.": "Verrouillé : ce message n’a pas pu être ouvert sur cet appareil.",
   "not encrypted": "non chiffré",
   "Chat with people on XMPP, who use Conversations, Monal, Gajim, Dino or another XMPP app. Messages are encrypted with OMEMO, but these chats are not anonymous: the XMPP server sees who talks with whom, and when.": "Discute avec des personnes sur XMPP, qui utilisent Conversations, Monal, Gajim, Dino ou une autre app XMPP. Les messages sont chiffrés avec OMEMO, mais ces discussions ne sont pas anonymes : le serveur XMPP voit qui parle avec qui, et quand.",
-  "Through Tor: the XMPP server does not see your address.": "Par Tor : le serveur XMPP ne voit pas ton adresse.",
-  "Not through Tor now: the XMPP server sees your address. Tor is under Settings → Relay and networks → Tor.": "Pas par Tor en ce moment : le serveur XMPP voit ton adresse. Tor se trouve dans Réglages → Relais et réseaux → Tor.",
   "XMPP address": "Adresse XMPP",
   "Only when the server is not the one in your address, or cannot be found. A name, name:port or a wss:// address.": "Seulement quand le serveur n’est pas celui de ton adresse, ou reste introuvable. Un nom, nom:port ou une adresse wss://.",
   "Erevos signs in as a new device of the account, and keeps the sign-in encrypted in this space only.": "Erevos se connecte comme un nouvel appareil du compte, et garde la connexion chiffrée dans cet espace seulement.",
@@ -143,4 +141,8 @@ export const xmpp: Record<string, string> = {
     "Ton relais n’accepte pas encore les notifications XMPP : il doit être mis à jour.",
   "Your XMPP server does not send notices to apps that are away.":
     "Ton serveur XMPP n’envoie pas de notifications aux applis qui ne sont pas actives.",
+  "Always through Tor":
+    "Toujours par Tor",
+  "This XMPP account goes only through Tor, which this server address cannot.":
+    "Ce compte XMPP passe seulement par Tor, ce que cette adresse de serveur ne permet pas.",
 };

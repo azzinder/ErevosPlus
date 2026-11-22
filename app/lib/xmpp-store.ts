@@ -59,6 +59,7 @@ import {
   type Taken,
   type XmppMessage,
   type XmppState,
+  xmppTorWay,
 } from './xmpp';
 import { fetchXmppAvatar } from './xmpp-avatar';
 import { downloadXmppFile, linkFits, shownType, uploadXmppFile, type XmppFile } from './xmpp-files';
@@ -82,6 +83,8 @@ import type { connectXmpp, XmppServer } from './xmpp-net';
 import { keepXmppPush, startXmppPush, stopXmppPush } from './xmpp-push';
 import { onRulesTick } from './chat-rules';
 import { sweepXmppRules, xmppRulesDue } from './xmpp-rules';
+import { ensureTor } from './tor';
+import { accountTorOf, type AccountTor } from './account-tor';
 
 // The open space's XMPP account as the screens use it (app/xmpp.tsx, app/xmpp-chat.tsx): loaded
 // from its sealed value (lock/xmpp-data.ts), connected to its server while the space is open, and
@@ -253,6 +256,7 @@ async function loop(it: Live): Promise<void> {
     while (it.state && stillOpen(it)) {
       const state = it.state;
       try {
+        if (xmppTorWay(state) === 'always') await torStarted();
         const connection = await XmppConnection.open(state, connect);
         if (!stillOpen(it) || it.state !== state) {
           connection.close();
@@ -454,16 +458,26 @@ function online(it: Live): XmppConnection {
 }
 
 /** Signs the open space in to XMPP: `jid` as name@example.org, `server` a host[:port] when its DNS does not say. */
-export async function xmppSignIn(jid: string, password: string, server = ''): Promise<void> {
+export async function xmppSignIn(jid: string, password: string, server = '', tor: AccountTor = 'never'): Promise<void> {
   const it = acting();
   if (!it || it.stopped) throw new Error(t('There is no XMPP account in this space.'));
-  await signInWith(it, jid, password, serverOf(server));
+  if (tor === 'always') await torStarted();
+  await signInWith(it, jid, password, serverOf(server), tor);
+}
+
+// Tor started for an account that goes only through it (Always, lib/account-tor.ts), whatever the space's way.
+async function torStarted(): Promise<void> {
+  try {
+    await ensureTor();
+  } catch {
+    throw new Error(t('Tor is not ready.'));
+  }
 }
 
 // Signs `it` in, as a new resource with an OMEMO device of its own. Answers whether it kept the
 // account: not when one was signed in to meanwhile, which stays.
-async function signInWith(it: Live, jid: string, password: string, given: XmppServer | undefined): Promise<boolean> {
-  const { state, connection } = await signInXmpp(jid, password, given, connect);
+async function signInWith(it: Live, jid: string, password: string, given: XmppServer | undefined, tor: AccountTor = 'never'): Promise<boolean> {
+  const { state, connection } = await signInXmpp(jid, password, given, connect, tor);
   state.restored = await lastRestore();
   let kept = false;
   await changeAccount(it, async () => {
@@ -560,11 +574,12 @@ export function xmppSend(jid: string, text: string, preview?: Preview | null): P
  * Makes a new account on its server (XEP-0077) and signs the space in with it, as signing in does.
  * A server that makes none here says so, with its page when it named one (XmppRegisterError).
  */
-export async function xmppRegister(jid: string, password: string, server = ''): Promise<void> {
+export async function xmppRegister(jid: string, password: string, server = '', tor: AccountTor = 'never'): Promise<void> {
   const it = acting();
   if (!it || it.stopped) throw new Error(t('There is no XMPP account in this space.'));
   if (it.state) throw new Error(t('This space is signed in to XMPP already.'));
-  const { state, connection } = await registerXmpp(jid, password, serverOf(server), connect);
+  if (tor === 'always') await torStarted();
+  const { state, connection } = await registerXmpp(jid, password, serverOf(server), connect, tor);
   connection.close();
   state.restored = await lastRestore();
   await changeAccount(it, async () => {
@@ -636,6 +651,52 @@ export async function xmppAvatar(jid: string, where: NetworkWhere = 'space'): Pr
     if (!connection?.isOpen) throw new Error('offline');
     return fetchXmppAvatar(connection, jid, avatar);
   }).catch(() => null);
+}
+
+// Changes what decides the account's Tor (its choice, or a chat's «Through Tor»), then, when the way
+// that counts changed, connects again that way at once: the loop sees the connection closed.
+async function changeTor(it: Live & { state: XmppState }, change: (state: XmppState) => void): Promise<void> {
+  const before = xmppTorWay(it.state);
+  const after = xmppTorWay((() => {
+    // Tried first on a copy (each chat copied, its messages not), to know whether the way changes.
+    const next = { tor: it.state.tor, chats: Object.fromEntries(Object.entries(it.state.chats).map(([jid, chat]) => [jid, { ...chat }])) };
+    change(next as XmppState);
+    return next;
+  })());
+  if (after === 'always') await torStarted();
+  await changeAccount(it, async () => change(it.state));
+  if (after !== before) it.connection?.close();
+}
+
+/** The account's Tor choice (lib/account-tor.ts): Off, as the space, or Always. */
+export function xmppSetTor(way: AccountTor): Promise<void> {
+  return changeTor(need(), (state) => {
+    state.tor = way;
+  });
+}
+
+/** «Through Tor» for the chat `jid`: while on, the whole account goes only through Tor. */
+export function xmppSetChatTor(jid: string, on: boolean): Promise<void> {
+  return changeTor(need(), (state) => {
+    const chat = (state.chats[jid] ??= { jid, messages: [], unread: 0, lastAt: 0 });
+    if (on) chat.tor = true;
+    else delete chat.tor;
+  });
+}
+
+/** The Tor way that counts now for the account the screen on top acts on, and its address: null when it has none. */
+export function xmppActingTor(): { jid: string; way: AccountTor } | null {
+  const state = acting()?.state;
+  return state ? { jid: state.jid, way: xmppTorWay(state) } : null;
+}
+
+/** The account's own Tor choice, and the one that counts now (Always while a chat goes «Through Tor»). */
+export function xmppTor(where: NetworkWhere = 'space'): { own: AccountTor; now: AccountTor; chats: boolean } {
+  const state = (where === 'place' ? places.shown() : live)?.state;
+  if (!state) return { own: 'never', now: 'never', chats: false };
+  const own = accountTorOf(state.tor);
+  const now = xmppTorWay(state);
+  return { own, now, chats: now === 'always' && own !== 'always' };
 }
 
 /** Whether the others are told when we write. */
@@ -721,7 +782,7 @@ async function sendUploaded(it: Live & { state: XmppState }, jid: string, picked
     ready = await prepareXmppFile(it.state, online(it), jid);
   });
   const { encrypt, service } = ready!;
-  const file = await uploadXmppFile(online(it), service, { bytes: picked.bytes, name: picked.name, type: picked.mime }, encrypt);
+  const file = await uploadXmppFile(online(it), service, { bytes: picked.bytes, name: picked.name, type: picked.mime }, encrypt, xmppTorWay(it.state));
   if (picked.duration && picked.duration > 0) file.duration = Math.round(picked.duration);
   await changeAccount(it, async () => {
     if (forward) await forwardXmpp(it.state, online(it), jid, { file });
@@ -833,7 +894,9 @@ const fetched = fileCache(40 * 1024 * 1024);
 
 /** A message's photo or file, fetched from the server and opened, or kept from before. */
 export function xmppFile(file: XmppFile): Promise<Uint8Array> {
-  return fetched.get(file.url, () => downloadXmppFile(file));
+  const state = acting()?.state;
+  const way = state ? xmppTorWay(state) : 'never';
+  return fetched.get(file.url, () => downloadXmppFile(file, way));
 }
 
 /** Writes to a person whose apps have no OMEMO without encryption from now on (or with it again). */

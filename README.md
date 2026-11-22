@@ -7,45 +7,42 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="brand/erevos-lockup-dark.svg">
-    <img src="brand/erevos-lockup-light.svg" alt="Erevos" width="420">
+    <img src="brand/erevos-lockup-light.svg" alt="Erevos+" width="420">
   </picture>
 </p>
 
-<h3 align="center">One private place for your conversations and your files.</h3>
+<h3 align="center">Erevos, with your other chats in it.</h3>
 
 <p align="center">
-  Chats and calls with no phone number, no email and no account,<br>
-  over the internet or without it, and an encrypted Collection for your photos, videos, music and documents.
+  Everything Erevos does, and next to its own chats your Telegram, Messenger, Signal, Session, Matrix and XMPP chats<br>
+  and chats with other Nostr apps, in one list, behind one lock.
 </p>
 
 <p align="center">
-  <a href="https://github.com/azzinder/erevos-releases/releases"><b>Download</b></a> ·
+  <a href="https://github.com/azzinder/erevos-releases/releases?q=Erevos%2B&expanded=true"><b>Download</b></a> ·
   <a href="https://lphl.nekten.eu/erevos">Website</a> ·
-  <a href="https://erevos-web.lphl.nekten.eu">Web app</a> ·
+  <a href="https://erevosplus-web.lphl.nekten.eu">Web app</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="docs/editions.md">Erevos+ and Erevos</a> ·
   <a href="docs/overview.md">Full overview</a>
 </p>
 
 <table align="center">
   <tr>
-    <td><img src="docs/screenshots/chats.png" alt="Chats" width="170"></td>
     <td><img src="docs/screenshots/qr.png" alt="Add by QR" width="170"></td>
     <td><img src="docs/screenshots/chat-poll.png" alt="Polls" width="170"></td>
-    <td><img src="docs/screenshots/call.png" alt="Calls" width="170"></td>
-    <td><img src="docs/screenshots/nearby.png" alt="No internet" width="170"></td>
+    <td><img src="docs/screenshots/phone.png" alt="Phone" width="170"></td>
   </tr>
   <tr align="center">
-    <td>Chats</td><td>Add by QR</td><td>Polls</td><td>Calls</td><td>No internet</td>
+    <td>Add by QR</td><td>Polls</td><td>Phone</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/services.png" alt="Services" width="170"></td>
-    <td><img src="docs/screenshots/phone.png" alt="Phone" width="170"></td>
     <td><img src="docs/screenshots/contacts.png" alt="Contacts" width="170"></td>
     <td><img src="docs/screenshots/panic.png" alt="Panic button" width="170"></td>
     <td><img src="docs/screenshots/public-groups.png" alt="Public groups" width="170"></td>
   </tr>
   <tr align="center">
-    <td>Services</td><td>Phone</td><td>Contacts</td><td>Panic button</td><td>Public groups</td>
+    <td>Contacts</td><td>Panic button</td><td>Public groups</td>
   </tr>
 </table>
 <p align="center"><sub>Screens of the app in English. The QR code is an example and leads to this page.</sub></p>
@@ -54,84 +51,98 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 > **Early work, not audited.** No one outside the project has reviewed the code or the cryptography yet. Use it,
 > test it and tell us what breaks, but do not rely on it to protect anyone's safety.
 
-## Why Erevos
+## What Erevos+ is
 
-The well-known apps ask for a phone number, know who talks to whom, and stop when the internet goes down. Erevos asks
-for nothing, and finds a way through whatever is there: the internet, Wi-Fi, Bluetooth, a phone nearby.
+Erevos+ is [Erevos](https://github.com/azzinder/Erevos) with more networks in it. It is the same app, built from the
+same code with more modules: the same package (`app.erevos`), the same release key and the same data. A phone goes
+from one to the other as an ordinary update, and keeps everything.
 
 | | |
 |---|---|
-| **No identity to give away** | No phone number, no email, no user name. You add people with a QR code or a link, or they invite you. |
-| **End-to-end encrypted** | PQXDH and the double ratchet for chats, MLS for groups, new keys every 30 days, safety numbers to compare. |
-| **Less for anyone to see** | A separate relay queue for each contact, fixed message sizes, and Tor if you turn it on (it is off by default, as it makes messages slower). |
-| **Hidden spaces** | A second password opens a second, separate Erevos that nothing reveals. Hidden chats, a panic button and a panic password are built in. |
-| **Works without internet** | Phones nearby talk over Bluetooth LE, Wi-Fi Aware, Wi-Fi Direct, the same Wi-Fi or a hotspot, or a LoRa radio. |
-| **Your own relay** | Run your own server (the program comes with Erevos), use your community's, or start with no relay at all. |
-| **Calls and groups** | End-to-end encrypted voice and video, group calls (voice up to 8, video up to 4), voice messages, photos, files and polls. |
-| **A Collection of your own** | Photos, videos, music and files in an encrypted place, with a player, a slideshow and internet radio. |
-| **Phone, SMS and contacts** | On Android Erevos can be your phone, SMS and contacts app too, with the SMS and contacts icons unlocking only themselves. |
-| **No ads, no trackers** | Free software, built on others' open-source work that is credited in the app. Nobody pays, nothing is collected. |
+| **Erevos, all of it** | Chats and calls with no phone number, email or account, nearby with no internet, hidden spaces, a panic button, your own relay, the encrypted Collection, and the phone, SMS and contacts apps. |
+| **Telegram** | Your own account, through TDLib, Telegram's own library. |
+| **Messenger** | Your Facebook Messenger chats. |
+| **Signal** | Your Signal account, linked to your phone's Signal or registered in Erevos+, with calls. |
+| **Session** | Your Session account. |
+| **Matrix** | Any homeserver, with encrypted rooms and calls. |
+| **XMPP** | Any server, with OMEMO. |
+| **Nostr** | Chats with people who use other Nostr apps. |
+| **One place** | All of them in one chat list, behind Erevos's lock, in its first space. |
+
+Each network is a module you turn on or off in **Settings → Modules**. What you sign in to stays on the phone.
 
 ## Who it is for
 
-For anyone who wants to talk with the people close to them without handing over a phone number: friends and
-families, groups and communities that would rather run their own relay, and people whose internet is down
-or blocked and who need a way to reach each other nearby.
+For people who already have chats on several networks and want them in one private app, without giving up the
+networks their friends use. Your Erevos contacts get Erevos's own protection; your other chats keep what their own
+network gives them.
 
-Want your Telegram, Messenger, Signal, Session, Matrix and XMPP chats in the same app? That is
-[Erevos+](#erevos), below.
+If you want only Erevos's own chats, the plain [Erevos](https://github.com/azzinder/Erevos) is smaller and does
+less, on more platforms.
 
 ## Get it
 
 | Where | How |
 |---|---|
-| **Android** | The APK from the [releases page](https://github.com/azzinder/erevos-releases/releases). It updates itself once you allow it, and only to builds signed with the same key. |
-| **iPhone and any browser** | The [web app](https://erevos-web.lphl.nekten.eu), added to the home screen. Each release is signed, and the app refuses to run anything unsigned. |
-| **Linux, Windows and macOS** | The desktop app, from the releases page. |
-| **Sailfish OS** | An RPM, from the releases page. |
+| **Android 8 or later, 64-bit** | `erevos-plus-android.apk` from the [Erevos+ releases](https://github.com/azzinder/erevos-releases/releases?q=Erevos%2B&expanded=true). |
+| **From Erevos** | In the app: **Settings → General → Updates → Next update: Erevos+ → Check for updates**. Going back works the same way, with **Next update: Erevos**. |
+| **Any browser** | The [Erevos+ web app](https://erevosplus-web.lphl.nekten.eu): Erevos, Matrix with calls, XMPP, Nostr and the Collection. Telegram, Messenger, Signal, Session, the phone and SMS need Android. |
 
-Every Android release is signed with the same key. The SHA-256 of its certificate (`CN=Erevos, O=LPHL, C=GR`):
+Erevos+ is for Android only. For iPhone, Linux, Windows, macOS and Sailfish OS there is the plain Erevos.
+
+> [!NOTE]
+> Erevos+ releases are titled **Erevos+ x.y.z** and are never marked *Latest* on GitHub, so a `releases/latest` link
+> always gives the plain Erevos.
+
+### Only from these places
+
+Get Erevos+ only from the [releases page](https://github.com/azzinder/erevos-releases/releases?q=Erevos%2B&expanded=true),
+the [web app](https://erevosplus-web.lphl.nekten.eu), the [website](https://lphl.nekten.eu/erevos) or the app's own
+**Updates**. A copy from anywhere else is not ours.
+
+Every Android release, Erevos's and Erevos+'s, is signed with the same key. The SHA-256 of its certificate
+(`CN=Erevos, O=LPHL, C=GR`):
 
 ```
 49:F0:D9:BE:60:09:2F:02:CF:27:C5:24:67:52:55:01:93:A6:7B:81:21:29:BF:53:41:79:53:B7:C8:79:8E:69
 ```
 
-Compare it with `apksigner verify --print-certs erevos-android.apk`. Each release lists the SHA-256 of its files in
-`SHA256SUMS`. The web app of a release can be rebuilt from this source and compared file by file:
-[docs/reproducible-builds.md](docs/reproducible-builds.md).
-
-### Only from these places
-
-Get Erevos only from the [releases page](https://github.com/azzinder/erevos-releases/releases), the
-[web app](https://erevos-web.lphl.nekten.eu), the [website](https://lphl.nekten.eu/erevos) or the app's own
-**Updates**. A copy from anywhere else is not ours.
-
-### Erevos+
-
-Erevos+ is Erevos with more networks in it: Telegram, Facebook Messenger, Signal, Session, Matrix, XMPP and chats
-with other Nostr apps, next to Erevos's own chats. It is the same app with the same key and the same data, for
-Android only. To move to it, and back again: **Settings → General → Updates → Next update: Erevos+** (or **Erevos**).
-Its releases are titled **Erevos+ x.y.z** and are never the *Latest* one.
+Compare it with `apksigner verify --print-certs erevos-plus-android.apk`. Each release also lists the SHA-256 of
+its files.
 
 ## Honest limits
 
 - **Not audited.** The cryptography follows published designs, but no independent expert has checked the code.
-- **Not everything has been tried on real phones.** The newest features among them; the changelog and the guide say which.
+- **The other networks see what they always see.** A Telegram, Messenger, Signal, Session, Matrix or XMPP chat is
+  as private in Erevos+ as that network makes it, no more. Erevos+ is not made or approved by any of them.
+- **Not everything has been tried on real phones.** The newest features among them; the changelog and the guide say
+  which.
 - **A relay sees some things.** Not what you write, but when messages arrive and, unless you turn Tor on, the address
   your phone connects from.
-- **SMS are not private.** When Erevos is your SMS app, your carrier sees SMS as with any app.
+- **SMS are not private.** When Erevos+ is your SMS app, your carrier sees SMS as with any app.
 
-In plain words: [the servers Erevos talks to](docs/servers.md), what each sees and keeps
+In plain words, for Erevos's own chats: [the servers Erevos talks to](docs/servers.md), what each sees and keeps
 ([Ελληνικά](docs/servers.el.md)), and [what a stolen phone or key opens](docs/stolen-key.md)
 ([Ελληνικά](docs/stolen-key.el.md)).
 
-Read more: [threat model](docs/threat-model.md) (who Erevos protects you from, and what each one still learns) ·
-[security review map](docs/security-review.md) · [protocol](docs/protocol.md) · [state diagrams](docs/state-machines.md) · [reporting a problem](SECURITY.md) · the guide's *Transparency* part
-(what the server keeps, for how long, and what has been asked of it).
+Read more: [threat model](docs/threat-model.md) · [security review map](docs/security-review.md) ·
+[protocol](docs/protocol.md) · [reporting a problem](SECURITY.md) · the guide's *Transparency* part.
+
+## Other networks
+
+Erevos+ is an independent project. It is not affiliated with, endorsed by or connected to Meta, Telegram, Signal,
+Session or any other network it can reach. Their names are used only to say which networks it works with, and they
+belong to their owners.
+
+Each network is reached with your own account and on your own choice. Telegram goes through TDLib, Telegram's own
+library, with this project's own API id; a build of your own needs an API id of its own. Messenger and Signal are
+reached the way their own web and desktop apps are, with code from mautrix-meta and presage. A network may not allow
+other apps, and may limit or close an account it finds using one: use them knowing that. Your Erevos contacts are not
+affected by any of this.
 
 ## Build it
 
-The Rust crates:
+Erevos+ is the default edition (`EREVOS_EDITION=plus`; `lite` gives the plain Erevos). The Rust crates:
 
 ```
 cargo test
@@ -148,8 +159,10 @@ cargo build -p erevos-relay
 npm run check
 ```
 
-The Android app is built by `.github/workflows/android.yml` and by the release workflow (`npx expo prebuild
---platform android`, then Gradle). The desktop app and the rest: [docs/overview.md](docs/overview.md#build).
+The Android app is built by `.github/workflows/erevosgram.yml`: `npx expo prebuild --platform android`, then Gradle.
+Telegram is in it only with `EREVOS_TELEGRAM=1`, and needs TDLib built by `scripts/build-tdlib.sh`
+([docs/erevosgram.md](docs/erevosgram.md)). More in [docs/overview.md](docs/overview.md#build) and
+[docs/editions.md](docs/editions.md).
 
 ## Languages
 
@@ -157,20 +170,23 @@ The Android app is built by `.github/workflows/android.yml` and by the release w
 
 ## Support it
 
-Erevos has no ads and collects nothing. If you want to help with its running costs:
+Erevos+ has no ads and collects nothing. If you want to help with its running costs:
 [Liberapay](https://liberapay.com/Nekten/donate) or [PayPal](https://www.paypal.com/donate/?business=A9DV5LKGBGUF4&no_recurring=0&currency_code=EUR),
 or **Settings → General → Support** in the app.
 
 ## Learn more
 
-- [docs/overview.md](docs/overview.md): everything Erevos does, how it works, the platforms, how to build it and how
-  releases are made.
-- [docs/linked-devices.md](docs/linked-devices.md), [docs/public-groups.md](docs/public-groups.md): design notes.
+- [docs/editions.md](docs/editions.md): how Erevos+ and Erevos differ, and moving between them.
+- [docs/matrix.md](docs/matrix.md), [docs/xmpp.md](docs/xmpp.md), [docs/nostr-chats.md](docs/nostr-chats.md),
+  [docs/erevosgram.md](docs/erevosgram.md): the other networks.
+- [docs/overview.md](docs/overview.md): everything Erevos does and how it works.
 - [CHANGELOG.md](CHANGELOG.md): what each release changed.
-- [CREDITS.md](CREDITS.md): the open-source projects Erevos is built on, with their makers and licences.
+- [CREDITS.md](CREDITS.md): the open-source projects Erevos+ is built on, with their makers and licences.
 
 ## Licence
 
 [AGPL-3.0-or-later](LICENSE), with additional terms under its section 7: keep "Erevos, by azzinder", mark a changed
-version as changed, and give it another name. Who makes Erevos, and the terms in full: [AUTHORS.md](AUTHORS.md).
-Every file says whose it is and under which licence, the [REUSE](https://reuse.software) way.
+version as changed, and give it another name. Who makes Erevos+, and the terms in full: [AUTHORS.md](AUTHORS.md).
+Every file says whose it is and under which licence, the [REUSE](https://reuse.software) way. Some of the code it takes
+in is under AGPL-3.0 or GPL-3.0 only (libsignal, presage, Element Call, Session's libraries), so Erevos+ as a whole goes
+out under version 3 of the AGPL; [CREDITS.md](CREDITS.md) lists every part.

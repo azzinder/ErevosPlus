@@ -54,6 +54,7 @@ test('the network a chat is handed to is told by its identity', () => {
   assert.equal(networkOf('matrix:!abc:example.org'), 'matrix');
   assert.equal(networkOf('xmpp:ann@example.org'), 'xmpp');
   assert.equal(networkOf(`nostr:${'b'.repeat(64)}`), 'nostr');
+  assert.equal(networkOf('telegram:-100123'), 'telegram');
   assert.equal(networkOf('contact:0123'), null);
   assert.equal(networkOf('group:42'), null);
   assert.equal(networkOf('+30690'), null);
