@@ -38,6 +38,7 @@ const PHONE = 'erevos.phone-id';
 const ELSEWHERE = 'erevos.restored-elsewhere';
 const OTHER = 'erevos.restored-other';
 const LOST = 'erevos.lost-phone';
+const MOVED = 'erevos.restored-move';
 
 const isId = (id: unknown): id is string => typeof id === 'string' && /^[0-9a-f]{32}$/.test(id);
 
@@ -72,6 +73,21 @@ export async function markRestore(now = Date.now(), elsewhere = false): Promise<
       else await secureSet(name, value);
     }
   };
+}
+
+// A restore that was a move from another edition on this phone (lib/edition-move.ts takeMove): the
+// app moved from receives and sends nothing from then on (lib/move-state.ts), so what it kept of an
+// account goes on here as the same device, never as two (lib/matrix-store.ts).
+
+/** Marks the last restore as a move's, made by takeMove once it restored. */
+export async function markMove(): Promise<void> {
+  const id = await lastRestore();
+  if (id) await secureSet(MOVED, id);
+}
+
+/** Whether the restore `id` was a move's (markMove). */
+export async function restoreWasMove(id: string): Promise<boolean> {
+  return isId(id) && (await secureGet(MOVED)) === id;
 }
 
 /** Whether the last restore here was of a backup made on another phone. */

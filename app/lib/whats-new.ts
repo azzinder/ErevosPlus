@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { EDITION, type Edition } from './edition';
+import { BRIDGE, EDITION, type Edition } from './edition';
 import { mark } from './i18n';
 import { laterThan } from './version-name';
 
@@ -26,6 +26,7 @@ export const NEXT: Changes = {
     mark("**Messenger in its case tells you of new messages**: in Erevos+, when you use Messenger in its case, Erevos now tells you of its new messages as it does of other chats, even if you never opened the case. A chat with messages not read shows on home until it is read, and tapping it opens it in the case; while the case is open, Erevos tells of nothing, as the page shows it. See [Messenger](#messenger)."),
     mark("**Messenger in its case wears your whole look**: in Erevos+, Meta's own Messenger page in its case now takes your look: its colours, dark or light as Erevos is, the shape of your bubbles (round, square or a line), your text size, your style's letters, and what lies behind your screens (a wallpaper, Neon's grid, Paper's lines and the others), and it changes with your look even while it is open. A photo of your own stays in Erevos: there the page shows a soft gradient instead. Where Meta changes its page, parts of it may keep Meta's look. See [Messenger](#messenger)."),
     mark("**Messenger in its case asks for the PIN once**: in Erevos+, what Meta's page keeps now stays in the case between openings, apart from every other page, so Meta knows your phone again and no longer asks for the PIN of your encrypted chats each time you open it. It goes when you sign out of Messenger, or when another account opens the case. See [Messenger](#messenger)."),
+    mark("**Your networks move with Erevos+**: moving from one Erevos+ to another on the same phone (as from Erevos+ 7.x to the new Erevos+), Telegram, Signal, Session, Messenger and Matrix now go on signed in, as they were. Telegram's photos and files download again as they are opened, and Messenger's page asks for its PIN once more. Moving from Erevos+ to Erevos or Erevos Lite says first that those accounts stay behind, and to write down Session's 13 recovery words. See [Updates](#updates)."),
   ],
   underTheHood: [],
 };
@@ -70,13 +71,14 @@ export const VERSIONS: WhatsNew[] = [
 
 /**
  * The list as the version that runs (`running`) shows it: NEXT under `running`'s number when it
- * comes after the last release, else (a build of main for testing) with no number, then every
- * release.
+ * comes after the last release, or the build is Erevos+'s bridge (`bridge`), whose 7.x name comes
+ * before the 3.x ones and is a release all the same; else (a build of main for testing) with no
+ * number, then every release.
  */
-export function whatsNewFor(running: string, edition: Edition = EDITION): (Changes & { version: string | null })[] {
+export function whatsNewFor(running: string, edition: Edition = EDITION, bridge = BRIDGE): (Changes & { version: string | null })[] {
   const released = VERSIONS[0]?.version ?? '0';
   const pending = NEXT.forYou.length + NEXT.underTheHood.length > 0;
-  const next = pending && !VERSIONS.some((v) => v.version === running) ? [{ version: laterThan(running, released) ? running : null, ...NEXT }] : [];
+  const next = pending && !VERSIONS.some((v) => v.version === running) ? [{ version: bridge || laterThan(running, released) ? running : null, ...NEXT }] : [];
   const all = [...next, ...VERSIONS];
   return edition === 'lite' ? all.map(({ forYou, underTheHood, ...rest }) => ({ ...rest, forYou: forYou.filter(inLite), underTheHood: underTheHood.filter(inLite) })) : asPlus(all);
 }

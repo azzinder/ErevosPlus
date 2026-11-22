@@ -49,7 +49,7 @@ module.exports = ({ config }) => {
           }
         : {}),
     },
-    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(erevosgram ? { edition: 'erevosgram' } : edition === 'lite' ? { edition } : {}) },
+    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(erevosgram ? { edition: 'erevosgram' } : edition === 'lite' ? { edition } : {}), ...(process.env.EREVOS_BRIDGE === '1' && edition === 'plus' ? { bridge: true } : {}) },
     plugins: [...(config.plugins || []), './plugins/with-release-signing', './plugins/with-native-programs', './plugins/with-unshrunk-release', './plugins/with-no-gms-entry', './plugins/with-launcher-icons', './plugins/with-movable-views', './plugins/with-latest-intent', './plugins/with-notices', ...(edition === 'plus' ? ['./plugins/with-session-maven'] : [])],
   };
 };

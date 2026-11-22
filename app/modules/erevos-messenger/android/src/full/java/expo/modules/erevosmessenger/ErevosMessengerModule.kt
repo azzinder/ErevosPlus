@@ -48,6 +48,12 @@ class ErevosMessengerModule : Module() {
         if (started) return@AsyncFunction null
         val app = appContext.reactContext?.applicationContext as? Application
           ?: throw CodedException("NO_APP", "The app is not ready", null)
+        // Not while this app moved out to another edition, nor while a move's folders wait to be
+        // put in place (erevos-device MoveNet.kt); and once open, a move's wait for the next start.
+        if (java.io.File(app.filesDir, "moved-out.json").exists() || java.io.File(app.filesDir, "move-net-in/ready").exists()) {
+          throw CodedException("MOVED", "Erevos moved, or is taking a move", null)
+        }
+        System.setProperty("erevos.move.engine-open", "1")
         EngineHost.appInFront = { inFront }
         SessionCalls.init(app)
         SignalCalls.onEvent = { event -> sendEvent("onEvent", mapOf("service" to "signal", "json" to event.toString())) }

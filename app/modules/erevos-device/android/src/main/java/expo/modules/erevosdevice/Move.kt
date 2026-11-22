@@ -43,6 +43,8 @@ class MoveProvider : ContentProvider() {
 
   override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
     if (!allowed() || mode != "r") throw SecurityException("Not for this app")
+    // What the edition's engines keep beside the backup (MoveNet.kt), streamed as it is read.
+    if (uri.lastPathSegment == MoveNet.NAME) return MoveNet.open(context ?: throw FileNotFoundException())
     val file = Move.outFile(context ?: throw FileNotFoundException(), uri.lastPathSegment ?: "") ?: throw FileNotFoundException()
     return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
   }
@@ -85,7 +87,7 @@ internal object Move {
     return !dir.exists() || dir.deleteRecursively()
   }
 
-  private fun authority(pkg: String) = "$pkg.move"
+  fun authority(pkg: String) = "$pkg.move"
 
   /** Whether `pkg` is installed and signed as this app is. */
   fun sibling(context: Context, pkg: String): Boolean {
@@ -140,6 +142,12 @@ internal object Move {
     target.parentFile?.mkdirs()
     val input = context.contentResolver.openInputStream(Uri.parse("content://${authority(pkg)}/$name")) ?: throw FileNotFoundException(name)
     input.use { from -> target.outputStream().use { to -> return from.copyTo(to) } }
+  }
+
+  /** Takes what `pkg`'s engines carry in its move (MoveNet.kt), not yet in place: its bytes. */
+  fun takeNet(context: Context, pkg: String): Long {
+    if (!sibling(context, pkg)) throw SecurityException("Not a move")
+    return MoveNet.take(context, pkg, authority(pkg))
   }
 
   /** Tells `pkg` that its move was taken, so it deletes its files. */

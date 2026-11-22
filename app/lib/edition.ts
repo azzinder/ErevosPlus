@@ -30,6 +30,20 @@ function read(): Edition {
 
 export const EDITION: Edition = read();
 
+/** Whether this build is Erevos+'s bridge (EREVOS_BRIDGE, app.config.js `extra.bridge`): Erevos+ as
+ *  app.erevos under a 7.x name, which the Erevos+ 7.x apps take as an update and which then moves to
+ *  app.erevos.plus (lib/edition-move.ts). */
+function readBridge(): boolean {
+  try {
+    const constants = (require('expo-constants') as typeof import('expo-constants')).default;
+    return constants.expoConfig?.extra?.bridge === true;
+  } catch {
+    return false;
+  }
+}
+
+export const BRIDGE: boolean = readBridge();
+
 /** Whether `module` is part of `edition`. */
 export function inEdition(module: Module, edition: Edition = EDITION): boolean {
   return edition === 'plus' || LITE_MODULES.includes(module);

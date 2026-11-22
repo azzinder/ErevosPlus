@@ -302,6 +302,12 @@ export default function UpdatesScreen() {
           t('This Erevos first makes a copy of everything for it, encrypted, here on the phone: every space, with its contacts, messages and settings. Open {edition} within a day and it asks whether to bring them; nothing leaves the phone.', { edition: name }),
           installable && !editionInstalled(moveTo) ? t('It then downloads ({size}), is checked against the release and Android installs it.', { size: formatSize(found.apk!.size) }) : '',
           t("The phone's SMS and calls stay in the phone: make {edition} the SMS and phone app afterwards, if you use them. This Erevos stays until you uninstall it.", { edition: name }),
+          // What the networks of Erevos+ keep outside the backup (lib/edition-move.ts): with them, or left here.
+          INSTALLED_EDITION !== 'plus'
+            ? ''
+            : moveTo === 'plus'
+              ? t("Telegram, Signal, Session, Messenger and Matrix go on signed in. Telegram's photos and files download again as they are opened, and Messenger's page asks for its PIN once more.")
+              : t('{edition} has no Telegram, Messenger, Signal or Session: their accounts stay only in this Erevos+, which opens nothing more after the move. If you use Session, write down its 13 recovery words first (Session, Your 13 recovery words): without them that account cannot come back.', { edition: name }),
           t('From then on this Erevos receives and sends nothing, so that no message stays here that {edition} does not have, unless you call the move off.', { edition: name }),
         ]
           .filter(Boolean)

@@ -136,7 +136,11 @@ export function MoveFound({ move, onDone, onLater }: { move: FoundMove; onDone: 
           void holdReceiver().then((release) =>
             takeMove(move, (done, all) => setTaking(Math.floor((done * 100) / Math.max(1, all))))
               .finally(release)
-              .then(onDone, (e: unknown) => {
+              .then((placed) => {
+                // An engine was open here: the networks' accounts go in place as Erevos starts again.
+                if (!placed) ask(t('Open Erevos again'), t('The accounts of the networks come in as Erevos starts again: close Erevos and open it again.'), [{ text: t('OK') }]);
+                onDone();
+              }, (e: unknown) => {
                 setTaking(null);
                 setError(t('It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.', { error: e instanceof Error ? e.message : String(e), edition: name }));
               }),

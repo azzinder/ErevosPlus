@@ -74,6 +74,39 @@ test('a move note is read only whole, for another edition, and within a day', ()
   assert.equal(read({ size: 1234 })?.size, 1234);
   assert.equal(read({ size: -1 }), null);
   assert.equal(read({ size: '9' }), null);
+  // What the engines carry beside it, likewise.
+  assert.equal(read({ net: 4096 })?.net, 4096);
+  assert.equal(read()?.net, undefined);
+  assert.equal(read({ net: 1.5 }), null);
+  assert.equal(read({ net: -1 }), null);
+});
+
+test("Erevos+'s networks go with a move, signed in, and only to where the same is carried", () => {
+  const net = readFileSync('modules/erevos-device/android/src/main/java/expo/modules/erevosdevice/MoveNet.kt', 'utf8');
+  // Streamed only once moved out, from a process in which no engine ran; and whole, or not at all.
+  assert.match(net, /moved-out\.json/);
+  assert.match(net, /processStarted\(\) <= moved\.lastModified\(\)/);
+  assert.match(net, /fd\.checkError\(\)/);
+  assert.match(net, /if \(!ended\) throw IOException/);
+  assert.match(net, /Not carried here/);
+  const provider = readFileSync('modules/erevos-device/android/src/main/java/expo/modules/erevosdevice/Move.kt', 'utf8');
+  assert.ok(provider.indexOf('if (!allowed()') < provider.indexOf('MoveNet.open('));
+  // Each engine says what it carries; the Keystore-sealed keys go opened and are sealed again there.
+  const messenger = readFileSync('modules/erevos-messenger/android/src/full/AndroidManifest.xml', 'utf8');
+  for (const carry of ['files:messenger', 'files:signal', 'sealed:erevos.messenger.chatlock.wrap:files:signal/db.key', 'files:session', 'sealed:erevos.messenger.chatlock.wrap:files:session/data.key']) assert.ok(messenger.includes(carry), carry);
+  assert.match(readFileSync('modules/erevos-telegram/android/src/full/AndroidManifest.xml', 'utf8'), /nobackup:telegram\/\*\/db/);
+  // No engine opens while moved out or while a move's carry waits, and each says it opened.
+  for (const file of ['modules/erevos-messenger/android/src/full/java/expo/modules/erevosmessenger/ErevosMessengerModule.kt', 'modules/erevos-telegram/android/src/full/java/expo/modules/erevostelegram/Tdlib.kt']) {
+    const code = readFileSync(file, 'utf8');
+    assert.match(code, /move-net-in\/ready/, file);
+    assert.match(code, /System\.setProperty\("erevos\.move\.engine-open", "1"\)/, file);
+  }
+  const move = readFileSync('lib/edition-move.ts', 'utf8');
+  // Taken before the restore changes anything; dropped should the restore fail; Matrix goes on as the same device.
+  assert.ok(move.indexOf('moveTakeNet(') < move.indexOf('beforeRestore()'));
+  assert.match(move, /if \(taking\) device\?\.moveDropNet\?\.\(\)/);
+  assert.ok(move.indexOf('markMove()') > move.indexOf('afterRestore('));
+  assert.match(readFileSync('lib/matrix-store.ts', 'utf8'), /!\(await restoreWasMove\(restore\)\)/);
 });
 
 test('the app moved from knows it moved, and a move needs room', () => {
@@ -135,7 +168,9 @@ test("Erevos+'s bridge (app.erevos) moves to app.erevos.plus, end to end, and no
 
 test('a move taken is told to the edition moved from at the next start, should it fail then', () => {
   const move = readFileSync('lib/edition-move.ts', 'utf8');
-  assert.match(move, /if \(!\(await device!\.moveDone!\(move\.pkg\)\.catch\(\(\) => false\)\)\) keepFile\(DONE_DUE, move\.pkg\)/);
+  assert.match(move, /if \(!placed \|\| !\(await device!\.moveDone!\(move\.pkg\)\.catch\(\(\) => false\)\)\) keepFile\(DONE_DUE, move\.pkg\)/);
+  // Nor while what the engines carried waits for the next start to go in place.
+  assert.match(move, /if \(device\?\.moveNetPending\?\.\(\)\) return;/);
   const layout = readFileSync('app/_layout.tsx', 'utf8');
   assert.match(layout, /void tellMoveTaken\(\)/);
   // Nothing is received while a move is taken before the lock.

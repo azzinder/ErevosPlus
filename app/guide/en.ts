@@ -4124,6 +4124,11 @@ On Android, **Updates** also says which releases are offered to this phone:
   first, for trying, and may have problems. A beta has it on at first. Turn it off to leave the betas: the next regular
   version with a build number above the beta you have installs over it and keeps everything, with no uninstalling.
 
+From Erevos+, the networks come too: Telegram, Signal, Session, Messenger and Matrix go on signed in, in the new app,
+as they were (Telegram's photos and files download again as they are opened, and Messenger's page asks for its PIN
+once more). Erevos and Erevos Lite have no Telegram, Messenger, Signal or Session: moving to them leaves those
+accounts in the old Erevos+, which then opens nothing, so if you use Session, write down its 13 recovery words first.
+
 Erevos+ needs Android 8.0 or newer: on an older phone it cannot be chosen, and the phone stays on Erevos.
 
 The notice of a new version follows the same choice. Each edition and its betas are signed apart by the release

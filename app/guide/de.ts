@@ -4739,6 +4739,12 @@ Unter Android sagt **Updates** auch, welche Versionen diesem Telefon angeboten w
   Betas zu verlassen: Die nächste reguläre Version mit einer höheren Build-Nummer als deine Beta installiert sich
   darüber und behält alles, ohne Deinstallieren.
 
+Aus Erevos+ kommen auch die Netzwerke mit: Telegram, Signal, Session, Messenger und Matrix bleiben in der neuen App
+angemeldet, wie sie waren (die Fotos und Dateien von Telegram werden beim Öffnen erneut heruntergeladen, und die Seite
+von Messenger fragt noch einmal nach ihrer PIN). Erevos und Erevos Lite haben kein Telegram, Messenger, Signal oder
+Session: Ein Umzug dorthin lässt diese Konten im alten Erevos+, das danach nichts mehr öffnet. Wenn du Session nutzt,
+schreib dir also zuerst die 13 Wiederherstellungswörter auf.
+
 Erevos+ braucht Android 8.0 oder neuer: Auf einem älteren Telefon lässt es sich nicht wählen, und das Telefon bleibt
 bei Erevos.
 

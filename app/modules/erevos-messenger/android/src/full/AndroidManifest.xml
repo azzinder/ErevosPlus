@@ -11,6 +11,12 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
   <application>
+    <!-- What a move to another edition carries for these engines (erevos-device MoveNet.kt): Messenger's,
+         Signal's and Session's folders, their Keystore-sealed keys opened and sealed again there, so
+         the accounts go on as they were, signed in. -->
+    <meta-data
+      android:name="erevos.move.carry.messenger"
+      android:value="files:messenger;files:signal;sealed:erevos.messenger.chatlock.wrap:files:signal/db.key;files:session;sealed:erevos.messenger.chatlock.wrap:files:session/data.key" />
     <activity
       android:name="eu.erevos.messenger.calls.SessionCallActivity"
       android:exported="false"

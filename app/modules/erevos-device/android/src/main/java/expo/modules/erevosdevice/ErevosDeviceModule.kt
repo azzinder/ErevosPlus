@@ -44,6 +44,13 @@ class ErevosDeviceModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ErevosDevice")
 
+    // What a move carried for the engines (MoveNet.kt) and could not put in place while one was
+    // open goes in place now, as Erevos starts, before any of them opens.
+    OnCreate {
+      val app = context?.applicationContext ?: return@OnCreate
+      runCatching { MoveNet.place(app) }
+    }
+
     // Where the phone was found, once findPlace started looking: lat, lon, how near, metres (-1
     // when the phone does not say) and how long ago, seconds; or `error` "timeout" when nothing
     // came in time.
@@ -237,6 +244,33 @@ class ErevosDeviceModule : Module() {
     AsyncFunction("moveCopy") { pkg: String, name: String, path: String ->
       val app = context?.applicationContext ?: throw IllegalStateException("No app")
       Move.copy(app, pkg, name, path).toDouble()
+    }
+
+    // What the edition moved from carries beside its backup (MoveNet.kt): its size there, taken
+    // here beside this app's own, then put in place (false: at the next start), and whether it waits.
+    Function("moveNetSize") {
+      val app = context?.applicationContext ?: return@Function 0.0
+      MoveNet.size(app).toDouble()
+    }
+
+    AsyncFunction("moveTakeNet") { pkg: String ->
+      val app = context?.applicationContext ?: throw IllegalStateException("No app")
+      Move.takeNet(app, pkg).toDouble()
+    }
+
+    AsyncFunction("movePlaceNet") {
+      val app = context?.applicationContext ?: throw IllegalStateException("No app")
+      MoveNet.place(app)
+    }
+
+    Function("moveDropNet") {
+      val app = context?.applicationContext ?: return@Function false
+      MoveNet.drop(app)
+    }
+
+    Function("moveNetPending") {
+      val app = context?.applicationContext ?: return@Function false
+      MoveNet.pending(app)
     }
 
     AsyncFunction("moveDone") { pkg: String ->

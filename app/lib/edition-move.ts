@@ -12,6 +12,7 @@ import { phoneStatus, requestDefaultPhone } from '../modules/erevos-phone';
 import { requestDefaultSms, smsStatus } from '../modules/erevos-sms';
 import { phoneSettingsForBackup } from './backup-native';
 import { afterRestore, beforeRestore } from './backup-settings';
+import { markMove } from '../lock/restored';
 import { randomBytes, toHex } from './crypto';
 import { MOVE_WAITS, moveFor, moveRoom, readMoveNote, type MoveNote } from './move-note';
 import { announceMovedOut, CAN_MOVE, cancelMove, clearMove, clearStaleMove, MOVE_FILE, movedOut, onMovedOut, outDir, writeMovedOut } from './move-state';
@@ -29,6 +30,13 @@ export { announceMovedOut, CAN_MOVE, cancelMove, clearMove, clearStaleMove, move
 // and restores it, and tells the other its move was taken, which then deletes it. Nothing leaves
 // the phone. What the backup holds is sealed as the phone keeps it: the spaces open with their
 // passwords, as after any restore. A move waits a day; after that it is deleted unused.
+//
+// What an edition's engines keep outside the backup (Erevos+'s Telegram, Signal, Session and
+// Messenger: erevos-device MoveNet.kt) goes too, not written anywhere for the while: the edition
+// moved to reads it from the one moved from as it takes the move, once that one's engines are shut,
+// and puts it in place of its own, so those accounts go on signed in. Matrix goes on as the same
+// device (lock/restored.ts markMove). What the edition moved to has no engine for stays behind
+// (app/updates.tsx says so before).
 //
 // The phone's SMS and calls are not in it: they stay in Android's own stores, where the edition moved
 // to finds them once it is the SMS or phone app. Without Move.kt (an Erevos from before moves, or
@@ -81,6 +89,10 @@ export async function tellMoveTaken(): Promise<void> {
   try {
     const file = new File(Paths.document, DONE_DUE);
     if (!file.exists) return;
+    // What the engines carried goes in place now, should Android's start not have put it (no engine
+    // opens while it waits); till it is, the edition moved from keeps its own.
+    if (device?.moveNetPending?.()) await device.movePlaceNet?.().catch(() => false);
+    if (device?.moveNetPending?.()) return;
     const pkg = file.textSync().trim();
     const told = (Object.values(PACKAGES) as string[]).includes(pkg) && (await device!.moveDone!(pkg).catch(() => false));
     const waits = (await device!.moveSources!().catch(() => [])).some((source) => source.pkg === pkg);
@@ -198,12 +210,23 @@ export async function prepareMove(to: UpdateEdition, progress?: (done: number, a
     });
     new File(dir, BACKUP_FILE).writeSync(bytes);
     const made = Date.now();
-    const note: MoveNote = { v: 1, from: INSTALLED_EDITION, to, made, backup: BACKUP_FILE, parts, password, size: written + bytes.length, roles: rolesHere() };
+    const net = netSize();
+    const note: MoveNote = { v: 1, from: INSTALLED_EDITION, to, made, backup: BACKUP_FILE, parts, password, size: written + bytes.length, ...(net > 0 ? { net } : {}), roles: rolesHere() };
     new File(dir, MOVE_FILE).writeSync(JSON.stringify(note));
     writeMovedOut(to, made);
   } catch (error) {
     cancelMove();
     throw error;
+  }
+}
+
+// The bytes this app's engines carry in a move (MoveNet.kt): 0 for none, or a build before it.
+function netSize(): number {
+  try {
+    const size = device?.moveNetSize?.() ?? 0;
+    return Number.isSafeInteger(size) && size > 0 ? size : 0;
+  } catch {
+    return 0;
   }
 }
 
@@ -227,10 +250,13 @@ export async function findMoves(now = Date.now()): Promise<FoundMove[]> {
  * Takes `move`: copies its files here, opens the backup and puts it in place of everything this
  * app keeps, with the settings it holds, then tells the other edition, which deletes its copy.
  * The caller holds the receiver while it runs and opens Erevos again after (as Backups' restore).
+ * False when what the engines carried waits for Erevos to start again to go in place (an engine
+ * was open here): the caller says so.
  */
-export async function takeMove(move: FoundMove, progress?: (done: number, all: number) => void): Promise<void> {
-  // Its files are copied here, then restored: twice its size, for a while.
-  const full = roomError(2 * (move.size ?? 0));
+export async function takeMove(move: FoundMove, progress?: (done: number, all: number) => void): Promise<boolean> {
+  // Its files are copied here, then restored: twice its size, for a while; and what the engines carry.
+  let taking = false;
+  const full = roomError(2 * (move.size ?? 0) + (move.net ?? 0));
   if (full) throw full;
   const dir = new Directory(Paths.cache, 'move-in');
   if (dir.exists) dir.delete();
@@ -247,6 +273,10 @@ export async function takeMove(move: FoundMove, progress?: (done: number, all: n
     // Every part the backup names is the move's own: none from elsewhere.
     if (!names.every((name) => move.parts.includes(name))) throw new Error('The move names parts it does not have');
     for (const name of names) await copy(name);
+    // What the engines carry, beside this app's own, before anything here changes: one cut short or
+    // not whole changes nothing. An edition with no engine for it takes none of it.
+    const net = move.net && device?.moveTakeNet ? await device.moveTakeNet(move.pkg) : 0;
+    taking = net > 0;
     const before = await beforeRestore();
     await restoreBackup(
       backup,
@@ -257,11 +287,18 @@ export async function takeMove(move: FoundMove, progress?: (done: number, all: n
       progress,
     );
     await afterRestore(backupNative(backup), before);
+    await markMove();
+    // In place now, or as Erevos starts again: the other edition is told it was taken only then.
+    const placed = taking ? await device!.movePlaceNet!() : true;
+    taking = false;
     // Told now, or at the next start: until then the other edition waits as moved out (lib/move-state.ts).
-    if (!(await device!.moveDone!(move.pkg).catch(() => false))) keepFile(DONE_DUE, move.pkg);
+    if (!placed || !(await device!.moveDone!(move.pkg).catch(() => false))) keepFile(DONE_DUE, move.pkg);
     askRoles(move);
+    return placed;
   } finally {
     if (dir.exists) dir.delete();
+    // Taken but not restored: none of it goes in place.
+    if (taking) device?.moveDropNet?.();
   }
 }
 

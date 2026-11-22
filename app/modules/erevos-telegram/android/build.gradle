@@ -53,6 +53,7 @@ android {
     main {
       java.srcDirs = telegram ? ['src/full/java', new File(tdlib, 'java')] : ['src/stub/java']
       if (telegram) {
+        manifest.srcFile 'src/full/AndroidManifest.xml'
         jniLibs.srcDirs = [new File(tdlib, 'libs'), tgcallsOut.get().dir('aar/jni').asFile]
         assets.srcDirs += [tgcallsOut.get().dir('assets').asFile]
       }

@@ -87,6 +87,8 @@ test('what is not out yet shows under the version that runs, once it comes after
   assert.deepEqual(whatsNewFor(last, 'lite').map((v) => v.version), VERSIONS.map((v) => v.version));
   // A build of main for testing: with no number.
   if (pending) assert.equal(whatsNewFor('0.0.1', 'lite')[0].version, null);
+  // Erevos+'s bridge (7.3.1) is a release, though its name comes before the 3.x ones: never «Not out yet».
+  if (pending) assert.equal(whatsNewFor('7.3.1', 'plus', true)[0].version, '7.3.1');
 });
 
 test('plain Erevos keeps the lines that are its own: SMS, Phone, Collection', () => {

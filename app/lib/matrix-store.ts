@@ -6,7 +6,7 @@ import { checkedChatNotify, type ChatNotify } from '../lock/chat-notify';
 import { loadMatrix, saveMatrix } from '../lock/matrix-data';
 import type { StickerPlace } from '../lock/sticker-data';
 import { currentSpace } from '../lock/keys';
-import { lastRestore } from '../lock/restored';
+import { lastRestore, restoreWasMove } from '../lock/restored';
 import type { Holder } from '../lock/sealed-file';
 import { checkedLook, type Look } from '../theme/look';
 import { changeGuard, type GuardChange } from './chat-protect';
@@ -456,10 +456,12 @@ function start(holder: Holder, space: number, key: Uint8Array, pocket?: number):
       // Restored from a backup since it was signed in: its device's keys are as the backup kept them,
       // which would use again what was used since, on a device the phone it came from may still be.
       // The Matrix server takes no device back, so it is let go of here (never signed out, which
-      // would end the other phone's), and the space signs in again as a new one.
+      // would end the other phone's), and the space signs in again as a new one. A move from another
+      // edition on this phone is not that: the app moved from does nothing more, so the device goes
+      // on here as it was (lock/restored.ts markMove).
       const restore = await lastRestore();
       if (state && state.restored !== restore) {
-        if (state.restored !== undefined) {
+        if (state.restored !== undefined && !(await restoreWasMove(restore))) {
           state = null;
           it.problem = t('A backup was restored here: sign in to Matrix again, as a new device. Your Security Key opens the messages from before.');
         } else state.restored = restore;

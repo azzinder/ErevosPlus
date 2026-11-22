@@ -13,9 +13,10 @@ export const MOVE_WAITS = 24 * 60 * 60 * 1000;
 /**
  * What move.json says: from which edition to which, when made, the backup and its parts, and their
  * password; `size`, all its files' bytes; `roles`, whether the app moved from was the phone's SMS or
- * phone app, so that the one moved to asks to be.
+ * phone app, so that the one moved to asks to be; `net`, the bytes its engines carry beside the
+ * backup (Erevos+'s networks, erevos-device MoveNet.kt), when they carry any.
  */
-export type MoveNote = { v: 1; from: UpdateEdition; to: UpdateEdition; made: number; backup: string; parts: string[]; password: string; size?: number; roles?: { sms: boolean; phone: boolean } };
+export type MoveNote = { v: 1; from: UpdateEdition; to: UpdateEdition; made: number; backup: string; parts: string[]; password: string; size?: number; net?: number; roles?: { sms: boolean; phone: boolean } };
 
 /** move.json, checked: null for anything else, or a move made more than MOVE_WAITS ago (or ahead of `now`). */
 export function readMoveNote(text: string, now = Date.now()): MoveNote | null {
@@ -34,6 +35,7 @@ export function readMoveNote(text: string, now = Date.now()): MoveNote | null {
   if (!name(v.backup) || !Array.isArray(v.parts) || v.parts.length > 100_000 || !v.parts.every(name)) return null;
   if (typeof v.password !== 'string' || !/^[0-9a-f]{64}$/.test(v.password)) return null;
   if (v.size !== undefined && !(typeof v.size === 'number' && Number.isSafeInteger(v.size) && v.size >= 0)) return null;
+  if (v.net !== undefined && !(typeof v.net === 'number' && Number.isSafeInteger(v.net) && v.net >= 0)) return null;
   const roles = v.roles as Record<string, unknown> | undefined;
   if (roles !== undefined && (typeof roles !== 'object' || roles === null || typeof roles.sms !== 'boolean' || typeof roles.phone !== 'boolean')) return null;
   return {
@@ -45,6 +47,7 @@ export function readMoveNote(text: string, now = Date.now()): MoveNote | null {
     parts: v.parts as string[],
     password: v.password,
     ...(v.size !== undefined ? { size: v.size as number } : {}),
+    ...(v.net !== undefined ? { net: v.net as number } : {}),
     ...(roles ? { roles: { sms: roles.sms as boolean, phone: roles.phone as boolean } } : {}),
   };
 }

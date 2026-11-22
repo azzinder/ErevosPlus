@@ -116,6 +116,10 @@ internal object Tdlib {
   @Synchronized
   fun open(slot: String, key: ByteArray, lang: String, proxy: String) {
     require(key.size == 32) { "the key is 32 bytes" }
+    // Not while this app moved out to another edition, nor while a move's databases wait to be put
+    // in place (erevos-device MoveNet.kt); and once one opens, a move's wait for the next start.
+    check(!File(app.filesDir, "moved-out.json").exists() && !File(app.filesDir, "move-net-in/ready").exists()) { "Erevos moved, or is taking a move" }
+    System.setProperty("erevos.move.engine-open", "1")
     val old = bySlot[slot]
     if (old != null) {
       // Still closing: its database is TDLib's until it has closed, so the new client starts then (take).

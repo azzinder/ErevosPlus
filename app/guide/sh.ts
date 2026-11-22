@@ -4299,6 +4299,11 @@ Na Androidu, **Ažuriranja** kažu i koje se verzije nude ovom telefonu:
   verzije: sljedeća redovna verzija s brojem builda većim od bete koju imate instalira se preko nje i sve zadržava, bez
   deinstaliranja.
 
+Iz Erevos+ dolaze i mreže: Telegram, Signal, Session, Messenger i Matrix ostaju prijavljeni u novoj aplikaciji, kao
+što su bili (fotografije i fajlovi sa Telegrama ponovo se preuzimaju kad ih otvoriš, a stranica Messengera još jednom
+traži svoj PIN). Erevos i Erevos Lite nemaju Telegram, Messenger, Signal ni Session: selidba u njih ostavlja te naloge
+u starom Erevos+, koji posle toga ništa ne otvara, pa ako koristiš Session, prvo zapiši njegovih 13 reči za oporavak.
+
 Erevos+ treba Android 8.0 ili noviji: na starijem telefonu ne može se izabrati, i telefon ostaje na Erevosu.
 
 Obavještenje o novoj verziji prati isti izbor. Računar za izdanja potpisuje svako izdanje i njegove bete posebno, pa se

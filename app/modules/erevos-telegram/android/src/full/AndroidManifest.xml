@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 azzinder
+SPDX-License-Identifier: AGPL-3.0-or-later
+Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- What a move to another edition carries for TDLib (erevos-device MoveNet.kt): each space's
+         database, encrypted by TDLib with a key from the space, so its Telegram goes on signed in.
+         The media files are not carried: they download again as they are opened. -->
+    <meta-data android:name="erevos.move.carry.telegram" android:value="nobackup:telegram/*/db" />
+  </application>
+</manifest>

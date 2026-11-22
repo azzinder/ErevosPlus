@@ -87,6 +87,16 @@ type Device = {
   moveSources?(): Promise<{ pkg: string; move: string }[]>;
   /** Copies the file `name` of `pkg`'s move to `path`, a file of this app's own: its size. */
   moveCopy?(pkg: string, name: string, path: string): Promise<number>;
+  /** The bytes this app's engines carry in a move beside its backup (MoveNet.kt): 0 when none. */
+  moveNetSize?(): number;
+  /** Takes what `pkg`'s engines carry in its move, beside this app's own, not yet in place: its bytes. */
+  moveTakeNet?(pkg: string): Promise<number>;
+  /** Puts in place what a move carried: false when an engine is open here, and it goes in place at the next start. */
+  movePlaceNet?(): Promise<boolean>;
+  /** Deletes what a move carried and did not put in place. */
+  moveDropNet?(): boolean;
+  /** Whether what a move carried waits for the next start to go in place. */
+  moveNetPending?(): boolean;
   /** Tells `pkg` that its move was taken, so its files go. */
   moveDone?(pkg: string): Promise<boolean>;
   /** The panic button's settings (Panic.kt). Null with no app context. Missing in a build before it. */
