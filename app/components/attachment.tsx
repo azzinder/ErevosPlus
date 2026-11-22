@@ -307,7 +307,7 @@ const SWIPE = 60;
 // small one does, still sharp when zoomed in.
 // `onSwipe`: a quick sideways stroke of one finger on the whole photo, not zoomed in, goes to the
 // photo after it (1) or before it (-1), as where photos are swiped between (the Collection).
-export function ZoomPhoto({ uri, w, h, onTap, onSwipe }: { uri: string; w?: number; h?: number; onTap: () => void; onSwipe?: (by: 1 | -1) => void }) {
+export function ZoomPhoto({ uri, w, h, onTap, onSwipe, onError }: { uri: string; w?: number; h?: number; onTap: () => void; onSwipe?: (by: 1 | -1) => void; onError?: () => void }) {
   const scale = useRef(new Animated.Value(1)).current;
   const x = useRef(new Animated.Value(0)).current;
   const y = useRef(new Animated.Value(0)).current;
@@ -409,6 +409,7 @@ export function ZoomPhoto({ uri, w, h, onTap, onSwipe }: { uri: string; w?: numb
         resizeMode="contain"
         resizeMethod="resize"
         {...ZOOM_ROOM}
+        onError={onError}
         style={[StyleSheet.absoluteFill, { transform: [{ translateX: x }, { translateY: y }, { scale }] }]}
         accessibilityLabel={t('Photo')}
       />

@@ -27,9 +27,9 @@ name: release
 # repositories, titled "Erevos+ …"; they count for nothing in the version.
 #
 # Every build has its own number, which Android and Check for updates go by: the run's, unless an
-# Erevos+ build already took it or one above it. Erevos and Erevos+ are the same app to Android
-# (app.erevos) and each installs over the other, so they share one row of build numbers, and a
-# build's is always above every one before it (the version job, Choose the build number).
+# Erevos+ build already took it or one above it. Erevos+'s 7.x were the same app to Android as
+# Erevos (app.erevos); since 3.1.0 it is app.erevos.plus. They still share one row of build
+# numbers, and a build's is always above every one before it (the version job, Choose the build number).
 #
 # The jobs hand their files to the publish job through a draft release, build-<build number>:
 # artifacts would fill the account's Actions storage, release files do not count toward it.
@@ -136,10 +136,23 @@ jobs:
           elif [ "$GITHUB_REF_NAME" != main ]; then
             echo "::error::Releases are built only from main or a release/<major>.x branch, not from $GITHUB_REF_NAME"; exit 1
           fi
-          # Every published release's version, oldest first. Sorted with "-" as "~", which sort -V
-          # puts before the end: 4.0.0~rc.1 before 4.0.0.
+          # Versions, oldest first. Sorted with "-" as "~", which sort -V puts before the end:
+          # 4.0.0~rc.1 before 4.0.0. And 3.x to 6.x after 7.x, before 8.x: since 7.x the second
+          # number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos⁻), and the numbers
+          # start again at 3; they skip 7 itself (6.x, then 8.0.0). No release before 7.x is
+          # published. app/lib/version-name.ts orders them the same way.
+          order() {
+            local v major rank
+            while read -r v; do
+              [ -n "$v" ] || continue
+              major=$((10#${v%%.*}))
+              if [ "$major" -ge 3 ] && [ "$major" -le 6 ]; then rank=$((70 + major - 2)); else rank=$((major * 10)); fi
+              printf '%s %s\n' "$rank" "${v//-/\~}"
+            done | sort -k1,1n -k2,2V | cut -d' ' -f2 | tr '~' '-'
+          }
+          # Every published release's version, oldest first.
           published=$(gh api "repos/$GH_REPO/releases?per_page=100" --jq '.[] | select(.draft | not) | select(.name | startswith("Erevos+") | not) | .tag_name | ltrimstr("v")' 2>/dev/null |
-            grep -E '^[1-9][0-9]*\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' | tr '-' '~' | sort -V | tr '~' '-' || true)
+            grep -E '^[1-9][0-9]*\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' | order || true)
           if [ -n "$series" ]; then
             # A series' branch: its own last release, whatever main released since.
             latest=$(grep -E "^$series\." <<< "$published" | tail -n1 || true)
@@ -167,14 +180,13 @@ jobs:
           if [ -n "$series" ] && [ "${version%%.*}" != "$series" ]; then
             echo "::error::$GITHUB_REF_NAME releases only $series.x versions, not $version: name the version when starting it."; exit 1
           fi
-          # Sorted with "-" as "~", which sort -V puts before the end: 4.0.0~rc.1 before 4.0.0.
-          newest=$(printf '%s\n%s\n' "${latest//-/\~}" "${version//-/\~}" | sort -V | tail -n1)
-          if [ "$version" = "$latest" ] || [ "$newest" != "${version//-/\~}" ]; then
+          newest=$(printf '%s\n%s\n' "$latest" "$version" | order | tail -n1)
+          if [ "$version" = "$latest" ] || [ "$newest" != "$version" ]; then
             echo "::error::$version is not newer than the latest release, $latest."; exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
           # GitHub's latest only when no published release is newer (a fix of an older series is not).
-          top=$(printf '%s\n%s\n' "$published" "$version" | grep . | tr '-' '~' | sort -V | tail -n1 | tr '~' '-')
+          top=$(printf '%s\n%s\n' "$published" "$version" | order | tail -n1)
           # A beta or an alpha never is: only those who joined the betas take it.
           if [[ "$version" =~ -(alpha|beta)\. ]]; then
             echo "latest=false" >> "$GITHUB_OUTPUT"
@@ -427,7 +439,13 @@ jobs:
           exit 1
       - name: Build the Arch Linux package and AppImage
         working-directory: desktop
-        run: npx electron-builder --linux pacman AppImage --x64 --publish never -c.extraMetadata.version=$EREVOS_VERSION
+        run: |
+          # Since 7.x the numbers start again at 3 (the version job): pacman takes every major from
+          # 3 on, but 7, as newer by its epoch, 1 (1:3.0.0 after 7.2.0).
+          if [ "${EREVOS_VERSION%%.*}" -ge 3 ] && [ "${EREVOS_VERSION%%.*}" != 7 ]; then
+            node -e 'const fs = require("fs"); const p = JSON.parse(fs.readFileSync("package.json", "utf8")); p.build.pacman = { ...p.build.pacman, fpm: ["--epoch", "1"] }; fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n")'
+          fi
+          npx electron-builder --linux pacman AppImage --x64 --publish never -c.extraMetadata.version=$EREVOS_VERSION
       - name: Hand the packages to the publish job
         env:
           GH_TOKEN: ${{ github.token }}
@@ -586,11 +604,12 @@ jobs:
         run: |
           # An RPM version has no "-": a test release's is 4.0.0~rc.1, which RPM puts before 4.0.0.
           sed -i "s/^Version:.*/Version:    ${EREVOS_VERSION//-/\~}/" rpm/erevos.spec
+          # Since 7.x the numbers start again at 3 (the version job): RPM takes every major from 3
+          # on, but 7, as newer by its epoch, 1 (1:3.0.0 after 7.2.0, which has none).
+          if [ "${EREVOS_VERSION%%.*}" -ge 3 ] && [ "${EREVOS_VERSION%%.*}" != 7 ]; then sed -i 's/^Version:.*/&\nEpoch:      1/' rpm/erevos.spec; fi
           # The SDK image builds as its own user.
           chmod -R a+rwX .
-          docker run --rm -v "$PWD:/home/mersdk/src" -w /home/mersdk/src \
-            coderus/sailfishos-platform-sdk-aarch64:5.0.0.43 \
-            bash -lc 'mb2 -t SailfishOS-5.0.0.43-aarch64 build'
+          ./build-rpm.sh
           ls RPMS/*.aarch64.rpm
       - name: Hand the RPM to the publish job
         env:
@@ -640,12 +659,13 @@ jobs:
               --argjson size "$(stat -c %s files/erevos-android.apk)" --arg sha256 "$(sha256sum files/erevos-android.apk | cut -d' ' -f1)" \
               '{url: $url, size: $size, sha256: $sha256}')
           fi
-          # Its channel (app/lib/update-channel.ts): a beta or an alpha is in Erevos's beta channel.
+          # Its channel (app/lib/update-channel.ts): a beta or an alpha is in Erevos's beta channel. And
+          # its Android app, app.erevos: another edition's is a move, not an update (lib/edition-move.ts).
           if [[ "$EREVOS_VERSION" =~ -(alpha|beta)\. ]]; then CHANNEL=erevos-beta; else CHANNEL=erevos; fi
           echo "CHANNEL=$CHANNEL" >> "$GITHUB_ENV"
           jq -n --arg name "$EREVOS_VERSION" --arg version "0.1.$EREVOS_BUILD" --argjson build "$EREVOS_BUILD" \
             --arg date "$(TZ=Europe/Athens date +%F)" --arg commit "${GITHUB_SHA::7}" --argjson apk "$APK" --arg channel "$CHANNEL" \
-            '{name: $name, version: $version, build: $build, date: $date, commit: $commit, channel: $channel, apk: $apk}' > files/version.json
+            '{name: $name, version: $version, build: $build, date: $date, commit: $commit, channel: $channel, package: "app.erevos", apk: $apk}' > files/version.json
           cat files/version.json
           : > packages.md
           package() { if [ -f "files/$1" ]; then echo "- $2" >> packages.md; fi; }
@@ -671,7 +691,7 @@ jobs:
 
           ${missing:+Not in this release:${missing%,} (its build failed or is switched off; the release before may have it).}
 
-          SHA256SUMS lists every file's SHA-256: \`sha256sum -c SHA256SUMS\`.
+          SHA256SUMS lists every file's SHA-256: \`sha256sum -c SHA256SUMS\`. Once the web app of this release is published, its release key signs the list too (SHA256SUMS.sig beside the web app, signed again whenever a package is added later): \`node pwa/release.mjs verify-sums SHA256SUMS https://<web app address>\` checks it first.
           Updating keeps your contacts and chats; make a backup first. In Erevos: Updates → Check for updates; by hand: User guide → Updates.
           NOTES
           cat notes.md

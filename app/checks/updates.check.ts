@@ -19,7 +19,11 @@ const json = (over: Record<string, unknown> = {}) =>
   JSON.stringify({ version: '0.1.7', build: 7, date: '2026-10-19', apk: { url: url('erevos-android.apk'), size: 1000, sha256: SHA }, ...over });
 
 test('a release is read with its package', () => {
-  assert.deepEqual(parseRelease(json()), { version: '0.1.7', build: 7, date: '2026-10-19', apk: { url: url('erevos-android.apk'), size: 1000, sha256: SHA } });
+  assert.deepEqual(parseRelease(json()), { version: '0.1.7', build: 7, date: '2026-10-19', apk: { url: url('erevos-android.apk'), size: 1000, sha256: SHA }, package: null });
+  // The Android package it names, when one of the three editions'; anything else is not told.
+  assert.equal(parseRelease(json({ package: 'app.erevos.plus' }))?.package, 'app.erevos.plus');
+  assert.equal(parseRelease(json({ package: 'app.erevos.lite' }))?.package, 'app.erevos.lite');
+  assert.equal(parseRelease(json({ package: 'com.other' }))?.package, null);
 });
 
 test('the version and build must agree', () => {
@@ -173,8 +177,8 @@ test('a package from anywhere else, or without its SHA-256, is not offered', () 
 
 test('only a newer build of a release is offered, never to a build from a computer', () => {
   // The ErevosGram build takes only its own APK.
-  assert.equal(parseRelease(json(), 'erevosgram')?.apk, null);
-  assert.equal(parseRelease(json({ erevosgram: { url: url('erevosgram-android.apk'), size: 9, sha256: SHA } }), 'erevosgram')?.apk?.url, url('erevosgram-android.apk'));
+  assert.equal(parseRelease(json(), undefined, 'erevosgram')?.apk, null);
+  assert.equal(parseRelease(json({ erevosgram: { url: url('erevosgram-android.apk'), size: 9, sha256: SHA } }), undefined, 'erevosgram')?.apk?.url, url('erevosgram-android.apk'));
   const release = parseRelease(json())!;
   assert.equal(buildOf('0.1.7'), 7);
   assert.equal(buildOf('0.0.1'), 0);

@@ -14,6 +14,7 @@ import { Button, Card, Page, Row, SectionTitle, Text, TextButton } from '../comp
 import { loadCloudBackup } from '../lib/backup-cloud';
 import { loadAutoBackup } from '../lib/backup-folder';
 import { backgroundState } from '../lib/background';
+import { findMoves, takeMove, type FoundMove } from '../lib/edition-move';
 import { plural, t } from '../lib/i18n';
 import type { Module } from '../lib/modules';
 import { myNameAt, setMyNameAt } from '../lib/my-name';
@@ -21,8 +22,11 @@ import { hrefLink, holdLink } from '../lib/open-link';
 import { lacking, makerOf, type Check } from '../lib/permission-checks';
 import { ASKS_ALL, askAll, checksOffered, readChecks } from '../lib/permissions';
 import { afterSteps, checksAt, keepSetupAfter, loadSetupAfter, setupAfterDone, type SetupAfter } from '../lib/setup-after';
+import { holdReceiver } from '../lib/receiver';
 import { spaceGroupsAt } from '../lib/space-groups';
+import { updateEditionName } from '../lib/update-channel';
 import { isPasswordLocked, loadLockConfig } from '../lock/config';
+import { useLock } from '../lock/context';
 import { biometricSealer } from '../modules/erevos-biometric';
 import { space } from '../theme/colors';
 import { useColors } from '../theme/context';
@@ -47,6 +51,12 @@ export default function FirstSteps() {
   const [at, setAt] = useState(0);
   const [checks, setChecks] = useState<Check[]>([]);
   const [noBackup, setNoBackup] = useState(false);
+  // Another edition on this phone that made a move for this one (lib/edition-move.ts), and how far
+  // taking it is, in percent (null while not taking it), or what went wrong.
+  const [move, setMove] = useState<FoundMove | null>(null);
+  const [taking, setTaking] = useState<number | null>(null);
+  const [moveError, setMoveError] = useState('');
+  const { closeNow } = useLock();
   const maker = makerOf(backgroundState()?.maker);
   const modules = after?.modules ?? [];
   const key = modules.join(',');
@@ -79,6 +89,15 @@ export default function FirstSteps() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (after?.restore !== 'wanted') return;
+    let active = true;
+    void findMoves().then((found) => active && setMove(found[0] ?? null), () => undefined);
+    return () => {
+      active = false;
+    };
+  }, [after?.restore]);
 
   const read = useCallback(() => {
     if (!key) return;
@@ -125,6 +144,24 @@ export default function FirstSteps() {
 
   const top = { paddingTop: insets.top + space.xl };
 
+  // Takes the move: what this space has now (only what these steps made) gives way to it, and
+  // Erevos opens again as the other edition was, with its passwords; these steps then go on.
+  async function bring(found: FoundMove) {
+    setMoveError('');
+    setTaking(0);
+    const release = await holdReceiver();
+    try {
+      await takeMove(found, (done, all) => setTaking(Math.floor((done * 100) / Math.max(1, all))));
+    } catch (error) {
+      setMoveError(t('It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.', { error: error instanceof Error ? error.message : String(error), edition: updateEditionName(found.from) }));
+      return;
+    } finally {
+      setTaking(null);
+      release();
+    }
+    closeNow();
+  }
+
   if (after.restore === 'wanted') {
     return (
       <Page style={top}>
@@ -135,6 +172,28 @@ export default function FirstSteps() {
         <Text tone="muted" style={hint}>
           {t('A backup brings everything over: every space, with its contacts, messages and hidden chats, your name, the modules, and the settings that go with you.')}
         </Text>
+        {move ? (
+          <Card>
+            <Text variant="bodyStrong">{t('From {edition} on this phone', { edition: updateEditionName(move.from) })}</Text>
+            <Text variant="caption" tone="muted" style={hint}>
+              {t('{edition} made everything ready for this app, here on the phone. Bring it: Erevos then opens as {edition} was, with its passwords, and these steps go on.', { edition: updateEditionName(move.from) })}
+            </Text>
+            {taking !== null ? (
+              <Text variant="caption" tone="muted" style={hint}>
+                {t('Bringing everything here… {percent}%', { percent: taking })}
+              </Text>
+            ) : (
+              <Row wrap>
+                <Button title={t('Bring everything here')} onPress={() => void bring(move)} />
+              </Row>
+            )}
+            {moveError ? (
+              <Text variant="caption" color={colors.danger} style={hint}>
+                {moveError}
+              </Text>
+            ) : null}
+          </Card>
+        ) : null}
         <Card>
           <Text variant="bodyStrong">{t('Restore a backup')}</Text>
           <Text variant="caption" tone="muted" style={hint}>

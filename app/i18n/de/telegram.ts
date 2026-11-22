@@ -205,7 +205,6 @@ export const telegramText: Record<string, string> = {
   "Telegram said: {reason}": "Telegram sagt: {reason}",
   "GIF": "GIF",
   "Play the video, {time}": "Video abspielen, {time}",
-  "Play the video": "Video abspielen",
   "The chat leaves the lists of this space and shows only in the hidden chats its PIN opens. Telegram still has it, on all your devices.": "Der Chat verlässt die Listen dieses Bereichs und erscheint nur in den versteckten Chats, die seine PIN öffnet. Telegram hat ihn weiterhin, auf all deinen Geräten.",
   "Telegram sends only a contact card with a phone number.": "Telegram sendet nur eine Kontaktkarte mit Telefonnummer.",
   "{name} gets this place through Telegram, which can read it. Erevos does not follow where you go after.": "{name} bekommt diesen Ort über Telegram, das ihn lesen kann. Erevos verfolgt nicht, wohin du danach gehst.",

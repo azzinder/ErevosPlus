@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import { KeyboardAvoidingView } from '../components/keyboard';
-import { Button, Input, Text } from '../components/ui';
+import { Button, Input, Text, TextButton } from '../components/ui';
 import { useColors, useTheme } from '../theme/context';
 
 import { BiometricError, biometricOn, unlockWithBiometric } from './biometric';
@@ -16,6 +16,7 @@ import { editionName, named } from '../lib/edition';
 import { t } from '../lib/i18n';
 import { wipeNow } from '../lib/panic';
 import { biometricSealer } from '../modules/erevos-biometric';
+import { openEmergencyDial, phoneStatus } from '../modules/erevos-phone';
 
 // The password screen shown before any space is opened. It looks the same whichever password is
 // typed, and the password decides which space opens. Wrong passwords are counted on the phone
@@ -111,6 +112,16 @@ export function PasswordGate({ config, onUnlock }: { config: LockConfig; onUnloc
         <Button title={t('Unlock')} onPress={submit} disabled={!password} loading={busy} style={styles.stretch} />
         {biometric ? (
           <Button title={t('Fingerprint or face')} kind="secondary" onPress={fingerprint} disabled={busy} style={styles.stretch} />
+        ) : null}
+        {/* With Erevos the phone app, an emergency call is a tap away, with no password: Android's
+            own emergency keypad, which calls only emergency numbers. */}
+        {phoneStatus()?.isDefault ? (
+          <TextButton
+            title={t('Emergency call')}
+            onPress={() => {
+              if (!openEmergencyDial()) setError(t('Call emergency services from the phone’s own lock screen.'));
+            }}
+          />
         ) : null}
       </View>
     </KeyboardAvoidingView>

@@ -25,4 +25,13 @@ dependencies {
   implementation 'androidx.media3:media3-ui:1.8.0'
   // Internet radio that comes as HLS (.m3u8), found by DefaultMediaSourceFactory when it is here.
   implementation 'androidx.media3:media3-exoplayer-hls:1.8.0'
+  // Erevos's own camera (CameraPreview.kt): AndroidX CameraX, Google's open-source camera
+  // library, with its Extensions, which use the night, HDR and portrait the phone's maker put in
+  // its system, where there are any (nothing of them is in Erevos).
+  implementation 'androidx.camera:camera-core:1.6.0'
+  implementation 'androidx.camera:camera-camera2:1.6.0'
+  implementation 'androidx.camera:camera-lifecycle:1.6.0'
+  implementation 'androidx.camera:camera-video:1.6.0'
+  implementation 'androidx.camera:camera-view:1.6.0'
+  implementation 'androidx.camera:camera-extensions:1.6.0'
 }

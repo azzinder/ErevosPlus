@@ -27,12 +27,15 @@ import type { SharedFile } from './share-in';
 export const CAN_COLLECT = true;
 /** Whether a photo can be taken with a camera straight into the Collection: not on a computer. */
 export const CAN_TAKE_PHOTO = false;
+/** Whether many photos and videos can be picked from a phone's gallery at once: the files' picker does it here. */
+export const CAN_PICK_GALLERY = false;
 export const CAN_DELETE_ORIGINALS = false;
 export const THUMB_SIDE = 256;
 // Photos larger than this are kept without a small picture: drawing one would hold too much in memory.
 const MOST_THUMBED = 40 * 1000 * 1000;
 
-const PHOTOS = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+// AVIF too, which every browser draws; HEIC only Safari does, so it stays a file here.
+const PHOTOS = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif']);
 
 export type Progress = (done: number, count: number) => void;
 
@@ -75,7 +78,7 @@ export async function thumbOf(bytes: Uint8Array): Promise<Uint8Array | undefined
 export const importFromCamera = (_place: CollectionPlace, _folder: string, _progress?: Progress): Promise<CollectionItem | null> => unavailable();
 
 /** Picks a file from the computer, or the phone's files, into the Collection, in `folder`, or returns null if the owner cancelled. */
-export async function importFromFiles(place: CollectionPlace, folder: string, progress?: Progress, _options: { deleteOriginal?: boolean } = {}): Promise<CollectionItem | null> {
+export async function importFromFiles(place: CollectionPlace, folder: string, progress?: Progress, _options: { deleteOriginal?: boolean; told?: (text: string) => void; gallery?: boolean } = {}): Promise<CollectionItem | null> {
   const picked = await pickPieces(MAX_COLLECTION_FILE);
   if (!picked) return null;
   try {

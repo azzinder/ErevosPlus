@@ -110,6 +110,8 @@ type CallAudio = {
   backgroundState?(): BackgroundState;
   /** The kind of network the phone is on now, for Tor's Automatic bridges (lib/tor.ts). */
   networkKind?(): 'wifi' | 'cellular' | 'ethernet' | 'other';
+  /** Whether Android says the phone has internet now: a network it checked. Missing in a build before it. */
+  hasInternet?(): boolean;
   /** Android's own question to leave Erevos out of battery saving. */
   askBattery?(): void;
   /** Android's setting to let Erevos show a call over the lock screen. */

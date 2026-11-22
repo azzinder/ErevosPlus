@@ -173,10 +173,11 @@ write(
   '.well-known/assetlinks.json',
   `${JSON.stringify(
     [
-      {
+      // Each edition is an app of its own (app/lib/update-channel.ts PACKAGES), all signed with that key.
+      ...['app.erevos', 'app.erevos.plus', 'app.erevos.lite'].map((package_name) => ({
         relation: ['delegate_permission/common.handle_all_urls'],
-        target: { namespace: 'android_app', package_name: 'app.erevos', sha256_cert_fingerprints: [RELEASE_CERTIFICATE] },
-      },
+        target: { namespace: 'android_app', package_name, sha256_cert_fingerprints: [RELEASE_CERTIFICATE] },
+      })),
     ],
     null,
     2,

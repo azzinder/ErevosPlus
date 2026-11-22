@@ -7,7 +7,7 @@ import { canVerify, verifySignature } from './core';
 import { httpFor } from './net-http';
 import { hostOf } from './relay-host';
 import { secureGet, secureSet } from './secure';
-import { channelOf, channelsOf, loadChannel, type Channel, type ChannelName } from './update-channel';
+import { channelOf, channelsOf, loadChannel, wireOf, type Channel, type ChannelName } from './update-channel';
 import { RELEASE_KEY, readChannelStatement } from './update-signature';
 import { VERSION_NAME } from './version-name';
 import { START_RELAY } from './welcome';
@@ -186,11 +186,12 @@ export async function latestToldIn(get: NoticeGet, channel: Channel, key = RELEA
 }
 
 async function toldIn(get: NoticeGet, name: ChannelName, key: string): Promise<Told | null> {
-  const { status, bytes } = await get(`${NOTICE_SERVER}android-update-${name}.json`);
+  const wire = wireOf(name);
+  const { status, bytes } = await get(`${NOTICE_SERVER}android-update-${wire}.json`);
   if (status === 404) return name === 'erevos' ? latestTold(get, key) : null;
-  if (status < 200 || status >= 300) throw new Error(`android-update-${name}.json: ${status}`);
+  if (status < 200 || status >= 300) throw new Error(`android-update-${wire}.json: ${status}`);
   const read = await readChannelStatement(utf8Decode(bytes), key);
-  return read && read.channel === name && VERSION_NAME.test(read.name) ? { build: read.build, name: read.name } : null;
+  return read && read.channel === wire && VERSION_NAME.test(read.name) ? { build: read.build, name: read.name } : null;
 }
 
 /** The channel Updates offers now, as chosen there, else as this app is (`version`). */

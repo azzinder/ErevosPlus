@@ -14,6 +14,10 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
   <uses-permission android:name="android.permission.READ_CALL_LOG" />
   <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
   <uses-permission android:name="android.permission.READ_CONTACTS" />
+  <!-- The voicemail tab (Voicemail.kt): the phone app role gives these too, to read every
+       voicemail, and to mark one heard or delete it. Without them the tab stays hidden. -->
+  <uses-permission android:name="com.android.voicemail.permission.READ_VOICEMAIL" />
+  <uses-permission android:name="com.android.voicemail.permission.WRITE_VOICEMAIL" />
   <!-- The call notices, the call screen over the lock screen, the screen off at the ear. -->
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
   <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />

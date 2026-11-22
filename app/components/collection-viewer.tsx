@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fileSize } from '../lib/attachments';
 import { MOST_IN_MEMORY, onCollectionMemoryDropped, openItemUri, releaseMemoryUri } from '../lib/collection-memory';
 import { CAN_OPEN_WITH } from '../lib/collection-out';
+import { itemPlace } from '../lib/collection-export';
 import { CAN_PLAY, playItems, playingFile, usePlayer } from '../lib/collection-play';
 import { fileLook, isText, MOST_TEXT, playKind, playListOf } from '../lib/collection-view';
 import { utf8Decode } from '../lib/crypto';
@@ -23,7 +24,7 @@ import { FetchNote, useFetching, type Fetching } from './collection-fetch';
 import { CollectionPdf } from './collection-pdf';
 import { NowPlayingScreen } from './collection-now-playing';
 import { PlayerControls, VideoScreen } from './collection-player';
-import { BackIcon, ChevronIcon, DownloadIcon, FileIcon, InfoIcon, SendIcon, TrashIcon } from './icons';
+import { BackIcon, ChevronIcon, DownloadIcon, FileIcon, InfoIcon, PencilIcon, SendIcon, TrashIcon } from './icons';
 import { Button, Sheet, Text } from './ui';
 
 // One file of the Collection looked at on its own (app/collection.tsx): a photo fills the screen,
@@ -59,6 +60,8 @@ type Props = {
   onSave: (item: CollectionItem) => void;
   onDelete: (item: CollectionItem) => void;
   onOpenWith: (item: CollectionItem) => void;
+  /** Turning and cutting a photo (components/collection-edit.tsx), where it can be done. */
+  onEdit?: (item: CollectionItem) => void;
   /** The place's own choices for its list playing (lock/collection-data.ts). */
   playOptions: { showTitle: boolean; stopOnLock: boolean; place: CollectionPlace | null };
 };
@@ -75,7 +78,7 @@ const WEB = Platform.OS === 'web';
 // How long each photo shows in a slideshow.
 export const SLIDE_MS = 4000;
 
-export function CollectionViewer({ items, start, canSend, onClose, onSend, onSave, onDelete, onOpenWith, playOptions }: Props) {
+export function CollectionViewer({ items, start, canSend, onClose, onSend, onSave, onDelete, onOpenWith, onEdit, playOptions }: Props) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -214,7 +217,7 @@ export function CollectionViewer({ items, start, canSend, onClose, onSend, onSav
         <View style={[styles.screen, { backgroundColor: photo ? '#000000' : colors.ground }]}>
           {photo && WEB ? (
             // On a computer one photo at a time: a pager's scroll there would move the one in view.
-            <PhotoPage key={item.id} item={item} width={width} near onTap={tapped} />
+            <PhotoPage key={item.id} item={item} width={width} near onTap={tapped} onOpenWith={() => void openWith(item)} />
           ) : photo ? (
             <FlatList
               // Turned, the pages are laid out again at the photo in view.
@@ -229,7 +232,7 @@ export function CollectionViewer({ items, start, canSend, onClose, onSend, onSav
               keyExtractor={(i) => i.id}
               onMomentumScrollEnd={(event) => setIndex(Math.round(event.nativeEvent.contentOffset.x / width))}
               windowSize={3}
-              renderItem={({ item: page, index: i }) => <PhotoPage item={page} width={width} near={Math.abs(i - at) <= 1} onTap={tapped} onSwipe={(by) => goTo(at + by)} />}
+              renderItem={({ item: page, index: i }) => <PhotoPage item={page} width={width} near={Math.abs(i - at) <= 1} onTap={tapped} onSwipe={(by) => goTo(at + by)} onOpenWith={() => void openWith(page)} />}
             />
           ) : (
             <FilePage item={item} ink={ink} muted={faint} onOpenWith={() => void openWith(item)} onPlay={() => void play(item)} onShowPlayer={() => setNowPlaying(true)} note={playNote} fetching={fetching} />
@@ -280,6 +283,7 @@ export function CollectionViewer({ items, start, canSend, onClose, onSend, onSav
             >
               {canSend ? act(<SendIcon color={ink} cut={photo ? '#000000' : colors.sheet} size={22} />, t('Send to a chat'), () => onSend(item)) : null}
               {act(<DownloadIcon color={ink} size={22} />, DESK ? t('Save to the computer') : BROWSER ? t('Save to this device') : t('Save to phone'), () => onSave(item))}
+              {photo && onEdit ? act(<PencilIcon color={ink} size={22} />, t('Edit'), () => onEdit(item)) : null}
               {act(<InfoIcon color={ink} size={22} />, t('Information'), () => setInfo(true))}
               {act(<TrashIcon color={colors.danger} size={22} />, t('Delete'), () => onDelete(item), true)}
             </View>
@@ -292,12 +296,32 @@ export function CollectionViewer({ items, start, canSend, onClose, onSend, onSav
             <InfoRow label={t('Size')} value={fileSize(item.file.size)} />
             {item.file.w && item.file.h ? <InfoRow label={t('Dimensions')} value={`${item.file.w} × ${item.file.h}`} /> : null}
             <InfoRow label={t('Added')} value={addedText(item.added)} />
+            {info ? <PlaceRow item={item} /> : null}
             <Button title={t('Close')} kind="secondary" compact onPress={() => setInfo(false)} />
           </Sheet>
         </View>
       ) : null}
     </Modal>
   );
+}
+
+// Whether a photo or video says where it was taken, read from its chunks when Information opens.
+function PlaceRow({ item }: { item: CollectionItem }) {
+  const [place, setPlace] = useState<string | null>(null);
+  const media = item.file.kind === 'photo' || item.file.mime.startsWith('image/') || playKind(item) === 'video';
+  useEffect(() => {
+    if (!media) return;
+    let active = true;
+    setPlace(null);
+    void itemPlace(item).then((said) => {
+      if (active) setPlace(said === 'yes' ? t('Yes: it says where it was taken') : said === 'no' ? t('No') : t('Cannot tell'));
+    });
+    return () => {
+      active = false;
+    };
+  }, [item.id, media]);
+  if (!media) return null;
+  return <InfoRow label={t('Place in the file')} value={place ?? t('Looking…')} />;
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -312,9 +336,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 // One photo of the pager: read when it is the one in view or next to it, let go of otherwise.
-function PhotoPage({ item, width, near, onTap, onSwipe }: { item: CollectionItem; width: number; near: boolean; onTap: () => void; onSwipe?: (by: 1 | -1) => void }) {
+function PhotoPage({ item, width, near, onTap, onSwipe, onOpenWith }: { item: CollectionItem; width: number; near: boolean; onTap: () => void; onSwipe?: (by: 1 | -1) => void; onOpenWith?: () => void }) {
   const [uri, setUri] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
+  // A photo this device cannot draw (a HEIC on an older Android, or in a browser): said, with the way to another app.
+  const [undrawn, setUndrawn] = useState(false);
   // Fetched from the server when it is not here, with Cancel; Go on opens it again (`round`).
   const fetching = useFetching();
   const [round, setRound] = useState(0);
@@ -348,8 +374,15 @@ function PhotoPage({ item, width, near, onTap, onSwipe }: { item: CollectionItem
   }, [near, item.id, round]);
   return (
     <View style={{ width, flex: 1 }}>
-      {uri ? (
-        <ZoomPhoto uri={uri} w={item.file.w} h={item.file.h} onTap={onTap} onSwipe={onSwipe} />
+      {uri && undrawn ? (
+        <View style={styles.center}>
+          <Text color="#FFFFFF" style={styles.centered}>
+            {t('This device cannot show this photo ({type}).', { type: item.file.mime })}
+          </Text>
+          {CAN_OPEN_WITH && onOpenWith ? <Button title={t('Open with another app')} kind="secondary" compact onPress={onOpenWith} /> : null}
+        </View>
+      ) : uri ? (
+        <ZoomPhoto uri={uri} w={item.file.w} h={item.file.h} onTap={onTap} onSwipe={onSwipe} onError={() => setUndrawn(true)} />
       ) : (
         <View style={styles.center}>
           {fetching.progress || fetching.stopped ? (

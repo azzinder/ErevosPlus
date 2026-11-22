@@ -12,7 +12,7 @@ import { canSealOpen, sealOpen, sealPublic } from './core';
 import { fromBase64, randomBytes, toBase64 } from './crypto';
 import { fromBase64Url, toBase64Url } from './e2e';
 import { collectInvites, invitePieces, plainNumber, readInviteAnswer, sameNumber, type InvitePiece, type SmsInvite } from './sms-invite';
-import { CARDS_ONCE_DAYS, DEVICE_ASKS_KEPT, fresh, MAX_CARDS_ONCE, LATER_TEXT, loadSmsData, MAX_LATER, MAX_MESSAGE_PINS, MAX_PINS, MAX_SMS_WAY, MAX_TRASH, MAX_VANISH, MAX_WORDS, saveSmsData, SMS_TITLE, smsSaves, UNDO_SECONDS, WORD, type DeviceAsk, type LaterSms, type SentInvite, type SmsData, type SmsPin } from '../lock/sms-data';
+import { CARDS_ONCE_DAYS, DEVICE_ASKS_KEPT, fresh, MAX_CARDS_ONCE, LATER_TEXT, loadSmsData, MAX_LATER, MAX_MESSAGE_PINS, MAX_PINS, MAX_QUICK, MAX_SMS_WAY, MAX_TRASH, MAX_VANISH, MAX_WORDS, QUICK_TEXT, saveSmsData, SMS_TITLE, smsSaves, UNDO_SECONDS, WORD, type DeviceAsk, type LaterSms, type SentInvite, type SmsData, type SmsPin } from '../lock/sms-data';
 import { smsSpamFilter, type Sim } from '../modules/erevos-sms';
 import { sameAddress, sameConversation, smsAddress, smsNumbers } from './sms-group';
 import { senderRule } from './sms-folders';
@@ -39,7 +39,7 @@ export class SmsLink {
     this.data = data;
     this.seen = seen;
     smsSpamFilter(data.spam);
-    smsNoticesRead(space, data.own);
+    smsNoticesRead(space, data);
   }
 
   static async open(space: number, key: Uint8Array): Promise<SmsLink> {
@@ -54,7 +54,7 @@ export class SmsLink {
     this.data = fresh(await loadSmsData('space', this.space, this.key), Date.now());
     this.seen = seen;
     smsSpamFilter(this.data.spam);
-    smsNoticesRead(this.space, this.data.own);
+    smsNoticesRead(this.space, this.data);
   }
 
   // Changes the data as it is on the phone now: the chat and the SMS screen each keep one.
@@ -111,6 +111,16 @@ export class SmsLink {
 
   setNames(on: boolean): Promise<void> {
     return this.update((d) => ({ ...d, names: on }));
+  }
+
+  /** Whether an SMS's notice shows who wrote and what, with Reply and Mark as read (lib/sms-notices.ts). */
+  get notices(): boolean {
+    return this.data.notices;
+  }
+
+  async setNotices(on: boolean): Promise<void> {
+    await this.update((d) => ({ ...d, notices: on }));
+    smsNoticesRead(this.space, this.data);
   }
 
   /** Whether the phone's SMS go to the space's linked devices too (lib/sms-share.ts). */
@@ -259,7 +269,7 @@ export class SmsLink {
   /** Changes what a conversation has of its own; the phone learns its notifications at once (lib/sms-notices.ts). */
   async setOwn(address: string, change: SmsOwnChange): Promise<void> {
     await this.update((d) => ({ ...d, own: withSmsOwn(d.own, address, change) }));
-    smsNoticesRead(this.space, this.data.own);
+    smsNoticesRead(this.space, this.data);
   }
 
   /** Says a number sends spam (true), or does not (false), whatever the filter thinks; null leaves
@@ -345,6 +355,25 @@ export class SmsLink {
 
   setUndo(seconds: number): Promise<void> {
     return this.update((d) => ({ ...d, undo: UNDO_SECONDS.includes(seconds) ? seconds : d.undo }));
+  }
+
+  /** Whether SMS go without accents, Greek in capitals, to cost fewer (lib/sms-count.ts). */
+  get plain(): boolean {
+    return this.data.plain;
+  }
+
+  setPlain(on: boolean): Promise<void> {
+    return this.update((d) => ({ ...d, plain: on }));
+  }
+
+  /** The owner's quick texts, or null for the app's own until they change them. */
+  get quick(): string[] | null {
+    return this.data.quick;
+  }
+
+  setQuick(list: string[]): Promise<void> {
+    const kept = [...new Set(list.map((q) => q.trim()).filter((q) => q.length > 0 && q.length <= QUICK_TEXT))].slice(0, MAX_QUICK);
+    return this.update((d) => ({ ...d, quick: kept }));
   }
 
   /** Whether the first SMS to `number` should carry an invite: invites are on, the core can open

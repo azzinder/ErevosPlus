@@ -313,6 +313,13 @@ export type BackupHard = HardCost & { salt: Uint8Array };
 
 /** The key a password gives for backups, with the salt and rounds it came from. `hard` is null
  *  for a backup from before Argon2id. */
+// The most a backup file may ask of the phone before its password is known: a file made
+// elsewhere, by anyone, could otherwise name a cost that keeps a small phone busy for minutes or
+// runs it out of memory. Five times the PBKDF2 rounds and twice the Argon2id cost Erevos makes
+// (ITER, HARD): a later Erevos that makes dearer keys raises these first, in a release before.
+export const MAX_BACKUP_ITER = 1_000_000;
+export const MAX_BACKUP_HARD: HardCost = { m: 64 * 1024, t: 6 };
+
 export type BackupKey = { key: Uint8Array; salt: Uint8Array; iter: number; hard: BackupHard | null };
 
 /** Where each part of a backup being made goes: it keeps the bytes and gives the name they are kept under. */
@@ -809,12 +816,12 @@ async function openSealed(bytes: Uint8Array, derive: (salt: Uint8Array, iter: nu
   const view = new DataView(head.buffer);
   const salt = head.slice(0, SALT);
   const iter = view.getUint32(SALT);
-  if (iter < 1000 || iter > 10_000_000) throw new NotABackupError();
+  if (iter < 1000 || iter > MAX_BACKUP_ITER) throw new NotABackupError();
   let hard: BackupHard | null = null;
   if (!old) {
     hard = { salt: head.slice(SALT + 4, SALT + 4 + SALT), m: view.getUint32(SALT + 4 + SALT), t: view.getUint32(SALT + 4 + SALT + 4) };
     // A cost no Erevos makes, as a made-up file may name to keep the phone busy.
-    if (!isHardCost(hard)) throw new NotABackupError();
+    if (!isHardCost(hard) || hard.m > MAX_BACKUP_HARD.m || hard.t > MAX_BACKUP_HARD.t) throw new NotABackupError();
   }
   const key = await derive(salt, iter, hard);
   let packed: Uint8Array;
@@ -850,10 +857,10 @@ async function restoreParts(
   read: PartReader | null,
   progress: ((done: number, all: number) => void) | undefined,
   without: RestoreOptions['without'],
-): Promise<{ wrote: Set<string>; left: string[] }> {
+): Promise<{ wrote: Set<string>; fresh: string[]; left: string[] }> {
   const wrote = new Set<string>();
   const left: string[] = [];
-  if (names.length === 0) return { wrote, left };
+  if (names.length === 0) return { wrote, fresh: [], left };
   const had = new Set([...(await listFiles(ATTACHMENT)), ...(await listFiles(VOICE))]);
   let going = false;
   try {
@@ -882,7 +889,8 @@ async function restoreParts(
     for (const name of wrote) if (!had.has(name)) await deleteFile(name).catch(() => undefined);
     throw error;
   }
-  return { wrote, left };
+  // What the parts wrote that the phone had not: gone again should the rest of the restore fail.
+  return { wrote, fresh: [...wrote].filter((name) => !had.has(name)), left };
 }
 
 /**
@@ -892,6 +900,33 @@ async function restoreParts(
  * `without` wants the rest restored without such parts (RestoreOptions). Open again afterwards
  * (the lock reads it all anew).
  */
+/** What the phone holds now under each name a backup's entries write: null where it holds nothing. */
+type Held = { kind: number; name: string; value: string | Uint8Array | null };
+
+async function heldBefore(entries: readonly Entry[]): Promise<Held[]> {
+  const held: Held[] = [];
+  for (const { kind, name } of entries) {
+    if (kind === KIND_TEXT) held.push({ kind, name, value: await readFile(name) });
+    else if (kind === KIND_BYTES) held.push({ kind, name, value: await readBytes(name) });
+    else if (kind === KIND_KEY) held.push({ kind, name, value: await secureGet(name) });
+  }
+  return held;
+}
+
+/** Puts back what heldBefore read, each on its own: one that fails does not keep the rest from going back. */
+async function putBack(held: readonly Held[]): Promise<void> {
+  for (const { kind, name, value } of held) {
+    try {
+      if (kind === KIND_KEY) await (typeof value === 'string' ? secureSet(name, value) : secureDelete(name));
+      else if (value === null) await deleteFile(name);
+      else if (typeof value === 'string') await writeFile(name, value);
+      else await writeBytes(name, value);
+    } catch {
+      // As much as can go back does.
+    }
+  }
+}
+
 export async function restoreBackup(
   { entries, parts }: Backup,
   read: PartReader | null = null,
@@ -906,11 +941,13 @@ export async function restoreBackup(
   const mine = await thisPhone();
   const undo = await markRestore(Date.now(), !!parts && (!mine || parts.phone !== mine));
   let left: string[] = [];
+  let fresh: string[] = [];
   if (parts) {
     try {
       const done = await restoreParts(parts, read, progress, without);
       for (const name of done.wrote) keep.add(name);
       left = done.left;
+      fresh = done.fresh;
     } catch (error) {
       await undo();
       throw error;
@@ -922,9 +959,23 @@ export async function restoreBackup(
     [CLOUD, await secureGet(CLOUD)],
     [LORA, await secureGet(LORA)],
   ]);
-  for (const entry of entries) {
-    if (entry.kind === KIND_TEXT) await writeFile(entry.name, utf8Decode(entry.data));
-    if (entry.kind === KIND_BYTES) await writeBytes(entry.name, entry.data);
+  // What the backup puts in place, all of it before anything is taken away, and what each of those
+  // held before: a write that fails (a full phone) puts every one back as it was, so the phone is
+  // left as before the restore, never half one and half the other.
+  const before = await heldBefore(entries);
+  try {
+    for (const entry of entries) {
+      if (entry.kind === KIND_TEXT) await writeFile(entry.name, utf8Decode(entry.data));
+      if (entry.kind === KIND_BYTES) await writeBytes(entry.name, entry.data);
+    }
+    for (const entry of entries) if (entry.kind === KIND_KEY) await secureSet(entry.name, keptHere(entry.name, utf8Decode(entry.data), here.get(entry.name) ?? null));
+  } catch (error) {
+    await putBack(before);
+    // The photos, files and voice messages its parts brought go too: unseen, they would only take
+    // room, just when the phone is full.
+    for (const name of fresh) await deleteFile(name).catch(() => undefined);
+    await undo();
+    throw error;
   }
   // Without some of its parts, the phone's own photos, files and voice messages all stay: which of
   // them those parts held, and the backup's messages show, nothing says.
@@ -934,7 +985,6 @@ export async function restoreBackup(
   }
   // A backup from before parts holds no photos and files, nor these: the phone's stay as they are.
   if (parts) for (const name of [...LATER_FILES, ...(own ? [] : await listFiles(ATTACHMENT))]) if (!keep.has(name)) await deleteFile(name);
-  for (const entry of entries) if (entry.kind === KIND_KEY) await secureSet(entry.name, keptHere(entry.name, utf8Decode(entry.data), here.get(entry.name) ?? null));
   for (const name of KEYS) if (!keep.has(name)) await secureDelete(name);
   if (parts) for (const name of LATER_KEYS) if (!keep.has(name)) await secureDelete(name);
   // One made before the queues entries were, or that held fewer spaces, has none for some: each is

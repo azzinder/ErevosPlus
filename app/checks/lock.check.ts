@@ -30,7 +30,7 @@ import { MIN_PIN, openHidden, prepareHidden, removeHiddenPassword, searchHidden,
 import { loadOpenKey, saveOpenKey } from '../lock/keys';
 import { changedRelaySettings, EMPTY_SPACE, firstSpaceKey, loadHiddenData, loadSpaceData, NOSTR_DEFAULT, prepareSpaces, relaySettingsOf, saveHiddenData, saveSpaceData, updateSpaceData, watchSpaceData, type SpaceData } from '../lock/space-data';
 import { POCKETS } from '../lock/sealed-file';
-import { assertNotLockedOut, FREE_TRIES, LockedOutError, recordRightPassword, recordWrongPassword, SEARCH_TRIES, searchFailsLeft, setUptimeForChecks, type Uptime } from '../lock/tries';
+import { assertNotLockedOut, countedCheck, FREE_TRIES, KEY_TRIES, LockedOutError, recordRightPassword, recordWrongPassword, SEARCH_TRIES, searchFailsLeft, setUptimeForChecks, type Uptime } from '../lock/tries';
 import { store } from './secure-memory';
 import { useWasmCore } from './wasm-core';
 
@@ -294,6 +294,34 @@ t('the panic password wipes from the lock screen, opens nothing, and its entry l
   await removePasswordLock(0, real);
   await setLockPassword(0, 'real-1111', real);
   assert.equal(await unlock(await loadLockConfig(), 'panic-9999'), null);
+});
+
+t('wrong passwords tried all at once each count: one check at a time, counted before it runs', async () => {
+  await recordRightPassword();
+  const now = realNow();
+  let running = 0;
+  let most = 0;
+  const slowWrong = async () => {
+    running++;
+    most = Math.max(most, running);
+    await new Promise((done) => setTimeout(done, 5));
+    running--;
+    return false;
+  };
+  const results = await Promise.allSettled(Array.from({ length: 50 }, () => countedCheck(KEY_TRIES, now, slowWrong, (right) => right)));
+  // Never two at once, and once the free tries are spent every further one waits instead.
+  assert.equal(most, 1);
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, FREE_TRIES);
+  assert.ok(results.slice(FREE_TRIES).every((r) => r.status === 'rejected' && r.reason instanceof LockedOutError));
+  // A check cut short still counted: the count was taken before it ran.
+  await recordRightPassword();
+  await assert.rejects(countedCheck(KEY_TRIES, now, async () => { throw new Error('closed'); }, () => true), /closed/);
+  for (let i = 1; i < FREE_TRIES; i++) await countedCheck(KEY_TRIES, now, async () => false, (right) => right);
+  await assert.rejects(assertNotLockedOut(now), LockedOutError);
+  // A right one ends the count.
+  await recordRightPassword();
+  assert.equal(await countedCheck(KEY_TRIES, now, async () => true, (right) => right), true);
+  await assertNotLockedOut(now);
 });
 
 t('the wait for wrong passwords goes by the clock the owner cannot set, and a new start of the phone starts it again', async () => {

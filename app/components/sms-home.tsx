@@ -17,7 +17,7 @@ import { smsAddress, smsNumbers } from '../lib/sms-group';
 import { sameNumber } from '../lib/sms-invite';
 import { SmsLink } from '../lib/sms-link';
 import { NO_SMS, smsRows, type SmsList } from '../lib/sms-rows';
-import { onSmsEvent, smsStatus } from '../modules/erevos-sms';
+import { onSmsEvent, smsStatus, waitingMms } from '../modules/erevos-sms';
 import { useLock } from '../lock/context';
 import { Logo } from '../lock/gate';
 import { currentSpace } from '../lock/keys';
@@ -47,6 +47,8 @@ export function SmsHome() {
   const [now, setNow] = useState(Date.now());
   const [query, setQuery] = useState('');
   const [folders, setFolders] = useState({ archived: 0, spam: 0, trash: 0 });
+  // The MMS waiting at the phone company for a tap (MmsStore.kt), also from numbers with no conversation yet.
+  const [atCarrier, setAtCarrier] = useState(0);
   const [target, setTarget] = useState<SmsTarget | null>(null);
   const [writing, setWriting] = useState(false);
   const [number, setNumber] = useState('');
@@ -79,6 +81,7 @@ export function SmsHome() {
           const at = Date.now();
           const list = buildInbox([], [], [], at, sorted?.list ?? sms.threads);
           setFolders({ archived: sorted?.archived.length ?? 0, spam: sorted?.spam.length ?? 0, trash: order?.trash.length ?? 0 });
+          setAtCarrier(waitingMms().length);
           setNow(at);
           setRows(order ? arrangeRows(list, order.pinned, order.drafts) : list);
         });
@@ -162,6 +165,7 @@ export function SmsHome() {
           {folders.archived ? <Chip label={t('Archived · {n}', { n: folders.archived })} onPress={() => router.push('/sms-folder?folder=archived')} /> : null}
           {folders.spam ? <Chip label={t('Spam · {n}', { n: folders.spam })} onPress={() => router.push('/sms-folder?folder=spam')} /> : null}
           {folders.trash ? <Chip label={t('Trash · {n}', { n: folders.trash })} onPress={() => router.push('/sms-folder?folder=trash')} /> : null}
+          {atCarrier ? <Chip label={t('MMS waiting · {n}', { n: atCarrier })} onPress={() => router.push('/sms-settings?part=mms')} /> : null}
         </Row>
       ) : null}
     </View>

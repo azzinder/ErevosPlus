@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import type { ComponentType } from 'react';
+import type { ComponentType, Ref } from 'react';
 import type { ViewProps } from 'react-native';
 import { requireNativeViewManager, requireOptionalNativeModule, type EventSubscription } from 'expo-modules-core';
 
@@ -154,4 +154,69 @@ export function collectionVideoView(): ComponentType<ViewProps> | null {
     videoView = null;
   }
   return videoView;
+}
+
+/** A photo Extension of the phone's maker (CameraX Extensions): night, HDR, portrait (bokeh), auto. */
+export type CameraEffect = 'night' | 'hdr' | 'bokeh' | 'auto';
+
+/** What the camera open can do (CameraPreview.kt tellReady), for the buttons to show. */
+export type CameraReady = {
+  /** The Extensions this camera has, if any. */
+  effects: CameraEffect[];
+  /** The zoom it takes, as ratios: below 1 where it has a wide lens. */
+  minZoom: number;
+  maxZoom: number;
+  /** Whether it can be made brighter or darker, by steps of exposureStep (EV) from exposureMin to exposureMax. */
+  exposure: boolean;
+  exposureMin: number;
+  exposureMax: number;
+  exposureStep: number;
+  /** Whether it films video in HDR (HLG, 10-bit). */
+  hdrVideo: boolean;
+  /** Whether it has a flash, for the flash and the light. */
+  flash: boolean;
+  /** Whether the phone has a front camera. */
+  front: boolean;
+};
+
+export type CameraProps = ViewProps & {
+  facing: 'back' | 'front';
+  mode: 'photo' | 'video';
+  effect: CameraEffect | 'none';
+  quality: '720p' | '1080p' | '2160p';
+  hdrVideo: boolean;
+  flash: 'off' | 'on' | 'auto';
+  torch: boolean;
+  /** The zoom, as a ratio (CameraReady minZoom to maxZoom). */
+  zoom: number;
+  onReady?: (event: { nativeEvent: CameraReady }) => void;
+  /** The camera could not open, or stopped: `kind` says which; `message` is English, never shown. */
+  onFail?: (event: { nativeEvent: { kind: 'open' | 'stopped'; message: string } }) => void;
+  /** How far a night photo has come, 0 to 100. */
+  onProcessing?: (event: { nativeEvent: { progress: number } }) => void;
+};
+
+/** What the camera is asked to do, through its ref. */
+export type CameraHandle = {
+  /** A photo taken into memory, cleaned of everything but its picture: JPEG bytes, its size, and its small picture (JPEG). */
+  takePhoto(silent: boolean): Promise<{ data: Uint8Array | string; width: number; height: number; thumb?: Uint8Array | string }>;
+  /** Records until stopRecording; resolves then with the video's file:// link in the app's cache. */
+  record(muted: boolean, silent: boolean): Promise<{ uri: string }>;
+  stopRecording(): Promise<void>;
+  /** Focuses and meters at a point of the view; false where the camera cannot. */
+  focusAt(x: number, y: number): Promise<boolean>;
+  setExposure(index: number): Promise<void>;
+};
+
+let cameraViewType: ComponentType<CameraProps & { ref?: Ref<CameraHandle> }> | null | undefined;
+
+/** Erevos's own camera (CameraPreview.kt); null on the web, a computer, and builds before it. */
+export function cameraView(): ComponentType<CameraProps & { ref?: Ref<CameraHandle> }> | null {
+  if (cameraViewType !== undefined) return cameraViewType;
+  try {
+    cameraViewType = requireOptionalNativeModule('ErevosCamera') ? requireNativeViewManager<CameraProps>('ErevosCamera') : null;
+  } catch {
+    cameraViewType = null;
+  }
+  return cameraViewType;
 }

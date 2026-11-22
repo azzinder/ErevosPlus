@@ -37,7 +37,8 @@ import { sealedFile, type Holder } from './sealed-file';
 //
 // Each place keeps its own choices for its Collection besides backups (CollectionOption), all off
 // until the owner turns them on: whether a photo or video picked from the phone's gallery is then
-// deleted there (lib/collection-import.ts, which Android has the owner confirm), whether the list
+// deleted there (lib/collection-import.ts, which Android has the owner confirm), whether a photo
+// that leaves Erevos keeps where and when it was taken (lib/collection-export.ts), whether the list
 // playing stops when the space locks, and whether the notice of the list playing shows a file's
 // name (lib/collection-play.ts). And two Tor switches, each the device's own, as they are not
 // carried to linked devices: one for the copies on its server, one for its radio and TV lists.
@@ -78,6 +79,8 @@ export type Collection = {
   backup: boolean;
   /** A photo or video picked from the gallery is deleted there once it is in the Collection. */
   deleteOriginals?: boolean;
+  /** A photo saved out or opened with another app keeps where and when it was taken (lib/collection-export.ts); otherwise that is taken out first. */
+  exportWhole?: boolean;
   /** The list playing stops when the space locks. */
   stopOnLock?: boolean;
   /** The notice of the list playing shows the file's name. */
@@ -127,8 +130,8 @@ export type CollectionPosition = { id: string; ms: number; at: number };
 export type CollectionPlaylist = { id: string; name: string; items: string[]; at: number };
 
 /** The place's own choices for its Collection, besides backups: each off until turned on. */
-export type CollectionOption = 'deleteOriginals' | 'stopOnLock' | 'showTitle' | 'devices' | 'showLogos' | 'serverTor' | 'listsTor' | 'playTor';
-const OPTIONS: CollectionOption[] = ['deleteOriginals', 'stopOnLock', 'showTitle', 'devices', 'showLogos', 'serverTor', 'listsTor', 'playTor'];
+export type CollectionOption = 'deleteOriginals' | 'exportWhole' | 'stopOnLock' | 'showTitle' | 'devices' | 'showLogos' | 'serverTor' | 'listsTor' | 'playTor';
+const OPTIONS: CollectionOption[] = ['deleteOriginals', 'exportWhole', 'stopOnLock', 'showTitle', 'devices', 'showLogos', 'serverTor', 'listsTor', 'playTor'];
 
 export const FILE = 'erevos-collection';
 const BLOCK = 16 * 1024;

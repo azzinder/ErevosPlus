@@ -9,7 +9,7 @@ import { itemSource, type CollectionItem } from '../lock/collection-data';
 import { collectionNative } from '../modules/erevos-collection';
 import { eachPiece } from './attachments';
 import { sealedRef } from './collection-play';
-import { randomBytes, toHex } from './crypto';
+import { randomBytes, toBase64, toHex } from './crypto';
 import { t } from './i18n';
 import { isSharedPhoto, type SharedFile } from './share-in';
 
@@ -81,6 +81,22 @@ export async function openWithOtherApp(item: CollectionItem): Promise<void> {
   dropOldCopies();
   if (!collectionNative) throw new Error(t('This build of Erevos cannot do this. Update Erevos for it.'));
   const { token, uri } = collectionNative.openWith(sealedRef(item.file), item.file.name, item.file.mime);
+  try {
+    await startActivityAsync('android.intent.action.VIEW', { data: uri, type: item.file.mime, flags: FLAG_GRANT_READ_URI_PERMISSION });
+  } catch (error) {
+    collectionNative.forget(token);
+    throw error;
+  }
+}
+
+/**
+ * Opens a photo of the Collection with another app from bytes made ready for it (its place and
+ * time taken out, lib/collection-export.ts), served from memory by a link of Erevos's own until
+ * `dropOpened`, with no copy on the disk.
+ */
+export async function openBytesWithOtherApp(item: CollectionItem, bytes: Uint8Array): Promise<void> {
+  if (!collectionNative?.openBytesWith) throw new Error(t('This build of Erevos cannot do this. Update Erevos for it.'));
+  const { token, uri } = collectionNative.openBytesWith(toBase64(bytes), item.file.name, item.file.mime);
   try {
     await startActivityAsync('android.intent.action.VIEW', { data: uri, type: item.file.mime, flags: FLAG_GRANT_READ_URI_PERMISSION });
   } catch (error) {

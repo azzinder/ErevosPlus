@@ -20,6 +20,8 @@ import { device } from '../modules/erevos-device';
 // Where no such clock exists (a build before it), the wait is by the date and time, as before.
 
 const KEY = 'erevos.lock-tries';
+/** The lock screen's count, and every other check against the spaces' passwords. */
+export const KEY_TRIES = KEY;
 /** Searches on the home screen are tried as the hidden chats' PIN (hidden.ts), counted apart, so
  *  searching never makes the lock screen wait. */
 export const SEARCH_TRIES = 'erevos.search-tries';
@@ -157,6 +159,49 @@ function sinceLast(before: Tries, now: number, clock: Uptime | null): number {
 export function searchFailsLeft(fails: number, since: number): number {
   const whiles = Math.floor(since / SEARCH_FORGET_MS);
   return whiles > 0 ? Math.max(0, Math.min(fails, FREE_TRIES - 1) - (whiles - 1)) : fails;
+}
+
+// One check of a password at a time, in this page and, in a browser, in every tab of it
+// (navigator.locks): two checks at once would both pass the wait and both read the same count, so
+// one of them would not count. Checks inside one must not ask for another: they would wait on
+// themselves.
+const LINE = 'erevos.lock-tries';
+let line: Promise<unknown> = Promise.resolve();
+
+type Locks = { request: <T>(name: string, run: () => Promise<T>) => Promise<T> };
+
+function tabsLock(): Locks | null {
+  try {
+    const locks = (globalThis as { navigator?: { locks?: Locks } }).navigator?.locks;
+    return locks && typeof locks.request === 'function' ? locks : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Runs `run` once every check of a password started before it is over. */
+export function oneCheckAtATime<T>(run: () => Promise<T>): Promise<T> {
+  const locks = tabsLock();
+  const go = locks ? () => locks.request(LINE, run) : run;
+  const result = line.then(go, go);
+  line = result.catch(() => undefined);
+  return result;
+}
+
+/**
+ * A check of a password, counted (oneCheckAtATime): throws LockedOutError while it must wait;
+ * otherwise counts it as wrong BEFORE `check` runs, so a check cut short (the app closed, the
+ * page left while the slow keys are made) still counts, and takes that back once `right` says it
+ * opened something.
+ */
+export function countedCheck<T>(entry: string, now: number, check: () => Promise<T>, right: (result: T) => boolean): Promise<T> {
+  return oneCheckAtATime(async () => {
+    await assertNotLockedOut(now, entry);
+    await recordWrongPassword(now, entry);
+    const result = await check();
+    if (right(result)) await recordRightPassword(entry);
+    return result;
+  });
 }
 
 /** Counts a wrong password; returns when the next check may run (now, while tries are free). */

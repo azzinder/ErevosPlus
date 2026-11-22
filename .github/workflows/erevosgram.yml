@@ -4,7 +4,7 @@
 
 name: erevosgram
 # Each run's title ends in its build number, which release.yml reads so its own never collides.
-run-name: Erevos+ ${{ inputs.version }}, build ${{ inputs.build }}
+run-name: Erevos+ ${{ inputs.version }}${{ inputs.bridge && ' (bridge)' || '' }}, build ${{ inputs.build }}
 
 # The ErevosGram build of Erevos for Android (docs/erevosgram.md): the same app, package and
 # release key, with Telegram (app/modules/erevos-telegram: TDLib, built here from source by
@@ -12,6 +12,12 @@ run-name: Erevos+ ${{ inputs.version }}, build ${{ inputs.build }}
 # with the version and build number it is to have; a build number above the phone's own installs
 # over it. The APK is kept as the run's artifact for three days. With publish on, it also goes out as an
 # Erevos+ release (the publish job below); off, it goes into no release.
+#
+# Since 3.1.0 Erevos+ is an app of its own, app.erevos.plus (docs/editions.md), published under the
+# channels erevos-plus and erevos-plus-beta (app/lib/update-channel.ts wireOf). With bridge on, it is
+# built as app.erevos instead (EREVOS_BRIDGE=1, app/app.config.js) and published under plus, the
+# channel the Erevos+ 7.x apps read: they take it as an update keeping everything, and it then moves
+# them to app.erevos.plus. A bridge is never a beta or an alpha, so that every 7.x finds it.
 #
 # Its Telegram API id and hash are the secrets EREVOS_TG_API_ID and EREVOS_TG_API_HASH, never in
 # the repository. TDLib's build is kept in the cache by its commit, so only the first run is long.
@@ -26,7 +32,11 @@ on:
         description: Its build number, above the one on the phone.
         required: true
       publish:
-        description: Publish it as an Erevos+ release (7.1.0, or 7.1.1-beta.1 for a beta) in the public download repository, for Updates. Off, it is only a test APK.
+        description: Publish it as an Erevos+ release (3.1.0, or 3.1.1-beta.1 for a beta) in the public download repository, for Updates. Off, it is only a test APK.
+        type: boolean
+        default: false
+      bridge:
+        description: The bridge (app.erevos, under plus), which moves the Erevos+ 7.x apps to app.erevos.plus. Off, it is Erevos+ itself (app.erevos.plus).
         type: boolean
         default: false
 
@@ -50,6 +60,7 @@ jobs:
       EREVOS_BUILD: ${{ inputs.build }}
       EREVOS_TELEGRAM: "1"
       EREVOS_PUBLISH: ${{ inputs.publish }}
+      EREVOS_BRIDGE: ${{ inputs.bridge && '1' || '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
@@ -93,6 +104,13 @@ jobs:
             [ "$GITHUB_REF_NAME" = main ] || { echo "::error::Erevos+ releases go out only from main, not from $GITHUB_REF_NAME"; exit 1; }
             [[ "$EREVOS_VERSION" =~ ^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*)?$ ]] \
               || { echo "::error::$EREVOS_VERSION is a test APK's name, not a release's"; exit 1; }
+            # The bridge goes under plus, where every Erevos+ 7.x looks, betas or not: never a beta's
+            # name. Erevos+ itself is 3.1.x and on: a 7.x name is the 7.x apps' and the bridge's.
+            if [ "$EREVOS_BRIDGE" = 1 ]; then
+              [[ ! "$EREVOS_VERSION" =~ -(alpha|beta)\. ]] || { echo "::error::A bridge is never a beta or an alpha: every Erevos+ 7.x must find it under plus"; exit 1; }
+            elif [ "${EREVOS_VERSION%%.*}" = 7 ]; then
+              echo "::error::Erevos+ $EREVOS_VERSION would be app.erevos.plus under a 7.x name: only the bridge may have one"; exit 1
+            fi
             # Checked here, not only when it publishes: without it the whole build would go for nothing.
             [ -n "$RELEASES_TOKEN" ] || { echo "::error::The secret RELEASES_TOKEN is missing"; exit 1; }
           fi
@@ -210,7 +228,12 @@ jobs:
           # NTgCalls and its WebRTC are only in their own room, never in the app's dex.
           unzip -l erevosgram-android.apk assets/tgcalls.jar | grep -q tgcalls.jar \
             || { echo "::error::assets/tgcalls.jar is missing"; exit 1; }
-          apksigner="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          # Its Android app: app.erevos.plus, or app.erevos for the bridge (app/app.config.js).
+          if [ "$EREVOS_BRIDGE" = 1 ]; then want=app.erevos; else want=app.erevos.plus; fi
+          package=$("$tools/aapt2" dump packagename erevosgram-android.apk)
+          [ "$package" = "$want" ] || { echo "::error::The APK is $package, not $want"; exit 1; }
+          apksigner="$tools/apksigner"
           "$apksigner" verify --print-certs erevosgram-android.apk | tee signature
           grep -i 'certificate SHA-256 digest' signature | tr -d ':' | tr 'A-F' 'a-f' | grep -q "$(cat release-fingerprint)" \
             || { echo "::error::The APK is not signed with the release key"; exit 1; }
@@ -274,9 +297,10 @@ jobs:
   # An Erevos+ release (publish on): the APK as a GitHub release, v<version>, here and in the public
   # download repository, titled "Erevos+ …" and never the latest, so that Erevos's own releases
   # (release.yml) stay what an Erevos that did not choose Erevos+ takes. Its channel's release there
-  # (channel-plus, or channel-plus-beta for a beta: app/lib/update-channel.ts) gets its version.json,
-  # which Updates reads. It installs once the release computer signed it:
-  # deploy/web/publish-android.sh <version> <user@server>.
+  # (channel-erevos-plus, or channel-erevos-plus-beta for a beta; channel-plus for the bridge:
+  # app/lib/update-channel.ts wireOf) gets its version.json, which Updates reads. It installs once
+  # the release computer signed it: deploy/web/publish-android.sh <version> <user@server>. The
+  # bridge carries no web app: Erevos+'s own release does.
   publish:
     needs: [apk, web]
     if: ${{ inputs.publish }}
@@ -287,6 +311,7 @@ jobs:
       EREVOS_VERSION: ${{ inputs.version }}
       EREVOS_BUILD: ${{ inputs.build }}
       RELEASES_REPO: azzinder/erevos-releases
+      EREVOS_BRIDGE: ${{ inputs.bridge && '1' || '' }}
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
@@ -298,48 +323,71 @@ jobs:
         run: |
           mkdir files
           mv erevosgram-android.apk files/erevos-plus-android.apk
-          mv erevos-web.tar.gz files/erevos-web.tar.gz
-          (cd files && sha256sum erevos-plus-android.apk erevos-web.tar.gz > SHA256SUMS && cat SHA256SUMS)
-          if [[ "$EREVOS_VERSION" =~ -(alpha|beta)\. ]]; then CHANNEL=plus-beta; PRE=--prerelease; else CHANNEL=plus; PRE=; fi
+          if [ "$EREVOS_BRIDGE" = 1 ]; then
+            # The bridge: app.erevos, under plus, where the Erevos+ 7.x apps look; no web app.
+            CHANNEL=plus; PRE=; PACKAGE=app.erevos
+            (cd files && sha256sum erevos-plus-android.apk > SHA256SUMS && cat SHA256SUMS)
+          else
+            mv erevos-web.tar.gz files/erevos-web.tar.gz
+            (cd files && sha256sum erevos-plus-android.apk erevos-web.tar.gz > SHA256SUMS && cat SHA256SUMS)
+            if [[ "$EREVOS_VERSION" =~ -(alpha|beta)\. ]]; then CHANNEL=erevos-plus-beta; PRE=--prerelease; else CHANNEL=erevos-plus; PRE=; fi
+            PACKAGE=app.erevos.plus
+          fi
           { echo "CHANNEL=$CHANNEL"; echo "PRE=$PRE"; } >> "$GITHUB_ENV"
           APK=$(jq -n --arg url "https://github.com/$RELEASES_REPO/releases/download/v$EREVOS_VERSION/erevos-plus-android.apk" \
             --argjson size "$(stat -c %s files/erevos-plus-android.apk)" --arg sha256 "$(sha256sum files/erevos-plus-android.apk | cut -d' ' -f1)" \
             '{url: $url, size: $size, sha256: $sha256}')
           jq -n --arg name "$EREVOS_VERSION" --argjson build "$EREVOS_BUILD" --arg date "$(TZ=Europe/Athens date +%F)" \
-            --arg commit "${GITHUB_SHA::7}" --arg channel "$CHANNEL" --argjson apk "$APK" \
-            '{name: $name, build: $build, date: $date, commit: $commit, channel: $channel, apk: $apk}' > files/version.json
+            --arg commit "${GITHUB_SHA::7}" --arg channel "$CHANNEL" --arg package "$PACKAGE" --argjson apk "$APK" \
+            '{name: $name, build: $build, date: $date, commit: $commit, channel: $channel, package: $package, apk: $apk}' > files/version.json
           cat files/version.json
+          if [ "$EREVOS_BRIDGE" = 1 ]; then
+          cat > notes.md <<NOTES
+          **Erevos+ $EREVOS_VERSION, the bridge**, $(TZ=Europe/Athens date +%-d/%-m/%Y), from commit ${GITHUB_SHA::7}.
+
+          - Only for phones with Erevos+ 7.x: Updates → Check for updates → Install takes it as an update, keeping everything. It then moves everything to Erevos+, now an app of its own (app.erevos.plus). Anyone else installs Erevos+ from its own release.
+
+          SHA256SUMS lists the file's SHA-256: \`sha256sum -c SHA256SUMS\`.
+          NOTES
+          else
           cat > notes.md <<NOTES
           **Erevos+ $EREVOS_VERSION**, $(TZ=Europe/Athens date +%-d/%-m/%Y), from commit ${GITHUB_SHA::7}$( [ -n "$PRE" ] && echo ", a beta: for trying, it may have problems").
 
-          - **Android** 8.0 or newer (64-bit): in Erevos or Erevos+, Updates → Next update: Erevos+ → Check for updates → Install. Or open this page on the phone and tap erevos-plus-android.apk. It installs over Erevos and keeps everything.
+          - **Android** 8.0 or newer (64-bit): an app of its own (app.erevos.plus), beside Erevos. In Erevos, Updates → Erevos+ moves everything into it. Or open this page on the phone and tap erevos-plus-android.apk.
 
           - **Web app** (any browser, iPhone too): https://erevosplus-web.lphl.nekten.eu, once signed on the release computer. erevos-web.tar.gz is that web app, not signed yet.
 
           Erevos+ is Erevos with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr. SHA256SUMS lists the file's SHA-256: \`sha256sum -c SHA256SUMS\`.
           NOTES
+          fi
           cat notes.md
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create "v$EREVOS_VERSION" files/* --target "$GITHUB_SHA" --title "Erevos+ $EREVOS_VERSION" --notes-file notes.md --latest=false $PRE
-          # The five newest Erevos+ releases stay; Erevos's own (release.yml) are not touched.
-          gh release list --limit 100 --exclude-drafts --json tagName,name --jq '[.[] | select(.name | startswith("Erevos+"))][5:][].tagName' |
+          gh release create "v$EREVOS_VERSION" files/* --target "$GITHUB_SHA" --title "Erevos+ $EREVOS_VERSION$([ "$EREVOS_BRIDGE" = 1 ] && echo " (bridge)")" --notes-file notes.md --latest=false $PRE
+          # The five newest Erevos+ releases stay; Erevos's own (release.yml) are not touched, nor a
+          # bridge, which the Erevos+ 7.x apps may take for as long as they are about.
+          gh release list --limit 100 --exclude-drafts --json tagName,name --jq '[.[] | select(.name | startswith("Erevos+")) | select(.name | endswith("(bridge)") | not)][5:][].tagName' |
             xargs -r -n1 gh release delete --cleanup-tag --yes
       - name: Publish to the public download repository
         env:
           GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
         run: |
           [ -n "$GH_TOKEN" ] || { echo "::error::The secret RELEASES_TOKEN is missing"; exit 1; }
-          gh release create "v$EREVOS_VERSION" files/* --repo "$RELEASES_REPO" --title "Erevos+ $EREVOS_VERSION" --notes-file notes.md --latest=false $PRE
+          gh release create "v$EREVOS_VERSION" files/* --repo "$RELEASES_REPO" --title "Erevos+ $EREVOS_VERSION$([ "$EREVOS_BRIDGE" = 1 ] && echo " (bridge)")" --notes-file notes.md --latest=false $PRE
           if ! gh release view "channel-$CHANNEL" --repo "$RELEASES_REPO" > /dev/null 2>&1; then
-            gh release create "channel-$CHANNEL" --repo "$RELEASES_REPO" --title "$([ "$CHANNEL" = plus ] && echo "Erevos+" || echo "Erevos+ betas")" \
-              --prerelease --latest=false --notes "The newest $([ "$CHANNEL" = plus ] && echo "Erevos+" || echo "Erevos+ beta"), for Updates. Its files are in the release this version.json names."
+            case $CHANNEL in
+            plus) title="Erevos+ 7.x" what="Erevos+ bridge, for the Erevos+ 7.x apps" ;;
+            erevos-plus) title="Erevos+" what="Erevos+" ;;
+            *) title="Erevos+ betas" what="Erevos+ beta" ;;
+            esac
+            gh release create "channel-$CHANNEL" --repo "$RELEASES_REPO" --title "$title" \
+              --prerelease --latest=false --notes "The newest $what, for Updates. Its files are in the release this version.json names."
           fi
           gh release upload "channel-$CHANNEL" files/version.json --repo "$RELEASES_REPO" --clobber
-          # The five newest Erevos+ releases stay there too; its channels' releases and Erevos's own are not touched.
+          # The five newest Erevos+ releases stay there too; its channels' releases, a bridge and Erevos's own are not touched.
           gh release list --repo "$RELEASES_REPO" --limit 100 --exclude-drafts --json tagName,name \
-            --jq '[.[] | select(.name | startswith("Erevos+")) | select(.tagName | startswith("channel-") | not)][5:][].tagName' |
+            --jq '[.[] | select(.name | startswith("Erevos+")) | select(.tagName | startswith("channel-") | not) | select(.name | endswith("(bridge)") | not)][5:][].tagName' |
             xargs -r -n1 gh release delete --repo "$RELEASES_REPO" --cleanup-tag --yes

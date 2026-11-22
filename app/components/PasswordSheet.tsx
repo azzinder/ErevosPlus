@@ -36,12 +36,17 @@ export function PasswordSheet({ visible, title, repeat, least = MIN_PASSWORD, hi
   const [second, setSecond] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // A short one is taken only once asked for again, after the word of care (his choice: 4 at least,
+  // with a warning): the first press says so, the second, unchanged, takes it.
+  const [weakSeen, setWeakSeen] = useState<string | null>(null);
   const colors = useColors();
+  const weak = repeat && !!warnWeak && isWeakSecret(first);
 
   function clear() {
     setFirst('');
     setSecond('');
     setError(null);
+    setWeakSeen(null);
   }
 
   function close() {
@@ -53,6 +58,7 @@ export function PasswordSheet({ visible, title, repeat, least = MIN_PASSWORD, hi
     if (busy) return;
     if (repeat && [...first].length < least) return setError(t('Use at least {n} characters.', { n: least }));
     if (repeat && first !== second) return setError(t('The passwords do not match.'));
+    if (weak && weakSeen !== first) return setWeakSeen(first);
     setBusy(true);
     setError(null);
     try {
@@ -92,8 +98,8 @@ export function PasswordSheet({ visible, title, repeat, least = MIN_PASSWORD, hi
           accessibilityLabel={repeat ? t('New password') : t('Password')}
         />
       </Field>
-      {repeat && warnWeak && isWeakSecret(first) ? (
-        <Text variant="caption" tone="muted">
+      {weak ? (
+        <Text variant="caption" tone={weakSeen === first ? undefined : 'muted'} color={weakSeen === first ? colors.danger : undefined}>
           {t(WEAK_SECRET)}
         </Text>
       ) : null}
@@ -116,7 +122,7 @@ export function PasswordSheet({ visible, title, repeat, least = MIN_PASSWORD, hi
         </Text>
       ) : null}
       <Row wrap>
-        <Button title={busy ? t('One moment…') : submitLabel} onPress={save} disabled={!ready} compact />
+        <Button title={busy ? t('One moment…') : weak && weakSeen === first ? t('Use it anyway') : submitLabel} onPress={save} disabled={!ready} compact />
         <Button title={t('Cancel')} kind="secondary" onPress={close} disabled={busy} compact />
       </Row>
     </Sheet>

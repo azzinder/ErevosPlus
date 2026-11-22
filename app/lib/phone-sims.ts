@@ -6,7 +6,7 @@
 // sealed in the space (lock/phone-data.ts), so the next call to it goes on the same SIM. With one
 // SIM there is nothing to choose.
 
-import { loadPhoneData, MAX_SIMS, savePhoneData, type PhoneData } from '../lock/phone-data';
+import { loadPhoneData, MAX_SIMS, savePhoneData, type PhoneData, type SpeedDial } from '../lock/phone-data';
 import type { PhoneAccount } from '../modules/erevos-phone';
 import { plainNumber, sameNumber } from './sms-invite';
 
@@ -36,6 +36,25 @@ export class PhoneSims {
     if (!plain || this.accountFor(plain) === account) return;
     const others = this.data.sims.filter((s) => !sameNumber(s.number, plain));
     const data = { ...this.data, sims: [...others, ...(account ? [{ number: plain, account }] : [])].slice(-MAX_SIMS) };
+    await savePhoneData('space', this.space, this.key, data);
+    this.data = data;
+  }
+
+  /** The number on speed dial for `key` (2 to 9), if one is. */
+  speed(key: string): SpeedDial | undefined {
+    return this.data.speed.find((s) => s.key === key);
+  }
+
+  /** Every number on speed dial, by key. */
+  speeds(): SpeedDial[] {
+    return [...this.data.speed].sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  /** Puts `number` on speed dial for `key`, or takes the key's number off with ''. */
+  async setSpeed(key: string, number: string, name: string): Promise<void> {
+    const plain = plainNumber(number);
+    const others = this.data.speed.filter((s) => s.key !== key);
+    const data = { ...this.data, speed: plain ? [...others, { key, number: plain, name: name.slice(0, 200) }] : others };
     await savePhoneData('space', this.space, this.key, data);
     this.data = data;
   }

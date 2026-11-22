@@ -15,7 +15,7 @@ import { contactLink, parseContact } from '../lib/contact-code';
 import { accountBundle, accountIdentity, accountSign, bundleVerify, canPq, canSign, newAccount, pqOn, setCore, type Core } from '../lib/core';
 import { fromBase64, randomBytes, setHardCost, toHex, utf8Encode } from '../lib/crypto';
 import { qrRows } from '../lib/qr';
-import { BlockedContactError, E2E, NoKeyError, ONLINE, OPEN_EVERY, OPEN_RECENT, ONLINE_AFTER_WRITE, OwnCodeError, PREKEYS_EVERY, toBase64Url, type Received } from '../lib/e2e';
+import { BlockedContactError, E2E, NoKeyError, ONLINE, OPEN_EVERY, OPEN_RECENT, ONLINE_AFTER_WRITE, OwnCodeError, PREKEYS_EVERY, staleFirst, toBase64Url, type Received } from '../lib/e2e';
 import { onShownEnded, placeSeenKey, placeShown, shownAt, spaceSeenKey, spaceShown } from '../lib/last-seen';
 import { giveLinkedName } from '../lib/linked-name';
 import { tookOf } from '../lib/queue-move';
@@ -620,6 +620,95 @@ t('a chat put back from a backup starts a new conversation with each contact, wh
   store.delete('erevos.restored');
 });
 
+test('a first packet is old unless it says a later start than the newest taken, whatever the clock', () => {
+  const at = 1_700_000_000_000;
+  // The same time, an earlier one, or none (an Erevos before `fa`, or one stripped of it): old.
+  assert.equal(staleFirst({ fa: at }, { firstAt: at }), true);
+  assert.equal(staleFirst({ fa: at - 1 }, { firstAt: at }), true);
+  assert.equal(staleFirst({}, { firstAt: at }), true);
+  // A sender's clock gone back years: old too, until they write in it (the check below).
+  assert.equal(staleFirst({ fa: 1000 }, { firstAt: at }), true);
+  // A later one is new.
+  assert.equal(staleFirst({ fa: at + 1 }, { firstAt: at }), false);
+  // From a contact that never said a time: any that says one is new; one that says none is old
+  // only when it names a queue made before the one kept (a late copy).
+  assert.equal(staleFirst({ fa: 1 }, {}), false);
+  assert.equal(staleFirst({}, {}), false);
+  assert.equal(staleFirst({ qa: 5 }, { qa: 9 }), true);
+  assert.equal(staleFirst({ qa: 9 }, { qa: 9 }), false);
+});
+
+t('after a restore, an old first packet sent again never takes the place of the new conversation', async () => {
+  const key = randomBytes(32);
+  const alice = await chat('space', 0, key);
+  const bob = await chat('space', 1);
+  const { identity: bobId } = await alice.e2e.addContact(bob.code, alice.from);
+  const oldest = alice.e2e.pending()[0].first;
+  const aliceId = message(await bob.e2e.receive(oldest)).identity;
+  await alice.e2e.firstSent(bobId);
+  await bob.e2e.acceptRequest(aliceId);
+  await alice.e2e.receive((await bob.e2e.seal(aliceId, '', bob.from, { keys: true })).packet);
+  await bob.e2e.keysGiven(aliceId);
+  const [renewed] = alice.e2e.pending();
+  await alice.e2e.firstSent(bobId);
+  await bob.e2e.receive(renewed.first);
+  const backup = await loadE2EData('space', 0, key);
+  await talkOn(alice.e2e, alice.from, bobId, bob.e2e, bob.from, aliceId);
+
+  // Alice's phone is put back; its new conversation reaches Bob, and both talk in it.
+  await saveE2EData('space', 0, key, backup);
+  await markRestore();
+  const restored = await E2E.open('space', 0, key);
+  const sent = await restored.seal(bobId, 'after the restore', alice.from);
+  message(await bob.e2e.receive(sent.first!));
+  await restored.firstSent(bobId);
+  assert.equal(message(await bob.e2e.receive(sent.packet)).text, 'after the restore');
+  assert.equal(message(await restored.receive((await bob.e2e.seal(aliceId, 'welcome back', bob.from)).packet)).text, 'welcome back');
+
+  // Someone who kept every packet sends the older first ones again, once Bob's lists have forgotten them.
+  const kept = await loadE2EData('space', 1, bob.key);
+  const live = kept.contacts.find((c) => c.identity === aliceId)!;
+  await saveE2EData('space', 1, bob.key, { ...kept, seen: [], contacts: kept.contacts.map((c) => ({ ...c, seen: [] })) });
+  const later = await E2E.open('space', 1, bob.key);
+  for (const old of [oldest, renewed.first, sent.first!]) {
+    const got = await later.receive(old);
+    if (got.kind === 'message') assert.deepEqual([got.text, got.added], ['', false]);
+    const now = (await loadE2EData('space', 1, bob.key)).contacts.find((c) => c.identity === aliceId)!;
+    // Bob still writes to the same place, in the conversation Alice's phone has now.
+    assert.deepEqual([now.sender, now.relay, now.relayKey, now.firstAt], [live.sender, live.relay, live.relayKey, live.firstAt]);
+    assert.equal(message(await restored.receive((await later.seal(aliceId, 'still here', bob.from)).packet)).text, 'still here');
+  }
+  store.delete('erevos.restored');
+});
+
+t('a conversation a contact really starts with its clock moved back takes over once they write in it', async () => {
+  const key = randomBytes(32);
+  const { alice, bob, aliceId, bobId } = await withPrekeys(key);
+  const backup = await loadE2EData('space', 0, key);
+  await talkOn(alice.e2e, alice.from, bobId, bob.e2e, bob.from, aliceId);
+  // Alice's clock was a year ahead when her last conversation started; it is right now.
+  const kept = await loadE2EData('space', 1, bob.key);
+  const ahead = Date.now() + 365 * 24 * 3600 * 1000;
+  await saveE2EData('space', 1, bob.key, { ...kept, contacts: kept.contacts.map((c) => (c.identity === aliceId ? { ...c, firstAt: ahead } : c)) });
+  const bobAgain = await E2E.open('space', 1, bob.key);
+  const before = (await loadE2EData('space', 1, bob.key)).contacts.find((c) => c.identity === aliceId)!;
+
+  await saveE2EData('space', 0, key, backup);
+  await markRestore();
+  const restored = await E2E.open('space', 0, key);
+  const sent = await restored.seal(bobId, 'after the restore', alice.from);
+  // Its first packet says an earlier time: taken behind, Bob does not send in it yet ...
+  message(await bobAgain.receive(sent.first!));
+  await restored.firstSent(bobId);
+  const behind = (await loadE2EData('space', 1, bob.key)).contacts.find((c) => c.identity === aliceId)!;
+  assert.equal(behind.conversations[0], before.conversations[0]);
+  assert.equal(behind.firstAt, ahead);
+  // ... until Alice writes in it: then it is the one, and they talk.
+  assert.equal(message(await bobAgain.receive(sent.packet)).text, 'after the restore');
+  assert.equal(message(await restored.receive((await bobAgain.seal(aliceId, 'welcome back', bob.from)).packet)).text, 'welcome back');
+  store.delete('erevos.restored');
+});
+
 t('a backup put back long after its contact gave prekeys starts the new conversation without waiting on it', async () => {
   const key = randomBytes(32);
   const { alice, bob, aliceId, bobId } = await withPrekeys(key);
@@ -695,7 +784,8 @@ t('a chat keeps its own look, sealed, until given the space\'s again', async () 
   const again = await E2E.open('space', 0, key);
   assert.equal(again.contacts()[0].look?.style, 'matrix');
   assert.equal(again.contacts()[0].look?.wallpaper, 'stars');
-  assert.ok(!files.get(FILE)!.includes('matrix'));
+  // As the contact holds it, in quotes: a short word alone may be in the sealed text by chance.
+  assert.ok(!files.get(FILE)!.includes(JSON.stringify('matrix')));
   await again.setLook(identity, null);
   assert.equal((await E2E.open('space', 0, key)).contacts()[0].look, null);
   await assert.rejects(again.setLook('00'.repeat(32), null));

@@ -103,7 +103,7 @@ pub enum Pass {
     Lent(Nonce),
 }
 
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 struct Counts {
     /// Places each ticket gave, with when it expires.
     borrowed: HashMap<Nonce, (u64, u32)>,
@@ -387,17 +387,23 @@ impl Lend {
         lock(&self.counts, COUNTS_LOCK)
     }
 
-    /// Writes the counts down, if they are kept. A failed write is said and
-    /// left: the counts in memory still hold until the relay stops.
-    fn save(&self, counts: &Counts) {
+    /// Writes the counts down, if they are kept: whether they are now on disk
+    /// (true when none are kept). A failed write is said; whoever asked then
+    /// gives nothing, as a place or a quota given while its count cannot be
+    /// kept would be given again after the relay starts again.
+    fn save(&self, counts: &Counts) -> bool {
         let Some(path) = &self.state else {
-            return;
+            return true;
         };
-        if let Err(e) = journal::write_whole(path, &counts.encode()) {
-            elog!(
-                "erevos-relay: cannot write the counts of lent places to {}: {e}",
-                path.display()
-            );
+        match journal::write_whole(path, &counts.encode()) {
+            Ok(()) => true,
+            Err(e) => {
+                elog!(
+                    "erevos-relay: cannot write the counts of lent places to {}: {e}",
+                    path.display()
+                );
+                false
+            }
         }
     }
 
@@ -472,12 +478,16 @@ impl Lend {
             if !counts.borrowed.contains_key(&nonce) && counts.borrowed.len() >= MAX_COUNTED {
                 return None;
             }
+            let before = counts.clone();
             let (_, given) = counts.borrowed.entry(nonce).or_insert((expires, 0));
             if *given >= MAX_BORROWS {
                 return None;
             }
             *given += 1;
-            self.save(&counts);
+            if !self.save(&counts) {
+                *counts = before;
+                return None;
+            }
         }
         Some(self.lent_token(&nonce))
     }
@@ -496,6 +506,7 @@ impl Lend {
 
     fn count(&self, nonce: Nonce, now: u64, queues: u32, bytes: u64) -> bool {
         let mut counts = self.counts();
+        let before = counts.clone();
         let today = now / DAY;
         let new_day = counts.day != today;
         if new_day {
@@ -503,8 +514,11 @@ impl Lend {
             counts.made.clear();
         }
         let allowed = Counts::add(&mut counts.made, nonce, queues, bytes);
-        if new_day || (allowed && (queues > 0 || bytes > 0)) {
-            self.save(&counts);
+        let used = allowed && (queues > 0 || bytes > 0);
+        if (new_day || used) && !self.save(&counts) && used {
+            // Not kept: nothing given, and the counts as they were.
+            *counts = before;
+            return false;
         }
         allowed
     }
@@ -688,6 +702,34 @@ mod tests {
         let n = WRITES.fetch_add(1, Ordering::Relaxed) as u64;
         file.set_modified(SystemTime::UNIX_EPOCH + Duration::from_secs(1_000_000 + n))
             .unwrap();
+    }
+
+    #[test]
+    fn nothing_is_given_while_the_counts_cannot_be_kept() {
+        let dir = TempPath::new("dir");
+        fs::create_dir_all(&dir.0).unwrap();
+        let state = dir.0.join("counts");
+        let list = TempPath::new("revoked");
+        let key = RelayKey::generate();
+        let lend = Lend::open(&key, &state, Revoked::new(list.0.clone())).unwrap();
+        let (nonce, expires) = ticket_pass(&lend, &lend.ticket(NOW));
+        let token = lend.borrow(nonce, expires, NOW).unwrap();
+        let Some(Pass::Lent(own)) = lend.check(&token, NOW) else {
+            panic!("not a lent token");
+        };
+        assert!(lend.may_create(own, NOW));
+        let kept = lend.counts().clone();
+        // The disk goes: no place, no quota, and the counts stay as they were kept.
+        fs::remove_dir_all(&dir.0).unwrap();
+        assert_eq!(lend.borrow(nonce, expires, NOW), None);
+        assert!(!lend.may_create(own, NOW));
+        assert!(!lend.may_put(own, NOW, 10));
+        assert_eq!(*lend.counts(), kept);
+        // Back: given again.
+        fs::create_dir_all(&dir.0).unwrap();
+        assert!(lend.may_create(own, NOW));
+        assert!(lend.borrow(nonce, expires, NOW).is_some());
+        let _ = fs::remove_dir_all(&dir.0);
     }
 
     #[test]

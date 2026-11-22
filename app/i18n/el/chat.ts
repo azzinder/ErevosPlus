@@ -218,6 +218,7 @@ export const chat: Record<string, string> = {
   'Place {n}': 'Θέση {n}',
   'New hidden chats start in place {n} with this PIN. If that place held hidden chats, they can no longer be opened.': 'Νέες κρυφές συνομιλίες ξεκινούν στη θέση {n} με αυτό το PIN. Αν εκείνη η θέση είχε κρυφές συνομιλίες, δεν ανοίγουν πια.',
   'Start and move': 'Έναρξη και μεταφορά',
+  'Use it anyway': 'Χρήση παρ’ όλα αυτά',
   'Move': 'Μεταφορά',
   'New hidden chats': 'Νέες κρυφές συνομιλίες',
   'Their phone is told at once where to write from now on. A message they send in that moment may not come.': 'Το τηλέφωνό τους μαθαίνει αμέσως πού να γράφει από εδώ και πέρα. Ένα μήνυμα που θα στείλουν εκείνη τη στιγμή μπορεί να μη φτάσει.',

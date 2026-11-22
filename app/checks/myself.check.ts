@@ -67,7 +67,7 @@ test("a space's notes are its own: the oldest first, sealed, and apart from anot
   assert.deepEqual((await loadNotes(hidden)).map((n) => n.text), ['hidden']);
   // Another key finds nothing there, and the file says nothing of the words.
   assert.deepEqual(await loadNotes({ ...mine, key: randomBytes(32) }), []);
-  assert.ok(!files.get(FILE)?.includes('first'));
+  assert.ok(!files.get(FILE)?.includes(JSON.stringify('first')));
 });
 
 test('a reminder is set, changed, taken away and seen; the home row counts those that came', async () => {

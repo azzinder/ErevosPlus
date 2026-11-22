@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { AppState, Linking, PermissionsAndroid, Platform, View } from 'react-native';
 
 import { BlockedNumbers } from '../components/blocked-numbers';
+import { SpeedDialPick } from '../components/speed-dial';
 import { Button, Card, Input, Page, Row, Sheet, Text } from '../components/ui';
 import { askFullScreen, backgroundState } from '../lib/background';
 import { mark, plural, t } from '../lib/i18n';
@@ -32,6 +33,16 @@ import {
 import {
   blockingRules,
   onPhoneEvent,
+  openCallSettings,
+  clearSpamList,
+  clearSpamReports,
+  setSpamSwitches,
+  spamReady,
+  spamState,
+  type SpamState,
+  phoneAccounts,
+  placeCall,
+  type PhoneAccount,
   phoneGroups,
   phoneReady,
   phoneStatus,
@@ -45,6 +56,12 @@ import {
 } from '../modules/erevos-phone';
 import { smsToolsReady } from '../modules/erevos-sms';
 import { useLock } from '../lock/context';
+import { accountLabel, PhoneSims } from '../lib/phone-sims';
+import { currentSpace } from '../lock/keys';
+import { SPEED_KEYS } from '../lock/phone-data';
+import { confirm } from '../lib/alert';
+import { netThroughTor } from '../lib/net-http';
+import { downloadSpamList, setSpamWeekly, spamAddress, spamWithoutTor } from '../lib/spam-list';
 import { space } from '../theme/colors';
 import { useTheme } from '../theme/context';
 
@@ -66,6 +83,26 @@ const PHONE_PERMISSIONS = [
 const NOT_CHOSEN = mark(
   "Choose Erevos in Android's Default apps → Phone app. If Android says it is a restricted setting, open Erevos's App info, tap ⋮ at the top right → Allow restricted settings, and choose Erevos again.",
 );
+// The codes every GSM network takes for what it keeps of a SIM's calls (3GPP TS 22.030): dialled
+// like a number, and the network answers in Android's own message.
+const CALL_CODES: { what: string; codes: { label: string; code: string }[] }[] = [
+  {
+    what: mark('Call forwarding'),
+    codes: [
+      { label: mark('Check'), code: '*#21#' },
+      { label: mark('Turn it all off'), code: '##002#' },
+    ],
+  },
+  {
+    what: mark('Call waiting'),
+    codes: [
+      { label: mark('Check'), code: '*#43#' },
+      { label: mark('On'), code: '*43#' },
+      { label: mark('Off'), code: '#43#' },
+    ],
+  },
+  { what: mark('Showing your number'), codes: [{ label: mark('Check'), code: '*#31#' }] },
+];
 const RESTRICTED = mark(
   "Android did not allow it all. In Erevos's App info, under Permissions, call logs may say Restricted setting: then go back, tap ⋮ at the top right → Allow restricted settings, and allow Phone, Call logs and Contacts under Permissions.",
 );
@@ -191,8 +228,11 @@ export default function PhoneSettings() {
         {note ? <Text tone="muted">{note}</Text> : null}
       </Card>
       {status?.isDefault ? <OpenLocked /> : null}
+      {status?.isDefault && status.phone ? <CallSettings /> : null}
+      {status?.phone ? <SpeedDials /> : null}
       {status?.isDefault ? <QuickReplies /> : null}
       {status?.isDefault ? <Blocking screens={status.screens} /> : null}
+      {status?.isDefault && spamReady() ? <SpamList screens={status.screens} /> : null}
     </Page>
   );
 }
@@ -385,6 +425,275 @@ function Blocking({ screens }: { screens: boolean }) {
         ))}
       </Sheet>
     </>
+  );
+}
+
+// What the phone company keeps of each SIM's calls: forwarding, call waiting, showing your number and
+// the voicemail number. Android's own screens set them; where a phone has none, the network's codes
+// ask it, and it answers in Android's own message.
+function CallSettings() {
+  const [accounts, setAccounts] = useState<PhoneAccount[]>([]);
+  const [chosen, setChosen] = useState('');
+  const [note, setNote] = useState('');
+
+  useEffect(() => {
+    phoneAccounts().then(
+      (found) => {
+        setAccounts(found);
+        if (found.length >= 2) setChosen(found[0].id);
+      },
+      () => setAccounts([]),
+    );
+  }, []);
+
+  function open(kind: 'calls' | 'voicemail') {
+    setNote(openCallSettings(kind, chosen) ? '' : t('This phone has no such screen of its own. The codes below ask your phone company instead.'));
+  }
+
+  async function dial(code: string) {
+    setNote('');
+    try {
+      await placeCall(code, chosen);
+    } catch (error) {
+      setNote(t('Not called. {error}', { error: error instanceof Error ? error.message : String(error) }));
+    }
+  }
+
+  return (
+    <Card>
+      <Text variant="bodyStrong">{t('Call settings')}</Text>
+      <Text tone="muted">
+        {t('Call forwarding, call waiting, showing your number and the voicemail number are kept by your phone company, for each SIM. Android sets them in its own screens.')}
+      </Text>
+      {accounts.length >= 2 ? (
+        <Row wrap style={{ gap: space.sm }}>
+          {accounts.map((a) => (
+            <Button key={a.id} title={accountLabel(a)} kind={chosen === a.id ? 'primary' : 'secondary'} compact onPress={() => setChosen(a.id)} />
+          ))}
+        </Row>
+      ) : null}
+      <Button title={t('Forwarding, waiting and your number')} kind="secondary" onPress={() => open('calls')} />
+      <Button title={t('Voicemail number')} kind="secondary" onPress={() => open('voicemail')} />
+      <Text variant="bodyStrong">{t('Ask your phone company')}</Text>
+      <Text tone="muted">{t('Each button calls a code, as every network takes them; the answer shows in a message of Android.')}</Text>
+      {CALL_CODES.map((group) => (
+        <View key={group.what} style={{ gap: space.xs }}>
+          <Text>{t(group.what)}</Text>
+          <Row wrap style={{ gap: space.sm }}>
+            {group.codes.map((each) => (
+              <Button key={each.code} title={`${t(each.label)} · ${each.code}`} kind="secondary" compact onPress={() => void dial(each.code)} />
+            ))}
+          </Row>
+        </View>
+      ))}
+      <Text variant="caption" tone="faint">
+        {t('To hide your number for one call only, type #31# before the number on the keypad.')}
+      </Text>
+      {note ? <Text tone="muted">{note}</Text> : null}
+    </Card>
+  );
+}
+
+// Speed dial: the number each of the keys 2 to 9 calls, held down on an empty keypad; sealed in the
+// space (lib/phone-sims.ts).
+function SpeedDials() {
+  const [sims, setSims] = useState<PhoneSims | null>(null);
+  const [choosing, setChoosing] = useState<string | null>(null);
+  const [note, setNote] = useState('');
+  // Bumped when a key changes, to show it.
+  const [, setShown] = useState(0);
+
+  useEffect(() => {
+    try {
+      const { space: open, key } = currentSpace();
+      PhoneSims.open(open, key).then(setSims, () => setSims(null));
+    } catch {
+      setSims(null);
+    }
+  }, []);
+
+  if (!sims) return null;
+
+  function pick(number: string, name: string) {
+    const key = choosing;
+    setChoosing(null);
+    if (!key || !sims) return;
+    sims.setSpeed(key, number, name).then(
+      () => {
+        setNote('');
+        setShown((n) => n + 1);
+      },
+      (error) => setNote(error instanceof Error ? error.message : String(error)),
+    );
+  }
+
+  return (
+    <Card>
+      <Text variant="bodyStrong">{t('Speed dial')}</Text>
+      <Text tone="muted">{t('Hold a key from 2 to 9 on an empty keypad to call its number. 1 calls the voicemail. Kept sealed in this space.')}</Text>
+      <Row wrap style={{ gap: space.sm }}>
+        {SPEED_KEYS.map((key) => {
+          const kept = sims.speed(key);
+          return (
+            <Button
+              key={key}
+              title={`${key} · ${kept ? kept.name || kept.number : t('Set')}`}
+              kind={kept ? 'primary' : 'secondary'}
+              compact
+              onPress={() => setChoosing(key)}
+            />
+          );
+        })}
+      </Row>
+      {note ? <Text tone="muted">{note}</Text> : null}
+      <SpeedDialPick slot={choosing} current={choosing ? sims.speed(choosing) : undefined} onClose={() => setChoosing(null)} onPick={pick} />
+    </Card>
+  );
+}
+
+// The spam list: a list of numbers downloaded whole, from an address the owner chooses, matched on
+// the phone (lib/spam-list.ts), and the numbers they reported in Recents. The call screen warns of
+// a number on it; it can ring silently. Never a number looked up anywhere.
+function SpamList({ screens }: { screens: boolean }) {
+  const [state, setState] = useState<SpamState | null>(spamState());
+  const [address, setAddress] = useState(state?.source ?? '');
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+  const [plainOk, setPlainOk] = useState(true);
+  useEffect(() => {
+    void spamWithoutTor().then(setPlainOk);
+  }, []);
+  if (!state) return null;
+
+  const look = () => {
+    setState(spamState());
+    void spamWithoutTor().then(setPlainOk);
+  };
+
+  function switches(warn: boolean, silence: boolean) {
+    setSpamSwitches(warn, silence);
+    look();
+    if (silence && !screens) {
+      try {
+        requestScreening();
+      } catch (error) {
+        setNote(error instanceof Error ? error.message : String(error));
+      }
+    }
+  }
+
+  async function weekly(on: boolean) {
+    const withoutTor = on && !netThroughTor();
+    if (withoutTor) {
+      const go = await confirm(
+        t('Your internet address can be seen'),
+        t("Without Tor, the list's server sees this phone's internet address (IP address) each week, though no number of yours: the list comes whole, and is matched on the phone."),
+        t('Download each week'),
+      );
+      if (!go) return;
+    }
+    await setSpamWeekly(on, withoutTor);
+    look();
+  }
+
+  async function download() {
+    const from = spamAddress(address);
+    if (!from) {
+      setNote(t('Type the https:// address of a list.'));
+      return;
+    }
+    if (!netThroughTor()) {
+      const go = await confirm(
+        t('Your internet address can be seen'),
+        t("Without Tor, the list's server sees this phone's internet address (IP address), though no number of yours: the list comes whole, and is matched on the phone."),
+        t('Download'),
+      );
+      if (!go) return;
+    }
+    setBusy(true);
+    setNote('');
+    try {
+      const count = await downloadSpamList(from);
+      setNote(plural(count, 'The list holds {n} number.', 'The list holds {n} numbers.'));
+    } catch (error) {
+      setNote(t('The list did not come. {error}', { error: error instanceof Error ? error.message : String(error) }));
+    } finally {
+      setBusy(false);
+      look();
+    }
+  }
+
+  return (
+    <Card>
+      <Text variant="bodyStrong">{t('Spam list')}</Text>
+      <Text tone="muted">
+        {t("A list of numbers known for spam, downloaded whole from an address you choose and matched on the phone, so no number of yours or of who calls is ever looked up anywhere. The call screen of a number on it warns you; the numbers you report in Recents count too. Without a list, the call screen still says where an unknown number is from and whether it is a mobile, from the number alone.")}
+      </Text>
+      <Button
+        title={state.warn ? t('Stop warning of spam') : t('Warn of spam')}
+        kind={state.warn ? 'secondary' : 'primary'}
+        onPress={() => switches(!state.warn, state.silence)}
+      />
+      <Button
+        title={state.silence ? t('Let spam calls ring') : t('Ring spam calls silently')}
+        kind="secondary"
+        onPress={() => switches(state.warn, !state.silence)}
+      />
+      <Text variant="caption" tone="faint">
+        {t('A silent call still shows, and can be answered; a contact of yours is never silenced.')}
+      </Text>
+      <Input value={address} onChangeText={setAddress} placeholder="https://" autoCapitalize="none" autoCorrect={false} keyboardType="url" />
+      <Button title={busy ? t('Downloading…') : t('Download the list')} disabled={busy} onPress={() => void download()} />
+      <Text tone="muted">
+        {state.at > 0
+          ? t('{count} on the list, downloaded {date}.', { count: String(state.count), date: new Date(state.at).toLocaleDateString() })
+          : t('No list downloaded yet.')}
+      </Text>
+      {state.at > 0 ? (
+        <>
+          <Button
+            title={state.auto ? t('Stop downloading it each week') : t('Download it again each week')}
+            kind="secondary"
+            onPress={() => void weekly(!state.auto)}
+          />
+          <Text variant="caption" tone="faint">
+            {t("With Erevos unlocked, the list comes again from the same address when it is a week old, through Tor when the space's Tor way is on.")}
+          </Text>
+          {state.auto && !plainOk && !netThroughTor() ? (
+            <Text variant="caption" tone="faint">
+              {t('Tor is off, so the list does not come again: it was switched on with Tor. Switch it off and on again to let it come without Tor.')}
+            </Text>
+          ) : null}
+        </>
+      ) : null}
+      {state.at > 0 ? (
+        <Button
+          title={t('Remove the list')}
+          kind="secondary"
+          onPress={() => {
+            clearSpamList();
+            look();
+          }}
+        />
+      ) : null}
+      {state.own > 0 ? (
+        <>
+          <Text tone="muted">{plural(state.own, 'You reported {n} number.', 'You reported {n} numbers.')}</Text>
+          <Button
+            title={t('Forget my reports')}
+            kind="secondary"
+            onPress={() => {
+              clearSpamReports();
+              look();
+            }}
+          />
+        </>
+      ) : null}
+      {note ? <Text tone="muted">{note}</Text> : null}
+      <Text variant="caption" tone="faint">
+        {t('The list, its address, these switches and the numbers you reported stay on this phone outside your spaces, not encrypted, so that a call is checked with Erevos locked too.')}
+      </Text>
+    </Card>
   );
 }
 

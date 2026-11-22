@@ -122,6 +122,12 @@ export type SmsData = {
   marks: SpamMark[];
   /** Seconds an SMS waits before it goes, to be taken back: 0, 5 or 10. */
   undo: number;
+  /** SMS go without accents, Greek in capitals, when that keeps them in the GSM alphabet (lib/sms-count.ts). Off unless turned on. */
+  plain: boolean;
+  /** An SMS's notice shows who wrote and what, with Reply and Mark as read, while this space is open (lib/sms-notices.ts). Off unless turned on. */
+  notices: boolean;
+  /** The owner's quick texts for SMS (app/sms.tsx), or null for the app's own until they change them. */
+  quick: string[] | null;
   /** Messages to every Erevos contact with a number go by SMS, encrypted, when nothing else takes them. Off unless turned on. */
   smsWay: boolean;
   /** The contacts (identity, hex) whose messages go so, whatever `smsWay` says. */
@@ -163,6 +169,9 @@ export const EMPTY_SMS: SmsData = {
   home: '',
   marks: [],
   undo: 5,
+  plain: false,
+  notices: false,
+  quick: null,
   smsWay: false,
   smsWayFor: [],
   devices: false,
@@ -184,6 +193,9 @@ const MAX_SIMS = 300;
 /** The SMS that can wait to go later at once, and the longest text of one: as long as a chat's. */
 export const MAX_LATER = MAX;
 export const LATER_TEXT = 4000;
+/** The most quick texts, and the longest one. */
+export const MAX_QUICK = 20;
+export const QUICK_TEXT = 300;
 /** The conversations that can be pinned at once, and those kept archived, in the Trash, with a
  *  draft, and numbers marked; the owner's spam words and sender rules, each this long at most. */
 export const MAX_PINS = 10;
@@ -220,7 +232,7 @@ const list = <T>(v: unknown, ok: (item: Record<string, unknown>) => T | null, ma
 const words = (v: unknown): string[] => (Array.isArray(v) ? v : []).filter((w): w is string => isText(w) && w.trim().length > 0 && w.length <= WORD).slice(-MAX_WORDS);
 const marked = (m: Record<string, unknown>): SmsMark | null => (isAddress(m.address) && isTime(m.at) ? { address: m.address, at: m.at } : null);
 
-function checked(value: unknown): SmsData {
+export function checked(value: unknown): SmsData {
   const v = (value ?? {}) as Partial<Record<keyof SmsData, unknown>>;
   return {
     invites: v.invites !== false,
@@ -271,6 +283,9 @@ function checked(value: unknown): SmsData {
     home: isText(v.home) && /^[1-9][0-9]{0,2}$/.test(v.home) ? v.home : '',
     marks: list(v.marks, (m) => (isNumber(m.number) && typeof m.spam === 'boolean' && isTime(m.at) ? { number: m.number, spam: m.spam, at: m.at } : null), MAX_MARKS),
     undo: UNDO_SECONDS.includes(v.undo as number) ? (v.undo as number) : EMPTY_SMS.undo,
+    plain: v.plain === true,
+    notices: v.notices === true,
+    quick: Array.isArray(v.quick) ? [...new Set(v.quick.filter((q): q is string => isText(q) && q.trim().length > 0 && q.length <= QUICK_TEXT))].slice(0, MAX_QUICK) : null,
     smsWay: v.smsWay === true,
     smsWayFor: [...new Set((Array.isArray(v.smsWayFor) ? v.smsWayFor : []).filter((id): id is string => isText(id) && /^[0-9a-f]{2,128}$/.test(id)))].slice(-MAX_SMS_WAY),
     devices: v.devices === true,

@@ -11,11 +11,17 @@
 // updates (lib/distribution.ts) and may not install packages. The release workflow does not set it.
 // EREVOS_EDITION picks the edition (docs/editions.md): `plus` (the default) is Erevos+, with every
 // module; `lite` is the plain Erevos, with only Erevos's own chats, the Phone, the SMS and the
-// Collection, its core built without the other networks. Same package: one or the other is on a
-// phone, and moving between them keeps everything. Kept in `extra.edition` (lib/edition.ts).
+// Collection, its core built without the other networks. Each is an app of its own: the plain Erevos
+// app.erevos, Erevos+ app.erevos.plus (from 3.1.0; its 7.x were app.erevos), so both can be on a
+// phone, and moving from one to the other hands everything over (lib/edition-move.ts). Kept in
+// `extra.edition` (lib/edition.ts).
 // EREVOS_TELEGRAM=1 puts Telegram into Erevos+ (docs/erevosgram.md): the same package with Telegram
 // (modules/erevos-telegram), marked in `extra.edition` so Check for updates takes its own APK.
 const INSTALL_PACKAGES = 'android.permission.REQUEST_INSTALL_PACKAGES';
+// Each edition's Android package (app/lib/update-channel.ts PACKAGES).
+// EREVOS_BRIDGE=1 builds Erevos+ as app.erevos: the bridge, which the Erevos+ 7.x apps take as an
+// update and which then moves to app.erevos.plus (lib/update-channel.ts wireOf).
+const PACKAGES = { lite: 'app.erevos', plus: process.env.EREVOS_BRIDGE === '1' ? 'app.erevos' : 'app.erevos.plus' };
 
 module.exports = ({ config }) => {
   const build = Number(process.env.EREVOS_BUILD || 0);
@@ -34,6 +40,7 @@ module.exports = ({ config }) => {
     version: process.env.EREVOS_VERSION || config.version,
     android: {
       ...config.android,
+      package: PACKAGES[edition],
       ...(build > 0 ? { versionCode: build } : {}),
       ...(fdroid
         ? {

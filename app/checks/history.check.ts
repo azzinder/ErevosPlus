@@ -43,7 +43,8 @@ t('keeps the messages of a chat between launches, in order, sealed with its key'
       ['contact:aa', 'τι κάνεις;', false],
     ],
   );
-  assert.ok(!files.get(FILE)!.includes('hello'));
+  // As the history holds it, in quotes: a short word alone may be in the sealed text by chance.
+  assert.ok(!files.get(FILE)!.includes(JSON.stringify('hello')));
   assert.deepEqual((await History.open('space', 0, randomBytes(32))).messages(), []);
   assert.deepEqual((await History.open('hidden', 0, key)).messages(), []);
   // Theirs that waits for its time, sent without sound, keeps it.

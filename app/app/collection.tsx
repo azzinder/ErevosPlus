@@ -13,20 +13,24 @@ import { NowPlaying } from '../components/collection-player';
 import { AddToPlaylistSheet, PlaylistScreen } from '../components/collection-playlist';
 import { AddStationSheet, StationsList } from '../components/collection-radio';
 import { AddChannelsSheet, ChannelsList } from '../components/collection-tv';
+import { CollectionEdit } from '../components/collection-edit';
+import { ErevosCamera } from '../components/erevos-camera';
 import { CollectionViewer, addedText } from '../components/collection-viewer';
 import { BackIcon, CameraIcon, CheckIcon, CloseIcon, FileIcon, FolderIcon, MoveIcon, MusicIcon, PhotoIcon, PlusIcon, SearchIcon, SendIcon, TrashIcon, MoreIcon, GearIcon, VideoIcon } from '../components/icons';
 import { Button, Chip, Input, Sheet, Text } from '../components/ui';
 import { fileSize } from '../lib/attachments';
 import { choose, confirm } from '../lib/alert';
-import { CAN_COLLECT, CAN_TAKE_PHOTO, importFromCamera, importFromFiles } from '../lib/collection-import';
+import { CAN_COLLECT, CAN_PICK_GALLERY, CAN_TAKE_PHOTO, importFromFiles } from '../lib/collection-import';
 import { TooLargeToSaveError, memoryUri, mostSavedOut, onCollectionMemoryDropped, releaseMemoryUri } from '../lib/collection-memory';
-import { copyToSend, dropOpened, openWithOtherApp } from '../lib/collection-out';
+import { CAN_EDIT, editPhoto, type Cut, type Turn } from '../lib/collection-edit';
+import { cleanedPhoto, itemPlace } from '../lib/collection-export';
+import { copyToSend, dropOpened, openBytesWithOtherApp, openWithOtherApp } from '../lib/collection-out';
 import { placeShown, usePlayer } from '../lib/collection-play';
 import { useCollectionPlace } from '../lib/collection-place';
 import { enterHiddenScreen } from '../lib/hidden-contacts';
 import { fileLook, folderTiles, folderTilesFor, gridEntries, inFolder, isPhoto, playKind, search, tabOf, type FileLook, type FileTab, type GridEntry } from '../lib/collection-view';
 import { locale, t } from '../lib/i18n';
-import { saveFile } from '../lib/save-file';
+import { saveBytes, saveFile } from '../lib/save-file';
 import { dropShared, handShared, type SharedFile } from '../lib/share-in';
 import { isPicking } from '../lib/picking';
 import { keepPrivate } from '../lib/screen-privacy';
@@ -200,6 +204,10 @@ function OpenCollection() {
   const [query, setQuery] = useState<string | null>(null);
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
   const [adding, setAdding] = useState(false);
+  // Erevos's own camera open, taking straight into the Collection.
+  const [filming, setFilming] = useState(false);
+  // The photo being turned and cut.
+  const [editing, setEditing] = useState<CollectionItem | null>(null);
   const [moving, setMoving] = useState<string[] | null>(null);
   const [naming, setNaming] = useState<Naming>(null);
   const [menu, setMenu] = useState<{ folder?: CollectionFolder; item?: CollectionItem; top?: boolean } | null>(null);
@@ -384,15 +392,26 @@ function OpenCollection() {
     else router.replace('/');
   }
 
+  // What leaves the Collection: a photo without where and when it was taken (unless the place
+  // keeps them, exportWhole), and the warning, said with the question, when what goes as it is
+  // says where it was taken.
+  async function readyToLeave(item: CollectionItem): Promise<{ cleaned: Uint8Array | null; words: string }> {
+    const cleaned = there.exportWhole ? null : await cleanedPhoto(item);
+    if (cleaned) return { cleaned, words: t('Where and when the photo was taken, and the phone, are taken out of this copy.') };
+    return { cleaned: null, words: (await itemPlace(item)) === 'yes' ? t('It says where it was taken, and that goes with it.') : '' };
+  }
+
   async function saveToPhone(item: CollectionItem) {
     if (item.file.size > MOST_SAVED_OUT) {
       setNote(new TooLargeToSaveError().message);
       return;
     }
+    const { cleaned, words } = await readyToLeave(item);
     // What is saved is outside the Collection, in the open.
-    if (!(await choose(DESK ? t('Save to the computer?') : BROWSER ? t('Save to this device?') : t('Save to the phone?'), t('The file leaves the Collection without encryption, and other apps will see it. Continue?'), t('Cancel'), t('Save')))) return;
+    const asked = t('The file leaves the Collection without encryption, and other apps will see it. Continue?');
+    if (!(await choose(DESK ? t('Save to the computer?') : BROWSER ? t('Save to this device?') : t('Save to the phone?'), words ? `${words} ${asked}` : asked, t('Cancel'), t('Save')))) return;
     try {
-      const saved = await saveFile(item.file);
+      const saved = cleaned ? await saveBytes(item.file.name, item.file.mime, cleaned) : await saveFile(item.file);
       if (saved) setNote(t('Saved as {name}. It is outside Erevos now: anyone who has the folder can read it.', { name: saved }));
     } catch (error) {
       setNote(errorText(error));
@@ -400,12 +419,30 @@ function OpenCollection() {
   }
 
   async function openWith(item: CollectionItem) {
-    if (!(await choose(t('Open with another app?'), t('The file goes to another app, outside the Collection and without encryption, and that app may keep a copy of it. Continue?'), t('Cancel'), t('Open')))) return;
+    const { cleaned, words } = await readyToLeave(item);
+    const asked = t('The file goes to another app, outside the Collection and without encryption, and that app may keep a copy of it. Continue?');
+    if (!(await choose(t('Open with another app?'), words ? `${words} ${asked}` : asked, t('Cancel'), t('Open')))) return;
     try {
-      await openWithOtherApp(item);
+      if (cleaned) await openBytesWithOtherApp(item, cleaned);
+      else await openWithOtherApp(item);
     } catch (error) {
       setNote(errorText(error));
     }
+  }
+
+  // A photo turned and cut is kept as a new photo next to it; the viewer shows the new one.
+  async function saveEdited(item: CollectionItem, turn: Turn, cut: Cut) {
+    if (!place) return;
+    try {
+      await editPhoto(place, item, turn, cut);
+      setEditing(null);
+      setViewing(null);
+      setNote(t('Saved as a new photo. The one it came from stays as it was.'));
+    } catch (error) {
+      setEditing(null);
+      setNote(errorText(error));
+    }
+    await reload();
   }
 
   async function deleteOne(item: CollectionItem) {
@@ -761,9 +798,28 @@ function OpenCollection() {
 
       <Sheet visible={adding} onClose={() => setAdding(false)} title={t('Add to the Collection')}>
         {CAN_TAKE_PHOTO ? (
-          <AddRow icon={<CameraIcon color={colors.primary} size={22} />} title={t('Camera')} text={t('The photo goes straight here, never to the gallery.')} onPress={() => void bringIn((p) => importFromCamera(place!, folder, p))} colors={colors} />
+          <AddRow
+            icon={<CameraIcon color={colors.primary} size={22} />}
+            title={t('Camera')}
+            text={t('Photos and videos straight here, with Erevos’s own camera: no other app sees them, and they never go to the gallery.')}
+            onPress={() => {
+              setAdding(false);
+              setNote('');
+              setFilming(true);
+            }}
+            colors={colors}
+          />
         ) : null}
-        <AddRow icon={<FileIcon color={colors.primary} size={22} />} title={DESK ? t('From the computer’s files') : BROWSER ? t('From this device’s files') : t('From the phone’s files')} text={t('Photos and files, encrypted as they come in.')} onPress={() => void bringIn((p) => importFromFiles(place!, folder, p, { deleteOriginal: there.deleteOriginals === true }))} colors={colors} />
+        {CAN_PICK_GALLERY ? (
+          <AddRow
+            icon={<PhotoIcon color={colors.primary} size={22} />}
+            title={t('From the gallery')}
+            text={there.deleteOriginals ? t('Many photos and videos at once, encrypted, then deleted from the gallery.') : t('Many photos and videos at once, encrypted as they come in.')}
+            onPress={() => void bringIn((p) => importFromFiles(place!, folder, p, { deleteOriginal: there.deleteOriginals === true, told: setNote, gallery: true }))}
+            colors={colors}
+          />
+        ) : null}
+        <AddRow icon={<FileIcon color={colors.primary} size={22} />} title={DESK ? t('From the computer’s files') : BROWSER ? t('From this device’s files') : t('From the phone’s files')} text={t('Photos and files, encrypted as they come in.')} onPress={() => void bringIn((p) => importFromFiles(place!, folder, p, { deleteOriginal: there.deleteOriginals === true, told: setNote }))} colors={colors} />
         <AddRow
           icon={<FolderIcon color={colors.primary} size={22} />}
           title={t('New folder')}
@@ -906,8 +962,22 @@ function OpenCollection() {
         onSave={(item) => void saveToPhone(item)}
         onDelete={(item) => void deleteOne(item)}
         onOpenWith={(item) => void openWith(item)}
+        onEdit={CAN_EDIT ? setEditing : undefined}
         playOptions={{ showTitle: there.showTitle === true, stopOnLock: there.stopOnLock === true, place }}
       />
+      <CollectionEdit item={editing} onClose={() => setEditing(null)} onSave={saveEdited} />
+      {CAN_TAKE_PHOTO ? (
+        <ErevosCamera
+          visible={filming}
+          place={place}
+          folder={folder}
+          onClose={() => {
+            setFilming(false);
+            void reload();
+          }}
+          onAdded={(item) => setTab(tabOf(item))}
+        />
+      ) : null}
       <AddToPlaylistSheet
         visible={listing !== null && naming === null}
         playlists={there.playlists ?? []}

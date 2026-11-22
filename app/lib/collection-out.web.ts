@@ -38,3 +38,4 @@ export async function copyToSend(item: CollectionItem): Promise<SharedFile> {
 export const dropOpened = (): void => undefined;
 
 export const openWithOtherApp = (_item: CollectionItem): Promise<void> => Promise.reject(new Error(t('This build of Erevos cannot do this. Update Erevos for it.')));
+export const openBytesWithOtherApp = (_item: CollectionItem, _bytes: Uint8Array): Promise<void> => Promise.reject(new Error(t('This build of Erevos cannot do this. Update Erevos for it.')));

@@ -426,3 +426,73 @@ test('a contact goes as a vCard without the owner\'s note and groups, and withou
   assert.ok(bytes.length <= 2000);
   assert.ok(!new TextDecoder().decode(bytes).includes('PHOTO'));
 });
+
+test('an SMS counts as the phone company counts it, and goes without accents in capitals when chosen', async () => {
+  const { smsCount, withoutAccents, isGsm } = await import('../lib/sms-count');
+  assert.deepEqual(smsCount('a'.repeat(160)), { used: 160, parts: 1, each: 160, gsm: true });
+  assert.deepEqual(smsCount('a'.repeat(161)), { used: 161, parts: 2, each: 153, gsm: true });
+  // A letter of the extension table counts twice.
+  assert.equal(smsCount('€'.repeat(80)).used, 160);
+  assert.equal(smsCount('€'.repeat(81)).parts, 2);
+  // Greek small letters make it UCS-2: 70 in one, 67 in each part.
+  assert.deepEqual(smsCount('α'.repeat(70)), { used: 70, parts: 1, each: 70, gsm: false });
+  assert.equal(smsCount('α'.repeat(71)).parts, 2);
+  assert.equal(smsCount('α'.repeat(135)).parts, 3);
+  // The Greek capitals that look Latin go Latin; Δ Λ Σ Ω and the others stay.
+  assert.equal(withoutAccents('Ναί, θά έρθω στίς 8!'), 'NAI, ΘA EPΘΩ ΣTIΣ 8!');
+  assert.equal(withoutAccents('Καλημέρα «φίλε»…'), 'KAΛHMEPA "ΦIΛE"...');
+  assert.ok(isGsm(withoutAccents('ΐ ΰ ϊ ϋ άέήίόύώ ς') ?? ''));
+  assert.equal(withoutAccents('plain words'), 'plain words');
+  assert.equal(withoutAccents('Ναι 👍'), null);
+  assert.equal(withoutAccents('Да'), null);
+  assert.equal(smsCount(withoutAccents('α'.repeat(150)) ?? '').parts, 1);
+});
+
+test('a video of an MMS is a video, in the list and among its parts', async () => {
+  const { partKind, partsOf } = await import('../lib/sms-parts');
+  assert.equal(partKind('video/3gpp'), 'video');
+  assert.equal(partKind('video/mp4; name=clip.mp4'), 'video');
+  const video = { uri: 'content://mms/part/9', type: 'video/mp4' };
+  assert.deepEqual(partsOf({ pictures: [], voices: [], cards: [], videos: [video] }), [video]);
+});
+
+test("an iPhone's or Google Messages' reaction by SMS shows as a mark on the message it names", async () => {
+  const { reactionOf, withReactions } = await import('../lib/sms-reactions');
+  assert.deepEqual(reactionOf('Liked “See you at 8”'), { emoji: '👍', quoted: 'See you at 8', removed: false, picture: false });
+  assert.deepEqual(reactionOf('Reacted 😂 to "See you at 8"'), { emoji: '😂', quoted: 'See you at 8', removed: false, picture: false });
+  assert.equal(reactionOf('Removed a heart from “See you at 8”')?.removed, true);
+  assert.equal(reactionOf('Loved an image')?.picture, true);
+  assert.equal(reactionOf('I liked “the film”'), null);
+  assert.equal(reactionOf('Reacted badly to “that”'), null);
+  const at = (n: number) => 1_700_000_000_000 + n * 1000;
+  const sms = (id: number, text: string, mine: boolean) => ({ id, kind: 'sms' as const, text, at: at(id), mine, state: 'done', read: true, sim: -1 });
+  const messages = [
+    sms(1, 'Έρχομαι σε 10\'', true),
+    sms(2, 'Liked “Έρχομαι σε 10\'”', false),
+    sms(3, 'A long one that an iPhone cuts when it quotes it in a reaction, as it does', true),
+    sms(4, 'Loved “A long one that an iPhone cuts…”', false),
+    sms(5, 'Laughed at “nothing said here”', false),
+    sms(6, 'Removed a like from “Έρχομαι σε 10\'”', false),
+  ];
+  const { lines, marks } = withReactions(messages as never);
+  assert.deepEqual(lines.map((m) => m.id), [1, 3, 5]);
+  assert.deepEqual(marks.get('sms:1'), []);
+  assert.deepEqual(marks.get('sms:3'), ['❤️']);
+});
+
+test('quick texts are the app\'s own until the owner keeps theirs, each kept once', async () => {
+  const { checked } = await import('../lock/sms-data');
+  assert.equal(checked({}).quick, null);
+  assert.deepEqual(checked({ quick: ['On my way', 'On my way', '', 7, 'x'.repeat(400), 'Later'] }).quick, ['On my way', 'Later']);
+});
+
+test("an MMS video's type is read from its bytes, not its name", async () => {
+  const { videoMimeOf } = await import('../lib/video-type');
+  const box = (brand: string) => new Uint8Array([0, 0, 0, 24, ...'ftyp'.split('').map((c) => c.charCodeAt(0)), ...brand.split('').map((c) => c.charCodeAt(0)), 0, 0, 0, 0]);
+  assert.equal(videoMimeOf(box('3gp4'), 'video/mp4'), 'video/3gpp');
+  assert.equal(videoMimeOf(box('3g2a'), 'video/mp4'), 'video/3gpp2');
+  assert.equal(videoMimeOf(box('isom'), 'video/3gpp'), 'video/mp4');
+  assert.equal(videoMimeOf(box('mp42'), 'video/3gpp'), 'video/mp4');
+  assert.equal(videoMimeOf(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 1]), 'video/mp4'), 'video/webm');
+  assert.equal(videoMimeOf(new Uint8Array([1, 2, 3]), 'video/3gpp'), 'video/3gpp');
+});

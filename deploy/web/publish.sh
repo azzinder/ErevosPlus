@@ -88,7 +88,8 @@ if grep -q ' erevos-android.apk$' "$work/SHA256SUMS"; then
 fi
 
 echo "== Signing it"
-node "$root/pwa/release.mjs" sign "$work/web" "$key" $android
+# The release's SHA256SUMS too, served beside the web app (SHA256SUMS.sig, release.mjs verify-sums).
+node "$root/pwa/release.mjs" sign "$work/web" "$key" $android --sums "$work/SHA256SUMS"
 node "$root/pwa/release.mjs" verify "$work/web"
 
 "$root/deploy/web/deploy.sh" $files_only "$target" "$domain" "$work/web"

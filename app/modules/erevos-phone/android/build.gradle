@@ -16,3 +16,10 @@ android {
     versionName "0.0.1"
   }
 }
+
+dependencies {
+  // Where an unknown number is from and what kind it is (NumberInfo.kt), offline: Google's
+  // libphonenumber and its geocoder, plain Java with their data inside, nothing of Google Play.
+  implementation 'com.googlecode.libphonenumber:libphonenumber:9.0.43'
+  implementation 'com.googlecode.libphonenumber:geocoder:3.43'
+}

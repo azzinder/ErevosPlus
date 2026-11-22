@@ -239,8 +239,16 @@ function Home() {
   // one opens those and the search empties; a wrong one is a search like any other.
   // A search sent is tried as a PIN of hidden chats and as another space's password
   // (lock/hidden.ts searchOpens): what it opens opens, and anything else stays a search.
+  // One try at a time from here: one sent again while the last is being checked is let go.
+  const trying = useRef(false);
   async function searchSubmitted() {
-    const found = await searchOpens(currentSpace().space, query, moduleOn('erevos')).catch(() => null);
+    if (trying.current) return;
+    trying.current = true;
+    const found = await searchOpens(currentSpace().space, query, moduleOn('erevos'))
+      .catch(() => null)
+      .finally(() => {
+        trying.current = false;
+      });
     if (!found) return;
     setQuery('');
     if ('space' in found) {
@@ -261,7 +269,13 @@ function Home() {
   async function openDoor() {
     const pin = doorPin;
     closeDoor();
-    const place = await searchHidden(currentSpace().space, pin).catch(() => null);
+    if (trying.current) return;
+    trying.current = true;
+    const place = await searchHidden(currentSpace().space, pin)
+      .catch(() => null)
+      .finally(() => {
+        trying.current = false;
+      });
     if (!place) return;
     handOverHidden(place);
     router.push('/chat?hidden=open');
@@ -665,11 +679,11 @@ function Home() {
   const tabs: InboxShow[] = [...arranged.shown, ...(show !== 'all' && !arranged.shown.includes(show) ? [show] : [])];
   const mixed = tabs.length > 2;
   // Where New chat goes: on Matrix's part, a Matrix chat (app/matrix.tsx); on XMPP's, an XMPP one
-  // (app/xmpp.tsx); on Nostr's, one with another Nostr app (app/nostr-chats.tsx); otherwise an
-  // Erevos chat, or, with Erevos off, the first other part on, a new SMS last. None without chats,
+  // (app/xmpp.tsx); on Nostr's, one with another Nostr app (app/nostr-chats.tsx); on the SMS's, a new
+  // SMS; otherwise an Erevos chat, or, with Erevos off, the first other part on, a new SMS last. None without chats,
   // and none on the Public part, which has New post instead, for a space with a Nostr key.
   const newChat: Href | 'sms' | null =
-    show === 'public' ? null : show === 'matrix' ? '/matrix' : show === 'xmpp' ? '/xmpp' : show === 'nostr' ? '/nostr-chats' : show === 'telegram' || tgFolderOf(show) !== null ? '/telegram' : show === 'messenger' || show === 'signal' || show === 'session' ? `/${show}` : show === 'sms' && !erevosOn ? 'sms' : erevosOn ? '/chat?setup=1' : modules.has('matrix') ? '/matrix' : modules.has('xmpp') ? '/xmpp' : modules.has('nostr') ? '/nostr-chats' : modules.has('telegram') ? '/telegram' : modules.has('sms') ? 'sms' : null;
+    show === 'public' ? null : show === 'matrix' ? '/matrix' : show === 'xmpp' ? '/xmpp' : show === 'nostr' ? '/nostr-chats' : show === 'telegram' || tgFolderOf(show) !== null ? '/telegram' : show === 'messenger' || show === 'signal' || show === 'session' ? `/${show}` : show === 'sms' ? 'sms' : erevosOn ? '/chat?setup=1' : modules.has('matrix') ? '/matrix' : modules.has('xmpp') ? '/xmpp' : modules.has('nostr') ? '/nostr-chats' : modules.has('telegram') ? '/telegram' : modules.has('sms') ? 'sms' : null;
   // New post, on the Public part, for a space with a Nostr key: its public posts are signed with it.
   const newPost = show === 'public' && !!nostr;
   const [writingSms, setWritingSms] = useState(false);
@@ -812,6 +826,28 @@ function Home() {
     </View>
   );
 
+  // The services: one button, which opens them all in a window (components/services.tsx), so
+  // however many there are, the list starts at once under it. It stays under the top bar while the
+  // list scrolls, so another part is a tap away from anywhere in it.
+  const servicesBar = mixed || arranged.hidden.length > 0 || pages.length > 0 ? (
+    <Services
+      services={services}
+      hidden={arranged.hidden.map((key) => ({ key, label: showLabel(key, telegram?.folders ?? []) }))}
+      pages={pages}
+      current={show}
+      onPick={(key) => setShow(key as InboxShow)}
+      onAdd={() => router.push('/modules')}
+      onReadAll={readAll}
+      onMove={(key, by) => void moveService(tabs, key, by)}
+      start={start}
+      onStart={(key) => void startOn(key)}
+      onHide={(key, hide) => {
+        void hideService(key, hide);
+        if (hide && show === key) setShow('all');
+      }}
+    />
+  ) : null;
+
   const header = (
     <View style={styles.headerBlock}>
       {messagesOn ? (
@@ -897,27 +933,7 @@ function Home() {
           ) : null}
         </View>
       ) : null}
-      {/* The services: one button, which opens them all in a window (components/services.tsx), so
-          however many there are, the list starts at once under it. */}
-      {mixed || arranged.hidden.length > 0 || pages.length > 0 ? (
-        <Services
-          services={services}
-          hidden={arranged.hidden.map((key) => ({ key, label: showLabel(key, telegram?.folders ?? []) }))}
-          pages={pages}
-          current={show}
-          onPick={(key) => setShow(key as InboxShow)}
-          onAdd={() => router.push('/modules')}
-          onReadAll={readAll}
-          onMove={(key, by) => void moveService(tabs, key, by)}
-          start={start}
-          onStart={(key) => void startOn(key)}
-          onHide={(key, hide) => {
-            void hideService(key, hide);
-            if (hide && show === key) setShow('all');
-          }}
-        />
-      ) : null}
-      {hasSmsRows && !smsMirrored() && (show === 'all' || show === 'sms') ? (
+      {hasSmsRows && !smsMirrored() && show === 'sms' ? (
         <Row wrap>
           <Chip label={t('Names')} selected={smsShown.current.names} onPress={() => void toggleNames()} />
         </Row>
@@ -947,7 +963,10 @@ function Home() {
     <KeyboardPaddedView inset={insets.bottom} style={styles.container}>
       {/* A swipe to the side goes to the chip beside (All messages, SMS, Erevos, Matrix, XMPP, Public, Nostr), on the rows too:
           an SMS conversation is archived or deleted by holding it down. */}
-      <View style={[styles.list, styles.fixedBar]}>{topBar}</View>
+      <View style={[styles.list, styles.fixedBar]}>
+        {topBar}
+        {servicesBar ? <View style={styles.fixedServices}>{servicesBar}</View> : null}
+      </View>
       <SwipeTabs tabs={mixed ? tabs : []} current={show} onChange={setShow}>
         <FlatList<InboxRow | PublicItem | Section>
           // The Public tab's posts are rows of the same list, so the search above them stays as it is.
@@ -1345,6 +1364,9 @@ const makeStyles = (colors: Colors) =>
       paddingBottom: space.sm,
     },
     fixedBar: {
+      paddingTop: space.md,
+    },
+    fixedServices: {
       paddingTop: space.md,
     },
     topBar: {

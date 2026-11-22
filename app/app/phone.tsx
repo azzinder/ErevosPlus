@@ -8,6 +8,7 @@ import { AppState, FlatList, Image, PermissionsAndroid, Platform, Pressable, Scr
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SearchIcon } from '../components/icons';
+import { SpeedDialPick } from '../components/speed-dial';
 import { SwipeTabs } from '../components/swipe-tabs';
 import { Button, Card, Chip, fontStyle, Page, Row, Sheet, Text, TextButton } from '../components/ui';
 import { offerUndo, UNDO_SHOWS, UndoBar } from '../components/undo-bar';
@@ -44,6 +45,7 @@ import {
 } from '../lib/phone-log';
 import { blockedUntil, liftGroup, liveGroups, rulesFrom, rulesJson, type PhoneRules } from '../lib/phone-rules';
 import { accountLabel, callAccount, PhoneSims } from '../lib/phone-sims';
+import { refreshSpamList } from '../lib/spam-list';
 import { currentSpace } from '../lock/keys';
 import {
   blockingRules,
@@ -57,6 +59,20 @@ import {
   phoneReady,
   phoneStatus,
   placeCall,
+  isEmergencyNumber,
+  callVoicemail,
+  deleteVoicemail,
+  hasVoicemail,
+  playVoicemail,
+  stopVoicemail,
+  voicemailReady,
+  voicemails,
+  placeVideoCall,
+  videoCalling,
+  reportedSpam,
+  reportSpam,
+  spamReady,
+  type Voicemail,
   seenMissedCalls,
   setBlockingRules,
   showCall,
@@ -83,7 +99,7 @@ import { useStyles, useTheme } from '../theme/context';
 // typed in (`number`), and from Android's notice of a missed call on the calls (`tab`). With two SIMs, each call goes on the one chosen for its
 // number (lib/phone-sims.ts), else on the one chosen now, which is then kept for the number.
 
-type Tab = 'keypad' | 'recents' | 'favourites';
+type Tab = 'keypad' | 'recents' | 'favourites' | 'voicemail';
 
 const TABS: { tab: Tab; label: string }[] = [
   { tab: 'keypad', label: mark('Keypad') },
@@ -91,9 +107,10 @@ const TABS: { tab: Tab; label: string }[] = [
   { tab: 'favourites', label: mark('Favourites') },
 ];
 
-const TAB_ORDER = TABS.map((each) => each.tab);
+// Voicemail shows only where the phone company sends voicemails as recordings, and only with Erevos open.
+const VOICEMAIL_TAB: { tab: Tab; label: string } = { tab: 'voicemail', label: mark('Voicemail') };
 
-const tabOf = (tab: unknown): Tab => (tab === 'recents' || tab === 'favourites' ? tab : 'keypad');
+const tabOf = (tab: unknown): Tab => (tab === 'recents' || tab === 'favourites' || tab === 'voicemail' ? tab : 'keypad');
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -203,6 +220,19 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
   // shown over the keys as a dialer does: the first, and the others in a list.
   const keyHits = useMemo(() => (dialable && number ? toDialKeys(dialable, number, KEY_HITS) : []), [dialable, number]);
   const [allHits, setAllHits] = useState(false);
+  // Whether the phone keeps voicemails (visual voicemail), for their tab; never with Erevos locked.
+  const [hasVoicemails, setHasVoicemails] = useState(false);
+  // The speed dial key whose number is being chosen.
+  const [speedKey, setSpeedKey] = useState<string | null>(null);
+  const tabs = hasVoicemails ? [...TABS, VOICEMAIL_TAB] : TABS;
+  const tabOrder = tabs.map((each) => each.tab);
+  const readVoicemails = useCallback(() => {
+    if (locked || !voicemailReady()) return;
+    voicemails().then(
+      (found) => setHasVoicemails(found.voicemails.length > 0),
+      () => setHasVoicemails(false),
+    );
+  }, [locked]);
   // Read as the keypad shows, and anew each time it does, so a contact added meanwhile is found.
   useEffect(() => {
     if (tab === 'keypad' && !searching) readDialable();
@@ -224,6 +254,7 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
     const look = () => {
       setStatus(phoneStatus());
       phoneAccounts().then(setAccounts, () => setAccounts([]));
+      readVoicemails();
     };
     look();
     // The calls are read at once, so that they show as soon as they are opened.
@@ -234,6 +265,8 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
       PhoneSims.open(open, key).then(setSims, () => setSims(null));
       // A contact linked to a number since the space opened: its calls show its name too.
       void refreshKnownNames();
+      // The spam list, a week old, comes again when the owner switched that on.
+      void refreshSpamList();
     }
     const app = AppState.addEventListener('change', (state) => state === 'active' && look());
     const calls = onPhoneEvent('onCalls', () => setStatus(phoneStatus()));
@@ -278,7 +311,9 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
       return;
     }
     setNote('');
-    const on = account ?? callAccount(accounts, sims?.accountFor(plain) ?? '');
+    // An emergency number goes at once, on the SIM Android picks: never asked which, nor kept.
+    const emergency = isEmergencyNumber(plain);
+    const on = emergency ? '' : (account ?? callAccount(accounts, sims?.accountFor(plain) ?? ''));
     if (on === null) {
       setChoosing(plain);
       return;
@@ -291,7 +326,7 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
       }
       locked?.onCalled();
       await placeCall(plain, on);
-      if (on && accounts.length >= 2) sims?.remember(plain, on).catch(() => undefined);
+      if (on && !emergency && accounts.length >= 2) sims?.remember(plain, on).catch(() => undefined);
     } catch (error) {
       setNote(t('Not called. {error}', { error: error instanceof Error ? error.message : String(error) }));
     }
@@ -299,6 +334,63 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
 
   async function copyNumber(to: string) {
     setNote((await copyText(to)) ? t('Copied.') : t('Not copied.'));
+  }
+
+  // A video call through the phone company (ViLTE), from the number's ⋯, where a SIM can make one.
+  async function videoCall(to: string) {
+    press();
+    const plain = dialNumber(to);
+    if (!plain) return;
+    setNote('');
+    const account = accounts.some((a) => a.id === chosen) ? chosen : (callAccount(accounts, sims?.accountFor(plain) ?? '') ?? '');
+    try {
+      if (!phoneStatus()?.isDefault) throw new Error(t('Erevos may not make calls. Make it the phone app under Settings.'));
+      locked?.onCalled();
+      await placeVideoCall(plain, account);
+    } catch (error) {
+      setNote(t('Not called. {error}', { error: error instanceof Error ? error.message : String(error) }));
+    }
+  }
+
+  // Speed dial, 2 to 9 held on an empty keypad: calls the key's number, or offers to choose one.
+  function speedDial(key: string) {
+    if (locked || !sims) {
+      press();
+      setNote(t('Speed dial works with Erevos unlocked.'));
+      return;
+    }
+    const kept = sims.speed(key);
+    if (kept) {
+      void call(kept.number);
+      return;
+    }
+    press();
+    setSpeedKey(key);
+  }
+
+  // The voicemail, held 1 on an empty keypad: on the SIM chosen above Call, else the default one.
+  async function callTheVoicemail() {
+    press();
+    setNote('');
+    const account = accounts.some((a) => a.id === chosen) ? chosen : '';
+    if (!voicemailReady()) {
+      setNote(t('This build of Erevos cannot do this yet.'));
+      return;
+    }
+    if (hasVoicemail(account) === false) {
+      setNote(t('This SIM has no voicemail number. Your phone company gives it; under Phone → Settings, Call settings sets it.'));
+      return;
+    }
+    try {
+      if (!phoneStatus()?.isDefault) {
+        const answer = await PermissionsAndroid.request('android.permission.CALL_PHONE');
+        if (answer !== PermissionsAndroid.RESULTS.GRANTED) throw new Error(t('Erevos may not make calls. Make it the phone app under Settings.'));
+      }
+      locked?.onCalled();
+      await callVoicemail(account);
+    } catch (error) {
+      setNote(t('Not called. {error}', { error: error instanceof Error ? error.message : String(error) }));
+    }
   }
 
   // The SIMs show once Erevos may read the phone's state; the phone app may, else it asks.
@@ -404,7 +496,7 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
         {locked ? null : <GroupBlocks />}
         {searching ? null : (
           <Row style={narrow ? styles.tabsNarrow : styles.tabs}>
-            {TABS.map((each) => (
+            {tabs.map((each) => (
               <Chip key={each.tab} label={t(each.label)} selected={tab === each.tab} onPress={() => setTab(each.tab)} fit={narrow} />
             ))}
           </Row>
@@ -467,8 +559,18 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
         />
       ) : (
         // A swipe to the side goes to the tab beside, as its chip does.
-        <SwipeTabs tabs={TAB_ORDER} current={tab} onChange={setTab}>
-          {tab === 'recents' ? (
+        <SwipeTabs tabs={tabOrder} current={tab} onChange={setTab}>
+          {tab === 'voicemail' && hasVoicemails ? (
+            <Voicemails
+              accounts={accounts}
+              onCall={(to) => void call(to)}
+              onCallVoicemail={() => void callTheVoicemail()}
+              onNone={() => {
+                setHasVoicemails(false);
+                setTab('recents');
+              }}
+            />
+          ) : tab === 'recents' || tab === 'voicemail' ? (
             <Recents
               accounts={accounts}
               locked={!!locked}
@@ -490,7 +592,7 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
                 </ScrollView>
               ) : null}
               <View style={styles.numberLine}>
-                {number && (CAN_COPY || (!locked && textable(number))) ? (
+                {number && (CAN_COPY || (!locked && textable(number)) || videoCalling()) ? (
                   <Pressable
                     onPress={() => {
                       tap();
@@ -584,7 +686,11 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
                                 press();
                                 setNumber((n) => typeKey(n, '+'));
                               }
-                            : undefined
+                            : key === '1' && !number
+                              ? () => void callTheVoicemail()
+                              : !number && key >= '2' && key <= '9'
+                                ? () => speedDial(key)
+                                : undefined
                         }
                         accessibilityRole="button"
                         accessibilityLabel={key}
@@ -599,6 +705,11 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
                         {key === '0' ? (
                           <Text variant="caption" tone="faint" style={[styles.keyPlus, sized.plus]}>
                             +
+                          </Text>
+                        ) : null}
+                        {key === '1' ? (
+                          <Text variant="caption" tone="faint" style={sized.letters} numberOfLines={1} accessibilityLabel={t('Hold for the voicemail')}>
+                            oo
                           </Text>
                         ) : null}
                       </Pressable>
@@ -663,6 +774,20 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
         )}
       </Sheet>
 
+      <SpeedDialPick
+        slot={speedKey}
+        onClose={() => setSpeedKey(null)}
+        onPick={(to, name) => {
+          const key = speedKey;
+          setSpeedKey(null);
+          if (!key || !sims || !to) return;
+          sims.setSpeed(key, to, name).then(
+            () => setNote(t('{name} is on speed dial {key}. Hold {key} to call.', { name: name || to, key })),
+            (error) => setNote(errorText(error)),
+          );
+        }}
+      />
+
       <Sheet visible={allHits && keyHits.length > 0} onClose={() => setAllHits(false)} title={number}>
         {keyHits.map((row) => (
           <HitRow
@@ -680,6 +805,15 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
         ))}
       </Sheet>
       <Sheet visible={more} onClose={() => setMore(false)} title={number}>
+        {more && videoCalling() ? (
+          <Button
+            title={t('Video call')}
+            onPress={() => {
+              setMore(false);
+              void videoCall(number);
+            }}
+          />
+        ) : null}
         {locked || !textable(number) ? null : (
           <>
             <Button
@@ -1077,6 +1211,18 @@ function Recents({ accounts, locked, onCall, onEdit }: {
                 onEdit(first.number);
               }}
             />
+            {spamReady() && !locked && !first.name ? (
+              <Button
+                title={reportedSpam(first.number) ? t('Not spam') : t('Report as spam')}
+                kind="secondary"
+                onPress={() => {
+                  const spam = !reportedSpam(first.number);
+                  setOpen(null);
+                  reportSpam(first.number, spam);
+                  setNote(spam ? t('Reported as spam on this phone only. Its calls show a warning.') : t('No longer reported as spam.'));
+                }}
+              />
+            ) : null}
             {blocked && !locked ? (
               <Button
                 title={isBlocked(first.number, blocked) ? t('Unblock this number') : t('Block this number')}
@@ -1188,6 +1334,162 @@ function CallDetails({ row, accounts, onDelete }: { row: CallRow; accounts: Phon
         </Row>
       ))}
     </View>
+  );
+}
+
+// The voicemails Android keeps, where the phone company sends them as recordings (visual voicemail):
+// each plays at a tap of ▶, straight from Android's store; a tap on the row offers Call back, Send an
+// SMS and Delete. Never shown with Erevos locked. `onNone` once none is left.
+function Voicemails({ accounts, onCall, onCallVoicemail, onNone }: {
+  accounts: PhoneAccount[];
+  onCall: (number: string) => void;
+  onCallVoicemail: () => void;
+  onNone: () => void;
+}) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
+  const [found, setFound] = useState<Voicemail[] | null>(null);
+  const [playing, setPlaying] = useState(-1);
+  const [open, setOpen] = useState<Voicemail | null>(null);
+  const [note, setNote] = useState('');
+
+  const load = useCallback(() => {
+    voicemails().then(
+      (read) => {
+        setFound(read.voicemails);
+        if (read.voicemails.length === 0) onNone();
+      },
+      () => setFound([]),
+    );
+  }, [onNone]);
+
+  useEffect(() => {
+    load();
+    const changed = onPhoneEvent('onVoicemail', (event) => {
+      setPlaying((now) => (event.playing ? event.id : now === event.id ? -1 : now));
+      if (!event.playing) load();
+    });
+    const app = AppState.addEventListener('change', (state) => {
+      if (state === 'active') load();
+      else stopVoicemail();
+    });
+    return () => {
+      changed?.remove();
+      app.remove();
+      stopVoicemail();
+    };
+  }, []);
+
+  async function play(item: Voicemail) {
+    tap();
+    setNote('');
+    if (playing === item.id) {
+      stopVoicemail();
+      return;
+    }
+    try {
+      await playVoicemail(item.id);
+    } catch (error) {
+      setNote(t('The voicemail did not play. {error}', { error: errorText(error) }));
+    }
+  }
+
+  function remove(item: Voicemail) {
+    setOpen(null);
+    ask(t('Delete this voicemail?'), t('It goes from the phone, and from your phone company too where its app keeps it.'), [
+      { text: t('Cancel'), style: 'cancel' },
+      {
+        text: t('Delete'),
+        style: 'destructive',
+        onPress: () =>
+          void deleteVoicemail(item.id).then((done) => {
+            if (!done) setNote(t('The voicemail was not deleted.'));
+            load();
+          }),
+      },
+    ]);
+  }
+
+  return (
+    <>
+      <ScrollView contentContainerStyle={styles.list}>
+        <View style={styles.filters}>
+          <Button title={t('Call the voicemail')} kind="secondary" onPress={onCallVoicemail} />
+        </View>
+        {note ? <Text tone="muted">{note}</Text> : null}
+        {(found ?? []).map((item) => {
+          const who = item.name || item.shown || item.number || t('Unknown number');
+          const sim = accounts.length >= 2 ? accounts.find((a) => a.id === item.account) : undefined;
+          const detail = [dayLabel(item.at, Date.now()), callClock(item.at), item.duration > 0 ? callLength(item.duration) : '', sim ? sim.name : '']
+            .filter(Boolean)
+            .join(' · ');
+          return (
+            <View key={item.id}>
+              <Pressable
+                onPress={() => setOpen(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`${who}, ${detail}`}
+                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              >
+                <View style={[styles.newDot, { backgroundColor: item.isNew ? colors.primary : 'transparent' }]} />
+                <Face name={item.name} photo="" size={40} />
+                <View style={styles.rowBody}>
+                  <Text variant={item.isNew ? 'bodyStrong' : 'body'} numberOfLines={1}>
+                    {who}
+                  </Text>
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {detail}
+                  </Text>
+                  {item.transcript ? (
+                    <Text variant="caption" tone="muted" numberOfLines={3}>
+                      {`«${item.transcript}»`}
+                    </Text>
+                  ) : null}
+                </View>
+                {item.playable ? (
+                  <Pressable
+                    onPress={() => void play(item)}
+                    accessibilityRole="button"
+                    accessibilityLabel={playing === item.id ? t('Stop') : t('Play')}
+                    hitSlop={6}
+                    style={({ pressed }) => [styles.playButton, { backgroundColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
+                  >
+                    <Text variant="bodyStrong" color={colors.onPrimary}>
+                      {playing === item.id ? '■' : '▶'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </Pressable>
+            </View>
+          );
+        })}
+      </ScrollView>
+
+      <Sheet visible={open !== null} onClose={() => setOpen(null)} title={open ? open.name || open.shown || open.number || t('Unknown number') : undefined}>
+        {open?.number ? (
+          <>
+            <Button
+              title={t('Call back')}
+              onPress={() => {
+                const to = open.number;
+                setOpen(null);
+                onCall(to);
+              }}
+            />
+            <Button
+              title={t('Send an SMS')}
+              kind="secondary"
+              onPress={() => {
+                const to = open.number;
+                setOpen(null);
+                router.push(`/sms?to=${encodeURIComponent(to)}`);
+              }}
+            />
+          </>
+        ) : null}
+        {open ? <Button title={t('Delete this voicemail')} kind="secondary" onPress={() => remove(open)} /> : null}
+      </Sheet>
+    </>
   );
 }
 
@@ -1494,6 +1796,18 @@ const makeStyles = (colors: Colors) =>
     },
     groupBlock: {
       gap: space.sm,
+    },
+    newDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    playButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     callBack: {
       width: 40,

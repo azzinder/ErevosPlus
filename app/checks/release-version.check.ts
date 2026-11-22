@@ -93,6 +93,23 @@ test('a release is named as asked, or the one after the latest', () => {
   assert.equal(named('v7.0.0', '', 'v7.1.0'), '7.0.1');
 });
 
+test('since 7.x the numbers start again at 3, after every 7.x (the second number says the edition)', () => {
+  assert.equal(named('v7.2.0', '3.0.0'), '3.0.0');
+  assert.equal(named('v7.2.0', '3.0.0-rc.1'), '3.0.0-rc.1');
+  assert.equal(named('v3.0.0', ''), '3.0.1');
+  assert.equal(named('v3.0.0', '4.0.0'), '4.0.0');
+  assert.equal(named('v6.0.0', '8.0.0'), '8.0.0');
+  assert.match(named('v3.0.0', '7.2.1'), /not newer/);
+  assert.match(named('v3.0.1', '3.0.0'), /not newer/);
+  // Only 3.x to 6.x come after 7.x: 8.x and on after them, and 1.x or 2.x stay before.
+  assert.match(named('v7.2.0', '2.0.0'), /not newer/);
+  assert.equal(named('v6.9.0', '9.0.0'), '9.0.0');
+  for (const [a, b] of [['7.2.0', '3.0.0'], ['7.3.0-rc.2', '3.0.0-beta.1'], ['7.9.9', '8.0.0'], ['3.0.0', '3.1.0'], ['6.9.9', '8.0.0'], ['2.0.0', '7.0.0'], ['1.0.0', '2.0.0'], ['8.0.0', '9.0.0']]) {
+    assert.equal(laterThan(b, a), true, `${b} after ${a}`);
+    assert.equal(laterThan(a, b), false, `${a} not after ${b}`);
+  }
+});
+
 test('a test release before a version: 4.0.0-rc.1, after 3.x, before 4.0.0, and the one after it is rc.2', () => {
   assert.equal(named('v3.4.2', '4.0.0-rc.1'), '4.0.0-rc.1');
   assert.equal(named('v3.4.2', 'v4.0.0-rc.1'), '4.0.0-rc.1');
@@ -196,16 +213,26 @@ test('a build whose number is not sure does not go out', () => {
   }
 });
 
-test("the Sailfish RPM's version has no -: 4.0.0~rc.1, which RPM puts before 4.0.0", () => {
-  const sed = workflow.map((line) => line.trim()).find((line) => line.startsWith('sed -i "s/^Version:'));
-  assert.ok(sed);
+test("the Sailfish RPM's version has no -: 4.0.0~rc.1, which RPM puts before 4.0.0; and 3.x an epoch", () => {
+  const at = workflow.findIndex((line) => line.trim().startsWith('sed -i "s/^Version:'));
+  assert.ok(at >= 0);
+  const epoch = workflow[at + 3]?.trim() ?? '';
+  assert.match(epoch, /Epoch/);
+  const sed = `${workflow[at].trim()}\n${epoch}`;
   const spec = (version: string) => {
-    const at = join(dir, 'sailfish');
-    mkdirSync(join(at, 'rpm'), { recursive: true });
-    copyFileSync(join(ROOT, '..', 'sailfish', 'rpm', 'erevos.spec'), join(at, 'rpm', 'erevos.spec'));
-    execFileSync('bash', ['--noprofile', '--norc', '-eo', 'pipefail', '-c', sed], { cwd: at, env: { ...process.env, EREVOS_VERSION: version } });
-    return /^Version:\s*(\S+)$/m.exec(readFileSync(join(at, 'rpm', 'erevos.spec'), 'utf8'))?.[1];
+    const where = join(dir, 'sailfish');
+    mkdirSync(join(where, 'rpm'), { recursive: true });
+    copyFileSync(join(ROOT, '..', 'sailfish', 'rpm', 'erevos.spec'), join(where, 'rpm', 'erevos.spec'));
+    execFileSync('bash', ['--noprofile', '--norc', '-eo', 'pipefail', '-c', sed], { cwd: where, env: { ...process.env, EREVOS_VERSION: version } });
+    const text = readFileSync(join(where, 'rpm', 'erevos.spec'), 'utf8');
+    const name = /^Version:\s*(\S+)$/m.exec(text)?.[1];
+    const marked = /^Epoch:\s*(\S+)$/m.exec(text)?.[1];
+    return marked ? `${marked}:${name}` : name;
   };
-  assert.equal(spec('4.0.0-rc.1'), '4.0.0~rc.1');
-  assert.equal(spec('3.4.3'), '3.4.3');
+  assert.equal(spec('7.2.0-rc.1'), '7.2.0~rc.1');
+  assert.equal(spec('7.2.0'), '7.2.0');
+  // Since 7.x the numbers start again at 3: an epoch puts them after 7.x.
+  assert.equal(spec('3.0.0'), '1:3.0.0');
+  assert.equal(spec('3.0.0-rc.1'), '1:3.0.0~rc.1');
+  assert.equal(spec('8.0.0'), '1:8.0.0');
 });

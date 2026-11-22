@@ -13,7 +13,7 @@ import { currentSpace, newSpaceKey } from './keys';
 import { changeSlots, clearSlot, fillSlots, getSlot, setSlot, SLOTS, type SlotStore } from './slots';
 import { hiddenHolder, POCKETS } from './sealed-file';
 import { EMPTY_SPACE, prepareHiddenEntries, saveHiddenData } from './space-data';
-import { assertNotLockedOut, LockedOutError, prepareTries, recordRightPassword, recordWrongPassword, SEARCH_TRIES } from './tries';
+import { assertNotLockedOut, countedCheck, KEY_TRIES, LockedOutError, oneCheckAtATime, prepareTries, recordWrongPassword, SEARCH_TRIES } from './tries';
 
 // Hidden chats: inside every space, chats that open only with their own PIN, built like the
 // second password (config.ts). Every space has POCKETS of them (sealed-file.ts), each with its own
@@ -86,11 +86,7 @@ async function tryPockets(space: number, password: string): Promise<HiddenPlace 
 
 /** The space's hidden chats `password` opens, or null. Throws LockedOutError while it must wait. */
 export async function openHidden(space: number, password: string, now = Date.now()): Promise<HiddenPlace | null> {
-  await assertNotLockedOut(now);
-  const place = await tryPockets(space, password);
-  if (place) await recordRightPassword();
-  else await recordWrongPassword(now);
-  return place;
+  return countedCheck(KEY_TRIES, now, () => tryPockets(space, password), (place) => !!place);
 }
 
 /** Shortest text a search is tried as a PIN of hidden chats. */
@@ -103,16 +99,7 @@ export const MIN_PIN = 4;
  */
 export async function searchHidden(space: number, text: string, now = Date.now()): Promise<HiddenPlace | null> {
   if (text.length < MIN_PIN) return null;
-  try {
-    await assertNotLockedOut(now, SEARCH_TRIES);
-  } catch (error) {
-    if (error instanceof LockedOutError) return null;
-    throw error;
-  }
-  const place = await tryPockets(space, text);
-  if (place) await recordRightPassword(SEARCH_TRIES);
-  else await recordWrongPassword(now, SEARCH_TRIES);
-  return place;
+  return quietWhileWaiting(countedCheck(SEARCH_TRIES, now, () => tryPockets(space, text), (place) => !!place));
 }
 
 /** What a search opens: hidden chats of the open space, or another space with its key. */
@@ -129,18 +116,28 @@ export type SearchOpened = { place: HiddenPlace } | { space: Unlocked };
  */
 export async function searchOpens(space: number, text: string, places = true, now = Date.now()): Promise<SearchOpened | null> {
   if (text.length < MIN_PIN) return null;
+  return quietWhileWaiting(
+    countedCheck(
+      SEARCH_TRIES,
+      now,
+      async (): Promise<SearchOpened | null> => {
+        const place = await tryPockets(space, text);
+        const other = await spaceOf(text);
+        return place && places ? { place } : other && other.space !== space ? { space: other } : null;
+      },
+      (found) => !!found,
+    ),
+  );
+}
+
+/** A search says nothing while its wrong tries make it wait: it opens nothing, as one that found nothing. */
+async function quietWhileWaiting<T>(check: Promise<T | null>): Promise<T | null> {
   try {
-    await assertNotLockedOut(now, SEARCH_TRIES);
+    return await check;
   } catch (error) {
     if (error instanceof LockedOutError) return null;
     throw error;
   }
-  const place = await tryPockets(space, text);
-  const other = await spaceOf(text);
-  const found: SearchOpened | null = place && places ? { place } : other && other.space !== space ? { space: other } : null;
-  if (found) await recordRightPassword(SEARCH_TRIES);
-  else await recordWrongPassword(now, SEARCH_TRIES);
-  return found;
 }
 
 // Sets the PIN of the hidden chats in a space's `pocket`. With `key` (they are open) they stay as
@@ -148,7 +145,12 @@ export async function searchOpens(space: number, text: string, places = true, no
 // before cannot be opened any more; they receive while closed (hidden-keep.ts), as new ones do,
 // once the space is open. The PIN must open nothing else: not the space, nor other hidden chats
 // of it (SamePasswordError).
-export async function setHiddenPassword(space: number, pocket: number, password: string, key: Uint8Array | null, now = Date.now()): Promise<Uint8Array> {
+export function setHiddenPassword(space: number, pocket: number, password: string, key: Uint8Array | null, now = Date.now()): Promise<Uint8Array> {
+  // One at a time with every other check of a password (tries.ts): it tells whether a PIN opens something.
+  return oneCheckAtATime(() => setHiddenPasswordNow(space, pocket, password, key, now));
+}
+
+async function setHiddenPasswordNow(space: number, pocket: number, password: string, key: Uint8Array | null, now: number): Promise<Uint8Array> {
   await assertNotLockedOut(now);
   const own = (await loadLockConfig()).slots[space];
   const ownOpens = !!own && (await trySlot(own, password));

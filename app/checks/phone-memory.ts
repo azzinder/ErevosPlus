@@ -61,3 +61,17 @@ export const restoreCallLog = async (json: string): Promise<{ calls: number; blo
   phone.blocked.push(...blocked);
   return { calls: given.calls.length, blocked: blocked.length };
 };
+
+// The spam list's keeping (lib/spam-list.ts): the text last kept.
+export const spamKept: { text: string; source: string }[] = [];
+// How the spam list stands, as Spam.kt says it: a check sets it, and a list kept dates it now.
+export const spamNow = { count: 0, source: '', at: 0, own: 0, warn: true, silence: false, auto: false };
+export const spamState = () => ({ ...spamNow });
+export const setSpamAuto = (auto: boolean) => {
+  spamNow.auto = auto;
+};
+export const setSpamList = async (text: string, source: string): Promise<number> => {
+  spamKept.push({ text, source });
+  Object.assign(spamNow, { source, at: Date.now() });
+  return text.split('\n').filter(Boolean).length;
+};

@@ -37,6 +37,8 @@ import {
   MissingPartError,
   newBackupHard,
   NewerBackupError,
+  MAX_BACKUP_HARD,
+  MAX_BACKUP_ITER,
   NotABackupError,
   openBackup,
   padme,
@@ -77,7 +79,7 @@ import {
 } from '../lib/backup-cloud';
 import { setCore, type Core } from '../lib/core';
 import { setThroughTor, setTorReady } from '../lib/relay';
-import { loadLockConfig, setLockPassword, unlock } from '../lock/config';
+import { ITER, loadLockConfig, setLockPassword, unlock } from '../lock/config';
 import { History, newTag } from '../lock/history';
 import { addNote, loadNotes, newNoteId } from '../lock/myself-data';
 import { openHidden, prepareHidden, setHiddenPassword } from '../lock/hidden';
@@ -206,6 +208,47 @@ t('a backup made while a value in pages is saved holds every page its files name
   const opened = await unlock(await loadLockConfig(), 'real-1111');
   assert.ok(opened);
   assert.equal((await loadNotes({ holder: 'space', space: 0, key: opened.key })).length, 12);
+});
+
+t('a restore that cannot write all of it (a full phone) leaves the phone as it was, never half of each', async () => {
+  await phone();
+  const file = await backUp(await backupKey('backup-pass'));
+  // The phone moves on after the backup: another space password, other files.
+  store.set('erevos.lock', 'the phone now');
+  files.set('erevos-archive', 'the phone now');
+  // And its photos and files are gone since, so the parts bring ones it does not have.
+  const brought = [...blobs.keys()];
+  for (const name of brought) blobs.delete(name);
+  const marks = ['erevos.restored', 'erevos.restored-at', 'erevos.restored-elsewhere', 'erevos.restored-other', 'erevos.phone-id'];
+  const keys = new Map([...store].filter(([name]) => !marks.includes(name)));
+  const texts = new Map(files);
+  const bytes = new Map(blobs);
+  const opened = await openBackup(file, 'backup-pass');
+  // The last file it writes, after the others, finds the phone full (the parts' own are written before).
+  const last = opened.entries.filter((entry) => entry.kind === 1 || entry.kind === 2).at(-1)!;
+  const [setText, setBytes] = [files.set.bind(files), blobs.set.bind(blobs)];
+  files.set = (name, value) => {
+    if (name === last.name) throw new Error('no room');
+    return setText(name, value);
+  };
+  blobs.set = (name, value) => {
+    if (name === last.name) throw new Error('no room');
+    return setBytes(name, value);
+  };
+  try {
+    await assert.rejects(restoreBackup(opened, fromShelf), /no room/);
+  } finally {
+    files.set = setText;
+    blobs.set = setBytes;
+  }
+  assert.deepEqual(new Map([...store].filter(([name]) => !marks.includes(name))), keys);
+  assert.deepEqual(new Map(files), texts);
+  // Nor do the parts' photos and files stay, unseen, taking room.
+  assert.ok(brought.length > 0);
+  assert.deepEqual(new Map(blobs), bytes);
+  // And the backup still restores whole once there is room.
+  await restoreBackup(await openBackup(file, 'backup-pass'), fromShelf);
+  assert.ok(await unlock(await loadLockConfig(), 'real-1111'));
 });
 
 t('puts everything back: the lock opens the same space, with its relay, messages, voice and stickers', async () => {
@@ -410,6 +453,18 @@ t('a backup costs Argon2id to open, and a key kept from before it gets it withou
   const costly = file.slice();
   new DataView(costly.buffer).setUint32(16 + 16 + 4 + 16, 1024 * 1024);
   await assert.rejects(openBackup(costly, 'backup-pass'), NotABackupError);
+  // Nor one dearer than twice what Erevos makes, though a key elsewhere may cost that: a file
+  // from anyone must not keep the phone busy before its password is known.
+  for (const [at, value] of [
+    [16 + 16 + 4 + 16, MAX_BACKUP_HARD.m * 2],
+    [16 + 16 + 4 + 16 + 4, MAX_BACKUP_HARD.t + 1],
+    [16 + 16, MAX_BACKUP_ITER + 1],
+  ]) {
+    const dear = file.slice();
+    new DataView(dear.buffer).setUint32(at, value);
+    await assert.rejects(openBackup(dear, 'backup-pass'), NotABackupError);
+  }
+  assert.ok(MAX_BACKUP_HARD.m >= HARD.m * 2 && MAX_BACKUP_HARD.t >= HARD.t * 2 && MAX_BACKUP_ITER >= ITER * 5);
 });
 
 t('names backups by the date and time they were made', () => {

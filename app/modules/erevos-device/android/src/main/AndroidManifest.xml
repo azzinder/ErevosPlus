@@ -25,6 +25,13 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
       <action android:name="info.guardianproject.panic.action.TRIGGER" />
     </intent>
   </queries>
+  <queries>
+    <!-- The other editions (Move.kt), whose move this one may take: Android 11 and later show
+         another app only to one that names it. -->
+    <package android:name="app.erevos" />
+    <package android:name="app.erevos.plus" />
+    <package android:name="app.erevos.lite" />
+  </queries>
 
   <application>
     <!-- The panic button (Panic.kt, PanicActivity.kt): PanicKit's requests from a panic app the
@@ -58,6 +65,13 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
       </intent-filter>
       <meta-data android:name="android.nfc.cardemulation.host_apdu_service" android:resource="@xml/erevos_nfc_share" />
     </service>
+    <!-- A move to another edition of Erevos (Move.kt): exported, as the edition moved to reads it,
+         but it answers only an app signed with this one's key. -->
+    <provider
+      android:name="expo.modules.erevosdevice.MoveProvider"
+      android:authorities="${applicationId}.move"
+      android:exported="true"
+      android:grantUriPermissions="false" />
     <receiver android:name="expo.modules.erevosdevice.ReminderReceiver" android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />

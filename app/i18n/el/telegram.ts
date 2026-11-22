@@ -205,7 +205,6 @@ export const telegramText: Record<string, string> = {
   "Telegram said: {reason}": "Το Telegram είπε: {reason}",
   "GIF": "GIF",
   "Play the video, {time}": "Αναπαραγωγή του βίντεο, {time}",
-  "Play the video": "Αναπαραγωγή του βίντεο",
   "The chat leaves the lists of this space and shows only in the hidden chats its PIN opens. Telegram still has it, on all your devices.": "Η συνομιλία φεύγει από τις λίστες αυτού του χώρου και φαίνεται μόνο στις κρυφές συνομιλίες που ανοίγει το PIN τους. Το Telegram την έχει ακόμα, σε όλες τις συσκευές σου.",
   "Telegram sends only a contact card with a phone number.": "Το Telegram στέλνει μόνο κάρτα επαφής με αριθμό τηλεφώνου.",
   "{name} gets this place through Telegram, which can read it. Erevos does not follow where you go after.": "Ο/Η {name} παίρνει αυτό το μέρος μέσω Telegram, που μπορεί να το διαβάσει. Το Erevos δεν ακολουθεί πού πηγαίνεις μετά.",

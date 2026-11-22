@@ -68,6 +68,10 @@ import { restoredAt } from '../lock/restored';
 import { LinkedText } from '../components/linked-text';
 import { loadCurrentSpaceData } from '../lock/space-data';
 import { LATER_TEXT, type LaterSms, type SmsData, type SmsPin } from '../lock/sms-data';
+import { smsCount, withoutAccents } from '../lib/sms-count';
+import { withReactions } from '../lib/sms-reactions';
+import { QuickTexts } from '../components/sms-quick';
+import { MMS_VIDEO_SECONDS, pickMmsVideo, recordMmsVideo } from '../lib/pick-mms-video';
 import { spaceStarPlace } from '../lock/stars-data';
 import { phoneContactPhoto } from '../modules/erevos-contacts';
 import {
@@ -85,8 +89,11 @@ import {
   smsMirrored,
   smsPictureBytes,
   smsStatus,
+  fetchMms,
+  waitingMms,
   type Sim,
   type SmsMessage,
+  type WaitingMms,
 } from '../modules/erevos-sms';
 import { radius, space, type Colors } from '../theme/colors';
 import { useStyles, useTheme } from '../theme/context';
@@ -265,6 +272,9 @@ function Sms({ tools }: { tools: ReactNode }) {
   const [menu, setMenu] = useState<SmsTarget | null>(null);
   // The sheet of what an MMS can carry, where you are being found, a contact being chosen to send.
   const [attaching, setAttaching] = useState(false);
+  // The sheet of quick texts (components/sms-quick.tsx): held +, or from Attach and more.
+  const [quicking, setQuicking] = useState(false);
+  const [atCarrier, setAtCarrier] = useState<WaitingMms[]>([]);
   const [placing, setPlacing] = useState(false);
   const [choosingCard, setChoosingCard] = useState(false);
   // The built-in stickers' sheet, what it says, and whether one's picture is being made.
@@ -328,6 +338,9 @@ function Sms({ tools }: { tools: ReactNode }) {
   // away stays unread, and its notice with it, until it comes back to it (SmsStore.kt markRead).
   const focusedNow = useRef(false);
   const load = useCallback(() => {
+    // The MMS of this conversation waiting at the phone company for a tap (MmsStore.kt).
+    const here = smsNumbers(to);
+    setAtCarrier(waitingMms().filter((w) => here.some((n) => sameNumber(n, w.from))));
     smsMessages(to, drawn.current)
       .then((loaded) => {
         setMessages(loaded);
@@ -512,7 +525,8 @@ function Sms({ tools }: { tools: ReactNode }) {
 
   const trashed = order ? trashOf(to, order) : null;
   const hidden = new Set(going.filter((g) => sameConversation(g.item.to, to)).map((g) => g.item.id));
-  const shown = shownMessages(messages, trashed).filter((m) => !hidden.has(smsLineId(m)) && !timedOut.includes(m));
+  // A reaction an iPhone or Google Messages sent as words shows as its mark on the message it names (lib/sms-reactions.ts).
+  const { lines: shown, marks: reactions } = withReactions(shownMessages(messages, trashed).filter((m) => !hidden.has(smsLineId(m)) && !timedOut.includes(m)));
   spot.current = () => (left.current && shown.some((m) => smsLineId(m) === left.current) ? (placed.current.get(left.current) ?? null) : undefined);
   // The one-time code of each SMS that came with one, found once for the conversation as read.
   const codes = useMemo(() => new Map(messages.filter((m) => !m.mine && m.text).map((m) => [smsLineId(m), oneTimeCode(m.text)] as const)), [messages]);
@@ -550,6 +564,17 @@ function Sms({ tools }: { tools: ReactNode }) {
     link.current?.setSim(to, id).catch(() => undefined);
   }
 
+  // A video for an MMS: recorded by the camera app in MMS quality, or one of the phone's small enough.
+  async function addVideo(record: boolean) {
+    setNote('');
+    try {
+      const picked = record ? await recordMmsVideo() : await pickMmsVideo();
+      if (picked) setPart(picked);
+    } catch (error) {
+      setNote(error instanceof Error ? error.message : String(error));
+    }
+  }
+
   async function addPhoto() {
     setNote('');
     try {
@@ -569,7 +594,7 @@ function Sms({ tools }: { tools: ReactNode }) {
       await maySendSms();
       if (group && !mmsReady() && !smsMirrored()) throw new Error(t('This build of Erevos cannot send to several numbers yet.'));
       // A group's message goes to everyone as one MMS, even without a part.
-      const sms: Outgoing = { id: toBase64Url(randomBytes(9)), to, text, part: carried, sim, group, space: currentSpace().space };
+      const sms: Outgoing = { id: toBase64Url(randomBytes(9)), to, text: sent(text, carried), part: carried, sim, group, space: currentSpace().space };
       taken?.();
       const seconds = link.current?.undo ?? 0;
       if (seconds > 0) outbox.hold(sms, seconds * 1000, deliver);
@@ -579,6 +604,13 @@ function Sms({ tools }: { tools: ReactNode }) {
       setNote(t('Not sent. {error}', { error: errorText(error) }));
       return false;
     }
+  }
+
+  // The words as they go: without accents, Greek in capitals, when the owner chose so and that keeps
+  // a plain SMS in the GSM alphabet (lib/sms-count.ts); an MMS costs the same either way.
+  function sent(text: string, carried: Part | null = null): string {
+    if (!link.current?.plain || carried || group) return text;
+    return withoutAccents(text) ?? text;
   }
 
   // Sends what is typed, and the part with it.
@@ -654,7 +686,7 @@ function Sms({ tools }: { tools: ReactNode }) {
     try {
       if (text.length > LATER_TEXT) throw new Error(t('It is too long to send later.'));
       await maySendSms();
-      if (!(await sms.addLater({ to, text, at, sim }))) throw new Error(t('{n} SMS already wait to go later.', { n: sms.later.length }));
+      if (!(await sms.addLater({ to, text: sent(text), at, sim }))) throw new Error(t('{n} SMS already wait to go later.', { n: sms.later.length }));
       setDraft('');
       setLater(sms.later.filter((l) => sameNumber(l.to, to)));
       laterChanged();
@@ -774,7 +806,6 @@ function Sms({ tools }: { tools: ReactNode }) {
   const lineOf = (m: SmsMessage) => m.text.split('\n')[0].trim() || (partsOf(m)[0] ? partWord(partsOf(m)[0].type) : '');
   // What an MMS carries can be added: a picture or a contact card where this build sends MMS, where you are where the phone finds it.
   const canPart = mmsReady();
-  const canAttach = canPart || CAN_PLACE;
   const partLabel = (p: Part) =>
     p.mime.startsWith('image/')
       ? t('Picture · {size} KB · remove', { size: Math.ceil(p.bytes.length / 1024) })
@@ -967,6 +998,9 @@ function Sms({ tools }: { tools: ReactNode }) {
                     </Text>
                   ) : null}
                   <SmsExtras m={m} />
+                  {reactions.get(id)?.length ? (
+                    <Text accessibilityLabel={t('Reactions: {marks}', { marks: reactions.get(id)!.join(' ') })}>{reactions.get(id)!.join(' ')}</Text>
+                  ) : null}
                   <Text variant="caption" tone="faint">
                     {new Date(m.at).toLocaleString(locale())}
                     {sims.length > 1 && simLabel(sims, m.sim) ? ` · ${simLabel(sims, m.sim)}` : ''}
@@ -993,6 +1027,28 @@ function Sms({ tools }: { tools: ReactNode }) {
               </View>
             );
           })}
+          {atCarrier.map((w) => (
+            <View key={w.location} style={[styles.bubble, styles.theirs]}>
+              <Text variant="caption" tone="muted">
+                {t('MMS · {size} KB', { size: String(Math.max(1, Math.round(w.size / 1024))) })}
+              </Text>
+              <Button
+                title={w.fetching ? t('Fetching…') : t('Fetch (may cost)')}
+                onPress={() => {
+                  setAtCarrier((now) => now.map((x) => (x.location === w.location ? { ...x, fetching: true, failed: false } : x)));
+                  fetchMms(w.location).catch((error: unknown) => setNote(errorText(error)));
+                }}
+              />
+              {w.failed && !w.fetching ? (
+                <Text variant="caption" tone="muted">
+                  {t('It did not come. Try again with mobile data on.')}
+                </Text>
+              ) : null}
+              <Text variant="caption" tone="faint">
+                {new Date(w.at).toLocaleString(locale())}
+              </Text>
+            </View>
+          ))}
           {later.map((l) => (
             <Pressable
               key={l.id}
@@ -1054,10 +1110,11 @@ function Sms({ tools }: { tools: ReactNode }) {
           {part ? <Chip label={partLabel(part)} selected onPress={() => setPart(null)} /> : null}
         </Row>
       ) : null}
+      {mayAnswer && !part && !group && draft.trim() ? <SmsCounter text={sent(draft.trim())} /> : null}
       {mayAnswer ? (
         <View style={styles.composer}>
-          {canAttach && !voice.recording ? (
-            <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)}>
+          {!voice.recording ? (
+            <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} onLongPress={() => setQuicking(true)}>
               <PlusIcon color={colors.text} size={22} />
             </IconButton>
           ) : null}
@@ -1186,7 +1243,26 @@ function Sms({ tools }: { tools: ReactNode }) {
       </Sheet>
       <SmsForward message={forwarding} contacts={contacts} onClose={() => setForwarding(null)} onNote={setNote} />
       <RemindSheet of={reminding} where="space" onClose={() => setReminding(null)} say={setNote} />
+      <QuickTexts
+        visible={quicking}
+        link={link.current}
+        onClose={() => setQuicking(false)}
+        onPick={(text) => setDraft((typed) => (typed.trim() ? `${typed.trimEnd()} ${text}` : text))}
+      />
       <Sheet visible={attaching} onClose={() => setAttaching(false)} title={t('Attach and more')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            setAttaching(false);
+            setQuicking(true);
+          }}
+          style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
+        >
+          <Text variant="bodyStrong">{t('Quick texts')}</Text>
+          <Text variant="caption" tone="muted">
+            {t('Or hold + down.')}
+          </Text>
+        </Pressable>
         {canPart ? (
           <Pressable
             accessibilityRole="button"
@@ -1197,6 +1273,36 @@ function Sms({ tools }: { tools: ReactNode }) {
             style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
           >
             <Text variant="bodyStrong">{t('Photo')}</Text>
+          </Pressable>
+        ) : null}
+        {canPart ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setAttaching(false);
+              void addVideo(true);
+            }}
+            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
+          >
+            <Text variant="bodyStrong">{t('Record a video')}</Text>
+            <Text variant="caption" tone="muted">
+              {t("Up to {n} seconds, in the small picture an MMS takes. The camera app keeps it in the phone's videos too.", { n: String(MMS_VIDEO_SECONDS) })}
+            </Text>
+          </Pressable>
+        ) : null}
+        {canPart ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setAttaching(false);
+              void addVideo(false);
+            }}
+            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
+          >
+            <Text variant="bodyStrong">{t('Video from the phone')}</Text>
+            <Text variant="caption" tone="muted">
+              {t('Only one small enough for an MMS, about {n} KB.', { n: String(Math.round(MMS_MAX / 1024)) })}
+            </Text>
           </Pressable>
         ) : null}
         {CAN_PLACE ? (
@@ -1281,6 +1387,7 @@ const makeStyles = (colors: Colors) =>
     theirs: { alignSelf: 'flex-start', backgroundColor: colors.surface },
     composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.sm, padding: space.md, borderTopWidth: 1, borderTopColor: colors.border },
     input: { flex: 1, maxHeight: 140 },
+    counter: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, paddingTop: space.xs },
     options: { paddingHorizontal: space.md, paddingTop: space.sm },
     picture: { width: 220, height: 220, borderRadius: radius.md, backgroundColor: colors.border },
     later: { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border },
@@ -1289,3 +1396,23 @@ const makeStyles = (colors: Colors) =>
     menuRow: { paddingVertical: space.md, paddingHorizontal: space.sm, borderRadius: radius.md },
     chosenText: { flexGrow: 0, maxHeight: 220, padding: space.md, borderRadius: radius.md, backgroundColor: colors.surfaceAlt },
   });
+
+// How many SMS what is typed costs, shown once it nears or passes one SMS: 160 letters in the GSM
+// alphabet, 70 with Greek small letters, accents or an emoji (lib/sms-count.ts).
+function SmsCounter({ text }: { text: string }) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
+  const count = smsCount(text);
+  if (count.parts === 1 && count.used < count.each - 20) return null;
+  return (
+    <View style={styles.counter}>
+      <Text variant="caption" tone="faint" style={styles.input}>
+        {count.gsm ? t('{n} letters an SMS', { n: String(count.each) }) : t('Greek, accents or emoji: {n} letters an SMS', { n: String(count.each) })}
+      </Text>
+      <Text variant="caption" style={{ color: count.parts > 1 ? colors.warning : colors.textMuted, fontWeight: '700' }}>
+        {t('{used} / {n} SMS', { used: String(count.used), n: String(count.parts) })}
+      </Text>
+    </View>
+  );
+}
+

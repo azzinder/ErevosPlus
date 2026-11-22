@@ -13,7 +13,7 @@ import { guideFor, PLUS_SECTIONS } from '../guide/index';
 import { randomBytes } from '../lib/crypto';
 import { editionNote } from '../lib/edition-notice';
 import { newNostrDm } from '../lib/nostr-dm';
-import { whatsNewFor } from '../lib/whats-new';
+import { inLite, whatsNewFor } from '../lib/whats-new';
 import { asEdition, editionName, guideNamed, named, unmarkKept } from '../lib/edition';
 import { KEEPS_EREVOS, KEEPS_SOME } from '../lib/edition-keeps';
 import { EL } from '../i18n/el/index';
@@ -66,14 +66,16 @@ test("the plain Erevos's What's new leaves out what is of Matrix, XMPP and chats
   // Erevos+ folds the plain releases after 7.0.0 into its own (lib/whats-new.ts asPlus): each of its releases is one of the plain Erevos's.
   assert.ok(plus.every((v) => lite.some((w) => w.version === v.version)));
   const all = (list: typeof plus) => list.flatMap((v) => [...v.forYou, ...v.underTheHood]);
-  assert.ok(all(lite).length < all(plus).length);
   for (const text of all(lite)) {
     if (text.startsWith('**Matrix, XMPP and Nostr chats are in Erevos+**')) continue;
     assert.doesNotMatch(text, /\bMatrix\b|\bXMPP\b|other Nostr apps/, text);
   }
-  assert.ok(all(lite).some((text) => text.startsWith('**Matrix, XMPP and Nostr chats are in Erevos+**')));
+  // What's new started again at 3.0.0-beta.1, so the rule is held on lines of its own kind too.
+  assert.equal(inLite('**A simpler field in Matrix and XMPP chats**: …'), false);
+  assert.equal(inLite('**Chats with other Nostr apps**: …'), false);
+  assert.equal(inLite('**Matrix, XMPP and Nostr chats are in Erevos+**: …'), true);
   // A change of Erevos's own that only names another app in passing stays.
-  assert.ok(all(lite).some((text) => text.startsWith('**Voice messages in Opus**')));
+  assert.equal(inLite('**Voice messages in Opus**, as WhatsApp and Signal send them.'), true);
 });
 
 test("each edition says its own name, in every language's words", () => {

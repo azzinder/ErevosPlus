@@ -55,6 +55,23 @@ export async function pickLink(most: number): Promise<{ name: string; mime: stri
 }
 
 /**
+ * Many files picked at once, not read nor copied, as pickLink: the owner may choose one or more.
+ * `types` narrows what the picker shows (the gallery's photos and videos: image/*, video/*). Null
+ * if the owner went back. Files above `most` are left out and counted (`tooLarge`).
+ */
+export async function pickLinks(most: number, types: string[] = ['*/*']): Promise<{ files: { name: string; mime: string; size: number; uri: string }[]; tooLarge: number } | null> {
+  const picked = await whilePicking(() => File.pickFileAsync({ mimeTypes: types, multipleFiles: true }));
+  if (picked.canceled) return null;
+  const files: { name: string; mime: string; size: number; uri: string }[] = [];
+  let tooLarge = 0;
+  for (const file of picked.result) {
+    if (file.size > most) tooLarge += 1;
+    else files.push({ name: fileName(file.uri), mime: file.type, size: file.size, uri: file.uri });
+  }
+  return { files, tooLarge };
+}
+
+/**
  * A file to send, or null if the owner went back. Throws TooLargeError above `most` bytes. With
  * `clean`, a photo sent as a file (JPEG, PNG, GIF, WebP, up to CLEAN_MOST) goes without what it says
  * besides its picture, as a photo does (lib/photo.ts cleanImage); one that cannot be cleaned (HEIC,

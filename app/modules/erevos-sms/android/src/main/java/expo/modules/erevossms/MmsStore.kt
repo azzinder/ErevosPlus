@@ -15,6 +15,9 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.Telephony
+import android.telephony.TelephonyManager
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 
 /**
@@ -30,6 +33,14 @@ internal object MmsStore {
   private const val PREFS = "erevos-mms"
   private const val FETCHED = "fetched"
   private const val MAX_FETCHED = 100
+  // Whether an MMS is fetched as soon as the carrier announces it, and when roaming too; and the
+  // notices waiting for a tap to fetch them, kept as JSON (location, from, size, sim, transaction, at).
+  private const val AUTO = "auto"
+  private const val ROAMING = "roaming"
+  private const val WAITING = "waiting"
+  private const val MAX_WAITING = 50
+  // How long a waiting MMS is listed: carriers keep one some days, then it can no longer be fetched.
+  private const val WAITING_DAYS = 7L
   private const val OWN = "own"
   private val MMS: Uri = Uri.parse("content://mms")
   private val PARTS: Uri = Uri.parse("content://mms/part")
@@ -46,24 +57,119 @@ internal object MmsStore {
 
   // --- Receiving -------------------------------------------------------------------------------
 
-  /** A notice that an MMS waits at the carrier: fetch it, unless it was fetched already. */
+  /** Whether an MMS is fetched as soon as it is announced (on unless turned off), and when roaming (off unless turned on). */
+  fun switches(context: Context): Map<String, Boolean> {
+    val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    return mapOf("auto" to prefs.getBoolean(AUTO, true), "roaming" to prefs.getBoolean(ROAMING, false))
+  }
+
+  fun setSwitches(context: Context, auto: Boolean, roaming: Boolean) {
+    context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(AUTO, auto).putBoolean(ROAMING, roaming).apply()
+  }
+
+  // Whether the SIM `sim` (or the phone's, -1) is roaming now; a phone that does not say is not.
+  private fun roaming(context: Context, sim: Int): Boolean = try {
+    val phone = context.getSystemService(TelephonyManager::class.java)
+    (if (sim >= 0) phone?.createForSubscriptionId(sim) else phone)?.isNetworkRoaming == true
+  } catch (_: Exception) {
+    false
+  }
+
+  /** A notice that an MMS waits at the carrier: fetch it, unless it was fetched already, or keep it
+   *  to fetch on a tap when the owner fetches none at once, or none while roaming and roaming now. */
   fun notified(context: Context, pdu: ByteArray, sim: Int) {
     val notice = try {
       MmsPdu.notification(pdu)
     } catch (_: Exception) {
       return
     }
-    if (!remember(context, notice.location)) return
+    val on = switches(context)
+    if (on["auto"] == false || (on["roaming"] == false && roaming(context, sim))) {
+      wait(context, notice, sim)
+      return
+    }
+    fetch(context, notice.location, notice.transactionId, sim)
+  }
+
+  // Fetches the MMS at `location` from the carrier.
+  private fun fetch(context: Context, location: String, transaction: String, sim: Int) {
+    if (!remember(context, location)) {
+      // Fetched already: a waiting one leaves the list.
+      fetched(context, location, true)
+      return
+    }
     val name = "in-${System.currentTimeMillis()}.pdu"
     val done = Intent(context, MmsDownloadedReceiver::class.java).setAction(DOWNLOADED_ACTION)
-      .putExtra("file", name).putExtra("sim", sim).putExtra("transaction", notice.transactionId).putExtra("location", notice.location)
+      .putExtra("file", name).putExtra("sim", sim).putExtra("transaction", transaction).putExtra("location", location)
     val pending = PendingIntent.getBroadcast(context, name.hashCode(), done, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     try {
-      SmsStore.manager(context, sim).downloadMultimediaMessage(context, notice.location, fileUri(context, name), null, pending)
+      SmsStore.manager(context, sim).downloadMultimediaMessage(context, location, fileUri(context, name), null, pending)
     } catch (_: Exception) {
-      forget(context, notice.location)
+      forget(context, location)
       SmsStore.notifyNew(context)
+      fetched(context, location, false)
     }
+  }
+
+  // Keeps a notice to fetch on a tap, and says something came, from whom when the open space shows that.
+  private fun wait(context: Context, notice: MmsPdu.Notification, sim: Int) {
+    val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    synchronized(this) {
+      val list = waitingJson(prefs).filter { it.optString("location") != notice.location }
+      val one = JSONObject().put("location", notice.location).put("from", notice.from).put("size", notice.size)
+        .put("sim", sim).put("transaction", notice.transactionId).put("at", System.currentTimeMillis())
+      prefs.edit().putString(WAITING, JSONArray(list.takeLast(MAX_WAITING - 1) + one).toString()).apply()
+    }
+    SmsStore.came(context, mapOf("address" to notice.from, "waiting" to true))
+  }
+
+  // The waiting list, without those announced more than WAITING_DAYS ago, which the carrier no longer keeps.
+  private fun waitingJson(prefs: android.content.SharedPreferences): List<JSONObject> = try {
+    val since = System.currentTimeMillis() - WAITING_DAYS * 24 * 60 * 60 * 1000
+    JSONArray(prefs.getString(WAITING, "[]")).let { a -> (0 until a.length()).map { a.getJSONObject(it) } }.filter { it.optLong("at") >= since }
+  } catch (_: Exception) {
+    emptyList()
+  }
+
+  /** The MMS waiting at the carrier for a tap: from, size (bytes), when announced, where, and whether
+   *  it is being fetched, or the last try failed. */
+  fun waiting(context: Context): List<Map<String, Any?>> =
+    waitingJson(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)).map {
+      mapOf(
+        "location" to it.optString("location"), "from" to it.optString("from"), "size" to it.optLong("size").toDouble(),
+        "at" to it.optLong("at").toDouble(), "sim" to it.optInt("sim", -1).toDouble(),
+        "fetching" to it.optBoolean("fetching", false), "failed" to it.optBoolean("failed", false),
+      )
+    }
+
+  // Changes the waiting MMS at `location`, or takes it off the list (`change` null).
+  private fun changeWaiting(context: Context, location: String, change: ((JSONObject) -> Unit)?): JSONObject? {
+    val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    synchronized(this) {
+      val list = waitingJson(prefs)
+      val one = list.firstOrNull { it.optString("location") == location } ?: return null
+      val kept = if (change == null) list.filter { it !== one } else list.also { change(one) }
+      prefs.edit().putString(WAITING, JSONArray(kept).toString()).apply()
+      return one
+    }
+  }
+
+  /** Fetches a waiting MMS now, as the owner tapped it. It stays listed until it came: if it does not
+   *  come, it is marked so, to be tried again. */
+  fun fetchWaiting(context: Context, location: String) {
+    val one = changeWaiting(context, location) { it.put("fetching", true).put("failed", false) } ?: return
+    fetch(context, location, one.optString("transaction"), one.optInt("sim", -1))
+  }
+
+  // A fetch ended: a waiting MMS that came leaves the list; one that did not is marked, and the
+  // screens that show it are told, with no notice.
+  private fun fetched(context: Context, location: String, ok: Boolean) {
+    if (ok) {
+      changeWaiting(context, location, null)
+      return
+    }
+    val one = changeWaiting(context, location) { it.put("fetching", false).put("failed", true) } ?: return
+    SmsStore.listener?.invoke("onSms", mapOf("address" to one.optString("from"), "waiting" to true, "failed" to true, "shown" to false))
   }
 
   /** The fetched message is in its file: keep it, and tell the carrier it came. */
@@ -72,18 +178,24 @@ internal object MmsStore {
     val sim = intent.getIntExtra("sim", -1)
     val file = File(folder(context), name)
     try {
+      val location = intent.getStringExtra("location")
       if (!ok || !file.exists()) {
-        // Fetched again with the next notice the carrier sends.
-        intent.getStringExtra("location")?.let { forget(context, it) }
+        // Fetched again with the next notice the carrier sends, or a tap on a waiting one.
+        location?.let {
+          forget(context, it)
+          fetched(context, it, false)
+        }
         return
       }
       val message = MmsPdu.message(file.readBytes())
       val id = keep(context, message, sim)
+      location?.let { fetched(context, it, true) }
       val transaction = intent.getStringExtra("transaction") ?: message.transactionId
       if (transaction.isNotEmpty()) acknowledge(context, transaction, sim)
       SmsStore.came(context, mapOf("address" to message.from, "mms" to id.toDouble()))
     } catch (_: Exception) {
       SmsStore.notifyNew(context)
+      intent.getStringExtra("location")?.let { fetched(context, it, false) }
     } finally {
       file.delete()
     }
@@ -201,6 +313,8 @@ internal object MmsStore {
       "amr" -> "audio/amr"
       "m4a" -> "audio/mp4"
       "vcf" -> "text/x-vcard"
+      "mp4" -> "video/mp4"
+      "3gp" -> "video/3gpp"
       else -> type
     }
 
@@ -215,7 +329,11 @@ internal object MmsStore {
       "audio/mp4", "audio/aac", "audio/x-m4a" -> "voice.m4a"
       "audio/mpeg" -> "voice.mp3"
       "audio/ogg", "application/ogg" -> "voice.ogg"
+      "video/3gpp" -> "video.3gp"
+      "video/3gpp2" -> "video.3g2"
+      "video/webm" -> "video.webm"
       else -> when {
+        plainType(type).startsWith("video/") -> "video.mp4"
         isCard(type) -> "contact.vcf"
         isVoice(type) -> "voice"
         else -> "image.jpg"
@@ -320,6 +438,7 @@ internal object MmsStore {
             "pictures" to found.pictures,
             "voices" to found.voices,
             "cards" to found.cards,
+            "videos" to found.videos,
           ),
         )
       }
@@ -329,10 +448,11 @@ internal object MmsStore {
 
   /** A message's text, and its pictures, sounds and contact cards as content addresses the app may
    *  read (partBytes). Destructured, the first two are its text and its pictures. */
-  data class Parts(val text: String, val pictures: List<Map<String, Any?>>, val voices: List<Map<String, Any?>>, val cards: List<Map<String, Any?>>) {
+  data class Parts(val text: String, val pictures: List<Map<String, Any?>>, val voices: List<Map<String, Any?>>, val cards: List<Map<String, Any?>>, val videos: List<Map<String, Any?>> = emptyList()) {
     /** What the list says of one without text, in English: the app says it in the owner's language (lib/sms-rows.ts). */
     fun word(): String = when {
       pictures.isNotEmpty() -> "Picture"
+      videos.isNotEmpty() -> "Video"
       voices.isNotEmpty() -> "Voice message"
       cards.isNotEmpty() -> "Contact card"
       else -> "MMS"
@@ -344,6 +464,7 @@ internal object MmsStore {
     val pictures = ArrayList<Map<String, Any?>>()
     val voices = ArrayList<Map<String, Any?>>()
     val cards = ArrayList<Map<String, Any?>>()
+    val videos = ArrayList<Map<String, Any?>>()
     val projection = arrayOf(Telephony.Mms.Part._ID, Telephony.Mms.Part.CONTENT_TYPE, Telephony.Mms.Part.TEXT, Telephony.Mms.Part.NAME, Telephony.Mms.Part.CONTENT_LOCATION)
     context.contentResolver.query(PARTS, projection, "${Telephony.Mms.Part.MSG_ID}=?", arrayOf(id.toString()), null)?.use { c ->
       while (c.moveToNext()) {
@@ -353,12 +474,13 @@ internal object MmsStore {
         when {
           type == "text/plain" -> c.getString(2)?.let { if (it.isNotEmpty()) texts.add(it) }
           type.startsWith("image/") -> pictures.add(part)
+          type.startsWith("video/") -> videos.add(part)
           isVoice(type) -> voices.add(part)
           isCard(type) -> cards.add(part)
         }
       }
     }
-    return Parts(texts.joinToString("\n"), pictures, voices, cards)
+    return Parts(texts.joinToString("\n"), pictures, voices, cards, videos)
   }
 
   /** The numbers of a conversation, as Android keeps them for its thread. */
@@ -463,7 +585,7 @@ internal object MmsStore {
     }
     val found = parts(context, id)
     val text = found.text
-    val picture = (found.pictures + found.voices + found.cards).firstOrNull()
+    val picture = (found.pictures + found.videos + found.voices + found.cards).firstOrNull()
     val data = picture?.let { partBytes(context, it["uri"] as String) }
     require(to.isNotEmpty() && (text.isNotEmpty() || data != null)) { "That MMS is no longer on the phone" }
     val sent = send(context, to.joinToString(","), text, data, (picture?.get("type") as String?) ?: "", if (sim >= 0) sim else was)

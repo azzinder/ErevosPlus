@@ -14,6 +14,7 @@ import { MMS_MAX } from '../lib/pick-mms-photo';
 import { placesIn } from '../lib/sms-parts';
 import { parseVCards, type VCard } from '../lib/vcard';
 import { MAX_VOICE_MS, MIN_VOICE_MS } from '../lib/voice';
+import { openFileWith } from '../lib/open-with';
 import { smsPictureBytes, type SmsMessage, type SmsPart } from '../modules/erevos-sms';
 import { space } from '../theme/colors';
 
@@ -154,13 +155,17 @@ export function useSmsVoice({ send, say }: { send: (audio: Uint8Array) => Promis
 }
 
 /** The voice messages, contact cards and places of an SMS or MMS, under its pictures; nothing when it has none. */
-export function SmsExtras({ m, ink }: { m: Pick<SmsMessage, 'text' | 'voices' | 'cards'>; ink?: StyleProp<TextStyle> }) {
+export function SmsExtras({ m, ink }: { m: Pick<SmsMessage, 'text' | 'voices' | 'cards' | 'videos'>; ink?: StyleProp<TextStyle> }) {
   const places = useMemo(() => placesIn(m.text), [m.text]);
   const voices = m.voices ?? [];
   const cards = m.cards ?? [];
-  if (voices.length === 0 && cards.length === 0 && places.length === 0) return null;
+  const videos = m.videos ?? [];
+  if (voices.length === 0 && cards.length === 0 && places.length === 0 && videos.length === 0) return null;
   return (
     <View style={{ gap: space.sm }}>
+      {videos.map((part) => (
+        <SmsVideo key={part.uri} part={part} ink={ink} />
+      ))}
       {voices.map((part) => (
         <VoiceClip key={part.uri} type={part.type} fetch={() => smsPictureBytes(part.uri)} />
       ))}
@@ -171,6 +176,34 @@ export function SmsExtras({ m, ink }: { m: Pick<SmsMessage, 'text' | 'voices' | 
         <PlaceCard key={`${place.lat},${place.lon}`} place={place} ink={ink} />
       ))}
     </View>
+  );
+}
+
+/** A video of an MMS: a tap plays it in the phone's own video app, as Erevos has no player of its own. */
+function SmsVideo({ part, ink }: { part: SmsPart; ink?: StyleProp<TextStyle> }) {
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function play() {
+    setNote('');
+    setBusy(true);
+    try {
+      const bytes = await smsPictureBytes(part.uri);
+      const ending = part.type.toLowerCase().includes('3gpp') ? '3gp' : part.type.toLowerCase().includes('webm') ? 'webm' : 'mp4';
+      await openFileWith(`video.${ending}`, part.type, bytes);
+    } catch (error) {
+      setNote(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Pressable onPress={() => void play()} accessibilityRole="button" accessibilityLabel={t('Play the video')} disabled={busy}>
+      <View style={{ width: 200, height: 120, borderRadius: 12, backgroundColor: '#334', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#fff', fontSize: 30 }}>{busy ? '…' : '▶'}</Text>
+      </View>
+      <Text style={[ink, { fontSize: 13, opacity: 0.8 }]}>{`🎬 ${t('Video')}`}</Text>
+      {note ? <Text style={[ink, { fontSize: 13, opacity: 0.8 }]}>{note}</Text> : null}
+    </Pressable>
   );
 }
 

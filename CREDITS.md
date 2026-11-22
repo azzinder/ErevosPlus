@@ -34,7 +34,9 @@ Makers and licences are as the projects' own packages and files state them.
 | [fflate](https://github.com/101arrowz/fflate) | Arjun Barrett | MIT | Reading the zip files of chat exports |
 | [jsQR](https://github.com/cozmo/jsQR) | Cosmo Wolfe | Apache-2.0 | Reading a QR code from a picture in the web app |
 | [ZXing](https://github.com/zxing/zxing) | The ZXing authors | Apache-2.0 | Reading a QR code from a photo on Android |
+| [libphonenumber](https://github.com/google/libphonenumber) and its geocoder | Google LLC and the libphonenumber authors | Apache-2.0 | Saying where an unknown caller's number is from, and whether it is a mobile, offline on Android |
 | [AndroidX Media3](https://github.com/androidx/media) (`media3-exoplayer`, `media3-session`, `media3-ui`) | The Android Open Source Project | Apache-2.0 | Playing the Collection's music and videos on Android, with the screen off and on the lock screen |
+| [AndroidX CameraX](https://developer.android.com/jetpack/androidx/releases/camera) (`camera-core`, `camera-video`, `camera-extensions` and the rest) | The Android Open Source Project | Apache-2.0 | Erevos's own camera on Android, with the night, HDR and portrait the phone's maker offers through CameraX Extensions, where it has them |
 | [hls.js](https://github.com/video-dev/hls.js) | The hls.js authors (video-dev) | Apache-2.0 | Playing HLS streams (TV channels, radio) in the desktop app and a browser, where the browser cannot by itself |
 | [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) | Kazuhiko Arase | MIT | Drawing the QR codes of the donation page |
 | [react-native-svg](https://github.com/react-native-community/react-native-svg) | Horcrux and the React Native community | MIT | Drawing the stickers |
@@ -52,8 +54,6 @@ Copied into Erevos or used by it, but not installed as packages.
 - **Matrix emoji for checking a chat.** The 64 pictures and their names (`app/lib/sas-emoji.ts`) are the table in the [Matrix specification](https://github.com/matrix-org/matrix-spec) (`data-definitions/sas-emoji.json`, Apache-2.0, by The Matrix.org Foundation); the Greek names are added here.
 - **Installed on a relay, not shipped.** `deploy/relay/install.sh` installs [coturn](https://github.com/coturn/coturn) (the TURN server for calls, BSD-3-Clause, by the Coturn project) and [Caddy](https://github.com/caddyserver/caddy) (TLS certificates and the web front, Apache-2.0, by the Caddy authors) from the server's own package sources.
 - **Test data.** The NIP-44 test vectors (`crates/erevos-nostr/tests/nip44.vectors.json`, from [paulmillr/nip44](https://github.com/paulmillr/nip44), MIT, by Paul Miller) and the example messages of NIP-17 (`nip17-*.json`, from the [Nostr NIPs](https://github.com/nostr-protocol/nips)). Only the tests use them; they are not part of the app.
-- **Erevos+: Messenger, Signal and Session.** Built from `messenger/` and fetched at build time, not listed above as their own lockfiles or build configurations hold them: [mautrix-meta](https://github.com/mautrix/meta) (messagix and the encrypted-chat code, AGPL-3.0-or-later, by Tulir Asokan and contributors) with the Go modules in `messenger/go.sum`; [presage](https://github.com/whisperfish/presage), libsignal-service-rs and [libsignal](https://github.com/signalapp/libsignal) (AGPL-3.0) with the crates in `messenger/signal/Cargo.lock`, among them presage's rusqlite fork, vendored under `messenger/signal/vendor/` (libsqlite3-sys, MIT, by the rusqlite developers), with [SQLCipher](https://github.com/sqlcipher/sqlcipher) inside it (BSD-3-Clause, by Zetetic, LLC) and [SQLite](https://sqlite.org) (public domain); [RingRTC](https://github.com/signalapp/ringrtc) (AGPL-3.0-only, by Signal Messenger) for Signal's calls; libsession-util and libsession-util-android (GPL-3.0, by the Session Foundation), with the word list and seed certificates of session-android (`messenger/NOTICE`). None of them is made by Meta, Signal or the Session Foundation for Erevos.
-- **Erevos+ only: Telegram.** The Erevos+ build (`docs/erevosgram.md`, `.github/workflows/erevosgram.yml`), and not the plain Erevos, carries [TDLib](https://github.com/tdlib/td) (Telegram's client library, Boost Software License 1.0, by Telegram), built from source at the commit `scripts/build-tdlib.sh` pins, and [NTgCalls](https://github.com/pytgcalls/ntgcalls) 3.0.5 (Telegram calls, LGPL-3.0, by the PyTgCalls developers) from Maven Central, unchanged, as shared libraries (`libtdjsonjava.so`, `libntgcalls.so`). NTgCalls brings [WebRTC](https://webrtc.org) with it (`libjingle_peerconnection_so.so`, BSD-3-Clause, by The WebRTC project authors). Because NTgCalls stays a separate, unchanged library, the LGPL lets it be replaced by another build of it; its source is at its link. Telegram is a trademark of Telegram; Erevos+ is not made or endorsed by Telegram.
 - **Models downloaded when asked for.** Not in the app: each is downloaded from Erevos's own server only when its owner asks, and checked against its SHA-256 (`crates/erevos-speech`). The speech model is OpenAI's [Whisper small](https://github.com/openai/whisper) (MIT, by OpenAI), its weights made 8-bit by `examples/make_model.rs`. The translation models are [OPUS-MT](https://github.com/Helsinki-NLP/Opus-MT) by Jörg Tiedemann and the Language Technology Research Group at the University of Helsinki (CC-BY 4.0): `opus-mt-grk-en`, `opus-mt-en-el`, `opus-mt-de-en`, `opus-mt-en-de`, `opus-mt-es-en`, `opus-mt-en-es`, `opus-mt-fr-en`, `opus-mt-en-fr`, `opus-mt-it-en` and `opus-mt-en-it`, as Hugging Face keeps them, their weights made 8-bit by `examples/make_translation.rs`, otherwise unchanged; trained on the [OPUS](https://opus.nlpl.eu) corpora.
 <!-- other:end -->
 
@@ -887,7 +887,7 @@ The core of the app, the relay and the Tor connection are written in Rust. Every
 | [fnv](https://github.com/servo/rust-fnv) | 1.0.7 | Apache-2.0 OR MIT |
 | [foldhash](https://github.com/orlp/foldhash) | 0.1.5 | Zlib |
 | [foldhash](https://github.com/orlp/foldhash) | 0.2.0 | Zlib |
-| [form_urlencoded](https://github.com/servo/rust-url) | 1.2.2 | MIT OR Apache-2.0 |
+| [form_urlencoded](https://github.com/servo/rust-url) | 1.2.3 | MIT OR Apache-2.0 |
 | [fs-mistrust](https://gitlab.torproject.org/tpo/core/arti) | 0.16.1 | MIT OR Apache-2.0 |
 | [fslock-guard](https://gitlab.torproject.org/tpo/core/arti) | 0.9.1 | MIT OR Apache-2.0 |
 | [funty](https://github.com/myrrlyn/funty) | 2.0.0 | MIT |
@@ -1303,7 +1303,7 @@ The core of the app, the relay and the Tor connection are written in Rust. Every
 | [universal-hash](https://github.com/RustCrypto/traits) | 0.6.1 | MIT OR Apache-2.0 |
 | [untrusted](https://github.com/briansmith/untrusted) | 0.9.0 | ISC |
 | [unty](https://github.com/bincode-org/unty) | 0.0.4 | MIT OR Apache-2.0 |
-| [url](https://github.com/servo/rust-url) | 2.5.8 | MIT OR Apache-2.0 |
+| [url](https://github.com/servo/rust-url) | 2.5.9 | MIT OR Apache-2.0 |
 | [utf8_iter](https://github.com/hsivonen/utf8_iter) | 1.1.0 | Apache-2.0 OR MIT |
 | [utf_types](https://github.com/hsivonen/utf_types) | 1.0.0 | Apache-2.0 OR MIT |
 | [uuid](https://github.com/uuid-rs/uuid) | 1.29.3 | Apache-2.0 OR MIT |
@@ -1461,16 +1461,24 @@ The Android app's Tor bridges are lyrebird, built from these modules (`transport
 
 ### Android libraries
 
-Libraries that Erevos's own Android code declares (`group:name`). React Native and Expo also bring Google's AndroidX libraries (Apache-2.0) when the Android app is built. React Native WebRTC brings the WebRTC library (BSD-3-Clause, built by Jitsi) and React Native Quick Crypto brings OpenSSL (Apache-2.0). 9 libraries.
+Libraries that Erevos's own Android code declares (`group:name`). React Native and Expo also bring Google's AndroidX libraries (Apache-2.0) when the Android app is built. React Native WebRTC brings the WebRTC library (BSD-3-Clause, built by Jitsi) and React Native Quick Crypto brings OpenSSL (Apache-2.0). 17 libraries.
 
 | Library | Version | Licence |
 | --- | --- | --- |
+| [androidx.camera:camera-camera2](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
+| [androidx.camera:camera-core](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
+| [androidx.camera:camera-extensions](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
+| [androidx.camera:camera-lifecycle](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
+| [androidx.camera:camera-video](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
+| [androidx.camera:camera-view](https://developer.android.com/jetpack/androidx/releases/camera) | 1.6.0 | Apache-2.0 |
 | [androidx.media3:media3-exoplayer](https://github.com/androidx/media) | 1.8.0 | Apache-2.0 |
 | [androidx.media3:media3-exoplayer-hls](https://github.com/androidx/media) | 1.8.0 | Apache-2.0 |
 | [androidx.media3:media3-session](https://github.com/androidx/media) | 1.8.0 | Apache-2.0 |
 | [androidx.media3:media3-ui](https://github.com/androidx/media) | 1.8.0 | Apache-2.0 |
 | androidx.webkit:webkit | 1.12.1 | see its source |
 | [com.google.zxing:core](https://github.com/zxing/zxing) | 3.5.3 | Apache-2.0 |
+| [com.googlecode.libphonenumber:geocoder](https://github.com/google/libphonenumber) | 3.43 | Apache-2.0 |
+| [com.googlecode.libphonenumber:libphonenumber](https://github.com/google/libphonenumber) | 9.0.43 | Apache-2.0 |
 | org.jetbrains.kotlinx:kotlinx-coroutines-android | 1.9.0 | see its source |
 | org.jitsi:webrtc | 155.+ | see its source |
 | org.sessionfoundation:libsession-util-android | 1.1.0-58-gc5c6c89 | see its source |

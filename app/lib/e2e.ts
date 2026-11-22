@@ -166,7 +166,8 @@ function firstAt(): number {
 // Whether a first packet from a known contact is older than the newest one taken from them: one
 // that says no later a time (`fa`) than that one, or, while they said none, a queue made before the
 // one kept (`qa`, a late copy). It never takes the place of the conversation this chat sends in.
-function staleFirst(message: Message, known: Contact): boolean {
+// Exported for its check only.
+export function staleFirst(message: Pick<Message, 'fa' | 'qa'>, known: Pick<Contact, 'firstAt' | 'qa'>): boolean {
   if (known.firstAt) return !message.fa || message.fa <= known.firstAt;
   return !message.fa && !takesPlace(message.qa, known.qa);
 }

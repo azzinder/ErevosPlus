@@ -213,4 +213,11 @@ export const cloudBackup: Record<string, string> = {
     "Il controllo successivo ha trovato un problema: {error}",
   "The check after it found {missing} of its {parts} parts missing and {damaged} damaged.":
     "Il controllo successivo ha trovato che delle sue {parts} parti ne mancano {missing} e {damaged} sono danneggiate.",
+  "Making the backup…": "Backup in corso…",
+  "Gathering chats, contacts, SMS, calls and settings…": "Raccolta di chat, contatti, SMS, chiamate e impostazioni…",
+  "Encrypting and saving…": "Cifratura e salvataggio…",
+  "Encrypting photos, files and voice messages…": "Cifratura di foto, file e messaggi vocali…",
+  "Keep Erevos open until it is done: a notice says when.": "Tieni Erevos aperto finché non ha finito: una notifica ti dirà quando.",
+  "Backup made": "Backup fatto",
+  "{name} ({size}) is saved in {folder}.": "{name} ({size}) è salvato in {folder}.",
 };

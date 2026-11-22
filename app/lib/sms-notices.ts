@@ -4,9 +4,9 @@
 
 import { mutedNow, type ChatNotify } from '../lock/chat-notify';
 import { currentSpace } from '../lock/keys';
-import { loadSmsData } from '../lock/sms-data';
+import { loadSmsData, type SmsData } from '../lock/sms-data';
 import type { SmsOwn } from '../lock/sms-own';
-import { canSmsOwnNotices, smsOwnNotices } from '../modules/erevos-sms';
+import { canSmsOwnNotices, smsNoticeDetails, smsOwnNotices } from '../modules/erevos-sms';
 
 import { smsNumbers } from './sms-group';
 import { sameNumber } from './sms-invite';
@@ -64,9 +64,12 @@ function tell(list: readonly SmsOwn[]): void {
 }
 
 /** The space's SMS data was read or changed (lib/sms-link.ts): while it is the one open, the phone
- *  learns what its conversations have of their own now. */
-export function smsNoticesRead(space: number, list: readonly SmsOwn[]): void {
-  if (space === open) tell(list);
+ *  learns what its conversations have of their own now, and whether a notice shows who wrote and
+ *  what (SmsStore.setNoticeDetails); once it closes, a notice says only "New message" again. */
+export function smsNoticesRead(space: number, data: Pick<SmsData, 'own' | 'notices'>): void {
+  if (space !== open) return;
+  tell(data.own);
+  smsNoticeDetails(data.notices);
 }
 
 /** How an SMS from `address` sounds as it comes, by its conversation's own notifications in the
@@ -85,12 +88,13 @@ export function startSmsNotices(): () => void {
   const { space, key } = currentSpace();
   open = space;
   void loadSmsData('space', space, key)
-    .then((data) => smsNoticesRead(space, data.own))
+    .then((data) => smsNoticesRead(space, data))
     .catch(() => undefined);
   return () => {
     if (open !== space) return;
     open = null;
     tell([]);
+    smsNoticeDetails(false);
     taken = false;
   };
 }

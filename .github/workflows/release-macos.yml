@@ -244,6 +244,8 @@ jobs:
           again() { for wait in 15 30 60; do "$@" && return; echo "::warning::$* failed; again in $wait s"; sleep "$wait"; done; "$@"; }
           again gh release upload "v$EREVOS_VERSION" files/erevos-macos.dmg files/SHA256SUMS --repo "$RELEASES_REPO" --clobber
           again gh release edit "v$EREVOS_VERSION" --repo "$RELEASES_REPO" --notes-file notes.md
+          # SHA256SUMS changed, so the signature served beside the web app no longer fits it.
+          echo "::notice::SHA256SUMS of v$EREVOS_VERSION changed: on the computer with the release key, run deploy/web/publish-sums.sh $EREVOS_VERSION <user@server>"
 
       - name: Delete the draft
         if: ${{ always() }}

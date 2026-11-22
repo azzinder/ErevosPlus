@@ -218,6 +218,7 @@ export const chat: Record<string, string> = {
   'Place {n}': 'Mjesto {n}',
   'New hidden chats start in place {n} with this PIN. If that place held hidden chats, they can no longer be opened.': 'Novi skriveni razgovori počinju na mjestu {n} s ovim PIN-om. Ako su na tom mjestu bili skriveni razgovori, više se ne mogu otvoriti.',
   'Start and move': 'Pokreni i premjesti',
+  'Use it anyway': 'Ipak koristi',
   'Move': 'Premjesti',
   'New hidden chats': 'Novi skriveni razgovori',
   'Their phone is told at once where to write from now on. A message they send in that moment may not come.': 'Telefon te osobe odmah saznaje novu adresu. Poruka koju ta osoba pošalje upravo tada možda neće stići.',

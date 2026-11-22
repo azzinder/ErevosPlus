@@ -23,7 +23,7 @@ import { secureGet, secureSet } from '../lib/secure';
 import { shutDoorsPast } from './doors';
 import { deleteOpenKey, saveOpenKey } from './keys';
 import { SLOTS } from './slots';
-import { assertNotLockedOut, recordRightPassword, recordWrongPassword } from './tries';
+import { countedCheck, KEY_TRIES } from './tries';
 
 // Password lock, built the way LPHL FASOULI builds its own. Kept in the OS keystore, outside
 // every space, because it decides which space opens and holds its key.
@@ -264,12 +264,14 @@ function openSlot(config: LockConfig, index: number, keys: SlotKeys): Uint8Array
 // here, since each one would tell whether a password opens some space.
 // The panic password is checked with the slots, as one more (`panic`: it was the one typed).
 async function countedMatch(config: LockConfig, password: string, now: number): Promise<{ index: number; keys: SlotKeys | null; panic: boolean }> {
-  await assertNotLockedOut(now);
-  const panicSlot = await loadPanicSlot(config.iter);
-  const result = await match({ ...config, slots: [...config.slots, panicSlot] }, password);
+  // One at a time, counted before the slow keys are made (tries.ts countedCheck).
+  const result = await countedCheck(
+    KEY_TRIES,
+    now,
+    async () => match({ ...config, slots: [...config.slots, await loadPanicSlot(config.iter)] }, password),
+    (found) => found.index >= 0,
+  );
   const panic = result.index === config.slots.length;
-  if (result.index < 0) await recordWrongPassword(now);
-  else await recordRightPassword();
   return panic ? { index: -1, keys: null, panic } : { ...result, panic };
 }
 

@@ -123,7 +123,7 @@ function answer(method: string, path: string, authorization: string, body: strin
     const n = ++provider.n;
     provider.access.add(`access-${n}`);
     provider.refresh.add(`refresh-${n}`);
-    const claims = { iss: issuer, aud: 'erevos-id', sub: 'sub-nekten', nonce, preferred_username: 'Nekten' };
+    const claims = { iss: issuer, aud: 'erevos-id', sub: 'sub-nekten', nonce, preferred_username: 'Nekten', exp: Math.floor(Date.now() / 1000) + 300 };
     return [200, { access_token: `access-${n}`, refresh_token: `refresh-${n}`, id_token: `e30.${b64url(JSON.stringify(claims))}.sig`, token_type: 'Bearer' }];
   }
   if (method === 'GET' && path === '/application/o/userinfo/') {

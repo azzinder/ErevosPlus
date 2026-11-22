@@ -265,6 +265,37 @@ pub struct SignIn {
     state: Mutex<State>,
 }
 
+/// How far the provider's clock may be ahead of or behind the relay's, for `exp`.
+const CLOCK_SKEW: u64 = 5 * 60;
+
+/// Whether an ID token's claims are for this sign-in (OpenID Connect Core 3.1.3.7): from the
+/// provider (`iss`), for this client (`aud`, and `azp` when it names others too, or names any
+/// party at all), with this flow's `nonce`, not expired (`exp`, required) and naming someone (`sub`).
+fn id_token_fits(claims: &Value, issuer: &str, client_id: &str, nonce: &str, now: u64) -> bool {
+    let from = claims["iss"].as_str().unwrap_or_default();
+    let (audience, others) = match &claims["aud"] {
+        Value::String(one) => (one == client_id, false),
+        Value::Array(all) => (
+            all.iter().any(|a| a.as_str() == Some(client_id)),
+            all.iter().any(|a| a.as_str() != Some(client_id)),
+        ),
+        _ => (false, false),
+    };
+    let party = match claims.get("azp") {
+        Some(azp) => azp.as_str() == Some(client_id),
+        None => !others,
+    };
+    let fresh = claims["exp"]
+        .as_f64()
+        .is_some_and(|exp| exp.is_finite() && exp + CLOCK_SKEW as f64 > now as f64);
+    from.trim_end_matches('/') == issuer.trim_end_matches('/')
+        && audience
+        && party
+        && fresh
+        && claims["nonce"].as_str() == Some(nonce)
+        && !claims["sub"].as_str().unwrap_or_default().is_empty()
+}
+
 impl SignIn {
     /// Sign-ins with the provider `config` names, the lines' records kept in
     /// `path` (none: in memory only, for checks).
@@ -530,22 +561,15 @@ impl SignIn {
             .as_deref()
             .and_then(oidc::id_claims)
             .ok_or_else(|| Failure::Later("it gave no ID token".into()))?;
-        let issuer = claims["iss"].as_str().unwrap_or_default();
-        let audience = match &claims["aud"] {
-            Value::String(one) => one == &config.client_id,
-            Value::Array(all) => all.iter().any(|a| a.as_str() == Some(&config.client_id)),
-            _ => false,
-        };
-        let sub = claims["sub"].as_str().unwrap_or_default().to_string();
-        if issuer.trim_end_matches('/') != config.issuer.trim_end_matches('/')
-            || !audience
-            || claims["nonce"].as_str() != Some(&flow.nonce)
-            || sub.is_empty()
-        {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_secs());
+        if !id_token_fits(&claims, &config.issuer, &config.client_id, &flow.nonce, now) {
             return Err(Failure::Later(
                 "its ID token is not for this sign-in".into(),
             ));
         }
+        let sub = claims["sub"].as_str().unwrap_or_default().to_string();
         if sub.len() > MAX_SUB || refresh.len() > MAX_REFRESH {
             return Err(Failure::Later(
                 "its sub or refresh token is too long to keep".into(),
@@ -1497,6 +1521,11 @@ pub mod tests {
                     let claims = serde_json::json!({
                         "iss": issuer, "aud": "erevos-id", "sub": sub, "nonce": nonce,
                         "preferred_username": s.user,
+                        "exp": std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs()
+                            + 300,
                     });
                     reply["id_token"] = Value::String(format!(
                         "eyJhbGciOiJSUzI1NiJ9.{}.signature",
@@ -1693,6 +1722,40 @@ pub mod tests {
 
     fn line_of(token: &str) -> [u8; 32] {
         Sha256::digest(token.as_bytes()).into()
+    }
+
+    #[test]
+    fn an_id_token_must_be_fresh_and_for_this_client_alone() {
+        let now = 1_800_000_000u64;
+        let good = serde_json::json!({
+            "iss": "https://id.example/app/", "aud": "erevos-id", "sub": "u1",
+            "nonce": "n1", "exp": now + 60,
+        });
+        assert!(id_token_fits(&good, "https://id.example/app", "erevos-id", "n1", now));
+        let with = |key: &str, value: Value| {
+            let mut claims = good.clone();
+            claims[key] = value;
+            claims
+        };
+        // Expired, past the allowed skew; without exp at all.
+        assert!(!id_token_fits(&with("exp", (now - CLOCK_SKEW - 1).into()), "https://id.example/app", "erevos-id", "n1", now));
+        assert!(id_token_fits(&with("exp", (now - 10).into()), "https://id.example/app", "erevos-id", "n1", now));
+        let mut no_exp = good.clone();
+        no_exp.as_object_mut().unwrap().remove("exp");
+        assert!(!id_token_fits(&no_exp, "https://id.example/app", "erevos-id", "n1", now));
+        // Several audiences: only with azp naming this client.
+        let many = with("aud", serde_json::json!(["erevos-id", "other"]));
+        assert!(!id_token_fits(&many, "https://id.example/app", "erevos-id", "n1", now));
+        let mut named = many.clone();
+        named["azp"] = "erevos-id".into();
+        assert!(id_token_fits(&named, "https://id.example/app", "erevos-id", "n1", now));
+        named["azp"] = "other".into();
+        assert!(!id_token_fits(&named, "https://id.example/app", "erevos-id", "n1", now));
+        // Another nonce, issuer or client; no sub.
+        assert!(!id_token_fits(&good, "https://id.example/app", "erevos-id", "n2", now));
+        assert!(!id_token_fits(&good, "https://other.example/app", "erevos-id", "n1", now));
+        assert!(!id_token_fits(&good, "https://id.example/app", "other", "n1", now));
+        assert!(!id_token_fits(&with("sub", "".into()), "https://id.example/app", "erevos-id", "n1", now));
     }
 
     #[test]

@@ -213,6 +213,7 @@ export const SETTINGS: SettingsGroup[] = [
           { id: 'spam', title: mark('Spam filter'), detail: mark('Its rules, your words, senders, numbers from abroad'), href: '/sms-settings?part=spam' },
           { id: 'blocked', title: mark('Blocked numbers'), detail: mark("Android's own list, for SMS and calls"), href: '/sms-settings?part=blocked' },
           { id: 'undo', title: mark('Taking an SMS back'), detail: mark('How long an SMS waits before it goes'), href: '/sms-settings?part=undo' },
+          { id: 'mms', title: mark('MMS'), detail: mark('Fetched at once, and while roaming'), href: '/sms-settings?part=mms' },
           { id: 'sims', title: mark('Two SIMs'), detail: mark('Which SIM answers a number'), href: '/sms-settings?part=sims', when: (place) => place.sims },
           { id: 'new', title: mark('New SMS'), detail: mark('To a number, or to several for a group MMS'), href: '/sms-settings?part=new' },
         ],

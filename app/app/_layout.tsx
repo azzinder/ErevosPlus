@@ -46,6 +46,7 @@ import { stopReleases, watchReleases } from '../lib/release-look';
 import { startSmsLater } from '../lib/sms-later';
 import { startChatLater } from '../lib/chat-later';
 import { startSmsNotices } from '../lib/sms-notices';
+import { clearCameraCache } from '../lib/camera-cache';
 import { StickerImageHost } from '../lib/sticker-image';
 import { forgetSmsLink } from '../lib/sms-relay';
 import { forgetSpaceChats, shareLastSeen } from '../lib/space-chats';
@@ -91,6 +92,9 @@ import { currentSpace, loadOpenKey, setCurrentSpace } from '../lock/keys';
 import { firstSpaceKey, firstStart, loadSpaceData, updateCurrentSpaceData, updateSpaceData } from '../lock/space-data';
 import { ModuleOff } from '../components/module-off';
 import { Setup, type SetupChoice } from '../components/setup';
+import { MovedOut, MoveFound } from '../components/moved-out';
+import { movedOut, onMovedOut, tellMoveTaken, waitingMove, type FoundMove } from '../lib/edition-move';
+import type { UpdateEdition } from '../lib/update-channel';
 import { radius, shape, space as gap } from '../theme/colors';
 import { ThemeProvider, useTheme } from '../theme/context';
 import { ensureStyleFonts } from '../theme/fonts';
@@ -128,7 +132,11 @@ type Phase =
   // `behind`: the space that goes on behind the password screen, until its password opens it again.
   | { kind: 'locked'; config: LockConfig; behind?: number }
   // `only`: the password was given for the SMS or the Contacts, which alone show; any other screen asks for it again.
-  | { kind: 'open'; space: number; passwordLock: boolean; only?: OnlyPart };
+  | { kind: 'open'; space: number; passwordLock: boolean; only?: OnlyPart }
+  // This app moved to another edition (lib/edition-move.ts): no space opens, until the move is called off.
+  | { kind: 'moved'; to: UpdateEdition; taken: boolean }
+  // Set up already, and another edition made a move for it: asked before anything opens.
+  | { kind: 'move-found'; move: FoundMove };
 
 // The space that was open when Android took the screens away (Erevos swiped away from the recent
 // apps), its look, and since when Erevos was away. The space goes on without them
@@ -161,11 +169,17 @@ export default function RootLayout() {
   // Another space to open, its password just given in the open one (LockState.openSpace): it opens
   // once the screens of the one that closed are gone.
   const switching = useRef<Unlocked | null>(null);
+  // Not now to a move another edition made: Erevos opens as before, this once.
+  const skipMoveAsk = useRef(false);
   const lang = useLang();
   // The words of Send to's encrypting screen follow the language (lib/share-texts.ts).
   useEffect(() => {
     if (Platform.OS === 'android') tellShareTexts();
   }, [lang]);
+  // What the Collection's camera left unencrypted in the cache, if Erevos stopped before it was kept.
+  useEffect(() => {
+    if (Platform.OS === 'android') clearCameraCache();
+  }, []);
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -253,10 +267,35 @@ export default function RootLayout() {
     // backup is restored too); whatever changes the lock waits for it.
     void hardenLock().catch(() => undefined);
     await loadLang();
+    // Moved to another edition (lib/edition-move.ts): nothing opens here, so that nothing comes in
+    // that it does not get; a move not taken within a day goes, and Erevos opens as before.
+    const moved = movedOut();
+    if (moved) {
+      // Nor does it go on receiving in the background, nor tell of messages there.
+      try {
+        callAudio?.stopReceiving?.();
+      } catch {
+        // A build from before it.
+      }
+      await show(await loadLockScreenLook());
+      setPhase({ kind: 'moved', ...moved });
+      return;
+    }
     // Which parts of Erevos run (lib/modules.ts): every one, until the owner chooses.
     await loadModules();
     followModuleIcons();
     const config = await loadLockConfig();
+    // A move taken here whose edition could not be told so then (lib/edition-move.ts).
+    void tellMoveTaken();
+    const setUp = config.direct !== null || config.slots.length > 0 || modulesChosen() || !(await firstStart());
+    // A move another edition made for this one, set up already: asked first (the first start's setup asks itself).
+    const found = setUp && !skipMoveAsk.current ? await waitingMove() : null;
+    skipMoveAsk.current = false;
+    if (found) {
+      await show(await loadLockScreenLook());
+      setPhase({ kind: 'move-found', move: found });
+      return;
+    }
     if (config.direct !== null) {
       // The lock was turned off in a later space: that one opens directly, with its key from the keystore.
       await openSpace(config.direct, false, await loadOpenKey(config.direct));
@@ -497,6 +536,15 @@ export default function RootLayout() {
     start().catch(fail);
   }, [start, fail]);
 
+  // This app has just moved to another edition (app/updates.tsx): the space closes, and only that shows.
+  useEffect(() => onMovedOut(() => void start().catch(fail)), [start, fail]);
+
+  // Not now to a move another edition made (components/moved-out.tsx): Erevos opens as before.
+  const moveLater = useCallback(() => {
+    skipMoveAsk.current = true;
+    start().catch(fail);
+  }, [start, fail]);
+
   // A look changed on the Appearance screen: kept in the open space, and copied for the password screen.
   const keepLook = useCallback(async (next: Look) => {
     setLook(next);
@@ -569,14 +617,14 @@ export default function RootLayout() {
       <ThemeProvider look={look} onChange={keepLook}>
         {/* A touch anywhere says the owner is there, for safety messages (lib/safety.ts). */}
         <View style={{ flex: 1 }} onTouchStart={() => ownerTouched()}>
-          <Shell lang={lang} phase={phase} error={error} lockState={lockState} onUnlock={unlocked} onRetry={retry} onSetup={(choice) => setupDone(choice).catch(fail)} />
+          <Shell lang={lang} phase={phase} error={error} lockState={lockState} onUnlock={unlocked} onRetry={retry} onMoveLater={moveLater} onSetup={(choice) => setupDone(choice).catch(fail)} />
         </View>
       </ThemeProvider>
     </KeyboardProvider>
   );
 }
 
-function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
+function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, onSetup }: {
   lang: Lang;
   phase: Phase;
   error: string | null;
@@ -584,6 +632,8 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
   onUnlock: (space: { space: number; key: Uint8Array }) => Promise<void>;
   /** Starts again after Erevos could not open: from the password, as when it starts. */
   onRetry: () => void;
+  /** Not now to a move another edition made for this app. */
+  onMoveLater: () => void;
   /** What the first start's setup chose. */
   onSetup: (choice: SetupChoice) => void;
 }) {
@@ -638,6 +688,24 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onSetup }: {
     return (
       <ScreenBackdrop>
         <View style={{ flex: 1, backgroundColor: colors.ground }} />
+        {bar}
+      </ScreenBackdrop>
+    );
+  }
+  if (phase.kind === 'moved') {
+    return (
+      <ScreenBackdrop>
+        <MovedOut key={lang} to={phase.to} taken={phase.taken} onChanged={onRetry} />
+        <AlertHost />
+        {bar}
+      </ScreenBackdrop>
+    );
+  }
+  if (phase.kind === 'move-found') {
+    return (
+      <ScreenBackdrop>
+        <MoveFound key={lang} move={phase.move} onDone={onRetry} onLater={onMoveLater} />
+        <AlertHost />
         {bar}
       </ScreenBackdrop>
     );

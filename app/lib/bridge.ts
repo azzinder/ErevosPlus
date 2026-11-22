@@ -15,7 +15,17 @@
 // `bridged`). Never for a relay reached only through Tor or another relay (mayReadThrough).
 
 import { nearby } from './nearby';
-import { ackThrough, mayReadThrough, receiveThrough, type ReadThrough, type Relay } from './relay';
+import { ackThrough, mayReadThrough, RelayUnreachableError, receiveThrough, type ReadThrough, type Relay } from './relay';
+
+/**
+ * Whether a look that failed with `error` may ask a phone nearby: only when the relay could not be
+ * reached at all and the phone has no internet as Android says (`online`, undefined where it is not
+ * told). A relay that answered (its queue full, a failure of its own), or one out of reach while
+ * the phone is online, is no reason to tell a phone nearby the queue (issue #22, 2026-11-22).
+ */
+export function needsBridge(error: unknown, online: boolean | undefined): boolean {
+  return error instanceof RelayUnreachableError && online !== true;
+}
 
 // The owner's answer for each phone nearby asked about, by what it reads for (the space, or one
 // hidden place) and link, while it is linked.

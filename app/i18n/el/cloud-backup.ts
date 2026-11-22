@@ -215,4 +215,11 @@ export const cloudBackup: Record<string, string> = {
     "Ο έλεγχος μετά βρήκε πρόβλημα: {error}",
   "The check after it found {missing} of its {parts} parts missing and {damaged} damaged.":
     "Ο έλεγχος μετά βρήκε ότι από τα {parts} κομμάτια του λείπουν {missing} και {damaged} είναι χαλασμένα.",
+  "Making the backup…": "Δημιουργία αντιγράφου…",
+  "Gathering chats, contacts, SMS, calls and settings…": "Συγκέντρωση συνομιλιών, επαφών, SMS, κλήσεων και ρυθμίσεων…",
+  "Encrypting and saving…": "Κρυπτογράφηση και αποθήκευση…",
+  "Encrypting photos, files and voice messages…": "Κρυπτογράφηση φωτογραφιών, αρχείων και φωνητικών μηνυμάτων…",
+  "Keep Erevos open until it is done: a notice says when.": "Κράτα το Erevos ανοιχτό μέχρι να τελειώσει: μια ειδοποίηση θα σου το πει.",
+  "Backup made": "Το αντίγραφο έγινε",
+  "{name} ({size}) is saved in {folder}.": "Το {name} ({size}) αποθηκεύτηκε στο {folder}.",
 };

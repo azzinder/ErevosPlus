@@ -21,8 +21,9 @@ import android.telephony.TelephonyManager
 import java.util.Locale
 
 /** Who is on a call, as the call screen and its notices show it: a name, when one is known, and the
- *  contact's photo. */
-internal class Caller(val number: String, val name: String?, val photo: Bitmap?)
+ *  contact's photo; for a number that is none of the contacts, what the number says of itself
+ *  (NumberInfo) and, when it is on the spam list, what kind (Spam, "" for no kind). */
+internal class Caller(val number: String, val name: String?, val photo: Bitmap?, val info: String? = null, val spam: String? = null)
 
 /** A number's contact in the phone's contacts: its name, photo (and a small one) and contact id. */
 internal class Contact(val id: Long, val name: String?, val photo: String?, val thumb: String?)
@@ -50,8 +51,11 @@ internal object Callers {
       Thread {
         val contact = runCatching { lookup(app, number) }.getOrNull()
         val photo = contact?.photo?.let { runCatching { photo(app, it) }.getOrNull() }
+        val stranger = contact == null && number.isNotBlank()
+        val info = if (stranger) runCatching { NumberInfo.of(app, number) }.getOrNull() else null
+        val spam = if (stranger && Spam.warns(app)) runCatching { Spam.of(app, number) }.getOrNull() else null
         main.post {
-          found[id] = Caller(number, contact?.name ?: networkName(call), photo)
+          found[id] = Caller(number, contact?.name ?: networkName(call), photo, info, spam)
           Calls.changed()
         }
       }.start()

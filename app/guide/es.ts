@@ -20,7 +20,7 @@ por internet.
 - **Apariencia:** los acabados de LPHL: Classic, Modernist y Nocturne, doce paletas, y cristal como en lphl.nekten.eu.
 
 {-**Erevos+** es la misma app con más: chats con gente en Telegram, Messenger, Signal, Session, Matrix, XMPP y
-Nostr, en Android 8.0 o posterior. Pasa a ella, o vuelve, en **Actualizaciones**: ver [Erevos o Erevos+, y betas](#update-channel).}
+Nostr, en Android 8.0 o posterior. Pasa a ella, o vuelve, en **Actualizaciones**: ver [Erevos, Erevos+ o Erevos Lite, y betas](#update-channel).}
 
 > Los mensajes están **cifrados de extremo a extremo**, tanto a través de un relay como cerca, pero nada ha sido auditado
 > todavía por expertos independientes. [Qué está protegido hoy](#privacy) dice exactamente qué lo está y qué no.
@@ -143,7 +143,7 @@ chats fijados y archivados.
   de al lado, te escribe un recordatorio.
 - **El auricular verde y la persona violeta** de arriba, en Android, abren **Teléfono** y **Contactos** directamente, en
   los colores de sus iconos en la pantalla de inicio del teléfono. No están además en el menú de los tres puntos.
-- **El botón de servicios**, bajo la búsqueda cuando hay dos partes con mensajes activadas en Módulos, dice qué parte
+- **El botón de servicios**, bajo la barra superior, donde se queda mientras la lista se desplaza, cuando hay dos partes con mensajes activadas en Módulos, dice qué parte
   de la lista se ve (**Todos los servicios**, o la elegida), con los signos de los servicios, los mensajes sin leer de
   todos y, en rojo, un servicio que ahora no está conectado. Tócalo para la ventana **Servicios**: una tarjeta por
   cada parte activada, también sin chats todavía, cada una con sus mensajes sin leer (99+ por encima de 99) y un
@@ -273,7 +273,7 @@ extremo entre ellos como tus chats: el relay solo las lleva cifradas.
 - **Pestañas:** desliza hacia la izquierda o la derecha para ir a la pestaña de al lado, como al tocar su chip:
   **Todos**, **SMS**{- y}{+,} **Erevos**{+, **Matrix**, **XMPP** y **Nostr**} en la pantalla de inicio (los activados en
   Módulos), **Teclado**, **Recientes** y **Favoritos** en **Teléfono**, los filtros en **Contactos**, y los grupos de
-  stickers. En la pantalla de inicio las partes se eligen en la ventana **Servicios**, con el botón bajo la búsqueda.
+  stickers. En la pantalla de inicio las partes se eligen en la ventana **Servicios**, con el botón bajo la barra superior.
 - En una pantalla con pestañas, deslizar solo cambia de pestaña, también sobre las filas de su lista, y más allá de la
   primera o la última pestaña no hace nada: vuelve ahí con la flecha de volver. Una conversación SMS se archiva o se
   elimina manteniéndola pulsada.
@@ -2697,6 +2697,11 @@ Erevos en una sola lista.
   ahí; en Android 12 y posteriores el botón del aviso pide desbloquear antes el teléfono. Solo se copian sus 4 a 8
   dígitos, nunca un número de teléfono, un importe, una fecha ni una hora, y Android no muestra ninguna vista previa de
   ellos. Cualquier app que lea el portapapeles puede leerlos, así que pega el código pronto.
+- **Responder desde el aviso:** **Ajustes** → **Teléfono y SMS** → **SMS** → **Lo que dice un SMS, en su aviso**,
+  desactivado al principio, muestra en el aviso de un SMS quién escribió y qué mientras este espacio está abierto,
+  con **Responder**, que envía un SMS simple por la SIM por la que llegó, y **Marcar como leído**. Quien vea la
+  pantalla lo ve; bloqueado, o con otro espacio abierto, el aviso vuelve a decir solo «Mensaje nuevo», y uno con
+  código de un solo uso siempre.
 - **Si no aparece ningún SMS:** Android 15 y posteriores retienen el permiso de SMS a una app instalada desde un
   navegador. En **Ajustes** → **Teléfono y SMS** → **SMS** → **Erevos como app de SMS**, toca **Permitir SMS**. Si
   Android dice que es un ajuste restringido, abre la **información de la aplicación de Erevos**, toca **⋮** arriba a la
@@ -2743,16 +2748,32 @@ que conozca números. La invitación es un SMS de datos, que las apps de mensaje
   Erevos como su imagen, solo en un MMS. Las fotos, mensajes de voz y tarjetas de contacto que llegan se ven en la
   conversación, para reproducir o guardar (**Guardar** abre un contacto nuevo con los datos de la tarjeta). Un MMS es
   tan claro como un SMS: la operadora puede verlo.
+- **Vídeos (MMS):** **+** → **Grabar un vídeo** pide a la app de cámara del teléfono un vídeo en calidad de MMS,
+  hasta 30 segundos de imagen pequeña, que la mayoría de cámaras respetan; **Vídeo del teléfono** toma uno solo si
+  ya es lo bastante pequeño, unos 280 KB, ya que Erevos no reduce vídeos. Un vídeo que llega muestra ▶ en la
+  conversación, y un toque lo reproduce en la app de vídeo del teléfono.
+- **MMS en el extranjero:** un MMS espera en la operadora hasta que el teléfono lo descarga por datos móviles, que
+  en el extranjero pueden costar. **Ajustes** → **Teléfono y SMS** → **SMS** → **MMS** los descarga al momento pero,
+  salvo que lo actives, no en itinerancia: entonces uno aparece en su conversación como **MMS** con su tamaño y
+  **Descargar (puede costar)**, y también bajo **MMS**, para un número sin conversación aún. Desactivado del todo,
+  cada MMS espera un toque.
 - **Dónde estás:** **+** → **Ubicación** envía dónde estás como un SMS con una dirección geo: y un enlace de
   OpenStreetMap, que abre cualquier teléfono. Una dirección geo:, o un enlace de OpenStreetMap, Google Maps, Apple Maps
   o Waze, en un SMS que llega se ve como un lugar, para abrir en la app de mapas; un enlace corto sigue siendo un
   enlace, porque habría que descargarlo para saber el lugar.
+- **Reacciones desde un iPhone o Google Messages:** cuando alguien sin Erevos reacciona a un SMS tuyo, su teléfono
+  la envía como palabras, Liked “Nos vemos a las 8” o Reacted 😂 to “Nos vemos a las 8”: la conversación la muestra
+  como 👍 o 😂 bajo el mensaje que nombra, el último con esas palabras, y no como un mensaje aparte; una retirada
+  (Removed a like from …) desaparece. Por ahora solo se leen las escritas en inglés; una cuyo mensaje no se
+  encuentra queda como llegó.
 - **Fijados para ti:** mantén pulsado un mensaje y elige **Fijar solo para mí** para fijarlo sobre la conversación. Los
   SMS no tienen fijados: se guarda solo en este teléfono, cifrado con los datos de SMS del espacio, y la otra persona
   nunca lo sabe.
 - **Varios mensajes:** mantén pulsado un mensaje y elige **Seleccionar**, luego toca otros: **Copiar** los pone en un
   solo texto, **Reenviar** los envía como uno al borrador de otra conversación, y **Eliminar** los elimina del teléfono,
   con **Deshacer** unos segundos.
+- **SMS nuevo:** en la parte **SMS** de la lista de chats, el botón de abajo es **SMS nuevo** y abre solo eso,
+  también con los chats propios de Erevos activados.
 - **Elegir al destinatario:** en **SMS nuevo**, toca **Contactos** para elegir entre tus contactos, con búsqueda, o
   simplemente escribe: los contactos que coinciden con el nombre o el número que escribes aparecen bajo el campo, y un
   toque lo rellena. Un contacto con varios números muestra una línea por cada uno. En un grupo, cada contacto que elijas
@@ -2776,7 +2797,7 @@ que conozca números. La invitación es un SMS de datos, que las apps de mensaje
 - **Enlaces:** una dirección web en un SMS aparece subrayada, y se abre como en un chat, después de haberla visto
   entera.
 - **Nombres de tus contactos:** desactivado al principio, así que los números de los SMS aparecen como números.
-  **Nombres**, encima de la lista, los desbloquea (como **Mostrar nombres de mis contactos** en **Ajustes** → **Teléfono
+  **Nombres**, encima de la lista en la parte **SMS**, los desbloquea (como **Mostrar nombres de mis contactos** en **Ajustes** → **Teléfono
   y SMS** → **SMS** → **Nombres de tus contactos**): los nombres que los contactos de tu teléfono dan a los números de
   SMS, y las fotos que tienen para ellos, o si no los de tus contactos guardados solo en Erevos, en la lista y en la
   conversación. Toca **Nombres** otra vez para ver solo números. Erevos solo los lee para mostrarlos, y no guarda
@@ -2859,9 +2880,18 @@ cuando tú lo eliges.
   verla y cambiarla.
 - **Borradores:** lo que escribes y no envías se queda con esa conversación, y la lista lo muestra como **Borrador**. Un
   SMS que no pudo salir también se queda ahí como borrador.
+- **Textos rápidos:** mantén pulsado el **+** junto al campo, o elige **Textos rápidos** en él, para palabras cortas
+  que escribes a menudo (Voy de camino, Te llamo luego): un toque pone uno en el campo, para enviarlo tal cual o con
+  algo más. **Añadir** guarda uno tuyo, y mantener uno pulsado lo quita; desde entonces la lista es tuya, guardada
+  cifrada con los SMS del espacio, cada espacio la suya.
 - **Deshacer el envío de un SMS:** un SMS que envías espera antes 5 segundos al final de la conversación: tócalo
   entonces para devolverlo al campo de mensaje. **Ajustes** → **Teléfono y SMS** → **SMS** → **Deshacer el envío de un
   SMS** fija **Desactivado**, 5 o 10 segundos. Cuando sales de Erevos, sale al instante.
+- **Lo que cuesta enviar:** un SMS más largo muestra sobre el campo una línea con cuántos caracteres tiene y en
+  cuántos SMS va: 160 caracteres en un SMS, o 153 en cada parte de uno más largo, pero 70, o 67, en cuanto tiene una
+  minúscula griega, un acento o un emoji. **Ajustes** → **Teléfono y SMS** → **SMS** → **Sin acentos (más barato)**
+  envía un SMS simple sin acentos y el griego en mayúsculas, como lo escribían los teléfonos antiguos (ΚΑΛΗΜΕΡΑ), y
+  vuelve a admitir 160; no uno con emoji, ni un MMS.
 - **Volver a enviar:** uno tuyo que no salió, o no se entregó, lo dice: tócalo para volver a enviarlo. Mantén pulsado
   cualquier mensaje para **Reenviar**, **Volver a enviar** y **Eliminar**, con sus palabras para seleccionar y copiar;
   un mensaje eliminado también tiene **Deshacer**.
@@ -2911,6 +2941,9 @@ lo abre en cuanto Erevos está desbloqueado: con contraseña, después de escrib
 ella (ver La contraseña de Erevos, más abajo). Hasta entonces una tarjeta arriba dice **Erevos no es la app de
 teléfono**; en un teléfono pequeño solo muestra ese título, y al tocarla se abren los **Ajustes** del Teléfono.
 
+- **Llamadas de emergencia:** un número de emergencia (112, o el de tu país) se llama al momento, sin preguntar la
+  SIM: la elige Android. Con Erevos bloqueado y Teléfono tras la contraseña, **Llamada de emergencia** en la pantalla
+  de contraseña abre el teclado de emergencia de Android, sin contraseña.
 - **Buscar contactos:** arriba del Teléfono, escribe un nombre, un número o parte de cualquiera de los dos: los
   contactos con número aparecen en lugar de las pestañas, cada número en una línea propia. Toca uno para llamarlo, o
   mantenlo pulsado para ponerlo en el teclado. Busca en los contactos del teléfono y, con Erevos desbloqueado, en los
@@ -2933,6 +2966,16 @@ teléfono**; en un teléfono pequeño solo muestra ese título, y al tocarla se 
 - **Una segunda llamada:** una que entra durante una llamada muestra **Hold and answer**, **End and answer** y
   **Decline**. Con una llamada retenida, la línea bajo el nombre lo dice: tócala, o **Swap**, para hablar con la
   otra. **Merge** junta las dos en una llamada, cuando tu compañía telefónica lo permite.
+- **Una conferencia:** con las llamadas combinadas, la pantalla de llamada muestra a las personas que están en ella
+  en lugar de la foto. Junto a cada una, **Separar** habla solo con ella mientras las demás esperan en espera, y
+  **Colgar** saca solo a esa; cada botón aparece solo donde tu compañía lo permite.
+- **Videollamadas a través de tu compañía:** donde tu SIM y tu red las admiten (ViLTE, por 4G o 5G), una
+  videollamada entrante muestra **Responder con vídeo** y **Solo audio**; en la llamada, el otro lado aparece a
+  pantalla completa y tu cámara en una esquina, con **Apagar cámara** y **Cambiar de cámara**. Una llamada sin vídeo
+  muestra **Vídeo** cuando ambos lados pueden, y cuando el otro lo pide, Erevos te pregunta: **Activar vídeo** o
+  **Seguir solo con audio**. Para empezar una, escribe el número y toca **⋯** → **Videollamada**. Android pide la
+  cámara una vez. Como cualquier llamada telefónica, la lleva tu compañía y puede verla; nada de esto aparece donde
+  la red no tiene videollamadas.
 - **Rechazar con un mensaje:** **Message**, en una llamada que suena, la rechaza con una respuesta rápida, o una que
   escribas, que tu teléfono envía a quien llama como SMS; aparece entre tus SMS. En **Teléfono** → **Ajustes**,
   **Respuestas rápidas** las cambia: **Añadir una respuesta**, **Quitar**, **Guardar** y **Usar las respuestas
@@ -2940,6 +2983,23 @@ teléfono**; en un teléfono pequeño solo muestra ese título, y al tocarla se 
 - **El teclado:** en **Teléfono**, escribe un número y toca **Llamar**; mantén pulsado **0** para el +. Al mantenerlo
   pulsado, el campo del número pega uno. **Add call**, durante una llamada, lo abre en cuanto Erevos está
   desbloqueado.
+- **Buzón de voz:** con el teclado vacío, mantén pulsado el **1** (marcado oo) para llamar a tu buzón de voz, desde
+  la SIM elegida encima de **Llamar**. Si la SIM no tiene número de buzón, el Teléfono lo dice: te lo da tu
+  compañía. Donde tu compañía envía los mensajes como grabaciones (buzón de voz visual), **Buzón de voz** aparece
+  junto a **Favoritos**: cada mensaje con quién lo dejó, cuándo, cuánto dura y sus palabras cuando llegaron. **▶**
+  lo reproduce, **■** lo para; un toque en la fila ofrece **Devolver la llamada**, **Enviar un SMS** y **Borrar este
+  mensaje de voz**. **Llamar al buzón de voz** arriba lo llama. Erevos los reproduce desde el almacén de Android y
+  no guarda copia; con Erevos bloqueado la pestaña no aparece.
+- **Marcación rápida:** con el teclado vacío, mantén pulsada una tecla del 2 al 9 para llamar a su número. Una tecla
+  sin número te deja elegir uno: escribe un nombre o un número y toca el contacto, o **Usar** el número escrito. En
+  **Teléfono** → **Ajustes**, **Marcación rápida** muestra las ocho teclas; toca una para cambiarla o vaciarla. La
+  marcación rápida se guarda cifrada en el espacio y funciona con Erevos desbloqueado.
+- **Ajustes de llamadas:** en **Teléfono** → **Ajustes**, **Ajustes de llamadas** abre las pantallas del propio
+  Android para lo que tu compañía guarda de las llamadas de cada SIM: **Desvío, espera y tu número** y **Número del
+  buzón de voz**; con dos SIM, toca primero la SIM. En **Preguntar a tu compañía**, cada botón marca el código de la
+  red (**Comprobar** el desvío \`*#21#\`, **Desactivarlo todo** \`##002#\`; llamada en espera \`*#43#\`,
+  **Activado** \`*43#\`, **Desactivado** \`#43#\`; mostrar tu número \`*#31#\`), y la respuesta aparece en un
+  mensaje de Android. Para ocultar tu número en una sola llamada, escribe \`#31#\` antes del número.
 - **Dos SIM:** encima de **Llamar**, toca la SIM con la que llamar; la primera vez, **Elegir la SIM** pide a Android que
   deje a Erevos verlas. Un número al que llamas sin elegir pregunta con cuál (**Llamar con**). Erevos guarda la SIM que
   usaste para cada número, sellada en el espacio, y la próxima vez llama con la misma. La pantalla de llamada nombra la
@@ -2978,6 +3038,19 @@ teléfono**; en un teléfono pequeño solo muestra ese título, y al tocarla se 
   uno para desbloquearlo. En **Recientes**, las llamadas de una fila muestran **Bloquear este número** o **Desbloquear
   este número**, con **Deshacer**. Android rechaza sus llamadas antes de que suenen, y sus SMS y MMS. Todos los
   espacios ven la misma lista.
+- **Números desconocidos y spam:** para un número que no está en tus contactos, la pantalla de llamada dice bajo el
+  número de dónde es (su país y bandera, y la ciudad de un fijo cuando el número la indica) y si es un móvil, un
+  fijo, gratuito o de tarificación adicional: leído solo del número, en el teléfono. En **Teléfono** → **Ajustes**,
+  **Lista de spam** descarga entera una lista de números conocidos por spam desde la dirección https:// que
+  escribes: un número por línea con su código de país, o el comienzo de números seguido de \`*\`, y luego qué tipo
+  de llamadas son. Erevos no tiene una propia; elige una lista de confianza. Sin Tor, el servidor de la lista ve la
+  dirección de internet del teléfono, y Erevos lo dice antes. La pantalla de llamada de un número de la lista
+  muestra **Posible spam**; **Llamadas de spam en silencio** las hace sonar sin sonido (Android 10 y posteriores),
+  nunca las de un contacto. En **Recientes**, **Denunciar como spam** en un número que no está en tus contactos lo
+  añade solo en este teléfono, y **No es spam** lo quita; **Olvidar mis denuncias** las borra. Ningún número se
+  busca nunca en ningún sitio. **Descargarla de nuevo cada semana** la trae otra vez de la misma dirección cuando
+  tiene una semana, con Erevos desbloqueado, por Tor cuando la vía Tor del espacio está activada; está desactivado
+  hasta que lo actives.
 - **Un grupo de contactos durante un tiempo:** en **Teléfono** → **Ajustes**, **Bloquear un grupo de contactos** lista
   los grupos (las etiquetas) de los contactos de tu teléfono. **Bloquear** junto a uno bloquea las llamadas de sus
   contactos **Durante una hora**, **Hasta mañana por la mañana** (7:00) o **Hasta que lo desbloquee**; la línea bajo el
@@ -3122,7 +3195,8 @@ opciones: **Sin bloqueo** y **Contraseña**.
   que una copia de su almacenamiento no sirve para probar contraseñas. Pero quien rompa la seguridad del propio
   teléfono, como hacen herramientas forenses en algunos teléfonos, podría probar en ordenadores propios, y un PIN de 6
   dígitos, un millón de combinaciones, cae en días. Una frase de 4 o 5 palabras no. Bajo una contraseña nueva corta, o
-  un PIN de chats ocultos, Erevos lo dice; aun así la acepta.
+  un PIN de chats ocultos, Erevos lo dice, y la acepta solo tras pulsar **Usar de todos modos**. Quien tenga una copia
+  de seguridad y su contraseña puede probar lo mismo en ella: ahí un PIN corto es más débil.
 - **Bloqueado, sigue recibiendo:** cuando Erevos se bloquea, la pantalla de la contraseña se pone delante del espacio
   abierto, que sigue detrás: los mensajes y las llamadas siguen llegando, con sus avisos, y una llamada aparece sobre la
   pantalla de la contraseña. Sus pantallas se cierran, también los chats ocultos, y la pantalla de llamada ya no muestra
@@ -3441,7 +3515,8 @@ La Colección es un lugar cifrado para tus fotos, archivos y carpetas, en cada e
 - **Con Nextcloud, como el de LPHL:** en ese formulario, y en **Añadir un servidor** de las copias de seguridad, escribe la dirección de tu Nextcloud en **Tu Nextcloud** y toca **Iniciar sesión con Nextcloud**: inicia sesión en el navegador, como en Fasouli, con Authentik o como se inicie allí, y elige **Conceder acceso**. Erevos obtiene una contraseña de aplicación propia y rellena el formulario con su propia carpeta en tus archivos, **Erevos/Collection** o **Erevos/Backups**, creada si no existe, junto a la de Fasouli, que nunca lee; luego toca **Conectar**. Esa contraseña se retira en Nextcloud → Configuración → Seguridad. El inicio de sesión sigue el interruptor **Por Tor** del servidor para el que se hace: activado, Erevos pregunta a tu Nextcloud solo por Tor, pero la página del navegador en sí va como siempre.
 - **En tus dispositivos vinculados:** en los ajustes de la Colección, **También en mis dispositivos vinculados** envía esa Colección a los [dispositivos vinculados](#devices) de su espacio o lugar oculto, y el interruptor vale para todos. Un archivo añadido, renombrado, movido o borrado en uno lo está en todos. Las miniaturas llegan enseguida; el archivo en sí llega enseguida en la misma Wi-Fi, si no cuando lo abres, desde el servidor WebDAV si la Colección tiene uno, o por el relay hasta 100 MB. Cada trozo se guarda solo cuando abre con la clave del archivo, y una transferencia cortada sigue desde el trozo que faltaba. Un archivo se borra en otro lugar solo cuando se borra en uno de tus dispositivos, nunca porque falte allí. La Colección de un lugar oculto va solo a los dispositivos vinculados de ese lugar.
 - **Música, vídeos y PDF:** un PDF se lee página a página dentro de Erevos (Android 11 y posteriores), descifrado solo en la memoria. La música y los vídeos se reproducen directamente desde sus trozos cifrados, nunca desde una copia: un vídeo a pantalla completa, la música con las siguientes de la carpeta, sin parar con la pantalla apagada, con reproducir, pausa, siguiente y anterior en la notificación y en la pantalla de bloqueo del teléfono, y solo eso allí. La lista sigue después de que el espacio se bloquee, salvo que **Detener la reproducción cuando el espacio se bloquea** esté activado en los ajustes de la Colección; **Detener** y el botón de pánico la terminan. La notificación solo dice **Reproduciendo**, salvo que **Mostrar el título en la notificación** esté activado. **Abrir con otra aplicación** entrega el archivo a medida que se descifra, sin copia en el teléfono, hasta que salgas de la Colección; la otra aplicación puede quedarse con una propia.
-- **Originales de la galería:** con **Borrar el original de la galería tras importarlo** activado, una foto o un vídeo elegido de los archivos del teléfono se borra de la galería en cuanto está en la Colección, después de que Android te pida confirmarlo. Hace falta Android 11 o posterior. Una foto de la cámara nunca va a la galería.
+- **Originales de la galería:** con **Borrar el original de la galería tras importarlo** activado, una foto o un vídeo elegido de los archivos del teléfono se borra de la galería en cuanto está en la Colección, después de que Android te pida confirmarlo. Hace falta Android 11 o posterior. Una foto de la cámara nunca va a la galería. Si Android no dice qué foto de la galería es (como desde **Recientes** en el selector de archivos), el original se queda y Erevos lo dice: elígela en **Imágenes** o en el almacenamiento del teléfono.
+- **Fotos y vídeos:** en **+**, **Cámara** es la propia de Erevos: fotos y vídeos uno tras otro, con flash y cámara frontal, directo a la Colección, nunca a la galería, y ninguna otra aplicación los ve; una foto nunca se escribe en ningún sitio, ni por un momento, y no lleva nada más que su imagen. Donde el fabricante del teléfono los ofrece, como en un Pixel, **Noche** y **Retrato** están junto a **Foto**, y arriba **HDR activado**: son del propio teléfono, se hacen en él, y nada sale. Un toque enfoca y ajusta la luz ahí; con dos dedos haces zoom, y los botones sobre el obturador van al gran angular (**0.5×**), a **1×**, **2×** y **5×** donde el teléfono los tiene. **Más** tiene un temporizador de 3 o 10 segundos, una cuadrícula, un obturador silencioso donde la ley lo permite, **Más oscuro** y **Más claro** y, para vídeos, HD, Full HD o 4K, y **Vídeo HDR activado** donde el teléfono lo graba; en vídeo la luz puede quedarse encendida. **De la galería** trae muchas fotos y vídeos a la vez; con **Borrar el original de la galería tras importarlo** activado, Android pregunta una sola vez por todos. Las fotos HEIC y AVIF aparecen en **Fotos** (Android muestra HEIC desde 9 y AVIF desde 12); una que el dispositivo no puede mostrar ofrece **Abrir con otra aplicación**. Bajo una foto, **Editar** la gira un cuarto cada vez y la recorta con un marco que arrastras por las esquinas: se guarda como foto nueva, y la original se queda como estaba. **Información** dice si una foto o un vídeo dice dónde se tomó. Una foto JPEG, PNG, WebP o GIF guardada fuera o abierta con otra aplicación sale sin dónde ni cuándo se tomó ni el teléfono, salvo que **Las fotos salen con lugar y hora** esté activado en los ajustes de la Colección; un vídeo o una foto HEIC sale tal cual, y Erevos avisa antes si nombra un lugar. La cámara, la galería y **Editar** están en Android; en la app de escritorio y en un navegador también se ven las fotos AVIF.
 - **En la aplicación de escritorio:** en Linux, macOS y Windows la Colección también funciona, con sus archivos cifrados en la carpeta propia de Erevos en el ordenador. **+** trae un archivo del ordenador, cifrado trozo a trozo; no hay cámara. Fotos, textos, PDF (en el visor de PDF integrado), música y vídeos se abren solo en la memoria de Erevos, nunca como copia sin cifrar en el disco, hasta 1 GB cada uno, y música y vídeos de cualquier tamaño, leídos trozo a trozo de sus partes cifradas mientras suenan; el archivo se cierra, y la música o un vídeo se detiene, cuando el espacio se bloquea o con el botón de pánico. **Guardar en el ordenador** pregunta antes, como en el teléfono; **Abrir con otra aplicación** no está.
 - **En un navegador y en Sailfish OS:** la app web, también en la pantalla de inicio de un iPhone, y {=Erevos} en Sailfish OS tienen también la Colección. **+** trae un archivo con el selector del propio navegador, leído y cifrado trozo a trozo, así que uno grande nunca se tiene entero en memoria; sus trozos se guardan en el almacenamiento del navegador, o en Sailfish OS en la carpeta propia de Erevos. Un navegador da a un sitio un espacio limitado: cuando se acaba, no se guarda nada del archivo, y Erevos lo dice. Fotos, textos, música y vídeos se abren solo en memoria, hasta 256 MB cada uno, y se cierran cuando el espacio se bloquea; un PDF no se muestra allí: guárdalo para leerlo con otra aplicación. **Guardar en este dispositivo** (en Sailfish OS **Guardar en el teléfono**) pregunta antes; en un navegador admite hasta 256 MB, mientras que Sailfish OS escribe en Descargas un archivo de cualquier tamaño trozo a trozo. En un navegador el servidor WebDAV tiene que dejar entrar a la app web, como para las copias de seguridad; Sailfish OS no tiene copia en WebDAV.
 - **Formatos:** en Android se reproducen MP3, AAC y M4A, FLAC, Ogg y Opus, WAV, AMR, MP4, MKV, WebM y 3GP, también un archivo que llegó sin tipo, reconocido por la terminación de su nombre, como suelen llegar los archivos de otras apps. En la app de escritorio y en un navegador, lo que el navegador reproduce de ellos: ni 3GP ni AMR.
@@ -3476,6 +3551,7 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
 1. **Hacer una copia de seguridad:** toca **Hacer una copia de seguridad**, elige una carpeta (en el teléfono, una
    tarjeta de memoria, o una app en la nube que muestre ahí sus carpetas; en un ordenador, cualquier carpeta), escribe
    dos veces una contraseña para la copia (al menos 12 caracteres, o cuatro palabras) y toca **Guardar**. En un navegador, la copia y sus archivos van al menú de compartir o a las descargas: el primero enseguida, y cada uno de los siguientes tras un toque en **Guardar**.
+   Mientras se hace, su tarjeta dice qué hace y cuánto lleva; cuando termina, lo dice un aviso.
 2. **Copias automáticas:** elige **Cada 6 horas**, **Cada día** o **Cada semana**, y luego una carpeta y una
    contraseña. Erevos hace una mientras está abierto, en cuanto la última es más antigua que eso: cuando se abre un
    espacio, cada 15 minutos y al pasar a segundo plano, antes de bloquearse; nunca sin un espacio abierto. Cada una
@@ -4384,16 +4460,25 @@ versión nueva, sin preguntar a GitHub, como explica **Aviso cuando sale una ver
 Una versión como **4.0.0-rc.1** es una versión de prueba anterior a la 4.0.0 (una versión candidata): se instala y se
 actualiza como cualquier otra, y la 4.0.0 llega después.
 
-### Erevos o Erevos+, y betas {#update-channel}
+### Erevos, Erevos+ o Erevos Lite, y betas {#update-channel}
 
 En Android, **Actualizaciones** dice también qué versiones se ofrecen a este teléfono:
 
-- **Próxima actualización**: **Erevos** (sus propios chats, el Teléfono, los SMS y la Colección; versiones 7.0.x) o
-  **Erevos+** (todo eso, con Telegram, Messenger, Signal, Session, Matrix, XMPP y Nostr; versiones 7.1.x). Al principio
-  está elegida la que tienes. Elige la otra, y la próxima actualización es de esa edición, en cuanto salga una con un
-  número de compilación mayor que el tuyo, ya que Android no instala nada más antiguo. Se instala sobre la que tienes y
-  lo conserva todo: al pasar a Erevos, los chats y las cuentas de las otras redes se quedan en el teléfono, sin usar, y
-  vuelven a estar en Erevos+.
+- **Próxima actualización**: **Erevos Lite** (los chats y llamadas propios de Erevos, nada más; versiones 3.2.x),
+  **Erevos** (sus propios chats, el Teléfono, los SMS y la Colección; versiones 3.0.x) o **Erevos+** (todo eso, con
+  Telegram, Messenger, Signal, Session, Matrix, XMPP y Nostr; versiones 3.1.x). Al principio está elegida la que
+  tienes. Cada una es una app aparte, con sus propios datos, así que elegir otra es un traslado, no una actualización:
+  **Buscar actualizaciones** la encuentra y pregunta **Pasar a …**. Este Erevos hace entonces una copia de todo,
+  cifrada, aquí en el teléfono (cada espacio, con sus contactos, mensajes y ajustes), y Android instala la otra app
+  junto a esta, si no está ya. Ábrela en el plazo de un día: pregunta si traer tus chats y los toma; nada sale del
+  teléfono. Los espacios se abren luego con sus contraseñas, como tras cualquier restauración. Los SMS y las llamadas
+  del teléfono se quedan en el teléfono: haz de la nueva app la app de SMS y de teléfono, si los usas. Desde que se
+  hace el traslado, la app antigua no recibe ni envía nada y solo muestra el traslado, para que no quede allí ningún
+  mensaje que la nueva no tenga; **Cancelar el traslado** la abre como antes. Cuando la nueva lo toma, la antigua
+  ofrece **Borrar todo aquí** y **Desinstalar**; un traslado no tomado en un día se borra, y la app antigua se abre
+  como antes. Una app nueva ya configurada también pregunta, y lo que trae ocupa el lugar de todo lo que tiene. El
+  traslado necesita espacio libre en el teléfono para una copia de todo: Erevos lo dice antes si no alcanza. La
+  versión de F-Droid, firmada con otra clave, no puede trasladarse así: usa las [Copias de seguridad](#backup).
 - **Versiones beta**: desactivado, solo se ofrecen las versiones normales. Activado, también las betas (como
   **7.0.1-beta.1**): salen antes, para probar, y pueden tener problemas. Una beta lo tiene activado al principio.
   Desactívalo para salir de las betas: la próxima versión normal con un número de compilación mayor que la beta que

@@ -74,4 +74,11 @@ export const setupText: Record<string, string> = {
   'Contacts, the password, the spaces and the backups are always there. Those you leave off do not start at all; turn them on any time in Settings → General → Modules.':
     'Kontakti, lozinka, prostori i rezervne kopije uvijek su tu. Ono što ostavite isključeno uopće se ne pokreće; uključite ga bilo kada u Postavke → Općenito → Moduli.',
   'I already have Erevos on another phone': 'Već imam Erevos na drugom telefonu',
+  "It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.": "Nije moglo da se prenese: {error}. Rezervne kopije rade isto ručno: napravi jednu u {edition}, pa je vrati ovde.",
+  "From {edition} on this phone": "Iz {edition} na ovom telefonu",
+  "{edition} made everything ready for this app, here on the phone. Bring it: Erevos then opens as {edition} was, with its passwords, and these steps go on.": "{edition} je sve pripremio za ovu aplikaciju, ovde na telefonu. Prenesi to: Erevos se onda otvara kakav je bio {edition}, sa njegovim lozinkama, i ovi koraci se nastavljaju.",
+  "Bringing everything here… {percent}%": "Sve se prenosi ovde… {percent}%",
+  "Bring everything here": "Prenesi sve ovde",
+  "{edition} is on this phone": "{edition} je na ovom telefonu",
+  "It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.": "Pripremio je sve za ovu aplikaciju: svaki prostor, sa kontaktima, porukama i podešavanjima. Prenesi to ovde, pa otvori prostore njihovim lozinkama, kao ranije.",
 };

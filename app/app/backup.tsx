@@ -3,7 +3,7 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 
 import {
   MIN_BACKUP_PASSWORD,
@@ -118,6 +118,7 @@ import { measureAppSpace, spaceText, type SpaceRow } from "../lib/app-space";
 import { canFindLeftovers } from "../lib/leftovers";
 import { LeftoversCard } from "../components/leftovers";
 import { device as phoneDevice } from "../modules/erevos-device";
+import { tellBackupMade } from "../lib/backup-notice";
 
 // Backups of everything Erevos keeps on the phone or computer (lock/backup.ts): made by hand into a folder the
 // owner picks, made by themselves every 6 hours, day or week (lib/backup-folder.ts), and put back. Every
@@ -206,6 +207,10 @@ export default function Backups() {
   const sheet = asking ?? asked.current;
   const [note, setNote] = useState("");
   const [failed, setFailed] = useState(false);
+  // A backup made by hand into a folder, as it goes: what it does now, and how far (0–100) when
+  // that is known; and whether the note is about it, said in its own card.
+  const [making, setMaking] = useState<{ step: string; percent: number | null } | null>(null);
+  const [noteAtMake, setNoteAtMake] = useState(false);
   const [busy, setBusy] = useState(false);
   const [space, setSpace] = useState<SpaceRow[] | null>(null);
   const [measuring, setMeasuring] = useState(false);
@@ -267,9 +272,10 @@ export default function Backups() {
     );
   }
 
-  function say(text: string, bad = false) {
+  function say(text: string, bad = false, atMake = false) {
     setNote(text);
     setFailed(bad);
+    setNoteAtMake(atMake);
   }
 
   async function chooseFolder(): Promise<string | null> {
@@ -617,12 +623,20 @@ export default function Backups() {
 
   // Says how far a backup's photos, files and voice messages are, made or put back, as they go.
   const shownPercent = useRef(-1);
-  function progress(making: boolean) {
+  // `inCard`: a backup into a folder, said in its own card (making).
+  function progress(making: boolean, inCard = false) {
     shownPercent.current = -1;
     return (done: number, all: number) => {
       const percent = Math.floor((done * 100) / Math.max(1, all));
       if (percent === shownPercent.current) return;
       shownPercent.current = percent;
+      if (making && inCard) {
+        setMaking({
+          step: t("Encrypting photos, files and voice messages…"),
+          percent,
+        });
+        return;
+      }
       say(
         making
           ? t(
@@ -750,11 +764,17 @@ export default function Backups() {
       const key = await backupKey(password);
       setAsking(null);
       setBusy(true);
+      say("", false, true);
       try {
+        setMaking({
+          step: t("Gathering chats, contacts, SMS, calls and settings…"),
+          percent: null,
+        });
         const phoneSms = await phoneSmsForBackup();
         const phoneCalls = await phoneCallsForBackup();
         const native = await phoneSettingsForBackup();
         const skip = await openCollectionSkips();
+        setMaking({ step: t("Encrypting and saving…"), percent: null });
         const { name, size, parts, where } = await writeBackup(
           asking.folder,
           (part) =>
@@ -763,26 +783,31 @@ export default function Backups() {
               phoneSms,
               phoneCalls,
               native,
-              progress: progress(true),
+              progress: progress(true, true),
               skip,
             }),
         );
+        const folder = where ?? folderLabel(asking.folder);
         say(
           t(
             "Saved {name} ({size}) in {folder}. Keep its password: nothing opens the backup without it.",
             {
               name,
               size: sizeText(size),
-              folder: where ?? folderLabel(asking.folder),
+              folder,
             },
           ) +
             partsText(parts) +
             smsText(phoneSms) +
             callsText(phoneCalls),
+          false,
+          true,
         );
+        tellBackupMade(name, sizeText(size), folder);
       } catch (error) {
-        say(errorText(error), true);
+        say(errorText(error), true, true);
       } finally {
+        setMaking(null);
         setBusy(false);
       }
     } else if (asking.kind === "cloud") {
@@ -1008,12 +1033,48 @@ export default function Backups() {
         </Text>
         <Row wrap>
           <Button
-            title={t("Make a backup")}
+            title={making ? t("Making the backup…") : t("Make a backup")}
             compact
             onPress={make}
             disabled={busy}
           />
         </Row>
+        {making ? (
+          <View accessibilityLiveRegion="polite" style={{ gap: 6 }}>
+            <Text variant="caption" tone="muted">
+              {making.percent === null
+                ? making.step
+                : `${making.step} ${making.percent}%`}
+            </Text>
+            <View
+              style={{
+                height: 6,
+                borderRadius: 3,
+                overflow: "hidden",
+                backgroundColor: colors.border,
+              }}
+            >
+              <View
+                style={{
+                  height: 6,
+                  width: `${making.percent ?? 8}%`,
+                  backgroundColor: colors.primary,
+                }}
+              />
+            </View>
+            <Text variant="caption" tone="faint">
+              {t("Keep Erevos open until it is done: a notice says when.")}
+            </Text>
+          </View>
+        ) : null}
+        {noteAtMake && note && !making ? (
+          <Text
+            variant="label"
+            color={failed ? colors.danger : colors.success}
+          >
+            {note}
+          </Text>
+        ) : null}
       </Card>
 
       {canBackUpSms() ? (
@@ -1547,7 +1608,7 @@ export default function Backups() {
         </Row>
       </Card>
 
-      {note ? (
+      {note && !noteAtMake ? (
         <Text variant="label" color={failed ? colors.danger : colors.success}>
           {note}
         </Text>

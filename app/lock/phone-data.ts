@@ -6,8 +6,9 @@ import { phoneId, simsHere } from './restored';
 import { sealedFile, type Holder } from './sealed-file';
 
 // What each space keeps for the phone's calls (app/phone.tsx), sealed like its contacts
-// (sealed-file.ts): the SIM chosen for each number called. The calls themselves stay in the phone's
-// call history, where Android keeps them for every phone app, and backups hold them only when the
+// (sealed-file.ts): the SIM chosen for each number called, and the numbers on speed dial. The calls
+// themselves stay in the phone's call history, where Android keeps them for every phone app, and
+// backups hold them only when the
 // owner wants (lib/backup-calls.ts); the rules that turn calls away stay
 // with Android too (lib/phone-rules.ts), as it applies them while Erevos is locked, and backups
 // hold them with the quick replies (lib/backup-native.ts). The SIMs are known by the ids this
@@ -19,13 +20,20 @@ export type { Holder };
 /** The SIM chosen for calls to a number: its account id (modules/erevos-phone PhoneAccount). */
 export type NumberAccount = { number: string; account: string };
 
+/** A number on speed dial: held, `key` (2 to 9) on the keypad calls it; `name` as it was chosen. */
+export type SpeedDial = { key: string; number: string; name: string };
+
+export const SPEED_KEYS = ['2', '3', '4', '5', '6', '7', '8', '9'] as const;
+
 export type PhoneData = {
   sims: NumberAccount[];
+  /** Speed dial, one number for each key at most; numbers count on every phone, unlike `sims`. */
+  speed: SpeedDial[];
   /** The phone `sims` were chosen on (lock/restored.ts phoneId), '' for those kept before it was said. */
   simsOn: string;
 };
 
-export const EMPTY_PHONE: PhoneData = { sims: [], simsOn: '' };
+export const EMPTY_PHONE: PhoneData = { sims: [], speed: [], simsOn: '' };
 
 export const FILE = 'erevos-phone';
 const BLOCK = 4 * 1024;
@@ -41,6 +49,20 @@ function checked(value: unknown): PhoneData {
       .filter((n) => isText(n.number) && n.number.length > 0 && n.number.length <= 32 && isText(n.account) && n.account.length > 0 && n.account.length <= 200)
       .map((n) => ({ number: n.number as string, account: n.account as string }))
       .slice(-MAX_SIMS),
+    speed: (Array.isArray(v.speed) ? v.speed : [])
+      .map((item) => (item ?? {}) as Record<string, unknown>)
+      .filter(
+        (n, i, all) =>
+          isText(n.key) &&
+          (SPEED_KEYS as readonly string[]).includes(n.key) &&
+          all.findIndex((m) => m.key === n.key) === i &&
+          isText(n.number) &&
+          n.number.length > 0 &&
+          n.number.length <= 32 &&
+          isText(n.name) &&
+          n.name.length <= 200,
+      )
+      .map((n) => ({ key: n.key as string, number: n.number as string, name: n.name as string })),
     simsOn: isText(v.simsOn) && v.simsOn.length <= 64 ? v.simsOn : '',
   };
 }

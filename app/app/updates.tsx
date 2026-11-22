@@ -21,7 +21,8 @@ import { readQrPhoto } from '../lib/read-qr';
 import { throughTor } from '../lib/relay';
 import { SHELL, shellFetch, shellSystem } from '../lib/shell';
 import { latestToldIn, loadNotice, noticeAnew, noticeSeen, onNotice, setNoticeOn, setUpdatesTor, torGet, type Told } from '../lib/release-notice';
-import { channelOf, INSTALLED_EDITION, loadChannel, onChannel, setChannel, type Channel } from '../lib/update-channel';
+import { announceMovedOut, CAN_MOVE, clearStaleMove, editionInstalled, ownPackage, prepareMove } from '../lib/edition-move';
+import { channelOf, INSTALLED_EDITION, loadChannel, onChannel, PACKAGES, packageOf, setChannel, updateEditionName, type Channel, type UpdateEdition } from '../lib/update-channel';
 import { fetchStatement, releaseSigning, signingOf } from '../lib/update-signature';
 import { buildNumber, channelPage, fetchChannelRelease, fetchLatestRelease, formatSize, isNewer, packageFile, RELEASES_PAGE, type ChannelRelease, type Release } from '../lib/updates';
 import { loadCurrentSpaceData } from '../lock/space-data';
@@ -57,6 +58,8 @@ export default function UpdatesScreen() {
   const [checking, setChecking] = useState(false);
   const [note, setNote] = useState('');
   const [progress, setProgress] = useState<{ received: number; total: number } | null>(null);
+  // A move to another edition being made (lib/edition-move.ts): how far, in percent; null when none.
+  const [moving, setMoving] = useState<number | null>(null);
   const abort = useRef<AbortController | null>(null);
   // Whether a new version is told at the top of the chats; null until read, and where none is told.
   const [telling, setTelling] = useState<boolean | null>(null);
@@ -99,29 +102,60 @@ export default function UpdatesScreen() {
     return onNotice(read);
   }, []);
 
-  // A package downloaded earlier is installed by now, or was not wanted.
+  // A package downloaded earlier is installed by now, or was not wanted; a move older than a day was not taken.
   useEffect(() => {
     try {
       clearDownloads();
+      clearStaleMove();
     } catch {
       // Tried again next time.
     }
     return () => abort.current?.abort();
   }, []);
 
-  async function install(release: Release) {
+  // Whether Android's installer was opened with it.
+  async function install(release: Release): Promise<boolean> {
     const controller = new AbortController();
     abort.current = controller;
     setProgress({ received: 0, total: release.apk?.size ?? 0 });
     try {
       await downloadAndInstall(release, (received, total) => setProgress({ received, total }), controller.signal);
       setNote(t('Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.'));
+      return true;
     } catch (error) {
       if (!controller.signal.aborted) setNote(error instanceof Error ? error.message : String(error));
+      return false;
     } finally {
       abort.current = null;
       setProgress(null);
     }
+  }
+
+  // Another edition (lib/edition-move.ts): everything is handed over here first, then its app is
+  // downloaded and installed beside this one, unless it is on the phone already; once opened, it
+  // takes what was handed over.
+  async function move(release: Release, edition: UpdateEdition, installable: boolean) {
+    const name = updateEditionName(edition);
+    setMoving(0);
+    try {
+      await prepareMove(edition, (done, all) => setMoving(Math.floor((done * 100) / Math.max(1, all))));
+    } catch (error) {
+      setNote(t('The move to {edition} could not be made ready: {error}', { edition: name, error: error instanceof Error ? error.message : String(error) }));
+      return;
+    } finally {
+      setMoving(null);
+    }
+    // From here this app receives nothing, and shows only the move (components/moved-out.tsx).
+    if (!editionInstalled(edition)) {
+      if (!installable) {
+        const page = isChannelRelease(release) ? channelPage(release.channel) : RELEASES_PAGE;
+        void Linking.openURL(page).catch(() => undefined);
+      } else {
+        // Should it not install, the move waits all the same: its screen offers the download page, or to call it off.
+        await install(release);
+      }
+    }
+    announceMovedOut();
   }
 
   // Erevos from a phone nearby with no internet (lib/give-app.ts): its QR code names the package's
@@ -210,15 +244,20 @@ export default function UpdatesScreen() {
       setNote(
         channel?.edition === 'plus' && INSTALLED_EDITION !== 'plus'
           ? t('Erevos+ is not out yet, so this phone stays on Erevos for now. Check again later.')
-          : t('No release was found yet.'),
+          : channel?.edition === 'lite' && INSTALLED_EDITION !== 'lite'
+            ? t('Erevos Lite is not out yet, so this phone stays as it is for now. Check again later.')
+            : t('No release was found yet.'),
       );
       return;
     }
-    if (!CURRENT_BUILD) {
+    // Another edition's app (lib/update-channel.ts packageOf): a move, not an update.
+    const target = channel?.edition ?? INSTALLED_EDITION;
+    const moveTo = CAN_MOVE && packageOf(target, release.version, release.package) !== (ownPackage() || PACKAGES[INSTALLED_EDITION]) ? target : null;
+    if (!moveTo && !CURRENT_BUILD) {
       setNote(t('This Erevos was built on a computer, so it does not update itself. The newest release is {version}: User guide → Updates says how to switch to it.', { version: release.version }));
       return;
     }
-    if (!isNewer(release, CURRENT_BUILD)) {
+    if (!moveTo && !isNewer(release, CURRENT_BUILD)) {
       setNote(t('Erevos is up to date ({version}).', { version: VERSION }));
       return;
     }
@@ -253,6 +292,26 @@ export default function UpdatesScreen() {
         );
         return;
       }
+    }
+    if (moveTo) {
+      const name = updateEditionName(moveTo);
+      ask(
+        t('Move to {edition}', { edition: name }),
+        [
+          t('{edition} {version} is an app of its own, beside this one.', { edition: name, version: found.version }),
+          t('This Erevos first makes a copy of everything for it, encrypted, here on the phone: every space, with its contacts, messages and settings. Open {edition} within a day and it asks whether to bring them; nothing leaves the phone.', { edition: name }),
+          installable && !editionInstalled(moveTo) ? t('It then downloads ({size}), is checked against the release and Android installs it.', { size: formatSize(found.apk!.size) }) : '',
+          t("The phone's SMS and calls stay in the phone: make {edition} the SMS and phone app afterwards, if you use them. This Erevos stays until you uninstall it.", { edition: name }),
+          t('From then on this Erevos receives and sends nothing, so that no message stays here that {edition} does not have, unless you call the move off.', { edition: name }),
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
+        [
+          { text: t('Not now'), style: 'cancel' },
+          { text: t('Move'), onPress: () => void move(found, moveTo, installable) },
+        ],
+      );
+      return;
     }
     const file = packageFile(SHELL, shellSystem());
     ask(
@@ -348,17 +407,18 @@ export default function UpdatesScreen() {
             <View style={{ gap: space.xs }}>
               <Text variant="bodyStrong">{t('Next update')}</Text>
               <Row wrap>
+                <Chip label="Erevos Lite" selected={channel.edition === 'lite'} onPress={() => choose({ edition: 'lite' })} />
                 <Chip label="Erevos" selected={channel.edition === 'erevos'} onPress={() => choose({ edition: 'erevos' })} />
                 <Chip label="Erevos+" selected={channel.edition === 'plus'} disabled={!PLUS_FITS && channel.edition !== 'plus'} onPress={() => choose({ edition: 'plus' })} />
               </Row>
               <Text variant="caption" tone="muted">
                 {channel.edition === INSTALLED_EDITION
                   ? channel.edition === 'plus'
-                    ? t('Erevos+ updates as Erevos+: with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr. Choose Erevos to move to the plain Erevos with the next update.')
-                    : t('Erevos updates as Erevos: its own chats, the Phone, SMS and the Collection. Choose Erevos+ to move to it with the next update, with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr too.')
-                  : channel.edition === 'plus'
-                    ? t('The next update is Erevos+, once one is out with a build number above this one. It installs over this Erevos and keeps everything.')
-                    : t('The next update is the plain Erevos, once one is out with a build number above this one. It installs over Erevos+ and keeps everything: the chats and accounts of the other networks stay on the phone, unused, and are there again in Erevos+.')}
+                    ? t('Erevos+ updates as Erevos+: with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr. Choose Erevos or Erevos Lite to move to it.')
+                    : channel.edition === 'lite'
+                      ? t("Erevos Lite updates as Erevos Lite: Erevos's own chats and calls, nothing else. Choose Erevos or Erevos+ to move to it.")
+                      : t('Erevos updates as Erevos: its own chats, the Phone, SMS and the Collection. Choose Erevos+ to move to it, with Telegram, Messenger, Signal, Session, Matrix, XMPP and Nostr too, or Erevos Lite, with only the chats.')
+                  : t('{edition} is an app of its own: Check for updates finds it, this Erevos hands it everything here on the phone, and Android installs it beside this one. Once opened, it brings your chats.', { edition: updateEditionName(channel.edition) })}
               </Text>
               {PLUS_FITS ? null : (
                 <Text variant="caption" tone="muted">
@@ -383,7 +443,14 @@ export default function UpdatesScreen() {
               </Text>
             </View>
           ) : null}
-          {progress ? (
+          {moving !== null ? (
+            <View style={{ gap: space.sm }}>
+              <Text variant="bodyStrong">{t('Making everything ready for the move… {percent}%', { percent: moving })}</Text>
+              <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.border, overflow: 'hidden' }}>
+                <View style={{ width: `${moving}%`, height: 8, backgroundColor: colors.primary }} />
+              </View>
+            </View>
+          ) : progress ? (
             <View style={{ gap: space.sm }}>
               <Text variant="bodyStrong">{t('Downloading…')}</Text>
               <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.border, overflow: 'hidden' }}>

@@ -8,8 +8,9 @@ import { KEEPS_EREVOS, KEEPS_SOME } from './edition-keeps';
 // The edition this build is (docs/editions.md), from the same code: Erevos+ (`plus`, the default)
 // has every module; the plain Erevos (`lite`, built with EREVOS_EDITION=lite, app.config.js) has
 // only Erevos's own chats, the Phone, the SMS and the Collection, and its core has no other
-// network in it. Same package, so moving from one to the other keeps everything: the chats of a
-// module the edition has not stay kept, and are there again in Erevos+.
+// network in it. Each is an app of its own (app.erevos, app.erevos.plus): moving from one to the
+// other hands everything over (lib/edition-move.ts), and the chats of a module the edition has not
+// stay kept, and are there again in Erevos+.
 
 export type Edition = 'plus' | 'lite';
 

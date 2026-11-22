@@ -721,6 +721,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // started with it (asked a second time), what went wrong, and while it moves.
   const [pinDraft, setPinDraft] = useState('');
   const [startingNew, setStartingNew] = useState(false);
+  // A short PIN for new hidden chats is taken only once asked for again (components/PasswordSheet.tsx).
+  const [weakPinSeen, setWeakPinSeen] = useState<string | null>(null);
+  const weakNewPin = startingNew && isWeakSecret(pinDraft);
   // The place, of the space's POCKETS, new hidden chats are started in: the owner remembers which
   // they used, as nothing on the phone can tell.
   const [newPocket, setNewPocket] = useState<number | null>(null);
@@ -7276,8 +7279,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                                   autoCorrect={false}
                                   onSubmitEditing={() => !startingNew && void moveToHidden(selectedContact, pinDraft, null)}
                                 />
-                                {startingNew && isWeakSecret(pinDraft) ? (
-                                  <Text variant="caption" tone="muted">
+                                {weakNewPin ? (
+                                  <Text variant="caption" tone={weakPinSeen === pinDraft ? undefined : 'muted'} color={weakPinSeen === pinDraft ? colors.danger : undefined}>
                                     {t(WEAK_SECRET)}
                                   </Text>
                                 ) : null}
@@ -7305,11 +7308,14 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                                 ) : null}
                                 <Row wrap>
                                   <Button
-                                    title={startingNew ? t('Start and move') : t('Move')}
+                                    title={weakNewPin && weakPinSeen === pinDraft ? t('Use it anyway') : startingNew ? t('Start and move') : t('Move')}
                                     compact
                                     loading={moving}
                                     disabled={pinDraft.length < MIN_PIN || (startingNew && newPocket === null)}
-                                    onPress={() => void moveToHidden(selectedContact, pinDraft, startingNew ? newPocket : null)}
+                                    onPress={() => {
+                                      if (weakNewPin && weakPinSeen !== pinDraft) return setWeakPinSeen(pinDraft);
+                                      void moveToHidden(selectedContact, pinDraft, startingNew ? newPocket : null);
+                                    }}
                                   />
                                   <Button
                                     title={startingNew ? t('Cancel') : t('New hidden chats')}

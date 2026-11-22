@@ -52,3 +52,4 @@ export const smsPacketParts = async (): Promise<SmsPacketPart[]> => [];
 export const forgetSmsPacketParts = async (_ns: number[]): Promise<void> => undefined;
 export const canSmsOwnNotices = () => false;
 export const smsOwnNotices = (_muted: { number: string; until: number }[], _sounds: string[]): boolean => false;
+export const smsNoticeDetails = (_on: boolean): void => undefined;

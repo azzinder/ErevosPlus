@@ -431,6 +431,15 @@ class ErevosCallModule : Module() {
       }
     }
 
+    // Whether Android says the phone has internet now (a network it checked reaches it): the bridge
+    // asks a phone nearby only when it does not (lib/bridge.ts).
+    Function("hasInternet") {
+      val connectivity = context?.applicationContext?.getSystemService(ConnectivityManager::class.java) ?: return@Function true
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@Function connectivity.activeNetworkInfo?.isConnected == true
+      val caps = connectivity.getNetworkCapabilities(connectivity.activeNetwork) ?: return@Function false
+      caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
     Function("backgroundState") {
       val context = context ?: return@Function mapOf("notices" to false, "fullScreen" to false, "battery" to false)
       val notices = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

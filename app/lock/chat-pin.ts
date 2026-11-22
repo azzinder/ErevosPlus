@@ -4,7 +4,7 @@
 
 import { fromBase64, hardCost, hardKey, isHardCost, randomBytes, sameBytes, toBase64, utf8Encode } from '../lib/crypto';
 
-import { assertNotLockedOut, CHAT_TRIES, recordRightPassword, recordWrongPassword } from './tries';
+import { CHAT_TRIES, countedCheck } from './tries';
 
 // A chat locked with a PIN of its own (Chat details → Lock with a PIN): it opens only once the PIN
 // is typed, and locks again once it is left, or Erevos was away more than RELOCK_MS. Meanwhile the
@@ -40,11 +40,7 @@ export async function makeChatPin(pin: string): Promise<ChatPin> {
  * wrong one counts, and a right one ends the count.
  */
 export async function opensChat(pin: string, kept: ChatPin, now = Date.now()): Promise<boolean> {
-  await assertNotLockedOut(now, CHAT_TRIES);
-  const right = sameBytes(await hashOf(pin, fromBase64(kept.salt), kept), fromBase64(kept.hash));
-  if (right) await recordRightPassword(CHAT_TRIES);
-  else await recordWrongPassword(now, CHAT_TRIES);
-  return right;
+  return countedCheck(CHAT_TRIES, now, async () => sameBytes(await hashOf(pin, fromBase64(kept.salt), kept), fromBase64(kept.hash)), (right) => right);
 }
 
 const isBase64Of = (v: unknown, length: number): v is string => {

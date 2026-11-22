@@ -170,9 +170,10 @@ function tint(colors: Colors, alpha: number): string {
 }
 
 /** A round button the size of a finger: 44 across at least. */
-export function IconButton({ label, onPress, children, state, role = 'button', width = 44, disabled }: {
+export function IconButton({ label, onPress, onLongPress, children, state, role = 'button', width = 44, disabled }: {
   label: string;
   onPress: () => void;
+  onLongPress?: () => void;
   children: ReactNode;
   state?: { checked?: boolean; expanded?: boolean };
   role?: 'button' | 'switch';
@@ -183,6 +184,7 @@ export function IconButton({ label, onPress, children, state, role = 'button', w
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       disabled={disabled}
       accessibilityRole={role}
       accessibilityLabel={label}

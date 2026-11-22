@@ -1,6 +1,11 @@
 {
-  "platforms": ["android"],
+  "platforms": [
+    "android"
+  ],
   "android": {
-    "modules": ["expo.modules.erevoscollection.ErevosCollectionModule"]
+    "modules": [
+      "expo.modules.erevoscollection.ErevosCollectionModule",
+      "expo.modules.erevoscollection.ErevosCameraModule"
+    ]
   }
 }

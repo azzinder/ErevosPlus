@@ -35,5 +35,8 @@ internal object Words {
     "New message" to t("Neue Nachricht", "Mensaje nuevo", "Nouveau message", "Nuovo messaggio", "Nova mensagem", "Nova poruka"),
     "Copy code" to t("Code kopieren", "Copiar código", "Copier le code", "Copia codice", "Copiar código", "Kopiraj kod"),
     "The code is copied" to t("Der Code wurde kopiert", "El código se ha copiado", "Le code est copié", "Il codice è stato copiato", "O código foi copiado", "Kod je kopiran"),
+    "Reply" to t("Antworten", "Responder", "Répondre", "Rispondi", "Responder", "Odgovori"),
+    "Mark as read" to t("Als gelesen markieren", "Marcar como leído", "Marquer comme lu", "Segna come letto", "Marcar como lida", "Označi kao pročitano"),
+    "SMS (not encrypted)" to t("SMS (nicht verschlüsselt)", "SMS (sin cifrar)", "SMS (non chiffré)", "SMS (non crittografato)", "SMS (sem criptografia)", "SMS (nije šifriran)"),
   )
 }

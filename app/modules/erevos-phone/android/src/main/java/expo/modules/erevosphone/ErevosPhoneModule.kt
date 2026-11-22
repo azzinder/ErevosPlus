@@ -5,6 +5,7 @@
 package expo.modules.erevosphone
 
 import android.app.role.RoleManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,7 +13,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
+import android.telecom.VideoProfile
+import android.telephony.TelephonyManager
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -30,7 +34,7 @@ class ErevosPhoneModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("ErevosPhone")
-    Events("onCalls", "onHistory")
+    Events("onCalls", "onHistory", "onVoicemail")
 
     OnCreate {
       Calls.onCount = { count -> main.post { sendEvent("onCalls", mapOf("count" to count)) } }
@@ -38,6 +42,7 @@ class ErevosPhoneModule : Module() {
     }
 
     OnDestroy {
+      Voicemail.stop()
       Calls.onCount = null
       unwatch?.invoke()
       unwatch = null
@@ -96,12 +101,134 @@ class ErevosPhoneModule : Module() {
       Sims.accounts(context()).map { mapOf("id" to it.id, "label" to it.label, "slot" to it.slot.toDouble(), "name" to Sims.label(it)) }
     }
 
+    // Android's own emergency keypad, which calls only emergency numbers and needs no password:
+    // for the password screen, with Erevos the phone app and locked. False when the phone has none.
+    Function("emergencyDial") {
+      val intent = Intent("com.android.phone.EmergencyDialer.DIAL").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      runCatching { context().startActivity(intent) }.isSuccess
+    }
+
+    // Whether `number` is one of the emergency numbers of the SIM's network or country (112, 911,
+    // 100 and the like), as Android knows them: such a call goes at once, on whichever SIM Android
+    // picks. False when Android cannot say (before 10, or no SIM service).
+    Function("isEmergency") { number: String ->
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return@Function false
+      runCatching { context().getSystemService(TelephonyManager::class.java)?.isEmergencyNumber(number) == true }.getOrDefault(false)
+    }
+
     // Calls `number` on the SIM whose account id is `account`, or on the phone's default for "".
     AsyncFunction("placeCall") { number: String, account: String ->
       val context = context()
       val telecom = context.getSystemService(TelecomManager::class.java) ?: throw IllegalStateException("This phone cannot call")
       val extras = Bundle()
       if (account.isNotEmpty()) Sims.find(context, account)?.let { extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it.handle) }
+      telecom.placeCall(Uri.fromParts("tel", number, null), extras)
+    }
+
+    // Android's own screens for what the phone company keeps of the SIM's calls: "calls" for
+    // forwarding, call waiting and showing the number, "voicemail" for the voicemail number.
+    // False when the phone has neither (index.ts then offers the codes).
+    Function("openCallSettings") { kind: String, account: String ->
+      val context = context()
+      val handle = if (account.isNotEmpty()) Sims.find(context, account)?.handle else null
+      val tries = if (kind == "voicemail") {
+        listOf(Intent(TelephonyManager.ACTION_CONFIGURE_VOICEMAIL).apply { handle?.let { putExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it) } })
+      } else {
+        listOf(
+          Intent().setComponent(ComponentName("com.android.phone", "com.android.phone.CallFeaturesSettingActivity")).apply {
+            handle?.let { putExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it) }
+          },
+          Intent(TelecomManager.ACTION_SHOW_CALL_SETTINGS),
+        )
+      }
+      tries.any { intent -> runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess }
+    }
+
+    // The voicemail of the SIM with this account id, or of the phone's default for "": Telecom
+    // calls the number the SIM gives for it.
+    AsyncFunction("callVoicemail") { account: String ->
+      val context = context()
+      val telecom = context.getSystemService(TelecomManager::class.java) ?: throw IllegalStateException("This phone cannot call")
+      val extras = Bundle()
+      if (account.isNotEmpty()) Sims.find(context, account)?.let { extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it.handle) }
+      telecom.placeCall(Uri.fromParts(PhoneAccount.SCHEME_VOICEMAIL, "", null), extras)
+    }
+
+    // Whether that SIM has a voicemail number: "yes", "no", or "" when Android does not say.
+    Function("hasVoicemail") { account: String ->
+      when (Voicemail.hasNumber(context(), account)) {
+        true -> "yes"
+        false -> "no"
+        null -> ""
+      }
+    }
+
+    // The voicemails Android keeps (visual voicemail, where the phone company sends it).
+    AsyncFunction("voicemails") {
+      Voicemail.list(context())
+    }
+
+    AsyncFunction("playVoicemail") { id: Double ->
+      Voicemail.play(context(), id.toLong()) { which, on ->
+        main.post { sendEvent("onVoicemail", mapOf("id" to which.toDouble(), "playing" to on)) }
+      }
+    }
+
+    Function("stopVoicemail") {
+      Voicemail.stop()
+    }
+
+    AsyncFunction("deleteVoicemail") { id: Double ->
+      Voicemail.delete(context(), id.toLong())
+    }
+
+    // The spam list (Spam.kt): how it stands, a downloaded list kept, the switches, the owner's reports.
+    Function("spamState") {
+      Spam.state(context())
+    }
+
+    AsyncFunction("setSpamList") { text: String, source: String ->
+      Spam.setList(context(), text, source)
+    }
+
+    Function("clearSpamList") {
+      Spam.clearList(context())
+    }
+
+    Function("setSpamSwitches") { warn: Boolean, silence: Boolean ->
+      Spam.setSwitches(context(), warn, silence)
+    }
+
+    Function("setSpamAuto") { auto: Boolean ->
+      Spam.setAuto(context(), auto)
+    }
+
+    Function("reportSpam") { number: String, spam: Boolean ->
+      Spam.report(context(), number, spam)
+    }
+
+    Function("reportedSpam") { number: String ->
+      Spam.reported(context(), number)
+    }
+
+    Function("clearSpamReports") {
+      Spam.clearReports(context())
+    }
+
+    // Whether a SIM can make the phone company's video calls (ViLTE).
+    Function("videoCalling") {
+      val context = context()
+      val telecom = context.getSystemService(TelecomManager::class.java)
+      telecom != null && Sims.accounts(context).any { runCatching { telecom.getPhoneAccount(it.handle)?.hasCapabilities(PhoneAccount.CAPABILITY_VIDEO_CALLING) }.getOrNull() == true }
+    }
+
+    // A video call to `number`, as placeCall, with video both ways from the start.
+    AsyncFunction("placeVideoCall") { number: String, account: String ->
+      val context = context()
+      val telecom = context.getSystemService(TelecomManager::class.java) ?: throw IllegalStateException("This phone cannot call")
+      val extras = Bundle()
+      if (account.isNotEmpty()) Sims.find(context, account)?.let { extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it.handle) }
+      extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL)
       telecom.placeCall(Uri.fromParts("tel", number, null), extras)
     }
 

@@ -65,6 +65,7 @@ export default function CollectionSettingsScreen() {
         setBackup(c.backup);
         setOptions({
           deleteOriginals: c.deleteOriginals === true,
+          exportWhole: c.exportWhole === true,
           stopOnLock: c.stopOnLock === true,
           showTitle: c.showTitle === true,
           devices: c.devices === true,
@@ -158,6 +159,15 @@ export default function CollectionSettingsScreen() {
           />
         </Card>
       )}
+      <Card>
+        <Switch
+          title={t('Photos leave with their place and time')}
+          text={t('Off: a JPEG, PNG, WebP or GIF photo saved out of the Collection or opened with another app goes without where and when it was taken and the phone. Inside the Collection every photo keeps them, encrypted. Videos and HEIC photos always go as they are; you are told first when they say where they were taken.')}
+          on={options?.exportWhole === true}
+          disabled={!options}
+          onPress={() => void turn('exportWhole')}
+        />
+      </Card>
       {PLAY_CHOICES ? (
         <Card>
           <Switch

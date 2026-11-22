@@ -3,7 +3,7 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { t } from './i18n';
-import { channelsOf, type Channel, type ChannelName } from './update-channel';
+import { channelsOf, wireOf, type Channel, type ChannelName } from './update-channel';
 import { VERSION_NAME } from './version-name';
 // New versions, as in LPHL FASOULI. Every release (.github/workflows/release.yml) also goes to the
 // public repository RELEASES_REPO, one release per version (tag v2.0.0 and up; v0.1.<build> until
@@ -12,23 +12,38 @@ import { VERSION_NAME } from './version-name';
 // GitHub, every day, that this device has Erevos.
 
 export const RELEASES_REPO = 'azzinder/erevos-releases';
+/** Erevos Lite's own public download repository (lib/update-channel.ts): its releases only. */
+export const LITE_RELEASES_REPO = 'azzinder/erevos-lite-releases';
 export const RELEASES_PAGE = `https://github.com/${RELEASES_REPO}/releases/latest`;
 export const LATEST_URL = `https://github.com/${RELEASES_REPO}/releases/latest/download/version.json`;
 
 // Each channel but Erevos's own (lib/update-channel.ts) has a release of its own in the public
-// repository, under a tag that stays (channel-plus, channel-erevos-beta, channel-plus-beta), whose
+// repository, under a tag that stays (channel-erevos-plus, channel-erevos-beta, channel-erevos-plus-beta: wireOf), whose
 // version.json the release workflow replaces with each release of that channel; Erevos's own is the
-// repository's latest release, as every Erevos before read it.
+// repository's latest release, as every Erevos before read it. Erevos Lite's are in a repository of
+// their own: its latest release, and channel-beta for its betas.
+
+/** The public repository a channel's releases are in. */
+export function channelRepo(name: ChannelName): string {
+  return name === 'lite' || name === 'lite-beta' ? LITE_RELEASES_REPO : RELEASES_REPO;
+}
 
 /** Where a channel's version.json is. */
 export function channelUrl(name: ChannelName): string {
-  return name === 'erevos' ? LATEST_URL : `https://github.com/${RELEASES_REPO}/releases/download/channel-${name}/version.json`;
+  if (name === 'erevos') return LATEST_URL;
+  if (name === 'lite') return `https://github.com/${LITE_RELEASES_REPO}/releases/latest/download/version.json`;
+  return `https://github.com/${channelRepo(name)}/releases/download/${channelTag(name)}/version.json`;
 }
 
 /** A channel's download page. */
 export function channelPage(name: ChannelName): string {
-  return name === 'erevos' ? RELEASES_PAGE : `https://github.com/${RELEASES_REPO}/releases/tag/channel-${name}`;
+  if (name === 'erevos') return RELEASES_PAGE;
+  if (name === 'lite') return `https://github.com/${LITE_RELEASES_REPO}/releases/latest`;
+  return `https://github.com/${channelRepo(name)}/releases/tag/${channelTag(name)}`;
 }
+
+// The tag of a channel's release that stays: channel-beta in Erevos Lite's repository, which has no other.
+const channelTag = (name: ChannelName): string => (name === 'lite-beta' ? 'channel-beta' : `channel-${wireOf(name)}`);
 
 export interface Release {
   /** 2.0.0 and up, or a test release such as 4.0.0-rc.1; 0.1.<build> until 0.1.16. */
@@ -39,6 +54,8 @@ export interface Release {
   date: string;
   /** The Android package, when the release has one, with its SHA-256 (lowercase hex). */
   apk: { url: string; size: number; sha256: string } | null;
+  /** The Android app it is (app.erevos…), as its version.json says from 3.0.0 on; null before. */
+  package?: string | null;
 }
 
 /** The build number in a version until 0.1.16, 0.<minor>.<build>; 0 for any other, and for a build made on a computer (0.0.x). */
@@ -56,10 +73,11 @@ export function buildNumber(extraBuild: unknown, version: string | null | undefi
 }
 
 /**
- * Downloads come only from the public repository's own releases: an https address of github.com
- * whose path, decoded and resolved (no "..", encoded or not), is under its download path.
+ * Downloads come only from the public repository's own releases (`repo`, Erevos's unless said): an
+ * https address of github.com whose path, decoded and resolved (no "..", encoded or not), is under
+ * its download path.
  */
-export function isReleaseFile(url: string): boolean {
+export function isReleaseFile(url: string, repo = RELEASES_REPO): boolean {
   let parsed: URL;
   try {
     const raw = new URL(url);
@@ -68,15 +86,16 @@ export function isReleaseFile(url: string): boolean {
   } catch {
     return false;
   }
-  return parsed.protocol === 'https:' && parsed.host === 'github.com' && parsed.pathname.startsWith(`/${RELEASES_REPO}/releases/download/`);
+  return parsed.protocol === 'https:' && parsed.host === 'github.com' && parsed.pathname.startsWith(`/${repo}/releases/download/`);
 }
 
 /**
- * version.json, checked; null if it is not a release this app understands. `apkOf` names the APK
- * that updates this build: `apk`, or `erevosgram` for the ErevosGram build (docs/erevosgram.md),
- * which the plain APK would otherwise replace with an Erevos without Telegram.
+ * version.json, checked, from the public repository `repo`; null if it is not a release this app
+ * understands. `apkOf` names the APK that updates this build: `apk`, or `erevosgram` for the
+ * ErevosGram build (docs/erevosgram.md), which the plain APK would otherwise replace with an Erevos
+ * without Telegram.
  */
-export function parseRelease(text: string, apkOf: 'apk' | 'erevosgram' = 'apk'): Release | null {
+export function parseRelease(text: string, repo = RELEASES_REPO, apkOf: 'apk' | 'erevosgram' = 'apk'): Release | null {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -98,15 +117,17 @@ export function parseRelease(text: string, apkOf: 'apk' | 'erevosgram' = 'apk'):
   const apkOk =
     !!apk &&
     typeof apk.url === 'string' &&
-    isReleaseFile(apk.url) &&
+    isReleaseFile(apk.url, repo) &&
     typeof apk.size === 'number' &&
     apk.size > 0 &&
     typeof apk.sha256 === 'string' &&
     /^[0-9a-f]{64}$/i.test(apk.sha256);
+  const pkg = typeof d.package === 'string' && /^app\.erevos(\.(plus|lite))?$/.test(d.package) ? d.package : null;
   return {
     version,
     build,
     date,
+    package: pkg,
     apk: apkOk ? { url: apk.url as string, size: apk.size as number, sha256: (apk.sha256 as string).toLowerCase() } : null,
   };
 }
@@ -125,7 +146,7 @@ export async function fetchChannelRelease(channel: Channel, fetchImpl: typeof fe
     const res = await fetchImpl(channelUrl(name), { headers: { 'Cache-Control': 'no-cache' } });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(t('GitHub answered {status}.', { status: res.status }));
-    const release = parseRelease(await res.text());
+    const release = parseRelease(await res.text(), channelRepo(name));
     return release ? { ...release, channel: name } : null;
   };
   const first = await one(regular!);
@@ -145,7 +166,7 @@ export async function fetchLatestRelease(fetchImpl: typeof fetch = fetch, apkOf:
   const res = await fetchImpl(LATEST_URL, { headers: { 'Cache-Control': 'no-cache' } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(t('GitHub answered {status}.', { status: res.status }));
-  return parseRelease(await res.text(), apkOf);
+  return parseRelease(await res.text(), RELEASES_REPO, apkOf);
 }
 
 // The release's file for each package of the computer's shell (desktop/main.js system()), as the

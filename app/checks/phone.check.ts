@@ -8,6 +8,8 @@
 // Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { randomBytes } from '../lib/crypto';
@@ -33,6 +35,7 @@ import {
 import { accountLabel, callAccount, PhoneSims } from '../lib/phone-sims';
 import type { LoggedCall, PhoneAccount } from '../modules/erevos-phone';
 import { files } from './files-memory';
+import { ROOT } from './words';
 
 test('what is typed or pasted keeps only what can be called', () => {
   assert.equal(dialNumber('+30 (210) 123-4567'), '+302101234567');
@@ -269,4 +272,75 @@ test('the keys show the letters of the app’s language, the ones a name is foun
   for (const lang of ['el', 'en']) {
     for (const key of '23456789') for (const letter of keyLetters(key, lang)) assert.equal(keysOf(letter), key, `${letter} on ${key}`);
   }
+});
+
+test('the spam list takes numbers with their country code, and starts of numbers', async () => {
+  const { spamAddress, spamLines } = await import('../lib/spam-list');
+  const list = [
+    '# A list of numbers',
+    '+30 211 000 4455, telemarketing',
+    '0030211000999\tcall centre',
+    '+33 162*',
+    '+30 21*',
+    '2110004455',
+    '+30 12',
+    '',
+  ].join('\n');
+  // The two whole numbers and the two starts; a national number and a short one are not taken.
+  assert.equal(spamLines(list), 4);
+  assert.equal(spamLines('nothing here\n'), 0);
+  assert.equal(spamAddress(' https://example.org/spam.txt '), 'https://example.org/spam.txt');
+  assert.equal(spamAddress('http://example.org/spam.txt'), null);
+  assert.equal(spamAddress('example.org'), null);
+});
+
+test('a spam list is kept only when it came and holds numbers', async () => {
+  const { downloadSpamList } = await import('../lib/spam-list');
+  const { spamKept } = await import('./phone-memory');
+  const bytes = (text: string) => new TextEncoder().encode(text);
+  const kept = spamKept.length;
+  assert.equal(await downloadSpamList('https://example.org/spam.txt', async () => ({ status: 200, bytes: bytes('+30 211 000 4455\n+33 162*\n') })), 2);
+  assert.equal(spamKept.length, kept + 1);
+  await assert.rejects(downloadSpamList('https://example.org/spam.txt', async () => ({ status: 404, bytes: bytes('') })));
+  await assert.rejects(downloadSpamList('https://example.org/spam.txt', async () => ({ status: 200, bytes: bytes('<html>not a list</html>') })));
+  assert.equal(spamKept.length, kept + 1);
+});
+
+test('the spam list comes again by itself only when switched on, and a week old; without Tor only when switched on without it', async () => {
+  const { refreshSpamList, setSpamWeekly, SPAM_EVERY } = await import('../lib/spam-list');
+  const tor = () => true;
+  const noTor = () => false;
+  const { spamKept, spamNow } = await import('./phone-memory');
+  const list = async () => ({ status: 200, bytes: new TextEncoder().encode('+30 211 000 4455\n') });
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.now() + 100 * day;
+  Object.assign(spamNow, { source: 'https://example.org/spam.txt', at: now - SPAM_EVERY - day, auto: false });
+  const kept = spamKept.length;
+  assert.equal(await refreshSpamList(now, list, tor), false, 'switched off');
+  Object.assign(spamNow, { auto: true, at: now - day });
+  assert.equal(await refreshSpamList(now, list, tor), false, 'a day old');
+  Object.assign(spamNow, { at: now - SPAM_EVERY - day });
+  assert.equal(await refreshSpamList(now, list, tor), true);
+  assert.equal(spamKept.length, kept + 1);
+  // A server that does not answer is asked again a day later, not each time the Phone opens.
+  Object.assign(spamNow, { at: now - SPAM_EVERY - day });
+  const down = async () => ({ status: 503, bytes: new Uint8Array() });
+  assert.equal(await refreshSpamList(now + 2 * day, down, tor), false);
+  assert.equal(await refreshSpamList(now + 2 * day + 60_000, list, tor), false);
+  assert.equal(await refreshSpamList(now + 3 * day + 60_000, list, tor), true);
+  // Without Tor only when it was switched on without Tor, after the warning of the IP address.
+  await setSpamWeekly(true, false);
+  Object.assign(spamNow, { at: now - SPAM_EVERY - day });
+  assert.equal(await refreshSpamList(now + 10 * day, list, noTor), false, 'switched on with Tor, Tor now off');
+  assert.equal(await refreshSpamList(now + 10 * day, list, tor), true);
+  await setSpamWeekly(true, true);
+  Object.assign(spamNow, { at: now - SPAM_EVERY - day });
+  assert.equal(await refreshSpamList(now + 20 * day, list, noTor), true, 'switched on without Tor');
+  await setSpamWeekly(false, false);
+  Object.assign(spamNow, { auto: false, source: '', at: 0 });
+});
+
+test('the phone module asks for the voicemails, which the phone app role gives, or the Voicemail tab stays hidden', () => {
+  const manifest = readFileSync(join(ROOT, 'modules', 'erevos-phone', 'android', 'src', 'main', 'AndroidManifest.xml'), 'utf8');
+  for (const name of ['READ_VOICEMAIL', 'WRITE_VOICEMAIL']) assert.ok(manifest.includes(`"com.android.voicemail.permission.${name}"`), name);
 });

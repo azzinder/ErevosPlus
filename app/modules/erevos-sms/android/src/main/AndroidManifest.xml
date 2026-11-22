@@ -187,6 +187,8 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
     <receiver android:name="expo.modules.erevossms.SentReceiver" android:exported="false" />
     <!-- Copy code on the notice of an SMS that came (OneTimeCode.kt). -->
     <receiver android:name="expo.modules.erevossms.CopyCodeReceiver" android:exported="false" />
+    <!-- Reply and Mark as read on the notice of an SMS that came (NoticeReply.kt). -->
+    <receiver android:name="expo.modules.erevossms.NoticeReplyReceiver" android:exported="false" />
     <receiver android:name="expo.modules.erevossms.DeliveredReceiver" android:exported="false" />
     <receiver android:name="expo.modules.erevossms.MmsSentReceiver" android:exported="false" />
     <receiver android:name="expo.modules.erevossms.MmsDownloadedReceiver" android:exported="false" />

@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tap } from '../lib/haptics';
 import { named } from '../lib/edition';
+import { findMoves, type FoundMove } from '../lib/edition-move';
+import { updateEditionName } from '../lib/update-channel';
 import { LANG_LABELS, lang, t } from '../lib/i18n';
 import { modulesHere, type Module } from '../lib/modules';
 import { linkParts, peekLink } from '../lib/open-link';
@@ -65,6 +67,15 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
   const [name, setName] = useState('');
   const [languages, setLanguages] = useState(false);
   const [invite] = useState(() => inviteFrom(peekLink()));
+  // Another edition on this phone that made a move for this one (lib/edition-move.ts).
+  const [move, setMove] = useState<FoundMove | null>(null);
+  useEffect(() => {
+    let active = true;
+    void findMoves().then((found) => active && setMove(found[0] ?? null), () => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
   const list = here.filter((m) => chosen.has(m));
   // The Collection alone leaves no chat to open (lib/modules.ts).
   const nothing = list.every((m) => m === 'collection');
@@ -108,6 +119,15 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
                 {named(t('Welcome to Erevos'))}
               </Text>
             </View>
+            {move ? (
+              <Card>
+                <Text variant="bodyStrong">{t('{edition} is on this phone', { edition: updateEditionName(move.from) })}</Text>
+                <Text style={hint}>{t('It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.', { edition: updateEditionName(move.from) })}</Text>
+                <Row wrap>
+                  <Button title={t('Bring everything here')} onPress={() => onDone({ modules: here, name: '', restore: true, linkPhone: false })} />
+                </Row>
+              </Card>
+            ) : null}
             <Card>
               <Text variant="bodyStrong">{t('No identity to give away')}</Text>
               <Text style={hint}>{t('No phone number, email, user name or account.')}</Text>

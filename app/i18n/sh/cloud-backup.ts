@@ -213,4 +213,11 @@ export const cloudBackup: Record<string, string> = {
     "Provjera nakon nje našla je problem: {error}",
   "The check after it found {missing} of its {parts} parts missing and {damaged} damaged.":
     "Provjera nakon nje našla je da od njenih {parts} dijelova nedostaje {missing}, a {damaged} je oštećeno.",
+  "Making the backup…": "Pravi se rezervna kopija…",
+  "Gathering chats, contacts, SMS, calls and settings…": "Prikupljanje razgovora, kontakata, SMS-ova, poziva i podešavanja…",
+  "Encrypting and saving…": "Šifrovanje i čuvanje…",
+  "Encrypting photos, files and voice messages…": "Šifrovanje fotografija, fajlova i glasovnih poruka…",
+  "Keep Erevos open until it is done: a notice says when.": "Držite Erevos otvoren dok ne završi: obavještenje će reći kada.",
+  "Backup made": "Rezervna kopija je napravljena",
+  "{name} ({size}) is saved in {folder}.": "{name} ({size}) je sačuvan u {folder}.",
 };

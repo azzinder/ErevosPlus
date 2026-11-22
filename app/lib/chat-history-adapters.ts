@@ -157,6 +157,7 @@ export const SMS_BEFORE = 20;
 function smsFile(part: SmsPart): HistoryFile {
   const kind = partKind(part.type);
   if (kind === 'picture') return { kind: 'photo', name: '', uri: part.uri };
+  if (kind === 'video') return { kind: 'video', name: '', uri: part.uri };
   if (kind === 'voice') return { kind: 'sound', name: '', voice: true, uri: part.uri };
   if (kind === 'card') return { kind: 'file', name: '', card: true, uri: part.uri };
   return { kind: 'file', name: '', uri: part.uri };
@@ -165,7 +166,7 @@ function smsFile(part: SmsPart): HistoryFile {
 /** An SMS conversation's SMS and MMS: in a group's, `whose` names who wrote one by their number. */
 export function smsHistory(messages: SmsMessage[], whose?: (from: string) => string): HistoryMessage[] {
   return messages.map((m) => {
-    const files = [...(m.pictures ?? []), ...(m.voices ?? []), ...(m.cards ?? [])].map(smsFile);
+    const files = [...(m.pictures ?? []), ...(m.videos ?? []), ...(m.voices ?? []), ...(m.cards ?? [])].map(smsFile);
     return {
       id: smsLineId(m),
       at: m.at,

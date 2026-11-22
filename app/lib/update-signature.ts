@@ -5,7 +5,7 @@
 import { t } from './i18n';
 import { canVerify, verifySignature } from './core';
 import { fromBase64, utf8Encode } from './crypto';
-import type { ChannelName } from './update-channel';
+import { wireOf, type ChannelName } from './update-channel';
 import type { ChannelRelease, Release } from './updates';
 
 // An Android update trusts more than GitHub. The release workflow signs the APK with a key kept
@@ -71,7 +71,7 @@ export async function fetchStatement(fetchImpl: typeof fetch = fetch): Promise<s
   return res.text();
 }
 
-// Since there are four channels (lib/update-channel.ts), the release computer signs each apart, in
+// Since there are several channels (lib/update-channel.ts), the release computer signs each apart, in
 // android-update-<channel>.json beside android-update.json, with a statement that names the channel
 // and the release's name too: so a statement of one channel never lets another's package install,
 // and the notice of a new version (lib/release-notice.ts) reads the name from it. android-update.json
@@ -79,18 +79,18 @@ export async function fetchStatement(fetchImpl: typeof fetch = fetch): Promise<s
 
 /** Where the release computer serves a channel's statement. */
 export function channelStatementUrl(name: ChannelName): string {
-  return STATEMENT_URL.replace(/android-update\.json$/, `android-update-${name}.json`);
+  return STATEMENT_URL.replace(/android-update\.json$/, `android-update-${wireOf(name)}.json`);
 }
 
-/** What the release key signs for a channel's APK, as pwa/release.mjs channelStatement makes it. */
-export function channelStatementOf(name: ChannelName, version: string, build: number, sha256: string): string {
+/** What the release key signs for a channel's APK, as pwa/release.mjs channelStatement makes it: `name` as published (wireOf). */
+export function channelStatementOf(name: string, version: string, build: number, sha256: string): string {
   return `erevos android update v2\nchannel ${name}\nname ${version}\nbuild ${build}\nsha256 ${sha256}\n`;
 }
 
-const V2 = /^erevos android update v2\nchannel (erevos|erevos-beta|plus|plus-beta)\nname ([0-9a-z.-]{1,40})\nbuild ([1-9]\d*)\nsha256 ([0-9a-f]{64})\n$/;
+const V2 = /^erevos android update v2\nchannel (erevos|erevos-beta|plus|plus-beta|erevos-plus|erevos-plus-beta|lite|lite-beta)\nname ([0-9a-z.-]{1,40})\nbuild ([1-9]\d*)\nsha256 ([0-9a-f]{64})\n$/;
 
-/** A channel's statement as it reads, when signed by `key`: its channel, name, build and SHA-256; null for anything else. */
-export async function readChannelStatement(text: string, key = RELEASE_KEY): Promise<{ channel: ChannelName; name: string; build: number; sha256: string } | null> {
+/** A channel's statement as it reads, when signed by `key`: its channel as published (wireOf), name, build and SHA-256; null for anything else. */
+export async function readChannelStatement(text: string, key = RELEASE_KEY): Promise<{ channel: string; name: string; build: number; sha256: string } | null> {
   if (!canVerify()) return null;
   let d: Partial<Record<'statement' | 'signature', unknown>>;
   try {
@@ -108,7 +108,7 @@ export async function readChannelStatement(text: string, key = RELEASE_KEY): Pro
     return null;
   }
   if (signature.length !== 64 || !(await verifySignature(fromBase64(key), utf8Encode(d.statement), signature))) return null;
-  return { channel: m[1] as ChannelName, name: m[2]!, build: Number(m[3]), sha256: m[4]! };
+  return { channel: m[1]!, name: m[2]!, build: Number(m[3]), sha256: m[4]! };
 }
 
 /**
@@ -119,8 +119,9 @@ export async function readChannelStatement(text: string, key = RELEASE_KEY): Pro
 export async function channelSigningOf(text: string | null, release: ChannelRelease, key = RELEASE_KEY): Promise<'signed' | 'not yet' | 'refused'> {
   if (text === null || !release.apk) return text === null ? 'not yet' : 'refused';
   const read = await readChannelStatement(text, key);
-  if (read && read.channel === release.channel && read.name === release.version && read.build === release.build && read.sha256 === release.apk.sha256) return 'signed';
-  if (read && read.channel === release.channel && read.build < release.build) return 'not yet';
+  const wire = wireOf(release.channel);
+  if (read && read.channel === wire && read.name === release.version && read.build === release.build && read.sha256 === release.apk.sha256) return 'signed';
+  if (read && read.channel === wire && read.build < release.build) return 'not yet';
   let statement: unknown;
   try {
     statement = (JSON.parse(text) as { statement?: unknown } | null)?.statement;

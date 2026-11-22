@@ -37,9 +37,10 @@ export const CARD_MIME = 'text/x-vcard';
 const CARD_TYPES = ['text/x-vcard', 'text/vcard', 'text/directory'];
 
 /** What a part of an MMS is, by its type: a picture, a sound, a contact card, or none of these. */
-export function partKind(mime: string): 'picture' | 'voice' | 'card' | null {
+export function partKind(mime: string): 'picture' | 'video' | 'voice' | 'card' | null {
   const type = mime.toLowerCase().split(';')[0].trim();
   if (type.startsWith('image/')) return 'picture';
+  if (type.startsWith('video/')) return 'video';
   if (type.startsWith('audio/') || type === 'application/ogg') return 'voice';
   return CARD_TYPES.includes(type) ? 'card' : null;
 }
@@ -47,7 +48,7 @@ export function partKind(mime: string): 'picture' | 'voice' | 'card' | null {
 /** A part's name as people read it: Picture, Voice message, Contact card. */
 export function partWord(mime: string): string {
   const kind = partKind(mime);
-  return kind === 'voice' ? t('Voice message') : kind === 'card' ? t('Contact card') : t('Picture');
+  return kind === 'voice' ? t('Voice message') : kind === 'card' ? t('Contact card') : kind === 'video' ? t('Video') : t('Picture');
 }
 
 /** A conversation's latest words in the list: an MMS without text says what it holds, in English
@@ -55,12 +56,13 @@ export function partWord(mime: string): string {
 export function listWords(text: string): string {
   if (text === 'Picture') return t('Picture');
   if (text === 'Voice message') return t('Voice message');
+  if (text === 'Video') return t('Video');
   return text === 'Contact card' ? t('Contact card') : text;
 }
 
-/** The parts of a message besides its words: its pictures, sounds and contact cards. */
-export function partsOf(m: Pick<SmsMessage, 'pictures' | 'voices' | 'cards'>): SmsPart[] {
-  return [...(m.pictures ?? []), ...(m.voices ?? []), ...(m.cards ?? [])];
+/** The parts of a message besides its words: its pictures, videos, sounds and contact cards. */
+export function partsOf(m: Pick<SmsMessage, 'pictures' | 'voices' | 'cards' | 'videos'>): SmsPart[] {
+  return [...(m.pictures ?? []), ...(m.videos ?? []), ...(m.voices ?? []), ...(m.cards ?? [])];
 }
 
 // --- Places ------------------------------------------------------------------------------------
@@ -215,5 +217,6 @@ export function forwardOf(messages: SmsMessage[], chosen: ReadonlySet<string>): 
     pictures: one?.pictures ?? [],
     voices: one?.voices ?? [],
     cards: one?.cards ?? [],
+    videos: one?.videos ?? [],
   };
 }

@@ -50,6 +50,8 @@ export type SmsMessage = {
   voices?: SmsPart[];
   /** Its contact cards (text/x-vcard). */
   cards?: SmsPart[];
+  /** Its videos (video/*); missing in a build before them. */
+  videos?: SmsPart[];
   /** Who wrote it, in a group's conversation (an MMS that came). */
   from?: string;
 };
@@ -75,7 +77,7 @@ export type SmsEvents = {
   /** `shown`: its conversation shows on the screen (smsShowOnScreen), so it came with no notice.
    *  `spam`: Spam's built-in rule caught it (BuiltInSpam.kt), so it came with no notice and plays
    *  nothing; the app's Spam folder (lib/sms-folders.ts) still decides where it shows. */
-  onSms: (event: { address: string; mms?: number; shown?: boolean; spam?: boolean }) => void;
+  onSms: (event: { address: string; mms?: number; shown?: boolean; spam?: boolean; waiting?: boolean; failed?: boolean }) => void;
   onSmsSent: (event: { id: number; ok: boolean; mms?: boolean }) => void;
   onSmsDelivered: (event: { id: number; ok: boolean }) => void;
   /** An SMS sent for later went, held by Android until its time (`id`: lock/sms-data.ts's). */
@@ -97,6 +99,11 @@ type NativeSms = {
   showOnScreen?(numbers: string[]): void;
   setSpamFilter?(on: boolean): void;
   setOwnNotices?(muted: string[], until: number[], sounds: string[]): void;
+  setNoticeDetails?(on: boolean): void;
+  mmsSwitches?(): { auto: boolean; roaming: boolean };
+  setMmsSwitches?(auto: boolean, roaming: boolean): void;
+  waitingMms?(): WaitingMms[];
+  fetchMms?(location: string): Promise<void>;
   /** `sim` only in a build with MMS (an older one takes two arguments). */
   send(address: string, text: string, sim?: number): Promise<number>;
   sendMms?(address: string, text: string, data: Uint8Array, type: string, sim: number): Promise<number>;
@@ -402,4 +409,47 @@ export function onSmsEvent<Name extends keyof SmsEvents>(name: Name, listener: S
       subscription?.remove();
     },
   };
+}
+
+/** Tells the phone whether an SMS's notice shows who wrote and what, with Reply and Mark as read,
+ *  while the open space says so: in memory only (SmsStore.kt). */
+export function smsNoticeDetails(on: boolean): void {
+  try {
+    own()?.setNoticeDetails?.(on);
+  } catch {
+    // A build from before it: every notice says "New message".
+  }
+}
+
+/** An MMS announced by the carrier and not fetched yet, as the owner fetches none at once, or none
+ *  while roaming (MmsStore.kt): from whom, how big (bytes), and when; whether it is being fetched,
+ *  or the last try did not bring it. Listed for 7 days, as long as carriers keep one. */
+export type WaitingMms = { location: string; from: string; size: number; at: number; sim: number; fetching?: boolean; failed?: boolean };
+
+/** Whether MMS are fetched at once (on unless turned off) and while roaming (off unless turned on); null in a build without it. */
+export function mmsSwitches(): { auto: boolean; roaming: boolean } | null {
+  try {
+    return own()?.mmsSwitches?.() ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function setMmsSwitches(auto: boolean, roaming: boolean): void {
+  own()?.setMmsSwitches?.(auto, roaming);
+}
+
+/** The MMS waiting at the carrier for a tap. */
+export function waitingMms(): WaitingMms[] {
+  try {
+    return own()?.waitingMms?.() ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Fetches a waiting MMS now; it comes as any MMS does. */
+export function fetchMms(location: string): Promise<void> {
+  const sms = own();
+  return sms?.fetchMms ? sms.fetchMms(location) : Promise.reject(new Error('This build of Erevos cannot do this yet.'));
 }

@@ -23,7 +23,6 @@ import { driveShares, packCame, roundsCame, takingCame } from './share-rounds';
 import {
   ackTaken,
   canReadManyAt,
-  canTryLater,
   canWaitAt,
   carryTo,
   fromHex,
@@ -41,7 +40,7 @@ import {
   warmCallRelay,
   type Relay,
 } from './relay';
-import { readNearby } from './bridge';
+import { needsBridge, readNearby } from './bridge';
 import { answerInvites, expireTextInvites, linkInviter, refreshSmsLink, takeInviteAnswer } from './sms-relay';
 import { isGroupPacket } from './groups';
 import { cameAt } from './later';
@@ -58,6 +57,16 @@ import { cameUnread, onContactsCame } from './contact-queues';
 import { onNetworkChange } from './network-change';
 import { setClockOffset } from './call';
 import { t } from './i18n';
+import { callAudio } from '../modules/erevos-call';
+
+// Whether Android says the phone has internet; undefined where it is not told.
+function phoneOnline(): boolean | undefined {
+  try {
+    return callAudio?.hasInternet?.();
+  } catch {
+    return undefined;
+  }
+}
 import { onShownEnded } from './last-seen';
 
 // Messages that come while a space is open, whatever screen shows. The chat screen takes them
@@ -708,7 +717,7 @@ async function lookOnce(state: State, stop: () => boolean): Promise<boolean> {
     failed = error;
   }
   // No internet here: a phone beside this one that has it may bring what waits (lib/bridge.ts).
-  if (failed && canTryLater(failed) && !stop()) {
+  if (failed && needsBridge(failed, phoneOnline()) && !stop()) {
     const { brought, asked } = await readNearby(place.own, recipient, (bytes) => take(bytes, 'own'), BATCH, stop).catch(() => ({ brought: 0, asked: true }));
     if (brought > 0) found.taken += brought;
     // The phone asked learned the queue: it moves once the relay can be reached here.

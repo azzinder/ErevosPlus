@@ -74,4 +74,11 @@ export const setupText: Record<string, string> = {
   'Contacts, the password, the spaces and the backups are always there. Those you leave off do not start at all; turn them on any time in Settings → General → Modules.':
     'Os contatos, a senha, os espaços e os backups estão sempre lá. O que você deixa desativado não inicia de jeito nenhum; ative quando quiser em Configurações → Geral → Módulos.',
   'I already have Erevos on another phone': 'Eu já tenho o Erevos em outro celular',
+  "It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.": "Não foi possível trazer: {error}. As cópias de segurança fazem o mesmo à mão: faça uma no {edition} e restaure-a aqui.",
+  "From {edition} on this phone": "Do {edition} neste telefone",
+  "{edition} made everything ready for this app, here on the phone. Bring it: Erevos then opens as {edition} was, with its passwords, and these steps go on.": "O {edition} preparou tudo para esta app, aqui no telefone. Traga-o: o Erevos abre então como estava o {edition}, com as suas palavras-passe, e estes passos continuam.",
+  "Bringing everything here… {percent}%": "A trazer tudo para aqui… {percent}%",
+  "Bring everything here": "Trazer tudo para aqui",
+  "{edition} is on this phone": "O {edition} está neste telefone",
+  "It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.": "Preparou tudo para esta app: cada espaço, com os seus contactos, mensagens e definições. Traga-o para aqui e depois abra os espaços com as suas palavras-passe, como antes.",
 };

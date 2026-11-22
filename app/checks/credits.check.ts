@@ -39,7 +39,7 @@ test('the hand-written parts and the list are all in CREDITS.md, in order', () =
 // The repository's lockfiles with a CREDITS.md that is wrong in the ways a change would make it.
 const dir = mkdtempSync(join(tmpdir(), 'erevos-credits-'));
 after(() => rmSync(dir, { recursive: true, force: true }));
-for (const file of ['app/package-lock.json', 'desktop/package-lock.json', 'Cargo.lock', 'transports/go.mod', 'app/modules/erevos-contacts/android/build.gradle', 'app/modules/erevos-collection/android/build.gradle', 'app/modules/erevos-messenger/android/build.gradle']) {
+for (const file of ['app/package-lock.json', 'desktop/package-lock.json', 'Cargo.lock', 'transports/go.mod', 'app/modules/erevos-contacts/android/build.gradle', 'app/modules/erevos-collection/android/build.gradle', 'app/modules/erevos-phone/android/build.gradle', 'app/modules/erevos-messenger/android/build.gradle']) {
   mkdirSync(join(dir, dirname(file)), { recursive: true });
   copyFileSync(join(REPO, file), join(dir, file));
 }

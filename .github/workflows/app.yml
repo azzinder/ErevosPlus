@@ -30,9 +30,9 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
       - run: npm ci
-      # Known advisories in what the app depends on: a critical one stops the build. The high ones
-      # today are in Expo's build tools (Metro, its command line, its config plugins).
-      - run: npm audit --omit=dev --audit-level=critical
+      # High and critical advisories in what the app ships stop the checks (moderate ones are
+      # read by hand at each dependency update).
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run typecheck
       # The checks run the end-to-end encryption on the real core, built to WebAssembly.
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable, 2026-10-21

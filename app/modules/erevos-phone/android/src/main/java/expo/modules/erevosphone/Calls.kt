@@ -161,6 +161,11 @@ internal object Calls {
     call.answer(VideoProfile.STATE_AUDIO_ONLY)
   }
 
+  /** Answers a video call with video both ways (ViLTE). */
+  fun answerVideo(call: Call) {
+    call.answer(VideoProfile.STATE_BIDIRECTIONAL)
+  }
+
   /** Ends the calls that are on, then answers `call`, as a phone can have only so many. */
   fun endAndAnswer(call: Call) {
     val others = live().filter { it !== call }

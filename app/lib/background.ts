@@ -15,6 +15,7 @@ import { CONTACT_PREFIX } from './calls';
 import { chatNotify } from './chat-notices';
 import { cryptoReady, setupCrypto } from './crypto-setup';
 import { followDoor, keepDoor, startClosedNotices } from './closed-notices';
+import { movedOut } from './move-state';
 import { onContactQueuesChanged } from './contact-queues';
 import { currentGroupCall } from './group-call';
 import { placeGroupTells } from './hidden-contacts';
@@ -233,8 +234,9 @@ if (Platform.OS === 'android') {
   // Spam that Spam's built-in rule caught (SmsStore.kt) plays nothing, on the screen too. A
   // conversation muted in the open space plays nothing either; one with a sound of its own came with
   // a notice that made none, and plays its own here, on the screen or not (lib/sms-notices.ts).
-  onSmsEvent('onSms', ({ address, shown, spam }) => {
-    if (spam) return;
+  onSmsEvent('onSms', ({ address, shown, spam, failed }) => {
+    // An MMS that did not come when fetched only changes the screens that list it.
+    if (spam || failed) return;
     const own = smsSoundOf(address);
     if (own === null) return;
     if (own !== undefined) {
@@ -408,6 +410,15 @@ export function startBootNotices(): Promise<void> {
   return new Promise<void>((done) => {
     void (async () => {
       if (spaceOpen() || bootStop) return done();
+      // Moved to another edition (lib/edition-move.ts): that one tells of its messages, not this.
+      if (movedOut()) {
+        try {
+          callAudio?.stopReceiving?.();
+        } catch {
+          // Gone with Erevos anyway.
+        }
+        return done();
+      }
       // No screen of Erevos ran yet (app/_layout.tsx does this as it loads), so the encryption and
       // the core are set up here, and the relay connections kept from loading the WebView.
       setupCrypto();

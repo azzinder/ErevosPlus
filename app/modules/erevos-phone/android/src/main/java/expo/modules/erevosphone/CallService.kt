@@ -43,6 +43,7 @@ class CallService : InCallService() {
       override fun onChildrenChanged(call: Call, children: List<Call>) = Calls.changed()
       override fun onConferenceableCallsChanged(call: Call, conferenceableCalls: List<Call>) = Calls.changed()
       override fun onCannedTextResponsesLoaded(call: Call, cannedTextResponses: List<String>) = Calls.changed()
+      override fun onVideoCallChanged(call: Call, videoCall: InCallService.VideoCall?) = Calls.changed()
 
       // A number with a pause in it ("123,4"): the rest of its tones go on without asking.
       override fun onPostDialWait(call: Call, remainingPostDialSequence: String) {

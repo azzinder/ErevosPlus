@@ -202,6 +202,54 @@ class ErevosDeviceModule : Module() {
       Updates.tell(app, name)
     }
 
+    // Moving to another edition (Move.kt): this app's package, where its move's files go, and
+    // the move of another edition on the phone, signed as this one, read and taken.
+    Function("packageName") {
+      context?.applicationContext?.packageName ?: ""
+    }
+
+    Function("moveOutDir") {
+      val app = context?.applicationContext ?: return@Function null
+      Move.outDir(app).also { it.mkdirs() }.absolutePath
+    }
+
+    Function("moveClear") {
+      val app = context?.applicationContext ?: return@Function false
+      Move.clear(app)
+    }
+
+    Function("appInstalled") { pkg: String ->
+      val app = context?.applicationContext ?: return@Function false
+      Move.installed(app, pkg)
+    }
+
+    // Opens another edition (the one moved to), never any other app.
+    Function("openApp") { pkg: String ->
+      val app = context?.applicationContext ?: return@Function false
+      Move.open(app, pkg)
+    }
+
+    AsyncFunction("moveSources") {
+      val app = context?.applicationContext ?: return@AsyncFunction emptyList<Map<String, String>>()
+      Move.sources(app)
+    }
+
+    AsyncFunction("moveCopy") { pkg: String, name: String, path: String ->
+      val app = context?.applicationContext ?: throw IllegalStateException("No app")
+      Move.copy(app, pkg, name, path).toDouble()
+    }
+
+    AsyncFunction("moveDone") { pkg: String ->
+      val app = context?.applicationContext ?: return@AsyncFunction false
+      Move.done(app, pkg)
+    }
+
+    // A backup made by hand is done (Backups.kt): a notice says so, in the app's words.
+    Function("tellBackup") { title: String, text: String, channel: String ->
+      val app = context?.applicationContext ?: return@Function Unit
+      Backups.tell(app, title, text, channel)
+    }
+
     // The panic button (Panic.kt): its settings, the panic app that asked to be the one, and the
     // wipe itself, after which Android stops Erevos.
     Function("panicState") {

@@ -74,4 +74,11 @@ export const setupText: Record<string, string> = {
   'Contacts, the password, the spaces and the backups are always there. Those you leave off do not start at all; turn them on any time in Settings → General → Modules.':
     'Οι επαφές, ο κωδικός, οι χώροι και τα αντίγραφα είναι πάντα εκεί. Όσες αφήσεις ανενεργές δεν ξεκινούν καθόλου· ενεργοποίησέ τες όποτε θέλεις στις Ρυθμίσεις → Γενικά → Ενότητες.',
   'I already have Erevos on another phone': 'Έχω ήδη Erevos σε άλλο τηλέφωνο',
+  "It could not be brought: {error}. Backups does the same by hand: make one in {edition}, then restore it here.": "Δεν μπόρεσαν να έρθουν: {error}. Τα Αντίγραφα ασφαλείας κάνουν το ίδιο με το χέρι: φτιάξε ένα στο {edition} και επανάφερέ το εδώ.",
+  "From {edition} on this phone": "Από το {edition} σε αυτό το τηλέφωνο",
+  "{edition} made everything ready for this app, here on the phone. Bring it: Erevos then opens as {edition} was, with its passwords, and these steps go on.": "Το {edition} ετοίμασε τα πάντα για αυτή την εφαρμογή, εδώ στο τηλέφωνο. Φέρ' τα: το Erevos ανοίγει μετά όπως ήταν το {edition}, με τους κωδικούς του, και τα βήματα συνεχίζουν.",
+  "Bringing everything here… {percent}%": "Τα φέρνω όλα εδώ… {percent}%",
+  "Bring everything here": "Φέρε τα όλα εδώ",
+  "{edition} is on this phone": "Το {edition} είναι σε αυτό το τηλέφωνο",
+  "It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.": "Ετοίμασε τα πάντα για αυτή την εφαρμογή: κάθε χώρο, με τις επαφές, τα μηνύματα και τις ρυθμίσεις του. Φέρ' τα εδώ και μετά άνοιξε τους χώρους με τους κωδικούς τους, όπως πριν.",
 };

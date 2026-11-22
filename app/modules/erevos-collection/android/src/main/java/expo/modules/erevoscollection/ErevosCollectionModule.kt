@@ -383,6 +383,12 @@ class ErevosCollectionModule : Module() {
   // The gallery's own link for a picked photo or video: a MediaStore link as it is, or the
   // MediaStore link of a document the file picker gave (Android 10 and later); null for anything
   // else, which is not deleted.
+  // The gallery's own link for a file picked by `uri`, or null when the gallery does not have it.
+  // The file picker gives links of several kinds: the gallery's own (media/.../images/media/7), a
+  // document of Images or of the phone's storage (mapped by MediaStore.getMediaUri, to the images,
+  // video or files table), or one of the photo picker (media/picker/..., media/picker_get_content/...),
+  // which cannot be deleted itself: its photo is found in the gallery by its id, and taken only when
+  // its name and size there are the same as the picked file's, so no other photo is ever asked for.
   private fun galleryUri(context: Context, uri: Uri): Uri? {
     val media = when {
       uri.authority == MediaStore.AUTHORITY -> uri
@@ -392,9 +398,28 @@ class ErevosCollectionModule : Module() {
     } ?: return null
     if (media.authority != MediaStore.AUTHORITY) return null
     val path = media.pathSegments
-    // The photo picker's own links (media/picker/...) are not the gallery's, and cannot be deleted.
-    if (path.firstOrNull() == "picker") return null
-    return if (path.contains("images") || path.contains("video")) media else null
+    val first = path.firstOrNull() ?: return null
+    if (first.startsWith("picker")) return pickedInGallery(context, media)
+    return if (path.contains("images") || path.contains("video") || path.contains("file")) media else null
+  }
+
+  // The photo picker's photo, as the gallery has it: only one on this phone (its own provider), by
+  // the id at the link's end, and only when the gallery's name and size match the picked one's.
+  private fun pickedInGallery(context: Context, picked: Uri): Uri? {
+    if (!picked.pathSegments.contains("com.android.providers.media.photopicker")) return null
+    val id = picked.lastPathSegment?.toLongOrNull() ?: return null
+    val resolver = context.contentResolver
+    val columns = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE)
+    fun nameAndSize(link: Uri): Pair<String?, Long>? =
+      runCatching {
+        resolver.query(link, columns, null, null, null)?.use { row ->
+          if (row.moveToFirst()) Pair(row.getString(0), row.getLong(1)) else null
+        }
+      }.getOrNull()
+    val shown = nameAndSize(picked) ?: return null
+    val gallery = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL, id)
+    val there = nameAndSize(gallery) ?: return null
+    return if (shown.first != null && shown == there) gallery else null
   }
 
   companion object {

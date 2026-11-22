@@ -71,6 +71,24 @@ type Device = {
   seenReminders?(ids: string[]): void;
   /** A notice says that Erevos `name` is out, and opens Updates (lib/release-notice.ts). Missing in a build before it. */
   tellUpdate?(name: string): void;
+  /** A notice says that a backup made by hand is done: `title`, `text`, in a channel named `channel`, all in the app's words (app/backup.tsx). Missing in a build before it. */
+  tellBackup?(title: string, text: string, channel: string): void;
+  /** This app's Android package (app.erevos, app.erevos.plus, app.erevos.lite). Missing in a build before moves. */
+  packageName?(): string;
+  /** The folder a move's files are written to, for another edition to take (Move.kt); null with no app context. */
+  moveOutDir?(): string | null;
+  /** Deletes the move's files. */
+  moveClear?(): boolean;
+  /** Whether the app `pkg` is installed, however signed. */
+  appInstalled?(pkg: string): boolean;
+  /** Opens the edition `pkg` (one of the three, installed): whether it opened. */
+  openApp?(pkg: string): boolean;
+  /** The other editions on the phone, signed as this one, whose move waits: each one's package and its move.json. */
+  moveSources?(): Promise<{ pkg: string; move: string }[]>;
+  /** Copies the file `name` of `pkg`'s move to `path`, a file of this app's own: its size. */
+  moveCopy?(pkg: string, name: string, path: string): Promise<number>;
+  /** Tells `pkg` that its move was taken, so its files go. */
+  moveDone?(pkg: string): Promise<boolean>;
   /** The panic button's settings (Panic.kt). Null with no app context. Missing in a build before it. */
   panicState?(): PanicState | null;
   /** Whether the trusted panic app may wipe, and whether automatic backups in `folder` (a tree uri) go too. */

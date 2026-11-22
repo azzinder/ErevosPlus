@@ -217,6 +217,7 @@ export const chat: Record<string, string> = {
   'Place {n}': 'Emplacement {n}',
   'New hidden chats start in place {n} with this PIN. If that place held hidden chats, they can no longer be opened.': 'De nouvelles discussions masquées commencent à l’emplacement {n} avec ce code PIN. Si cet emplacement contenait des discussions masquées, elles ne pourront plus être ouvertes.',
   'Start and move': 'Créer et déplacer',
+  'Use it anyway': 'L’utiliser quand même',
   'Move': 'Déplacer',
   'New hidden chats': 'Nouvelles discussions masquées',
   'Their phone is told at once where to write from now on. A message they send in that moment may not come.': 'Son téléphone apprend tout de suite où écrire désormais. Un message envoyé à ce moment précis pourrait ne pas arriver.',
