@@ -15,7 +15,7 @@ import { accountNeverStraight, accountTorDoor, AccountTorError, accountTorOf, ca
 import { onTorReady, onTorWay } from './relay';
 import { actingWhere, type NetworkWhere } from './network-place';
 import { PlaceLives, type PlaceKey } from './place-lives';
-import { addHistory, applyUpdate, freshMessage, heardUnread, newTgState, phoneRequest, readMessage, saidError, setLater, tdError, telegramKeys, textRequest, type TgList, type TgMessage, type TgState } from './telegram';
+import { addHistory, applyUpdate, freshCounts, freshLeft, freshMessage, heardUnread, readLocally, newTgState, phoneRequest, readMessage, saidError, setLater, tdError, telegramKeys, textRequest, type TgList, type TgMessage, type TgState } from './telegram';
 import { entitiesOf } from './telegram-marks';
 import { TelegramCalls, type CallsNativeLike, type TgCall } from './telegram-calls';
 import { isWire, TelegramSeal, type SealInfo, type Shown } from './telegram-seal';
@@ -63,6 +63,8 @@ type Live = {
   startedAt: number;
   /** What its notices last heard (heardUnread), null before the first time. */
   lastHeard: Map<string, number> | null;
+  /** The messages that truly came and are not told of yet, by home row: their ids (freshLeft). */
+  fresh: Map<string, number[]>;
   /** What each wire message of ours shows, by `chat:message`. */
   shown: Map<string, Shown>;
   loaded: boolean;
@@ -120,8 +122,6 @@ function take(slot: string, updates: string[]): void {
   const it = every().find((x) => x.slot === slot && !x.stopped);
   if (!it) return;
   let changed = false;
-  // The messages that truly came in this batch, by home row (heardUnread).
-  const fresh = new Map<string, number>();
   for (const text of updates) {
     let update: Record<string, unknown>;
     try {
@@ -148,7 +148,7 @@ function take(slot: string, updates: string[]): void {
       const chatId = Number(raw?.chat_id);
       const readInbox = it.state.chats[chatId]?.readInbox ?? 0;
       if (raw && freshMessage({ id: Number(raw.id), outgoing: raw.is_outgoing === true, date: Number(raw.date) }, readInbox, it.startedAt)) {
-        fresh.set(`telegram:${chatId}`, (fresh.get(`telegram:${chatId}`) ?? 0) + 1);
+        it.fresh.set(`telegram:${chatId}`, [...(it.fresh.get(`telegram:${chatId}`) ?? []), Number(raw.id)]);
       }
       const m = it.state.messages[Number((update.message as { chat_id?: number })?.chat_id)]?.find((x) => x.id === Number((update.message as { id?: number }).id));
       const message = m ?? null;
@@ -161,18 +161,29 @@ function take(slot: string, updates: string[]): void {
     }
   }
   if (changed) {
-    hear(it, Date.now() < it.hushUntil, fresh);
+    hear(it, Date.now() < it.hushUntil);
     told();
   }
 }
 
 // Tells the notices what its chats have not read (unreadAt), as heardUnread lets them: `quiet`
-// counts only; `fresh`, the messages that truly came, the only ones that may be told of.
-function hear(it: Live, quiet: boolean, fresh: ReadonlyMap<string, number> = new Map()): void {
+// counts only; else only the messages that truly came (it.fresh) may be told of.
+function hear(it: Live, quiet: boolean): void {
   const now = unreadAt(it);
-  const heard = quiet ? now : heardUnread(it.lastHeard, now, fresh);
+  const before = it.lastHeard;
+  const mark = (where: string) => it.state.chats[Number(where.slice('telegram:'.length))]?.readInbox ?? 0;
+  const heard = quiet ? now : heardUnread(before, now, freshCounts(it.fresh, mark));
+  it.fresh = quiet ? new Map() : freshLeft(it.fresh, mark, before, heard);
   it.lastHeard = heard;
   it.heard.hear(heard, quiet);
+}
+
+// A read done here counts at once (readLocally): leaving Erevos right after reading leaves no
+// notice of what was read, and the read is told so a notice already up goes.
+function readHere(it: Live, chatId: number, upTo: number): void {
+  if (!readLocally(it.state, chatId, upTo)) return;
+  hear(it, false);
+  told();
 }
 
 async function openWire(it: Live, m: TgMessage): Promise<void> {
@@ -233,7 +244,7 @@ function start(holder: Holder, space: number, key: Uint8Array, pocket?: number):
   const calls = new TelegramCalls((body) => request(it, body), callSound, told);
   // A hidden place's tell only of its place, with no name (hearing).
   const heard = hearing(pocket === undefined ? undefined : { space, pocket }, (where) => chatNotify(it, where));
-  Object.assign(it, { holder, space, key: key.slice(), slot, dbKey, data: null, state: newTgState(), seal, calls, pocket, heard, hushUntil: 0, startedAt: Date.now(), lastHeard: null, shown: new Map(), loaded: false, running: false, stopped: false, problem: '', saving: Promise.resolve() });
+  Object.assign(it, { holder, space, key: key.slice(), slot, dbKey, data: null, state: newTgState(), seal, calls, pocket, heard, hushUntil: 0, startedAt: Date.now(), lastHeard: null, fresh: new Map(), shown: new Map(), loaded: false, running: false, stopped: false, problem: '', saving: Promise.resolve() });
   seal.onChange(told);
   loadTelegram(space, key, holder)
     .then(async (data) => {
@@ -427,7 +438,9 @@ export async function telegramOlder(chatId: number): Promise<number> {
 /** Marks messages read: Telegram tells the other side, as read receipts. */
 export async function telegramRead(chatId: number, ids: number[]): Promise<void> {
   if (ids.length === 0) return;
-  await request(need(), { '@type': 'viewMessages', chat_id: chatId, message_ids: ids, force_read: true }).catch(() => undefined);
+  const it = need();
+  readHere(it, chatId, Math.max(...ids));
+  await request(it, { '@type': 'viewMessages', chat_id: chatId, message_ids: ids, force_read: true }).catch(() => undefined);
 }
 
 /**
@@ -996,7 +1009,10 @@ export async function telegramReadChat(chatId: number): Promise<void> {
   const it = need();
   const c = it.state.chats[chatId];
   if (!c) throw new Error('no such chat');
-  if (c.unread > 0 && c.last) await request(it, { '@type': 'viewMessages', chat_id: c.id, message_ids: [c.last.id], source: null, force_read: true });
+  if (c.unread > 0 && c.last) {
+    readHere(it, c.id, c.last.id);
+    await request(it, { '@type': 'viewMessages', chat_id: c.id, message_ids: [c.last.id], source: null, force_read: true });
+  }
   await request(it, { '@type': 'readAllChatMentions', chat_id: c.id }).catch(() => undefined);
   await request(it, { '@type': 'readAllChatReactions', chat_id: c.id }).catch(() => undefined);
   if (c.markedUnread) await request(it, { '@type': 'toggleChatIsMarkedAsUnread', chat_id: c.id, is_marked_as_unread: false });

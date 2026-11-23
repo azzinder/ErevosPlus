@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { addHistory, applyUpdate, freshMessage, heardUnread, chatList, setLater, nameOf, newTgState, phoneRequest, readMessage, readPoll, tdError, telegramKeys, textRequest } from '../lib/telegram';
+import { addHistory, applyUpdate, freshCounts, freshLeft, freshMessage, heardUnread, readLocally, chatList, setLater, nameOf, newTgState, phoneRequest, readMessage, readPoll, tdError, telegramKeys, textRequest } from '../lib/telegram';
 import { inboxParts, showsIn, tabUnread, telegramInboxRows, telegramKeptRows, tgFolderOf } from '../lib/inbox';
 import { statusLine, telegramLine, telegramStatusLine } from '../lib/telegram-view';
 import { hideVideo, newVideoSlots, playsNow, showVideo, takeSlot } from '../lib/video-slots';
@@ -486,4 +486,29 @@ test('notices: a count tells only of messages that truly came, never of ones rea
   assert.equal(freshMessage({ id: 10, outgoing: true, date: 2000 }, 9, 1_000_000), false);
   assert.equal(freshMessage({ id: 9, outgoing: false, date: 2000 }, 9, 1_000_000), false);
   assert.equal(freshMessage({ id: 10, outgoing: false, date: 999 }, 9, 1_000_000), false);
+});
+
+test('notices: a read here counts at once, and a count that comes after its message is still told of', () => {
+  const s = newTgState();
+  applyUpdate(s, { '@type': 'updateNewChat', chat: { id: 7, title: 'A', type: { '@type': 'chatTypePrivate', user_id: 1 }, unread_count: 1, last_read_inbox_message_id: 4, last_read_outbox_message_id: 0, notification_settings: { mute_for: 0 }, positions: [] } });
+  addHistory(s, 7, { messages: [{ id: 5, chat_id: 7, is_outgoing: false, date: 10, sender_id: { '@type': 'messageSenderUser', user_id: 1 }, content: { '@type': 'messageText', text: { text: 'hi' } } }] });
+  // Read on the screen: at once nothing is unread, before TDLib says so, so leaving Erevos leaves no notice.
+  assert.equal(readLocally(s, 7, 5), true);
+  assert.equal(s.chats[7].unread, 0);
+  assert.equal(s.chats[7].readInbox, 5);
+  // Never back down, nor twice.
+  assert.equal(readLocally(s, 7, 3), false);
+  // A message that came in one batch, its count in the next: still told of once, and only once.
+  const m = (pairs: [string, number][]) => new Map(pairs);
+  const fresh = new Map([['telegram:7', [6]]]);
+  const mark = () => 5;
+  const first = heardUnread(m([]), m([]), freshCounts(fresh, mark));
+  const waiting = freshLeft(fresh, mark, m([]), first);
+  assert.deepEqual([...waiting], [['telegram:7', [6]]]);
+  const then = heardUnread(first, m([['telegram:7', 1]]), freshCounts(waiting, mark));
+  assert.equal(then.get('telegram:7'), 1);
+  assert.equal(freshLeft(waiting, mark, first, then).size, 0);
+  // One read before its count came (here or on another device) waits no more.
+  assert.equal(freshLeft(fresh, () => 6, m([]), m([])).size, 0);
+  assert.equal(freshCounts(fresh, () => 6).size, 0);
 });
