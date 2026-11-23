@@ -725,7 +725,7 @@ function Home() {
       live = false;
     };
   }, [messengerIn]);
-  // Messenger's case (Erevos+), at a chat, at Facebook's feed ('feed') or at its chats (''); if it cannot open, it says why.
+  // Messenger's case (Erevos+), at a chat or at its chats (''); if it cannot open, it says why.
   const openCase = (at: string) =>
     openMessengerCase(at).catch((e: unknown) => ask(t('Not done'), e instanceof Error ? e.message : String(e), [{ text: t('OK') }]));
   // In Messenger's case Facebook's feed is a tap away in the case's own bar: no card of its own then.

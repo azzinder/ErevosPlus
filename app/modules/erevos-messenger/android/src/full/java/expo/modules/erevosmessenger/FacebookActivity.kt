@@ -35,7 +35,8 @@ import org.json.JSONObject
  * - Messenger's links (facebook.com/messages, messenger.com, m.me) close the page and go to
  *   Erevos's own Messenger: [start] answers "messages", or "thread:<id>" for one chat.
  * - The page wears Erevos's look (WebPages.dress), as Messenger's case does, as far as the mobile
- *   site takes it. With Messenger used in its case, the Facebook card opens the case instead.
+ *   site takes it. With Messenger used in its case, there is no Facebook card nor Open Facebook:
+ *   Facebook's feed is in the case's own bar.
  * - With a Tor door (the Messenger account goes through Tor), the page goes only through Tor, never
  *   straight, as the sign-in page does.
  */

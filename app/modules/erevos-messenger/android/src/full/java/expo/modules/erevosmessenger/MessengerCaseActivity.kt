@@ -419,9 +419,7 @@ class MessengerCaseActivity : Activity() {
   }
 
   private fun load() {
-    // "feed": Facebook's feed (the Facebook card, while Messenger is used in its case).
-    val at = intent.getStringExtra(THREAD).orEmpty()
-    val page = if (at == "feed") "$SITE/" else pageOf(at)
+    val page = pageOf(intent.getStringExtra(THREAD).orEmpty())
     val door = intent.getStringExtra(DOOR)
     if (door == null) {
       web.loadUrl(page)
