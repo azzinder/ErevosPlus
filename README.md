@@ -142,7 +142,7 @@ affected by any of this.
 
 ## Build it
 
-Erevos+ is the default edition (`EREVOS_EDITION=plus`; `lite` gives the plain Erevos). The Rust crates:
+Erevos+ is the default edition (`EREVOS_EDITION=plus`; `erevos` gives the plain Erevos, `lite` Erevos Lite). The Rust crates:
 
 ```
 cargo test
