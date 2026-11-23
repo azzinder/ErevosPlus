@@ -9,13 +9,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { guideFor, PLUS_SECTIONS } from '../guide/index';
+import { EREVOS_SECTIONS, guideFor, PLUS_SECTIONS } from '../guide/index';
 import { randomBytes } from '../lib/crypto';
 import { editionNote } from '../lib/edition-notice';
 import { newNostrDm } from '../lib/nostr-dm';
-import { inLite, whatsNewFor } from '../lib/whats-new';
-import { asEdition, editionName, guideNamed, named, unmarkKept } from '../lib/edition';
+import { inErevosLite, inLite, whatsNewFor } from '../lib/whats-new';
+import { asEdition, editionName, guideNamed, inEdition, named, unmarkKept, withoutNetworks } from '../lib/edition';
 import { KEEPS_EREVOS, KEEPS_SOME } from '../lib/edition-keeps';
+import { editionModules, modulesHere } from '../lib/modules';
 import { EL } from '../i18n/el/index';
 import { setLang, tFor } from '../lib/i18n';
 import { saveNostrDm } from '../lock/nostr-dm-data';
@@ -28,7 +29,7 @@ useWasmCore();
 test('the plain Erevos guide leaves out Matrix, XMPP and the chats with other Nostr apps; Erevos+ has them', () => {
   for (const lang of ['en', 'el'] as const) {
     const plus = guideFor(lang, 'plus').map((section) => section.id);
-    const lite = guideFor(lang, 'lite').map((section) => section.id);
+    const lite = guideFor(lang, 'erevos').map((section) => section.id);
     for (const id of PLUS_SECTIONS) {
       assert.ok(plus.includes(id), `${lang} ${id}`);
       assert.ok(!lite.includes(id), `${lang} ${id}`);
@@ -47,13 +48,13 @@ test('the plain Erevos says once in a space that its Nostr account is kept for E
   const other = randomBytes(32);
   await saveNostrDm(0, key, await newNostrDm());
   assert.equal(await editionNote(0, key, 'plus'), null);
-  const said = await editionNote(0, key, 'lite');
+  const said = await editionNote(0, key, 'erevos');
   assert.ok(said?.includes('Nostr'));
   assert.ok(said?.includes('Erevos+'));
   // Once only in that space.
-  assert.equal(await editionNote(0, key, 'lite'), null);
+  assert.equal(await editionNote(0, key, 'erevos'), null);
   // A space with no such account: nothing to say.
-  assert.equal(await editionNote(1, other, 'lite'), null);
+  assert.equal(await editionNote(1, other, 'erevos'), null);
   // What is kept shows neither the spaces' keys nor the networks.
   const kept = store.get('erevos.edition-told') ?? '';
   assert.doesNotMatch(kept, /nostr|matrix|xmpp/i);
@@ -62,7 +63,7 @@ test('the plain Erevos says once in a space that its Nostr account is kept for E
 
 test("the plain Erevos's What's new leaves out what is of Matrix, XMPP and chats with other Nostr apps, but says they are in Erevos+", () => {
   const plus = whatsNewFor('99.0.0', 'plus');
-  const lite = whatsNewFor('99.0.0', 'lite');
+  const lite = whatsNewFor('99.0.0', 'erevos');
   // Erevos+ folds the plain releases after 7.0.0 into its own (lib/whats-new.ts asPlus): each of its releases is one of the plain Erevos's.
   assert.ok(plus.every((v) => lite.some((w) => w.version === v.version)));
   const all = (list: typeof plus) => list.flatMap((v) => [...v.forYou, ...v.underTheHood]);
@@ -80,18 +81,18 @@ test("the plain Erevos's What's new leaves out what is of Matrix, XMPP and chats
 
 test("each edition says its own name, in every language's words", () => {
   assert.equal(editionName('plus'), 'Erevos+');
-  assert.equal(editionName('lite'), 'Erevos');
+  assert.equal(editionName('erevos'), 'Erevos');
   assert.equal(named('Καλώς ήρθες στο Erevos', 'plus'), 'Καλώς ήρθες στο Erevos+');
   assert.equal(named('Erevos 7.1.3 ist da.', 'plus'), 'Erevos+ 7.1.3 ist da.');
   assert.equal(named('Erevos+ stays', 'plus'), 'Erevos+ stays');
-  assert.equal(named('Willkommen bei Erevos', 'lite'), 'Willkommen bei Erevos');
+  assert.equal(named('Willkommen bei Erevos', 'erevos'), 'Willkommen bei Erevos');
   // Names that are more than the app stay: ErevosGram, a repository, a file.
   assert.equal(named('ErevosGram, azzinder/Erevos, Erevos.apk, erevos-web', 'plus'), 'ErevosGram, azzinder/Erevos, Erevos.apk, erevos-web');
   assert.equal(named('Erevos contacts and Erevos.', 'plus'), 'Erevos+ contacts and Erevos+.');
   // Words that speak of the two editions apart, or of whose Erevos is, stay as written.
   assert.equal(asEdition('The next update is the plain Erevos. It installs over Erevos+.', 'plus'), 'The next update is the plain Erevos. It installs over Erevos+.');
   assert.equal(asEdition('Erevos, by azzinder', 'plus'), 'Erevos, by azzinder');
-  assert.equal(asEdition('Open Erevos', 'lite'), 'Open Erevos');
+  assert.equal(asEdition('Open Erevos', 'erevos'), 'Open Erevos');
   assert.equal(guideNamed('Erevos+ has Matrix, and\nErevos has not.\n\nErevos opens.', 'plus'), 'Erevos+ has Matrix, and\nErevos has not.\n\nErevos+ opens.');
   assert.equal(guideNamed('Erevos opens.\n- Erevos+ has Matrix; Erevos has not.\n**Erevos, by azzinder.**', 'plus'), 'Erevos+ opens.\n- Erevos+ has Matrix; Erevos has not.\n**Erevos, by azzinder.**');
 });
@@ -102,7 +103,7 @@ test('the app says Erevos+ in its own words when the checks do not ask for the p
   try {
     flags.__EREVOS_PLAIN_NAMES__ = false;
     assert.equal(tFor('plus', 'Open Erevos'), 'Open Erevos+');
-    assert.equal(tFor('lite', 'Open Erevos'), 'Open Erevos');
+    assert.equal(tFor('erevos', 'Open Erevos'), 'Open Erevos');
     assert.equal(tFor('plus', 'Erevos, by azzinder'), 'Erevos, by azzinder');
     assert.equal(tFor('plus', 'Erevos {version} is out.', { version: '7.0.3' }), 'Erevos+ 7.0.3 is out.');
   } finally {
@@ -144,9 +145,40 @@ test("Erevos+ keeps «Erevos» where it speaks of the other person's app or of w
   }
   // The guide: a marked «Erevos» stays, the others in the same paragraph are Erevos+'s, and no mark shows.
   assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'plus'), 'Erevos+ looks for other Erevos phones.');
-  assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'lite'), 'Erevos looks for other Erevos phones.');
+  assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'erevos'), 'Erevos looks for other Erevos phones.');
+  assert.equal(guideNamed('Erevos looks for other {=Erevos} phones.', 'lite'), 'Erevos Lite looks for other Erevos phones.');
   assert.equal(unmarkKept('a {=Erevos} b'), 'a Erevos b');
   for (const lang of ['de', 'el', 'en', 'es', 'fr', 'it', 'pt', 'sh'] as const) {
     for (const section of guideFor(lang, 'plus')) assert.doesNotMatch(JSON.stringify(section), /\{=/, `${lang} ${section.id}`);
   }
+});
+
+test("Erevos Lite has Erevos's own chats alone, and says its own name", () => {
+  assert.deepEqual(editionModules('lite'), ['erevos']);
+  assert.deepEqual(modulesHere('android', null, false, 'lite'), ['erevos']);
+  for (const module of ['phone', 'sms', 'collection', 'nostr', 'matrix', 'xmpp'] as const) assert.equal(inEdition(module, 'lite'), false, module);
+  assert.equal(withoutNetworks('lite'), true);
+  assert.equal(withoutNetworks('erevos'), true);
+  assert.equal(withoutNetworks('plus'), false);
+  assert.equal(editionName('lite'), 'Erevos Lite');
+  assert.equal(named('Open Erevos', 'lite'), 'Open Erevos Lite');
+  // Never twice, and names that are more than the app stay.
+  assert.equal(named('Erevos Lite opens', 'lite'), 'Erevos Lite opens');
+  assert.equal(named('ErevosGram, azzinder/Erevos, Erevos.apk', 'lite'), 'ErevosGram, azzinder/Erevos, Erevos.apk');
+  assert.equal(asEdition('Choose Erevos+ or Erevos Lite', 'lite'), 'Choose Erevos+ or Erevos Lite');
+});
+
+test("Erevos Lite's guide and What's new leave out the Phone, the SMS and the Collection too", () => {
+  for (const lang of ['en', 'el'] as const) {
+    const erevos = guideFor(lang, 'erevos').map((section) => section.id);
+    const lite = guideFor(lang, 'lite').map((section) => section.id);
+    for (const id of [...PLUS_SECTIONS, ...EREVOS_SECTIONS]) assert.ok(!lite.includes(id), `${lang} ${id}`);
+    for (const id of EREVOS_SECTIONS) assert.ok(erevos.includes(id), `${lang} ${id}`);
+    assert.ok(lite.includes('relay') && lite.includes('nearby') && lite.includes('updates'));
+  }
+  const all = whatsNewFor('99.0.0', 'lite').flatMap((v) => [...v.forYou, ...v.underTheHood]);
+  for (const text of all) assert.doesNotMatch(text, /\(#(?:phone|sms|collection)\)|\bSMS\b/, text);
+  assert.equal(inErevosLite('**Quick texts** for SMS. See [SMS](#sms).'), false);
+  assert.equal(inErevosLite('**Speed dial** on the Phone.'), false);
+  assert.equal(inErevosLite('**The day stands out in every chat**.'), true);
 });

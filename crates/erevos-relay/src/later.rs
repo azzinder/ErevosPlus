@@ -79,6 +79,15 @@ struct Item {
     tries: u32,
 }
 
+/// Makes the removal of the file at `path` itself durable, so a request
+/// taken back or gone does not come back after a power cut. One that could
+/// not be made so is said.
+fn gone_for_good(path: &Path) {
+    if let Err(e) = journal::sync_dir(path) {
+        elog!("erevos-relay: a request removed may come back after a power cut: {e}");
+    }
+}
+
 pub struct Held {
     dir: Option<PathBuf>,
     /// By when to run next and the order they came.
@@ -245,7 +254,7 @@ impl Held {
         };
         if let Some(path) = self.path(id) {
             match fs::remove_file(&path) {
-                Ok(()) => {}
+                Ok(()) => gone_for_good(&path),
                 Err(e) if e.kind() == ErrorKind::NotFound => {}
                 Err(e) => return Err(storage(e)),
             }
@@ -290,11 +299,11 @@ impl Held {
         };
         self.used -= item.request.len() as u64;
         if let Some(path) = self.path(id) {
-            if let Err(e) = fs::remove_file(&path) {
-                if e.kind() != ErrorKind::NotFound {
-                    // Run again after a restart, the other phone takes it as one it has.
-                    elog!("erevos-relay: cannot remove a request that went: {e}");
-                }
+            match fs::remove_file(&path) {
+                Ok(()) => gone_for_good(&path),
+                Err(e) if e.kind() == ErrorKind::NotFound => {}
+                // Run again after a restart, the other phone takes it as one it has.
+                Err(e) => elog!("erevos-relay: cannot remove a request that went: {e}"),
             }
         }
     }
@@ -467,6 +476,58 @@ mod tests {
         let mut held = Held::in_memory(DEFAULT_TTL);
         held.used = HELD_CAP - 1;
         assert_eq!(held.hold(id(1), 1, vec![0; 2]), Err(HeldError::Full));
+    }
+
+    // Regression: acknowledgement of a scheduled SEND and removal of its
+    // held file are separate durable operations. A restart in between can
+    // repeat the same encrypted payload; consumers must be replay-safe.
+    #[test]
+    fn restart_between_send_and_went_can_deliver_the_same_payload_twice() {
+        let root = folder("scheduled-send-crash-window");
+        let held_dir = root.join("held");
+        let journal_path = root.join("queues.journal");
+        let start = clock();
+        let queue = {
+            let mut held = Held::open_clocked(&held_dir, DEFAULT_TTL, clock).unwrap();
+            let mut store = crate::queue::Store::open(&journal_path).unwrap();
+            let queue = store.create().unwrap();
+            held.hold(id(7), start, b"ciphertext".to_vec()).unwrap();
+            let due = held.take_due();
+            assert_eq!(due.len(), 1);
+            store.send(&queue.sender_id, due[0].request.clone()).unwrap();
+            // Simulate process death after journaled SEND, before held.went().
+            // Neither `held` nor `store` writes a shutdown marker here.
+            queue
+        };
+        let mut store = crate::queue::Store::open(&journal_path).unwrap();
+        let mut held = Held::open_clocked(&held_dir, DEFAULT_TTL, clock).unwrap();
+        let due = held.take_due();
+        assert_eq!(due.len(), 1, "still-present held file is retried");
+        store.send(&queue.sender_id, due[0].request.clone()).unwrap();
+        held.went(&id(7));
+        assert_eq!(store.receive(&queue.recipient_id).unwrap().unwrap(), b"ciphertext");
+        assert_eq!(store.receive(&queue.recipient_id).unwrap().unwrap(), b"ciphertext");
+        assert_eq!(store.receive(&queue.recipient_id).unwrap(), None);
+        drop(held);
+        drop(store);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    // Failure injection via the actual filesystem, not a mock: a path
+    // collision at the temporary write target must not mutate the index.
+    #[test]
+    fn blocked_partial_write_does_not_create_a_scheduled_request() {
+        let dir = folder("blocked-part");
+        let mut held = Held::open_clocked(&dir, DEFAULT_TTL, clock).unwrap();
+        let part = dir.join(format!("{}{PART}", hex(&id(9))));
+        fs::create_dir(&part).unwrap();
+        let before = held.used;
+        assert_eq!(held.hold(id(9), clock() + 5, b"x".to_vec()), Err(HeldError::Storage));
+        assert_eq!(held.used, before);
+        assert!(!held.holds(&id(9)));
+        assert_eq!(held.next(), None);
+        drop(held);
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

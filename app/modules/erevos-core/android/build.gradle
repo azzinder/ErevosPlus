@@ -71,10 +71,11 @@ def buildRustCore = tasks.register('buildRustCore', Exec) {
   def command = [cargo, 'ndk', '--platform', '24', '-o', rustLibs.path]
   abis.each { command += ['-t', it] }
   // Erevos+ (the default) has Matrix, XMPP and chats with other Nostr apps; the plain Erevos
-  // (EREVOS_EDITION=lite, docs/editions.md) is built without them.
-  def lite = System.getenv('EREVOS_EDITION') == 'lite'
-  inputs.property('edition', lite ? 'lite' : 'plus')
-  command += ['build', '--release', '-p', 'erevos-ffi', '--features', lite ? 'android,tor,speech' : 'android,tor,networks,speech']
+  // (EREVOS_EDITION=erevos) and Erevos Lite (EREVOS_EDITION=lite, docs/editions.md) are built without them.
+  def edition = System.getenv('EREVOS_EDITION') ?: 'plus'
+  def plain = edition != 'plus'
+  inputs.property('edition', edition)
+  command += ['build', '--release', '-p', 'erevos-ffi', '--features', plain ? 'android,tor,speech' : 'android,tor,networks,speech']
   commandLine command
 
   doFirst {

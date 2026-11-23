@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
+import { inEdition } from '../lib/edition';
 import { mark, t } from '../lib/i18n';
 import { WIDGET_BUTTONS, setWidgetOrder, widgetOrder, type WidgetButton } from '../modules/erevos-widget';
 import { radius, space, type Colors } from '../theme/colors';
@@ -36,11 +37,16 @@ export function WidgetOrder({ titled = true }: { titled?: boolean }) {
     if (setWidgetOrder(next)) setOrder(next);
   }
 
+  // The buttons this app has (Erevos Lite has no Phone or SMS, lib/edition.ts): the widget shows only them.
+  const shown = order.filter((button) => (button !== 'phone' && button !== 'sms') || inEdition(button));
+
   function move(place: number, by: -1 | 1) {
     const other = place + by;
-    if (!order || other < 0 || other >= order.length) return;
+    if (!order || other < 0 || other >= shown.length) return;
+    const a = order.indexOf(shown[place]);
+    const b = order.indexOf(shown[other]);
     const next = [...order];
-    [next[place], next[other]] = [next[other], next[place]];
+    [next[a], next[b]] = [next[b], next[a]];
     save(next);
   }
 
@@ -53,7 +59,7 @@ export function WidgetOrder({ titled = true }: { titled?: boolean }) {
         {t("The order of the buttons on the home screen's widget, from left to right. Tap ↑ or ↓ to move a button.")}
       </Text>
       <Card>
-        {order.map((button, place) => (
+        {shown.map((button, place) => (
           <View key={button} style={[styles.row, place > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]}>
             <Text tone="muted" style={styles.place}>
               {place + 1}
@@ -61,7 +67,7 @@ export function WidgetOrder({ titled = true }: { titled?: boolean }) {
             <Image source={PICTURES[button]} style={[styles.glyph, { tintColor: colors.text }]} />
             <Text style={styles.name}>{t(LABELS[button])}</Text>
             <Arrow up label={t('Move up')} disabled={place === 0} onPress={() => move(place, -1)} />
-            <Arrow up={false} label={t('Move down')} disabled={place === order.length - 1} onPress={() => move(place, 1)} />
+            <Arrow up={false} label={t('Move down')} disabled={place === shown.length - 1} onPress={() => move(place, 1)} />
           </View>
         ))}
       </Card>
@@ -69,7 +75,7 @@ export function WidgetOrder({ titled = true }: { titled?: boolean }) {
         {t('This is how it will look:')}
       </Text>
       <View style={styles.widget}>
-        {order.map((button) => (
+        {shown.map((button) => (
           <View key={button} style={styles.button}>
             <Image source={PICTURES[button]} style={styles.widgetGlyph} />
             <Text numberOfLines={1} style={styles.widgetLabel}>

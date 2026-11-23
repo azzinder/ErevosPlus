@@ -31,7 +31,7 @@ concurrency:
 env:
   EXPO_NO_TELEMETRY: "1"
   # The plain Erevos, as release.yml builds it (docs/editions.md).
-  EREVOS_EDITION: lite
+  EREVOS_EDITION: erevos
 
 jobs:
   # The release's commit and build number.

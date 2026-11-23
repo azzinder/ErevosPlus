@@ -314,7 +314,9 @@ class CallActivity : Activity() {
   }
 
   private fun render() {
-    if (closing) return
+    // A call that rings while "Call ended" still shows (1.5 s) shows at once, not that dark screen.
+    if (closing && Calls.ringing() == null) return
+    closing = false
     val ringing = Calls.ringing()
     val front = Calls.front()
     val shown = ringing ?: front

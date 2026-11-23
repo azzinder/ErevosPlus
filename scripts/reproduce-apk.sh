@@ -31,7 +31,18 @@ case $version in
 	;;
 esac
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || git -C "${2:-.}" rev-parse --show-toplevel)
-repo=${EREVOS_RELEASES_REPO:-azzinder/erevos-releases}
+# Erevos Lite's releases (3.2.x; 7.2.x was Erevos) are in a repository of their own, with their own APK.
+apk=erevos-android.apk
+default_repo=azzinder/erevos-releases
+case $version in
+7.*) ;;
+*.2.*)
+	default_repo=azzinder/erevos-lite-releases
+	apk=erevos-lite-android.apk
+	export EREVOS_EDITION=lite
+	;;
+esac
+repo=${EREVOS_RELEASES_REPO:-$default_repo}
 base=${EREVOS_RELEASES_URL:-https://github.com/$repo/releases/download}/v$version
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -40,8 +51,8 @@ src=${2:-$work/src}
 echo "== Downloading the Android app of v$version"
 curl -fsSL "$base/SHA256SUMS" -o "$work/SHA256SUMS"
 curl -fsSL "$base/version.json" -o "$work/version.json"
-curl -fL --progress-bar "$base/erevos-android.apk" -o "$work/erevos-android.apk"
-(cd "$work" && grep ' erevos-android.apk$' SHA256SUMS | sha256sum -c -)
+curl -fL --progress-bar "$base/$apk" -o "$work/erevos-android.apk"
+(cd "$work" && grep " $apk\$" SHA256SUMS | sed "s/ $apk\$/ erevos-android.apk/" | sha256sum -c -)
 field() { node -e "const v = JSON.parse(require('fs').readFileSync(process.argv[1]))[process.argv[2]]; console.log(v ?? '')" "$1" "$2"; }
 commit=$(field "$work/version.json" commit)
 build=$(field "$work/version.json" build)
@@ -57,6 +68,11 @@ if [ "$src" != "$(git -C "$src" rev-parse --show-toplevel 2>/dev/null)" ]; then
 fi
 cp "$root/app/plugins/with-release-signing.js" "$work/"
 git -C "$src" checkout -q "$commit"
+# Until 3.0.0 the plain Erevos was built as `lite`, now Erevos Lite's name (docs/editions.md): a
+# commit from before knows only plus and lite.
+if [ "${EREVOS_EDITION:-}" = erevos ] && ! grep -q "'erevos' | 'lite'" "$src/app/lib/edition.ts" 2>/dev/null; then
+	export EREVOS_EDITION=lite
+fi
 if ! grep -q EREVOS_UNSIGNED "$src/app/plugins/with-release-signing.js"; then
 	# Made before it could build unsigned: only how Gradle signs changes, not what goes in the APK.
 	cp "$work/with-release-signing.js" "$src/app/plugins/"

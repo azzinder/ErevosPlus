@@ -11,7 +11,7 @@
 //
 //   node pwa/build.mjs <web build> <out> [--key <public key file>] [--version <n>] [--label <2.0.0>]
 //       [--origin <https://app.example.org>] [--call-origin <https://call.example.org>]
-//       [--element-call <Element Call's dist> | --no-element-call] [--edition plus|lite]
+//       [--element-call <Element Call's dist> | --no-element-call] [--edition plus|erevos]
 //
 // The key defaults to pwa/release-key.pub. The version, which must grow from one release to the
 // next, defaults to the time in seconds. The label names the GitHub release (v2.0.0, v4.0.0-rc.1)
@@ -49,7 +49,8 @@ const option = (name, fallback) => {
   return value;
 };
 const edition = option('--edition', process.env.EREVOS_EDITION || 'plus');
-if (edition !== 'plus' && edition !== 'lite') fail(`The edition is "${edition}": only plus and lite are known.`);
+if (edition === 'lite') fail('Erevos Lite is Android only: it has no web app (docs/editions.md).');
+if (edition !== 'plus' && edition !== 'erevos') fail(`The edition is "${edition}": only plus and erevos are known.`);
 const plus = edition === 'plus';
 const webApp = plus ? 'erevosplus-web' : 'erevos-web';
 const appName = plus ? 'Erevos+' : 'Erevos';

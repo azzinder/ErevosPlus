@@ -9,13 +9,13 @@ group = 'expo.modules.erevosmessenger'
 version = '0.0.1'
 
 // Messenger, Signal and Session are in Erevos+ (docs/editions.md), not in the plain Erevos
-// (EREVOS_EDITION=lite), which takes src/stub: a module that says they are not here, with none of
+// (EREVOS_EDITION=erevos) and Erevos Lite (EREVOS_EDITION=lite), which take src/stub: a module that says they are not here, with none of
 // their code in the APK. Erevos+ takes src/full and the engines from messenger/ at the top of the
 // repository:
 // - Messenger's engine (Go, messenger/core) through gomobile bind: its classes.jar and its .so;
 // - Signal's (Rust, messenger/signal, presage) through cargo-ndk, as liberevos_signal.so;
 // - Session's (Kotlin) over libsession-util-android, from its makers' own Maven repository.
-def full = (System.getenv('EREVOS_EDITION') ?: 'plus') != 'lite'
+def full = (System.getenv('EREVOS_EDITION') ?: 'plus') == 'plus'
 def repoRoot = file('../../../..')
 def messenger = new File(repoRoot, 'messenger')
 def engines = layout.buildDirectory.dir('engines')

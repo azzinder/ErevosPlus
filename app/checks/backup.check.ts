@@ -251,6 +251,37 @@ t('a restore that cannot write all of it (a full phone) leaves the phone as it w
   assert.ok(await unlock(await loadLockConfig(), 'real-1111'));
 });
 
+// What the backup lacks that will not go (cleanup) leaves no phone half restored either.
+t('a failure during restore cleanup leaves the previous phone and its restore marker untouched', async () => {
+  await phone();
+  const backup = await backUp(await backupKey('backup-pass'));
+  // After the backup, the phone changes, and has an extra file the backup does not contain.
+  store.set('erevos.lock', 'current phone lock');
+  files.set('erevos-archive', 'current phone archive');
+  const beforeLock = store.get('erevos.lock');
+  const beforeFiles = new Map(files);
+  const beforeBlobs = new Map(blobs);
+  const beforeRestoreMarker = await lastRestore();
+  const opened = await openBackup(backup, 'backup-pass');
+  assert.ok(!opened.entries.some((entry) => entry.name === 'erevos-archive'));
+
+  const del = files.delete.bind(files);
+  files.delete = (name: string) => {
+    if (name === 'erevos-archive') throw new Error('injected cleanup failure');
+    return del(name);
+  };
+  try {
+    await assert.rejects(restoreBackup(opened, fromShelf), /injected cleanup failure/);
+  } finally {
+    files.delete = del;
+  }
+
+  assert.equal(store.get('erevos.lock'), beforeLock, 'previous lock must be restored');
+  assert.deepEqual(new Map(files), beforeFiles, 'previous files must be restored');
+  assert.deepEqual(new Map(blobs), beforeBlobs, 'previous blobs must be restored');
+  assert.equal(await lastRestore(), beforeRestoreMarker, 'restore marker must be undone');
+});
+
 t('puts everything back: the lock opens the same space, with its relay, messages, voice and stickers', async () => {
   const { key, clip, photo, sticker } = await phone();
   // Everything but the wrong tries, which stay with the phone; the panic password's place too.

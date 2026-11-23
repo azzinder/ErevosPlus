@@ -848,8 +848,10 @@ function Home() {
     />
   ) : null;
 
-  const header = (
-    <View style={styles.headerBlock}>
+  // The search and the Ways stay under the top bar with the services while the list scrolls (as
+  // the services do): a search or another way out is a tap away from anywhere in the list.
+  const pinned = messagesOn || erevosOn ? (
+    <View style={styles.pinned}>
       {messagesOn ? (
         <View style={styles.search}>
           <View>
@@ -933,6 +935,11 @@ function Home() {
           ) : null}
         </View>
       ) : null}
+    </View>
+  ) : null;
+
+  const header = (
+    <View style={styles.headerBlock}>
       {hasSmsRows && !smsMirrored() && show === 'sms' ? (
         <Row wrap>
           <Chip label={t('Names')} selected={smsShown.current.names} onPress={() => void toggleNames()} />
@@ -966,6 +973,7 @@ function Home() {
       <View style={[styles.list, styles.fixedBar]}>
         {topBar}
         {servicesBar ? <View style={styles.fixedServices}>{servicesBar}</View> : null}
+        {pinned}
       </View>
       <SwipeTabs tabs={mixed ? tabs : []} current={show} onChange={setShow}>
         <FlatList<InboxRow | PublicItem | Section>
@@ -1310,7 +1318,8 @@ function ReleaseRow({ release }: { release: Told & { seen: boolean } }) {
   const styles = useStyles(makeStyles);
   const { colors } = useTheme();
   // A release of the plain Erevos (7.0.x), told in Erevos+ whose Updates chose it, says Erevos's name.
-  const of: Edition = /^\d+\.\d*[02468]\.\d/.test(release.name) ? 'lite' : EDITION;
+  // 7.2.x were the plain Erevos's, before Erevos Lite took the second number 2.
+  const of: Edition = /^(?:\d+\.0|7\.2)\.\d/.test(release.name) ? 'erevos' : /^\d+\.2\.\d/.test(release.name) ? 'lite' : EDITION;
   const said = tFor(of, 'Erevos {name} is out. Tap to see what is new and update.', { name: release.name });
   return (
     <Pressable
@@ -1367,6 +1376,10 @@ const makeStyles = (colors: Colors) =>
       paddingTop: space.md,
     },
     fixedServices: {
+      paddingTop: space.md,
+    },
+    pinned: {
+      gap: space.md,
       paddingTop: space.md,
     },
     topBar: {

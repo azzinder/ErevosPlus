@@ -963,35 +963,46 @@ export async function restoreBackup(
   // held before: a write that fails (a full phone) puts every one back as it was, so the phone is
   // left as before the restore, never half one and half the other.
   const before = await heldBefore(entries);
+  // Without some of its parts, the phone's own photos, files and voice messages all stay: which of
+  // them those parts held, and the backup's messages show, nothing says.
+  const own = left.length > 0;
+  // What the phone had and the backup does not, small enough to hold while the restore goes on
+  // (its texts, keys, photos of contacts and pages), read before any of it goes: should one not go
+  // (or a write fail), all of it is put back as well, so the phone is as before the restore.
+  const gone: Held[] = [];
+  for (const name of [...TEXT_FILES, ...PHONE_FILES, ...(parts ? LATER_FILES : [])]) if (!keep.has(name)) gone.push({ kind: KIND_TEXT, name, value: await readFile(name) });
+  for (const name of [...(await listFiles(AVATAR)), ...(await listFiles(PAGE))]) if (!keep.has(name)) gone.push({ kind: KIND_BYTES, name, value: await readBytes(name) });
+  const heard = HEARD.some((name) => keep.has(name));
+  for (const name of [...KEYS, ...(parts ? LATER_KEYS : []), ...(heard ? HEARD : [])]) if (!keep.has(name)) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
   try {
     for (const entry of entries) {
       if (entry.kind === KIND_TEXT) await writeFile(entry.name, utf8Decode(entry.data));
       if (entry.kind === KIND_BYTES) await writeBytes(entry.name, entry.data);
     }
     for (const entry of entries) if (entry.kind === KIND_KEY) await secureSet(entry.name, keptHere(entry.name, utf8Decode(entry.data), here.get(entry.name) ?? null));
+    for (const { kind, name, value } of gone) {
+      if (value === null) continue;
+      if (kind === KIND_KEY) await secureDelete(name);
+      else await deleteFile(name);
+    }
   } catch (error) {
     await putBack(before);
+    await putBack(gone);
     // The photos, files and voice messages its parts brought go too: unseen, they would only take
     // room, just when the phone is full.
     for (const name of fresh) await deleteFile(name).catch(() => undefined);
     await undo();
     throw error;
   }
-  // Without some of its parts, the phone's own photos, files and voice messages all stay: which of
-  // them those parts held, and the backup's messages show, nothing says.
-  const own = left.length > 0;
-  for (const name of [...TEXT_FILES, ...PHONE_FILES, ...(own ? [] : await listFiles(VOICE)), ...(await listFiles(AVATAR)), ...(await listFiles(PAGE))]) {
-    if (!keep.has(name)) await deleteFile(name);
+  // The phone's own voice messages, photos and files the backup does not name, too big to hold:
+  // the restore is done, so one that does not go stays, named by nothing (app/backup.tsx, «Leftovers»).
+  for (const name of [...(own ? [] : await listFiles(VOICE)), ...(parts && !own ? await listFiles(ATTACHMENT) : [])]) {
+    if (!keep.has(name)) await deleteFile(name).catch(() => undefined);
   }
-  // A backup from before parts holds no photos and files, nor these: the phone's stay as they are.
-  if (parts) for (const name of [...LATER_FILES, ...(own ? [] : await listFiles(ATTACHMENT))]) if (!keep.has(name)) await deleteFile(name);
-  for (const name of KEYS) if (!keep.has(name)) await secureDelete(name);
-  if (parts) for (const name of LATER_KEYS) if (!keep.has(name)) await secureDelete(name);
   // One made before the queues entries were, or that held fewer spaces, has none for some: each is
   // there again, sealed with a random key, before anything opens, so which are used shows nowhere.
   await prepareQueueEntries();
-  if (HEARD.some((name) => keep.has(name))) {
-    for (const name of HEARD) if (!keep.has(name)) await secureDelete(name);
+  if (heard) {
     await prepareWatchEntries();
     await prepareRingEntries();
     await prepareDoors();

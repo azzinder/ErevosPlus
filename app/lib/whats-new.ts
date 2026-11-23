@@ -28,12 +28,43 @@ export const NEXT: Changes = {
 
 export const VERSIONS: WhatsNew[] = [
   {
+    version: '3.1.0-rc.1',
+    forYou: [
+      mark("**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.2.0-rc.1',
+    forYou: [
+      mark("**Release candidate**: Erevos Lite as it is meant to come out, with what Erevos 3.0.0-rc.1 brought to its chats and calls."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.0.0-rc.1',
+    forYou: [
+      mark("**Search and Ways stay in sight**: on home, the search and the **Ways** line stay under the top bar while the list scrolls."),
+      mark("**Calls on a locked phone**: a call that rings with the phone locked or its screen off now turns the screen on by itself. See [Phone](#phone)."),
+    ],
+    underTheHood: [
+      mark("From a code review made with the help of AI: a restore that cannot finish leaves the phone as it was, and the relay keeps its lent places, held messages and deletions right, also after a power cut."),
+    ],
+  },
+  {
     version: '3.1.0-beta.2',
     forYou: [
       mark("**Messenger in its case tells you of new messages**: in Erevos+, when you use Messenger in its case, Erevos now tells you of its new messages as it does of other chats, even if you never opened the case. A chat with messages not read shows on home until it is read, and tapping it opens it in the case; while the case is open, Erevos tells of nothing, as the page shows it. See [Messenger](#messenger)."),
       mark("**Messenger in its case wears your whole look**: in Erevos+, Meta's own Messenger page in its case now takes your look: its colours, dark or light as Erevos is, the shape of your bubbles (round, square or a line), your text size, your style's letters, and what lies behind your screens (a wallpaper, Neon's grid, Paper's lines and the others), and it changes with your look even while it is open. A photo of your own stays in Erevos: there the page shows a soft gradient instead. Where Meta changes its page, parts of it may keep Meta's look. See [Messenger](#messenger)."),
       mark("**Messenger in its case asks for the PIN once**: in Erevos+, what Meta's page keeps now stays in the case between openings, apart from every other page, so Meta knows your phone again and no longer asks for the PIN of your encrypted chats each time you open it. It goes when you sign out of Messenger, or when another account opens the case. See [Messenger](#messenger)."),
       mark("**Your networks move with Erevos+**: moving from one Erevos+ to another on the same phone (as from Erevos+ 7.x to the new Erevos+), Telegram, Signal, Session, Messenger and Matrix now go on signed in, as they were. Telegram's photos and files download again as they are opened, and Messenger's page asks for its PIN once more. Moving from Erevos+ to Erevos or Erevos Lite says first that those accounts stay behind, and to write down Session's 13 recovery words. See [Updates](#updates)."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.2.0-beta.2',
+    forYou: [
+      mark("**Erevos Lite**: Erevos's own chats, groups and calls, end-to-end encrypted, in an app of its own that asks for fewer permissions. It moves to Erevos or Erevos+, and they to it, under **Updates**. See [Updates](#updates)."),
     ],
     underTheHood: [],
   },
@@ -81,11 +112,54 @@ export const VERSIONS: WhatsNew[] = [
  * number, then every release.
  */
 export function whatsNewFor(running: string, edition: Edition = EDITION, bridge = BRIDGE): (Changes & { version: string | null })[] {
-  const released = VERSIONS[0]?.version ?? '0';
-  const pending = NEXT.forYou.length + NEXT.underTheHood.length > 0;
-  const next = pending && !VERSIONS.some((v) => v.version === running) ? [{ version: bridge || laterThan(running, released) ? running : null, ...NEXT }] : [];
-  const all = [...next, ...VERSIONS];
-  return edition === 'lite' ? all.map(({ forYou, underTheHood, ...rest }) => ({ ...rest, forYou: forYou.filter(inLite), underTheHood: underTheHood.filter(inLite) })) : asPlus(all);
+  return whatsNewOf(VERSIONS, NEXT, running, edition, bridge);
+}
+
+/** whatsNewFor, of any list of releases and what is not out yet: for the checks. */
+export function whatsNewOf(versions: WhatsNew[], next: Changes, running: string, edition: Edition, bridge = false): (Changes & { version: string | null })[] {
+  // A release of Erevos Lite (x.2.y) is told only in Erevos Lite: what it brought of Erevos's own is
+  // told in Erevos's releases already.
+  const lite = (v: { version: string | null }) => v.version !== null && LITE_RELEASE.test(v.version);
+  const own = edition === 'lite' ? versions : versions.filter((v) => !lite(v));
+  // The last release of this edition: Erevos Lite's own, before which what runs is its first.
+  const released = (edition === 'lite' ? own.find(lite) : own[0])?.version ?? '0';
+  const pending = next.forYou.length + next.underTheHood.length > 0;
+  const coming = pending && !own.some((v) => v.version === running) ? [{ version: bridge || laterThan(running, released) ? running : null, ...next }] : [];
+  const all = [...coming, ...own];
+  if (edition === 'plus') return asPlus(all);
+  const kept = edition === 'lite' ? (text: string) => inLite(text) && inErevosLite(text) : inLite;
+  const shown = all.map(({ forYou, underTheHood, ...rest }) => ({ ...rest, forYou: forYou.filter(kept), underTheHood: underTheHood.filter(kept) }));
+  return edition === 'lite' ? asLite(shown, running).filter((v) => v.forYou.length + v.underTheHood.length > 0) : shown;
+}
+
+// Erevos Lite tells its releases (x.2.y, their betas and rcs) as its own: what a release of another
+// edition brought shows under the Lite release that came after it, or, with none yet, under the
+// Lite version that runs (its first release, 3.2.0-beta.2, brings all Erevos had until then). A
+// build of main for testing, with no Lite number, keeps them as they are. So each release of Erevos
+// Lite has its entry in VERSIONS, as CHANGELOG.md's "## 3.2.x" (release-lite.yml checks it): what
+// came before it then stays under it, not under the next one.
+const LITE_RELEASE = /^(?!7\.)\d+\.2\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/;
+
+export function asLite<T extends Changes & { version: string | null }>(list: T[], running: string): (Changes & { version: string | null })[] {
+  const out: (Changes & { version: string | null })[] = [];
+  let carried: T[] = [];
+  const merged = (entry: Changes & { version: string | null }, from: T[]) => ({
+    ...entry,
+    forYou: [...entry.forYou, ...from.flatMap((x) => x.forYou)],
+    underTheHood: [...entry.underTheHood, ...from.flatMap((x) => x.underTheHood)],
+  });
+  // Oldest first, so what another edition's release brought goes up to the next Lite one.
+  for (const entry of [...list].reverse()) {
+    if (entry.version !== null && !LITE_RELEASE.test(entry.version)) {
+      carried = [entry, ...carried];
+      continue;
+    }
+    out.unshift(merged(entry, carried));
+    carried = [];
+  }
+  if (carried.length === 0) return out;
+  if (LITE_RELEASE.test(running) && !list.some((v) => v.version === running)) return [merged({ version: running, forYou: [], underTheHood: [] }, carried), ...out];
+  return [...carried, ...out];
 }
 
 // Erevos+ tells its releases as its own: a release of the plain Erevos alone (7.0.y after 7.0.0,
@@ -119,3 +193,9 @@ export function asPlus<T extends Changes & { version: string | null }>(list: T[]
 const PLUS_ONLY = /\bMatrix\b|\bXMPP\b|other Nostr apps|Nostr chats|Nostr accounts?\b|\bElement Call\b|\bPublic\b/;
 const IN_PLUS = '**Matrix, XMPP and Nostr chats are in Erevos+**';
 export const inLite = (text: string): boolean => text.startsWith(IN_PLUS) || !PLUS_ONLY.test(text);
+
+// What Erevos Lite shows besides: not what is of the Phone, the SMS, the Collection or its camera,
+// which it has not.
+// Case counts: the Phone and the Collection are written with a capital, the phone you hold is not.
+const EREVOS_ONLY = /\(#(?:phone|sms|collection|modules)\)|\bSMS\b|\bMMS\b|\bPhone\b|\bCollection\b|\b[Vv]oicemails?\b|\b[Ss]peed dial\b/;
+export const inErevosLite = (text: string): boolean => !EREVOS_ONLY.test(text);

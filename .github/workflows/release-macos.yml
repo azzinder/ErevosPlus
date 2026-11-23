@@ -36,7 +36,7 @@ concurrency:
 env:
   EXPO_NO_TELEMETRY: "1"
   # The plain Erevos, as release.yml builds it (docs/editions.md).
-  EREVOS_EDITION: lite
+  EREVOS_EDITION: erevos
   DRAFT: build-macos-${{ github.run_number }}
 
 jobs:
@@ -109,7 +109,7 @@ jobs:
           test -f ../desktop/web/core/erevos_ffi_bg.wasm
           # Element Call, for Matrix calls, served apart at app://element-call (desktop/main.js):
           # Erevos+ only, as the plain Erevos has no Matrix.
-          if [ "$EREVOS_EDITION" != lite ]; then node ../pwa/element-call.mjs node_modules/@element-hq/element-call-embedded/dist ../desktop/web/element-call; fi
+          if [ "$EREVOS_EDITION" = plus ]; then node ../pwa/element-call.mjs node_modules/@element-hq/element-call-embedded/dist ../desktop/web/element-call; fi
       - name: Hand the desktop web build to the macOS job
         env:
           GH_TOKEN: ${{ github.token }}

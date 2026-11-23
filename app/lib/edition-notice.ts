@@ -47,7 +47,7 @@ export async function networksKept(space: number, key: Uint8Array): Promise<stri
 
 /** What to say once in this space, in the plain Erevos, of its accounts kept for Erevos+; null when nothing. */
 export async function editionNote(space: number, key: Uint8Array, edition: Edition = EDITION): Promise<string | null> {
-  if (edition !== 'lite') return null;
+  if (edition === 'plus') return null;
   const tag = tagOf(key);
   const before = await told();
   if (before.includes(tag)) return null;

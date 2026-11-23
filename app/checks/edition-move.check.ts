@@ -29,7 +29,8 @@ test('each edition has its own channels, repository and package', () => {
   assert.equal(wireOf('erevos-beta'), 'erevos-beta');
   assert.equal(channelUrl('erevos-beta'), `https://github.com/${RELEASES_REPO}/releases/download/channel-erevos-beta/version.json`);
   assert.equal(channelPage('lite-beta'), `https://github.com/${LITE_RELEASES_REPO}/releases/tag/channel-beta`);
-  assert.equal(updateEditionOf('lite'), 'erevos');
+  assert.equal(updateEditionOf('erevos'), 'erevos');
+  assert.equal(updateEditionOf('lite'), 'lite');
   assert.equal(updateEditionOf('plus'), 'plus');
   assert.equal(updateEditionName('lite'), 'Erevos Lite');
   assert.equal(updateEditionName('erevos'), 'Erevos');

@@ -26,7 +26,7 @@ A first review fits best on the parts every platform shares and every message pa
 | App protocol layer | `app/lib/e2e.ts`, `app/lib/sealed-packet.ts`, `app/lib/attachments.ts`, `app/lib/device-list.ts`, `app/lib/queue-move.ts` | TypeScript | What the app builds on top of the core: contacts, the extra sealing for the relay, files, linked devices, queue moves. |
 | Storage on the device | `app/lock/` and `app/lib/crypto.ts` | TypeScript | Password slots, sealed files and pages, backups. |
 
-This is the plain Erevos, built with `EREVOS_EDITION=lite` ([editions.md](editions.md)): the chats
+This is the plain Erevos, built with `EREVOS_EDITION=erevos` (`lite` until 3.0.0) ([editions.md](editions.md)): the chats
 with Matrix, XMPP and other Nostr apps (`crates/erevos-matrix`, `crates/erevos-xmpp`, the Nostr
 chats) are not built into it and belong to Erevos+, outside this scope.
 

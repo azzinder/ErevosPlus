@@ -12,7 +12,7 @@ speak to them: `call(service, op, json)` and `onEvent`.
 
 - `src/full`: Erevos+. Needs Go with gomobile/gobind, Rust with cargo-ndk and the
   `aarch64-linux-android` target, and protoc (as `.github/workflows/erevosgram.yml`).
-- `src/stub`: the plain Erevos (`EREVOS_EDITION=lite`): nothing of the three is in the APK.
+- `src/stub`: the plain Erevos (`EREVOS_EDITION=erevos`) and Erevos Lite (`EREVOS_EDITION=lite`): nothing of the three is in the APK.
 
 `src/full` compiles the engines' Kotlin straight from `messenger/android` (the headless package
 `eu.erevos.messenger.engine` with Signal.kt, Session*.kt and KeyWrap.kt; build.gradle `messengerKotlin`),

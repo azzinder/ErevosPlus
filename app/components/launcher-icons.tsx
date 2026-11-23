@@ -93,7 +93,7 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
       <Text variant="caption" tone="muted" style={styles.hint}>
         {t("The color of each icon among the phone's apps. It is the phone's, not each space's, as the icons show before Erevos is unlocked.")}
       </Text>
-      {LAUNCHER_ICONS.map((icon) => (
+      {LAUNCHER_ICONS.filter((icon) => chosen[icon] !== undefined).map((icon) => (
         <Card key={icon}>
           <Text variant="bodyStrong">{t(ICON_LABELS[icon])}</Text>
           <View style={styles.row}>

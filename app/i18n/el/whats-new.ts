@@ -4,6 +4,18 @@
 
 // The Greek of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/el/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":
+    "**Υποψήφια έκδοση**: το Erevos+ όπως σκοπεύει να βγει, με ό,τι έφερε το Erevos 3.0.0-rc.1.",
+  "**Release candidate**: Erevos Lite as it is meant to come out, with what Erevos 3.0.0-rc.1 brought to its chats and calls.":
+    "**Υποψήφια έκδοση**: το Erevos Lite όπως σκοπεύει να βγει, με ό,τι έφερε το Erevos 3.0.0-rc.1 στις συνομιλίες και τις κλήσεις του.",
+  "**Search and Ways stay in sight**: on home, the search and the **Ways** line stay under the top bar while the list scrolls.":
+    "**Αναζήτηση και Δρόμοι πάντα στη θέα**: στην αρχική, η αναζήτηση και η γραμμή **Δρόμοι** μένουν κάτω από την πάνω μπάρα όσο κυλά η λίστα.",
+  "**Calls on a locked phone**: a call that rings with the phone locked or its screen off now turns the screen on by itself. See [Phone](#phone).":
+    "**Κλήσεις με κλειδωμένο κινητό**: μια κλήση που χτυπά με το κινητό κλειδωμένο ή την οθόνη σβηστή ανάβει πλέον μόνη της την οθόνη. Δες [Τηλέφωνο](#phone).",
+  "From a code review made with the help of AI: a restore that cannot finish leaves the phone as it was, and the relay keeps its lent places, held messages and deletions right, also after a power cut.":
+    "Από έλεγχο κώδικα με τη βοήθεια AI: μια επαναφορά που δεν ολοκληρώνεται αφήνει το κινητό όπως ήταν, και ο relay κρατά σωστά τις δανεικές θέσεις, τα μηνύματα για αργότερα και τις διαγραφές, και μετά από διακοπή ρεύματος.",
+  "**Erevos Lite**: Erevos's own chats, groups and calls, end-to-end encrypted, in an app of its own that asks for fewer permissions. It moves to Erevos or Erevos+, and they to it, under **Updates**. See [Updates](#updates).":
+    "**Erevos Lite**: οι συνομιλίες, οι ομάδες και οι κλήσεις του ίδιου του Erevos, κρυπτογραφημένα από άκρο σε άκρο, σε δική τους εφαρμογή που ζητά λιγότερες άδειες. Μετακομίζει στο Erevos ή στο Erevos+, κι εκείνα σε αυτό, από τις **Ενημερώσεις**. Δες [Ενημερώσεις](#updates).",
   "**Short passwords**: a new password, or PIN of hidden chats, that is short is taken only after **Use it anyway**. See [Password lock](#lock).":
     "**Σύντομοι κωδικοί**: ένας νέος κωδικός, ή PIN κρυφών συνομιλιών, που είναι σύντομος γίνεται δεκτός μόνο μετά το **Χρήση παρ’ όλα αυτά**. Δες [Κλείδωμα με κωδικό](#lock).",
   "Tries of a password or PIN count one at a time, also across a browser's tabs; a restore that cannot finish puts back what the phone had; a release's SHA256SUMS is signed.":

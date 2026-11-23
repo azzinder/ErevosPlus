@@ -1138,14 +1138,11 @@ fn respond(
         ));
     }
     let reply = match op[0] {
-        CREATE
-            if !lent_may(shared, access, |lend, nonce| {
-                lend.may_create(nonce, system_now())
-            }) =>
-        {
-            vec![FULL]
-        }
         CREATE => {
+            let now = system_now();
+            if !lent_may(shared, access, |lend, nonce| lend.may_create(nonce, now)) {
+                return Ok(Some(vec![FULL]));
+            }
             let created = shared.store().create_for(owner_of(access));
             match created {
                 Ok(q) => {
@@ -1154,7 +1151,10 @@ fn respond(
                     out.extend_from_slice(&q.sender_id);
                     out
                 }
-                Err(e) => vec![code(e)],
+                Err(e) => {
+                    lent_give_back(shared, access, now, 1, 0);
+                    vec![code(e)]
+                }
             }
         }
         SEND => {
@@ -1354,7 +1354,9 @@ fn respond(
         }
         FILE_PUT => {
             let chunk = read_bytes(r, MAX_CHUNK)?;
-            if !lent_may_put(shared, access, chunk.len()) {
+            let now = system_now();
+            let bytes = chunk.len() as u64;
+            if !lent_may_put(shared, access, now, bytes) {
                 return Ok(Some(vec![FULL]));
             }
             let put = shared.files().put(chunk);
@@ -1364,7 +1366,10 @@ fn respond(
                     out.extend_from_slice(&id);
                     out
                 }
-                Err(e) => vec![file_code(e)],
+                Err(e) => {
+                    lent_give_back(shared, access, now, 0, bytes);
+                    vec![file_code(e)]
+                }
             }
         }
         FILE_GET => {
@@ -1451,8 +1456,12 @@ fn respond(
             if let Some(mark) = read_mark(r, framed)?.byte() {
                 request.push(mark);
             }
-            let held = shared.held().hold(id, at, request);
-            if let (Ok(()), Access::Phone(phone)) = (&held, access) {
+            // One held already is given again: it stays with the phone that held it first.
+            let (had, held) = {
+                let mut held = shared.held();
+                (held.holds(&id), held.hold(id, at, request))
+            };
+            if let (false, Ok(()), Access::Phone(phone)) = (had, &held, access) {
                 shared.held_by().insert(id, phone);
             }
             shared.held_changed.notify_all();
@@ -1474,7 +1483,9 @@ fn respond(
         FILE_KEEP => {
             let from = read_time(r)?;
             let chunk = read_bytes(r, MAX_CHUNK)?;
-            if !lent_may_put(shared, access, chunk.len()) {
+            let now = system_now();
+            let bytes = chunk.len() as u64;
+            if !lent_may_put(shared, access, now, bytes) {
                 return Ok(Some(vec![FULL]));
             }
             let put = shared.files().put_from(chunk, from);
@@ -1484,7 +1495,10 @@ fn respond(
                     out.extend_from_slice(&id);
                     out
                 }
-                Err(e) => vec![file_code(e)],
+                Err(e) => {
+                    lent_give_back(shared, access, now, 0, bytes);
+                    vec![file_code(e)]
+                }
             }
         }
         CALL_RELAY => match &shared.turn {
@@ -1819,10 +1833,17 @@ fn lent_may(shared: &Shared, access: Access, may: impl FnOnce(&Lend, Nonce) -> b
     }
 }
 
-fn lent_may_put(shared: &Shared, access: Access, bytes: usize) -> bool {
-    lent_may(shared, access, |lend, nonce| {
-        lend.may_put(nonce, system_now(), bytes as u64)
-    })
+fn lent_may_put(shared: &Shared, access: Access, now: u64, bytes: u64) -> bool {
+    lent_may(shared, access, |lend, nonce| lend.may_put(nonce, now, bytes))
+}
+
+/// Gives back to a connection's lent token what `lent_may` counted at `now`
+/// for something that then failed (LEND-04): a queue not made, a file not
+/// kept costs no place of the day.
+fn lent_give_back(shared: &Shared, access: Access, now: u64, queues: u32, bytes: u64) {
+    if let (Access::Lent(nonce), Some(lend)) = (access, shared.lend.get()) {
+        lend.give_back(nonce, now, queues, bytes);
+    }
 }
 
 /// Queues `msg` from `sender`, then wakes the connections waiting for a
@@ -2313,6 +2334,21 @@ fn call_relay(
     request: Vec<u8>,
     timeout: Duration,
 ) -> Result<Vec<u8>, Cow<'static, str>> {
+    call_relay_via(shared, url, request, timeout, |host, port| {
+        (host, port).to_socket_addrs().map(Iterator::collect)
+    })
+}
+
+/// `call_relay`, with the name looked up by `resolve`: once (`FnOnce`), so a
+/// name that answers differently when asked again (DNS rebinding) changes
+/// nothing. Its own for the checks, which give a lookup of their own.
+fn call_relay_via(
+    shared: &Shared,
+    url: &str,
+    request: Vec<u8>,
+    timeout: Duration,
+    resolve: impl FnOnce(&str, u16) -> io::Result<Vec<SocketAddr>>,
+) -> Result<Vec<u8>, Cow<'static, str>> {
     let uri: tungstenite::http::Uri = url
         .parse()
         .map_err(|_| Cow::Borrowed("not an address it can connect to"))?;
@@ -2329,9 +2365,9 @@ fn call_relay(
     // name is not looked up again, by this or by the WebSocket client. Each is
     // tried in turn, so one that does not answer does not fail the forward.
     let private_peers = shared.limits.private_peers;
-    let addresses: Vec<SocketAddr> = (host, port)
-        .to_socket_addrs()
+    let addresses: Vec<SocketAddr> = resolve(host, port)
         .map_err(|e| io_failed("its name could not be looked up", &e))?
+        .into_iter()
         .filter(|addr| private_peers || peers::global(addr.ip()))
         .collect();
     if addresses.is_empty() {
@@ -4272,6 +4308,75 @@ mod tests {
     }
 
     #[test]
+    fn a_name_is_looked_up_once_and_only_the_addresses_it_passed_are_connected_to() {
+        let shared = |private_peers| {
+            Shared::new(
+                Store::default(),
+                FileStore::default(),
+                None,
+                None,
+                Limits {
+                    private_peers,
+                    ..Limits::default()
+                },
+            )
+        };
+        let asked = std::cell::Cell::new(0);
+        let lookup = |answer: Vec<SocketAddr>| {
+            let asked = &asked;
+            move |host: &str, _port: u16| {
+                assert_eq!(host, "rebind.invalid");
+                asked.set(asked.get() + 1);
+                Ok(answer)
+            }
+        };
+
+        // A name that answers only addresses of this machine and private networks, however they
+        // are written: none is connected to, not even the one where something listens.
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        listener.set_nonblocking(true).unwrap();
+        let inside: Vec<SocketAddr> = [
+            "127.0.0.1",
+            "10.0.0.1",
+            "192.168.1.1",
+            "::1",
+            "::ffff:127.0.0.1",
+            "64:ff9b::7f00:1",
+            "2002:7f00:1::1",
+            "fd00::1",
+        ]
+        .iter()
+        .map(|ip| SocketAddr::new(ip.parse().unwrap(), port))
+        .collect();
+        let url = format!("ws://rebind.invalid:{port}{SEALED_PATH}");
+        let why = call_relay_via(&shared(false), &url, vec![SEALED_SEND], Duration::from_secs(5), lookup(inside))
+            .unwrap_err();
+        assert_eq!(why, "no address the relay may connect to");
+        assert_eq!(asked.get(), 1);
+        assert!(listener.accept().is_err(), "a refused address was connected to");
+
+        // Allowed, the connection goes to the address the lookup gave, and the WebSocket client
+        // does not look the name up again: `rebind.invalid` has no address of its own. The
+        // relay there takes the sealed send, and its queue has it.
+        asked.set(0);
+        let key = RelayKey::generate();
+        let public = key.public();
+        let relay = start_ws_with(Some("t"), Some(key));
+        let mut owner = connect_with_token(relay, "", "t");
+        let (recipient, sender) = ws_create(&mut owner);
+        let sealed = seal(&public, &sender, b"rebind").unwrap();
+        let mut request = vec![SEALED_SEND];
+        request.extend_from_slice(&(sealed.len() as u32).to_be_bytes());
+        request.extend_from_slice(&sealed);
+        let url = format!("ws://rebind.invalid:{}{SEALED_PATH}", relay.port());
+        let reply = call_relay_via(&shared(true), &url, request, Duration::from_secs(5), lookup(vec![relay]));
+        assert_eq!(asked.get(), 1);
+        assert_eq!(reply, Ok(vec![OK]));
+        assert_eq!(ws_receive(&mut owner, &recipient).as_deref(), Some(&b"rebind"[..]));
+    }
+
+    #[test]
     fn a_failed_call_to_another_relay_says_why_without_its_address() {
         let shared = |private_peers| {
             Shared::new(
@@ -4659,6 +4764,31 @@ mod tests {
             ws_call(&mut relay, unlater_request(&[7; 16])),
             vec![NOT_FOUND]
         );
+        let _ = std::fs::remove_file(&list);
+    }
+
+    #[test]
+    fn a_message_held_again_by_another_phone_stays_the_first_ones() {
+        let list = std::env::temp_dir().join(format!("erevos-held-again-{}", std::process::id()));
+        let (pixel, pixel_line) = crate::tokens::new_token("pixel");
+        let (other, other_line) = crate::tokens::new_token("other");
+        std::fs::write(&list, format!("{pixel_line}\n{other_line}\n")).unwrap();
+        let addr = start_ws_tokens(Some("s3cret"), None, Limits::default(), Some(list.clone()));
+        let mut relay = connect_with_token(addr, "", "s3cret");
+        let (recipient, sender) = ws_create(&mut relay);
+        let message = send_request(&sender, b"from the pixel");
+        let held = later_request(system_now() + 2, &[9; 16], &message);
+        let mut ws = connect_with_token(addr, "", &pixel);
+        assert_eq!(ws_call(&mut ws, held.clone()), vec![OK]);
+        // The same id from another phone changes nothing, not even whose it is.
+        let mut theirs = connect_with_token(addr, "", &other);
+        assert_eq!(ws_call(&mut theirs, held), vec![OK]);
+        std::fs::write(&list, format!("{other_line}\n")).unwrap();
+        let file = std::fs::File::options().write(true).open(&list).unwrap();
+        file.set_modified(std::time::SystemTime::UNIX_EPOCH + Duration::from_secs(2_000_000))
+            .unwrap();
+        thread::sleep(Duration::from_millis(3500));
+        assert_eq!(ws_receive(&mut relay, &recipient), None);
         let _ = std::fs::remove_file(&list);
     }
 

@@ -54,36 +54,49 @@ function cells(line: string): string[] {
 
 /**
  * The guide's text for one edition (lib/edition.ts). Erevos+ has networks the plain Erevos has not,
- * so the sources mark what only one of them says:
+ * and Erevos Lite has not the Phone, the SMS, the Collection or the Modules, so the sources mark
+ * what only some of them say:
  *
  *   {+text}            only in Erevos+ (inside a line, or over lines)
- *   {-text}            only in the plain Erevos
- *   - [+] item         a list item, with the lines that continue it, only in Erevos+
- *   [+] paragraph      a paragraph, note or table row, to the next blank line, only in Erevos+
+ *   {-text}            only in the plain Erevos and Erevos Lite
+ *   {~text}            not in Erevos Lite (inside a line, or over lines; it may sit inside the two above)
+ *   {~text|lite text}  `text`, but `lite text` in Erevos Lite
+ *   - [+] item         a list item or step, with the lines that continue it, only in Erevos+
+ *   [+] paragraph      a paragraph or note, to the next blank line, or a table row alone, only in Erevos+
+ *   - [~] item         as `- [+]`, but: not in Erevos Lite
+ *   [~] paragraph      as `[+]`, but: not in Erevos Lite
  *
- * With Erevos+, the marks go and their text stays: the guide reads as if there were none.
+ * Where a mark keeps its text, the mark goes and the text stays: the guide reads as if there were none.
  */
-export function editionSource(source: string, edition: 'plus' | 'lite'): string {
-  const lite = edition === 'lite';
-  const text = source.replace(/\{([+-])([\s\S]*?)\}/g, (_all, which: string, inner: string) => ((which === '-') === lite ? inner : ''));
+export function editionSource(source: string, edition: 'plus' | 'erevos' | 'lite'): string {
+  // {~…} first: it may be inside {-…} or {+…}, whose ends would otherwise be its own.
+  const text = source.replace(/\{~([^{}|]*)(?:\|([^{}]*))?\}/g, (_all, inner: string, lite?: string) => (edition === 'lite' ? (lite ?? '') : inner));
+  const plain = text.replace(/\{([+-])([\s\S]*?)\}/g, (_all, which: string, inner: string) => ((which === '-') === (edition !== 'plus') ? inner : ''));
+  return marked(marked(plain, '+', edition === 'plus'), '~', edition !== 'lite');
+}
+
+/** `text` with the blocks marked `[mark]` kept, their mark gone, or left out, with what continues them. */
+function marked(text: string, mark: '+' | '~', keep: boolean): string {
+  const tag = `[${mark}] `;
   const lines = text.split('\n');
   const out: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const item = /^(\s*)- \[\+\] /.exec(line);
-    const block = /^(\| |> )?\[\+\] /.test(line);
+    const item = new RegExp(`^(\\s*)(- |\\d+\\. )\\[\\${mark}\\] `).exec(line);
+    const block = new RegExp(`^(\\| |> )?\\[\\${mark}\\] `).test(line);
     if (!item && !block) {
       out.push(line);
       continue;
     }
-    if (!lite) {
-      out.push(item ? line.replace('- [+] ', '- ') : line.replace('[+] ', ''));
+    if (keep) {
+      out.push(line.replace(tag, ''));
       continue;
     }
     // Left out, with what continues it: an item's more indented lines (its sub-items too), a
     // paragraph's or note's lines to the next blank one; a table row alone.
     const indent = item ? item[1].length : -1;
-    while (i + 1 < lines.length && lines[i + 1].trim() !== '' && !line.startsWith('| ')) {
+    const row = /^\s*\|/.test(line.replace(tag, ''));
+    while (i + 1 < lines.length && lines[i + 1].trim() !== '' && !row) {
       if (item && /^(\s*)/.exec(lines[i + 1])![1].length <= indent) break;
       i++;
     }

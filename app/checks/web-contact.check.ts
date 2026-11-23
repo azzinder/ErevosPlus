@@ -17,7 +17,7 @@ import vm from 'node:vm';
 import { CONTACT_PAGE, contactLink, contactLinkName, contactPageLink, linkOfFields, parseContact, type ContactCode } from '../lib/contact-code';
 
 const PAGE = readFileSync(join(import.meta.dirname, '../../pwa/c/contact.js'), 'utf8');
-// The worker of the plain Erevos's web app (pwa/build.mjs --edition lite).
+// The worker of the plain Erevos's web app (pwa/build.mjs --edition erevos).
 const WORKER = readFileSync(join(import.meta.dirname, '../../pwa/sw.js'), 'utf8').replace('__EREVOS_WEB_APP__', 'erevos-web');
 
 type Shown = { data: string; name: string } | null;

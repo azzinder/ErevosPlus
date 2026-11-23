@@ -472,6 +472,11 @@ impl Lend {
     /// One place on the ticket `nonce`, which expires at `expires`: the lent
     /// token for it, or `None` when the ticket gave all its places.
     pub fn borrow(&self, nonce: Nonce, expires: u64, now: u64) -> Option<String> {
+        // Ticket access is checked at the WebSocket handshake, but a connection
+        // can remain open beyond expiry (or after the operator revokes it).
+        if expires <= now || self.is_revoked(&nonce) {
+            return None;
+        }
         {
             let mut counts = self.counts();
             counts.borrowed.retain(|_, (until, _)| *until > now);
@@ -502,6 +507,25 @@ impl Lend {
     /// counted if so.
     pub fn may_put(&self, nonce: Nonce, now: u64, bytes: u64) -> bool {
         self.count(nonce, now, 0, bytes)
+    }
+
+    /// Gives back what `may_create` or `may_put` counted at `now` for the
+    /// lent token `nonce`, when what it was counted for then failed (the
+    /// relay full, a file not written): a place is not lost for the day to a
+    /// failure. Nothing once the day it was counted on is over. A failed write
+    /// of the counts leaves them lower in memory only: on disk they stay as
+    /// counted, never less than what was given.
+    pub fn give_back(&self, nonce: Nonce, now: u64, queues: u32, bytes: u64) {
+        let mut counts = self.counts();
+        if counts.day != now / DAY {
+            return;
+        }
+        let Some((made, put)) = counts.made.get_mut(&nonce) else {
+            return;
+        };
+        *made = made.saturating_sub(queues);
+        *put = put.saturating_sub(bytes);
+        let _ = self.save(&counts);
     }
 
     fn count(&self, nonce: Nonce, now: u64, queues: u32, bytes: u64) -> bool {
@@ -628,6 +652,35 @@ mod tests {
     }
 
     #[test]
+    fn an_open_ticket_connection_cannot_borrow_after_expiry() {
+        let lend = Lend::new(&RelayKey::generate());
+        let ticket = lend.ticket(NOW);
+        let (nonce, expires) = ticket_pass(&lend, &ticket);
+        assert!(lend.borrow(nonce, expires, expires - 1).is_some());
+        // WebSocket access can still carry the ticket captured at handshake.
+        // Neither expiry nor a cleared daily counter may renew that access.
+        for _ in 0..(MAX_BORROWS + 2) {
+            assert!(lend.borrow(nonce, expires, expires).is_none());
+            assert!(lend.borrow(nonce, expires, expires + DAY).is_none());
+        }
+    }
+
+    #[test]
+    fn an_open_ticket_connection_cannot_borrow_after_revocation() {
+        let state = TempPath::new("counts-revoked");
+        let list = TempPath::new("revoked-open-ticket");
+        let key = RelayKey::generate();
+        let lend = Lend::open(&key, &state.0, Revoked::new(list.0.clone())).unwrap();
+        let ticket = lend.ticket(NOW);
+        let (nonce, expires) = ticket_pass(&lend, &ticket);
+        assert!(lend.borrow(nonce, expires, NOW).is_some());
+        // A pre-existing WebSocket still has Access::Ticket; revocation must
+        // also be enforced at the point of borrowing, not just handshake.
+        write_revoked(&list.0, &format!("{}\n", &ticket[7 + 16..7 + 48]));
+        assert!(lend.borrow(nonce, expires, NOW).is_none());
+    }
+
+    #[test]
     fn only_what_this_relay_made_is_taken() {
         let lend = Lend::new(&RelayKey::generate());
         let other = Lend::new(&RelayKey::generate());
@@ -691,6 +744,32 @@ mod tests {
         assert!(lend.may_create(nonce, NOW + DAY));
         assert!(lend.may_put(nonce, NOW + DAY, MAX_FILE_BYTES));
         assert!(!lend.may_put(nonce, NOW + DAY, 1));
+    }
+
+    #[test]
+    fn what_failed_is_given_back_the_same_day() {
+        // LEND-04: a queue not made or a file not kept costs no place of the day.
+        let lend = Lend::new(&RelayKey::generate());
+        let nonce = [9u8; 16];
+        for _ in 0..MAX_QUEUES {
+            assert!(lend.may_create(nonce, NOW));
+        }
+        assert!(!lend.may_create(nonce, NOW));
+        lend.give_back(nonce, NOW, 1, 0);
+        assert!(lend.may_create(nonce, NOW));
+        assert!(!lend.may_create(nonce, NOW));
+        assert!(lend.may_put(nonce, NOW, MAX_FILE_BYTES));
+        lend.give_back(nonce, NOW, 0, 100);
+        assert!(lend.may_put(nonce, NOW, 100));
+        assert!(!lend.may_put(nonce, NOW, 1));
+        // Never below nothing, and never another day's or another token's.
+        lend.give_back([10u8; 16], NOW, 1, 1);
+        assert!(lend.may_create(nonce, NOW + DAY));
+        lend.give_back(nonce, NOW, 5, 0);
+        for _ in 1..MAX_QUEUES {
+            assert!(lend.may_create(nonce, NOW + DAY));
+        }
+        assert!(!lend.may_create(nonce, NOW + DAY));
     }
 
     /// Writes `text` as the file of revoked tickets, and makes sure it reads

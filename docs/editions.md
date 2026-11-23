@@ -4,37 +4,64 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 -->
 
-# Editions: Erevos+ and Erevos
+# Editions: Erevos+, Erevos and Erevos Lite
 
 One codebase gives the editions of the app. Each is an app of its own, signed with the same
 release key: Erevos is `app.erevos`, Erevos+ `app.erevos.plus` (from 3.1.0; its 7.x were
-`app.erevos`), and Erevos Lite, to come, `app.erevos.lite`. So they can be side by side on a
-phone, each with its own data, and going from one to another is a move, not an update (below).
+`app.erevos`), and Erevos Lite `app.erevos.lite`. So they can be side by side on a phone, each with
+its own data, and going from one to another is a move, not an update (below). The second number of
+a version says the edition: 3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite.
 
-| Edition | `EREVOS_EDITION` | Modules |
-|---|---|---|
-| **Erevos+** | `plus` (default) | Erevos, Phone, SMS, Collection, Nostr, Matrix, XMPP, Telegram (with TDLib: `EREVOS_TELEGRAM=1`, docs/erevosgram.md), Messenger, Signal, Session |
-| **Erevos** | `lite` | Erevos, Phone, SMS, Collection |
+| Edition | `EREVOS_EDITION` | Modules | Where |
+|---|---|---|---|
+| **Erevos+** | `plus` (default) | Erevos, Phone, SMS, Collection, Nostr, Matrix, XMPP, Telegram (with TDLib: `EREVOS_TELEGRAM=1`, docs/erevosgram.md), Messenger, Signal, Session | Android, web |
+| **Erevos** | `erevos` | Erevos, Phone, SMS, Collection | Android, Linux, Windows, macOS, Sailfish OS, web |
+| **Erevos Lite** | `lite` | Erevos | Android |
+
+Until 3.0.0 the plain Erevos was built as `lite`. That name is Erevos Lite's now, so every workflow
+and script names the plain Erevos `erevos`.
 
 ## What the edition changes
 
-- `app/app.config.js` reads `EREVOS_EDITION`; `lite` is kept as `extra.edition` (`app/lib/edition.ts`). The name
-  under the icon is the edition's: **Erevos+**, or **Erevos** for the plain one.
+- `app/app.config.js` reads `EREVOS_EDITION`; `erevos` and `lite` are kept as `extra.edition`
+  (`app/lib/edition.ts`). The package and the name under the icon are the edition's: **Erevos+**,
+  **Erevos** or **Erevos Lite**.
 - `app/lib/modules.ts`: `modulesHere()` gives only the edition's modules, so the first start,
-  Settings → Modules, the home screen and the menus offer nothing else. A module the plain Erevos
-  does not have is never part of a choice made there (`known`), so it is on after moving to Erevos+.
+  Settings → Modules, the home screen and the menus offer nothing else. A module an edition
+  does not have is never part of a choice made there (`known`), so it is on after moving to one that has it.
+  Erevos Lite has one module, so its first start has no step for them and Settings has no Modules.
 - The core (`crates/erevos-ffi`): Matrix, XMPP and chats with other Nostr apps are behind the
-  `networks` feature. `app/modules/erevos-core/android/build.gradle` builds it without them when
-  `EREVOS_EDITION=lite`; asked anyway, they answer that they are in Erevos+. Nostr for Erevos's own
-  messages (relays carrying sealed packets) is in both.
+  `networks` feature. `app/modules/erevos-core/android/build.gradle` builds it without them for
+  every edition but Erevos+; asked anyway, they answer that they are in Erevos+. Nostr for Erevos's
+  own messages (relays carrying sealed packets) is in all three.
+- Erevos Lite: `app/plugins/with-edition-modules.js` leaves the Phone's and the SMS's native modules
+  (`erevos-phone`, `erevos-sms`) out of the app (`expoAutolinking.exclude` in settings.gradle), so
+  neither their code nor the permissions of their manifests (calls, call log, SMS, MMS) are in it.
+  Their JavaScript finds no native module, as in a browser. The Collection's native module stays,
+  as chats open files with another app and play videos through it, but the Collection is not
+  offered. The guide leaves out their sections (`EREVOS_SECTIONS`) and, in the others, what speaks
+  of them, marked in the sources of every language (`{~…}`, `{~…|…}`, `- [~]` and `[~]`, read by
+  `editionSource` in lib/guide.ts; checks/guide.check.ts holds every language to the English
+  shape and to what Erevos Lite keeps); What's new their lines (`inErevosLite`), under Erevos Lite's own numbers (`asLite`);
+  the widget and Appearance → Launcher icons their icons. Chat photos, video calls and the QR
+  scanner keep the camera permission.
+- Erevos Lite has no payment requests of Fasouli's: `erevos://pay` only opens it, and a request a
+  contact sends shows as its words, with no **Paid**.
+- Releases: Erevos Lite has its own workflow (`.github/workflows/release-lite.yml`, by hand, version
+  3.2.x) and its own download repository, `azzinder/erevos-lite-releases` (secret
+  `LITE_RELEASES_TOKEN`); the release computer signs it with `deploy/web/publish-android.sh`.
+  Before each, CHANGELOG.md gets its `## 3.2.x (date)` and app/lib/whats-new.ts its entry (the
+  workflow checks both): Erevos Lite's What's new shows what Erevos brought since its last release
+  under its new one, and Erevos and Erevos+ never list a 3.2.x release. Should a run stop after its
+  release is made, Re-run failed jobs finishes it with the same build.
 
 - Messenger, Signal and Session: `messenger/` (from azzinder/erevos-messenger, with its history) holds their
   engines; `app/modules/erevos-messenger` builds them (Go with gomobile, Rust with cargo-ndk, Session's Kotlin over
   libsession-util-android) and compiles the engines' Kotlin straight from `messenger/android`, so its test app and
-  Erevos+ carry the same engines. The plain Erevos takes the module's stub. In the app: `lib/messenger.ts` (state,
+  Erevos+ carry the same engines. The plain Erevos and Erevos Lite take the module's stub. In the app: `lib/messenger.ts` (state,
   64-bit keys kept as text), `lib/messenger-store.ts`, `components/msg-account.tsx`, `components/msg-chat.tsx`. Their
   accounts are the phone's and show in its first space (space 0).
-- Telegram: `app/modules/erevos-telegram`, only with `EREVOS_TELEGRAM=1`, which the plain Erevos refuses.
+- Telegram: `app/modules/erevos-telegram`, only with `EREVOS_TELEGRAM=1`, which only Erevos+ takes.
 
 ## In a browser
 

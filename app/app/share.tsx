@@ -18,6 +18,7 @@ import { locale, t } from '../lib/i18n';
 import { shownName } from '../lib/inbox';
 import { useModules } from '../lib/modules';
 import { holdsShare } from '../lib/open-link';
+import { EDITION } from '../lib/edition';
 import { handPay, payAmount, type Pay } from '../lib/pay';
 import { dropShared, handShared, isSharedPhoto, sharedFileOf, type SharedFile } from '../lib/share-in';
 import { fitsNetwork, inOrder, networkOf, tooLargeFor, useNetworkTargets, type Network } from '../lib/share-networks';
@@ -240,7 +241,12 @@ export function SendTo({ pay }: { pay?: Pay | null }) {
       {large ? <Text tone="muted">{t('This file is too large for the Collection.')}</Text> : null}
       {onlyCollection ? (
         <Text tone="muted">
-          {toCollection ? t('Chats take files up to 100 MB: this one can go only to the Collection.') : t('Chats take files up to 100 MB: this one can go only to the Collection. Turn the Collection on in Settings → General → Modules.')}
+          {toCollection
+            ? t('Chats take files up to 100 MB: this one can go only to the Collection.')
+            : // Erevos Lite has no Collection to turn on.
+              EDITION === 'lite'
+              ? t('Chats take files up to 100 MB: this one is larger.')
+              : t('Chats take files up to 100 MB: this one can go only to the Collection. Turn the Collection on in Settings → General → Modules.')}
         </Text>
       ) : null}
       {note ? <Text color={colors.warning}>{note}</Text> : null}

@@ -56,7 +56,7 @@ echo "   commit $commit, release $number, build $build"
 app=$(field "$work/published/release.json" app)
 calls=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1])).origins ? 'yes' : '')" "$work/published/release.json")
 if [ "$app" = erevos-web ] && [ -z "$calls" ]; then
-	export EREVOS_EDITION=lite
+	export EREVOS_EDITION=erevos
 else
 	export EREVOS_EDITION=plus
 fi
@@ -65,6 +65,11 @@ echo "   edition $EREVOS_EDITION"
 echo "== Building commit $commit"
 git clone -q --no-checkout "$root" "$work/src"
 git -C "$work/src" checkout -q "$commit"
+# Until 3.0.0 the plain Erevos was built as `lite`, now Erevos Lite's name (docs/editions.md): a
+# commit from before knows only plus and lite.
+if [ "$EREVOS_EDITION" = erevos ] && ! grep -q "'erevos' | 'lite'" "$work/src/app/lib/edition.ts" 2>/dev/null; then
+	export EREVOS_EDITION=lite
+fi
 if ! grep -q remap-path-prefix "$work/src/app/scripts/build-web-core.mjs"; then
 	# Built before paths were left out of the core: GitHub's runner kept Rust's crates here.
 	echo "   (built before paths were left out of the core: it holds the path /home/runner/.cargo, so CARGO_HOME must be that folder)"

@@ -15,6 +15,7 @@ import { Text, TextButton, Toggle } from './ui';
 import { LinkedText } from './linked-text';
 import { PlaceCard, PreviewCard, Quote, Reactions } from './message-parts';
 import { PhotoSticker, StickerView } from './stickers';
+import { EDITION } from '../lib/edition';
 import { PayCard } from './pay-card';
 import { PollCard } from './poll';
 import { CardBubble } from './card-share';
@@ -333,7 +334,9 @@ export const MessageLine = memo(function MessageLine({ message, quoted, name, ne
               <PhotoSticker uri={photo} status={comingText(message.file, taking)} />
             ) : message.place ? (
               <PlaceCard place={message.place} ink={ink} />
-            ) : message.pay ? (
+            ) : message.pay && EDITION !== 'lite' ? (
+              // Erevos Lite has no payment requests (docs/editions.md): one from a contact shows as
+              // its words, as an Erevos from before shows it.
               <PayCard
                 pay={message.pay}
                 mine={message.mine}

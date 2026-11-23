@@ -84,12 +84,13 @@ the last message with its marks, when it came, and how many of their messages yo
 means its messages disappear. **Search chats** finds a chat by its name or its last message, and, under the chats,
 the messages that have what you type in them, in all the space's chats: tap one to open its chat at it. In a chat, its
 details have **Search in this chat**: ▲ and ▼ go to what it found earlier and later. Either looks only on this phone:
-in what it keeps sealed, and **Search in this chat** in the SMS a contact's chat shows too; hidden chats are searched
+in what it keeps sealed{~, and **Search in this chat** in the SMS a contact's chat shows too}; hidden chats are searched
 only from inside them. A long chat opens at its latest 100 messages, and earlier ones, those imported from Telegram or
 WhatsApp among them, come by themselves as you scroll up (**Show earlier messages**, above them, brings them too); going
 to an earlier one (from the search, a starred message or the one a message answers) brings it too.
-Every chat opens at its latest message, with the message bar under it: chats with contacts, groups and SMS
-conversations{+, and the Matrix, XMPP and Nostr chats} alike. Scrolled up a little, round arrows show at the lower right in
+Every chat opens at its latest message, with the message bar under it: chats with contacts{~, groups and SMS
+conversations|
+and groups}{+, and the Matrix, XMPP and Nostr chats} alike. Scrolled up a little, round arrows show at the lower right in
 each of them: the upper one goes to the chat's start, the lower one back to its end. Between them, when some messages
 were new as you opened the chat, a double tick goes to the first of those, where you left off, for as long as that
 message is out of sight. From the start, **Show later messages**, under what shows, brings more; writing a message, or
@@ -99,14 +100,15 @@ the lower arrow, goes back to the end.
 on older phones most of all. Hidden chats are left out of the home screen's search so that the home screen looks the
 same whether a space has any or not: their messages can be read only while their PIN has them open.
 
-**Pinned and archived:** hold any chat down on the home screen, a contact's or a group's, {+on Matrix, XMPP, Nostr or
-SMS}{-or an SMS conversation}, for **Pin to the top**, **Archive** and, on Android, **Mute this chat**. At most 10 chats stay pinned. An
-archived chat leaves the list until a new message comes from it; tap **Archived** at the top to see what you archived,
-SMS too, and tap it again to go back. Hidden chats keep their own pinned and archived chats.
+**Pinned and archived:** hold any chat down on the home screen, a contact's or a group's{~, |}{+on Matrix, XMPP, Nostr or
+SMS}{-{~or an SMS conversation}}, for **Pin to the top**, **Archive** and, on Android, **Mute this chat**. At most 10 chats stay pinned. An
+archived chat leaves the list until a new message comes from it; tap **Archived** at the top to see what you archived,{~
+SMS too,} and tap it again to go back. Hidden chats keep their own pinned and archived chats.
 
 - **The picture** is drawn from the contact's key: the same key always gives the same colours and moon{+ (in greens under Matrix)}, so you know
   a chat at a glance without any photo. It is not a check of the key; the [safety number](#relay) is.
 - **The line under the search** says whether a relay is set and your queue is ready. Tap it to set one up.
+- **The search and that line stay** under the top bar{~, with the services button,|} while the list scrolls.
 - **Chat with myself**, always first in the chats, with a pin, holds your notes to yourself: see Chat with myself and
   reminders below.
 - [+] **Matrix chats**, once you sign in to Matrix, are in the list with the others, newest first, each marked
@@ -118,8 +120,8 @@ SMS too, and tap it again to go back. Hidden chats keep their own pinned and arc
 - [+] **Nostr chats**, once the space has a Nostr key, are in the list the same way, each marked **Nostr**. The **Nostr**
   chip shows only them, with how many are not read, and there **New chat** opens the Nostr chats screen: see
   [Chats with other Nostr apps](#nostr-chats).
-- **Mark all as read**, in the ⋮ menu, reads at once every chat of the part of the list you are on (all messages, SMS{- or
-  Erevos}{+,
+- **Mark all as read**, in the ⋮ menu, reads at once every chat of the part of the list you are on (all messages{~, SMS| or}{-{~ or
+ |} Erevos}{+,
   Erevos, Matrix, XMPP or Nostr}), muted and PIN-locked ones too, after asking. Each is read as if you opened it, so
   those who wrote are told as then; invitations and people asking to add you stay until you answer them.{+ The Matrix,
   XMPP and Nostr screens have it under **Chats** for their own chats.} Hidden chats are never read by it.
@@ -132,9 +134,9 @@ SMS too, and tap it again to go back. Hidden chats keep their own pinned and arc
   post, with up to four photos. See [Chats with other Nostr apps](#nostr-chats).
 - **New chat**, at the bottom, opens the relay settings and adding a contact. **Remind me**, the orange bell beside it,
   writes a reminder for you.
-- **The green handset and the violet person** at the top, on Android, open **Phone** and **Contacts** at once, in the
-  colours of their icons on the phone's home screen. They are not in the menu under the three dots as well.
-- **The services button**, under the top bar, where it stays while the list scrolls, once two parts with messages are on in Modules, says which part of the
+- **{~The green handset and the violet person|The violet person}** at the top, on Android, {~open **Phone** and **Contacts** at once, in the
+  colours of their icons|opens **Contacts** at once, in the colour of its icon} on the phone's home screen. {~They are|It is} not in the menu under the three dots as well.
+- [~] **The services button**, under the top bar, where it stays while the list scrolls, once two parts with messages are on in Modules, says which part of the
   list shows (**All services**, or the one chosen), with the services' signs, the messages not read in all of them,
   and in red a service that is not connected now. Tap it for the **Services** window: a card for each part that is on,
   also with no chat yet, each with the messages not read in it (99+ above 99) and a dot, green while its network is
@@ -148,10 +150,12 @@ SMS too, and tap it again to go back. Hidden chats keep their own pinned and arc
   **All messages** while none is chosen. Chats and groups on **Muted** are left out of the numbers, as they are of the number on Erevos's icon, and
   what is typed in the search changes nothing in them. Under the button, with no search, the chats with messages not
   read come first, under **Unread**, with **Mark all as read** beside it, then the others under **Recent**.
-- **The widget**, on Android: add Erevos from your home screen's widgets. Its four buttons open **Phone**, the
+- **The widget**, on Android: add Erevos from your home screen's widgets. {~Its four buttons open **Phone**, the
   **SMS**, the Erevos **Messages** and **Contacts**, after the password like any link (the Phone without it, if you
   let it). Over the first three it shows how many missed calls, unread SMS and new messages there are, never who or
-  what; with missed calls, **Phone** opens on **Recents**. A button tapped again shows its screen again, also after
+  what; with missed calls, **Phone** opens on **Recents**.|Its two buttons open the Erevos **Messages** and
+  **Contacts**, after the password like any link. Over **Messages** it shows how many new messages there are, never
+  who or what.} A button tapped again shows its screen again, also after
   you chose another tab there. Its words follow Erevos's language. **Settings** → **Appearance** → **Widget** sets the
   order of its buttons.
 - **The orange lock** at the top locks Erevos at once when a password is set, or opens the lock settings when not.
@@ -184,7 +188,7 @@ does the same for the chat itself: it goes to that day's first message.
 **Why:** the lists are made on this phone from what it already keeps, so no server learns what a chat holds; and only
 the photos on the screen are read, as in the chat, so a chat with thousands of them opens as fast as one with none.
 
-**On {+Matrix, XMPP, Nostr and }SMS too:** {+a chat on Matrix, XMPP or Nostr has **Search in this chat**, **Media, links
+[~] **On {+Matrix, XMPP, Nostr and }SMS too:** {+a chat on Matrix, XMPP or Nostr has **Search in this chat**, **Media, links
 and files**, **Go to a day** and **Export chat** at its foot, beside **Notifications**, and }an SMS conversation has
 {-**Search in this chat**, **Media, links and files**, **Go to a day** and **Export chat** }{+them }first under its **⋮**. They look only at what this phone keeps of the chat: {+the messages a Matrix chat keeps
 (under the search, **Load earlier messages** fetches older ones from its server, as the top of the chat does), those
@@ -243,7 +247,7 @@ space and Android is told only its time: the notice cannot tell anyone what you 
 is in. And the notes go to no one but your own devices, end-to-end encrypted between them as your chats are: the relay
 carries them only sealed.
 
-- **From other chats:** a message of {+a Matrix, XMPP, Nostr or }{-an }SMS {+chat}{-conversation} can come here too, with a reminder: **Remind
+- [~] **From other chats:** a message of {+a Matrix, XMPP, Nostr or }{-an }SMS {+chat}{-conversation} can come here too, with a reminder: **Remind
   me** in its menu.
 
 ### Moving around with swipes
@@ -252,13 +256,13 @@ carries them only sealed.
   the left; let go once it is whole, or flick, and you are back. Let go sooner and you stay. In a chat it does what
   its back arrow does: back to the list of chats, or out of hidden chats, closing them. In a chat's **Details** it
   closes them.
-- **Tabs:** swipe to the left or right to go to the tab beside, as tapping its chip does: **All messages**, **SMS**{+,}{- and}
-  **Erevos**{+, **Matrix**, **XMPP** and **Nostr**} on the home screen (those on in Modules), **Keypad**, **Recents** and
-  **Favourites** in **Phone**, the filters in **Contacts**, and the sets of stickers. On the home screen the parts are
-  chosen in the **Services** window, under the button below the top bar.
+- **Tabs:** swipe to the left or right to go to the tab beside, as tapping its chip does: {~**All messages**, **SMS**}{+,}{-{~ and}}
+  {~**Erevos**}{+, **Matrix**, **XMPP** and **Nostr**}{~ on the home screen (those on in Modules), **Keypad**, **Recents** and
+  **Favourites** in **Phone**,} the filters in **Contacts**, and the sets of stickers.{~ On the home screen the parts are
+  chosen in the **Services** window, under the button below the top bar.}
 - On a screen with tabs, a swipe only changes the tab, on the rows of its list too, and past the first or the last
-  tab it does nothing: go back there with the back arrow. An SMS conversation is archived or deleted by holding it
-  down.
+  tab it does nothing: go back there with the back arrow.{~ An SMS conversation is archived or deleted by holding it
+  down.}
 
 ### Settings
 
@@ -267,23 +271,23 @@ phone's own settings do. In the other languages it is named in that language and
 **Einstellungen · Settings**, so it is found in a language you cannot read.
 
 - **Search the settings,** at the top, finds a setting by the start of its words, with or without accents, and shows
-  where it is, such as **Phone and SMS › SMS**. Tap it to open it.
+  where it is, such as {~**Phone and SMS › SMS**|**Privacy and security › Hidden chats**}. Tap it to open it.
 - **Language · Γλώσσα,** the row under the search, opens the list of languages, see Language below.
-- **A group** opens the list of its settings, and a setting opens its screen. A setting with parts, such as **SMS**,
+- **A group** opens the list of its settings, and a setting opens its screen. A setting with parts, such as {~**SMS**|**Backups**},
   lists them, and each part opens alone.
-- **Only what works here shows:** on a computer, on Sailfish OS and in the web app there is no **Phone and SMS**,
-  Tor, Nostr or LoRa, and a group with nothing to set here does not show.
-- **Only the modules on show:** the settings of a module that is off, such as {+**Matrix** or }**Phone and SMS**, do not
+- **Only what works here shows:** on a computer, on Sailfish OS and in the web app there is no {~**Phone and SMS**,
+  |}Tor, Nostr or LoRa, and a group with nothing to set here does not show.
+- [~] **Only the modules on show:** the settings of a module that is off, such as {+**Matrix** or }**Phone and SMS**, do not
   show either: see [Modules](#modules).
 
 | Group | What is in it |
 | --- | --- |
-| **General** | **Language**, **Modules**, **Updates**, **Give Erevos to a phone nearby** (Android), **What's new**, **About Erevos**, **Support Erevos** and **Permissions** (Android and the web app). See Language below, [Modules](#modules), [Updates](#updates) and [Erevos to a phone nearby](#give-app). |
+| **General** | **Language**, {~**Modules**, |}**Updates**, **Give Erevos to a phone nearby** (Android), **What's new**, **About Erevos**, **Support Erevos** and **Permissions** (Android and the web app). See Language below, {~[Modules](#modules), |}[Updates](#updates) and [Erevos to a phone nearby](#give-app). |
 | **Appearance** | **Style and colours** (look, glass, style, theme, colours and text on coloured areas, with the preview), **Wallpaper**, **Messages** (the bubbles' shape), **Launcher icons** (Android), **Widget** (Android) and **Vibrate on touch** (Android). See [Appearance](#appearance). |
 | **Notifications** | **In the background** (Android and the computer app): receiving and ringing while Erevos is closed, and the notice for messages; on a computer, whether Erevos keeps running with its window closed. **Notifications while closed** (the web app): Web Push. **Number on the icon**: how many messages are not read, on Erevos's icon. See [On an iPhone](#iphone) and [On a computer](#desktop). |
 | **Privacy and security** | **Lock and second password** (lock when Erevos opens, the password, screen privacy, fingerprint or face, the second password), **Hidden chats** (the PINs of the 4 places), **Panic button** (with the panic password), **Calculator in place of Erevos** (Android, under Appearance), **Screenshots** (Android) and **This web app** (the web app only). See [Password lock](#lock), [Second password](#second), [Hidden chats](#hidden) and [Panic button](#panic). See also [Delete me from everywhere](#forget). |
 | **Relay and networks** | **Ways**, **Relay** (it opens **New chat** with **For advanced users** open), **Home relay**, **Tor** (Android), **Nostr** (Android){+,}{- and} **LoRa radio** (Android){+, **Matrix**, **XMPP** and **Nostr chats**}. See [Chat through a relay](#relay), [Home relay](#home-relay), [Through Tor](#tor), [Through Nostr](#nostr){+,}{- and} [Over a LoRa radio](#lora){+, [Matrix](#matrix), [XMPP](#xmpp) and [Chats with other Nostr apps](#nostr-chats)}. |
-| **Phone and SMS** (Android) | **Phone**, the phone app's settings, the same as **Phone** → **Settings**. **SMS**, in parts: **Erevos as the SMS app**, **Find Erevos on a number**, **SMS when nothing else works**, **Names from your contacts**, **Archived, Spam and Trash**, **Spam filter**, **Blocked numbers**, **Taking an SMS back**, **Two SIMs** (only with two SIMs) and **New SMS**. See [Phone](#phone) and [SMS](#sms). |
+[~] | **Phone and SMS** (Android) | **Phone**, the phone app's settings, the same as **Phone** → **Settings**. **SMS**, in parts: **Erevos as the SMS app**, **Find Erevos on a number**, **SMS when nothing else works**, **Names from your contacts**, **Archived, Spam and Trash**, **Spam filter**, **Blocked numbers**, **Taking an SMS back**, **Two SIMs** (only with two SIMs) and **New SMS**. See [Phone](#phone) and [SMS](#sms). |
 | **Data and devices** | **Backups**, **Backup pieces**, **Linked devices** and **Imported chats**. See [Backups](#backup), [Backup pieces with friends](#backup-pieces), [Linked devices](#devices) and [Imported chats](#import). |
 | **For testing** | **Relay test** and **Radio test** (Android). See [The test screens](#tests). |
 
@@ -429,7 +433,7 @@ the chats of the space that is open, and kept a while in memory for the others, 
 chats use them too, but what they hear is their own: the link a hidden contact was heard on is kept apart from the
 space's, in memory only while those hidden chats are open or receive while closed, so the space never learns that one
 of their contacts is near; and on the air their messages look like the space's. They never carry for others, are never
-carried, and never go over LoRa or by SMS.
+carried, and never go over LoRa{~ or by SMS}.
 
 **Bluetooth that cannot be followed:** what your phone sends out over Bluetooth for others to find it says only
 that a phone with {=Erevos} is near, with a random number that changes every nine to twelve minutes, and on Android 8
@@ -616,7 +620,7 @@ nothing, and you are each other's contacts at once, with no message request.
 - **A phone with a relay already** keeps its own: the invite only adds you, and you are contacts at once all the same.
 - **What is kept:** your phone keeps each invite's secret and the name for them, sealed in the space, until it is used
   or its 7 days end, 20 at most at once. Nothing of it is on the relay but the invite to the relay.
-- **By SMS, to someone with no {=Erevos} yet:** on Android, the card of a contact who is not in Erevos has **Invite by
+- [~] **By SMS, to someone with no {=Erevos} yet:** on Android, the card of a contact who is not in Erevos has **Invite by
   SMS**. It writes an SMS to their first number with a short link, in the SMS app (Erevos's own when it is the phone's
   SMS app), for you to send or not. The link's page on LPHL's web server offers them {=Erevos} (the Android app, or the
   web app on an iPhone) and then opens the invite in it; in the web app on an iPhone, they paste the link under **I
@@ -825,10 +829,10 @@ message stays at **✓**. Public groups have no marks. A computer linked to this
   Telegram and Signal show them; an e-mail address or a file's name (photo.jpg) is not. Tap it and Erevos shows it
   whole, to open in the browser only if it is where you want to go. Nothing is fetched before that.
 - **Share from another app** (Android): in another app's **Share**, such as the browser's for a page, pick
-  **Erevos**. Once a space is open, **Send to** lists the chats, groups and SMS conversations the home screen showed
+  **Erevos**. Once a space is open, **Send to** lists the chats{~, groups and SMS conversations| and groups} the home screen showed
   last, then every other chat and group{+, and the chats of your Matrix, XMPP and Nostr accounts}, with a search; never
   hidden chats. Words and links open in the message field of the one you pick, to read and send there; a photo or file
-  goes as soon as that chat or group opens, a photo at the quality you chose for photos, and never as an SMS. A file
+  goes as soon as that chat or group opens, a photo at the quality you chose for photos{~, and never as an SMS}. A file
   can be 100 MB at most{+ in an Erevos chat, 50 MB on Matrix and XMPP and 20 MB on Nostr}. It is encrypted as it comes
   in, with a key only in Erevos's memory, and waits so on the phone, also while you give the password if Erevos locks
   first; it goes once sent, or when you leave **Send to**.
@@ -955,7 +959,7 @@ push address for all your contacts' queues (see [On an iPhone](#iphone)).
   **Refuse**, blocks a message request: a request knows only your contact link, so it moves your queue only while the
   link still names that one, as it does until your first move. Whoever you blocked is under **Blocked contacts** on
   **New chat**, with **Unblock**. Adding them again from their link asks you to unblock them first;
-  until then nothing adds them, neither their answer to an invite by SMS nor their contact link in a group. Each
+  until then nothing adds them, {~neither their answer to an invite by SMS nor their contact link|not even their contact link} in a group. Each
   person who writes from your contact link can make the phone sound, as any message does: **Refuse** or **Block**
   stops that one, **Notifications** → **Muted** in their chat silences them without refusing, and **New contact link**
   stops whoever has the old link once its 14 days are over.
@@ -1005,11 +1009,11 @@ Press and hold a message for its menu: the reactions at the top, then what you c
   is not forwarded, and from hidden chats a message goes only to the same hidden chats.
 - **Star:** stars it, on this phone only, to find it again: **Starred messages** in the home screen's menu lists them
   from all your chats, and a chat's details list its own. A tap goes to the message. Hidden chats' starred messages
-  show only in their chats' details. {+Chats on Matrix, XMPP and Nostr, and }SMS conversations{+,} have **Star** too, kept
+  show only in their chats' details.{~ }{+Chats on Matrix, XMPP and Nostr, and }{~SMS conversations}{+,}{~ have **Star** too, kept
   encrypted on this phone only: a chat's own **Starred messages** lists its stars, and the home screen's lists them
   with all the rest, each opening its chat at the message. In those chats, holding a photo, video, voice message or
   file, or an MMS's picture, also offers **Save to the Collection**, and holding a sticker or photo that came offers
-  **Add to my stickers**; the SMS sticker picker offers your own stickers too, to send as MMS.
+  **Add to my stickers**; the SMS sticker picker offers your own stickers too, to send as MMS.}
 - **Pin:** pins it to the top of the chat, on both phones; either of you can **Unpin** it. With more than one pinned,
   the latest shows; tap it to go to it, and the next one shows.
 - **Copy:** puts its words on the clipboard, to paste in another app. On Android the copy is marked private, so the
@@ -1047,7 +1051,7 @@ quote (there as ▒▒▒).
 - **Photo to see once:** under **+**, **Photo to see once** sends a photo that never shows in the chat, in contacts'
   chats and groups. **Camera, to see once** sends one you take there and then, the same way. Whoever gets it taps it
   and sees it once, on its own, kept out of screenshots where the phone allows; as it closes, Erevos deletes it from
-  their phone, and the chat says **Photo seen once**. It cannot be forwarded, saved or put in the Collection, and your
+  their phone, and the chat says **Photo seen once**. It cannot be forwarded{~, saved or put in the Collection| or saved}, and your
   own phone lets go of it once it reached them. Nothing stops a camera pointed at the screen, and an Erevos from
   before shows it as a hidden photo.
 
@@ -1059,8 +1063,8 @@ Open a chat, tap its name and then **Disappearing messages** to choose how long 
 1 day or 1 week. To make only the next message disappear, tap the stopwatch beside the message field (or
 **Disappearing message** under **+**, or **Disappear** in the send arrow's menu): **Disappears 1 hour after it is read**
 shows over the field. Tap the time to pick another, or **✕** to turn it off. It goes with the next message you send:
-words, a voice message, a photo or file, a sticker, a place or a poll, now or later. An SMS cannot disappear: sent as
-an SMS, it stays on both phones (Erevos says so first), and the stopwatch is off again. Its time starts when the other phone shows it on the screen, and your copy starts when their phone says so
+words, a voice message, a photo or file, a sticker, a place or a poll, now or later.{~ An SMS cannot disappear: sent as
+an SMS, it stays on both phones (Erevos says so first), and the stopwatch is off again.} Its time starts when the other phone shows it on the screen, and your copy starts when their phone says so
 (**✓✓✓**). Each message says when it disappears. The other phone learns the chat's setting the next time it looks at
 the relay, and either phone can change it: the later change wins. Messages already in the chat stay.
 
@@ -1227,7 +1231,7 @@ stickers too):
   Tap an option to choose it, again to take it back; each option shows how many chose it, and who. Votes travel inside
   the encryption, as reactions do. An Erevos from before this shows the question and its options as words, to answer in
   words.
-- **Payment request** (asked from another app, as Fasouli): an amount and what it is for, as a card. The one asked
+- [~] **Payment request** (asked from another app, as Fasouli): an amount and what it is for, as a card. The one asked
   taps **Paid** once they paid, which tells your phone, and cannot be taken back; then **Mark in Fasouli**, on Android,
   marks it collected there. Erevos moves no money and knows of no bank: the card only says what was asked. Only in
   chats with a contact, never in hidden chats. An Erevos from before this shows the amount as words.
@@ -1291,9 +1295,9 @@ before anything it has to send, and after its network changes (Wi-Fi to mobile d
 
 **A plain call on the mobile network:** when a contact has their phone number linked to them, or is connected to one
 of your contacts with a number (**Connect to one of my contacts** in their chat, a mobile number first), the orange
-keypad at the top of their chat, before the camera, opens a keypad with that number typed, and so does the one at the
-top of an SMS conversation. It is Erevos's **Phone** when Erevos is the phone app, or else the phone's own: tap the call key there. Such a
-call goes over the phone company's network and is not encrypted, as a plain SMS is not. Hidden chats and computers do not have it.
+keypad at the top of their chat, before the camera, opens a keypad with that number typed{~, and so does the one at the
+top of an SMS conversation}. It is {~Erevos's **Phone** when Erevos is the phone app, or else }the phone's own: tap the call key there. Such a
+call goes over the phone company's network and is not encrypted{~, as a plain SMS is not}. Hidden chats and computers do not have it.
 
 - **End-to-end encrypted:** the call is set up with messages through the relay, encrypted like the rest. Those carry
   the key that encrypts the call itself, so no one in between can listen, not even the call relay below.
@@ -1380,7 +1384,7 @@ call goes over the phone company's network and is not encrypted, as a plain SMS 
   calls over the lock screen, running on battery, running in the background with battery use not set to Restricted,
   not paused when unused, mobile data in the background, the microphone) and for other things (the sound for new
   messages, notices on the lock screen, calls through Do Not Disturb, camera, phones nearby, contacts, exact times for
-  SMS sent later and reminders, the reminder notice once a reminder came), each with why and a
+  {~SMS sent later and }reminders, the reminder notice once a reminder came), each with why and a
   button that opens Android's own question or setting. It also says when the phone is on silent or vibrate, when
   battery saver is on, and when Do Not Disturb is on while Erevos calls are not let through it. On Huawei, Honor,
   Xiaomi, OPPO, realme, OnePlus, vivo, Samsung and ASUS phones it also says where the maker's own setting is, which
@@ -1559,12 +1563,12 @@ When you send a message, Erevos picks the path by itself:
 4. **And over LoRa,** when a radio is set and the relay could not take a text, as in [Over a LoRa radio](#lora). With
    no way at all, the message waits, marked **Waiting**, and goes by itself once there is one, as in
    [Sent, came and read](#relay); a line under the chat says why.
-5. **And by SMS,** last of all, when you turned it on for that contact and nothing else took a text, as in
+5. [~] **And by SMS,** last of all, when you turned it on for that contact and nothing else took a text, as in
    [SMS](#sms).
 
 Every path is end-to-end encrypted: no relay and no phone in between can read what you send.
 
-**Ways**, under **Settings** → **Relay and networks**, shows every path at a glance: a card for the relay, Nostr, the phones nearby, LoRa, SMS and Tor, each with how it is now and a line under it, full when it works, faint when it is on but reaches no one now, and dashed when it is off. Above them it says how many of your messages wait to go, with an orange dot for each. A card opens the settings of its path. It shows only the space that is open, never hidden chats. On home, the line under the top bar is **Ways** too, once a relay is set: a dot for each way, and how many of your messages wait; a tap opens it.
+**Ways**, under **Settings** → **Relay and networks**, shows every path at a glance: a card for the relay, Nostr, the phones nearby, LoRa{~, SMS} and Tor, each with how it is now and a line under it, full when it works, faint when it is on but reaches no one now, and dashed when it is off. Above them it says how many of your messages wait to go, with an orange dot for each. A card opens the settings of its path. It shows only the space that is open, never hidden chats. On home, the line under the top bar is **Ways** too, once a relay is set: a dot for each way, and how many of your messages wait; a tap opens it.
 
 | Line under the chat | What to do |
 | --- | --- |
@@ -1573,10 +1577,10 @@ Every path is end-to-end encrypted: no relay and no phone in between can read wh
 | **Sent to the {=Erevos} phones nearby, end-to-end encrypted, as the relay could not be reached.** | It comes only if one of them is theirs: wait for **✓✓**, or check the relay. |
 | **… If their phone is not one of them, they hand it to their relay once they reach the internet, and so does this phone.** | Nothing: it comes once one of them, or this phone, reaches the internet. Wait for **✓✓**. |
 | **Sent over LoRa, end-to-end encrypted, as the relay could not be reached.** | It comes if their {=Erevos} has a radio on the same mesh, within reach: wait for **✓✓**, or check the relay. |
-| **Sent by SMS, end-to-end encrypted, as nothing else could take it.** | Nothing: it costs SMS, and the phone company sees that you wrote to their number. **✓✓** comes once the relay or Nostr can be reached. |
+[~] | **Sent by SMS, end-to-end encrypted, as nothing else could take it.** | Nothing: it costs SMS, and the phone company sees that you wrote to their number. **✓✓** comes once the relay or Nostr can be reached. |
 | **Waiting. The relay cannot be reached (or There is no relay), and their phone is not near.** | Nothing: it goes by itself once the relay or their phone nearby can take it, and then shows **✓**. Without a relay, fill in its address, as in [Chat through a relay](#relay), or come near their phone. |
 | **Waiting. It is too long for LoRa.** | Nothing: it goes once the relay or their phone nearby can take it. Or send it in shorter parts. |
-| **Waiting. It is too long for SMS.** | Nothing: it goes once the relay or their phone nearby can take it. Or send it in shorter parts. |
+[~] | **Waiting. It is too long for SMS.** | Nothing: it goes once the relay or their phone nearby can take it. Or send it in shorter parts. |
 | **Not sent. The relay does not have this contact's queue any more.** | Ask them to write to you, or for their new contact link. |
 | **This build cannot encrypt, so chats through the relay are off.** | Build the app again: this build is older than its encryption. |
 
@@ -1696,7 +1700,7 @@ are large, go straight and so faster.
   shows how far Tor is. To spare the battery, Erevos sends the reduced padding Tor made for phones: the filler Tor
   sends to hide when you talk goes every 9 to 14 seconds, not every few, and none comes to the phone.
 - **What it does not cover:** calls, whose sound and picture go straight between the phones or through the call
-  relay; nearby phones and SMS, which do not use the internet.
+  relay; nearby phones{~ and SMS}, which do not use the internet.
 - **On Android only:** {=Erevos} on a computer and the web app have no Tor yet, so there everything goes straight.
 
 > With **Messages**, a message never waits for Tor: one Tor could not take to the relay goes straight at once, and so
@@ -1851,11 +1855,11 @@ show what you write. Whoever your phone connects to sees it, unless the connecti
 - **Groups:** a message in an Erevos group goes through a server, which sees the address. Tor for the space hides it;
   a group has no switch of its own.
 
-- **Backups, the Collection's server, radio and TV lists, link previews and updates:** each has its own **Through
-  Tor** switch, in its own screen, off unless you turn it on. See [Backups](#backup), [Collection](#collection), [Chat
+- **Backups, {~the Collection's server, radio and TV lists, |}link previews and updates:** each has its own **Through
+  Tor** switch, in its own screen, off unless you turn it on. See [Backups](#backup), {~[Collection](#collection), |}[Chat
   through a relay](#relay) and [Updates](#updates).
 
-- **Radio stations and TV channels:** each sees the address while it plays. **Play through Tor**, in the Collection's
+- [~] **Radio stations and TV channels:** each sees the address while it plays. **Play through Tor**, in the Collection's
   settings on Android, off unless you turn it on, plays them only through Tor. See [Collection](#collection).
 
 Erevos warns once before each of these, with the title **Your internet address can be seen**, a **Guide** button that
@@ -1866,7 +1870,7 @@ After the guide, the same question comes back, and what you were sending, such a
 for it. A call that rings here says it under the call, and answering goes on. Hidden chats keep what was said with
 them, apart from the space.
 
-Nearby phones, LoRa and SMS do not use the internet, so they show no internet address.
+Nearby phones{~, LoRa and SMS| and LoRa} do not use the internet, so they show no internet address.
 
 ## Matrix {#matrix}
 
@@ -2854,7 +2858,7 @@ password, once you type it.
 - **Finding someone:** **Search contacts** looks in every field: names, numbers (however they are written, with or
   without the country code), emails, addresses, the company, the birthday and the note. **Favourites** shows only
   the contacts with a star.
-- **A contact:** tap one to see all of it. Tap a number to call it, or **SMS** beside it to write to it in Erevos;
+- **A contact:** tap one to see all of it. Tap a number to call it{~, or **SMS** beside it to write to it in Erevos};
   tap an email or an address to open it. **Add to favourites** at the top gives it a star, in Android's contacts,
   so the phone app lists it among the favourites too.
 - **New contact** and **Edit:** first and last name, company and job title, as many numbers, emails and addresses
@@ -2894,8 +2898,8 @@ password, once you type it.
   Erevos** chip shows just those.
   **Keep only in Erevos** on a phone contact moves it in, with its photo and star, and deletes it from the phone's
   contacts; **Move to the phone's contacts** takes it back out. Its photo is sealed with it. Groups, ringtones and
-  birthday reminders are Android's, so it has none. A call or SMS to it still goes through the phone, and shows in
-  the phone's call log and SMS like any other. An Erevos backup holds these contacts, sealed.
+  birthday reminders are Android's, so it has none. A call{~ or SMS} to it still goes through the phone, and shows in
+  the phone's call log{~ and SMS} like any other. An Erevos backup holds these contacts, sealed.
 - **In hidden chats:** **Contacts** at the top of open hidden chats lists their own contacts, kept only there and
   sealed with them: they show nowhere else, not even in the space's contacts, and the screen shows nothing once the
   hidden chats close. A new contact there is always one of theirs. A photo can be given to one, as hidden chats stay
@@ -2917,9 +2921,9 @@ password, once you type it.
   links it to one you have, whose card then shows it; the **Erevos contacts** chip lists them all. An Erevos contact without a name of its own takes the name of the contact linked to it, as they are linked or
   as that contact's card opens; a name you gave it in Erevos stays, and one you emptied comes back from the contact
   then. In hidden chats, these are the hidden chats' own contacts, and their chat opens there.
-- **History:** a contact's card lists its latest calls in the phone's call log, its SMS and its messages in Erevos,
-  the newest first; tap one to call back, write an SMS or open the chat. The calls show once you let Erevos read the
-  call log (**Show calls**). Erevos only reads them to show them, and keeps no copy.
+- **History:** a contact's card lists {~its latest calls in the phone's call log, its SMS and |}its messages in Erevos,
+  the newest first; tap one to {~call back, write an SMS or |}open the chat.{~ The calls show once you let Erevos read the
+  call log (**Show calls**). Erevos only reads them to show them, and keeps no copy.}
 - **Other apps:** another app's **Add to contacts** (a number in the phone app, an email in mail) can open in Erevos:
   a new contact with what that app gave, or the list to tap the contact to add it to. An app that shows or changes a
   contact can open it in Erevos too, behind Erevos's lock. Android asks which app to use; choose Erevos. An app that
@@ -2951,7 +2955,7 @@ choices: **No lock** and **Password**.
   behind it: messages and calls still come, with their notices, and a call shows over the password screen. Its
   screens close, hidden chats too, and the call screen no longer shows its contacts' names. Its password opens it
   again; another space's password closes it first, with nothing of it kept in memory.
-- **Only the SMS:** with Erevos locked, the SMS icon, the widget's **SMS** button and the notice of a new SMS still ask
+- [~] **Only the SMS:** with Erevos locked, the SMS icon, the widget's **SMS** button and the notice of a new SMS still ask
   for the password, but then open only the SMS: the list of the phone's SMS conversations, each in a row of its own,
   their conversations, **Archived**, **Spam** and **Trash**, and **New SMS**. Nothing else of the space shows. Anything
   else, a contact, a chat, **Settings**, Erevos's own icon or the orange padlock **Unlock everything** at the top, asks
@@ -2959,11 +2963,11 @@ choices: **No lock** and **Password**.
   you, and the rest of Erevos stays closed.
 - **Only the Contacts:** in the same way, the Contacts icon, the widget's **Contacts** button and the notice of a
   birthday ask for the password, then open only the contacts: their list, a contact's card (without your chats and
-  calls with them), **Edit**, groups, duplicates, the SIM and importing. **Call** still opens the phone's dialer. A chat,
-  an SMS, **Settings** or the orange padlock **Unlock everything** at the top asks for the password again, and then
-  opens all of the space. Another icon, the widget or a notice, with only the SMS or only the Contacts open, asks for
-  the password as when Erevos is locked, then opens what it names: the Contacts icon only the contacts, the SMS icon
-  only the SMS, Erevos's own icon all of it.
+  calls with them), **Edit**, groups, duplicates, the SIM and importing. **Call** still opens the phone's dialer. A chat{~,
+  an SMS|}, **Settings** or the orange padlock **Unlock everything** at the top asks for the password again, and then
+  opens all of the space. Another icon, the widget or a notice, with {~only the SMS or |}only the Contacts open, asks for
+  the password as when Erevos is locked, then opens what it names: the Contacts icon only the contacts, {~the SMS icon
+  only the SMS, |}Erevos's own icon all of it.
 
 - **Seeing what you type:** every field for a password, a PIN or a token, here and anywhere in Erevos, has an eye at
   its end: tap it to see what you type, and again to hide it. It is hidden again each time the field shows anew, and
@@ -3096,7 +3100,7 @@ what the places taken away hold.
 
 - **Relay, Nostr and phones nearby:** hidden chats have their own relay queue and their own keys. While they are open,
   or receive while closed, they also reach a contact's phone nearby, as your other chats do (see [Chat with a nearby
-  phone](#nearby)), but other phones never carry them, and they never go over LoRa or by SMS.
+  phone](#nearby)), but other phones never carry them, and they never go over LoRa{~ or by SMS}.
   With no relay, their contact link says where they read on Nostr, with a key of that place alone, and texts go there,
   as from a phone with no relay; photos, voice messages, calls and groups need a relay. While they are closed, their
   messages wait on the relay, or on Nostr for two days, unless **Receive while closed** is on.
@@ -3216,7 +3220,7 @@ its PIN.
   hidden chats' own PIN guards them. Moved back to the chats, the same PIN asks again.
 - **To take it off:** **Details** → **Lock with a PIN** again, and type its PIN.
 - **Only this phone knows it,** and each linked device has its own. Backups keep it.
-- **On {+Matrix, XMPP, Nostr and }SMS too:** {+a chat on Matrix, XMPP or Nostr has **Lock with a PIN** at its foot, and }an
+- [~] **On {+Matrix, XMPP, Nostr and }SMS too:** {+a chat on Matrix, XMPP or Nostr has **Lock with a PIN** at its foot, and }an
   SMS conversation {-has **Lock with a PIN** }under its **Plain SMS** line, working the same way: its name with a lock in the list, none of its
   messages in the search, and the space's password takes a forgotten PIN off. **Block screenshots** sits beside it, on
   this phone only (Android): the others are not told. A hidden place's chats offer neither, as its own PIN guards them
@@ -3304,8 +3308,8 @@ automatic backup uses the files of the ones before it too: keep the whole folder
   computer goes, with no phone to slow them down, so a short one does not hold: Erevos takes none under 12 characters.
 - **Automatic backups keep their password on the phone,** so they need no password each time. Whoever opens their
   folder still needs the spaces' passwords to read the chats.
-- **What takes room:** on Android, **Measure** under **What takes room** shows how much room Erevos takes on the phone, by kind: the Collection with the chats' photos and files, voice messages, chat history, Tor, and what writes that did not end left over. Each automatic backup holds it all, so this tells why one is large. Only the files' names and sizes are looked at, on the phone, and nothing is sent.
-- **Leftovers:** photos and files no chat, Collection or import names any more, as those of an import that stopped in its middle, stay on the phone and in every backup. Under **Leftovers**, type one at a time, or several at once separated by commas or spaces, the PIN of each of your hidden chats and the password of any other space, then tap **Find leftovers**: Erevos reads which files each of them and this space name, and shows how much none of them names. **Delete them** deletes those, after you say so once more. A place you did not open there loses its photos and files: open every one first. A file written in the last day is never taken, and backups already made keep everything.
+- **What takes room:** on Android, **Measure** under **What takes room** shows how much room Erevos takes on the phone, by kind: {~the Collection with |}the chats' photos and files, voice messages, chat history, Tor, and what writes that did not end left over. Each automatic backup holds it all, so this tells why one is large. Only the files' names and sizes are looked at, on the phone, and nothing is sent.
+- **Leftovers:** photos and files no chat{~, Collection|} or import names any more, as those of an import that stopped in its middle, stay on the phone and in every backup. Under **Leftovers**, type one at a time, or several at once separated by commas or spaces, the PIN of each of your hidden chats and the password of any other space, then tap **Find leftovers**: Erevos reads which files each of them and this space name, and shows how much none of them names. **Delete them** deletes those, after you say so once more. A place you did not open there loses its photos and files: open every one first. A file written in the last day is never taken, and backups already made keep everything.
 - **Check the backups:** after each automatic backup Erevos reads it back from the folder: it opens with its password, every part it names is there, of its size, and two parts picked at random are read through. Of a server it then only looks at the listing, so nothing is downloaded. **Check now** also downloads the server’s newest backup and ten of its parts. A part missing or damaged shows in red: back up now, then check again. **Full check of the folder** reads every part there through and compares it with the SHA-256 the backup wrote down for it: a few minutes for many GB, and nothing leaves the phone.
 - **On a server:** the backup sent there is sealed with its password like the others, and that password never leaves
   the phone, so the server cannot open it. Its name is random and the file looks like random bytes, of one of a few
@@ -3354,7 +3358,7 @@ automatic backup uses the files of the ones before it too: keep the whole folder
 - **Closed chats:** a backup also holds what **Ring calls when closed** and **Say when a message comes** of hidden
   chats, and **Also while another space is open**, need. So after a restore, on another phone too, they go on as they
   were. A backup from before this version has none of it: restoring it leaves them as the phone has them.
-- **Settings:** a backup holds the settings that are yours rather than the phone's: the language, the modules,
+- **Settings:** a backup holds the settings that are yours rather than the phone's: the language,{~ the modules,}
   vibration, notices in the background and the number on the icon, the battery mode, screen privacy, photo quality,
   whether the Phone opens without the password, and how Erevos reaches phones nearby (carrying their messages, the
   same Wi-Fi, Wi-Fi Direct, Wi-Fi Aware and a LoRa radio, which comes back on only where this phone knows it). On
@@ -3374,12 +3378,12 @@ automatic backup uses the files of the ones before it too: keep the whole folder
 - **Discretion:** every space shows the same Backups screen, and a backup holds every space, so neither tells how
   many spaces there are or whether hidden chats are set. The files' names say they are an Erevos backup, and their
   number and size show roughly how much is kept.
-- **The phone's SMS:** on Android, **Put the SMS in backups** adds the phone's SMS and MMS to each backup from then
+- [~] **The phone's SMS:** on Android, **Put the SMS in backups** adds the phone's SMS and MMS to each backup from then
   on, with up to 32 MB of their pictures, while Erevos is the SMS app. They are sealed with the backup's password like
   the rest. Restoring the backup puts back into the phone's SMS each message it does not have yet, and deletes none;
   Erevos has to be the SMS app then too, or the rest is restored without them. The SMS are the phone's, the same in
   every space. An older Erevos does not open a backup that holds SMS.
-- **The phone's calls:** on Android, **Put the calls in backups**, under **The phone's calls**, adds the phone's call
+- [~] **The phone's calls:** on Android, **Put the calls in backups**, under **The phone's calls**, adds the phone's call
   history (its newest 10,000 calls, without voicemail) and Android's own list of blocked numbers to each backup from
   then on, while Android lets Erevos read the call history; the blocked numbers only while Erevos is the Phone or SMS
   app. It is off until you turn it on, and the choice goes in backups. They are sealed with the backup's password like
@@ -3387,7 +3391,7 @@ automatic backup uses the files of the ones before it too: keep the whole folder
   none; Erevos has to be the Phone app then (**Settings** → **Phone and SMS** → **Phone**), or the rest is restored
   without them. Android keeps about the newest 500 calls of each SIM, so older ones restored may go as new calls come.
   An older Erevos does not open a backup that holds calls.
-- **The SMS in order:** each space's pins, archived conversations, Trash, drafts, spam filter and marks, how long an
+- [~] **The SMS in order:** each space's pins, archived conversations, Trash, drafts, spam filter and marks, how long an
   SMS waits to be taken back, the SMS to go later (**SMS later**), invites, names from your contacts, whether messages
   to Erevos contacts may go by SMS, and the SIM chosen for each number are in every backup, sealed with the space's
   password like the rest. The SIM chosen comes back only on the same phone, as each phone gives its SIMs ids of its own: on another, SMS and calls go on its default SIM until you choose one there. An SMS for later whose time came before the restore does not go by itself, as the phone the
@@ -3397,9 +3401,9 @@ automatic backup uses the files of the ones before it too: keep the whole folder
 - **What never comes back:** what belongs to the phone itself comes with no backup, so a restore on another phone
   cannot bring it: the fingerprint or face, whose key Android keeps in that phone's chip; the folders Erevos may write
   in, as that of automatic backups, which Android lets it into only on the phone they were chosen on; what Android lets
-  Erevos do and which apps make calls and send SMS, which only you can allow on each phone, so after a restore on
-  Android **Permissions** opens for the modules that are on; the call history and Android's own list of blocked
-  numbers, unless **Put the calls in backups** was on, as above; and the count of wrong passwords.{+ An XMPP account comes
+  Erevos do{~ and which apps make calls and send SMS}, which only you can allow on each phone, so after a restore on
+  Android **Permissions** opens{~ for the modules that are on}; {~the call history and Android's own list of blocked
+  numbers, unless **Put the calls in backups** was on, as above; |}and the count of wrong passwords.{+ An XMPP account comes
   back as a new device of itself and Matrix signs in again, as above,}{- Linked devices link again, as below.}{+ and linked devices link again, as below.}
 - **Linked devices:** a link stays with the phone and the computer it was made on, and no backup holds it, but a
   backup holds what lets the phone it is restored on ask each of them to link again. After restoring a backup on
@@ -3453,12 +3457,12 @@ secret sharing), no single friend, and no relay, holds anything that opens it.
 ## Moving to a new phone {#new-phone}
 
 Everything Erevos keeps goes to a new phone in one backup: every space with its hidden chats, contacts, messages,
-photos, files and Collection, its accounts and relays, the lock, the panic password and your settings. No server
+photos{~, files and Collection| and files}, its accounts and relays, the lock, the panic password and your settings. No server
 keeps a copy of it for you, so nothing comes over by itself: the backup carries it, sealed with its password.
 
 1. **On the new phone, install {=Erevos}:** the same version as on the old phone, or newer, as an older {=Erevos} refuses
    a backup a newer one made. With no internet, the old phone can give it, see [Erevos to a phone nearby](#give-app).
-2. **On the old phone, get it ready:** for the phone's SMS to come too, turn on **Put the SMS in backups** under
+2. [~] **On the old phone, get it ready:** for the phone's SMS to come too, turn on **Put the SMS in backups** under
    **Backups**, and for its call history **Put the calls in backups**. A Collection left out of the backups stays behind: put it back in, or give it a WebDAV server, see
    [Collection](#collection).{+ Have your Matrix Security Key at hand, as Matrix signs in again on the new phone.}
 3. **On the old phone, make the backup:** under **Settings** → **Data and devices** → **Backups**, tap **Make a
@@ -3467,7 +3471,7 @@ keeps a copy of it for you, so nothing comes over by itself: the backup carries 
 4. **Bring it over:** copy the backup and every file whose name starts as its name, all in one folder, to the new
    phone, by cable, a memory card or a cloud app. A backup on your server needs no copying.
 5. **On the new phone, restore:** at the first start, tap **I already have {=Erevos} on another phone** (or go through
-   the first start). On Android, for the SMS, let Erevos be the SMS app there too. Then under **Settings** → **Data and devices** → **Backups** tap **Restore a backup** and choose the
+   the first start).{~ On Android, for the SMS, let Erevos be the SMS app there too.} Then under **Settings** → **Data and devices** → **Backups** tap **Restore a backup** and choose the
    file, or **Restore from a server** and give the server's address, user name and password; type the backup's
    password and say yes. Erevos opens as the old phone was, with the same passwords.
 6. **On the new phone, set again what is the phone's:** **Permissions** opens for what Android should allow. Then
@@ -3489,11 +3493,11 @@ keeps a copy of it for you, so nothing comes over by itself: the backup carries 
   link again** for each computer or browser that is still yours, then **Link again** on it: it keeps its chats, with
   no code to scan. A hidden place's devices from inside that place. A device on an older {=Erevos}: tap **Unlink this
   device** on it, then link it to the new phone as the first time. See [Backups](#backup).
-- **The Collection:** it comes in the backup's files. One left out of the backups comes only from its WebDAV server,
+- [~] **The Collection:** it comes in the backup's files. One left out of the backups comes only from its WebDAV server,
   each file as it opens; one with neither stays on the old phone, and the wipe deletes it.
-- **Modules and settings:** the modules that are on, the language and your other settings come with the backup.
-  What Android keeps for each phone stays there, as what it lets Erevos do; the call history and its blocked numbers
-  come too with **Put the calls in backups** on.
+- **{~Modules and settings:** the modules that are on, the|Settings:** the} language and your other settings come with the backup.
+  What Android keeps for each phone stays there, as what it lets Erevos do{~; the call history and its blocked numbers
+  come too with **Put the calls in backups** on}.
 - **A file missing:** with a file of the backup missing or damaged, Erevos says which and changes nothing, unless you
   choose to restore the rest without it.
 - **If the old phone is lost:** restore your newest backup on the new phone as soon as you can, from your server too,
@@ -3733,30 +3737,30 @@ always reads well, on glass too.
   in Erevos too, once it shows again. They are read on the phone and go nowhere. On older Android and on a computer
   it is not offered.
 - **Launcher icons** (Android): the colour of each of Erevos's icons among the phone's apps, **Erevos** (red, it
-  opens the Erevos chats, or the chat you left open), **Phone** (green, it opens the keypad), **SMS** (blue, it opens
-  the SMS list) and **Contacts** (violet): red, orange, green, blue, violet or dark. Each tap opens what its icon
+  opens the Erevos chats, or the chat you left open){~, **Phone** (green, it opens the keypad), **SMS** (blue, it opens
+  the SMS list)} and **Contacts** (violet): red, orange, green, blue, violet or dark. Each tap opens what its icon
   names, also when Erevos showed another of them. The colour is the phone's, not each space's, as the icons show
   before Erevos is unlocked. After a change some launchers take the icon off the home screen: add it again from the
   list of apps.
 - **Dots and numbers on the icons** (Android): Android gives a notice's dot or number to the app, not to one of its
   icons, so on most launchers, such as those of Pixel and GrapheneOS, Samsung's, Xiaomi's and Kvaesitso, each notice
-  of Erevos (a message, an SMS, a call, a birthday) shows on the Erevos, Phone, SMS and Contacts icons alike; Erevos
+  of Erevos (a message, {~an SMS, |}a call, a birthday) shows on the Erevos{~, Phone, SMS and| and} Contacts icons alike; Erevos
   cannot change that there. To keep the dot for some notices only, turn it off for the others in Android's settings
   for Erevos's notifications, where each kind of notice has a switch of its own. Huawei's and Honor's launchers take a
   number for each icon: there, with **Settings** → **Notifications** → **Number on the icon** → **Show the number**,
-  Erevos's own icon shows the messages its notice counts, the SMS icon the SMS not read, the Phone icon the missed
-  calls and the Contacts icon a birthday today, each number on its own icon only.
+  Erevos's own icon shows the messages its notice counts, {~the SMS icon the SMS not read, the Phone icon the missed
+  calls |}and the Contacts icon a birthday today, each number on its own icon only.
 - **Calculator in place of Erevos** (Android, under **Launcher icons**): a calculator that works shows among the
   phone's apps instead of Erevos's icon. Tap **Put the calculator in its place**, type a code of 4 to 12 digits twice
   and tap **Save**. From then on open the calculator, type the code, then **=**: Erevos opens, asking for its password
   as always. Any other sum is only a sum. **Change the code** changes it; **Show Erevos's icon again** brings the icon
   back, in its colour, and forgets the code. Only the icon is hidden: Android's list of apps, the notices, the recent
-  apps, and the Phone, SMS and Contacts icons still show Erevos. The phone keeps only a hash of the code: it is a door,
+  apps, and the {~Phone, SMS and |}Contacts {~icons|icon} still {~show|shows} Erevos. The phone keeps only a hash of the code: it is a door,
   not the lock. Once Erevos is wiped, by the panic password or Android's **Clear storage**, no code opens it any more:
   the calculator then opens Erevos, as new, and Erevos's own icon comes back in its place.
 
   **Why:** whoever glances at the phone sees a calculator, not a messenger; the password still guards what is inside.
-- **Widget** (Android): the order of the widget's four buttons, from left to right, with the widget drawn as it will
+- **Widget** (Android): the order of the widget's {~four|two} buttons, from left to right, with the widget drawn as it will
   look. Tap ↑ or ↓ to move a button; **First order** puts them back.
 - **Vibrate on touch** (Android): a short buzz when you tap a key of the keypad, Send, Enter or a switch, and when a menu opens; never while you scroll. On unless turned off here. It is the phone's, the same in every space.
 
@@ -3876,7 +3880,7 @@ The chats then come to the computer, and after them the messages chosen.
 - **Settings:** the language, the look (the style, the colours, the size of the text) and **Last seen** are the same on
   every device of the space: changed on one, they change on the others too. A photo behind the screens stays on the device it was
   chosen on, and so does all that is about one device alone: passwords, PINs and the panic code, the lock's time,
-  vibration, the relay and Tor, the modules, the device's name. A device that should keep its own: **Settings** →
+  vibration, the relay and Tor,{~ the modules,} the device's name. A device that should keep its own: **Settings** →
   **Data and devices** → **Linked devices** → **Same settings on every device** off. Turned on again, it takes the
   others' at once. Hidden chats keep their own.
 - **Through Tor for one chat:** the **Through Tor** switch in an Erevos chat's **Details** is the same on every device:
@@ -3945,7 +3949,7 @@ The chats then come to the computer, and after them the messages chosen.
   devices**, into the same place on the computer: never the space's, and the space's never go to it. Each device signs
   in as itself, never with a copy of the phone's keys, which would then be used twice and break the encryption; so
   either can be signed out alone, from the account's devices.
-- **SMS**: the phone's SMS can show on the devices too, and be answered there through the phone, once you turn it on
+- [~] **SMS**: the phone's SMS can show on the devices too, and be answered there through the phone, once you turn it on
   under **Settings** → **Phone and SMS** → **SMS** → **On my linked devices too**, see [SMS](#sms).
 - **Unlink**, on the phone, cuts a device off at once: nothing more goes to it, and nothing it sends is taken.
   Contacts on this version are told the next time the phone reaches the relay: they stop writing to it, and take
@@ -3990,7 +3994,7 @@ send changed code. Erevos does not take that code on trust:
   replace it without asking Erevos. Erevos then checks the new one against the signed release and warns you
   (**Erevos was tampered with**), but a server that knows how could get past that check. If you see the warning, do
   not open Erevos from that server again until it is explained. With a password lock your chats stay sealed.
-- **No Bluetooth or nearby link** and no SMS: Safari does not allow them.
+- **No Bluetooth or nearby link**{~ and no SMS}: Safari does not allow them.
 - **Only while it is open:** iOS stops web apps in the background, so messages arrive when you open Erevos; they wait
   on the relay until then.
 - **Calls** ring while Erevos is open, with a ring of its own: two short rings every 3 seconds. Safari lets it sound
@@ -4050,7 +4054,7 @@ relay, end-to-end encrypted as on the phone, and keeps its contacts, messages an
    below why it matters here.
 4. Set the relay and add contacts as on the phone, see [Chat through a relay](#relay).
 
-- **What only Android does:** Bluetooth, Wi-Fi Aware, Wi-Fi Direct, LoRa and SMS. The same Wi-Fi works here too, as on
+- **What only Android does:** Bluetooth, Wi-Fi Aware, Wi-Fi Direct{~, LoRa and SMS| and LoRa}. The same Wi-Fi works here too, as on
   a computer: see [Chat with a nearby phone](#nearby). Sailfish OS's firewall already lets its port, 47905, in: only
   a firewall you made stricter yourself needs a rule for it. The rest is the same: spaces and
   the second password, hidden chats, voice messages, imported chats and backups.
@@ -4257,14 +4261,14 @@ Erevos says plainly what it protects and what it does not, yet.
 | **Messages to a nearby phone** | End-to-end encrypted, the same as through the relay. Whoever listens nearby can tell that {=Erevos} phones are near each other, and when and how much they send; on the same Wi-Fi, so can anyone on it, and over Wi-Fi Direct anyone who joins the phones' own Wi-Fi. Until your contact's phone is known, the other {=Erevos} phones linked nearby get your short messages, sealed. | |
 | **Messages carried by other phones** | Sealed twice: end-to-end for your contact, and for their relay. A phone that carries one sees which relay it goes to, when, and how big; not who it is from or for. Its relay sees which relay it goes to, and that relay sees the carrier's relay, not its phone. Kept sealed on the phone, three days at most: those for others in a file of the phone's, whose size shows roughly how many; your own in your space, sealed with its key. Hidden chats are never carried. | |
 | **Messages over LoRa** | End-to-end encrypted, the same as through the relay. Anyone with a radio, kilometres away, can tell that yours sends, when and how much, and its signal can be traced to where it is. Erevos keeps your radio from saying its name and where it is (role Client hidden, GPS off, no fixed position) unless you let it; it still answers a radio that asks its name. Every Erevos on the mesh gets your LoRa messages, sealed. | Setting the radio's name from Erevos. |
-| **Messages by SMS, when nothing else works** | End-to-end encrypted, the same as through the relay, in hidden data SMS. Off unless you turn it on. The phone company sees which number wrote to which, when, and how many SMS; never what was written. Each costs what an SMS costs. | |
+[~] | **Messages by SMS, when nothing else works** | End-to-end encrypted, the same as through the relay, in hidden data SMS. Off unless you turn it on. The phone company sees which number wrote to which, when, and how many SMS; never what was written. Each costs what an SMS costs. | |
 | **Who talks to whom** | The relay sees IP addresses, queue ids, and when and how much. With a second relay, your relay never sees your address. From a place lent on a contact's relay, every relay you send to sees it. [Through Tor](#tor), once you turn it on, with **Messages** no relay sees it for what you write, and with **Everything** for pictures and files too; with bridges, for where Tor is blocked, the network sees only a bridge. Snowflake's broker and STUN servers see your address. | Tor on a computer. |
 | **The connection to the relay** | TLS, and inside it, once the relay's key is known, a channel to that key: the relay proves it holds it on every connection, and the token and every request go encrypted to it, so someone in between with a certificate for the relay's name cannot pass for it. A relay that proved its key once is never reached without it again. A relay older than this app goes as before, and **How you connect now** says so. The first key comes from the relay the first time it is asked, or from a contact link: whoever is in between that very first time could give one of their own. [The relay's own key](#relay). Not audited. | Our relay's key built into the app, and in invites. |
 | **Texts through Nostr** | End-to-end encrypted as through a relay, then wrapped once more for a key your contact gave that chat alone, signed by a key made for that text alone. The Nostr relays see when and how big, and that a key that names no one gets a text; your phone reads all its keys on one connection, through Tor when Tor is on, so a relay can tell they are read together, and from where only with Tor off. Your relay sees them only as the backup, and a bell for hidden chats. [Through Nostr](#nostr). | |
-| **SMS** | A plain SMS is read by the phone company, as every SMS. To a number linked to an Erevos contact it goes through Erevos instead. A hidden invite is one more short SMS the phone company sees. | |
-| **The phone's contacts** | In Android's own contacts, not sealed by Erevos, as with every contacts app: every app allowed to read them sees them, and an account (Google) may sync them. Erevos sends them nowhere. A .vcf file saved from them is outside Erevos, not sealed. A contact's calls and SMS are read from the phone's own call log and SMS only to show its history, and kept nowhere. | |
-| **Contacts kept only in Erevos** | Sealed with the space's key, or with the hidden chats' for theirs, in one file for every space whose size shows roughly how many there are in all, not whose they are; their photos each in a file of its own. Never in Android's contacts. A .vcf file saved from them, hidden chats' too, is outside Erevos, not encrypted. Calls and SMS to them go through the phone, and show in its call log and SMS. | |
-| **Phone calls** | Plain phone calls: the phone company carries them and can listen, as with every phone app. Android keeps the call history, not sealed by Erevos, as for every phone app; Erevos reads it, and the favourites, to show them, deletes from it only the calls you delete, and keeps no copy. The SIM chosen for each number is sealed in the space; the quick replies, and what is blocked (prefixes, group ids and times only, the same for every space), are kept on the phone, not sealed. | |
+[~] | **SMS** | A plain SMS is read by the phone company, as every SMS. To a number linked to an Erevos contact it goes through Erevos instead. A hidden invite is one more short SMS the phone company sees. | |
+| **The phone's contacts** | In Android's own contacts, not sealed by Erevos, as with every contacts app: every app allowed to read them sees them, and an account (Google) may sync them. Erevos sends them nowhere. A .vcf file saved from them is outside Erevos, not sealed.{~ A contact's calls and SMS are read from the phone's own call log and SMS only to show its history, and kept nowhere.} | |
+| **Contacts kept only in Erevos** | Sealed with the space's key, or with the hidden chats' for theirs, in one file for every space whose size shows roughly how many there are in all, not whose they are; their photos each in a file of its own. Never in Android's contacts. A .vcf file saved from them, hidden chats' too, is outside Erevos, not encrypted. Calls{~ and SMS} to them go through the phone, and show in its call log{~ and SMS}. | |
+[~] | **Phone calls** | Plain phone calls: the phone company carries them and can listen, as with every phone app. Android keeps the call history, not sealed by Erevos, as for every phone app; Erevos reads it, and the favourites, to show them, deletes from it only the calls you delete, and keeps no copy. The SIM chosen for each number is sealed in the space; the quick replies, and what is blocked (prefixes, group ids and times only, the same for every space), are kept on the phone, not sealed. | |
 | **Imported chats** | Sealed in the space they were brought into, their photos and files too, each in its pieces as a chat's file is. The file's size, and how many pieces there are, tell roughly how much was imported, not where. | Viber's photos and files, and files over 4 GB. |
 | **Message history** | Kept on the phone, sealed in its space, with no limit, in same-size pages mixed for all spaces. Only how much it all takes shows, not which space it belongs to. Deleting on both phones, and disappearing messages, rely on the other phone's Erevos. | |
 | **Nearby messages** | Open only in the space that has the contact. One for another space waits in memory, six hours at most, until that space opens. One for hidden chats opens only while they are open, or receive while closed, and the space never learns that one of their contacts is near. | |
@@ -4275,7 +4279,7 @@ Erevos says plainly what it protects and what it does not, yet.
 | **Marks ✓✓ and ✓✓✓** | The contact's phone learns when yours got and read their messages, encrypted. In a group that is not public, so does the phone of whoever sent the message. The relay, or whoever listens nearby, sees one more small message. | A switch to stop telling when you read. |
 | **Fingerprint or face (Android)** | Off unless turned on. Opens only the first password's space: its key sealed in the Android Keystore, usable only right after a strong fingerprint or face check, and dropped when they change. Someone who holds you can use your finger. | |
 | **Notices (Android)** | In the background: "Erevos – Ready for calls and messages" (not on the lock screen), "Incoming call" or "Incoming video call" – "Open Erevos to answer", and "New message" or how many came; when Android or the password stops it, "Closed by Android" or "Locked" – "Open it to receive calls and messages again"; a reminder, "Reminder" or how many; a new version, "Erevos X is out". Never who or what. On a locked phone the one for messages says only "Erevos". Hidden chats that may say so show the same notice, counted with the rest: whoever sees it and finds nothing new may guess there are more. As the phone app, the notice of a phone call names who calls, over the lock screen too, as every phone app's does, but never by a name only hidden chats know: a call from one of their contacts shows the number. | |
-| **Widget and Phone (Android)** | The widget, once added, shows how many missed calls, unread SMS and new messages there are, never who or what. The Phone opens without the password only if you let it: then anyone holding the unlocked phone sees the calls and favourites Android keeps, with the names of the phone's contacts only. | |
+| **Widget{~ and Phone} (Android)** | The widget, once added, shows how many {~missed calls, unread SMS and |}new messages there are, never who or what.{~ The Phone opens without the password only if you let it: then anyone holding the unlocked phone sees the calls and favourites Android keeps, with the names of the phone's contacts only.} | |
 | **Calls** | End-to-end encrypted (DTLS-SRTP, its key sent in the encrypted chat). Through the call relay, neither phone sees the other's IP address; the server running it sees both, when and how long, and how much passes. Without a call relay, on the same Wi-Fi only, each phone sees the other's address. The relays see when a call starts ringing. | Ringing in the web app while closed. Calls over Bluetooth (the walkie-talkie works there). |
 | **Group chats** | End-to-end encrypted with MLS (RFC 9420); members taken out read nothing after. Each member's copy is sealed apart, so relays cannot tell who is in a group; each relay still sees a message reach a queue. Members see each other's keys and relay addresses. Photos, files and voice messages go through the sender's relay's file store, as to a contact, and stay there 14 days. Not audited. | |
 | **Group calls** | Voice and video, end-to-end encrypted between each two phones in the call (DTLS-SRTP, its keys sent in the group's encryption). Through the call relay, no phone sees another's IP address; the server running it sees each phone's, when and how long, and how much passes. Every member, in the call or not, learns who is in it. The relays see when one starts. | Video with more than four people, through a server; more than eight people. |
@@ -4371,8 +4375,8 @@ End-to-end encryption is here, through the relay and over the nearby link, and m
 - **More ways to stay in touch:** Tor bridges for where Tor is blocked are here, see [Through Tor](#tor). Next: Tor
   on a computer.
   - **LoRa radios (Meshtastic):** here, see [Over a LoRa radio](#lora). Next: setting the radio's name from Erevos.
-  - **SMS:** Erevos as the SMS app is here, with MMS photos, group MMS and two SIMs, see [SMS](#sms).
-  - **Phone:** Erevos as the phone app is here, with its own call screen, see [Phone](#phone).
+  - [~] **SMS:** Erevos as the SMS app is here, with MMS photos, group MMS and two SIMs, see [SMS](#sms).
+  - [~] **Phone:** Erevos as the phone app is here, with its own call screen, see [Phone](#phone).
   - **Email, QR codes, USB, NFC:** for when nothing else gets through.
 - **Calls:** voice and video calls are here, and on Android they ring in the background, see [Chat through a
   relay](#relay), and so is a walkie-talkie that works even over Bluetooth.

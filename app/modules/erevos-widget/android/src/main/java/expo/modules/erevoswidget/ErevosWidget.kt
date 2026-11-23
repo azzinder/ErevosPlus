@@ -67,6 +67,12 @@ class ErevosWidget : AppWidgetProvider() {
       for (id in ids) {
         val views = RemoteViews(context.packageName, R.layout.erevos_widget)
         order.forEachIndexed { place, button ->
+          // A button of a part this app has not (Erevos Lite has no Phone or SMS) is not shown.
+          if (!hasPart(context, button)) {
+            views.setViewVisibility(SLOTS[place], View.GONE)
+            return@forEachIndexed
+          }
+          views.setViewVisibility(SLOTS[place], View.VISIBLE)
           views.setImageViewResource(SLOT_ICONS[place], ICONS.getValue(button))
           views.setTextViewText(SLOT_LABELS[place], words[BUTTONS.indexOf(button)])
           count(views, SLOT_COUNTS[place], counts.getValue(button))
@@ -82,6 +88,21 @@ class ErevosWidget : AppWidgetProvider() {
         }
         manager.updateAppWidget(id, views)
       }
+    }
+
+    // The screens the Phone's and the SMS's buttons open with, in their own modules: an app built
+    // without them (Erevos Lite, plugins/with-edition-modules.js) has neither.
+    private val PARTS = mapOf(
+      "phone" to "expo.modules.erevosphone.PhoneOpenActivity",
+      "sms" to "expo.modules.erevossms.SmsOpenActivity",
+    )
+
+    /** Whether this app has `button`'s part: Messages and Contacts always. */
+    fun hasPart(context: Context, button: String): Boolean {
+      val activity = PARTS[button] ?: return true
+      return runCatching {
+        context.packageManager.getActivityInfo(ComponentName(context.packageName, activity), PackageManager.MATCH_DISABLED_COMPONENTS)
+      }.isSuccess
     }
 
     /** The buttons, in the order Erevos first shows them. */

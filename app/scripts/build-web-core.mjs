@@ -20,8 +20,10 @@ const remap = [`--remap-path-prefix=${cargoHome}=/cargo`, `--remap-path-prefix=$
 const env = { ...process.env, CARGO_ENCODED_RUSTFLAGS: remap.join('\x1f') };
 const run = (command, args) => execFileSync(command, args, { cwd: root, stdio: 'inherit', env });
 
-// The plain Erevos (EREVOS_EDITION=lite, docs/editions.md) has no Matrix, XMPP or chats with other
-// Nostr apps in its core; Erevos+, the default, has them.
-const lite = process.env.EREVOS_EDITION === 'lite';
-run('cargo', ['build', '--release', '--target', 'wasm32-unknown-unknown', '-p', 'erevos-ffi', '--features', lite ? 'web' : 'web,networks']);
+// The plain Erevos (EREVOS_EDITION=erevos, docs/editions.md) has no Matrix, XMPP or chats with other
+// Nostr apps in its core; Erevos+, the default, has them. Erevos Lite is Android only.
+const edition = process.env.EREVOS_EDITION || 'plus';
+if (edition === 'lite') throw new Error('Erevos Lite is Android only: it has no web core (docs/editions.md).');
+const plain = edition !== 'plus';
+run('cargo', ['build', '--release', '--target', 'wasm32-unknown-unknown', '-p', 'erevos-ffi', '--features', plain ? 'web' : 'web,networks']);
 run('wasm-bindgen', ['--target', 'web', '--no-typescript', '--experimental-reset-state-function', '--out-dir', out, 'target/wasm32-unknown-unknown/release/erevos_ffi.wasm']);

@@ -6,7 +6,68 @@ and security inside. After 0.1.16 comes 2.0.0.
 Until then releases were numbered `0.1.<run of the release workflow>`, so some numbers have none:
 0.1.1 went out only on the private repository, without an Android app, and 0.1.3, 0.1.9, 0.1.13
 and 0.1.15 never came out.
-4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+), and What's new in the app starts again there. **Not audited.**
+4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
+
+## 3.1.0-rc.1 (2026-11-23)
+
+The first release candidate of Erevos+: Erevos 3.0.0-rc.1 with every network, with what is below. Erevos+ 7.x
+moves to it through the bridge, 7.3.1, with its networks signed in.
+
+### For you
+
+- Everything Erevos 3.0.0-rc.1 brought (below), in Erevos+: the search and the **Ways** that stay in sight, calls on
+  a locked phone that wake the screen, and the code review's fixes.
+- Erevos Lite, 3.2.x, is a third app beside Erevos and Erevos+: moving from Erevos+ to it says first, as moving to
+  Erevos does, that the other networks' accounts stay behind, and to write down Session's 13 recovery words.
+
+### Under the hood
+
+- Erevos's main merged in: the plain Erevos is built as `erevos` now, and `lite` is Erevos Lite. Messenger, Signal
+  and Session are built only into Erevos+ (`erevos-messenger` takes its stub in both other editions), and Telegram
+  goes only with Erevos+. Where Erevos+ keeps «Erevos» as written (the other person's app, or what all editions
+  share), Erevos Lite keeps it too.
+
+## 3.2.0-rc.1 (2026-11-23)
+
+The first release candidate of Erevos Lite: Erevos 3.0.0-rc.1 for Erevos's own chats and calls, with what is below.
+
+### For you
+
+- What Erevos 3.0.0-rc.1 brought to chats and calls; its call on a locked phone is the Phone's, which Erevos Lite has not.
+
+### Under the hood
+
+- The guide's new line on the search and the **Ways** staying under the top bar leaves out the services button in Erevos Lite, which has none, and What's new no longer names that button in its line on them, in any edition.
+
+## 3.0.0-rc.1 (2026-11-23)
+
+### For you
+
+- On home, the search and the **Ways** line stay under the top bar with the services button while the list scrolls
+  (`app/index.tsx` `pinned`), so a search or another way out is a tap away from anywhere in the list; the guide says
+  so. Requested by the maintainer.
+- Phone: a SIM call that rings on a locked phone, or with its screen off, wakes the screen itself and keeps it on,
+  bright, while it rings (at most a minute; `CallService` `wake`), as Erevos's own calls already do: on some phones it
+  rang with a black screen that could not be answered. A call that rings while **Call ended** still shows now shows at
+  once. Requested by the maintainer; the cause is not proven (no log), and it is not yet tried on a phone.
+
+### Under the hood
+
+From an AI-assisted code review, each finding checked in the code:
+
+- A restore that cannot delete what the backup did not have, after it wrote everything else, puts the phone back as it
+  was instead of saying it failed with the backup's lock already in place (`lock/backup.ts`, BACKUP-03).
+- Relay: a ticket gives no more places once it expires or is revoked, also on a connection that opened with it before
+  (`lend.rs` `borrow`, LEND-02).
+- Relay: a lent token's queue or file that then fails (the relay full, a write that failed) is given back for the day,
+  so a failure costs no place (`server.rs` `lent_give_back`, `Lend::give_back`, LEND-04).
+- Relay: a message held for later that is taken back, one that went, and a deleted file chunk stay gone after a power
+  cut (the folder is synced after each delete, STORAGE-02).
+- Relay: a message held again for later under an id already held stays with the phone that held it first
+  (SCHEDULE-02).
+- Checks: wrong passwords tried from two browser tabs at once count one at a time, and a lockout reached while checks
+  wait in line holds; what a relay restart keeps of a queue (its owner only in memory, on purpose) and the sender and
+  recipient roles after it.
 
 ## 3.1.0-beta.2 (2026-11-23)
 
@@ -25,6 +86,21 @@ last number of its generation, as Erevos 3.0.0-beta.2 and Erevos Lite 3.2.0-beta
 ### Under the hood
 
 - Releases: Erevos+ from 3.1.0 is built as `app.erevos.plus` and published under `erevos-plus` and `erevos-plus-beta`, with its Android app named in `version.json` (`package`); with **bridge** on, `erevosgram.yml` builds it as `app.erevos` (`EREVOS_BRIDGE=1`) and publishes it under `plus`, where the Erevos+ 7.x apps look, titled "(bridge)", never a beta, without the web app, and never deleted with the older releases. The APK's package is checked before it goes out. Requested by the maintainer.
+
+## 3.2.0-beta.2 (2026-11-23)
+
+The first release of Erevos Lite, an Android app of its own (`app.erevos.lite`): Erevos's own chats and calls,
+without the Phone, the SMS, the Collection or Fasouli. It is Erevos 3.0.0-beta.2 otherwise, with what is below;
+Erevos and Erevos+ have no release of this number.
+
+### For you
+
+- **Erevos Lite**: Erevos's own chats, groups and calls, end-to-end encrypted, in an app of its own, with no Phone, SMS or Collection and none of their permissions. It moves to Erevos or Erevos+, and they to it, under **Updates**.
+
+### Under the hood
+
+- **Erevos Lite** as an edition of its own (`EREVOS_EDITION=lite`, docs/editions.md): Erevos's own chats and calls alone, the Android app `app.erevos.lite`, versions 3.2.x, released by hand with `.github/workflows/release-lite.yml` to `azzinder/erevos-lite-releases`. The Phone's and the SMS's native modules are left out of its app (`app/plugins/with-edition-modules.js`), and with them every permission of theirs; the Collection is not offered, though its native module stays for opening chat files with another app; its first start has no step for the modules, Settings no Modules, the widget and the launcher icons no Phone or SMS, and its guide and What's new leave them out, What's new under its own 3.2.x numbers. It has no payment requests of Fasouli's either: a request a contact sends shows as its words. Its guide says only what Lite has, in every language: what only the other editions have is marked in the guide's text (`{~…}`, `[~]`), down to a contact's history, which in Lite is its messages alone, as it may not read the call log.
+- The plain Erevos is built as `EREVOS_EDITION=erevos`: `lite` was its name until 3.0.0 and is Erevos Lite's now. Every workflow says `erevos`; `scripts/reproduce-apk.sh` and `scripts/reproduce-web.sh` still build a commit from before with `lite`, and `reproduce-apk.sh` also checks Erevos Lite's releases.
 
 ## 3.0.0-beta.2 (2026-11-22)
 

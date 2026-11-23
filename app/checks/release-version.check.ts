@@ -151,6 +151,10 @@ writeFileSync(
   [
     '#!/bin/bash',
     'case "$*" in',
+    // Erevos Lite's download repository: missing (404) until LITE names its releases.
+    '  *"--jq .full_name"*) [ "$FAIL" = lite ] && exit 1; [ -z "$LITE" ] && { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }; echo "$LITE_RELEASES_REPO" ;;',
+    '  "release download "*erevos-lite-releases*) for p in $LITE; do [ "${p%%:*}" = "$3" ] && printf \'{"name": "x", "build": %s}\\n\' "${p##*:}"; done ;;',
+    '  *erevos-lite-releases/releases*) for p in $LITE; do echo "${p%%:*}"; done ;;',
     '  "release download "*) [ "$FAIL" = download ] && exit 1; for p in $PUBLISHED; do [ "${p%%:*}" = "$3" ] && printf \'{"name": "x", "build": %s}\\n\' "${p##*:}"; done ;;',
     '  *"select(.draft | not)"*) [ "$FAIL" = releases ] && exit 1; for p in $PUBLISHED; do echo "${p%%:*}"; done ;;',
     '  *"select(.draft)"*) for d in $DRAFTS; do echo "$d" | sed "s/^build-//"; done ;;',
@@ -165,7 +169,7 @@ chmodSync(join(numberDir, 'gh'), 0o755);
 writeFileSync(join(numberDir, 'number.sh'), stepScript('number'));
 
 /** The build number the version job gives run `run`; an error's words when it refuses. */
-function numbered(run: number, builds: { published?: string; drafts?: string; runs?: string[]; built?: string; fail?: string } = {}): string {
+function numbered(run: number, builds: { published?: string; drafts?: string; runs?: string[]; built?: string; fail?: string; lite?: string } = {}): string {
   const output = join(numberDir, 'output');
   writeFileSync(output, '');
   const env = {
@@ -175,6 +179,8 @@ function numbered(run: number, builds: { published?: string; drafts?: string; ru
     DRAFTS: builds.drafts ?? '',
     RUNS: (builds.runs ?? []).join('\n'),
     FAIL: builds.fail ?? '',
+    LITE: builds.lite ?? '',
+    LITE_RELEASES_REPO: 'azzinder/erevos-lite-releases',
     EREVOS_BUILT: builds.built ?? '',
     GITHUB_OUTPUT: output,
     GITHUB_RUN_NUMBER: String(run),
@@ -205,10 +211,13 @@ test("a build's number is the run's, unless an Erevos or Erevos+ build already t
   // Several, one kept before its run names it.
   assert.equal(numbered(67, { built: '67 68', runs: ['erevosgram'] }), '69');
   assert.equal(numbered(67, { built: '62 67' }), '68');
+  // Erevos Lite's builds, once its download repository is there.
+  assert.equal(numbered(67, { lite: 'v3.2.0-beta.1:90' }), '91');
+  assert.equal(numbered(95, { lite: 'v3.2.0-beta.1:90' }), '95');
 });
 
 test('a build whose number is not sure does not go out', () => {
-  for (const fail of ['releases', 'download', 'runs']) {
+  for (const fail of ['releases', 'download', 'runs', 'lite']) {
     assert.match(numbered(67, { published: 'v7.0.0-rc.10:66', fail }), /Not every build so far could be read/, fail);
   }
 });

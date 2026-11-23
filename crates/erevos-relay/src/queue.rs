@@ -1674,6 +1674,59 @@ mod tests {
     }
 
     #[test]
+    fn journal_replay_follows_documented_memory_only_owner_policy() {
+        // Owners are intentionally NOT journalled in this version. Test the
+        // documented behavior, without accidentally treating it as persistence.
+        let path = TempPath::new();
+        let owner = [9u8; 32];
+        let old = {
+            let mut store = Store::open(&path.0)
+                .unwrap()
+                .with_byte_limits(5 * cost(100), cost(100));
+            let old = store.create_for(Some(owner)).unwrap();
+            store.send(&old.sender_id, vec![1; 100]).unwrap();
+            assert_eq!(store.usage.of(&owner), cost(100));
+            assert_eq!(store.send(&old.sender_id, vec![2; 100]), Err(QueueError::Full));
+            old
+        };
+        let mut reopened = Store::open(&path.0)
+            .unwrap()
+            .with_byte_limits(5 * cost(100), cost(100));
+        assert_eq!(reopened.queues[&old.recipient_id].owner, None);
+        assert_eq!(reopened.usage.of(&owner), 0);
+        assert_eq!(reopened.usage.total, cost(100));
+        // The pre-restart queue is still subject to the global byte cap.
+        reopened.send(&old.sender_id, vec![3; 100]).unwrap();
+        assert_eq!(reopened.usage.total, 2 * cost(100));
+        // A queue created after the restart does have an owner and share cap.
+        let fresh = reopened.create_for(Some(owner)).unwrap();
+        reopened.send(&fresh.sender_id, vec![4; 100]).unwrap();
+        assert_eq!(reopened.usage.of(&owner), cost(100));
+        assert_eq!(reopened.send(&fresh.sender_id, vec![5; 100]), Err(QueueError::Full));
+        // No change may exceed the global bound, even on the unowned queue.
+        reopened.send(&old.sender_id, vec![6; 100]).unwrap();
+        reopened.send(&old.sender_id, vec![7; 100]).unwrap();
+        assert_eq!(reopened.usage.total, 5 * cost(100));
+        assert_eq!(reopened.send(&old.sender_id, vec![8; 100]), Err(QueueError::Full));
+    }
+
+    #[test]
+    fn journal_replay_keeps_sender_capability_separate_from_recipient() {
+        let path = TempPath::new();
+        let queue = {
+            let mut store = Store::open(&path.0).unwrap();
+            let queue = store.create_for(Some([8u8; 32])).unwrap();
+            store.send(&queue.sender_id, b"encrypted".to_vec()).unwrap();
+            queue
+        };
+        let mut reopened = Store::open(&path.0).unwrap();
+        assert_eq!(reopened.recipient_of(&queue.sender_id), Some(queue.recipient_id));
+        assert_eq!(reopened.recipient_of(&queue.recipient_id), None);
+        assert_eq!(reopened.receive(&queue.recipient_id).unwrap(), Some(b"encrypted".to_vec()));
+        assert_eq!(reopened.receive(&queue.recipient_id).unwrap(), None);
+    }
+
+    #[test]
     fn one_phone_fills_only_its_share() {
         let (greedy, other) = ([1u8; 32], [2u8; 32]);
         let mut s = Store::default().with_byte_limits(10 * cost(100), 2 * cost(100));

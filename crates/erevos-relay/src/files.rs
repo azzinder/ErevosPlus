@@ -231,7 +231,12 @@ impl FileStore {
         }
         if let Some(path) = self.path(id) {
             match fs::remove_file(&path) {
-                Ok(()) => {}
+                // Durable too, so a chunk deleted does not come back with the power.
+                Ok(()) => {
+                    if let Err(e) = journal::sync_dir(&path) {
+                        elog!("erevos-relay: a chunk deleted may come back after a power cut: {e}");
+                    }
+                }
                 Err(e) if e.kind() == ErrorKind::NotFound => {}
                 Err(e) => return Err(storage(e)),
             }
@@ -341,6 +346,17 @@ mod tests {
         assert_eq!(s.put(vec![2; 6]), Err(FileError::Full));
         s.delete(&id).unwrap();
         s.put(vec![2; 6]).unwrap();
+    }
+
+    // A truncated committed file is not a successful read. This is not an
+    // authentication/integrity test: payload integrity belongs to the E2E layer.
+    #[test]
+    fn truncated_committed_chunk_is_reported_as_storage_failure() {
+        let dir = TempDir::new();
+        let mut store = FileStore::open(&dir.0, DEFAULT_CAP, DEFAULT_TTL).unwrap();
+        let id = store.put(b"encrypted-chunk".to_vec()).unwrap();
+        fs::write(dir.0.join(hex(&id)), b"bad").unwrap();
+        assert_eq!(store.get(&id), Err(FileError::Storage));
     }
 
     #[test]

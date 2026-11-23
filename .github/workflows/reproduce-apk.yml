@@ -22,7 +22,7 @@ permissions:
 # The plain Erevos, as release.yml builds it (docs/editions.md); a release from before the editions
 # does not read it.
 env:
-  EREVOS_EDITION: lite
+  EREVOS_EDITION: erevos
 
 jobs:
   apk:

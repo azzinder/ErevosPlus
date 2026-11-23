@@ -110,6 +110,7 @@ export const collectionText: Record<string, string> = {
   "To open it with another app, save it first. That copy is not encrypted.": "Para abrirlo con otra aplicación, guárdalo antes. Esa copia no está cifrada.",
   "Chats take files up to 100 MB: this one can go only to the Collection.": "Los chats aceptan archivos de hasta 100 MB: este solo puede ir a la Colección.",
   "Chats take files up to 100 MB: this one can go only to the Collection. Turn the Collection on in Settings → General → Modules.": "Los chats aceptan archivos de hasta 100 MB: este solo puede ir a la Colección. Activa la Colección en Ajustes → General → Módulos.",
+  "Chats take files up to 100 MB: this one is larger.": "Los chats aceptan archivos de hasta 100 MB: este es más grande.",
   "Encrypting it for Erevos…": "Cifrándolo para Erevos…",
   "Slideshow": "Presentación",
   "Radio and TV lists": "Listas de radio y TV",

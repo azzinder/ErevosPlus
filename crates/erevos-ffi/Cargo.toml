@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 android = ["dep:jni"]
 web = ["dep:wasm-bindgen", "dep:getrandom02", "dep:getrandom04", "erevos-group/js", "erevos-matrix?/js"]
-# Matrix, XMPP and chats with other Nostr apps: in Erevos+, not in the plain Erevos (EREVOS_EDITION=lite,
+# Matrix, XMPP and chats with other Nostr apps: in Erevos+, not in the plain Erevos (EREVOS_EDITION=erevos, and Erevos Lite, EREVOS_EDITION=lite,
 # docs/editions.md), whose core then has only Erevos's own chats.
 networks = ["dep:erevos-matrix", "dep:erevos-xmpp"]
 # Relay requests through Tor (erevos-tor), for the Android app.

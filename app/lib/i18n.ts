@@ -205,7 +205,7 @@ export function t(text: string, vars?: Record<string, string | number>): string 
 
 /** `t`, with the name of `edition`'s app: Erevos+ says its own name wherever the words say Erevos
  *  (lib/edition.ts), unless they speak of the two editions apart, as the English says: the translation
- *  follows it. A text about a release of the plain Erevos, in Erevos+, asks for 'lite'. */
+ *  follows it. A text about a release of the plain Erevos, in Erevos+, asks for 'erevos'. */
 export function tFor(edition: Edition, text: string, vars?: Record<string, string | number>): string {
   const words = current === 'en' ? text : (WORDS[current][text] ?? text);
   const shown = ownNames() ? namedFor(text, words, edition) : words;

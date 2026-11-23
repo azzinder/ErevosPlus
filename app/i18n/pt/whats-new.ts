@@ -4,6 +4,18 @@
 
 // The Portuguese of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/pt/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":
+    "**Versão candidata**: o Erevos+ como deve sair, com tudo o que o Erevos 3.0.0-rc.1 trouxe.",
+  "**Release candidate**: Erevos Lite as it is meant to come out, with what Erevos 3.0.0-rc.1 brought to its chats and calls.":
+    "**Versão candidata**: o Erevos Lite como deve sair, com o que o Erevos 3.0.0-rc.1 trouxe às suas conversas e chamadas.",
+  "**Search and Ways stay in sight**: on home, the search and the **Ways** line stay under the top bar while the list scrolls.":
+    "**Busca e Caminhos sempre à vista**: no início, a busca e a linha **Caminhos** ficam sob a barra superior enquanto a lista rola.",
+  "**Calls on a locked phone**: a call that rings with the phone locked or its screen off now turns the screen on by itself. See [Phone](#phone).":
+    "**Chamadas com o telefone bloqueado**: uma chamada que toca com o telefone bloqueado ou a tela apagada agora acende a tela sozinha. Veja [Telefone](#phone).",
+  "From a code review made with the help of AI: a restore that cannot finish leaves the phone as it was, and the relay keeps its lent places, held messages and deletions right, also after a power cut.":
+    "De uma revisão de código feita com a ajuda de IA: uma restauração que não termina deixa o telefone como estava, e o relay mantém certos os lugares emprestados, as mensagens para depois e as exclusões, também após uma queda de energia.",
+  "**Erevos Lite**: Erevos's own chats, groups and calls, end-to-end encrypted, in an app of its own that asks for fewer permissions. It moves to Erevos or Erevos+, and they to it, under **Updates**. See [Updates](#updates).":
+    "**Erevos Lite**: as conversas, grupos e chamadas do próprio Erevos, criptografados de ponta a ponta, num app próprio que pede menos permissões. Ele passa para o Erevos ou o Erevos+, e eles para ele, em **Atualizações**. Veja [Atualizações](#updates).",
   "**Short passwords**: a new password, or PIN of hidden chats, that is short is taken only after **Use it anyway**. See [Password lock](#lock).":
     "**Senhas curtas**: uma nova senha, ou PIN de conversas ocultas, que seja curta só é aceita depois de **Usar mesmo assim**. Ver [Bloqueio com senha](#lock).",
   "Tries of a password or PIN count one at a time, also across a browser's tabs; a restore that cannot finish puts back what the phone had; a release's SHA256SUMS is signed.":

@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { GUIDE_LANGS, guideFor } from '../guide/index';
+import { GUIDE_LANGS, GUIDE_SOURCES, guideFor } from '../guide/index';
 import { DE } from '../i18n/de/index';
 import { EL } from '../i18n/el/index';
 import { ES } from '../i18n/es/index';
@@ -137,9 +137,9 @@ test('the guide has the same sections, in the same order and shape, in every lan
 });
 
 test("the plain Erevos's guide leaves out what only Erevos+ has, the same in every language", () => {
-  const liteEn = guideFor('en', 'lite');
+  const liteEn = guideFor('en', 'erevos');
   for (const lang of GUIDE_LANGS) {
-    const lite = guideFor(lang, 'lite');
+    const lite = guideFor(lang, 'erevos');
     assert.deepEqual(
       lite.map((s) => ({ id: s.id, blocks: s.blocks.map(shape) })),
       liteEn.map((s) => ({ id: s.id, blocks: s.blocks.map(shape) })),
@@ -150,7 +150,7 @@ test("the plain Erevos's guide leaves out what only Erevos+ has, the same in eve
       .filter((s) => !['about', 'appearance', 'updates'].includes(s.id))
       .flatMap((s) => s.blocks.flatMap(blockTexts).filter((t) => /Matrix|XMPP/.test(t)).map((t) => `${lang} ${s.id}: ${t.slice(0, 120)}`));
     assert.deepEqual(said, [], lang);
-    for (const edition of ['plus', 'lite'] as const) {
+    for (const edition of ['plus', 'erevos', 'lite'] as const) {
       const left = guideFor(lang, edition).flatMap((s) => s.blocks.flatMap(blockTexts)).filter((t) => /\{[+-]|\[\+\]/.test(t));
       assert.deepEqual(left, [], `${lang} ${edition}`);
     }
@@ -160,7 +160,9 @@ test("the plain Erevos's guide leaves out what only Erevos+ has, the same in eve
 test('the marks of the editions: Erevos+ reads the text without them, the plain Erevos without what they keep for Erevos+', () => {
   const source = 'A{+ and B}{- alone}.\n\n- [+] Plus only\n  goes on\n  - and its sub-item\n- Both\n\n[+] A paragraph\nof Erevos+.\n\n| a |\n| --- |\n| [+] b |\n| c |';
   assert.equal(editionSource(source, 'plus'), 'A and B.\n\n- Plus only\n  goes on\n  - and its sub-item\n- Both\n\nA paragraph\nof Erevos+.\n\n| a |\n| --- |\n| b |\n| c |');
-  assert.equal(editionSource(source, 'lite'), 'A alone.\n\n- Both\n\n\n| a |\n| --- |\n| c |');
+  assert.equal(editionSource(source, 'erevos'), 'A alone.\n\n- Both\n\n\n| a |\n| --- |\n| c |');
+  // Erevos Lite has none of the other networks either.
+  assert.equal(editionSource(source, 'lite'), editionSource(source, 'erevos'));
 });
 
 test('the guide links only to sections that exist, the same ones in every language, and leaves no mark unread', () => {
@@ -225,4 +227,92 @@ test('no list marker is left inside a step, an item or a note', () => {
       }
     }
   }
+});
+
+test("Erevos Lite's guide says nothing of what it has not: no link to a section it leaves out, no SMS, no Collection, no Fasouli's payment requests", () => {
+  for (const lang of GUIDE_LANGS) {
+    const sections = guideFor(lang, 'lite');
+    // Sections, and the headings inside them that have an id of their own ("### … {#id}").
+    const ids = new Set([...sections.map((s) => s.id), ...sections.flatMap((s) => s.blocks.flatMap((b) => (b.kind === 'heading' ? [/\{#([a-z0-9-]+)\}$/.exec(b.text)?.[1] ?? ''] : [])))]);
+    for (const gone of ['sms', 'phone', 'collection', 'modules']) assert.ok(!ids.has(gone), `${lang} ${gone}`);
+    // The Collection and the Modules as this language's guide titles them.
+    const titled = (id: string) => new RegExp(`^##\\s+(.+?)\\s*\\{#${id}\\}`, 'm').exec(GUIDE_SOURCES[lang])![1];
+    const named = new RegExp(`(?<!\\p{L})(?:${[titled('collection'), titled('modules')].map((t) => t.slice(0, -2)).join('|')})`, 'u');
+    for (const section of sections) {
+      for (const raw of section.blocks.flatMap(inlineTexts)) {
+        const text = raw.replace(/\s*\{#[a-z0-9-]+\}$/, '');
+        for (const span of parseInline(text)) if (span.link?.startsWith('#')) assert.ok(ids.has(span.link.slice(1)), `${lang} ${section.id}: ${span.link}`);
+        // Updates names the three editions, each with what it has.
+        if (section.id === 'updates' && /Erevos Lite/.test(text) && /3\.0\.x/.test(text)) continue;
+        assert.doesNotMatch(text, /\bSMS\b|\bMMS\b|\[~\]|[{}]/, `${lang} ${section.id}: ${text}`);
+        assert.doesNotMatch(text, named, `${lang} ${section.id}: ${text}`);
+      }
+      assert.ok(section.blocks.length > 0, `${lang} ${section.id}`);
+    }
+    // The payment requests are in the plain Erevos's, unmarked.
+    const plain = guideFor(lang, 'erevos').flatMap((s) => s.blocks.flatMap(inlineTexts)).join(' ');
+    assert.match(plain, /Fasouli\)/, lang);
+    assert.doesNotMatch(plain, /\[~\]|\{~/, lang);
+    assert.doesNotMatch(sections.flatMap((s) => s.blocks.flatMap(inlineTexts)).join(' '), /Fasouli\)/, lang);
+  }
+});
+
+test("Erevos Lite's guide keeps what it has: in every language the same parts as in English, and these in English", () => {
+  const shape = (lang: (typeof GUIDE_LANGS)[number]) =>
+    guideFor(lang, 'lite').map((s) => `${s.id}: ${s.blocks.map((b) => (b.kind === 'bullets' ? `b${b.items.map((i) => i.sub.length).join('')}` : b.kind === 'steps' ? `s${b.items.length}` : b.kind === 'table' ? `t${b.rows.length}` : b.kind[0])).join(' ')}`);
+  for (const lang of GUIDE_LANGS) assert.deepEqual(shape(lang), shape('en'), lang);
+  const text = (id: string) => guideFor('en', 'lite').find((s) => s.id === id)!.blocks.flatMap(inlineTexts).join(' ');
+  const kept: [string, RegExp][] = [
+    ['start', /The home screen is the list of your chats/],
+    ['start', /\*\*Pinned and archived:\*\*/],
+    ['start', /\*\*Mark all as read\*\*/],
+    ['start', /\*\*Search the settings,\*\*/],
+    ['start', /\*\*The widget\*\*, on Android: add Erevos from your home screen's widgets\. Its two buttons/],
+    ['relay', /Open a chat, tap its name and then \*\*Disappearing messages\*\*/],
+    ['relay', /\*\*Block contact\*\*/],
+    ['relay', /\*\*Star:\*\*/],
+    ['relay', /\*\*Photo to see once:\*\*/],
+    ['relay', /\*\*Share from another app\*\*/],
+    ['relay', /\*\*Permissions \(Android\):\*\*/],
+    ['relay', /\*\*A plain call on the mobile network:\*\*/],
+    ['tor', /\*\*What it does not cover:\*\*/],
+    ['ip', /\*\*Backups, link previews and updates:\*\*/],
+    ['paths', /\*\*Ways\*\*, under/],
+    ['new-phone', /Everything Erevos keeps goes to a new phone/],
+    ['new-phone', /\*\*On the new phone, restore:\*\*/],
+    ['appearance', /\*\*Launcher icons\*\*/],
+    ['appearance', /\*\*Dots and numbers on the icons\*\*/],
+    ['appearance', /\*\*Calculator in place of Erevos\*\*/],
+    ['updates', /\*\*Next update\*\*/],
+    ['privacy', /\*\*The phone's contacts\*\*/],
+    ['privacy', /\*\*Contacts kept only in Erevos\*\*/],
+    ['contacts', /\*\*A contact:\*\*/],
+    ['contacts', /\*\*History:\*\*/],
+    ['backup', /\*\*What takes room:\*\*/],
+    ['backup', /\*\*What never comes back:\*\*/],
+    ['hidden', /\*\*Relay, Nostr and phones nearby:\*\*/],
+  ];
+  for (const [id, what] of kept) assert.match(text(id), what, `${id}: ${what}`);
+  // It has not the Phone's permission to read the call log: a contact's history is its messages alone.
+  assert.match(text('contacts'), /\*\*History:\*\* a contact's card lists its messages in Erevos, the newest first; tap one to open the chat\./);
+  const gone: [string, RegExp][] = [
+    ['contacts', /Show calls/],
+    ['contacts', /call back/],
+    ['privacy', /\*\*Phone calls\*\*/],
+    ['privacy', /only to show its history/],
+  ];
+  for (const [id, what] of gone) assert.doesNotMatch(text(id), what, `${id}: ${what}`);
+});
+
+test('a list item marked [~] is left out of Erevos Lite alone, with what continues it', () => {
+  const source = '- Both\n- [~] Not in Lite\n  goes on\n- Both again';
+  assert.equal(editionSource(source, 'erevos'), '- Both\n- Not in Lite\n  goes on\n- Both again');
+  assert.equal(editionSource(source, 'plus'), '- Both\n- Not in Lite\n  goes on\n- Both again');
+  assert.equal(editionSource(source, 'lite'), '- Both\n- Both again');
+});
+
+test('a table row marked [~] is left out of Erevos Lite alone, and the rows after it stay', () => {
+  const source = '| a | b |\n| --- | --- |\n| one | 1 |\n[~] | two | 2 |\n| three | 3 |\n\nAfter.';
+  assert.equal(editionSource(source, 'erevos'), '| a | b |\n| --- | --- |\n| one | 1 |\n| two | 2 |\n| three | 3 |\n\nAfter.');
+  assert.equal(editionSource(source, 'lite'), '| a | b |\n| --- | --- |\n| one | 1 |\n| three | 3 |\n\nAfter.');
 });

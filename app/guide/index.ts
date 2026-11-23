@@ -133,6 +133,9 @@ const parsed = new Map<string, GuideSection[]>();
 /** The sections of networks only Erevos+ has (lib/edition.ts): the plain Erevos leaves them out. */
 export const PLUS_SECTIONS: readonly string[] = ['matrix', 'xmpp', 'nostr-chats', 'telegram', 'messenger', 'signal', 'session'];
 
+/** The sections of what only the plain Erevos and Erevos+ have, besides: Erevos Lite leaves them out too. */
+export const EREVOS_SECTIONS: readonly string[] = ['modules', 'sms', 'phone', 'collection'];
+
 export function guideFor(lang: GuideLang, edition: Edition = EDITION): GuideSection[] {
   const key = `${lang} ${edition}`;
   let sections = parsed.get(key);
@@ -141,7 +144,8 @@ export function guideFor(lang: GuideLang, edition: Edition = EDITION): GuideSect
     sections = parseGuide(ownNames() ? guideNamed(source, edition) : unmarkKept(source));
     parsed.set(key, sections);
   }
-  return edition === 'lite' ? sections.filter((section) => !PLUS_SECTIONS.includes(section.id)) : sections;
+  if (edition === 'plus') return sections;
+  return sections.filter((section) => !PLUS_SECTIONS.includes(section.id) && (edition !== 'lite' || !EREVOS_SECTIONS.includes(section.id)));
 }
 
 /** The guide shows in the app's language (lib/i18n.ts). */

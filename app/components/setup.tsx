@@ -79,8 +79,11 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
   const list = here.filter((m) => chosen.has(m));
   // The Collection alone leaves no chat to open (lib/modules.ts).
   const nothing = list.every((m) => m === 'collection');
+  // With one module only (Erevos Lite, lib/edition.ts, or a device with Erevos's own chats alone)
+  // there is nothing to choose: no step for the modules.
+  const single = here.length === 1;
   // These two, then a screen for each module chosen, the lock and the backups, and what is done.
-  const count = 2 + afterSteps(list).length;
+  const count = (single ? 1 : 2) + afterSteps(list).length;
   const at = step === 'welcome' ? 0 : 1;
 
   function toggle(module: Module) {
@@ -194,7 +197,7 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
           <Button
             title={t('Next')}
             disabled={step === 'modules' && nothing}
-            onPress={() => (step === 'welcome' ? setStep('modules') : onDone({ modules: list, name: name.trim(), restore: false, linkPhone: false }))}
+            onPress={() => (step === 'welcome' && !single ? setStep('modules') : onDone({ modules: list, name: name.trim(), restore: false, linkPhone: false }))}
           />
         </Row>
         {step === 'welcome' ? (

@@ -76,8 +76,10 @@ export const SETTINGS: SettingsGroup[] = [
       {
         id: 'modules',
         title: mark('Modules'),
-        detail: EDITION === 'lite' ? mark('Erevos, Phone, SMS and the Collection: the ones you use') : mark('Erevos, Phone, SMS, Nostr, Matrix, XMPP and the Collection: the ones you use'),
+        detail: EDITION === 'erevos' ? mark('Erevos, Phone, SMS and the Collection: the ones you use') : mark('Erevos, Phone, SMS, Nostr, Matrix, XMPP and the Collection: the ones you use'),
         href: '/modules',
+        // Erevos Lite has Erevos's own chats alone: nothing to choose.
+        when: () => EDITION !== 'lite',
       },
       { id: 'updates', title: mark('Updates'), detail: mark('This version, and Check for updates'), href: '/updates' },
       { id: 'give-app', title: mark('Give Erevos to a phone nearby'), detail: mark('Over Wi-Fi or a hotspot, with no internet'), href: '/give-app', when: phone },

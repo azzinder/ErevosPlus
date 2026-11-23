@@ -68,7 +68,7 @@ concurrency:
 # built by erevosgram.yml.
 env:
   EXPO_NO_TELEMETRY: "1"
-  EREVOS_EDITION: lite
+  EREVOS_EDITION: erevos
 
 jobs:
   # Decides whether to build at all and the build's number, then opens the draft release the jobs
@@ -96,12 +96,14 @@ jobs:
           # kept for Erevos+'s next build (beta.5 with Messenger's start fixed) before its run names it;
           EREVOS_BUILT: "67 68"
           RELEASES_REPO: azzinder/erevos-releases
+          LITE_RELEASES_REPO: azzinder/erevos-lite-releases
         run: |
           # Every build so far: each published release's, Erevos's and Erevos+'s (its version.json),
           # the builds under way here (their drafts, build-<n>), and Erevos+'s and ErevosGram's
           # (erevosgram.yml, whose runs are named "<version>, build <n>", the unpublished ones too, until
           # Erevos+ moved to azzinder/ErevosPlus), and every release in the public download repository,
-          # where Erevos+'s releases are published from there.
+          # where Erevos+'s releases are published from there, and Erevos Lite's (release-lite.yml),
+          # once its download repository is there.
           # Should any of them not be read, no build: two with one number would not install.
           builds=$(mktemp)
           if ! {
@@ -112,7 +114,12 @@ jobs:
             gh api "repos/$GH_REPO/actions/workflows/erevosgram.yml/runs?per_page=100" --jq '.workflow_runs[].display_title' |
               sed -n 's/.*, build \([1-9][0-9]*\)$/\1/p' &&
             gh api "repos/$RELEASES_REPO/releases?per_page=100" --jq '.[] | select(.draft | not) | select(any(.assets[]; .name == "version.json")) | .tag_name' |
-              while read -r tag; do gh release download "$tag" --repo "$RELEASES_REPO" -p version.json -O - | jq -r '.build // empty' || exit 1; done
+              while read -r tag; do gh release download "$tag" --repo "$RELEASES_REPO" -p version.json -O - | jq -r '.build // empty' || exit 1; done &&
+            { lite=$(gh api "repos/$LITE_RELEASES_REPO" --jq .full_name 2>&1) || grep -q 'Not Found' <<< "$lite"; } &&
+            if [ "$lite" = "$LITE_RELEASES_REPO" ]; then
+              gh api "repos/$LITE_RELEASES_REPO/releases?per_page=100" --jq '.[] | select(.draft | not) | select(any(.assets[]; .name == "version.json")) | .tag_name' |
+                while read -r tag; do gh release download "$tag" --repo "$LITE_RELEASES_REPO" -p version.json -O - | jq -r '.build // empty' || exit 1; done
+            fi
           } > "$builds"; then
             echo "::error::Not every build so far could be read, so no number is sure for this one: no build."; exit 1
           fi
@@ -395,7 +402,7 @@ jobs:
           test -f ../desktop/web/core/erevos_ffi_bg.wasm
           # Element Call, for Matrix calls, served apart at app://element-call (desktop/main.js):
           # Erevos+ only, as the plain Erevos has no Matrix.
-          if [ "$EREVOS_EDITION" != lite ]; then node ../pwa/element-call.mjs node_modules/@element-hq/element-call-embedded/dist ../desktop/web/element-call; fi
+          if [ "$EREVOS_EDITION" = plus ]; then node ../pwa/element-call.mjs node_modules/@element-hq/element-call-embedded/dist ../desktop/web/element-call; fi
 
       # Handed over before the Linux packages, so a failure there does not hold the Mac and Windows back.
       - name: Hand the desktop web build to the macOS and Windows jobs
@@ -415,7 +422,7 @@ jobs:
           npx expo export --clear --platform web --output-dir ../web-build
           cd ..
           # Element Call only in Erevos+: the plain Erevos has no Matrix.
-          node pwa/build.mjs web-build erevos-web --label "$EREVOS_VERSION" $([ "$EREVOS_EDITION" = lite ] && echo --no-element-call)
+          node pwa/build.mjs web-build erevos-web --label "$EREVOS_VERSION" $([ "$EREVOS_EDITION" != plus ] && echo --no-element-call)
           tar -czf erevos-web.tar.gz -C erevos-web .
       - name: Hand the web app to the publish job
         env:

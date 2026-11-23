@@ -28,14 +28,15 @@ class ErevosIconsModule : Module() {
     // Each icon's colour as the launcher shows it now, as { erevos: "red", phone: "green", … }.
     Function("colors") {
       val context = context() ?: return@Function null
-      ICONS.mapValues { (icon, _) -> colorOf(context, icon) }
+      // An icon whose part is not in this app (Erevos Lite has no Phone, no SMS) is left out.
+      ICONS.filterKeys { icon -> exists(context, icon) }.mapValues { (icon, _) -> colorOf(context, icon) }
     }
 
     // Shows the icon in that colour: the new alias goes on before the old one goes off, so the
     // launcher always has one. False for an unknown icon or colour.
     Function("setColor") { icon: String, color: String ->
       val context = context() ?: return@Function false
-      if (icon !in ICONS || color !in COLORS) return@Function false
+      if (icon !in ICONS || color !in COLORS || !exists(context, icon)) return@Function false
       // Behind the calculator Erevos's icon stays off: its colour is kept for when it comes back.
       if (icon == "erevos" && Calculator.isOn(context)) {
         Calculator.prefs(context).edit().putString(Calculator.EREVOS_COLOR, color).apply()
@@ -56,7 +57,7 @@ class ErevosIconsModule : Module() {
     // Contacts' always stay. False for any other icon, or with no app context.
     Function("setShown") { icon: String, shown: Boolean ->
       val context = context() ?: return@Function false
-      if (icon != "phone" && icon != "sms") return@Function false
+      if ((icon != "phone" && icon != "sms") || !exists(context, icon)) return@Function false
       val kept = offColor(context, icon)
       if (shown) {
         if (kept != null) {
@@ -157,6 +158,10 @@ private fun launcher(prefix: String, color: String, first: String) =
 
 private fun component(context: Context, icon: String, color: String) =
   ComponentName(context.packageName, ICONS.getValue(icon).name(context, color))
+
+// Whether the icon's part is in this app: its first alias is in the manifest, on or off.
+private fun exists(context: Context, icon: String): Boolean =
+  runCatching { context.packageManager.getActivityInfo(component(context, icon, ICONS.getValue(icon).first), PackageManager.MATCH_DISABLED_COMPONENTS) }.isSuccess
 
 // The colours of the icons taken off while their part of Erevos is off, by icon.
 private fun offPrefs(context: Context) = context.applicationContext.getSharedPreferences("erevos-icons-off", Context.MODE_PRIVATE)

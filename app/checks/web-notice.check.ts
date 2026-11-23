@@ -20,7 +20,7 @@ import vm from 'node:vm';
 import { LANGS } from '../lib/i18n';
 import { iconNumber, type IconParts } from '../lib/icon-number';
 
-// The worker of the plain Erevos's web app (pwa/build.mjs --edition lite).
+// The worker of the plain Erevos's web app (pwa/build.mjs --edition erevos).
 const WORKER = readFileSync(join(import.meta.dirname, '../../pwa/sw.js'), 'utf8').replace('__EREVOS_WEB_APP__', 'erevos-web');
 
 type Notice = { title: string; body: string; tag: string; renotify?: boolean; data?: unknown; closed: boolean; close(): void };

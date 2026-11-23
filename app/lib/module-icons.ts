@@ -4,6 +4,7 @@
 
 import { setLauncherShown } from '../modules/erevos-icons';
 
+import { inEdition } from './edition';
 import { moduleOn, onModulesChange } from './modules';
 
 // The Phone's and the SMS's icons among the phone's apps (modules/erevos-icons) follow their
@@ -14,6 +15,8 @@ let following = false;
 
 /** Puts the icons as the modules are now, and again each time one is turned on or off. */
 export function followModuleIcons(): void {
+  // Erevos Lite has no Phone or SMS icons at all (lib/edition.ts): nothing to put.
+  if (!inEdition('phone')) return;
   const apply = () => {
     setLauncherShown('phone', moduleOn('phone'));
     setLauncherShown('sms', moduleOn('sms'));

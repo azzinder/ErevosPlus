@@ -498,5 +498,5 @@ export default function UpdatesScreen() {
 /** The edition whose release a channel brings (lib/update-channel.ts): Erevos+ says the plain Erevos's
  *  name for a release of it (tFor). */
 function releaseEdition(channel: Channel | null): Edition {
-  return channel?.edition === 'erevos' ? 'lite' : EDITION;
+  return channel?.edition ?? EDITION;
 }

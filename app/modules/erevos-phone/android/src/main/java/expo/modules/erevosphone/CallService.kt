@@ -6,6 +6,7 @@ package expo.modules.erevosphone
 
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.CallEndpoint
@@ -23,13 +24,20 @@ import java.util.IdentityHashMap
 class CallService : InCallService() {
   private val callbacks = IdentityHashMap<Call, Call.Callback>()
   private val main = Handler(Looper.getMainLooper())
+  // The screen kept on, bright, while a call rings with the phone locked or its screen off (wake).
+  private var ringWake: PowerManager.WakeLock? = null
+  private var stopListening: (() -> Unit)? = null
 
   override fun onCreate() {
     super.onCreate()
     Calls.service = this
+    stopListening = Calls.listen { if (Calls.ringing() == null) sleep() }
   }
 
   override fun onDestroy() {
+    stopListening?.invoke()
+    stopListening = null
+    sleep()
     if (Calls.service === this) Calls.service = null
     CallNotices.update(this)
     super.onDestroy()
@@ -71,9 +79,34 @@ class CallService : InCallService() {
       val show = !blocked && runCatching { CallNotices.needsScreen(app, call, number) }.getOrDefault(true)
       main.post {
         if (!Calls.isRinging(call)) return@post
-        if (blocked) call.reject(false, null) else if (show) CallActivity.show(this)
+        if (blocked) call.reject(false, null)
+        else if (show) {
+          wake()
+          CallActivity.show(this)
+        }
       }
     }.start()
+  }
+
+  // The call screen asks Android to turn the screen on over the lock screen, but on some phones
+  // that is not always enough: the phone rang with its screen black. So, as Erevos's own calls do
+  // (erevos-call wakeForRing), the screen is also woken and kept on, bright, while the call rings,
+  // for at most RING_WAKE_MS, and let go as soon as no call rings.
+  private fun wake() {
+    val power = getSystemService(PowerManager::class.java) ?: return
+    runCatching {
+      ringWake?.let { if (it.isHeld) it.release() }
+      @Suppress("DEPRECATION")
+      ringWake = power.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, "erevos:phone-ring").also {
+        it.setReferenceCounted(false)
+        it.acquire(RING_WAKE_MS)
+      }
+    }
+  }
+
+  private fun sleep() {
+    ringWake?.let { lock -> runCatching { if (lock.isHeld) lock.release() } }
+    ringWake = null
   }
 
   override fun onCallRemoved(call: Call) {
@@ -112,5 +145,10 @@ class CallService : InCallService() {
   // the phone's call button.
   override fun onBringToForeground(showDialpad: Boolean) {
     CallActivity.show(this)
+  }
+
+  private companion object {
+    // How long the screen is kept on for a call that rings, at most: about as long as a call rings.
+    const val RING_WAKE_MS = 60_000L
   }
 }

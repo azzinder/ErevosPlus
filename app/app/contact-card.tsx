@@ -21,6 +21,7 @@ import { saveVCards, vcfName } from '../lib/contact-files';
 import { birthdayComing, birthdayLabel, callsWith, fillText, historyLines, kindLabel, parseBirthday, phoneSave, whenText, type Entry, type ErevosPerson, type HistoryLine } from '../lib/contacts';
 import { fromBase64 } from '../lib/crypto';
 import { enterHiddenScreen, hiddenScreens, useOpenHiddenPlace, type OpenHiddenPlace } from '../lib/hidden-contacts';
+import { EDITION } from '../lib/edition';
 import { t } from '../lib/i18n';
 import { linkedName } from '../lib/linked-name';
 import { moduleOn } from '../lib/modules';
@@ -551,7 +552,8 @@ export default function ContactCardScreen() {
           <ErevosIdInput value={erevosCode} onChange={setErevosCode} onNote={setIdNote} />
           {erevosCode.trim() ? <Button title={t('Add to Erevos')} compact onPress={addErevos} /> : null}
           {people.length > 0 ? <Button title={t('Choose from my Erevos chats')} kind="secondary" compact onPress={() => setLinking(true)} /> : null}
-          {!hidden && Platform.OS === 'android' && first ? (
+          {/* Erevos Lite sends no SMS, invites neither (docs/editions.md). */}
+          {!hidden && Platform.OS === 'android' && EDITION !== 'lite' && first ? (
             <>
               <Button title={t('Invite by SMS')} kind="secondary" compact loading={inviting} onPress={() => void inviteBySms(first)} />
               <Text variant="caption" tone="muted">

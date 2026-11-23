@@ -30,9 +30,9 @@ export const UPDATE_EDITIONS: readonly UpdateEdition[] = ['lite', 'erevos', 'plu
 /** Each edition's Android package. */
 export const PACKAGES: Readonly<Record<UpdateEdition, string>> = { erevos: 'app.erevos', plus: 'app.erevos.plus', lite: 'app.erevos.lite' };
 
-/** The edition of a build of `edition` (lib/edition.ts: `lite` there is the plain Erevos, until Erevos Lite is an edition of its own). */
+/** The edition of a build of `edition` (lib/edition.ts): the same three, by the same names. */
 export function updateEditionOf(edition: Edition): UpdateEdition {
-  return edition === 'plus' ? 'plus' : 'erevos';
+  return edition;
 }
 
 /** The edition of this build. */

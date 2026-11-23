@@ -24,13 +24,15 @@ const native = requireOptionalNativeModule<{
   setShown?(icon: string, shown: boolean): boolean;
 }>('ErevosIcons');
 
-/** Each icon's colour as the launcher shows it now, or null where there is no choice. */
-export function launcherColors(): Record<LauncherIcon, LauncherColor> | null {
+/** Each icon's colour as the launcher shows it now (an icon this app has not, missing), or null where there is no choice. */
+export function launcherColors(): Partial<Record<LauncherIcon, LauncherColor>> | null {
   try {
     const colors = native?.colors();
     if (!colors) return null;
     const known = (color: string | undefined): color is LauncherColor => LAUNCHER_COLORS.includes(color as LauncherColor);
-    if (!LAUNCHER_ICONS.every((icon) => known(colors[icon]))) return null;
+    // Erevos Lite has no Phone and no SMS, so no icons of theirs: the others are enough.
+    if (!LAUNCHER_ICONS.filter((icon) => icon !== 'phone' && icon !== 'sms').every((icon) => known(colors[icon]))) return null;
+    if (!LAUNCHER_ICONS.every((icon) => colors[icon] === undefined || known(colors[icon]))) return null;
     return colors as Record<LauncherIcon, LauncherColor>;
   } catch {
     return null;
