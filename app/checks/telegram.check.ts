@@ -513,7 +513,7 @@ test('notices: a read here counts at once, and a count that comes after its mess
   assert.equal(freshCounts(fresh, () => 6).size, 0);
 });
 
-test('notices: a chat muted, hidden or out of the folders keeps nothing to tell of when it is heard again', () => {
+test('notices: a chat muted or hidden keeps nothing to tell of when it is heard again', () => {
   const m = (pairs: [string, number][]) => new Map(pairs);
   const mark = () => 0;
   // Three messages came while the chat was heard, their count not yet: then it is muted.
@@ -530,4 +530,42 @@ test('notices: a chat muted, hidden or out of the folders keeps nothing to tell 
   // Once heard again, a message that truly comes then is told of, once.
   const after = heardUnread(m([]), m([['telegram:7', 4]]), freshCounts(new Map([['telegram:7', [5]]]), mark));
   assert.equal(after.get('telegram:7'), 1);
+});
+
+test('notices: the first message of a new chat is told of once, whether its place in the list comes in the same batch or later', () => {
+  // As lib/telegram-store.ts takes TDLib's batches: every fresh message waits by its id, the notices
+  // hear the chats with a place in the main list, and only a silenced chat forgets what came.
+  const run = (batches: Record<string, unknown>[][]) => {
+    const s = newTgState();
+    let fresh = new Map<string, number[]>();
+    let before: Map<string, number> = new Map();
+    const told: number[] = [];
+    const mark = (where: string) => s.chats[Number(where.slice('telegram:'.length))]?.readInbox ?? 0;
+    const loud = (where: string) => s.chats[Number(where.slice('telegram:'.length))]?.muted === false;
+    for (const batch of batches) {
+      for (const u of batch) {
+        if (u['@type'] === 'updateNewMessage') {
+          const raw = u.message as { id: number; chat_id: number; is_outgoing: boolean; date: number };
+          if (freshMessage({ id: raw.id, outgoing: raw.is_outgoing, date: raw.date }, s.chats[raw.chat_id]?.readInbox ?? 0, 0)) {
+            fresh.set(`telegram:${raw.chat_id}`, [...(fresh.get(`telegram:${raw.chat_id}`) ?? []), raw.id]);
+          }
+        }
+        applyUpdate(s, u);
+      }
+      const now = new Map(Object.values(s.chats).filter((c) => c.unread > 0 && !c.muted && c.main !== undefined).map((c) => [`telegram:${c.id}`, c.unread] as [string, number]));
+      const heard = heardUnread(before, now, freshCounts(fresh, mark));
+      fresh = freshLeft(fresh, mark, before, heard, loud);
+      told.push(Math.max(0, (heard.get('telegram:9') ?? 0) - (before.get('telegram:9') ?? 0)));
+      before = heard;
+    }
+    return told;
+  };
+  const chat = { '@type': 'updateNewChat', chat: { id: 9, title: 'B', type: { '@type': 'chatTypePrivate', user_id: 2 }, unread_count: 0, last_read_inbox_message_id: 0, last_read_outbox_message_id: 0, notification_settings: { mute_for: 0 }, positions: [] } };
+  const message = { id: 10, chat_id: 9, is_outgoing: false, date: 10, sender_id: { '@type': 'messageSenderUser', user_id: 2 }, content: { '@type': 'messageText', text: { text: 'hi' } } };
+  const fresh = { '@type': 'updateNewMessage', message };
+  const placed = { '@type': 'updateChatLastMessage', chat_id: 9, last_message: message, positions: [{ '@type': 'chatPosition', list: { '@type': 'chatListMain' }, order: '100', is_pinned: false }] };
+  const counted = { '@type': 'updateChatReadInbox', chat_id: 9, last_read_inbox_message_id: 0, unread_count: 1 };
+  assert.deepEqual(run([[chat, fresh, placed, counted]]), [1]);
+  assert.deepEqual(run([[chat, fresh, counted], [placed], [placed]]), [0, 1, 0]);
+  assert.deepEqual(run([[chat, fresh], [placed], [counted]]), [0, 0, 1]);
 });

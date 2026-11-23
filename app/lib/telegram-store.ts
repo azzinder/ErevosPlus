@@ -147,9 +147,7 @@ function take(slot: string, updates: string[]): void {
       const raw = update.message as { chat_id?: number; id?: number; is_outgoing?: boolean; date?: number } | undefined;
       const chatId = Number(raw?.chat_id);
       const readInbox = it.state.chats[chatId]?.readInbox ?? 0;
-      // Only a chat the notices hear now keeps what came: one muted, hidden or out of the folders
-      // would otherwise tell of all of it at once when heard again.
-      if (raw && freshMessage({ id: Number(raw.id), outgoing: raw.is_outgoing === true, date: Number(raw.date) }, readInbox, it.startedAt) && listening(it)(`telegram:${chatId}`)) {
+      if (raw && freshMessage({ id: Number(raw.id), outgoing: raw.is_outgoing === true, date: Number(raw.date) }, readInbox, it.startedAt)) {
         it.fresh.set(`telegram:${chatId}`, [...(it.fresh.get(`telegram:${chatId}`) ?? []), Number(raw.id)]);
       }
       const m = it.state.messages[Number((update.message as { chat_id?: number })?.chat_id)]?.find((x) => x.id === Number((update.message as { id?: number }).id));
@@ -175,7 +173,7 @@ function hear(it: Live, quiet: boolean): void {
   const before = it.lastHeard;
   const mark = (where: string) => it.state.chats[Number(where.slice('telegram:'.length))]?.readInbox ?? 0;
   const heard = quiet ? now : heardUnread(before, now, freshCounts(it.fresh, mark));
-  it.fresh = quiet ? new Map() : freshLeft(it.fresh, mark, before, heard, listening(it));
+  it.fresh = quiet ? new Map() : freshLeft(it.fresh, mark, before, heard, unsilenced(it));
   it.lastHeard = heard;
   it.heard.hear(heard, quiet);
 }
@@ -217,15 +215,27 @@ function unreadAt(it: Live): Map<string, number> {
   return at;
 }
 
-// Which home rows the notices hear now (unreadAt): not muted, here or in Telegram, not kept in
-// hidden chats (one there says nothing outside them), and in the folders chosen, or the main list.
+// Which home rows the notices hear now (unreadAt): not silenced, and in the folders chosen, or the
+// main list.
 function listening(it: Live): (where: string) => boolean {
   const folders = chosenFolders(it);
+  const loud = unsilenced(it);
+  return (where) => {
+    const c = it.state.chats[Number(where.slice('telegram:'.length))];
+    if (!c || !loud(where)) return false;
+    return folders.length ? folders.some((id) => c.folders?.[id] !== undefined) : c.main !== undefined;
+  };
+}
+
+// Which home rows are not silenced: not muted, here or in Telegram, nor kept in hidden chats (one
+// there says nothing outside them). What came to a silenced chat is forgotten (freshLeft), so being
+// heard again tells of nothing from meanwhile. Its place in the list is not asked: TDLib gives a new
+// chat's, or one coming back's, after its first message, and that message is still told of.
+function unsilenced(it: Live): (where: string) => boolean {
   const away = new Set(it.data?.away ?? []);
   return (where) => {
     const c = it.state.chats[Number(where.slice('telegram:'.length))];
-    if (!c || c.muted || away.has(c.id) || mutedNow(it.data?.notify?.[String(c.id)])) return false;
-    return folders.length ? folders.some((id) => c.folders?.[id] !== undefined) : c.main !== undefined;
+    return !!c && !c.muted && !away.has(c.id) && !mutedNow(it.data?.notify?.[String(c.id)]);
   };
 }
 
