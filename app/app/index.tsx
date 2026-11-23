@@ -725,7 +725,11 @@ function Home() {
       live = false;
     };
   }, [messengerIn]);
-  const pages = facebookHere
+  // Messenger's case (Erevos+), at a chat, at Facebook's feed ('feed') or at its chats (''); if it cannot open, it says why.
+  const openCase = (at: string) =>
+    openMessengerCase(at).catch((e: unknown) => ask(t('Not done'), e instanceof Error ? e.message : String(e), [{ text: t('OK') }]));
+  // In Messenger's case Facebook's feed is a tap away in the case's own bar: no card of its own then.
+  const pages = facebookHere && !msgCaseOnly('messenger')
     ? [
         {
           key: 'facebook',
@@ -835,7 +839,11 @@ function Home() {
       hidden={arranged.hidden.map((key) => ({ key, label: showLabel(key, telegram?.folders ?? []) }))}
       pages={pages}
       current={show}
-      onPick={(key) => setShow(key as InboxShow)}
+      onPick={(key) => {
+        setShow(key as InboxShow);
+        // Messenger in its case: its card opens the case, as Settings does; its chats not read stay here.
+        if (key === 'messenger' && msgCaseOnly('messenger') && messengerIn) void openCase('');
+      }}
       onAdd={() => router.push('/modules')}
       onReadAll={readAll}
       onMove={(key, by) => void moveService(tabs, key, by)}
@@ -1044,7 +1052,7 @@ function Home() {
                   compact
                   onPress={() =>
                     show === 'messenger' && messengerNow(show).signedIn && !messengerNow(show).signInAgain && msgMessengerWay() === 'case'
-                      ? void openMessengerCase().catch(() => router.push('/messenger'))
+                      ? void openCase('')
                       : router.push(`/${show}`)
                   }
                 />

@@ -8,8 +8,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.webkit.CookieManager
@@ -18,6 +16,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebStorage
 import android.webkit.WebView
+import android.webkit.WebResourceResponse
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
@@ -35,6 +34,8 @@ import org.json.JSONObject
  *   out of Facebook's l.facebook.com wrapper and without its tracking marks (fbclid and the like).
  * - Messenger's links (facebook.com/messages, messenger.com, m.me) close the page and go to
  *   Erevos's own Messenger: [start] answers "messages", or "thread:<id>" for one chat.
+ * - The page wears Erevos's look (WebPages.dress), as Messenger's case does, as far as the mobile
+ *   site takes it. With Messenger used in its case, the Facebook card opens the case instead.
  * - With a Tor door (the Messenger account goes through Tor), the page goes only through Tor, never
  *   straight, as the sign-in page does.
  */
@@ -158,7 +159,21 @@ class FacebookActivity : Activity() {
         }
         return true
       }
+
+      // The style's letters, asked for by the look's CSS: from the phone, never the network.
+      override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+        WebPages.fontAnswer(this@FacebookActivity, request.url.toString())
+
+      override fun onPageCommitVisible(view: WebView, url: String) {
+        WebPages.repaint(view)
+      }
+
+      override fun onPageFinished(view: WebView, url: String) {
+        WebPages.repaint(view)
+      }
     }
+    // Facebook's page in Erevos's look, as Messenger's case (lib/messenger-case-look.ts).
+    WebPages.dress(web)
     web.webChromeClient = object : WebChromeClient() {
       // A photo or video for a post: the phone's own picker.
       override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
@@ -172,9 +187,8 @@ class FacebookActivity : Activity() {
       }
     }
 
-    val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     val frame = FrameLayout(this)
-    frame.setBackgroundColor(if (night) Color.BLACK else Color.WHITE)
+    frame.setBackgroundColor(WebPages.ground(this))
     frame.addView(web, FrameLayout.LayoutParams(-1, -1))
     WebPages.framed(this, "Facebook", frame)
 
@@ -242,6 +256,7 @@ class FacebookActivity : Activity() {
     picking?.onReceiveValue(null)
     picking = null
     web.stopLoading()
+    WebPages.undress(web)
     web.destroy()
     // The session goes back to the engine alone: nothing of it stays in the web view.
     CookieManager.getInstance().removeAllCookies(null)

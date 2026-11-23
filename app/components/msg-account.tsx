@@ -73,7 +73,8 @@ export function MsgAccountScreen({ service }: { service: MsgService }) {
           {service === 'session' ? <SessionId /> : null}
           {inCase ? <CaseButton onError={fail} /> : null}
           {service === 'messenger' ? <MessengerWayChoice onError={fail} /> : null}
-          {service === 'messenger' ? <FacebookPage chats={state.threads} onError={fail} /> : null}
+          {/* In the case Facebook's feed is in the case's own bar: one way in, not two. */}
+          {service === 'messenger' && !inCase ? <FacebookPage chats={state.threads} onError={fail} /> : null}
           <ServiceTor service={service} onError={fail} />
           {inCase ? null : (
             <>

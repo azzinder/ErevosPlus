@@ -8,6 +8,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { press } from '../lib/haptics';
 import { SERVICE_NAMES } from '../lib/messenger';
+import { ask } from '../lib/alert';
 import { msgCaseOnly, openMessengerCase } from '../lib/messenger-store';
 import { t } from '../lib/i18n';
 import { rowTime, shownName, type InboxRow } from '../lib/inbox';
@@ -66,9 +67,11 @@ export function ChatRow({
       onPress={
         onOpen ??
         (() =>
-          // Messenger in its case: the chat opens there (its screen here, if the case cannot open).
+          // Messenger in its case: the chat opens there; if the case cannot open, it says why.
           row.network === 'messenger' && msgCaseOnly('messenger')
-            ? void openMessengerCase(row.identity.slice('messenger:'.length)).catch(() => router.push('/messenger'))
+            ? void openMessengerCase(row.identity.slice('messenger:'.length)).catch((e: unknown) =>
+                ask(t('Not done'), e instanceof Error ? e.message : String(e), [{ text: t('OK') }]),
+              )
             : router.push(
             row.sms
               ? `/sms?to=${encodeURIComponent(row.sms)}`
