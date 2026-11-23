@@ -4,6 +4,8 @@
 
 // The French of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/fr/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
+    "**Messenger dans son étui, un seul chemin** : dans Erevos+, avec Messenger **Dans son étui**, sa carte dans **Services** ouvre l’étui comme les Réglages, et le fil de Facebook est dans la barre de l’étui, sans carte ni bouton Facebook à côté. Si l’étui ne peut pas s’ouvrir, Erevos dit pourquoi. Voir [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":
     "**Les notifications de Telegram partent une fois lues** : dans Erevos+, une discussion Telegram lue et quittée aussitôt ne laisse plus derrière elle sa notification de nouveaux messages, et une discussion en sourdine ne dit rien de ce qui est arrivé entre-temps quand la sourdine est levée. Voir [Telegram](#telegram).",
   "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":

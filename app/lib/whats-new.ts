@@ -31,6 +31,7 @@ export const VERSIONS: WhatsNew[] = [
     version: '3.1.0-rc.1',
     forYou: [
       mark("**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought."),
+      mark("**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger)."),
       mark("**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram)."),
     ],
     underTheHood: [],

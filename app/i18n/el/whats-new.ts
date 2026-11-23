@@ -4,6 +4,8 @@
 
 // The Greek of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/el/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
+    "**Το Messenger στη θήκη του, ένας δρόμος**: στο Erevos+, με το Messenger **Στη θήκη του**, η κάρτα του στις **Υπηρεσίες** ανοίγει τη θήκη όπως οι Ρυθμίσεις, και η ροή του Facebook είναι στη μπάρα της θήκης, χωρίς χωριστή κάρτα ή κουμπί Facebook δίπλα. Αν η θήκη δεν ανοίξει, το Erevos λέει γιατί. Δες [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":
     "**Οι ειδοποιήσεις του Telegram φεύγουν μόλις διαβάσεις**: στο Erevos+, μια συνομιλία Telegram που διαβάζεις και αφήνεις αμέσως δεν αφήνει πια πίσω της ειδοποίηση για νέα μηνύματα, και μια συνομιλία σε σίγαση δεν λέει τίποτα για όσα ήρθαν στο μεταξύ όταν βγει από τη σίγαση. Δες [Telegram](#telegram).",
   "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":

@@ -4,6 +4,8 @@
 
 // The Serbo-Croatian of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/sh/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
+    "**Messenger u svojoj futroli, jedan put**: u Erevos+, s Messengerom **U svojoj futroli**, njegova kartica u **Usluge** otvara futrolu kao Postavke, a Facebookov feed je u traci futrole, bez Facebook kartice ili gumba pored. Ako se futrola ne može otvoriti, Erevos kaže zašto. Vidi [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":
     "**Obavještenja Telegrama nestaju kad pročitaš**: u Erevos+, Telegram razgovor koji pročitaš i odmah napustiš više ne ostavlja za sobom obavještenje o novim porukama, a utišan razgovor ne javlja ništa o onome što je stiglo u međuvremenu kad mu se vrati zvuk. Vidi [Telegram](#telegram).",
   "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":

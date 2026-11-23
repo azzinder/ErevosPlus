@@ -23,6 +23,11 @@ moves to it through the bridge, 7.3.1, with its networks signed in.
   once, `readLocally`), and a message whose count TDLib gives in a later batch, or its new chat's place in the list,
   is still told of, once. A chat muted or kept in hidden chats keeps nothing to tell of, so being unmuted says nothing
   of what came meanwhile (`freshLeft`). Reported by the maintainer.
+- Messenger in its case, one way in: with **In its case** chosen, Messenger's card in **Services** opens the case as
+  Settings does, and a chat on home opens there at that chat; if the case cannot open, Erevos says why instead of
+  going to the settings page. Facebook's feed is then in the case's own bar, so there is no Facebook card nor **Open
+  Facebook** button beside it. Facebook's own page, used by Erevos itself, wears Erevos's look too, as far as the
+  mobile site takes it. Requested by the maintainer.
 
 ### Under the hood
 
