@@ -4,6 +4,8 @@
 
 // The Spanish of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/es/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a chat muted or out of your folders says nothing of what came meanwhile once it is heard again. See [Telegram](#telegram).":
+    "**Los avisos de Telegram se van al leer**: en Erevos+, un chat de Telegram que lees y dejas enseguida ya no deja atrás su aviso de mensajes nuevos, y un chat silenciado o fuera de tus carpetas no dice nada de lo que llegó entretanto cuando vuelve a oírse. Mira [Telegram](#telegram).",
   "**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought.":
     "**Versión candidata**: Erevos+ tal como debe salir, con todo lo que trajo Erevos 3.0.0-rc.1.",
   "**Release candidate**: Erevos Lite as it is meant to come out, with what Erevos 3.0.0-rc.1 brought to its chats and calls.":

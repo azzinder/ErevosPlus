@@ -19,6 +19,10 @@ moves to it through the bridge, 7.3.1, with its networks signed in.
   a locked phone that wake the screen, and the code review's fixes.
 - Erevos Lite, 3.2.x, is a third app beside Erevos and Erevos+: moving from Erevos+ to it says first, as moving to
   Erevos does, that the other networks' accounts stay behind, and to write down Session's 13 recovery words.
+- Telegram: a chat read and left at once no longer leaves its «1 message» notice behind (the read counts here at
+  once, `readLocally`), and a message whose count TDLib gives in a later batch is still told of, once. A chat muted,
+  hidden or out of the chosen folders keeps nothing to tell of, so being heard again says nothing of what came
+  meanwhile (`freshLeft`). Reported by the maintainer.
 
 ### Under the hood
 

@@ -31,6 +31,7 @@ export const VERSIONS: WhatsNew[] = [
     version: '3.1.0-rc.1',
     forYou: [
       mark("**Release candidate**: Erevos+ as it is meant to come out, with everything Erevos 3.0.0-rc.1 brought."),
+      mark("**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a chat muted or out of your folders says nothing of what came meanwhile once it is heard again. See [Telegram](#telegram)."),
     ],
     underTheHood: [],
   },

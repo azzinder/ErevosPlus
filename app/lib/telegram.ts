@@ -904,11 +904,14 @@ export function readLocally(state: TgState, chatId: number, upTo: number): boole
  * The messages that came and are not told of yet, by home row: their ids, those the chat has read
  * since (`readInbox`) left out, and as many of the first as the notices told of (`heard` over
  * `before`). TDLib may give a message and the count it adds in different batches, so one waits
- * here until its count comes, or it is read.
+ * here until its count comes, or it is read. A row the notices no longer hear (`listens`: muted,
+ * hidden, archived or out of the folders) forgets its own, so being heard again tells of nothing
+ * that came in between.
  */
-export function freshLeft(fresh: ReadonlyMap<string, readonly number[]>, readInbox: (where: string) => number, before: ReadonlyMap<string, number> | null, heard: ReadonlyMap<string, number>): Map<string, number[]> {
+export function freshLeft(fresh: ReadonlyMap<string, readonly number[]>, readInbox: (where: string) => number, before: ReadonlyMap<string, number> | null, heard: ReadonlyMap<string, number>, listens: (where: string) => boolean = () => true): Map<string, number[]> {
   const left = new Map<string, number[]>();
   for (const [where, ids] of fresh) {
+    if (!listens(where)) continue;
     const told = Math.max(0, (heard.get(where) ?? 0) - (before?.get(where) ?? 0));
     const mark = readInbox(where);
     const rest = ids.filter((id) => id > mark).sort((a, b) => a - b).slice(told);

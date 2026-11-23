@@ -147,7 +147,9 @@ function take(slot: string, updates: string[]): void {
       const raw = update.message as { chat_id?: number; id?: number; is_outgoing?: boolean; date?: number } | undefined;
       const chatId = Number(raw?.chat_id);
       const readInbox = it.state.chats[chatId]?.readInbox ?? 0;
-      if (raw && freshMessage({ id: Number(raw.id), outgoing: raw.is_outgoing === true, date: Number(raw.date) }, readInbox, it.startedAt)) {
+      // Only a chat the notices hear now keeps what came: one muted, hidden or out of the folders
+      // would otherwise tell of all of it at once when heard again.
+      if (raw && freshMessage({ id: Number(raw.id), outgoing: raw.is_outgoing === true, date: Number(raw.date) }, readInbox, it.startedAt) && listening(it)(`telegram:${chatId}`)) {
         it.fresh.set(`telegram:${chatId}`, [...(it.fresh.get(`telegram:${chatId}`) ?? []), Number(raw.id)]);
       }
       const m = it.state.messages[Number((update.message as { chat_id?: number })?.chat_id)]?.find((x) => x.id === Number((update.message as { id?: number }).id));
@@ -173,7 +175,7 @@ function hear(it: Live, quiet: boolean): void {
   const before = it.lastHeard;
   const mark = (where: string) => it.state.chats[Number(where.slice('telegram:'.length))]?.readInbox ?? 0;
   const heard = quiet ? now : heardUnread(before, now, freshCounts(it.fresh, mark));
-  it.fresh = quiet ? new Map() : freshLeft(it.fresh, mark, before, heard);
+  it.fresh = quiet ? new Map() : freshLeft(it.fresh, mark, before, heard, listening(it));
   it.lastHeard = heard;
   it.heard.hear(heard, quiet);
 }
@@ -207,15 +209,24 @@ async function keep(it: Live): Promise<void> {
 // folders are chosen for home (telegramHomeFolders), only those of the chosen folders.
 function unreadAt(it: Live): Map<string, number> {
   const at = new Map<string, number>();
-  const folders = chosenFolders(it);
-  const away = new Set(it.data?.away ?? []);
+  const listens = listening(it);
   for (const c of Object.values(it.state.chats)) {
-    // One kept in hidden chats says nothing outside them.
-    if (c.unread <= 0 || c.muted || away.has(c.id) || mutedNow(it.data?.notify?.[String(c.id)])) continue;
-    if (folders.length ? !folders.some((id) => c.folders?.[id] !== undefined) : c.main === undefined) continue;
+    if (c.unread <= 0 || !listens(`telegram:${c.id}`)) continue;
     at.set(`telegram:${c.id}`, c.unread);
   }
   return at;
+}
+
+// Which home rows the notices hear now (unreadAt): not muted, here or in Telegram, not kept in
+// hidden chats (one there says nothing outside them), and in the folders chosen, or the main list.
+function listening(it: Live): (where: string) => boolean {
+  const folders = chosenFolders(it);
+  const away = new Set(it.data?.away ?? []);
+  return (where) => {
+    const c = it.state.chats[Number(where.slice('telegram:'.length))];
+    if (!c || c.muted || away.has(c.id) || mutedNow(it.data?.notify?.[String(c.id)])) return false;
+    return folders.length ? folders.some((id) => c.folders?.[id] !== undefined) : c.main !== undefined;
+  };
 }
 
 function start(holder: Holder, space: number, key: Uint8Array, pocket?: number): Live {

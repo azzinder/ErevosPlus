@@ -512,3 +512,22 @@ test('notices: a read here counts at once, and a count that comes after its mess
   assert.equal(freshLeft(fresh, () => 6, m([]), m([])).size, 0);
   assert.equal(freshCounts(fresh, () => 6).size, 0);
 });
+
+test('notices: a chat muted, hidden or out of the folders keeps nothing to tell of when it is heard again', () => {
+  const m = (pairs: [string, number][]) => new Map(pairs);
+  const mark = () => 0;
+  // Three messages came while the chat was heard, their count not yet: then it is muted.
+  const fresh = new Map([['telegram:7', [1, 2, 3]]]);
+  const muted = (where: string) => where !== 'telegram:7';
+  const kept = freshLeft(fresh, mark, m([]), m([]), muted);
+  assert.equal(kept.size, 0);
+  // Unmuted with three unread: none was told of, so none is now.
+  const heard = heardUnread(m([]), m([['telegram:7', 3]]), freshCounts(kept, mark));
+  assert.equal(heard.get('telegram:7') ?? 0, 0);
+  // A chat still heard keeps its own while another forgets.
+  const two = new Map([['telegram:7', [1]], ['telegram:8', [4]]]);
+  assert.deepEqual([...freshLeft(two, mark, m([]), m([]), muted)], [['telegram:8', [4]]]);
+  // Once heard again, a message that truly comes then is told of, once.
+  const after = heardUnread(m([]), m([['telegram:7', 4]]), freshCounts(new Map([['telegram:7', [5]]]), mark));
+  assert.equal(after.get('telegram:7'), 1);
+});
