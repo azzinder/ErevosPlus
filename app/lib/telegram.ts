@@ -884,3 +884,46 @@ export function heardUnread(before: ReadonlyMap<string, number> | null, now: Rea
 export function freshMessage(m: Pick<TgMessage, 'id' | 'outgoing' | 'date'>, readInbox: number, since: number): boolean {
   return !m.outgoing && m.id > readInbox && m.date * 1000 >= since;
 }
+
+/**
+ * A read done here, at once in what the screens and notices count: the chat's read mark moves up
+ * to `upTo` and its count falls to the messages after it that are known, never rising. TDLib's
+ * own count follows a moment later; until it does, leaving Erevos would keep a notice of what was
+ * just read. Says whether anything changed.
+ */
+export function readLocally(state: TgState, chatId: number, upTo: number): boolean {
+  const chat = state.chats[chatId];
+  if (!chat || upTo <= chat.readInbox) return false;
+  chat.readInbox = upTo;
+  const after = (state.messages[chatId] ?? []).filter((m) => !m.outgoing && m.id > upTo).length;
+  chat.unread = Math.min(chat.unread, after);
+  return true;
+}
+
+/**
+ * The messages that came and are not told of yet, by home row: their ids, those the chat has read
+ * since (`readInbox`) left out, and as many of the first as the notices told of (`heard` over
+ * `before`). TDLib may give a message and the count it adds in different batches, so one waits
+ * here until its count comes, or it is read.
+ */
+export function freshLeft(fresh: ReadonlyMap<string, readonly number[]>, readInbox: (where: string) => number, before: ReadonlyMap<string, number> | null, heard: ReadonlyMap<string, number>): Map<string, number[]> {
+  const left = new Map<string, number[]>();
+  for (const [where, ids] of fresh) {
+    const told = Math.max(0, (heard.get(where) ?? 0) - (before?.get(where) ?? 0));
+    const mark = readInbox(where);
+    const rest = ids.filter((id) => id > mark).sort((a, b) => a - b).slice(told);
+    if (rest.length) left.set(where, rest);
+  }
+  return left;
+}
+
+/** How many messages wait to be told of, by home row (freshLeft), as heardUnread takes them. */
+export function freshCounts(fresh: ReadonlyMap<string, readonly number[]>, readInbox: (where: string) => number): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const [where, ids] of fresh) {
+    const mark = readInbox(where);
+    const n = ids.filter((id) => id > mark).length;
+    if (n) counts.set(where, n);
+  }
+  return counts;
+}
