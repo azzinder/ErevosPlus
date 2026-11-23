@@ -74,6 +74,8 @@ export async function downloadAndInstall(
   release: Release,
   onProgress: (received: number, total: number) => void,
   signal: AbortSignal,
+  // Only downloaded and checked, not installed yet: a move gets the package first (app/updates.tsx).
+  onlyDownload = false,
 ): Promise<void> {
   const apk = release.apk;
   if (FDROID) throw new Error(t('This Erevos comes from F-Droid, which updates it: a new version shows in F-Droid, under Updates.'));
@@ -109,6 +111,7 @@ export async function downloadAndInstall(
     target.delete();
     throw new Error(t('The downloaded package is not the one the release published. Nothing was installed.'));
   }
+  if (onlyDownload) return;
   await startActivityAsync('android.intent.action.VIEW', {
     data: target.contentUri,
     type: 'application/vnd.android.package-archive',

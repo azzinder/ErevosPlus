@@ -114,13 +114,13 @@ export default function UpdatesScreen() {
   }, []);
 
   // Whether Android's installer was opened with it.
-  async function install(release: Release): Promise<boolean> {
+  async function install(release: Release, onlyDownload = false): Promise<boolean> {
     const controller = new AbortController();
     abort.current = controller;
     setProgress({ received: 0, total: release.apk?.size ?? 0 });
     try {
-      await downloadAndInstall(release, (received, total) => setProgress({ received, total }), controller.signal);
-      setNote(t('Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.'));
+      await downloadAndInstall(release, (received, total) => setProgress({ received, total }), controller.signal, onlyDownload);
+      if (!onlyDownload) setNote(t('Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.'));
       return true;
     } catch (error) {
       if (!controller.signal.aborted) setNote(error instanceof Error ? error.message : String(error));
@@ -131,11 +131,15 @@ export default function UpdatesScreen() {
     }
   }
 
-  // Another edition (lib/edition-move.ts): everything is handed over here first, then its app is
-  // downloaded and installed beside this one, unless it is on the phone already; once opened, it
-  // takes what was handed over.
+  // Another edition (lib/edition-move.ts): its app is downloaded and checked first, unless it is on
+  // the phone already, then everything is handed over here, and this app moves out at once, before
+  // Android installs the other beside it: from then on no engine of this one runs longer than its
+  // screen shows (components/moved-out.tsx). Once opened, the other takes what was handed over.
   async function move(release: Release, edition: UpdateEdition, installable: boolean) {
     const name = updateEditionName(edition);
+    const download = installable && !editionInstalled(edition);
+    // Nothing is handed over before the package is here and is the release's.
+    if (download && !(await install(release, true))) return;
     setMoving(0);
     try {
       await prepareMove(edition, (done, all) => setMoving(Math.floor((done * 100) / Math.max(1, all))));
@@ -146,16 +150,17 @@ export default function UpdatesScreen() {
       setMoving(null);
     }
     // From here this app receives nothing, and shows only the move (components/moved-out.tsx).
+    announceMovedOut();
     if (!editionInstalled(edition)) {
       if (!installable) {
         const page = isChannelRelease(release) ? channelPage(release.channel) : RELEASES_PAGE;
         void Linking.openURL(page).catch(() => undefined);
       } else {
-        // Should it not install, the move waits all the same: its screen offers the download page, or to call it off.
+        // Downloaded and checked already: only Android's installer now. Should it not install, the
+        // move waits all the same: its screen offers the download page, or to call it off.
         await install(release);
       }
     }
-    announceMovedOut();
   }
 
   // Erevos from a phone nearby with no internet (lib/give-app.ts): its QR code names the package's

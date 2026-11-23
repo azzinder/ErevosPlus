@@ -182,6 +182,13 @@ test('a move taken is told to the edition moved from at the next start, should i
   for (const screen of ['components/moved-out.tsx', 'app/first-steps.tsx']) assert.match(readFileSync(screen, 'utf8'), /moveErrorText\(/, screen);
   // An app moved out ends its process as its screen is left, so no engine runs on there (Δ1).
   assert.match(readFileSync('components/moved-out.tsx', 'utf8'), /if \(state === 'background'\) device\?\.endProcess\?\.\(\)/);
+  // The other edition's package is downloaded and checked before anything is handed over, and this app
+  // moves out before Android's installer shows, so no engine runs on while it does (Δ1).
+  const updates = readFileSync('app/updates.tsx', 'utf8');
+  const mv = updates.slice(updates.indexOf('async function move('), updates.indexOf('async function fromNearby'));
+  assert.ok(mv.indexOf('install(release, true)') < mv.indexOf('prepareMove(') && mv.indexOf('prepareMove(') < mv.indexOf('announceMovedOut()'));
+  assert.ok(mv.indexOf('announceMovedOut()') < mv.indexOf('await install(release);'));
+  assert.match(readFileSync('lib/install-update.ts', 'utf8'), /if \(onlyDownload\) return;\n  await startActivityAsync/);
   const deviceKt = readFileSync('modules/erevos-device/android/src/main/java/expo/modules/erevosdevice/ErevosDeviceModule.kt', 'utf8');
   assert.match(deviceKt, /Function\("endProcess"\) \{[^}]*moved-out\.json"\)\.exists\(\)\) return@Function false/);
   const layout = readFileSync('app/_layout.tsx', 'utf8');

@@ -15,6 +15,7 @@ export async function downloadAndInstall(
   _release: Release,
   _onProgress: (received: number, total: number) => void,
   _signal: AbortSignal,
+  _onlyDownload = false,
 ): Promise<void> {
   throw new Error(t('This version installs from the download page.'));
 }
