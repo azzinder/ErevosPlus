@@ -109,6 +109,10 @@ The second release candidate of Erevos Lite: Erevos 3.0.0-rc.2 for Erevos's own 
 
 - Erevos+: Messenger's chats read stay read (`messenger/core`: `inboxFolder`, only Meta's inbox, or no folder, can be unread, so a message request, an archived chat or the old open half of a chat moved to encryption, whose read mark stays where it was when it moved, never is; `markAllRead` keeps a floor, `allRead` in `read.json`, so the older chats Meta sends a few at a time later come read too, also after a restart; `lib/read-all.ts` asks for it whenever Messenger chats are read with the others). With Messenger in its case, its card in Services opens the case and leaves home on the part it showed (`app/index.tsx`). Requested by the maintainer.
 
+- Erevos+: Signal's **New chat** finds the phone's contacts (#39). As you type, the contacts that match by name or
+  number show, and a typed number shows as **New number**; Signal is asked only about the one you tap, never the
+  whole address book (`lib/signal-new-chat.ts`, `components/msg-account.tsx`). Requested by the maintainer.
+
 ## 3.1.0-rc.1 (2026-11-23)
 
 The first release candidate of Erevos+: Erevos 3.0.0-rc.1 with every network, with what is below. Erevos+ 7.x
