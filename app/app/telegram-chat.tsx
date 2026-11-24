@@ -25,9 +25,10 @@ import { hiddenOnScreen, useNetworkChatShown } from '../components/network-chat-
 import { MicButton, RecordingLine } from '../components/matrix-voice';
 import { useNetworkThread } from '../components/network-thread';
 import { IconButton } from '../components/composer';
-import { PhoneIcon, SearchIcon, VideoIcon } from '../components/icons';
+import { OptionsIcon, PhoneIcon, SearchIcon, VideoIcon } from '../components/icons';
+import { NetworkChatNotify } from '../components/network-chat-notify';
 import { SelectBar } from '../components/select-bar';
-import { Button, Card, Chip, Input, Page, Row, Sheet, Text, TextButton } from '../components/ui';
+import { Button, Card, Chip, Input, OptionList, Page, Row, Sheet, Text, TextButton } from '../components/ui';
 import { ask, confirm } from '../lib/alert';
 import { callPermissions } from '../lib/call-permissions';
 import { CAN_COPY, copyText } from '../lib/clipboard';
@@ -97,6 +98,8 @@ import {
   telegramSponsorClicked,
   telegramSponsorSeen,
   telegramSend,
+  telegramSetChatNotify,
+  telegramChatNotify,
   telegramShown,
   telegramVerified,
 } from '../lib/telegram-store';
@@ -218,6 +221,7 @@ function TelegramChat() {
   const [editId, setEditId] = useState<number | null>(null);
   editing.current = editId !== null;
   const [attach, setAttach] = useState(false);
+  const [more, setMore] = useState(false);
   const [forwardIds, setForwardIds] = useState<number[] | null>(null);
   const [selecting, setSelecting] = useState<number[] | null>(null);
   const [pinnedList, setPinnedList] = useState<TgMessage[]>([]);
@@ -1168,6 +1172,10 @@ function TelegramChat() {
               />
             )}
             {editId === null && !voice.recording ? <TextButton title={t('Attach')} onPress={() => setAttach((on) => !on)} /> : null}
+            {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
+            <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+              <OptionsIcon color={colors.text} size={22} />
+            </IconButton>
             {!draft.trim() && editId === null ? <MicButton voice={voice} /> : <Button title={editId !== null ? t('Save') : t('Send')} compact disabled={!draft.trim()} onPress={submit} />}
           </Row>
         )}
@@ -1192,6 +1200,42 @@ function TelegramChat() {
             if (target !== undefined) void react(target, emoji, mine);
           }}
         />
+        <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
+          <View style={{ gap: space.md }}>
+            <OptionList title={t('This chat')}>
+              <NetworkChatNotify notify={telegramChatNotify(chatId, where)} hidden={where !== 'space' || keptHere} calls={isPrivate} onChange={(next) => telegramSetChatNotify(chatId, next, where)} />
+              <Button
+                title={t('Chat info')}
+                kind="secondary"
+                compact
+                onPress={() => {
+                  setMore(false);
+                  router.push({ pathname: '/telegram-info', params: { id: String(chatId), ...whereParams(where, keptHere) } });
+                }}
+              />
+            </OptionList>
+            <OptionList title={t('Find')}>
+              <Button
+                title={t('Search')}
+                kind="secondary"
+                compact
+                onPress={() => {
+                  setMore(false);
+                  setSearching(true);
+                }}
+              />
+              <Button
+                title={t('Go to a day')}
+                kind="secondary"
+                compact
+                onPress={() => {
+                  setMore(false);
+                  setDayPicking(true);
+                }}
+              />
+            </OptionList>
+          </View>
+        </Sheet>
         <PollSheet visible={pollForm} onClose={() => setPollForm(false)} onSend={sendPoll} />
         <DayCalendar visible={dayPicking} days={dayPicking ? daysToToday() : EMPTY_DAYS} start={messages[messages.length - 1]?.date ? messages[messages.length - 1].date * 1000 : Date.now()} onPick={(day) => void goToDay(day)} onClose={() => setDayPicking(false)} />
         <Sheet visible={choosingLater} onClose={() => setChoosingLater(false)} title={t('Send later')}>

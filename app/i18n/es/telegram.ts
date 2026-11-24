@@ -109,6 +109,7 @@ export const telegramText: Record<string, string> = {
   "Forwarded.": "Reenviado.",
   "That message is too far back to show here.": "Ese mensaje es demasiado antiguo para mostrarlo aquí.",
   "Opens the chat info": "Abre la información del chat",
+  "Chat info": "Información del chat",
   "Editing": "Editando",
   "Attach": "Adjuntar",
   "1 day": "1 día",

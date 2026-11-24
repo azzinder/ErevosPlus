@@ -109,6 +109,7 @@ export const telegramText: Record<string, string> = {
   "Forwarded.": "Proslijeđeno.",
   "That message is too far back to show here.": "Ta poruka je previše stara da bi se ovdje prikazala.",
   "Opens the chat info": "Otvara podatke o razgovoru",
+  "Chat info": "Podaci o razgovoru",
   "Editing": "Uređivanje",
   "Attach": "Priloži",
   "1 day": "1 dan",

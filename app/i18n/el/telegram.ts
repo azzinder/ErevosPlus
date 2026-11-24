@@ -109,6 +109,7 @@ export const telegramText: Record<string, string> = {
   "Forwarded.": "Προωθήθηκε.",
   "That message is too far back to show here.": "Αυτό το μήνυμα είναι πολύ παλιό για να φανεί εδώ.",
   "Opens the chat info": "Ανοίγει τα στοιχεία της συνομιλίας",
+  "Chat info": "Στοιχεία συνομιλίας",
   "Editing": "Επεξεργασία",
   "Attach": "Επισύναψη",
   "1 day": "1 ημέρα",

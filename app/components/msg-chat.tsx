@@ -20,9 +20,9 @@ import { SessionCallButtons, SessionGroupButton } from './session-more';
 import { MicButton, RecordingLine, useVoiceCapture } from './matrix-voice';
 import { usePhotoQuality } from './network-carry';
 import { XmppStickerSheet } from './xmpp-stickers';
-import { Button, Input, Row, Sheet, Text } from './ui';
+import { Button, Input, OptionList, Row, Sheet, Text } from './ui';
 import { IconButton } from './composer';
-import { MoreIcon } from './icons';
+import { MoreIcon, OptionsIcon } from './icons';
 import { PhoneSign, ShortcutTile, VideoSign } from './shortcut-tile';
 import { ask, confirm } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
@@ -303,9 +303,9 @@ function MsgChat({ service }: { service: MsgService }) {
                 </ShortcutTile>
               </>
             ) : null}
-            {/* The chat's notifications and «Through Tor». */}
+            {/* The chat's options (notifications, «Through Tor»), also beside the field (#54). */}
             {key ? (
-              <IconButton label={t('More')} onPress={() => setMore(true)}>
+              <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
                 <MoreIcon color={colors.text} />
               </IconButton>
             ) : null}
@@ -356,6 +356,12 @@ function MsgChat({ service }: { service: MsgService }) {
               <Input style={{ flex: 1 }} value={draft} onChangeText={setDraft} placeholder={t('Message')} multiline />
             </>
           )}
+          {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
+          {key ? (
+            <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+              <OptionsIcon color={colors.text} size={22} />
+            </IconButton>
+          ) : null}
           {draft.trim() && !voice.recording ? (
             <Button title={t('Send')} compact disabled={busy} loading={busy} onPress={() => void send()} />
           ) : (
@@ -363,13 +369,13 @@ function MsgChat({ service }: { service: MsgService }) {
           )}
         </Row>
       </KeyboardAwareScrollView>
-      <Sheet visible={more} onClose={() => setMore(false)} title={t('More')}>
+      <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
           {/* Its own notifications, muted or with a sound of its own (lock/msg-own-data.ts). */}
           {key ? (
-            <Row wrap>
+            <OptionList title={t('This chat')}>
               <NetworkChatNotify notify={msgNotifyOf(service, key)} calls={service !== 'messenger' && !chat?.group} onChange={(next) => msgSetNotify(service, key, next)} />
-            </Row>
+            </OptionList>
           ) : null}
           {/* «Through Tor»: each service has one connection for all its chats, so it takes the whole account (lib/account-tor.ts). */}
           {key ? <ChatTorSwitch network={SERVICE_NAMES[service]} on={msgChatTor(service, key)} onChange={(on) => void (on ? chatTorOn() : msgSetChatTor(service, key, false)).catch(fail)} /> : null}
