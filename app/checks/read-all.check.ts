@@ -240,3 +240,23 @@ test("each kind is read its own way, a contact's number's SMS with it; one that 
   assert.deepEqual(await readAll([row('ann', 1), row('nostr:ab12', 1, { network: 'nostr' })], { ways: none.ways, now }), { read: 1, failed: 1 });
   assert.deepEqual(none.read, ['nostr:ab12']);
 });
+
+test("Messenger's chats read with the others leave a Read all with the engine, for the older chats Meta sends later; Signal's do not", async () => {
+  fresh();
+  const all: string[] = [];
+  const { ways, read } = waysOf(null);
+  const msgWays: ReadWays = {
+    ...ways,
+    msg: async (service, key) => {
+      read.push(`${service}:${key}`);
+    },
+    messengerAll: async () => {
+      all.push('messenger');
+    },
+  };
+  await readAll([row('signal:1', 1, { network: 'signal' })], { ways: msgWays });
+  assert.deepEqual(all, []);
+  assert.deepEqual(await readAll([row('messenger:5', 1, { network: 'messenger' })], { ways: msgWays }), { read: 1, failed: 0 });
+  assert.deepEqual(all, ['messenger']);
+  assert.deepEqual(read, ['signal:1', 'messenger:5']);
+});

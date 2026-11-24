@@ -11,7 +11,7 @@ import { showsIn, type InboxRow, type InboxShow, type InboxSms } from './inbox';
 import { lookNow } from './look-now';
 import { matrixRead } from './matrix-store';
 import type { MsgService } from './messenger';
-import { msgReadChat } from './messenger-store';
+import { msgReadAllMessenger, msgReadChat } from './messenger-store';
 import { readElsewhere } from './notice-count';
 import { nostrDmRead } from './nostr-dm-store';
 import { sameNumber } from './sms-invite';
@@ -100,6 +100,8 @@ export type ReadWays = {
   telegram?(chat: number): Promise<void>;
   /** A Messenger, Signal or Session chat, in Erevos+. */
   msg?(service: MsgService, key: string): Promise<void>;
+  /** Every Messenger chat, also those Meta sends later, in Erevos+. */
+  messengerAll?(): Promise<void>;
 };
 
 const APP_WAYS: ReadWays = {
@@ -112,6 +114,7 @@ const APP_WAYS: ReadWays = {
   nostr: nostrDmRead,
   telegram: telegramReadChat,
   msg: msgReadChat,
+  messengerAll: msgReadAllMessenger,
 };
 
 export type ReadAllOptions = {
@@ -218,6 +221,8 @@ export async function readAll(rows: readonly ReadRow[], { sms = [], onOwnRead, w
   );
 
   await Promise.all([own, groups, ...networks]);
+  // Messenger's older chats come a few at a time, each with Meta's old read mark: read with these.
+  if (of('msg').some((k) => k.service === 'messenger')) await ways.messengerAll?.().catch(() => undefined);
   iconNumberChanged();
   return { read, failed: kinds.length - read };
 }

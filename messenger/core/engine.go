@@ -353,6 +353,11 @@ func (e *Engine) call(op string, args []byte) (any, error) {
 	return e.callMore(op, args)
 }
 
+// allRead is the key in readMs (no chat has it) of when every chat was marked
+// read here at once: a chat Meta sends only later (an older one, fetched as the
+// list goes further back) counts as read up to then too.
+const allRead int64 = 0
+
 // readMark is up to when the chat `key` was read here, 0 if never. Caller holds mu.
 func (e *Engine) readMark(key int64) int64 {
 	if e.readMs == nil {
@@ -361,7 +366,15 @@ func (e *Engine) readMark(key int64) int64 {
 			_ = json.Unmarshal(b, &e.readMs)
 		}
 	}
-	return e.readMs[key]
+	return max(e.readMs[key], e.readMs[allRead])
+}
+
+// inboxFolder is whether a chat in Meta's folder `folder` can be unread here:
+// only the inbox's, as Meta's own page counts them. Message requests, spam,
+// archived chats, and the old open half of a chat moved to encryption (its
+// read mark stays where it was when it moved) never are.
+func inboxFolder(folder string) bool {
+	return folder == "" || folder == "inbox"
 }
 
 // readHere marks the chats `keys` read up to `ms` here and keeps it on disk.
@@ -862,7 +875,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 			cur.E2EEKey = enc
 		}
 		if w := th.LastReadWatermarkTimestampMs; w > 0 {
-			cur.Unread = e.unreadAfter(key, w, last)
+			cur.Unread = inboxFolder(th.FolderName) && e.unreadAfter(key, w, last)
 		}
 		if e.lastIsMine(th.SnippetSenderContactId) && last >= cur.LastMs {
 			// The last word in it is ours (from here or another device): read.
@@ -895,7 +908,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 			Group:     !th.ThreadType.IsOneToOne(),
 		}
 		if w := th.LastReadWatermarkTimestampMs; w > 0 {
-			cur.Unread = e.unreadAfter(th.ThreadKey, w, th.LastActivityTimestampMs)
+			cur.Unread = inboxFolder(th.FolderName) && e.unreadAfter(th.ThreadKey, w, th.LastActivityTimestampMs)
 		}
 		if e.lastIsMine(th.SnippetSenderContactId) {
 			e.readHere(th.LastActivityTimestampMs, th.ThreadKey)
@@ -916,7 +929,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 						o.Snippet = th.Snippet
 					}
 					if w := th.LastReadWatermarkTimestampMs; w > 0 {
-						o.Unread = e.unreadAfter(open, w, th.LastActivityTimestampMs)
+						o.Unread = inboxFolder(th.FolderName) && e.unreadAfter(open, w, th.LastActivityTimestampMs)
 					}
 					if e.lastIsMine(th.SnippetSenderContactId) {
 						e.readHere(th.LastActivityTimestampMs, open, th.ThreadKey)

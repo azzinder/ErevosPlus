@@ -840,9 +840,10 @@ function Home() {
       pages={pages}
       current={show}
       onPick={(key) => {
-        setShow(key as InboxShow);
-        // Messenger in its case: its card opens the case, as Settings does; its chats not read stay here.
+        // Messenger in its case: its card opens the case, as Settings does, and home stays as it was
+        // (its chats not read show among all, until read).
         if (key === 'messenger' && msgCaseOnly('messenger') && messengerIn) void openCase('');
+        else setShow(key as InboxShow);
       }}
       onAdd={() => router.push('/modules')}
       onReadAll={readAll}

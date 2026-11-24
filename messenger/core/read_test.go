@@ -103,3 +103,31 @@ func TestLastIsMine(t *testing.T) {
 		t.Fatal("lastIsMine")
 	}
 }
+
+// Read all keeps a floor: a chat Meta sends only later, older than it, comes
+// read, also after a restart; something newer is still unread. Only the
+// inbox's chats can be unread at all.
+func TestReadAllFloor(t *testing.T) {
+	dir := t.TempDir()
+	e := NewEngine(dir, nil)
+	e.mu.Lock()
+	e.readHere(1000, allRead)
+	if e.unreadAfter(42, 100, 900) {
+		t.Fatal("older than Read all: read")
+	}
+	if !e.unreadAfter(42, 100, 1100) {
+		t.Fatal("newer than Read all: unread")
+	}
+	e.mu.Unlock()
+	again := NewEngine(dir, nil)
+	again.mu.Lock()
+	defer again.mu.Unlock()
+	if again.unreadAfter(43, 100, 900) {
+		t.Fatal("Read all forgotten after a restart")
+	}
+	for folder, want := range map[string]bool{"": true, "inbox": true, "e2ee_cutover": false, "archived": false, "pending": false, "other": false, "legacy": false} {
+		if inboxFolder(folder) != want {
+			t.Fatalf("folder %q: %v", folder, !want)
+		}
+	}
+}

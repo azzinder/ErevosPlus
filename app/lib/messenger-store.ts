@@ -503,6 +503,14 @@ export async function msgReadChat(service: MsgService, key: string): Promise<voi
   if (had) await msgCall(service, 'markRead', { thread: key });
 }
 
+/**
+ * Read all, of every Messenger chat (lib/read-all.ts): the engine keeps it, so a chat Meta sends only
+ * later, an older one fetched as the list goes further back, comes read too.
+ */
+export async function msgReadAllMessenger(): Promise<void> {
+  await msgCall('messenger', 'markAllRead');
+}
+
 /** Sends text to a chat, as an answer to `replyTo` when given. */
 export async function msgSend(service: MsgService, key: string, text: string, replyTo?: string): Promise<void> {
   await msgCall(service, 'sendText', { thread: key, text, ...(replyTo ? { replyTo } : {}) });

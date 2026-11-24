@@ -1258,6 +1258,8 @@ func (e *Engine) markRead(thread int64) error {
 
 func (e *Engine) markAllRead() (int, error) {
 	e.mu.Lock()
+	// Every chat, also those Meta sends later, read up to now.
+	e.readHere(time.Now().UnixMilli(), allRead)
 	var keys []int64
 	for k, th := range e.threads {
 		if th.Unread || len(e.unreadWA[k]) > 0 {
