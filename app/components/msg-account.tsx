@@ -18,6 +18,8 @@ import { AccountTorChoice } from './account-tor';
 import { space } from '../theme/colors';
 import { useColors } from '../theme/context';
 import { editionName } from '../lib/edition';
+import { dialCards } from '../lib/contact-book';
+import { contactMatches, typedNumber, type ContactNumber } from '../lib/signal-new-chat';
 
 // A Messenger, Signal or Session account in Erevos+ (app/messenger.tsx, app/signal.tsx,
 // app/session.tsx): signing in, its connection, its chats, and signing out. The accounts are the
@@ -221,6 +223,34 @@ function NewChat({ service, onOpen }: { service: MsgService; onOpen: (key: strin
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [opening, setOpening] = useState('');
+  // Signal: the phone's contacts, matched here as one types (lib/signal-new-chat.ts); only the one
+  // tapped is asked of Signal.
+  const [book, setBook] = useState<Awaited<ReturnType<typeof dialCards>>>([]);
+  useEffect(() => {
+    if (service !== 'signal') return;
+    void dialCards(false).then(setBook, () => undefined);
+  }, [service]);
+  const number = service === 'signal' ? typedNumber(query) : null;
+  const matches = service === 'signal' ? contactMatches(book, query) : [];
+
+  // A number (typed, or a contact's): asked of Signal, and its chat opened when it has Signal.
+  function byNumber(row: ContactNumber) {
+    const id = `${row.name}|${row.number}`;
+    setOpening(id);
+    setNote('');
+    void (async () => {
+      const people = await msgSearch(service, row.number);
+      const person = people[0];
+      if (!person) {
+        setNote(t('{number} is not on Signal, or does not let itself be found by its number.', { number: row.number }));
+        return;
+      }
+      onOpen(await startChat(service, person.id, row.name || person.name));
+    })()
+      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)))
+      .finally(() => setOpening(''));
+  }
+
   async function search() {
     setBusy(true);
     setNote('');
@@ -252,6 +282,29 @@ function NewChat({ service, onOpen }: { service: MsgService; onOpen: (key: strin
         />
         <Button title={service === 'session' ? t('Open') : t('Search')} compact disabled={!query.trim() || busy} loading={busy} onPress={() => void search()} />
       </Row>
+      {number ? (
+        <Button
+          title={t('New number: {number}', { number })}
+          loading={opening === `|${number}`}
+          disabled={!!opening}
+          onPress={() => byNumber({ name: '', number })}
+        />
+      ) : null}
+      {matches.length ? (
+        <Text variant="caption" tone="muted">
+          {t('From the phone’s contacts: Signal is asked only about the one you tap.')}
+        </Text>
+      ) : null}
+      {matches.map((row) => (
+        <Button
+          key={`${row.name}|${row.number}`}
+          title={`${row.name} · ${row.number}`}
+          kind="secondary"
+          loading={opening === `${row.name}|${row.number}`}
+          disabled={!!opening}
+          onPress={() => byNumber(row)}
+        />
+      ))}
       {found.map((p) => (
         <Button
           key={p.id}
