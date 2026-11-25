@@ -17,6 +17,7 @@ pub mod calls;
 pub mod engine;
 pub mod events;
 pub mod groups;
+pub mod history;
 pub mod keys;
 
 #[cfg(target_os = "android")]

@@ -39,6 +39,7 @@ use tokio::sync::{mpsc, oneshot};
 use uuid::Uuid;
 
 use crate::events::{self, Pending};
+use crate::history::{self, History, KeptChat};
 use crate::keys;
 use crate::Listener;
 
@@ -164,6 +165,8 @@ struct Inner {
     /// Whom our replies carry our PNI signature to: those who wrote to our phone number and have
     /// not yet written to this account itself. Kept in pni-signature.json.
     pni_signed: RefCell<Option<HashSet<Uuid>>>,
+    /// The history a backup brought back (history.rs), read once from `kept/`.
+    kept: RefCell<Option<History>>,
 }
 
 #[derive(Deserialize, Default)]
@@ -206,6 +209,8 @@ struct Args {
     #[serde(rename = "given")]
     given: String,
     family: String,
+    /// historyImport: the history (history.rs) as JSON.
+    history: String,
 }
 
 fn now_ms() -> u64 {
@@ -236,6 +241,7 @@ impl Inner {
             identities: RefCell::new(None),
             read_receipts: RefCell::new(None),
             pni_signed: RefCell::new(None),
+            kept: RefCell::new(None),
         }
     }
 
@@ -315,6 +321,9 @@ impl Inner {
             "callRelays" => self.call_relays().await,
             "callPeer" => self.call_peer(a.person),
             "setProxy" => self.set_proxy(&a.url).await,
+            "historyExport" => self.history_export().await,
+            "historyDir" => self.history_dir(),
+            "historyImport" => self.history_import(&a.history).await,
             _ => Err(format!("unknown op {op:?}")),
         }
     }
@@ -438,6 +447,7 @@ impl Inner {
         self.people.borrow_mut().clear();
         self.names.borrow_mut().clear();
         *self.identities.borrow_mut() = None;
+        *self.kept.borrow_mut() = None;
         let store = self.store.borrow_mut().take();
         if let Some(mut store) = store {
             // If this fails, the files below still go, and with them the registration.
@@ -450,7 +460,7 @@ impl Inner {
             for e in entries.flatten() {
                 let p = e.path();
                 let name = e.file_name().to_string_lossy().to_string();
-                if name.starts_with("signal.db") || name == "identities.json" || name == "media" || name == "db.key" {
+                if name.starts_with("signal.db") || name == "identities.json" || name == "media" || name == "db.key" || name == "kept" {
                     let _ = if p.is_dir() { std::fs::remove_dir_all(&p) } else { std::fs::remove_file(&p) };
                 }
             }
@@ -509,6 +519,7 @@ impl Inner {
                 self.touch_chat(m, Thread::Group(mk)).await;
             }
         }
+        self.show_kept_chats(Some(m)).await;
     }
 
     fn key_of(thread: &Thread) -> i64 {
@@ -969,14 +980,21 @@ impl Inner {
 
     /// The chat's history, sent as events (newest last).
     async fn messages(self: &Rc<Self>, key: i64) -> Result<Value, String> {
-        let m = self.manager()?;
-        let thread = self.thread_of(key)?;
+        // What a backup brought back first (history.rs), then the chat's own.
+        let kept = self.kept_of(key);
+        let shown_kept = kept.len().min(300);
+        for msg in kept.into_iter().rev().take(300).rev() {
+            self.emit(json!({"type": "message", "message": msg}));
+        }
+        let (Ok(m), Ok(thread)) = (self.manager(), self.thread_of(key)) else {
+            return if shown_kept > 0 { Ok(json!(shown_kept)) } else { Err("chat not found".into()) };
+        };
         let msgs: Vec<Content> = m.store().messages(&thread, ..).await.map_err(err)?.flatten().collect();
         let skip = msgs.len().saturating_sub(300);
         for c in msgs.iter().skip(skip) {
             self.take(&m, c, false).await;
         }
-        Ok(json!(msgs.len() - skip))
+        Ok(json!(shown_kept + msgs.len() - skip))
     }
 
     fn thread_of(&self, key: i64) -> Result<Thread, String> {
@@ -986,7 +1004,152 @@ impl Inner {
         if let Some(u) = self.people.borrow().get(&key) {
             return Ok(Thread::Contact(ServiceId::Aci((*u).into())));
         }
+        let person = self.with_kept(|h| h.chats.iter().find(|c| c.key == key).map(|c| c.person.clone()));
+        if let Some(u) = person.and_then(|p| Uuid::parse_str(&p).ok()) {
+            return Ok(Thread::Contact(ServiceId::Aci(u.into())));
+        }
         Err("chat not found".into())
+    }
+
+    // ---- the history a backup brought back (history.rs) ----
+
+    fn with_kept<T>(&self, job: impl FnOnce(&History) -> T) -> T {
+        let mut kept = self.kept.borrow_mut();
+        job(kept.get_or_insert_with(|| history::load(&self.dir)))
+    }
+
+    /// A chat's kept messages, as the screens take them, oldest first.
+    fn kept_of(&self, key: i64) -> Vec<Value> {
+        let media = history::kept_media(&self.dir);
+        self.with_kept(|h| h.messages.iter().filter(|m| m["thread"].as_i64() == Some(key)).cloned().collect::<Vec<_>>())
+            .into_iter()
+            .map(|m| history::to_shown(m, &media))
+            .collect()
+    }
+
+    /// The kept chats in the list: one-to-one ones as the chats they are again (sending to them
+    /// works), the others to read only; each with its last kept message when it has none newer.
+    async fn show_kept_chats(self: &Rc<Self>, m: Option<&Ready>) {
+        let chats = self.with_kept(|h| h.chats.clone());
+        for c in chats {
+            let person = Uuid::parse_str(&c.person).ok().filter(|u| !u.is_nil());
+            if let Some(u) = person {
+                self.people.borrow_mut().insert(c.key, u);
+                if !c.name.is_empty() {
+                    self.names.borrow_mut().entry(u).or_insert_with(|| c.name.clone());
+                }
+            }
+            let last = self.kept_of(c.key).last().map(|m| {
+                let text = m["text"].as_str().unwrap_or_default().to_string();
+                (m["ms"].as_u64().unwrap_or(0), if text.is_empty() { "📎".to_string() } else { text })
+            });
+            let known = self.chats.borrow().contains_key(&c.key);
+            if !known {
+                if let (Some(m), Some(u)) = (m, person) {
+                    if keys::person(&u) == c.key {
+                        self.touch_chat(m, Thread::Contact(ServiceId::Aci(u.into()))).await;
+                    }
+                }
+            }
+            if let Some((ms, snippet)) = last {
+                let mut shown = false;
+                if let Some(chat) = self.chats.borrow_mut().get_mut(&c.key) {
+                    if chat.last_ms < ms {
+                        chat.last_ms = ms;
+                        chat.snippet = snippet.clone();
+                    }
+                    if chat.name.is_empty() {
+                        chat.name = c.name.clone();
+                    }
+                    shown = true;
+                }
+                if shown {
+                    self.emit_chat(c.key);
+                } else {
+                    self.emit(json!({"type": "thread", "thread": {
+                        "key": c.key, "name": if c.name.is_empty() { "Signal".to_string() } else { c.name.clone() },
+                        "snippet": snippet, "lastMs": ms, "encrypted": true, "group": c.group,
+                        "unread": false, "pinned": "", "network": "signal",
+                    }}));
+                }
+            }
+        }
+    }
+
+    /// What a backup takes of Signal: the history (history.rs) as JSON, and the files it names
+    /// (name and where they are now). Never a key, a session or anything of the account.
+    async fn history_export(self: &Rc<Self>) -> Result<Value, String> {
+        let mut h = self.with_kept(|h| h.clone());
+        let media = self.media_dir();
+        if let Ok(m) = self.manager() {
+            let me = *self.self_uuid.borrow();
+            let chats: Vec<(i64, Chat)> = self.chats.borrow().iter().map(|(k, c)| (*k, c.clone())).collect();
+            let mut now = History { v: history::VERSION, ..Default::default() };
+            let mut files = HashSet::new();
+            for (key, c) in chats {
+                let Ok(msgs) = m.store().messages(&c.thread, ..).await else { continue };
+                let mut evs = Vec::new();
+                for content in msgs.flatten() {
+                    let reading = {
+                        let names = self.names.borrow();
+                        let name_of = |u: &Uuid| names.get(u).cloned().unwrap_or_default();
+                        let local = |id: &str, i: usize, p: &AttachmentPointer| {
+                            let path = self.media_path(id, i, p);
+                            path.exists().then(|| format!("file://{}", path.display()))
+                        };
+                        events::read(&content, key, &me, &name_of, &local)
+                    };
+                    evs.extend(reading.events);
+                }
+                let messages = history::fold(evs);
+                if messages.is_empty() {
+                    continue;
+                }
+                let person = match &c.thread {
+                    Thread::Contact(sid) => sid.raw_uuid().to_string(),
+                    Thread::Group(_) => String::new(),
+                };
+                now.chats.push(KeptChat { key, name: c.name.clone(), group: c.group, person });
+                now.messages.extend(messages.into_iter().map(|msg| history::to_kept(msg, &media, &mut files)));
+            }
+            h = history::merge(h, now);
+        }
+        // No history at all: nothing for a backup to hold, not an empty one.
+        if h.messages.is_empty() {
+            return Ok(Value::Null);
+        }
+        let kept_media = history::kept_media(&self.dir);
+        let mut names: Vec<String> = history::files_of(&h).into_iter().collect();
+        names.sort();
+        let files: Vec<Value> = names
+            .into_iter()
+            .filter_map(|n| {
+                let here = [media.join(&n), kept_media.join(&n)].into_iter().find(|p| p.is_file())?;
+                Some(json!({"name": n, "path": here.display().to_string()}))
+            })
+            .collect();
+        Ok(json!({"history": serde_json::to_string(&h).map_err(err)?, "files": files}))
+    }
+
+    /// Where a restore puts the history's files before historyImport.
+    fn history_dir(&self) -> Result<Value, String> {
+        let dir = history::kept_media(&self.dir);
+        std::fs::create_dir_all(&dir).map_err(err)?;
+        Ok(json!(dir.display().to_string()))
+    }
+
+    /// Keeps the history a backup brought, with what was kept before, and lists its chats.
+    async fn history_import(self: &Rc<Self>, text: &str) -> Result<Value, String> {
+        let incoming: History = serde_json::from_str(text).map_err(err)?;
+        let incoming = history::checked(incoming);
+        let merged = history::merge(history::load(&self.dir), incoming);
+        history::save(&self.dir, &merged)?;
+        history::drop_unnamed(&self.dir, &merged);
+        let n = merged.messages.len();
+        *self.kept.borrow_mut() = Some(merged);
+        let m = self.manager().ok();
+        self.show_kept_chats(m.as_ref()).await;
+        Ok(json!(n))
     }
 
     // ---- sending ----
