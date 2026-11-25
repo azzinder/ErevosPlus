@@ -24,8 +24,8 @@ import { useTelegramVoice } from '../components/telegram-voice';
 import { hiddenOnScreen, useNetworkChatShown } from '../components/network-chat-notify';
 import { MicButton, RecordingLine } from '../components/matrix-voice';
 import { useNetworkThread } from '../components/network-thread';
-import { IconButton } from '../components/composer';
-import { OptionsIcon, PhoneIcon, SearchIcon, VideoIcon } from '../components/icons';
+import { ComposerPanel, IconButton } from '../components/composer';
+import { CloseIcon, OptionsIcon, PhoneIcon, PlusIcon, SearchIcon, VideoIcon } from '../components/icons';
 import { NetworkChatNotify } from '../components/network-chat-notify';
 import { SelectBar } from '../components/select-bar';
 import { Button, Card, Chip, Input, OptionList, Page, Row, Sheet, Text, TextButton } from '../components/ui';
@@ -539,6 +539,18 @@ function TelegramChat() {
 
   // A photo, a picture from the camera or a file, sent with the draft as its words if there are any.
   // The ErevosGram encryption covers only text, so with it on the owner is asked first.
+  // "+" opens and closes the panel under the field; open, the end of the chat comes into view.
+  function openAttach(open: boolean) {
+    setAttach(open);
+    if (open) setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 50);
+  }
+
+  // A tile that opens a sheet of its own closes the panel first.
+  function attachThen(open: (on: boolean) => void) {
+    setAttach(false);
+    open(true);
+  }
+
   async function sendPicked(how: 'photos' | 'camera' | 'file', hidden = false) {
     setAttach(false);
     setNote('');
@@ -977,7 +989,7 @@ function TelegramChat() {
         ref={scroll}
         style={{ flex: 1, backgroundColor: colors.ground }}
         // As Page (components/ui.tsx) has it.
-        contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingTop: space.xs, paddingBottom: insets.bottom + space.xl, gap: space.md }}
+        contentContainerStyle={{ flexGrow: 1, width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingTop: space.xs, paddingBottom: insets.bottom + space.xl, gap: space.md }}
         keyboardShouldPersistTaps="handled"
         bottomOffset={space.xl}
         {...scrollProps}
@@ -1059,6 +1071,8 @@ function TelegramChat() {
           </Text>
         ) : null}
 
+        {/* A short chat keeps the field at the bottom of the screen, not under its last message (#61). */}
+        <View style={{ flexGrow: 1, marginTop: -space.md }} />
         {answered ? <Quote name={writerOf(answered)} line={lineOf(answered)} onClose={() => setReplyId(null)} /> : null}
         {editId !== null ? (
           <Row>
@@ -1077,75 +1091,6 @@ function TelegramChat() {
         {waiting.length > 0 && selecting === null ? (
           <TextButton title={plural(waiting.length, '{n} message goes later', '{n} messages go later')} onPress={() => setLaterOpen(true)} />
         ) : null}
-        {attach && selecting === null ? (
-          <Row wrap>
-            {!seal?.sealed ? (
-              <Button
-                title={t('Send later')}
-                kind="secondary"
-                compact
-                disabled={!draft.trim() || editId !== null}
-                onPress={() => {
-                  setAttach(false);
-                  setChoosingLater(true);
-                }}
-              />
-            ) : null}
-            <Button title={t('Photo')} kind="secondary" compact onPress={() => void sendPicked('photos')} />
-            <Button title={t('Camera')} kind="secondary" compact onPress={() => void sendPicked('camera')} />
-            <Button title={t('Hidden photo')} kind="secondary" compact onPress={() => void sendPicked('photos', true)} />
-            <Button title={t('File')} kind="secondary" compact onPress={() => void sendPicked('file')} />
-            <Button
-              title={t('Sticker')}
-              kind="secondary"
-              compact
-              onPress={() => {
-                setAttach(false);
-                setStickers(true);
-              }}
-            />
-            <Button
-              title={t('Erevos sticker')}
-              kind="secondary"
-              compact
-              onPress={() => {
-                setAttach(false);
-                setErevosStickers(true);
-              }}
-            />
-            {CAN_PLACE ? (
-              <Button
-                title={t('Location')}
-                kind="secondary"
-                compact
-                onPress={() => {
-                  setAttach(false);
-                  setPlacing(true);
-                }}
-              />
-            ) : null}
-            <Button
-              title={t('Contact card')}
-              kind="secondary"
-              compact
-              onPress={() => {
-                setAttach(false);
-                setCarding(true);
-              }}
-            />
-            {chat.type !== 'private' && chat.type !== 'secret' ? (
-              <Button
-                title={t('Poll')}
-                kind="secondary"
-                compact
-                onPress={() => {
-                  setAttach(false);
-                  setPollForm(true);
-                }}
-              />
-            ) : null}
-          </Row>
-        ) : null}
         {selecting !== null ? (
           <View {...endProps}>
             <SelectBar
@@ -1159,19 +1104,24 @@ function TelegramChat() {
           </View>
         ) : (
           <Row {...endProps}>
+            {editId === null && !voice.recording ? (
+              <IconButton label={attach ? t('Close') : t('Attach and more')} onPress={() => openAttach(!attach)} state={{ expanded: attach }}>
+                {attach ? <CloseIcon color={colors.text} size={20} /> : <PlusIcon color={colors.text} size={20} />}
+              </IconButton>
+            ) : null}
             {voice.recording ? (
               <RecordingLine />
             ) : (
               <Input
                 style={{ flex: 1 }}
                 value={draft}
+                onFocus={() => setAttach(false)}
                 onChangeText={setDraft}
                 multiline
                 placeholder={seal?.sealed ? t('Encrypted message') : t('Message')}
                 accessibilityLabel={t('Message')}
               />
             )}
-            {editId === null && !voice.recording ? <TextButton title={t('Attach')} onPress={() => setAttach((on) => !on)} /> : null}
             {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
             <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
               <OptionsIcon color={colors.text} size={22} />
@@ -1179,6 +1129,40 @@ function TelegramChat() {
             {!draft.trim() && editId === null ? <MicButton voice={voice} /> : <Button title={editId !== null ? t('Save') : t('Send')} compact disabled={!draft.trim()} onPress={submit} />}
           </Row>
         )}
+        {/* What "+" opens under the field, as in Erevos's own chats (#59): tiles of what to send, then how it goes. */}
+        {attach && selecting === null && editId === null ? (
+          <ComposerPanel
+            encrypted={chat.type === 'secret'}
+            tiles={[
+              { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPicked('photos') },
+              { key: 'camera', title: t('Camera'), icon: 'camera', onPress: () => void sendPicked('camera') },
+              { key: 'hidden', title: t('Hidden photo'), icon: 'photo', onPress: () => void sendPicked('photos', true) },
+              { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendPicked('file') },
+              { key: 'sticker', title: t('Sticker'), icon: 'sticker', onPress: () => attachThen(setStickers) },
+              { key: 'erevos-sticker', title: t('Erevos sticker'), icon: 'sticker', onPress: () => attachThen(setErevosStickers) },
+              ...(CAN_PLACE ? [{ key: 'place', title: t('Location'), icon: 'place' as const, onPress: () => attachThen(setPlacing) }] : []),
+              { key: 'contact', title: t('Contact card'), icon: 'contact', onPress: () => attachThen(setCarding) },
+              ...(chat.type !== 'private' && chat.type !== 'secret' ? [{ key: 'poll', title: t('Poll'), icon: 'poll' as const, onPress: () => attachThen(setPollForm) }] : []),
+            ]}
+            ways={
+              // As before, only once there is a message to send later.
+              !seal?.sealed && draft.trim()
+                ? [
+                    {
+                      key: 'later',
+                      title: t('Send later'),
+                      description: t('Goes at the time you choose'),
+                      icon: 'later',
+                      onPress: () => {
+                        setAttach(false);
+                        setChoosingLater(true);
+                      },
+                    },
+                  ]
+                : []
+            }
+          />
+        ) : null}
         {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
         <MessageMenu
           visible={!!menuMessage && menuable(menuMessage) && shown && menuCan?.id === menuMessage.id}

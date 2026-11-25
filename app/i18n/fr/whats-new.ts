@@ -4,6 +4,12 @@
 
 // The French of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/fr/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Ce qu’une sauvegarde laisse de côté** : dans Erevos+, **Sauvegardes** et le message après une sauvegarde disent que Telegram, Signal, Messenger et Session n’y sont pas, et ce qu’il faut à chacun après une restauration. Voir [Sauvegardes](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Un + pour chaque conversation** : dans les conversations Telegram, Signal, Messenger et Session d’Erevos+, **+** à côté de là où vous écrivez ouvre une grille d’icônes, comme dans les conversations d’Erevos, à la place des boutons gris. Voir [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Là où vous écrivez reste en bas** : dans une conversation Telegram, Signal, Messenger ou Session avec peu de messages, le champ ne se place plus sous le dernier message au milieu de l’écran.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Messenger dans son étui, un seul chemin** : dans Erevos+, avec Messenger **Dans son étui**, sa carte dans **Services** ouvre l’étui comme les Réglages, et le fil de Facebook est dans la barre de l’étui, sans carte ni bouton Facebook à côté. Si l’étui ne peut pas s’ouvrir, Erevos dit pourquoi. Voir [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

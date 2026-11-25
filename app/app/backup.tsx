@@ -94,6 +94,7 @@ import {
 import { takeHandedServer } from "../lib/backup-pieces";
 import { pickFile, TooLargeError } from "../lib/pick-file";
 import { SHELL } from "../lib/shell";
+import { EDITION } from "../lib/edition";
 import { holdReceiver } from "../lib/receiver";
 import {
   backupKey,
@@ -153,6 +154,10 @@ type Asking =
 
 // A backup file larger than this is not one Erevos made: every space's chats are far smaller. One
 // from a server comes up to 100 MB only (CLOUD_RESTORE_MOST), as any download (lib/net-http.ts).
+// What Erevos+ says of the networks a backup leaves out (#67): each keeps its own, and how they come back.
+const NETWORKS_LEFT = mark(
+  "Telegram, Signal, Messenger and Session are not in a backup. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words. Their messages come back only as far as each network keeps them.",
+);
 const MAX_BYTES = 200 * 1024 * 1024;
 
 const CHOICES = [
@@ -748,6 +753,11 @@ export default function Backups() {
   }
 
   // What a backup holds of the phone's SMS, said after it is made.
+  // Erevos+: the other networks' accounts and chats stay with them, never in a backup (#67).
+  function networksText(): string {
+    return EDITION === "plus" ? ` ${t(NETWORKS_LEFT)}` : "";
+  }
+
   function smsText(sms: Uint8Array | null): string {
     const counts = sms ? smsCounts(sms) : null;
     if (!counts) return "";
@@ -810,7 +820,8 @@ export default function Backups() {
           ) +
             partsText(parts) +
             smsText(phoneSms) +
-            callsText(phoneCalls),
+            callsText(phoneCalls) +
+            networksText(),
           false,
           made,
         );
@@ -1037,6 +1048,11 @@ export default function Backups() {
           { device: t(THIS_DEVICE) },
         )}
       </Text>
+      {EDITION === "plus" ? (
+        <Text variant="caption" tone="muted" style={hint}>
+          {t(NETWORKS_LEFT)}
+        </Text>
+      ) : null}
 
       <SectionTitle title={t("Make a backup")} />
       <Card>

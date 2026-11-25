@@ -21,8 +21,8 @@ import { MicButton, RecordingLine, useVoiceCapture } from './matrix-voice';
 import { usePhotoQuality } from './network-carry';
 import { XmppStickerSheet } from './xmpp-stickers';
 import { Button, Input, OptionList, Row, Sheet, Text } from './ui';
-import { IconButton } from './composer';
-import { MoreIcon, OptionsIcon } from './icons';
+import { ComposerPanel, IconButton } from './composer';
+import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from './icons';
 import { PhoneSign, ShortcutTile, VideoSign } from './shortcut-tile';
 import { ask, confirm } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
@@ -209,6 +209,12 @@ function MsgChat({ service }: { service: MsgService }) {
   }
 
   // A photo from the phone's photos or its camera, in the quality chosen for photos (as in the other chats).
+  // "+" opens and closes the panel under the field; open, the end of the chat comes into view.
+  function openAdding(open: boolean) {
+    setAdding(open);
+    if (open) setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 50);
+  }
+
   async function sendPhoto(from: 'photos' | 'camera') {
     setAdding(false);
     setNote('');
@@ -325,7 +331,7 @@ function MsgChat({ service }: { service: MsgService }) {
       <KeyboardAwareScrollView
         ref={scroll as never}
         style={{ flex: 1, backgroundColor: colors.ground }}
-        contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingBottom: insets.bottom + space.xl, gap: space.md }}
+        contentContainerStyle={{ flexGrow: 1, width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingBottom: insets.bottom + space.xl, gap: space.md }}
         keyboardShouldPersistTaps="handled"
         bottomOffset={space.xl}
       >
@@ -339,6 +345,8 @@ function MsgChat({ service }: { service: MsgService }) {
             <Bubble key={m.id} service={service} message={m} group={!!chat?.group} quoted={m.replyTo ? (messages.find((x) => x.id === m.replyTo!.id) ?? null) : null} onMenu={() => setMenuFor(m.id)} onSign={(sign) => void msgReact(service, m.id, sign).catch(fail)} />
           ))}
         </View>
+        {/* A short chat keeps the field at the bottom of the screen, not under its last message (#61). */}
+        <View style={{ flexGrow: 1, marginTop: -space.md }} />
         {answered ? <Quote name={answered.mine ? t('You') : answered.name} line={lineOf(answered)} onClose={() => setReplyId(null)} /> : null}
         {note ? (
           <Text variant="caption" color={colors.danger}>
@@ -352,8 +360,10 @@ function MsgChat({ service }: { service: MsgService }) {
             </View>
           ) : (
             <>
-              <Button title="+" kind="secondary" compact disabled={busy} onPress={() => setAdding(true)} />
-              <Input style={{ flex: 1 }} value={draft} onChangeText={setDraft} placeholder={t('Message')} multiline />
+              <IconButton label={adding ? t('Close') : t('Attach and more')} onPress={() => openAdding(!adding)} state={{ expanded: adding }} disabled={busy}>
+                {adding ? <CloseIcon color={colors.text} size={20} /> : <PlusIcon color={colors.text} size={20} />}
+              </IconButton>
+              <Input style={{ flex: 1 }} value={draft} onChangeText={setDraft} onFocus={() => setAdding(false)} placeholder={t('Message')} multiline />
             </>
           )}
           {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
@@ -368,6 +378,30 @@ function MsgChat({ service }: { service: MsgService }) {
             <MicButton voice={voice} disabled={busy} />
           )}
         </Row>
+        {/* What "+" opens under the field, as in Erevos's own chats (#59). */}
+        {adding && !voice.recording ? (
+          <ComposerPanel
+            encrypted={chat?.encrypted ?? service !== 'messenger'}
+            tiles={[
+              { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto('photos') },
+              ...(CAN_TAKE_PHOTOS ? [{ key: 'camera', title: t('Camera'), icon: 'camera' as const, onPress: () => void sendPhoto('camera') }] : []),
+              { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendFile() },
+              ...(stickerPlace
+                ? [
+                    {
+                      key: 'sticker',
+                      title: t('Sticker'),
+                      icon: 'sticker' as const,
+                      onPress: () => {
+                        setAdding(false);
+                        setStickering(true);
+                      },
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        ) : null}
       </KeyboardAwareScrollView>
       <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
@@ -380,20 +414,6 @@ function MsgChat({ service }: { service: MsgService }) {
           {/* «Through Tor»: each service has one connection for all its chats, so it takes the whole account (lib/account-tor.ts). */}
           {key ? <ChatTorSwitch network={SERVICE_NAMES[service]} on={msgChatTor(service, key)} onChange={(on) => void (on ? chatTorOn() : msgSetChatTor(service, key, false)).catch(fail)} /> : null}
         </View>
-      </Sheet>
-      <Sheet visible={adding} onClose={() => setAdding(false)} title={t('Attach')}>
-        <Button title={t('Photo')} kind="secondary" onPress={() => void sendPhoto('photos')} />
-        {CAN_TAKE_PHOTOS ? <Button title={t('Camera')} kind="secondary" onPress={() => void sendPhoto('camera')} /> : null}
-        <Button title={t('File')} kind="secondary" onPress={() => void sendFile()} />
-        <Button
-          title={t('Sticker')}
-          kind="secondary"
-          disabled={!stickerPlace}
-          onPress={() => {
-            setAdding(false);
-            setStickering(true);
-          }}
-        />
       </Sheet>
       <XmppStickerSheet
         visible={stickering}

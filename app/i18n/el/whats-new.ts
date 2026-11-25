@@ -4,6 +4,12 @@
 
 // The Greek of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/el/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Τι αφήνει έξω το αντίγραφο**: στο Erevos+, τα **Αντίγραφα ασφαλείας** και το μήνυμα μετά από ένα αντίγραφο λένε ότι τα Telegram, Signal, Messenger και Session δεν μπαίνουν σε αυτό, και τι χρειάζεται το καθένα μετά την επαναφορά. Δες [Αντίγραφα ασφαλείας](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Ένα + για κάθε συνομιλία**: στις συνομιλίες Telegram, Signal, Messenger και Session του Erevos+, το **+** δίπλα στο πεδίο γραφής ανοίγει πλέγμα με εικονίδια, όπως στις συνομιλίες του ίδιου του Erevos, στη θέση των γκρι κουμπιών. Δες [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Το πεδίο γραφής μένει κάτω**: σε συνομιλία Telegram, Signal, Messenger ή Session με λίγα μηνύματα, το πεδίο δεν κάθεται πια κάτω από το τελευταίο μήνυμα στη μέση της οθόνης.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Το Messenger στη θήκη του, ένας δρόμος**: στο Erevos+, με το Messenger **Στη θήκη του**, η κάρτα του στις **Υπηρεσίες** ανοίγει τη θήκη όπως οι Ρυθμίσεις, και η ροή του Facebook είναι στη μπάρα της θήκης, χωρίς χωριστή κάρτα ή κουμπί Facebook δίπλα. Αν η θήκη δεν ανοίξει, το Erevos λέει γιατί. Δες [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

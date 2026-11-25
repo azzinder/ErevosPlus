@@ -4,6 +4,12 @@
 
 // The German of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/de/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Was eine Sicherung auslässt**: in Erevos+ sagen **Backups** und die Meldung nach einer Sicherung, dass Telegram, Signal, Messenger und Session nicht darin sind und was jedes nach dem Wiederherstellen braucht. Siehe [Backups](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Ein + für jeden Chat**: in den Telegram-, Signal-, Messenger- und Session-Chats von Erevos+ öffnet **+** neben dem Schreibfeld ein Raster mit Symbolen, wie in Erevos' eigenen Chats, statt der grauen Tasten. Siehe [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Das Schreibfeld bleibt unten**: in einem Telegram-, Signal-, Messenger- oder Session-Chat mit wenigen Nachrichten steht das Feld nicht mehr unter der letzten Nachricht mitten auf dem Bildschirm.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Messenger in seiner Hülle, ein Weg hinein**: In Erevos+ öffnet mit Messenger **In seiner Hülle** seine Karte unter **Dienste** die Hülle wie die Einstellungen, und Facebooks Feed ist in der eigenen Leiste der Hülle, ohne eigene Facebook-Karte oder -Knopf daneben. Kann sich die Hülle nicht öffnen, sagt Erevos warum. Siehe [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

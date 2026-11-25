@@ -4,6 +4,12 @@
 
 // The Italian of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/it/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Cosa lascia fuori un backup**: in Erevos+, **Backup** e il messaggio dopo un backup dicono che Telegram, Signal, Messenger e Session non ci sono, e cosa serve a ciascuno dopo un ripristino. Vedi [Backup](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Un + per ogni chat**: nelle chat Telegram, Signal, Messenger e Session di Erevos+, **+** accanto a dove scrivi apre una griglia di icone, come nelle chat di Erevos, al posto dei pulsanti grigi. Vedi [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Dove scrivi resta in basso**: in una chat Telegram, Signal, Messenger o Session con pochi messaggi, il campo non sta più sotto l’ultimo messaggio a metà schermo.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Messenger nella sua custodia, una sola via**: in Erevos+, con Messenger **Nella sua custodia**, la sua scheda in **Servizi** apre la custodia come le Impostazioni, e il feed di Facebook è nella barra della custodia, senza scheda o pulsante Facebook accanto. Se la custodia non si apre, Erevos dice perché. Vedi [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

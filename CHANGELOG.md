@@ -8,6 +8,22 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
+## Unreleased
+
+### For you
+
+- Erevos+: the same **+** as in Erevos (#59). In Telegram, Signal, Messenger and Session chats, **+** beside where you
+  write opens `ComposerPanel`, the grid with icons of Erevos's own chats, in place of rows of grey buttons; on
+  Telegram **Send later** sits under **How it goes**. The panel's «encrypted» mark shows only where what is sent is
+  end-to-end encrypted (a secret Telegram chat, Signal, Session) (`components/composer.tsx`, `app/telegram-chat.tsx`,
+  `components/msg-chat.tsx`). Requested by the maintainer.
+- Erevos+: a backup says what it leaves out (#67). **Backups**, the message after a backup and the guide say that
+  Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore: sign in again to Telegram
+  and Messenger, register or link Signal again, Session back with its 13 words (`app/backup.tsx`). Requested by the
+  maintainer.
+- Erevos+: where you write stays at the bottom of a Telegram, Signal, Messenger or Session chat with few messages
+  (#61), not under the last message. Requested by the maintainer.
+
 ## 3.1.0-rc.2 (2026-11-25)
 
 The second release candidate of Erevos+: Erevos 3.0.0-rc.2 with every network, with what is below.

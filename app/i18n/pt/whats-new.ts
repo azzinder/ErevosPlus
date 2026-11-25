@@ -4,6 +4,12 @@
 
 // The Portuguese of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/pt/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**O que uma cópia deixa de fora**: no Erevos+, **Backups** e a mensagem depois de uma cópia dizem que Telegram, Signal, Messenger e Session não estão nela, e o que cada um precisa depois de restaurar. Vê [Backups](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Um + para cada conversa**: nas conversas do Telegram, Signal, Messenger e Session do Erevos+, **+** ao lado de onde escreves abre uma grelha com ícones, como nas conversas do próprio Erevos, em vez dos botões cinzentos. Vê [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Onde escreves fica em baixo**: numa conversa do Telegram, Signal, Messenger ou Session com poucas mensagens, o campo já não fica por baixo da última mensagem a meio do ecrã.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Messenger na sua capa, um só caminho**: no Erevos+, com o Messenger **Na sua capa**, o seu cartão em **Serviços** abre a capa como as Definições, e o feed do Facebook está na barra da capa, sem cartão nem botão do Facebook ao lado. Se a capa não abrir, o Erevos diz porquê. Vê [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

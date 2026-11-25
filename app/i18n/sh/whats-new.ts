@@ -4,6 +4,12 @@
 
 // The Serbo-Croatian of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/sh/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Šta kopija izostavlja**: u Erevos+, **Rezervne kopije** i poruka nakon kopije kažu da Telegram, Signal, Messenger i Session nisu u njoj, i šta svakom treba nakon vraćanja. Vidi [Rezervne kopije](#backup).",
+  "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
+    "**Jedan + za svaki razgovor**: u Telegram, Signal, Messenger i Session razgovorima Erevos+, **+** pored mjesta gdje pišeš otvara mrežu s ikonama, kao u Erevosovim razgovorima, umjesto sivih dugmadi. Vidi [Telegram](#telegram).",
+  "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":
+    "**Mjesto za pisanje ostaje dolje**: u Telegram, Signal, Messenger ili Session razgovoru s malo poruka polje više ne stoji ispod zadnje poruke na sredini ekrana.",
   "**Messenger in its case, one way in**: in Erevos+, with Messenger **In its case**, its card in **Services** opens the case as Settings does, and Facebook's feed is in the case's own bar, with no Facebook card or button beside it. If the case cannot open, Erevos says why. See [Messenger](#messenger).":
     "**Messenger u svojoj futroli, jedan put**: u Erevos+, s Messengerom **U svojoj futroli**, njegova kartica u **Usluge** otvara futrolu kao Postavke, a Facebookov feed je u traci futrole, bez Facebook kartice ili gumba pored. Ako se futrola ne može otvoriti, Erevos kaže zašto. Vidi [Messenger](#messenger).",
   "**Telegram notices go once read**: in Erevos+, a Telegram chat read and left at once no longer leaves its notice of new messages behind, and a muted chat says nothing of what came meanwhile once it is unmuted. See [Telegram](#telegram).":

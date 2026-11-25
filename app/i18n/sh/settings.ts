@@ -4,6 +4,8 @@
 
 // Serbo-Croatian for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Telegram, Signal, Messenger and Session are not in a backup. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words. Their messages come back only as far as each network keeps them.":
+    "Telegram, Signal, Messenger i Session nisu u sigurnosnoj kopiji. Nakon vraćanja ponovo se prijavi na Telegram i Messenger, ponovo registruj ili poveži Signal, i vrati Session s njegovih 13 riječi za oporavak. Njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva.",
   'Turn off the lock': 'Isključi zaključavanje',
   'Erevos will open without a password. The second password stops working too.': 'Erevos će se otvarati bez lozinke. Prestaje raditi i druga lozinka.',
   'The lock is off.': 'Zaključavanje je isključeno.',

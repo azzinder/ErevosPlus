@@ -1033,8 +1033,10 @@ function disc(line?: string) {
  * message can go, each a row with one line on what it does, and `foot` last. With `page`, that
  * instead (choosing when it goes, say), with a way back to the rest.
  */
-export function ComposerPanel({ tiles, quality, ways = [], foot, page }: {
+export function ComposerPanel({ tiles, quality, ways = [], foot, page, encrypted = true }: {
   tiles: ComposerTile[];
+  /** False where what is sent is not end-to-end encrypted (another network's chat): no «encrypted» mark. */
+  encrypted?: boolean;
   quality?: { value: PhotoQuality; onChange: (quality: PhotoQuality) => void };
   ways?: ComposerWay[];
   foot?: string;
@@ -1057,6 +1059,7 @@ export function ComposerPanel({ tiles, quality, ways = [], foot, page }: {
       }}
     >
       <ScrollView
+        nestedScrollEnabled
         style={{ maxHeight: Math.max(280, Math.round(window.height * 0.52)), backgroundColor: colors.popover, borderTopWidth: 1, borderColor: colors.border, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}
         contentContainerStyle={{ paddingTop: space.sm, paddingBottom: space.md }}
         keyboardShouldPersistTaps="handled"
@@ -1076,12 +1079,14 @@ export function ComposerPanel({ tiles, quality, ways = [], foot, page }: {
         ) : (
           <>
             <Kicker title={t('What to send')}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <ShieldIcon color={colors.success} size={11} />
-                <Text variant="caption" tone="faint" style={{ fontSize: 12 }}>
-                  {t('encrypted')}
-                </Text>
-              </View>
+              {encrypted ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                  <ShieldIcon color={colors.success} size={11} />
+                  <Text variant="caption" tone="faint" style={{ fontSize: 12 }}>
+                    {t('encrypted')}
+                  </Text>
+                </View>
+              ) : null}
             </Kicker>
             <View style={{ paddingHorizontal: space.sm }}>
               {rows.map((row, r) => (
