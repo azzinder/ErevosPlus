@@ -208,7 +208,7 @@ function editMessage(state: MsgState, id: string, edit: (m: MsgMessage) => MsgMe
 }
 
 /** The state after one of the engine's events (messenger/docs/api.md). Unknown events change nothing. */
-export function applyEvent(state: MsgState, event: unknown): MsgState {
+export function applyEvent(state: MsgState, event: unknown, fresh: (key: string, ms: number | null) => boolean = () => true): MsgState {
   const e = obj(event);
   switch (e.type) {
     case 'connected':
@@ -256,7 +256,11 @@ export function applyEvent(state: MsgState, event: unknown): MsgState {
         if (list.length && list[list.length - 1].ms > m.ms) next.sort((a, b) => a.ms - b.ms);
       }
       const t = state.threads[key];
-      const threads = t && m.ms >= t.lastMs ? { ...state.threads, [key]: { ...t, lastMs: m.ms, snippet: m.text || t.snippet, unread: t.unread || !m.mine } } : state.threads;
+      // Only a message new here makes its chat unread (`fresh`, lib/messenger-store.ts): an engine
+      // sends each chat's last message again as it starts, and a message again when its attachments
+      // come, and none of those is new. Whether the chat was unread before that its account says.
+      const came = !m.mine && at < 0 && fresh(key, typeof raw.ms === 'number' ? raw.ms : null);
+      const threads = t && m.ms >= t.lastMs ? { ...state.threads, [key]: { ...t, lastMs: m.ms, snippet: m.text || t.snippet, unread: t.unread || came } } : state.threads;
       return withMessages({ ...state, threads }, key, next);
     }
     case 'reaction': {

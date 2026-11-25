@@ -8,6 +8,12 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
+## Unreleased
+
+### For you
+
+- Erevos+: Messenger's old chats no longer come back unread after the phone restarts (#55; the fix in 3.1.0-rc.2 was in the engine, and the cause was not there). As its engine starts, it sends each chat again with its last message, and the list of older chats later as it goes further back; `lib/messenger.ts` `applyEvent` took every such message from someone else for a new one and marked its chat unread, whatever the account said. What hid it was only in memory (`readTo`, `keepRead`), so Mark all as read held until Erevos+ truly started afresh, as after the phone restarted. Now a message makes its chat unread only when it is new here, by the rule that already counts messages for the notice (`newHere` in `lib/messenger-store.ts`, `countsAsNew`): not one from before the engine's start, not one read here, not one sent again when its attachments came. What came while Erevos+ was closed the account itself says (the engine's `unread`). The same for Signal and Session, whose engines keep their own. `checks/messenger-store.check.ts` starts the store afresh and lets the engine send its chats again: it fails on the old code. Requested by the maintainer.
+
 ## 3.1.0-rc.2 (2026-11-25)
 
 The second release candidate of Erevos+: Erevos 3.0.0-rc.2 with every network, with what is below.

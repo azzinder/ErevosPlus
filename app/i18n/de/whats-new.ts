@@ -152,4 +152,6 @@ export const whatsNew: Record<string, string> = {
     "**Signal findet deine Kontakte**: in Erevos+ bietet **Neuer Chat** bei Signal beim Tippen die passenden Kontakte des Telefons an, und eine getippte Nummer als **Neue Nummer**. Signal wird nur nach dem gefragt, den du antippst. Siehe [Signal](#signal).",
   "**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below.":
     "**Release Candidate 2**: Erevos+ mit allem, was Erevos 3.0.0-rc.2 gebracht hat, und dem Folgenden.",
+  "**Messenger's old chats no longer come back unread**: in Erevos+, after the phone restarted, Erevos+ showed old Messenger, Signal or Session chats as not read again, each with one message, although nothing new had come. Only a message that really comes now, or one that came while Erevos+ was closed, makes a chat unread. See [Messenger](#messenger).":
+    "**Alte Messenger-Chats werden nicht mehr wieder ungelesen**: In Erevos+ zeigte Erevos+ nach einem Neustart des Telefons alte Chats von Messenger, Signal oder Session wieder als ungelesen, jeden mit einer Nachricht, obwohl nichts Neues gekommen war. Nur eine Nachricht, die wirklich jetzt kommt oder kam, während Erevos+ geschlossen war, macht einen Chat ungelesen. Siehe [Messenger](#messenger).",
 };

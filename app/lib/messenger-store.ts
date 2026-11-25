@@ -144,9 +144,17 @@ function counted(service: MsgService, event: unknown): void {
   // (lib/messenger.ts countsAsNew). What came while Erevos was away its account counts (the chat's
   // unread). Not by the chat's last time: Session and Messenger move it to a message before sending it.
   const ms = typeof raw.ms === 'number' ? raw.ms : null;
-  if (!countsAsNew(ms, readTo[service].get(key), countedTo[service].get(key), startedAt.get(service) ?? 0)) return;
+  if (!newHere(service, key, ms)) return;
   if (ms !== null) countedTo[service].set(key, Math.max(ms, countedTo[service].get(key) ?? 0));
   cameSince[service].set(key, (cameSince[service].get(key) ?? 0) + 1);
+}
+
+/**
+ * Whether a message of `ms` in a chat is new here (lib/messenger.ts countsAsNew): what is counted
+ * and told of, and what alone makes a chat unread besides its account's own word.
+ */
+function newHere(service: MsgService, key: string, ms: number | null): boolean {
+  return countsAsNew(ms, readTo[service].get(key), countedTo[service].get(key), startedAt.get(service) ?? 0);
 }
 
 /** A chat read: here, or on another device of the account (its engine says it has none not read). */
@@ -198,7 +206,7 @@ function open(): Promise<void> {
         const event = readJson(json);
         if (service === 'signal' && takeSignalCall(event)) return;
         counted(service, event);
-        const next = keepRead(states[service], applyEvent(states[service], event), readTo[service]);
+        const next = keepRead(states[service], applyEvent(states[service], event, (key, ms) => newHere(service, key, ms)), readTo[service]);
         // Read on another device: no longer counted here.
         for (const t of Object.values(next.threads)) if (!t.unread && states[service].threads[t.key]?.unread) readHere(service, t.key);
         set(service, next);
