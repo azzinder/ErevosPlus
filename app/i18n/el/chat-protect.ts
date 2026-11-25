@@ -6,4 +6,9 @@
 export const chatProtect: Record<string, string> = {
   'Allow screenshots': 'Να επιτρέπονται τα στιγμιότυπα οθόνης',
   'Screenshots of this chat are now blocked here. The others are not told, and their apps can still take them.': 'Τα στιγμιότυπα οθόνης αυτής της συνομιλίας μπλοκάρονται πλέον εδώ. Οι άλλοι δεν ενημερώνονται, και οι εφαρμογές τους μπορούν ακόμα να τα τραβήξουν.',
+  'Chat options': 'Επιλογές συνομιλίας',
+  'This chat': 'Αυτή η συνομιλία',
+  'Find': 'Εύρεση',
+  'This contact': 'Αυτή η επαφή',
+  'This group': 'Αυτή η ομάδα',
 };

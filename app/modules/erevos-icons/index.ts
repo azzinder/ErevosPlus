@@ -7,10 +7,10 @@ import { requireOptionalNativeModule } from 'expo-modules-core';
 // The colour of each launcher icon (modules/erevos-icons, Appearance → Launcher icons). Android
 // only; null on other platforms and in a build made before this module was added, where the choice
 // is not offered.
-export type LauncherIcon = 'erevos' | 'phone' | 'sms' | 'contacts';
+export type LauncherIcon = 'erevos' | 'phone' | 'sms' | 'contacts' | 'camera';
 export type LauncherColor = 'red' | 'orange' | 'green' | 'blue' | 'violet' | 'dark';
 
-export const LAUNCHER_ICONS: LauncherIcon[] = ['erevos', 'phone', 'sms', 'contacts'];
+export const LAUNCHER_ICONS: LauncherIcon[] = ['erevos', 'phone', 'sms', 'contacts', 'camera'];
 export const LAUNCHER_COLORS: LauncherColor[] = ['red', 'orange', 'green', 'blue', 'violet', 'dark'];
 
 const native = requireOptionalNativeModule<{
@@ -22,6 +22,10 @@ const native = requireOptionalNativeModule<{
   calculatorOff?(): boolean;
   // Missing in a build before the modules.
   setShown?(icon: string, shown: boolean): boolean;
+  // Missing in a build before the Camera's icon.
+  camera?(): boolean | null;
+  setCamera?(wanted: boolean): boolean;
+  setCameraAllowed?(allowed: boolean): boolean;
 }>('ErevosIcons');
 
 /** Each icon's colour as the launcher shows it now (an icon this app has not, missing), or null where there is no choice. */
@@ -30,8 +34,8 @@ export function launcherColors(): Partial<Record<LauncherIcon, LauncherColor>> |
     const colors = native?.colors();
     if (!colors) return null;
     const known = (color: string | undefined): color is LauncherColor => LAUNCHER_COLORS.includes(color as LauncherColor);
-    // Erevos Lite has no Phone and no SMS, so no icons of theirs: the others are enough.
-    if (!LAUNCHER_ICONS.filter((icon) => icon !== 'phone' && icon !== 'sms').every((icon) => known(colors[icon]))) return null;
+    // Erevos Lite has no Phone, no SMS and no camera, so no icons of theirs: the others are enough.
+    if (!LAUNCHER_ICONS.filter((icon) => icon !== 'phone' && icon !== 'sms' && icon !== 'camera').every((icon) => known(colors[icon]))) return null;
     if (!LAUNCHER_ICONS.every((icon) => colors[icon] === undefined || known(colors[icon]))) return null;
     return colors as Record<LauncherIcon, LauncherColor>;
   } catch {
@@ -79,6 +83,34 @@ export function calculatorOff(): boolean {
 export function setLauncherShown(icon: 'phone' | 'sms', shown: boolean): boolean {
   try {
     return native?.setShown?.(icon, shown) ?? false;
+  } catch {
+    return false;
+  }
+}
+
+/** Whether the owner put the Camera's icon among the phone's apps; null where this app has no camera, or this build no such icon. */
+export function cameraIconOn(): boolean | null {
+  try {
+    return native?.camera?.() ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Puts the Camera's icon among the phone's apps, or takes it off; false where it cannot. It shows
+ *  while the Collection is on and no calculator stands in place of Erevos. */
+export function setCameraIcon(wanted: boolean): boolean {
+  try {
+    return native?.setCamera?.(wanted) ?? false;
+  } catch {
+    return false;
+  }
+}
+
+/** Tells whether the Collection is on, which the Camera's icon and the Camera shortcut on Erevos's icon follow. */
+export function setCameraAllowed(allowed: boolean): boolean {
+  try {
+    return native?.setCameraAllowed?.(allowed) ?? false;
   } catch {
     return false;
   }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2026 azzinder
+SPDX-License-Identifier: AGPL-3.0-or-later
+Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+-->
+
+<!-- The orange launcher icon's background layer, from top to bottom (mipmap-anydpi-v26/erevos_camera_launcher_orange.xml). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+  <gradient android:angle="270" android:startColor="#ffc061" android:centerColor="#f28a12" android:endColor="#a85200" />
+</shape>

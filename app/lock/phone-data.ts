@@ -31,9 +31,12 @@ export type PhoneData = {
   speed: SpeedDial[];
   /** The phone `sims` were chosen on (lock/restored.ts phoneId), '' for those kept before it was said. */
   simsOn: string;
+  /** While this space keeps speed dial working with Erevos locked, the `feed` of that copy
+   *  (lib/phone-open.ts); '' otherwise. */
+  lockedFeed: string;
 };
 
-export const EMPTY_PHONE: PhoneData = { sims: [], speed: [], simsOn: '' };
+export const EMPTY_PHONE: PhoneData = { sims: [], speed: [], simsOn: '', lockedFeed: '' };
 
 export const FILE = 'erevos-phone';
 const BLOCK = 4 * 1024;
@@ -64,6 +67,7 @@ function checked(value: unknown): PhoneData {
       )
       .map((n) => ({ key: n.key as string, number: n.number as string, name: n.name as string })),
     simsOn: isText(v.simsOn) && v.simsOn.length <= 64 ? v.simsOn : '',
+    lockedFeed: isText(v.lockedFeed) && v.lockedFeed.length <= 64 ? v.lockedFeed : '',
   };
 }
 

@@ -26,6 +26,8 @@ import {
   SLOTS,
   unlock,
 } from '../lock/config';
+import { lockedSpeedDials, setPhoneOpensLocked } from '../lib/phone-open';
+import { PhoneSims } from '../lib/phone-sims';
 import { MIN_PIN, openHidden, prepareHidden, removeHiddenPassword, searchHidden, searchOpens, setHiddenPassword } from '../lock/hidden';
 import { loadOpenKey, saveOpenKey } from '../lock/keys';
 import { changedRelaySettings, EMPTY_SPACE, firstSpaceKey, loadHiddenData, loadSpaceData, NOSTR_DEFAULT, prepareSpaces, relaySettingsOf, saveHiddenData, saveSpaceData, updateSpaceData, watchSpaceData, type SpaceData } from '../lock/space-data';
@@ -195,7 +197,7 @@ t('removes the second password (and any set beyond it) or the whole lock', async
   await setLockPassword(0, 'a1', real);
   await setLockPassword(1, 'b2', decoy);
   await setLockPassword(2, 'c3', randomBytes(32));
-  await removeSecondPassword(0);
+  await removeSecondPassword(0, real);
   assert.equal(await opened('b2'), null);
   assert.equal(await opened('c3'), null);
   assert.equal((await opened('a1'))?.space, 0);
@@ -205,6 +207,45 @@ t('removes the second password (and any set beyond it) or the whole lock', async
   assert.equal(isPasswordLocked(c), false);
   assert.deepEqual(c.slots, []);
   assert.deepEqual(await loadOpenKey(0), real);
+});
+
+t('a password that stops opening its space takes that space\'s speed dial with Erevos locked away, and leaves the open space\'s', async () => {
+  const third = randomBytes(32);
+  const feeds = async (space: number, key: Uint8Array, number: string) => {
+    const sims = await PhoneSims.open(space, key);
+    await sims.setSpeed('2', number, '');
+    await sims.setFeedsLocked(true);
+  };
+  const called = async () => (await lockedSpeedDials())?.keys.map((k) => k.number) ?? null;
+  await setLockPassword(0, 'a1', real);
+  await setLockPassword(1, 'b2', decoy);
+  await setLockPassword(2, 'c3', third);
+  await setPhoneOpensLocked(true);
+
+  // Kept by a space the password opened: gone with it, from the space before, whichever of them it was.
+  await feeds(2, third, '6933333333');
+  assert.deepEqual(await called(), ['6933333333']);
+  await removeSecondPassword(0, real);
+  assert.equal(await called(), null);
+  assert.equal(store.has('erevos.phone-speed'), false);
+
+  // Kept by the open space: it stays, as this space can still take it away.
+  await setLockPassword(1, 'b2', decoy);
+  await feeds(0, real, '6911111111');
+  await removeSecondPassword(0, real);
+  assert.deepEqual(await called(), ['6911111111']);
+
+  // Kept by a space before the open one: nothing says whose it is, so it goes too, to be turned on there again.
+  await setLockPassword(1, 'b2', decoy);
+  await removeSecondPassword(1, decoy);
+  assert.equal(await called(), null);
+  assert.equal(await (await PhoneSims.open(0, real)).feedsLocked(), false);
+
+  // With the lock off nothing opens locked: the copy goes, the open space's own too.
+  await feeds(0, real, '6911111111');
+  assert.deepEqual(await called(), ['6911111111']);
+  await removePasswordLock(0, real);
+  assert.equal(store.has('erevos.phone-speed'), false);
 });
 
 t('turned off in the second space, opens that space and keeps the real one locked', async () => {

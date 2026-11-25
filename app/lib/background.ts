@@ -388,12 +388,39 @@ export function loadBootStart(): boolean {
   }
 }
 
+// The choice is kept by the phone (BootStart.kt), as it is read before anything of Erevos runs,
+// and here too, with the phone's other settings that go with a copy of Erevos (SETTINGS in the
+// lock): so a restore, or a move to another edition (lib/edition-move.ts), keeps it as it was.
+const BOOT_KEY = 'erevos.boot-start';
+
 export function saveBootStart(on: boolean): void {
   try {
     callAudio?.setBootStart?.(on);
   } catch {
     // A build from before it: nothing to keep.
   }
+  void secureSet(BOOT_KEY, on ? 'on' : 'off').catch(() => undefined);
+}
+
+/**
+ * As Erevos starts: the phone's choice made what the kept one says, after a restore or a move to
+ * another edition; with none kept yet (before it was kept, or one restored from before), the phone's
+ * is kept.
+ */
+export async function syncBootStart(): Promise<void> {
+  if (!canStartAtBoot) return;
+  const kept = await secureGet(BOOT_KEY).catch(() => null);
+  if (kept === 'on' || kept === 'off') {
+    if (loadBootStart() !== (kept === 'on')) {
+      try {
+        callAudio?.setBootStart?.(kept === 'on');
+      } catch {
+        // A build from before it.
+      }
+    }
+    return;
+  }
+  await secureSet(BOOT_KEY, loadBootStart() ? 'on' : 'off').catch(() => undefined);
 }
 
 const spaceOpen = () => {
@@ -431,11 +458,19 @@ export function startBootNotices(): Promise<void> {
       const [notices, doors] = await Promise.all([loadMessageNotices(), openDoors(-1).catch(() => [])]);
       if (spaceOpen()) return done();
       if (!notices || doors.length === 0) {
-        // Nothing to say while closed: the service and its notice go.
+        // Nothing to say while closed: the service and its notice go, and the quiet "Locked" notice
+        // stays, so that Erevos is seen to have started and a tap on it opens Erevos for a password,
+        // until a space opens (startBackground).
         try {
           callAudio?.stopReceiving?.();
         } catch {
           // Gone with Erevos anyway.
+        }
+        closedReceiving = true;
+        try {
+          callAudio?.setLocked?.(true);
+        } catch {
+          // A build from before the notice.
         }
         return done();
       }

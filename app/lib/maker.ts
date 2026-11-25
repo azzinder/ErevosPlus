@@ -5,7 +5,7 @@
 import { contactLinkName, parseContact, type ContactCode } from './contact-code';
 
 // Contact (Settings → General, app/contact-maker.tsx): the maker's own Erevos contact link, as
-// New chat → Your contact link gives it, so whoever uses Erevos can write to its maker in Erevos
+// New chat → My link gives it, so whoever uses Erevos can write to its maker in Erevos
 // itself, end-to-end encrypted, with no phone number or email (the maker's choice). It comes with
 // the app, signed with the release. It names no one: the contact takes MAKER_NAME.
 export const MAKER_LINK =

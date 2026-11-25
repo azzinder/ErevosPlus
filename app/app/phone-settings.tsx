@@ -118,6 +118,13 @@ export default function PhoneSettings() {
   // Set once the owner asked Android to make Erevos the phone app, until it is.
   const [asked, setAsked] = useState(false);
   const [note, setNote] = useState('');
+  // Whether the Phone opens without the password (lib/phone-open.ts); null until read. Speed dial
+  // with Erevos locked is offered only while it does.
+  const [opensLocked, setOpensLocked] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    void phoneOpensLocked().then(setOpensLocked);
+  }, []);
 
   useEffect(() => {
     const look = () => {
@@ -227,9 +234,9 @@ export default function PhoneSettings() {
         {status && !status.phone ? <Text tone="muted">{t('This device has no phone part, so it cannot make calls.')}</Text> : null}
         {note ? <Text tone="muted">{note}</Text> : null}
       </Card>
-      {status?.isDefault ? <OpenLocked /> : null}
+      {status?.isDefault ? <OpenLocked on={opensLocked} onChange={setOpensLocked} /> : null}
       {status?.isDefault && status.phone ? <CallSettings /> : null}
-      {status?.phone ? <SpeedDials /> : null}
+      {status?.phone ? <SpeedDials opensLocked={opensLocked === true} /> : null}
       {status?.isDefault ? <QuickReplies /> : null}
       {status?.isDefault ? <Blocking screens={status.screens} /> : null}
       {status?.isDefault && spamReady() ? <SpamList screens={status.screens} /> : null}
@@ -238,15 +245,10 @@ export default function PhoneSettings() {
 }
 
 // Whether the Phone opens without Erevos's password (lib/phone-open.ts); only with a password to
-// open without.
-function OpenLocked() {
+// open without. Going back behind it takes the copy of speed dial numbers away too.
+function OpenLocked({ on, onChange }: { on: boolean | null; onChange: (on: boolean) => void }) {
   const { passwordLock } = useLock();
-  const [on, setOn] = useState<boolean | null>(null);
   const [note, setNote] = useState('');
-
-  useEffect(() => {
-    void phoneOpensLocked().then(setOn);
-  }, []);
 
   if (!passwordLock || on === null) return null;
 
@@ -254,7 +256,7 @@ function OpenLocked() {
     setNote('');
     try {
       await setPhoneOpensLocked(next);
-      setOn(next);
+      onChange(next);
     } catch (error) {
       setNote(error instanceof Error ? error.message : String(error));
     }
@@ -495,11 +497,15 @@ function CallSettings() {
 }
 
 // Speed dial: the number each of the keys 2 to 9 calls, held down on an empty keypad; sealed in the
-// space (lib/phone-sims.ts).
-function SpeedDials() {
+// space (lib/phone-sims.ts). With Erevos locked too, if its owner lets it, and only while the Phone
+// opens without the password (`opensLocked`): nothing would read the copy otherwise.
+function SpeedDials({ opensLocked }: { opensLocked: boolean }) {
+  const { passwordLock } = useLock();
   const [sims, setSims] = useState<PhoneSims | null>(null);
   const [choosing, setChoosing] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  // Whether this space's speed dial works with Erevos locked too (lib/phone-open.ts).
+  const [whenLocked, setWhenLocked] = useState(false);
   // Bumped when a key changes, to show it.
   const [, setShown] = useState(0);
 
@@ -512,7 +518,28 @@ function SpeedDials() {
     }
   }, []);
 
+  // Read again when the Phone goes back behind the password, as the copy goes with it.
+  useEffect(() => {
+    if (!sims) return;
+    let shown = true;
+    const show = (on: boolean) => shown && setWhenLocked(on);
+    sims.feedsLocked().then(show, () => show(false));
+    return () => {
+      shown = false;
+    };
+  }, [sims, opensLocked]);
+
   if (!sims) return null;
+
+  function changeLocked(next: boolean) {
+    if (!sims) return;
+    setNote('');
+    // What is kept now, read back: no copy is kept while the Phone stays behind the password.
+    sims
+      .setFeedsLocked(next)
+      .then(() => sims.feedsLocked())
+      .then(setWhenLocked, (error) => setNote(error instanceof Error ? error.message : String(error)));
+  }
 
   function pick(number: string, name: string) {
     const key = choosing;
@@ -545,6 +572,20 @@ function SpeedDials() {
           );
         })}
       </Row>
+      {passwordLock && opensLocked ? (
+        <>
+          <Text variant="bodyStrong">{t('Speed dial with Erevos locked')}</Text>
+          <Text tone="muted">
+            {t("Holding 2 to 9 on the Phone opened without the password then calls this space's speed dial numbers with Erevos locked too. For that, a copy of the numbers, without their names, is kept on this phone outside the space's encryption: anyone holding the unlocked phone can call them, and whoever looks into the phone can read them. One space at a time: turned on here, it takes another space's place. It can show that this space exists: someone who is shown another space of yours, and then holds a key on the Phone with Erevos locked, sees a number called that is not that space's.")}
+          </Text>
+          {whenLocked ? <Text variant="bodyStrong">{t('Speed dial works with Erevos locked.')}</Text> : null}
+          <Button
+            title={whenLocked ? t('Keep speed dial behind the password') : t('Let speed dial work with Erevos locked')}
+            kind="secondary"
+            onPress={() => changeLocked(!whenLocked)}
+          />
+        </>
+      ) : null}
       {note ? <Text tone="muted">{note}</Text> : null}
       <SpeedDialPick slot={choosing} current={choosing ? sims.speed(choosing) : undefined} onClose={() => setChoosing(null)} onPick={pick} />
     </Card>

@@ -11,7 +11,7 @@ import { throughTor } from '../lib/relay';
 import { circuitOf } from '../lib/tor-chats';
 
 import { openGuideLink } from './guide';
-import { Button, Card, Row, Text } from './ui';
+import { Button, Card, Row, Text, TextButton } from './ui';
 
 // Saying that this phone's internet address may be seen (lib/ip-warning.ts), before it may be:
 // asked once (ipGate), or shown in a screen as it stands (IpNotice).
@@ -109,5 +109,22 @@ export function IpNotice({ warning, fix }: { warning: IpWarning; fix?: IpFix }) 
         <Button title={t('Guide')} kind="secondary" compact onPress={() => openGuideLink(IP_GUIDE)} />
       </Row>
     </Card>
+  );
+}
+
+/**
+ * The quiet line of a chat or group that goes without Tor, above where you write, once the warning
+ * of what is sent was said (ipKey: once for the network): that the relays see this phone's internet
+ * address, with `fix` beside it when given (Tor for the chat), and the guide.
+ */
+export function IpQuiet({ fix }: { fix?: IpFix }) {
+  return (
+    <Row wrap style={{ alignItems: 'center', gap: 4 }}>
+      <Text variant="caption" tone="faint">
+        {t('Without Tor: the relays see your internet address.')}
+      </Text>
+      {fix ? <TextButton title={fix.label} onPress={() => void fix.run()} /> : null}
+      <TextButton title={t('Guide')} onPress={() => openGuideLink(IP_GUIDE)} />
+    </Row>
   );
 }

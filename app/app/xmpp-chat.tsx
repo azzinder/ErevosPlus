@@ -36,8 +36,8 @@ import { useNetworkThread } from '../components/network-thread';
 import { useSayTyping } from '../components/say-typing';
 import { PhoneSign, ShortcutTile, VideoSign } from '../components/shortcut-tile';
 import { IconButton } from '../components/composer';
-import { MoreIcon, PlusIcon } from '../components/icons';
-import { Button, Card, Chip, Input, Page, Row, SectionTitle, Sheet, Text, TextButton } from '../components/ui';
+import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { Button, Card, Chip, Input, OptionList, Page, Row, SectionTitle, Sheet, Text, TextButton } from '../components/ui';
 import { ask } from '../lib/alert';
 import { currentCall } from '../lib/call';
 import { shownLine } from '../lib/call-lines';
@@ -963,6 +963,10 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
                 {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
               </>
             )}
+            {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
+            <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+              <OptionsIcon color={colors.text} size={22} />
+            </IconButton>
             <MicButton voice={voice} disabled={sending || unsent !== null || !!changed} />
           </Row>
           {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
@@ -1012,14 +1016,14 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
               </Row>
             </View>
           </Sheet>
-          <Sheet visible={more} onClose={() => setMore(false)} title={t('More')}>
+          <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
             <View style={{ gap: space.md }}>
               {channel ? (
                 <Text variant="caption" tone="muted">
                   {t('A channel tells only of messages that name you.')}
                 </Text>
               ) : null}
-              <Row wrap>
+              <OptionList title={t('This chat')}>
                 <NetworkChatNotify notify={checkedChatNotify(chat?.notify)} hidden={where !== 'space'} onChange={(next) => xmppSetNotify(jid, next)} />
                 <Button title={t('Chat look')} kind="secondary" compact onPress={() => {
                     setMore(false);
@@ -1033,8 +1037,10 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
                   onChoose={(after) => void xmppAct(async (s) => setTimerIn(s, jid, after)).catch(fail)}
                   onChosen={() => setMore(false)}
                 />
-              </Row>
-              <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} />
+              </OptionList>
+              <OptionList title={t('Find')}>
+                <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} />
+              </OptionList>
               {/* «Through Tor» for this chat or group: one connection carries the account's chats, so the whole account then goes only through Tor. Off unless turned on. */}
               {canXmppTor() ? <ChatTorSwitch network="XMPP" on={chat?.tor === true} disabled={!state} onChange={(on) => void xmppSetChatTor(jid, on).catch(fail)} /> : null}
               {/* A contact's name of our own: their item's in the account's contacts, which its other apps show too. */}

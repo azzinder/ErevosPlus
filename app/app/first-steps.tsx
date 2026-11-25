@@ -287,7 +287,7 @@ function ModuleStep({ module, modules, checks, maker, onChanged }: { module: Mod
               {t('Scan its QR code, or open or paste the link they sent you.')}
             </Text>
             <Row wrap>
-              <Button title={t('Open')} kind="secondary" compact onPress={() => router.push('/chat?setup=1')} />
+              <Button title={t('Open')} kind="secondary" compact onPress={() => router.push('/chat?setup=code')} />
             </Row>
           </Card>
           <Card>

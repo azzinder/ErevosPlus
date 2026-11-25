@@ -419,6 +419,5 @@ export const chat: Record<string, string> = {
   "Look for phones nearby": "Traži telefone u blizini",
   "Erevos phones near this one find each other and talk with no internet, over Bluetooth and the ways below.": "Erevos telefoni blizu ovog nalaze jedni druge i razgovaraju bez interneta, preko Bluetootha i načina ispod.",
   "Off: Erevos looks for no phone nearby, and everything goes through the relay. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.": "Isključeno: Erevos ne traži nijedan telefon u blizini, i sve ide preko relaya. Uključi ga za razgovore i pozive bez interneta, jedan pored drugog ili na istoj Wi-Fi mreži.",
-  "Phones nearby are off on this phone: turn on Look for phones nearby, under Nearby, with no internet.": "Telefoni u blizini su isključeni na ovom telefonu: uključi Traži telefone u blizini, pod U blizini, bez interneta.",
   "Off on this phone. Tap to turn on Look for phones nearby.": "Isključeno na ovom telefonu. Dodirni da uključiš Traži telefone u blizini.",
 };

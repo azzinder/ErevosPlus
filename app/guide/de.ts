@@ -144,8 +144,9 @@ einmal, um zurückzugehen. Versteckte Chats haben ihre eigenen angehefteten und 
   ist, und **Fotos** wählt, wie Fotos und Karten geholt werden. Unter einem Beitrag: antworten, erneut teilen, liken
   und teilen; unter einer Matrix-Nachricht: antworten, reagieren und teilen. **Neuer Beitrag**, der Stift unten,
   schreibt einen öffentlichen Beitrag mit bis zu vier Fotos. Siehe [Chats mit anderen Nostr-Apps](#nostr-chats).
-- **Neuer Chat**, unten, öffnet die Relay-Einstellungen und das Hinzufügen eines Kontakts. **Erinnern**, die orange
-  Glocke daneben, schreibt eine Erinnerung für dich.
+- **Neuer Chat**, unten, fragt, wo die andere Person ist, **Neben mir**, **Weit weg** oder **Ich habe ihren Code**,
+  und fügt sie hinzu; die Zeilen darunter öffnen deinen eigenen Link, die blockierten Kontakte und die
+  Relay-Einstellungen. **Erinnern**, die orange Glocke daneben, schreibt eine Erinnerung für dich.
 - **{~Der grüne Hörer und die violette Person|Die violette Person}** oben, auf Android, {~öffnen direkt **Telefon** und **Kontakte**, in den
   Farben ihrer Symbole|öffnet direkt **Kontakte**, in der
   Farbe ihres Symbols} auf dem Startbildschirm des Telefons. Im Menü unter den drei Punkten {~sind sie|ist sie} nicht noch einmal.
@@ -227,8 +228,9 @@ Eine gute erste Stunde:
    fest, damit niemand, der das Telefon in die Hand nimmt, Erevos öffnen kann.
 2. Öffne **Telefone in der Nähe** im Menü auf zwei Telefonen, die nah beieinander sind, und erlaube, worum Android
    bittet.
-3. Fügt euch gegenseitig mit **Meinen QR-Code zeigen** hinzu, wie in [Chat mit einem Telefon in der Nähe](#nearby), und
-   sende eine Nachricht: Sie geht in der Nähe, Ende-zu-Ende-verschlüsselt, ohne Relay und ohne Internet.
+3. Fügt euch gegenseitig mit **Neuer Chat** → **Neben mir** hinzu, auf beiden Telefonen, wie in [Chat mit einem
+   Telefon in der Nähe](#nearby), und sende eine Nachricht: Sie geht in der Nähe, Ende-zu-Ende-verschlüsselt, ohne
+   Relay und ohne Internet.
 4. Um aus größerer Entfernung zu reden, richte ein Relay ein, wie in [Chat über ein Relay](#relay).
 
 ### Chat mit mir selbst und Erinnerungen
@@ -402,15 +404,18 @@ Solange ein Bereich offen ist, auf jedem Bildschirm, sucht {=Erevos} nach andere
 gleichermaßen. Internet, SIM-Karte oder WLAN-Netz sind nicht nötig. Es überbringt Nachrichten an deine Kontakte,
 Ende-zu-Ende-verschlüsselt wie die über das Relay.
 
-Es sucht erst, wenn **Nach Telefonen in der Nähe suchen** an ist, unter **In der Nähe, ohne Internet**, in **Neuer
-Chat**: Es ist aus, bis du es auf beiden Telefonen einschaltest, und bis dahin geht alles über das Relay.
+Es sucht erst, wenn **Nach Telefonen in der Nähe suchen** an ist, unter **Für Fortgeschrittene** → **In der Nähe, ohne
+Internet**, in **Neuer Chat**: Es ist aus, bis du es auf beiden Telefonen einschaltest, und bis dahin geht alles über
+das Relay. Nur **Neben mir**, in Neuer Chat, sucht auch ohne es, solange seine Seite offen ist, um einen Kontakt
+hinzuzufügen.
 
 1. Öffne **Telefone in der Nähe** im Menü auf beiden Telefonen. Beim ersten Mal bittet Android darum, Geräte in der
    Nähe finden zu dürfen (auf Android 12 und älter auch um den Standort); erlaube es, sonst finden sich die Telefone
    nicht.
-2. Wenn ihr noch keine Kontakte seid, fügt euch gegenseitig hinzu: Tippe auf einem Telefon auf **Neuer Chat**, wo
-   **Dein QR-Code** zu sehen ist, und scanne ihn mit dem anderen, wie in [Chat über ein Relay](#relay). Ohne Relay
-   enthält der Code nur eure Schlüssel, und ihr erreicht euch nur in der Nähe, bis ihr eines habt.
+2. Wenn ihr noch keine Kontakte seid, fügt euch gegenseitig hinzu: Tippe auf beiden Telefonen auf **Neuer Chat** und
+   dann auf **Neben mir**, und tippe auf **Ja, dieselben**, sobald beide dieselben Bilder zeigen, wie in [Chat über
+   ein Relay](#relay). Ohne Relay gibt jedes Telefon nur seine Schlüssel, und ihr erreicht euch nur in der Nähe, bis
+   ihr eines habt.
 3. Wähle den Kontakt, tippe in die Nachrichtenleiste unten und tippe auf den Sendepfeil. Sobald das andere Telefon
    antwortet, steht oben im Chat **In der Nähe**.
 
@@ -429,7 +434,8 @@ Chat**: Es ist aus, bis du es auf beiden Telefonen einschaltest, und bis dahin g
   direkt miteinander, auch wenn dieses WLAN kein Internet hat; die Desktop-App ebenso. Wenn Android fragt, ob es in
   einem WLAN ohne Internet bleiben soll, bleib. Jeder in diesem WLAN kann erkennen, dass dort eine Erevos-App ist,
   nicht wessen. Die Firewall eines Computers muss Port 47905 hereinlassen (UDP und TCP). Um es abzuschalten, schalte
-  **Erevos im selben WLAN finden** unter **In der Nähe, ohne Internet** in **Neuer Chat** aus.
+  **Erevos im selben WLAN finden** unter **Für Fortgeschrittene** → **In der Nähe, ohne Internet** in **Neuer Chat**
+  aus.
 - **Ein eigenes WLAN (Android 10 und neuer):** Ohne gemeinsames WLAN bauen zwei Erevos-Telefone in der Nähe ein
   kleines eigenes WLAN auf (Wi-Fi Direct) und sprechen darüber wie im selben WLAN: schneller als Bluetooth, und ein
   Anruf geht darüber ohne Internet. Es fragt nichts; jedes Telefon bleibt, wo es kann, auch in seinem eigenen WLAN.
@@ -451,11 +457,11 @@ Chat**: Es ist aus, bis du es auf beiden Telefonen einschaltest, und bis dahin g
   übergibt sie über sein eigenes Relay an jenes Relay, sobald es kann; deines ebenso. Sie können sie nicht lesen und
   auch nicht erkennen, von wem oder für wen sie ist: Sie sehen nur die Adresse des Relays. Sie bleibt, wenn {=Erevos}
   sich schließt, versiegelt auf dem Telefon. Deine bleiben in deinem Bereich und gehen nur, solange er offen ist. Das
-  Mitnehmen für andere ist an, solange du nicht **Nachrichten für andere mitnehmen** unter
-  **In der Nähe, ohne Internet** in **Neuer Chat** ausschaltest, und nur für Relays im Internet über TLS
-  (wss://): Ein Fremder in der Nähe bringt dein Telefon oder dein Relay nie dazu, eines in einem lokalen Netz oder auf
-  dem Telefon selbst anzusprechen. Deine eigenen Nachrichten werden von den Telefonen in der Nähe mitgenommen, bei
-  denen es eingeschaltet ist.
+  Mitnehmen für andere ist an, solange du nicht **Nachrichten für andere mitnehmen** unter **Für
+  Fortgeschrittene** → **In der Nähe, ohne Internet** in **Neuer Chat** ausschaltest, und nur für Relays im Internet
+  über TLS (wss://): Ein Fremder in der Nähe bringt dein Telefon oder dein Relay nie dazu, eines in einem lokalen Netz
+  oder auf dem Telefon selbst anzusprechen. Deine eigenen Nachrichten werden von den Telefonen in der Nähe
+  mitgenommen, bei denen es eingeschaltet ist.
 - **Von anderen Telefonen geholt:** Andersherum: Hat dein Telefon kein Internet, holt ein Erevos-Telefon daneben, das
   Internet hat und für andere mitnimmt, was auf deinem Relay für dich wartet, und gibt es dir in der Nähe. Erevos
   fragt einmal für jedes solche Telefon, auch das eines Kontakts, da ein Fremder die Nachrichten eines Kontakts
@@ -560,53 +566,81 @@ deines Telefons sieht. Ein Telefon ohne Relay bekommt einen Platz auf dem seines
 Telefonnummer oder E-Mail-Adresse, um dich zu erreichen: Wer deinen Kontaktlink hat, kann in deine Warteschlange
 schreiben, und nur du liest sie.
 
-1. Tippe auf dem Startbildschirm auf **Neuer Chat**. Solange etwas fehlt, sagt oben **So bist du jetzt verbunden** in einfachen Worten, wie
-   deine Kontakte dich erreichen: über dein Relay, über Nostr ohne Relay oder nur in der Nähe; wenn alles funktioniert,
-   wird es nicht angezeigt. Mit Relay findet ein Feld ganz oben einen Kontakt nach Namen oder fügt einen dort
-   eingefügten Link hinzu, und darunter kommen **Dein QR-Code**, darüber **Hat {=Erevos} schon** und **Neu bei {=Erevos}**, und Zeilen für **Dein
-   Kontaktlink** und mehr; ein Telefon, das noch kein Relay hat, beginnt mit **Mit einer Einladung beginnen**. Die
-   eigenen Einstellungen des Relays sind unter **Für Fortgeschrittene**, ganz unten;
-   **Einstellungen** → **Relay und Netze** → **Relay** öffnet „Neuer Chat“ mit ihnen geöffnet.
+1. Tippe auf dem Startbildschirm auf **Neuer Chat**. Solange etwas fehlt, sagt oben **So bist du jetzt verbunden** in
+   einfachen Worten, wie deine Kontakte dich erreichen: über dein Relay, über Nostr ohne Relay oder nur in der Nähe;
+   wenn alles funktioniert, wird es nicht angezeigt. Mit Relay findet ein Feld ganz oben einen Kontakt nach Namen oder
+   fügt einen dort eingefügten Link hinzu. Dann kommt eine Frage, **Wo ist die andere Person?**, und jede Antwort
+   öffnet eine eigene Seite: **Neben mir**, **Weit weg** und **Ich habe ihren Code**, wie in 4 bis 6 unten. Drei
+   Zeilen darunter öffnen den Rest: **Mein Link**, **Blockierte Kontakte** und **Für Fortgeschrittene**, wo die
+   eigenen Einstellungen des Relays sind; **Einstellungen** → **Relay und Netze** → **Relay** öffnet „Neuer Chat“ mit
+   ihnen geöffnet.
 2. Gib unter **Für Fortgeschrittene** die **Relay-Adresse** ein: \`ws://<Adresse des Computers>:7879\` für ein Relay in
    deinem eigenen Netz oder \`wss://relay.example.org\` für eines im Internet. Füge das **Token** hinzu, wenn das Relay
    eines braucht.
 3. Erevos legt deine Warteschlange darauf von selbst an, ein paar Sekunden später, und sagt **Relay-Warteschlange angelegt**: Alles funktioniert, Texte, Fotos, Sprachnachrichten,
    Anrufe und Gruppen, und **So bist du jetzt verbunden** verschwindet, weil nichts fehlt. Wenn es nicht klappt, sagt der Hinweis, warum; **Meine Relay-Warteschlange anlegen** unter der Adresse versucht es erneut.
-4. **Dein QR-Code** steht auf Neuer Chat selbst, sobald er sich öffnet. Lass das andere Telefon ihn mit seiner Kamera
-   scannen und dann den Link in Erevos öffnen. Der Bildschirm **Kontakt hinzufügen** zeigt, was er enthält: Tippe nur
-   auf **Zum Chat hinzufügen**, wenn du ihn selbst gescannt hast. **Hinzufügen und mit einem meiner Kontakte
-   verknüpfen** fügt ihn ebenfalls hinzu, verknüpft mit dem Kontakt, den du wählst, dessen Namen der Chat übernimmt.
-   Der Code ist kurz, sodass jede Kamera ihn liest. Wer ihn scannt, antwortet mit dem eigenen Kontaktlink, und dann schreibt dieses Telefon ihm zuerst. Der Code ist jedes Mal neu, wenn sich Neuer Chat öffnet, und gilt einmal: Wer ihn zuerst scannt, ist sofort ein Kontakt; wer ihn danach scannt oder den Link nimmt, den du teilst, schreibt zuerst eine Nachrichtenanfrage. **Großer QR-Code, ohne Internet** zeigt stattdessen den ganzen Code, der in der Nähe ohne Internet funktioniert, und **Kleiner QR-Code** geht zurück. **Teilen**, darunter, sendet einen kurzen Link, den jede App antippbar macht; auf Android öffnet er Erevos, das fragt, bevor es ihn übernimmt. Um jemanden mit seinem Kontakt-QR-Code hinzuzufügen, braucht dein Telefon zuerst ein Relay.
-   Dieser QR-Code klappt nur, wenn beide Telefone ein Relay haben, wie die Karte sagt. Für jemanden, der noch kein
-   {=Erevos} hat oder dessen Telefon kein Relay hat, wähle stattdessen darüber **Neu bei {=Erevos}**: Die Karte zeigt
-   **Einladung zu {=Erevos}**, eine Einladung, mit der sein Telefon deinem Relay beitritt, wie unten in Jemand Neues
-   einladen. Neuer Chat zeigt, was du zuletzt gewählt hast.
-   Dasselbe geht per Berührung: Solange der kleine Kontaktcode zu sehen ist und NFC auf Android eingeschaltet ist, nimmt
-   das andere Telefon ihn, wenn du seine Rückseite an die Rückseite deines hältst. Das geht nur, solange Erevos im
-   Vordergrund ist, nicht im Hintergrund, und nie mit dem großen QR-Code.
-5. Wenn die Kamera des anderen nur den Text zeigt oder ihr weit voneinander entfernt seid, tippe unter deinem QR-Code
-   auf **Teilen**, oder öffne **Dein Kontaktlink** und tippe auf **Meinen Kontaktlink teilen**, und schick ihn. Dein
-   Kontakt fügt ihn in das Feld oben auf **Neuer Chat** ein und tippt auf **Hinzufügen**.
-6. Oder andersherum: Tippe unter deinem QR-Code auf **Ihren scannen** und fotografiere den Code auf dem Bildschirm des
-   anderen, oder tippe auf **Aus einem Foto ihres QR-Codes** für einen Screenshot oder ein Foto davon, das dir
+4. **Neben mir**, für jemanden neben dir: Tippt auf beiden Telefonen auf **Neuer Chat** und dann auf **Neben mir**.
+   Die beiden Telefone finden sich von selbst, über Bluetooth oder das WLAN, das sie teilen, und jedes zeigt **Ein
+   Telefon wurde gefunden** mit sechs Bildern. Schaut auf beide Bildschirme: Sind die Bilder dieselben, in derselben
+   Reihenfolge, tippt jeder von euch auf **Ja, dieselben**, und ihr seid Kontakte, ohne Relay, ohne Internet und ohne
+   etwas einzutippen. **Nein, andere** lässt dieses Telefon beiseite. Die Bilder kommen aus einem Schlüssel, den die
+   beiden Telefone miteinander bilden, sodass ein Telefon, das zwischen ihnen säße, jedem von euch andere zeigen
+   würde; jedes Telefon gibt seinen Kontaktlink erst, wenn sein Besitzer Ja sagt, verschlüsselt mit diesem Schlüssel.
+   Die Seite sucht nur nach Telefonen, solange sie offen ist, auch wenn **Nach Telefonen in der Nähe suchen** aus ist,
+   das aus bleibt; in versteckten Chats und in der Web-App sucht nichts. Unter **Wenn es nicht gefunden wird** hat die
+   Seite die anderen Wege für jemanden neben dir: einen QR-Code für seine Kamera, der eine Einladung ist, wo dein
+   Relay dieses Telefon einladen lässt, und sonst dein Kontaktlink; **Einen Code mit 8 Ziffern zeigen**, den die
+   andere Person wie in 6 eintippt; **Ihren scannen** und **Ihren Code eintippen**, für ihren; und, auf Android,
+   **Kein Erevos auf ihrem Telefon?**, das ihr die App selbst gibt.
+5. **Weit weg**, für jemanden, der nicht bei dir ist: Die Seite macht eine Einladung, einen Link für eine Person, in
+   einer Nachricht, die fertig zum Senden ist. Tippe auf **Senden mit…** und wähle die App, mit der sie geht (im
+   Browser und auf einem Computer **Einladung kopieren**), oder auf **QR-Code der Einladung**, um sie als Code zu
+   zeigen. Die Person tippt auf den Link: Mit Erevos auf ihrem Telefon öffnet er sich dort, und ohne zeigt der Link
+   zuerst, woher sie es bekommt. Ihr Telefon tritt dann deinem Relay mit einem eigenen Zugang bei, ohne etwas
+   einzutippen, und ihr seid Kontakte. Die Seite sagt, wie weit es ist, **Die Einladung ist fertig**, **Warte, bis sie
+   geöffnet wird**, **Ihr seid verbunden**, und du kannst sie inzwischen verlassen: Sobald ihr Telefon beigetreten
+   ist, erscheint die Person in deinen Chats. Mehr zu Einladungen steht unten in „Jemand Neues einladen“. Wo dieses
+   Telefon keine Einladung machen kann, noch ohne Relay, in versteckten Chats oder auf einem verknüpften Computer,
+   gibt die Seite stattdessen deinen Kontaktlink zum Senden: Die Person öffnet ihn in Erevos oder fügt ihn unter **Ich
+   habe ihren Code** ein.
+6. **Ich habe ihren Code**, für das, was die andere Person dir gegeben hat. Tippe die 8 Ziffern ein, die ihr Telefon
+   unter **Neben mir** → **Einen Code mit 8 Ziffern zeigen** zeigt, neben dir oder am Telefon angesagt: Dann hat jedes
+   Telefon das andere als Kontakt. Der Code selbst verlässt die Telefone nie: Sie beweisen einander, dass sie ihn
+   kennen, und ihre Kontaktlinks gehen verschlüsselt mit einem Schlüssel, den nur derselbe Code ergibt. Sie treffen
+   sich auf öffentlichen Nostr-Relays, die weder den Code noch die Links sehen, und wer rät, hat 3 Versuche, bevor der
+   Code schließt. Ein Code gilt 10 Minuten. Unter den Ziffern fügst du ihren Kontaktlink oder ihre Einladung in das
+   Feld ein und tippst auf **Hinzufügen**, oder du tippst auf **Ihren QR-Code scannen** und fotografierst den Code auf
+   ihrem Bildschirm, oder auf **Aus einem Foto ihres QR-Codes** für einen Screenshot oder ein Foto davon, das dir
    geschickt wurde. Erevos liest ihn und fügt den Kontakt sofort hinzu. Auf einem Computer, unter Sailfish OS und in
-   der Web-App bittet **Ihren scannen** um ein Foto davon; auf einem iPhone bietet es auch die Kamera an.
-   Versteckte Chats haben beides auch; dort nimmt das Feld oben nur einen Link.
-7. Oder mit jemandem neben dir oder am Telefon: Tippe in **Neuer Chat** auf **Mit einem Code koppeln**. Einer von
-   euch tippt auf **Einen Code zeigen** und sagt oder zeigt die 8 Ziffern; der andere tippt auf **Ihren Code eintippen**
-   und tippt sie ein. Dann hat jedes Telefon das andere als Kontakt, als hätte jedes den QR-Code des anderen gescannt.
-   Der Code selbst verlässt die Telefone nie: Sie beweisen einander, dass sie ihn kennen, und ihre Kontaktlinks gehen
-   verschlüsselt mit einem Schlüssel, den nur derselbe Code ergibt. Sie treffen sich auf öffentlichen Nostr-Relays, die
-   weder den Code noch die Links sehen, und wer rät, hat 3 Versuche, bevor der Code schließt. Ein Code gilt 10 Minuten.
+   der Web-App bittet **Ihren QR-Code scannen** um ein Foto davon; auf einem iPhone bietet es auch die Kamera an.
+   Versteckte Chats haben diese Seite auch.
+7. **Mein Link**, in den Zeilen unter den dreien, ist der eigene QR-Code und Kontaktlink dieses Telefons. Lass das
+   andere Telefon den Code mit seiner Kamera scannen und dann den Link in Erevos öffnen. Der Bildschirm **Kontakt
+   hinzufügen** zeigt, was er enthält: Tippe nur auf **Zum Chat hinzufügen**, wenn du ihn selbst gescannt hast.
+   **Hinzufügen und mit einem meiner Kontakte verknüpfen** fügt ihn ebenfalls hinzu, verknüpft mit dem Kontakt, den du
+   wählst, dessen Namen der Chat übernimmt. Der Code ist kurz, sodass jede Kamera ihn liest. Wer ihn scannt, antwortet
+   mit dem eigenen Kontaktlink, und dann schreibt dieses Telefon ihm zuerst. Der Code ist jedes Mal neu, wenn sich die
+   Seite öffnet, und gilt einmal: Wer ihn zuerst scannt, ist sofort ein Kontakt; wer ihn danach scannt oder den Link
+   nimmt, den du teilst, schreibt zuerst eine Nachrichtenanfrage. **Großer QR-Code, ohne Internet** zeigt stattdessen
+   den ganzen Code, der in der Nähe ohne Internet funktioniert, und **Kleiner QR-Code** geht zurück. **Teilen**,
+   darunter, sendet einen kurzen Link, den jede App antippbar macht; auf Android öffnet er Erevos, das fragt, bevor es
+   ihn übernimmt. Um jemanden mit seinem Kontakt-QR-Code hinzuzufügen, braucht dein Telefon zuerst ein Relay. Dieser
+   QR-Code klappt nur, wenn beide Telefone ein Relay haben, wie die Seite sagt: Nutze sonst **Neben mir** oder eine
+   Einladung aus **Weit weg**. **Ihren scannen** und **Aus einem Foto ihres QR-Codes**, darunter, lesen von hier den
+   Code des anderen Telefons. Dasselbe geht per Berührung: Solange der kleine Kontaktcode zu sehen ist und NFC auf
+   Android eingeschaltet ist, nimmt das andere Telefon ihn, wenn du seine Rückseite an die Rückseite deines hältst.
+   Das geht nur, solange Erevos im Vordergrund ist, nicht im Hintergrund, und nie mit dem großen QR-Code.
 
-Der neue Chat erscheint auf dem Startbildschirm mit dem Namen **Kontakt** und den ersten Zeichen des Schlüssels, bis
-er einen Namen hat: **Umbenennen** in seinen Details gibt ihm einen. Direkt nachdem du jemanden hier hinzugefügt hast,
-lässt dich **Mit einem meiner Kontakte verknüpfen** unter dem Hinweis, dass er hinzugefügt wurde, stattdessen einen
-deiner Kontakte wählen (**Nicht jetzt** lässt es): Der Chat übernimmt den Namen dieses Kontakts, wenn er keinen eigenen
-hat, und die Karte des Kontakts zeigt den Chat. Versteckte Chats bieten nur ihre eigenen Kontakte an, nie die des
-Telefons. Es genügt, dass ein Telefon das andere hinzufügt: Einen Link hinzuzufügen beginnt eine verschlüsselte
-Unterhaltung und sagt dem anderen Telefon, wie es antworten kann, sodass es den Chat anzeigt, wenn es das nächste Mal
-in seine Warteschlange schaut, was es alle paar Sekunden tut.
+Welchen Weg du auch nimmst, er endet auf **Ihr seid verbunden**: das Bild der Person, **Ihr Name in deinen Chats**,
+den ihr Telefon genannt haben kann und den du ändern kannst, und **Nachricht schreiben** oder **Noch jemanden
+hinzufügen**. Der neue Chat erscheint auf dem Startbildschirm mit dem Namen **Kontakt** und den ersten Zeichen des
+Schlüssels, bis er einen Namen hat: **Umbenennen** in seinen Details gibt ihm einen. Direkt nachdem du jemanden hier
+hinzugefügt hast, lässt dich **Mit einem meiner Kontakte verknüpfen** unter dem Hinweis, dass er hinzugefügt wurde,
+stattdessen einen deiner Kontakte wählen (**Nicht jetzt** lässt es): Der Chat übernimmt den Namen dieses Kontakts,
+wenn er keinen eigenen hat, und die Karte des Kontakts zeigt den Chat. Versteckte Chats bieten nur ihre eigenen
+Kontakte an, nie die des Telefons. Es genügt, dass ein Telefon das andere hinzufügt: Einen Link hinzuzufügen beginnt
+eine verschlüsselte Unterhaltung und sagt dem anderen Telefon, wie es antworten kann, sodass es den Chat anzeigt, wenn
+es das nächste Mal in seine Warteschlange schaut, was es alle paar Sekunden tut.
 
 **Was das Relay von einem Chat sieht:** Alle deine Kontakte schreiben in deine eine Warteschlange. Sobald jedes
 Telefon eine Nachricht vom anderen bekommen hat, wird jede Nachricht zwischen ihnen noch einmal für das Telefon
@@ -658,43 +692,46 @@ dorthin gelangt ist, wo es nicht hingehört, seine Token-Datei nicht füllen kan
 Ein QR-Code oder Link holt jemand Neues herein: Das Telefon dieser Person tritt {=Erevos} auf deinem Relay bei, mit
 eigenem Zugang, ohne etwas einzutippen, und ihr seid sofort gegenseitig Kontakte, ohne Nachrichtenanfrage.
 
-- **Einladen:** Tippe auf dem Startbildschirm auf **Einladen** neben der Zeile des Relays oder, auf **Neuer Chat**,
-  wähle über dem QR-Code **Neu bei {=Erevos}**. Der QR-Code erscheint sofort: Sobald {=Erevos} auf dem anderen Telefon
-  ist, scannt die Person ihn mit der Kamera und öffnet den Link in Erevos, oder du tippst auf **Einladung teilen** und
-  schickst ihr den Link. Darunter kannst du eingeben, für wen sie ist (der Name der Person in deinen Chats), und
-  **Dein Name, für die Person**, oder beides leer lassen. Erneut geöffnet, solange niemand sie genommen hat und sie
-  noch mindestens einen Tag gilt, zeigt sie dieselbe Einladung, verbraucht also keine der 5 wartenden und 10 am Tag;
-  **Jemand anderen einladen** macht eine neue. Sie gilt für eine Person, 7 Tage lang, oder kürzer, wenn die Einladung
-  des Relays früher endet. Wer sie zuerst nimmt, hat sie, also gib sie nur dieser Person.
-  Auf einem Android-Telefon mit eingeschaltetem NFC kannst du sie auch per Berührung weitergeben: Halte die Rückseite
-  seines Telefons an die Rückseite deines, solange der Code zu sehen ist, und sein Telefon öffnet den Link von selbst, in
-  Erevos, wenn es installiert ist, sonst auf der Webseite von Erevos, die {=Erevos} anbietet. Ist NFC aus, sagt die
-  Seite, dass du es in den Android-Einstellungen einschalten sollst.
-- **Beitreten:** Auf einem Telefon ohne Relay beginnt **Neuer Chat** mit **Mit einer Einladung beginnen**. Tippe auf
-  **Ihren QR-Code scannen** und fotografiere die Einladung auf dem Bildschirm der Person, oder tippe auf **Aus einem
-  Foto ihres QR-Codes**, oder füge den Link in das Feld dort ein und tippe auf **Beitreten**; sie mit der Kamera zu
-  scannen und den Link in Erevos zu öffnen geht auch. Der Link öffnet **… lädt dich zu {=Erevos} ein**: Tippe nur auf
-  **Beitreten**, wenn er von dieser Person kam. Erevos nimmt einen eigenen Zugang zu ihrem Relay und eine
-  Warteschlange dort, fügt die Person hinzu und sagt **Willkommen bei Erevos**. Seine erste Nachricht sagt es dem
-  Telefon der Person, das dieses sofort als Kontakt hinzufügt, so benannt, wie sie es eingegeben hat.
-- **Die anderen Wege hinein:** Darunter öffnet **Für Fortgeschrittene** die übrigen, für wen sie sucht: **Mit LPHL
-  anmelden** meldet dieses Telefon mit einem LPHL-Konto im Browser beim Relay von LPHL an (siehe „Beim Relay anmelden“
-  weiter unten), dann fügst du deine Kontakte über ihre Einladungen oder Links hinzu; **Ohne Relay anfangen**, wie in
-  „Ganz ohne Relay“ unter „Über Nostr“; und die Relay-Einstellungen, wie in 1 bis 6 oben. Eine Einladung ist der
-  einfachste Weg hinein, und auf dem Relay hat ein eingeladenes Telefon nur einen Namen aus zufälligen Buchstaben und
-  Ziffern.
+- **Einladen:** Tippe auf dem Startbildschirm auf **Einladen** neben der Zeile des Relays oder tippe in **Neuer Chat**
+  auf **Weit weg**. Die Einladung wird sofort gemacht und steht in einer Nachricht, die fertig zum Senden ist: Tippe
+  auf **Senden mit…** und wähle die App, oder tippe auf **QR-Code der Einladung** und lass die Person ihn mit der
+  Kamera ihres Telefons scannen. Darunter kannst du eingeben, für wen sie ist (der Name der Person in deinen Chats),
+  und **Dein Name, für die Person**, oder beides leer lassen. Erneut geöffnet, solange niemand sie genommen hat und
+  sie noch mindestens einen Tag gilt, zeigt sie dieselbe Einladung, verbraucht also keine der 5 wartenden und 10 am
+  Tag; **Jemand anderen einladen** macht eine neue, und **Diese Einladung zurücknehmen** schließt ihren Link, solange
+  kein Telefon sie genommen hat. Sie gilt für eine Person, 7 Tage lang, oder kürzer, wenn die Einladung des Relays
+  früher endet. Wer sie zuerst nimmt, hat sie, also gib sie nur dieser Person. Für jemanden neben dir zeigt auch
+  **Neben mir** eine solche Einladung als QR-Code. Auf einem Android-Telefon mit eingeschaltetem NFC kannst du sie
+  auch per Berührung weitergeben: Halte die Rückseite seines Telefons an die Rückseite deines, solange der Code zu
+  sehen ist, und sein Telefon öffnet den Link von selbst, in Erevos, wenn es installiert ist, sonst auf der Webseite
+  von Erevos, die {=Erevos} anbietet. Ist NFC aus, sagt die Seite, dass du es in den Android-Einstellungen einschalten
+  sollst.
+- **Beitreten:** Tippe auf den Link, den die Person geschickt hat, oder scanne die Einladung mit der Kamera und öffne
+  den Link in Erevos: Er öffnet **… lädt dich zu Erevos ein**, und du tippst nur auf **Beitreten**, wenn er von dieser
+  Person kam. In Erevos nimmt auch **Ich habe ihren Code** in **Neuer Chat** eine Einladung: Tippe auf **Ihren QR-Code
+  scannen** und fotografiere die Einladung auf dem Bildschirm der Person, oder auf **Aus einem Foto ihres QR-Codes**,
+  oder füge den Link in das Feld dort ein und tippe auf **Hinzufügen**. Erevos nimmt einen eigenen Zugang zu ihrem
+  Relay und eine Warteschlange dort, fügt die Person hinzu und sagt **Willkommen bei {=Erevos}**. Seine erste Nachricht
+  sagt es dem Telefon der Person, das dieses sofort als Kontakt hinzufügt, so benannt, wie sie es eingegeben hat.
+- **Die anderen Wege hinein:** In **Neuer Chat** öffnet **Für Fortgeschrittene** die übrigen, für wen sie sucht: **Mit
+  LPHL anmelden** meldet dieses Telefon mit einem LPHL-Konto im Browser beim Relay von LPHL an (siehe „Beim Relay
+  anmelden“ weiter unten), dann fügst du deine Kontakte über ihre Einladungen oder Links hinzu; **Ohne Relay
+  anfangen**, wie in „Ganz ohne Relay“ unter „Über Nostr“; und die Relay-Einstellungen, wie in 1 bis 3 oben. Eine
+  Einladung ist der einfachste Weg hinein, und auf dem Relay hat ein eingeladenes Telefon nur einen Namen aus
+  zufälligen Buchstaben und Ziffern.
 - **Ein anderes Relay:** Unter **Mit LPHL anmelden** nimmt **Bei einem anderen Relay anmelden…** die Adresse eines
   anderen Relays, so wie der Betreiber sie dir gegeben hat, etwa relay.example.org: Die Karte meldet dich dann dort an,
   benannt nach den Konten, die dieses Relay annimmt, oder sagt, dass es keine Anmeldung anbietet; dann kann dir der
   Betreiber eine Einladung geben. **Zurück zu** holt LPHL zurück.
-- **Was dein Relay erlauben muss:** Der eigene Zugang ist eine Einladung zu deinem Relay (siehe „Einladungen zum Relay“
-  weiter unten), also kommt er nur von einem Telefon mit eigenem Token auf einem Relay, das Einladungen annimmt. Er
-  zählt zu deinen Einladungen, unter einem Namen aus zufälligen Buchstaben und Ziffern, und bleibt, auch wenn deiner
-  geht. Ein Telefon mit dem einen Token des Relays für alle tauscht es zuerst gegen ein eigenes (siehe „Wege zum Relay“
-  oben); wo das Relay das nicht tut, macht es keine Einladung: Melde dich zuerst beim Relay an (unter dem **Token**,
-  unter **Für Fortgeschrittene**) oder nimm eine Einladung dazu an. Wenn dein Relay keine Einladungen annimmt, macht
-  euch die Einladung trotzdem zu Kontakten, und das andere Telefon nutzt dein Relay nur so, wie es dein Kontaktlink
-  zulässt, wie in „Kein eigenes Relay“ weiter unten.
+- **Was dein Relay erlauben muss:** Der eigene Zugang ist eine Einladung zu deinem Relay (siehe „Einladungen zum
+  Relay“ weiter unten), also kommt er nur von einem Telefon mit eigenem Token auf einem Relay, das Einladungen
+  annimmt. Er zählt zu deinen Einladungen, unter einem Namen aus zufälligen Buchstaben und Ziffern, und bleibt, auch
+  wenn deiner geht. Ein Telefon mit dem einen Token des Relays für alle tauscht es zuerst gegen ein eigenes (siehe
+  „Wege zum Relay“ oben); wo das Relay das nicht tut, macht es keine Einladung: Melde dich zuerst beim Relay an (unter
+  dem **Token**, unter **Für Fortgeschrittene**) oder nimm eine Einladung dazu an. Wenn dein Relay keine Einladungen
+  annimmt, macht euch die Einladung trotzdem zu Kontakten, und das andere Telefon nutzt dein Relay nur so, wie es dein
+  Kontaktlink zulässt, wie in „Kein eigenes Relay“ weiter unten. Eine solche Einladung öffnet sich nur auf einem
+  Telefon, das Erevos schon hat.
 - **Ein Telefon, das schon ein Relay hat,** behält sein eigenes: Die Einladung fügt nur dich hinzu, und ihr seid
   trotzdem sofort Kontakte.
 - **Was gespeichert wird:** Dein Telefon bewahrt das Geheimnis jeder Einladung und den Namen für die Person auf,
@@ -718,16 +755,15 @@ eigenem Zugang, ohne etwas einzutippen, und ihr seid sofort gegenseitig Kontakte
 Ein Telefon ohne Relay chattet trotzdem über das Internet: Wenn es den Link eines Kontakts hinzufügt, dessen Relay
 Plätze verleiht, nimmt es dort einen Platz, ohne Token.
 
-- **Wie:** Füge den Link hinzu wie in 4 und 5, ohne etwas unter **Relay**. Erevos sagt, dass du jetzt einen Platz auf
-  dem Relay des Kontakts hast, über seinen Link geliehen, und nutzt ihn von da an als seinen eigenen: Dein eigener
-  Link nennt ihn, sodass andere dich auch dort erreichen.
-- **Wer verleiht:** Dein Link trägt nur dann ein Ticket für einen Platz auf deinem Relay, wenn du
-  **Mit diesem Link einen Platz auf meinem Relay teilen** unter **Dein Kontaktlink** in **Neuer Chat** einschaltest,
-  und nur für den Link, der dann gezeigt wird: Das nächste Mal, wenn sich der Chat öffnet, ist es wieder aus. Das
-  Relay braucht einen Schlüssel für das Senden über zwei Stationen und verleiht erst, wenn sein Betreiber das
-  Verleihen einschaltet; der kann auch die Plätze eines Tickets zurücknehmen. Ein Ticket hält 30 Tage und gibt bis zu
-  vier Plätze. Jeder, der einen Link mit Ticket sieht, kann damit einen Platz nehmen, also gib einen solchen Link nur
-  denen, für die er gedacht ist.
+- **Wie:** Füge den Link hinzu wie in 6, ohne etwas unter **Relay**. Erevos sagt, dass du jetzt einen Platz auf dem
+  Relay des Kontakts hast, über seinen Link geliehen, und nutzt ihn von da an als seinen eigenen: Dein eigener Link
+  nennt ihn, sodass andere dich auch dort erreichen.
+- **Wer verleiht:** Dein Link trägt nur dann ein Ticket für einen Platz auf deinem Relay, wenn du **Mit diesem Link
+  einen Platz auf meinem Relay teilen** unter **Mein Link** in **Neuer Chat** einschaltest, und nur für den Link, der
+  dann gezeigt wird: Das nächste Mal, wenn sich der Chat öffnet, ist es wieder aus. Das Relay braucht einen Schlüssel
+  für das Senden über zwei Stationen und verleiht erst, wenn sein Betreiber das Verleihen einschaltet; der kann auch
+  die Plätze eines Tickets zurücknehmen. Ein Ticket hält 30 Tage und gibt bis zu vier Plätze. Jeder, der einen Link
+  mit Ticket sieht, kann damit einen Platz nehmen, also gib einen solchen Link nur denen, für die er gedacht ist.
 - **Was ein geliehener Platz nicht tut:** Nachrichten an Kontakte auf anderen Relays gehen direkt an deren Relay, das
   dann die Adresse deines Telefons sieht. Er hebt nichts für später auf (eine später gesendete Nachricht wartet auf dem
   Telefon), gibt kein Anruf-Relay (Anrufe gehen direkt zwischen den Telefonen) und macht höchstens 4 weitere
@@ -753,13 +789,13 @@ lassen, mit einem eigenen Token dieses Telefons, sodass kein Token eingetippt od
   und schick sie. Sie gilt für ein Telefon 7 Tage lang, und wer sie zuerst nimmt, hat sie, also zeig sie nur der
   richtigen Person.
 - **Eine annehmen:** Der Link öffnet **Einladung zu einem Relay**, mit der Adresse des Relays: Tippe nur auf **Dieses
-  Relay nutzen**, wenn sie von jemandem kam, den du kennst. In Erevos lesen auch **Ihren scannen** und **Aus einem Foto
-  ihres QR-Codes** auf Neuer Chat eine Einladung, und ihr Link lässt sich in das Feld oben einfügen. Erevos macht ein
-  Token für dieses Telefon, bewahrt es mit der Adresse des Relays nur in diesem Bereich auf
-  und legt dort deine Warteschlange an. Nutzt das Telefon ein anderes Relay, fragt es zuerst, und Kontakte erfahren
-  deine neue Warteschlange mit deiner nächsten Nachricht. Erevos nimmt eine Einladung zu einem wss://-Relay an, oder zu
-  einem ws://-Relay nur in einem Heimnetz (etwa \`ws://192.168.1.10:7879\`). Versteckte Chats nehmen keine Einladungen
-  an.
+  Relay nutzen**, wenn sie von jemandem kam, den du kennst. In Erevos nimmt auch **Ich habe ihren Code** in **Neuer
+  Chat** eine Einladung: mit **Ihren QR-Code scannen**, **Aus einem Foto ihres QR-Codes** oder ihrem Link, in das Feld
+  dort eingefügt. Erevos macht ein Token für dieses Telefon, bewahrt es mit der Adresse des Relays nur in diesem
+  Bereich auf und legt dort deine Warteschlange an. Nutzt das Telefon ein anderes Relay, fragt es zuerst, und Kontakte
+  erfahren deine neue Warteschlange mit deiner nächsten Nachricht. Erevos nimmt eine Einladung zu einem wss://-Relay
+  an, oder zu einem ws://-Relay nur in einem Heimnetz (etwa \`ws://192.168.1.10:7879\`). Versteckte Chats nehmen keine
+  Einladungen an.
 - **Deine Einladungen:** unter der Taste aufgelistet, offen oder in Gebrauch. **Zurücknehmen** nimmt eine noch offene
   zurück oder sperrt das Telefon, das sie genommen hat, sofort aus, nur dieses: Die Telefone, die es wiederum eingeladen
   hat, behalten ihren Zugang.
@@ -1119,7 +1155,7 @@ für alle Warteschlangen deiner Kontakte (siehe [Auf einem iPhone](#iphone)).
   Weise eine neue und sagt es, höchstens einmal am Tag. Wenn Müll die Warteschlange füllt, die dein Kontaktlink nennt,
   bekommst du stattdessen einen neuen Link. Eine Flut erfundener Nachrichtenanfragen zählt auch als Müll, während ein
   Schwung echter trotzdem ankommt.
-- **Neuer Kontaktlink**, neben **Meinen Kontaktlink teilen**, gibt dir einen neuen Link: Die Links und QR-Codes, die
+- **Neuer Kontaktlink**, unter **Mein Link** in **Neuer Chat**, gibt dir einen neuen Link: Die Links und QR-Codes, die
   du vorher gegeben hast, funktionieren noch 14 Tage, dann nicht mehr. Deine Kontakte sind nicht betroffen. Sollte das
   Relay die Warteschlange verlieren, die dein Link nennt, bekommst du auf dieselbe Weise einen neuen Link, aber die
   vorher gegebenen funktionieren sofort nicht mehr.
@@ -1584,7 +1620,8 @@ Versteckte Chats und Computer haben das nicht.
   anderer Bereich offen ist** schon „New message“ oder wie viele kamen, nie welcher Bereich, auch nicht von wem oder
   was, und eine stille Benachrichtigung sagt „Locked“. Anrufe klingeln nicht, und nichts anderes kommt, bis du einen
   Bereich öffnest; Bereiche, die über Tor gehen, sagen bis dahin nichts. Gibt es keinen solchen Bereich, oder mit
-  **Keine Benachrichtigung**, hält es sofort an. Nur auf Android.
+  **Keine Benachrichtigung**, sagt nur eine stille Benachrichtigung,
+  dass es gesperrt ist, und ein Tippen darauf öffnet Erevos. Nur auf Android.
 
   **Warum:** Nach einem Neustart konnte Erevos dir nicht sagen, dass Nachrichten warten, bis du es zufällig öffnetest.
   Ohne dein Passwort kann es sie trotzdem nicht lesen, also sagt es nicht mehr, als ein geschlossener Bereich sagt.
@@ -2061,10 +2098,10 @@ dorthin (siehe Ganz ohne Relay).
 Ein Telefon ohne Relay, ohne Einladung und ohne LPHL-Konto kann trotzdem anfangen: Sein Kontaktlink und QR-Code sagen,
 wo es auf Nostr liest, und das genügt, um zu reden.
 
-- **Anfangen:** Tippe in **Neuer Chat** auf **Ohne Relay anfangen**, dann auf **Meinen QR-Code zeigen** oder
-  **Meinen Kontaktlink teilen**, und gib ihn jemandem, der {=Erevos} nutzt. Wer ihn hinzufügt, schreibt dir über Nostr
-  und erscheint als Nachrichtenanfrage, die du annimmst. Du kannst auch seinen Link oder QR-Code hinzufügen,
-  auf dieselbe Weise.
+- **Anfangen:** Tippe in **Neuer Chat** unter **Für Fortgeschrittene** auf **Ohne Relay anfangen**, dann auf **Meinen
+  QR-Code zeigen** oder **Meinen Kontaktlink teilen**, und gib ihn jemandem, der {=Erevos} nutzt. Wer ihn hinzufügt,
+  schreibt dir über Nostr und erscheint als Nachrichtenanfrage, die du annimmst. Du kannst auch seinen Link oder
+  QR-Code hinzufügen, auf dieselbe Weise.
 - **Was geht:** Texte, Sticker, Reaktionen, Bearbeitungen und die Zeichen, dass eine Nachricht ankam oder gelesen wurde, alles über Nostr; und Fotos, Dateien und Sprachnachrichten. Eine Sprachnachricht geht in Wraps wie ein Text. Ein Foto bis 3 MB geht in Stücken von 32 KB, je ein Wrap, die vor der Nachricht gesendet werden, die es anbietet; das andere Telefon behält sie, verschlüsselt mit dem Rest des Bereichs oder der versteckten Chats, für die sie kamen, bis alle da sind, höchstens vier Tage. Ein größeres Foto, ein Video oder jede andere Datei, bis 20 MB, geht als ein Blob, auf dem Telefon verschlüsselt, an einen Blossom-Dateiserver (blossom.primal.net, blossom.band oder nostr.download), über Tor, wie die Tor-Wahl des Bereichs sagt (direkt mit **Nichts**): Der Server behält nur, was er nicht lesen kann. Anrufe und Gruppen brauchen ein Relay oder das andere Telefon in der Nähe. Versteckte Chats funktionieren auch so, nur über Nostr (siehe [Versteckte Chats](#hidden)).
 - **Wenn er nicht ankommt:** Die Nostr-Relays bewahren einen Text zwei Tage auf. Bis das Telefon deines Kontakts sagt,
   dass er ankam, gibt Erevos ihn ihm einmal am Tag erneut, zwei Wochen lang.
@@ -2097,8 +2134,9 @@ Tor.
 - **Die öffentlichen Nostr-Relays und die Nostr-Dateiserver:** Sie sehen sie, außer die Verbindung geht über Tor.
   Schalte **Nostr über Tor** unter **Einstellungen** → **Relay und Netze** → **Nostr** ein, oder **Über Tor** für
   einen Chat. Siehe [Über Nostr](#nostr).
-- **Mit einem Code koppeln:** Die beiden Telefone treffen sich auf denselben öffentlichen Nostr-Relays, ohne Nostr über
-  Tor sehen diese also die Adresse, nicht aber den Code oder die Kontaktlinks. Erevos sagt es vor dem ersten Koppeln.
+- **Ein Code mit 8 Ziffern**, unter **Neben mir** und **Ich habe ihren Code**: Die beiden Telefone treffen sich auf
+  denselben öffentlichen Nostr-Relays, ohne Nostr über Tor sehen diese also die Adresse, nicht aber den Code oder die
+  Kontaktlinks. Erevos sagt es vor dem ersten Mal.
 
 - [+] **Matrix:** Nur dein eigener Matrix-Server sieht sie, nicht die Server deiner Kontakte: Fotos und Dateien von
   anderen Servern kommen auch über deinen. Wähle **Tor für dieses Matrix-Konto** auf dem Matrix-Bildschirm, oder
@@ -2144,7 +2182,9 @@ Tor.
 
 Erevos warnt vor jedem davon einmal, mit dem Titel **Deine Internetadresse kann gesehen werden**, einem Knopf
 **Anleitung**, der diesen Abschnitt öffnet, und, wo es geht, einem Knopf, der es behebt, etwa **Über Tor für diesen
-Chat**. Mit **Weiter** geht es weiter; für einen Chat wird es einmal gesagt und für diesen Chat nicht wieder.
+Chat**. Mit **Weiter** geht es weiter. Für das, was du sendest, wird es einmal für das ganze Netz gesagt, nicht in
+jedem Chat: danach zeigt ein Chat oder eine Gruppe ohne Tor nur eine leise Zeile über dem Schreibfeld, **Ohne Tor: Die
+Relays sehen deine Internetadresse.**, mit **Über Tor für diesen Chat** und **Anleitung** daneben.
 
 Nach der Anleitung kommt dieselbe Frage wieder, und was du gerade sendest, etwa eine Sprachnachricht oder eine Datei,
 wartet darauf. Ein Anruf, der hier klingelt, sagt es unter dem Anruf, und Annehmen geht weiter. Versteckte Chats
@@ -2292,6 +2332,9 @@ Element: Keine Brücke sitzt dazwischen.
   Erevos, wie in Erevos’ eigenen Chats, solange dieser Bereich offen ist; auf einem Computer, solange Erevos läuft. Auf
   Android schaltet **Benachrichtigungen** unten in einem Chat ihn stumm oder gibt ihm einen eigenen Ton; ein stummer
   Chat zählt nicht. **Chat-Aussehen** daneben gibt dem Chat ein eigenes Aussehen.
+- **Chat-Optionen:** Die Regler-Taste neben dem Schreibfeld, oder **⋯** oben, öffnet sie alle in einer aufgeräumten
+  Liste, erreichbar, wie lang der Chat auch ist: **Benachrichtigungen**, **Chat-Aussehen**, die PIN, Bildschirmfotos
+  und verschwindende Nachrichten unter **Dieser Chat**, dann Suche, Medien, ein Tag und Export unter **Finden**.
 - **Solange dieser Bereich geschlossen ist:** Auf Android lässt **Neue Nachrichten melden** unter **Solange dieser
   Bereich geschlossen ist** auf dem Matrix-Bildschirm diesen Bereich „Neue Nachricht“ sagen, wenn auf Matrix etwas
   kommt, während ein anderer Bereich offen ist, wie seine eigenen Chats mit **Auch, wenn ein anderer Bereich offen
@@ -2523,6 +2566,9 @@ dem XMPP-Server, wie diese Apps: Keine Brücke sitzt dazwischen.
   Erevos, wie in Erevos’ eigenen Chats, solange dieser Bereich offen ist; auf einem Computer, solange Erevos läuft. Auf
   Android schaltet **Benachrichtigungen** unten in einem Chat ihn stumm oder gibt ihm einen eigenen Ton; ein stummer
   Chat zählt nicht. **Chat-Aussehen** daneben gibt dem Chat ein eigenes Aussehen.
+- **Chat-Optionen:** Die Regler-Taste neben dem Schreibfeld, oder **⋯** oben, öffnet sie alle in einer aufgeräumten
+  Liste, erreichbar, wie lang der Chat auch ist: **Benachrichtigungen**, **Chat-Aussehen**, die PIN, Bildschirmfotos
+  und verschwindende Nachrichten unter **Dieser Chat**, dann Suche, Medien, ein Tag und Export unter **Finden**.
 - **Solange dieser Bereich geschlossen ist:** Auf Android lässt **Neue Nachrichten melden** unter **Solange dieser
   Bereich geschlossen ist** auf dem XMPP-Bildschirm diesen Bereich „Neue Nachricht“ sagen, wenn auf XMPP etwas kommt,
   während ein anderer Bereich offen ist, wie seine eigenen Chats mit **Auch, wenn ein anderer Bereich offen ist** unter
@@ -2735,6 +2781,9 @@ die private Nachrichten nach NIP-17 sendet. Das ist nicht [Über Nostr](#nostr),
   Erevos, wie in Erevos’ eigenen Chats, solange dieser Bereich offen ist; auf einem Computer, solange Erevos läuft. Auf
   Android schaltet **Benachrichtigungen** unten in einem Chat ihn stumm oder gibt ihm einen eigenen Ton; ein stummer
   Chat zählt nicht. **Chat-Aussehen** daneben gibt dem Chat ein eigenes Aussehen.
+- **Chat-Optionen:** Die Regler-Taste neben dem Schreibfeld, oder **⋯** oben, öffnet sie alle in einer aufgeräumten
+  Liste, erreichbar, wie lang der Chat auch ist: **Benachrichtigungen**, **Chat-Aussehen**, die PIN, Bildschirmfotos
+  und verschwindende Nachrichten unter **Dieser Chat**, dann Suche, Medien, ein Tag und Export unter **Finden**.
 - **Noch nicht:** Dateien, die eine andere App anders verschlüsselt (sie erscheinen als Datei, die Erevos nicht öffnen
   kann).
 
@@ -3027,6 +3076,9 @@ wenn du ihn wählst.
   Chat, und, mit einer Nummer, **Benachrichtigungen**: Schalte sie für eine Weile oder immer stumm oder gib ihr einen
   eigenen Ton oder keinen. Das gilt, während der Bereich offen ist; ist er geschlossen, benachrichtigt jede SMS so,
   wie es die Einstellungen sagen.
+- **Chat-Optionen:** Die Regler-Taste neben dem Schreibfeld, oder **⋯** oben, öffnet sie alle in einer aufgeräumten
+  Liste, erreichbar, wie lang der Chat auch ist: **Benachrichtigungen**, **Chat-Aussehen**, die PIN, Bildschirmfotos
+  und verschwindende Nachrichten unter **Dieser Chat**, dann Suche, Medien, ein Tag und Export unter **Finden**.
 - **Papierkorb:** Eine gelöschte Unterhaltung wartet 30 Tage im **Papierkorb**, dann löscht Erevos sie aus den SMS des
   Telefons. Bis dahin legt **Zurückholen** sie zurück in die Liste; **Jetzt löschen** und **Papierkorb leeren** löschen
   sofort, endgültig. Eine SMS, die kommt, nachdem die Unterhaltung im Papierkorb gelandet ist, erscheint wieder in der
@@ -3168,11 +3220,17 @@ auf einem kleinen Telefon zeigt sie nur diesen Titel, und ein Tippen darauf öff
   spielt sie ab, **■** hält sie an; ein Tippen auf die Zeile bietet **Zurückrufen**, **SMS senden** und
   **Sprachnachricht löschen**. **Mailbox anrufen** oben ruft sie an. Erevos spielt sie aus dem Speicher von Android
   ab und behält keine Kopie; bei gesperrtem Erevos erscheint der Tab nicht.
-- **Kurzwahl:** Halte bei leerer Wähltastatur eine Taste von 2 bis 9, um ihre Nummer anzurufen. Eine Taste ohne
-  Nummer lässt dich eine wählen: Gib einen Namen oder eine Nummer ein und tippe auf den Kontakt, oder nimm die
-  getippte Nummer mit **verwenden**. Unter **Telefon** → **Einstellungen** zeigt **Kurzwahl** die acht Tasten; tippe
-  auf eine, um sie zu ändern oder zu leeren. Die Kurzwahl wird verschlüsselt im Bereich aufbewahrt und funktioniert
-  bei entsperrtem Erevos.
+- **Kurzwahl:** Halte bei leerer Wähltastatur eine Taste von 2 bis 9, um ihre Nummer anzurufen. Eine Taste ohne Nummer
+  lässt dich eine wählen: Gib einen Namen oder eine Nummer ein und tippe auf den Kontakt, oder nimm die getippte
+  Nummer mit **verwenden**. Unter **Telefon** → **Einstellungen** zeigt **Kurzwahl** die acht Tasten; tippe auf eine,
+  um sie zu ändern oder zu leeren. Die Kurzwahl wird verschlüsselt im Bereich aufbewahrt und funktioniert bei
+  entsperrtem Erevos. Solange das Telefon ohne Passwort öffnet, lässt **Kurzwahl auch bei gesperrtem Erevos** (anfangs
+  aus) sie auch dort funktionieren: Eine Kopie der Nummern, ohne Namen, liegt dann auf dem Handy außerhalb des
+  Bereichs, und wer das entsperrte Handy hält, kann sie anrufen. Immer nur ein Bereich. Sie kann zeigen, dass es den
+  Bereich gibt: Wer einen anderen Bereich von dir sieht, findet, dass die Tasten Nummern anrufen, die nicht zu jenem
+  Bereich gehören. Die Kopie wird gelöscht, wenn das Telefon wieder hinter das Passwort kommt, wenn ein Backup
+  wiederhergestellt wird, wenn die Sperre ausgeschaltet wird und wenn ein zweites Passwort entfernt oder neu
+  festgelegt wird, während ein anderer Bereich offen ist; schalte sie dann wieder ein.
 - **Anrufeinstellungen:** Unter **Telefon** → **Einstellungen** öffnen die **Anrufeinstellungen** die eigenen
   Bildschirme von Android für das, was dein Anbieter von den Anrufen jeder SIM verwaltet: **Umleitung, Anklopfen und
   deine Nummer** und **Mailbox-Nummer**; bei zwei SIMs tippe zuerst die SIM an. Unter **Deinen Anbieter fragen**
@@ -3472,7 +3530,9 @@ sich Erevos auch damit öffnen. Es ist aus, solange du es nicht einschaltest.
 - **Wie es aufbewahrt wird:** Der Schlüssel des ersten Bereichs ist mit einem Schlüssel in der sicheren Hardware des
   Telefons (dem Android Keystore) versiegelt, der nur direkt nach einer starken Fingerabdruck- oder Gesichtsprüfung
   funktioniert, einmal für jede Nutzung. Einen Fingerabdruck oder ein Gesicht hinzuzufügen oder zu entfernen, lässt
-  Android diesen Schlüssel verwerfen: Es ist dann aus, und du schaltest es wieder ein. Nichts verlässt das Telefon.
+  Android diesen Schlüssel verwerfen: Es ist dann aus, und du schaltest es wieder ein. Ein Schlüssel, der auf andere
+  Weise nicht mehr funktioniert, schaltet es ebenfalls aus, nach drei Versuchen in Folge, bei denen er sich nicht
+  benutzen ließ. Nichts verlässt das Telefon.
 - **Welches Gesicht:** Ein Gesicht zählt nur, wo Android seine Gesichtsentsperrung als stark einstuft, etwa auf dem
   Pixel 8 und neuer; anderswo ist es der Fingerabdruck.
 - **Falsche Passwörter** werden wie bisher gezählt: Ein Fingerabdruck ändert die Zählung nicht.
@@ -4298,6 +4358,12 @@ Text immer gut lesbar ist, auch auf Glas.
   oder dunkel. Jedes Tippen öffnet, was sein Symbol nennt, auch wenn Erevos gerade ein anderes davon zeigte. Die Farbe
   gehört dem Telefon, nicht jedem Bereich, da die Symbole erscheinen, bevor Erevos entsperrt ist. Nach einer Änderung
   nehmen manche Launcher das Symbol vom Startbildschirm: Füge es aus der App-Liste wieder hinzu.
+- [~] **Kamera** (Android, unter **Startbildschirm-Symbole**): die Kamera von Erevos mit einem Tippen. **Kamera unter die
+  Apps des Telefons legen** fügt ein eigenes Symbol hinzu (zuerst orange, in jeder Farbe), und hältst du das Symbol von
+  Erevos gedrückt, bietet es auch **Kamera** an, das sich auch auf den Startbildschirm ziehen lässt. Beides öffnet die
+  Kamera der Sammlung, hinter dem Passwort von Erevos und dem der Sammlung, und was sie aufnimmt, kommt direkt in die
+  Sammlung. Beides zeigt sich nicht, solange die Sammlung in **Module** aus ist oder der Rechner an der Stelle von Erevos
+  steht.
 - **Punkte und Zahlen auf den Symbolen** (Android): Android gibt den Punkt oder die Zahl einer Meldung der App, nicht
   einem ihrer Symbole. Auf den meisten Launchern, etwa denen von Pixel und GrapheneOS, dem von Samsung, dem von Xiaomi
   und Kvaesitso, zeigt sich daher jede Meldung von Erevos (eine Nachricht, {~eine SMS, |}ein Anruf, ein Geburtstag) gleich

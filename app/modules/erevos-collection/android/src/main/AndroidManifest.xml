@@ -13,6 +13,98 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
   <application>
+    <!-- The Camera as an icon of its own in the launcher, and the Camera shortcut on Erevos's icon
+         (plugins/with-launcher-icons.js): it hands erevos://collection?camera=1 to Erevos and closes,
+         in a task of its own (taskAffinity ""). The camera opens behind Erevos's lock and the
+         Collection's own, as from the Collection. -->
+    <activity
+      android:name="expo.modules.erevoscollection.CameraOpenActivity"
+      android:taskAffinity=""
+      android:exported="true"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+    <!-- The Camera's launcher icon, one per colour the owner can choose (Appearance → Launcher icons,
+         modules/erevos-icons). All off at first: the owner puts it among the phone's apps there. -->
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherActivity"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_orange"
+      android:roundIcon="@mipmap/erevos_camera_launcher_orange"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherRed"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_red"
+      android:roundIcon="@mipmap/erevos_camera_launcher_red"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherGreen"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_green"
+      android:roundIcon="@mipmap/erevos_camera_launcher_green"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherBlue"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_blue"
+      android:roundIcon="@mipmap/erevos_camera_launcher_blue"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherViolet"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_violet"
+      android:roundIcon="@mipmap/erevos_camera_launcher_violet"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
+    <activity-alias
+      android:name="expo.modules.erevoscollection.CameraLauncherDark"
+      android:targetActivity="expo.modules.erevoscollection.CameraOpenActivity"
+      android:enabled="false"
+      android:exported="true"
+      android:icon="@mipmap/erevos_camera_launcher_dark"
+      android:roundIcon="@mipmap/erevos_camera_launcher_dark"
+      android:label="@string/erevos_camera_launcher">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
     <!-- Erevos in other apps' Share (ShareActivity.kt): words, a link, a photo or a file, handed to
          Erevos by a link, in a task of its own (taskAffinity ""), so it shows Send to, not Erevos
          as it was left. Here, beside the Sealer, as a photo or file is encrypted as it comes. -->

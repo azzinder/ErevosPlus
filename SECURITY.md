@@ -38,3 +38,7 @@ welcome.
 [docs/security-review.md](docs/security-review.md) is a map of the code for a review: what each
 part does, where its cryptography is, how to build and test it, and the places that most need a
 second look.
+
+An AI-assisted review of November 2026, what it found, what was fixed and what it did not cover:
+[docs/ai-review-2026-11.md](docs/ai-review-2026-11.md). It does not change what this page says
+first: Erevos has not been audited.

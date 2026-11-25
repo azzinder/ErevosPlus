@@ -189,7 +189,7 @@ function OpenCollection() {
   const styles = useStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { hidden, to } = useLocalSearchParams<{ hidden?: string; to?: string }>();
+  const { hidden, to, camera } = useLocalSearchParams<{ hidden?: string; to?: string; camera?: string }>();
   const inHidden = hidden === '1';
   // Opened from a chat's "+" (app/chat.tsx) to pick photos or files for it: a tap chooses, and Send
   // hands them to that chat, which sends them as it shows again (lib/share-in.ts).
@@ -206,6 +206,14 @@ function OpenCollection() {
   const [adding, setAdding] = useState(false);
   // Erevos's own camera open, taking straight into the Collection.
   const [filming, setFilming] = useState(false);
+  // Opened by the Camera's icon or the Camera shortcut on Erevos's icon (modules/erevos-collection,
+  // CameraOpenActivity.kt): the camera at once, once the Collection is open. Taken off the address
+  // so going back to the Collection does not open it again.
+  useEffect(() => {
+    if (camera !== '1' || inHidden || !CAN_TAKE_PHOTO) return;
+    setFilming(true);
+    router.setParams({ camera: undefined });
+  }, [camera, inHidden]);
   // The photo being turned and cut.
   const [editing, setEditing] = useState<CollectionItem | null>(null);
   const [moving, setMoving] = useState<string[] | null>(null);

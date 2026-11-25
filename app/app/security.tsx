@@ -36,7 +36,7 @@ import {
   saveRingInBackground,
 } from '../lib/background';
 import { BiometricError, biometricOn, turnOffBiometric, turnOnBiometric } from '../lock/biometric';
-import { loadLockConfig, lockWithPassword, removePasswordLock, removeSecondPassword, setLockPassword, type LockConfig } from '../lock/config';
+import { dropOthersLockedSpeed, loadLockConfig, lockWithPassword, removePasswordLock, removeSecondPassword, setLockPassword, type LockConfig } from '../lock/config';
 import { useLock } from '../lock/context';
 import { prepareHidden, removeHiddenPassword, setHiddenPassword } from '../lock/hidden';
 import { POCKETS } from '../lock/sealed-file';
@@ -148,7 +148,7 @@ export default function Security() {
       t('The second password will stop working. What was in that space stays on the phone, and nothing opens it.'),
     );
     if (!ok) return;
-    await removeSecondPassword(space);
+    await removeSecondPassword(space, currentSpace().key);
     await reload();
     setNote(t('Saved.'));
   }
@@ -189,6 +189,8 @@ export default function Security() {
       // A new space with a new key, and no hidden chats. Whatever was there before cannot be opened any more.
       const next = space + 1;
       const nextKey = newSpaceKey();
+      // Nor is its speed dial called with Erevos locked any more (lock/config.ts).
+      await dropOthersLockedSpeed(space, key);
       await setLockPassword(next, password, nextKey);
       // It looks like this space, so the two cannot be told apart by their look.
       await saveSpaceData(next, nextKey, { ...EMPTY_SPACE, look });
@@ -542,7 +544,7 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
           </Row>
           <Text variant="caption" tone="muted" style={hint}>
             {boot
-              ? t('After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say "New message", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says "Locked". Spaces that go through Tor say nothing until a space is open. With no such space, it stops at once.')
+              ? t('After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say "New message", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says "Locked". Spaces that go through Tor say nothing until a space is open. With no such space, only a quiet notice says it is locked, and a tap on it opens Erevos.')
               : t('After the phone turns on, Erevos waits until you open it.')}
           </Text>
         </>

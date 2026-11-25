@@ -140,19 +140,29 @@ export async function linkInviter(e2e: E2E, identity: string): Promise<{ number:
   return { number: got.number, name: e2e.contacts().find((c) => c.identity === identity)?.name ?? '' };
 }
 
+/**
+ * Of the invites kept for the next look, those answered now and those that wait: with SMS invites
+ * turned off (`bySms` false) only what the owner took here themselves, a contact QR code or an
+ * invite link, which has no number; what came by SMS waits until they are turned on again.
+ */
+export function invitesDue<T extends { from: string }>(kept: readonly T[], bySms: boolean): { now: T[]; later: T[] } {
+  return bySms ? { now: [...kept], later: [] } : { now: kept.filter((item) => !item.from), later: kept.filter((item) => !!item.from) };
+}
+
 /** Answers SMS invites from Erevos phones with this chat's contact link, sealed for the inviter: the queue the link names (`linkSender`, lib/queue-move.ts). */
 export async function answerInvites(e2e: E2E, linkSender: string, here: Where, sends: Relay): Promise<void> {
   if (!canSealOpen()) return;
   const link = await spaceSmsLink();
-  // Invites turned off: this phone sends none, and answers none either, so no one becomes a
-  // contact from a phone number alone. What came waits; turned on again, it is answered.
-  if (!link.invites) return;
+  // SMS invites turned off: this phone answers none that came by SMS, so no one becomes a contact
+  // from a phone number alone; what came waits and, turned on again, is answered. A contact QR code
+  // or an invite link the owner took here themselves (no number) is answered all the same (#35).
+  const bySms = link.invites;
   // Taken off the list at once: one added meanwhile waits for the next look.
-  const queued = unanswered;
-  unanswered = [];
+  const { now: queued, later } = invitesDue(unanswered, bySms);
+  unanswered = later;
   let invites: typeof queued;
   try {
-    const pieces = (await takeSmsInvites()).map((p) => ({ from: p.from, data: fromBase64(p.data), at: p.at }));
+    const pieces = bySms ? (await takeSmsInvites()).map((p) => ({ from: p.from, data: fromBase64(p.data), at: p.at })) : [];
     invites = [...queued, ...(pieces.length ? await link.collect(pieces) : [])];
   } catch (error) {
     unanswered.push(...queued);
@@ -292,6 +302,24 @@ export async function nameShortInvite(secret: string, name: string): Promise<voi
 /** Whether a short invite made here still waits for its answer. */
 export async function shortInviteWaits(secret: string): Promise<boolean> {
   return (await spaceSmsLink()).textInviteWaits(secret);
+}
+
+/**
+ * Takes back a short invite made here that no phone used yet: from the relay, so its link lets no
+ * one in any more, and forgotten here. False when a phone has used it already: that one may still
+ * answer, and is left to.
+ */
+export async function takeBackShortInvite(short: ShortInvite): Promise<boolean> {
+  const data = await loadCurrentSpaceData();
+  if (!data.url) return false;
+  const relay: Relay = { url: data.url, token: data.token || undefined };
+  const id = inviteId(short.invite.code);
+  const listed = await listInvites(relay);
+  const it = listed?.find((l) => l.id === id);
+  if (it && it.used > 0) return false;
+  if (it) await takeBackInvite(relay, id);
+  await (await spaceSmsLink()).settleTextInvite(short.secret, true);
+  return true;
 }
 
 async function shortInvite(number: string, name: string, days: number): Promise<ShortInvite> {

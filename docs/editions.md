@@ -39,7 +39,9 @@ and script names the plain Erevos `erevos`.
   neither their code nor the permissions of their manifests (calls, call log, SMS, MMS) are in it.
   Their JavaScript finds no native module, as in a browser. The Collection's native module stays,
   as chats open files with another app and play videos through it, but the Collection is not
-  offered. The guide leaves out their sections (`EREVOS_SECTIONS`) and, in the others, what speaks
+  offered: what its manifest declares for the Collection's camera, the Camera's icon among the
+  phone's apps and the activity it opens, is removed as the manifests are merged
+  (`CAMERA_NOT_IN_LITE`), so Erevos Lite has no Camera icon and no Camera shortcut. The guide leaves out their sections (`EREVOS_SECTIONS`) and, in the others, what speaks
   of them, marked in the sources of every language (`{~…}`, `{~…|…}`, `- [~]` and `[~]`, read by
   `editionSource` in lib/guide.ts; checks/guide.check.ts holds every language to the English
   shape and to what Erevos Lite keeps); What's new their lines (`inErevosLite`), under Erevos Lite's own numbers (`asLite`);

@@ -13,7 +13,7 @@ import { useColors } from '../theme/context';
 import { ChevronIcon, PersonIcon } from './icons';
 import { QrCode } from './QrCode';
 import { Tile, type TileTint } from './shortcut-tile';
-import { Button, Chip, Row, Text, TextButton } from './ui';
+import { Button, Row, Text, TextButton } from './ui';
 
 // The parts of New chat (app/chat.tsx, with no chat open) that say how this phone connects: a card
 // with how its contacts reach it now, in plain words, and the ways in for a phone with no relay yet,
@@ -89,62 +89,21 @@ export function WayCard({ tint, sign, title, line, open, onPress, children }: {
 const WHITE = '#ffffff';
 
 /**
- * New chat's own QR code (#12), shown on the screen itself, at once: whoever scans it adds this
- * phone. Under it, scanning theirs, sharing the link, and a photo of their QR code. `text` null
- * while it is not ready yet. `children` go under the buttons (NFC, the large code).
- * `forNew`, where this phone can invite: a choice over it, whether the other person has Erevos
- * already. The contact link's QR code works only when both phones have a relay, which it says; an
- * invite (`invite`) brings a newcomer in with a place on this phone's relay, and works for anyone.
+ * This phone's own QR code (#12), on My link, a page of New chat: whoever scans it adds
+ * this phone. Under it, scanning theirs, sharing the link, and a photo of their QR code. `text`
+ * null while it is not ready yet. `children` go under the buttons (NFC, the large code).
  */
-export function MyQrCard({ text, onScan, onShare, shareTitle, onPhoto, forNew, children }: {
+export function MyQrCard({ text, onScan, onShare, shareTitle, onPhoto, children }: {
   text: string | null;
   onScan?: () => void;
   onShare: () => void;
   shareTitle: string;
   onPhoto: () => void;
-  forNew?: { on: boolean; onChoose: (on: boolean) => void; invite: ReactNode };
   children?: ReactNode;
 }) {
   const colors = useColors();
   return (
     <View style={[styles.qrCard, { borderRadius: radius.lg, backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {forNew ? (
-        <View style={styles.forNew}>
-          <Text variant="caption" tone="muted">
-            {t('Does the other person have Erevos?')}
-          </Text>
-          <Row wrap>
-            <Chip label={t('Has Erevos already')} selected={!forNew.on} onPress={() => forNew.onChoose(false)} />
-            <Chip label={t('New to Erevos')} selected={forNew.on} onPress={() => forNew.onChoose(true)} />
-          </Row>
-        </View>
-      ) : null}
-      {forNew?.on ? (
-        <>
-          <Text variant="heading">{t('Invite to Erevos')}</Text>
-          {forNew.invite}
-        </>
-      ) : (
-        <QrOwn text={text} onScan={onScan} onShare={onShare} shareTitle={shareTitle} onPhoto={onPhoto} relayHint={!!forNew}>
-          {children}
-        </QrOwn>
-      )}
-    </View>
-  );
-}
-
-function QrOwn({ text, onScan, onShare, shareTitle, onPhoto, relayHint, children }: {
-  text: string | null;
-  onScan?: () => void;
-  onShare: () => void;
-  shareTitle: string;
-  onPhoto: () => void;
-  relayHint: boolean;
-  children?: ReactNode;
-}) {
-  const colors = useColors();
-  return (
-    <>
       <Text variant="heading">{t('Your QR code')}</Text>
       <View style={styles.qrBox}>
         {text ? <QrCode text={text} size={200} /> : <Text tone="muted">{t('Getting it ready…')}</Text>}
@@ -152,18 +111,13 @@ function QrOwn({ text, onScan, onShare, shareTitle, onPhoto, relayHint, children
       <Text variant="caption" tone="muted" style={styles.center}>
         {t('They scan it with the camera, and you are each other’s contacts at once.')}
       </Text>
-      {relayHint ? (
-        <View style={[styles.hint, { borderRadius: radius.md, backgroundColor: colors.primarySoft }]}>
-          <Text variant="caption">{t('This works only when both phones have a relay. If you do not connect, choose New to Erevos.')}</Text>
-        </View>
-      ) : null}
       <Row wrap style={styles.qrButtons}>
         {onScan ? <Button title={t('Scan theirs')} onPress={onScan} /> : null}
         <Button title={shareTitle} kind="secondary" onPress={onShare} />
       </Row>
       <TextButton title={t('From a photo of their QR code')} onPress={onPhoto} />
       {children}
-    </>
+    </View>
   );
 }
 
@@ -264,14 +218,6 @@ const styles = StyleSheet.create({
     minHeight: 200,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  forNew: {
-    alignSelf: 'stretch',
-    gap: space.xs,
-  },
-  hint: {
-    alignSelf: 'stretch',
-    padding: space.sm,
   },
   qrButtons: {
     justifyContent: 'center',

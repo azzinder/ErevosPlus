@@ -12,6 +12,8 @@ import { LinkedText } from '../components/linked-text';
 import { keptName, StarredHere, useKeep } from '../components/keep-actions';
 import { Missing, type Answered } from '../components/matrix-message';
 import { MicButton, RecordingLine, useVoiceCapture, VoiceClip } from '../components/matrix-voice';
+import { IconButton } from '../components/composer';
+import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { MessageMenu, type MenuAction } from '../components/message-menu';
 import { Pinned, PlaceCard, Quote, Reactions } from '../components/message-parts';
 import { ChatLookSheet, ChatScreen } from '../components/chat-look';
@@ -26,7 +28,7 @@ import { useNetworkThread } from '../components/network-thread';
 import { NostrStickers } from '../components/nostr-stickers';
 import { PlaceSheet } from '../components/place-sheet';
 import { chosenStyle, SelectBar, selectAction, useSelection } from '../components/select-bar';
-import { Button, Input, Page, Row, Sheet, Text } from '../components/ui';
+import { Button, Input, OptionList, Page, Row, Sheet, Text } from '../components/ui';
 import { ask } from '../lib/alert';
 import { nostrHistory } from '../lib/chat-history-adapters';
 import type { Place } from '../lib/chat-parts';
@@ -177,6 +179,9 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
   // Whether the chat's own look shows its choices (components/chat-look.tsx).
   const [styling, setStyling] = useState(false);
+  // The chat's options (#44), and what goes with a message: each a sheet, opened beside the field.
+  const [more, setMore] = useState(false);
+  const [attaching, setAttaching] = useState(false);
   // The messages being forwarded, while the chats to forward them to show; the stickers' sheet;
   // which pin the bar over the thread shows.
   const [forwarding, setForwarding] = useState<string[] | null>(null);
@@ -506,9 +511,14 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
 
   // The chat's name: fixed over the thread, it stays while the thread scrolls (#12).
   const top = (
-    <Text variant="title" numberOfLines={2}>
-      {name}
-    </Text>
+    <Row>
+      <Text variant="title" numberOfLines={2} style={{ flex: 1 }}>
+        {name}
+      </Text>
+      <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+        <MoreIcon color={colors.text} />
+      </IconButton>
+    </Row>
   );
 
   const thread = withArrows(
@@ -533,26 +543,10 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       <Text variant="caption" tone="muted">
         {t('Nostr · encrypted (NIP-17), not anonymous')}
       </Text>
-      {group || self ? null : (
-        <CheckInPerson
-          checked={!!chat.checked}
-          code={ownCode(npubOf(state.public))}
-          about={t('Their Nostr app shows their key as a code (nostr:npub…): take a photo of it here, and the chat is marked checked when it is this chat’s key. Let them take a photo of this code too. Nothing is sent.')}
-          check={async (text) => checkSaid(await nostrDmAct((s) => checkByCode(s, key, text)))}
-          onUncheck={() => void nostrDmAct(async (s) => uncheck(s, key)).catch(fail)}
-        />
-      )}
-      {group || self ? null : (
-        <>
-          <Row>
-            <Button title={t('Public posts')} kind="secondary" compact onPress={() => router.push({ pathname: '/nostr-posts', params: { key, ...whereParams(where) } })} />
-          </Row>
-          {chat.messages.length === 0 ? (
-            <Text variant="caption" tone="faint">
-              {t('No private messages here yet. What they post for everyone is under Public posts.')}
-            </Text>
-          ) : null}
-        </>
+      {group || self || chat.messages.length > 0 ? null : (
+        <Text variant="caption" tone="faint">
+          {t('No private messages here yet. What they post for everyone is under Public posts.')}
+        </Text>
       )}
       {pins.length ? (
         <Pinned
@@ -608,140 +602,169 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         {/* Held down: what is typed goes later. */}
         <Button title={t('Send')} compact disabled={!draft.trim()} onPress={() => void send()} onLongPress={draft.trim() ? () => setChoosingLater(true) : undefined} />
       </Row>
-      {voice.recording ? null : (
-        <Row wrap>
-          <Button title={t('Location')} kind="secondary" compact disabled={sending} onPress={() => setPlacing(true)} />
-          <CarryButtons
-            disabled={sending}
-            photos={photos}
-            among={among}
-            shown={shown}
-            onCamera={() => void sendPhoto('camera')}
-            onVideo={() => void sendVideo()}
-            onCard={(card) => void sendCard(card)}
-          />
-        </Row>
-      )}
       <LaterSheet visible={choosingLater && shown} where={where} onClose={() => setChoosingLater(false)} onPick={(at) => void sendLater(at)} />
       <RemindSheet of={shown ? reminding : null} where={where} onClose={() => setReminding(null)} say={setNote} />
+      {/* Under the field, one line: what goes with a message ("+"), the chat's options, and the microphone (#44). */}
       <Row {...endProps}>
         {voice.recording ? (
           <RecordingLine />
         ) : (
           <>
-            <Button title={t('Photo')} kind="secondary" compact disabled={sending} onPress={() => void sendPhoto()} />
-            <Button title={t('File')} kind="secondary" compact disabled={sending} onPress={() => void sendAnyFile()} />
-            {stickerPlace ? <Button title={t('Sticker')} kind="secondary" compact disabled={sending} onPress={() => setStickering(true)} /> : null}
-            {vanish.on ? null : <Button title={t('Disappear')} kind="secondary" compact onPress={vanish.toggle} />}
-            {sending ?<Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
+            <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} disabled={sending}>
+              <PlusIcon color={colors.text} size={22} />
+            </IconButton>
+            {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
           </>
         )}
+        <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+          <OptionsIcon color={colors.text} size={22} />
+        </IconButton>
         <MicButton voice={voice} disabled={sending} />
       </Row>
       {note ? <Text tone="muted">{note}</Text> : null}
-      <Row wrap>
-        <NetworkChatNotify notify={checkedChatNotify(chat.notify)} hidden={where !== 'space'} calls={false} onChange={(next) => nostrDmSetNotify(key, next)} />
-        {canNostrTor() && !self ? (
-          <Button
-            title={chat.tor ? t('Through Tor: on') : t('Through Tor')}
-            kind="secondary"
-            compact
-            onPress={() => void nostrDmSetTor(key, !chat.tor).catch(fail)}
+      <Sheet visible={attaching && shown} onClose={() => setAttaching(false)} title={t('Attach and more')}>
+        <Row wrap>
+          <Button title={t('Photo')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); void sendPhoto(); }} />
+          <Button title={t('File')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); void sendAnyFile(); }} />
+          <Button title={t('Location')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setPlacing(true); }} />
+          {stickerPlace ? <Button title={t('Sticker')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setStickering(true); }} /> : null}
+          <CarryButtons
+            disabled={sending}
+            photos={photos}
+            among={among}
+            shown={shown}
+            onCamera={() => { setAttaching(false); void sendPhoto('camera'); }}
+            onVideo={() => { setAttaching(false); void sendVideo(); }}
+            onCard={(card) => { setAttaching(false); void sendCard(card); }}
           />
-        ) : null}
-        <Button title={t('Chat look')} kind="secondary" compact onPress={() => setStyling(true)} />
-        <StarredHere stars={keep.stars} who={name} onGo={(id) => (byId.has(id) ? goTo(id) : setNote(t('That message is not on this phone.')))} />
-        {guard.buttons}
-        <ChatTimer
-          seconds={timerOf(chat)}
-          note={t('New messages, sent or received, go from this phone that long after they were sent. Yours carry that time, so their app and the relays delete them then (NIP-40); those that do not honour it keep them. Messages already here stay.')}
-          onChoose={(after) => void nostrDmAct(async (s) => setTimerIn(s, key, after)).catch(fail)}
-        />
-      </Row>
-      {chat.tor && canNostrTor() && !self ? (
-        <Text variant="caption" tone="faint">
-          {t('What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.')}
-        </Text>
-      ) : null}
-      <HistoryButtons tools={history} exportable={where === 'space'} />
+          {vanish.on ? null : <Button title={t('Disappear')} kind="secondary" compact onPress={() => { setAttaching(false); vanish.toggle(); }} />}
+        </Row>
+      </Sheet>
+      <Sheet visible={more && shown} onClose={() => setMore(false)} title={t('Chat options')}>
+        <View style={{ gap: space.md }}>
+          <OptionList title={t('This chat')}>
+            <NetworkChatNotify notify={checkedChatNotify(chat.notify)} hidden={where !== 'space'} calls={false} onChange={(next) => nostrDmSetNotify(key, next)} />
+            {canNostrTor() && !self ? (
+              <Button
+                title={chat.tor ? t('Through Tor: on') : t('Through Tor')}
+                kind="secondary"
+                compact
+                onPress={() => void nostrDmSetTor(key, !chat.tor).catch(fail)}
+              />
+            ) : null}
+            <Button title={t('Chat look')} kind="secondary" compact onPress={() => { setMore(false); setStyling(true); }} />
+            <StarredHere stars={keep.stars} who={name} onGo={(id) => (byId.has(id) ? goTo(id) : setNote(t('That message is not on this phone.')))} onGoing={() => setMore(false)} />
+            {guard.buttons}
+            <ChatTimer
+              seconds={timerOf(chat)}
+              note={t('New messages, sent or received, go from this phone that long after they were sent. Yours carry that time, so their app and the relays delete them then (NIP-40); those that do not honour it keep them. Messages already here stay.')}
+              onChoose={(after) => void nostrDmAct(async (s) => setTimerIn(s, key, after)).catch(fail)}
+              onChosen={() => setMore(false)}
+            />
+          </OptionList>
+          {chat.tor && canNostrTor() && !self ? (
+            <Text variant="caption" tone="faint">
+              {t('What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.')}
+            </Text>
+          ) : null}
+          <OptionList title={t('Find')}>
+            <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} />
+          </OptionList>
+          {self ? null : (
+            <OptionList title={group ? t('This group') : t('This contact')}>
+              {group ? null : (
+                <Button title={t('Public posts')} kind="secondary" compact onPress={() => { setMore(false); router.push({ pathname: '/nostr-posts', params: { key, ...whereParams(where) } }); }} />
+              )}
+              {naming === null ? (
+                <Button title={group ? t('Name this group') : t('Name them here')} kind="secondary" compact onPress={() => setNaming((group ? chat.subject : chat.name) ?? '')} />
+              ) : null}
+              {group ? null : isBlocked(state, key) ? (
+                <Button title={t('Unblock')} kind="secondary" onPress={() => void nostrDmAct(async (s) => setBlocked(s, key, false)).catch(fail)} />
+              ) : (
+                <Button
+                  title={t('Block')}
+                  kind="secondary"
+                  onPress={() =>
+                    ask(t('Block {name}?', { name }), t('What they send is dropped on this phone, unread, and does not come back if you unblock them. They are not told: Nostr cannot stop anyone from writing to you.'), [
+                      { text: t('Cancel'), style: 'cancel' },
+                      { text: t('Block'), style: 'destructive', onPress: () => void nostrDmAct(async (s) => setBlocked(s, key, true)).catch(fail) },
+                    ])
+                  }
+                />
+              )}
+              <Button
+                title={t('Remove this chat')}
+                kind="danger"
+                onPress={() =>
+                  ask(
+                    t('Remove this chat?'),
+                    group
+                      ? t('Its messages are removed from this phone. The others keep theirs, and a new message in the group starts it again.')
+                      : t('Its messages are removed from this phone. The other person keeps theirs, and a new message from them starts the chat again.'),
+                    [
+                      { text: t('Cancel'), style: 'cancel' },
+                      {
+                        text: t('Remove'),
+                        style: 'destructive',
+                        onPress: () =>
+                          void nostrDmForgetChat(key)
+                            .then(() => router.back())
+                            .catch(fail),
+                      },
+                    ],
+                  )
+                }
+              />
+            </OptionList>
+          )}
+          {!group && !self && isBlocked(state, key) ? (
+            <Text variant="caption" tone="muted">
+              {t('Blocked: what they send is dropped on this phone.')}
+            </Text>
+          ) : null}
+          {self || naming === null ? null : (
+            <View style={{ gap: space.xs }}>
+              <Row>
+                <Input
+                  style={{ flex: 1 }}
+                  value={naming}
+                  onChangeText={setNaming}
+                  maxLength={group ? 100 : 64}
+                  placeholder={group ? name : state.people[key]?.name || shortNpub(npub)}
+                  accessibilityLabel={group ? t('Name this group') : t('Name them here')}
+                />
+                <Button
+                  title={t('Save')}
+                  compact
+                  onPress={() =>
+                    void (group ? nostrDmSetSubject(key, naming) : nostrDmRename(key, naming))
+                      .then(() => setNaming(null))
+                      .catch(fail)
+                  }
+                />
+              </Row>
+              <Text variant="caption" tone="faint">
+                {group
+                  ? t('Everyone in the group sees it, with your next message.')
+                  : where === 'place'
+                    ? t('Only in these hidden chats: they are not told. Empty, it shows the name they gave themselves.')
+                    : t('Only in this space: they are not told. Empty, it shows the name they gave themselves.')}
+              </Text>
+            </View>
+          )}
+          {group || self ? null : (
+            <CheckInPerson
+              checked={!!chat.checked}
+              code={ownCode(npubOf(state.public))}
+              about={t('Their Nostr app shows their key as a code (nostr:npub…): take a photo of it here, and the chat is marked checked when it is this chat’s key. Let them take a photo of this code too. Nothing is sent.')}
+              check={async (text) => checkSaid(await nostrDmAct((s) => checkByCode(s, key, text)))}
+              onUncheck={() => void nostrDmAct(async (s) => uncheck(s, key)).catch(fail)}
+            />
+          )}
+        </View>
+      </Sheet>
       <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={name} chat={lookChat} />
       <PlaceSheet visible={placing && shown} onClose={() => setPlacing(false)} onSend={sendPlace} said={t('Everyone in this chat can see it.')} />
-
-      {self ? null : naming === null ? (
-        <Button title={group ? t('Name this group') : t('Name them here')} kind="secondary" compact onPress={() => setNaming((group ? chat.subject : chat.name) ?? '')} />
-      ) : (
-        <View style={{ gap: space.xs }}>
-          <Row>
-            <Input
-              style={{ flex: 1 }}
-              value={naming}
-              onChangeText={setNaming}
-              maxLength={group ? 100 : 64}
-              placeholder={group ? name : state.people[key]?.name || shortNpub(npub)}
-              accessibilityLabel={group ? t('Name this group') : t('Name them here')}
-            />
-            <Button
-              title={t('Save')}
-              compact
-              onPress={() =>
-                void (group ? nostrDmSetSubject(key, naming) : nostrDmRename(key, naming))
-                  .then(() => setNaming(null))
-                  .catch(fail)
-              }
-            />
-          </Row>
-          <Text variant="caption" tone="faint">
-            {group
-              ? t('Everyone in the group sees it, with your next message.')
-              : where === 'place'
-                ? t('Only in these hidden chats: they are not told. Empty, it shows the name they gave themselves.')
-                : t('Only in this space: they are not told. Empty, it shows the name they gave themselves.')}
-          </Text>
-        </View>
-      )}
-
-      {group || self ? null : isBlocked(state, key) ? (
-        <>
-          <Text variant="caption" tone="muted">
-            {t('Blocked: what they send is dropped on this phone.')}
-          </Text>
-          <Button title={t('Unblock')} kind="secondary" onPress={() => void nostrDmAct(async (s) => setBlocked(s, key, false)).catch(fail)} />
-        </>
-      ) : (
-        <Button
-          title={t('Block')}
-          kind="secondary"
-          onPress={() =>
-            ask(t('Block {name}?', { name }), t('What they send is dropped on this phone, unread, and does not come back if you unblock them. They are not told: Nostr cannot stop anyone from writing to you.'), [
-              { text: t('Cancel'), style: 'cancel' },
-              { text: t('Block'), style: 'destructive', onPress: () => void nostrDmAct(async (s) => setBlocked(s, key, true)).catch(fail) },
-            ])
-          }
-        />
-      )}
-      <Button
-        title={t('Remove this chat')}
-        kind="secondary"
-        onPress={() =>
-          ask(
-            t('Remove this chat?'),
-            group
-              ? t('Its messages are removed from this phone. The others keep theirs, and a new message in the group starts it again.')
-              : t('Its messages are removed from this phone. The other person keeps theirs, and a new message from them starts the chat again.'),
-            [
-              { text: t('Cancel'), style: 'cancel' },
-              {
-                text: t('Remove'),
-                style: 'destructive',
-                onPress: () =>
-                  void nostrDmForgetChat(key)
-                    .then(() => router.back())
-                    .catch(fail),
-              },
-            ],
-          )
-        }
-      />
       <MessageMenu
         visible={!!menuMessage && shown}
         onClose={() => setMenuFor(null)}

@@ -8,6 +8,105 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
+## 3.2.0-rc.2 (2026-11-25)
+
+The second release candidate of Erevos Lite: Erevos 3.0.0-rc.2 for Erevos's own chats and calls, with what is below.
+
+### For you
+
+- What Erevos 3.0.0-rc.2 brought to chats: New chat that asks where the other person is, with **Near me**, **Far
+  away** and **I have their code**; the warning without Tor said once for a network; **Make a backup** showing how
+  far it is again; and **Start when the phone turns on** waiting with a notice in the status bar. The camera's icon,
+  the chat options and the speed dial with Erevos locked are the Collection's, the SMS's and the Phone's, which
+  Erevos Lite has not.
+
+### Under the hood
+
+- Unlocking with a fingerprint or face no longer turns itself off by mistake, and **Near me** pairs with a key the
+  two phones agree on then, as in Erevos 3.0.0-rc.2.
+
+## 3.0.0-rc.2 (2026-11-25)
+
+### For you
+
+- Erevos's camera at a tap (Android; not in Erevos Lite, which has no camera). **Appearance** → **Launcher icons** →
+  **Camera** → **Put the Camera among the phone's apps** adds an icon of its own, off at first, in any of the six
+  colours, and holding Erevos's icon down offers **Camera** too. Both open the Collection's camera, behind Erevos's
+  password and the Collection's (`modules/erevos-collection` `CameraOpenActivity`, `erevos://collection?camera=1`,
+  `app/collection.tsx`). Neither shows while the Collection is off or the calculator stands in place of Erevos
+  (`modules/erevos-icons` `applyCamera`, `applyShortcut`; `lib/module-icons.ts`). Erevos Lite keeps the Collection's
+  module, for the files in its chats, so its build takes the Camera's icon and what it opens out of the app
+  (`plugins/with-edition-modules.js` `CAMERA_NOT_IN_LITE`), and shows neither the card nor the shortcut. Requested by
+  the maintainer.
+- The warning that your internet address can be seen before you send without Tor now comes once for the whole
+  network, not in every chat. After that a chat or group that goes without Tor shows only a quiet line above where
+  you write, **Without Tor: the relays see your internet address.**, with **Through Tor for this chat** and
+  **Guide** (`lib/ip-warning.ts` `ipKey`, `components/ip-warning.tsx` `IpQuiet`). Requested by the maintainer.
+- **Make a backup** shows how far it is again when you leave the backups screen, or Erevos, and come back, and then
+  how it ended. Only in the space it was made in: once that space closes, nothing of the backup shows in the one
+  opened next, and one still being made then ends without a word, the phone's notice that names it left out too
+  (`lib/backup-making.ts`, `app/backup.tsx`).
+- **Start when the phone turns on**: with no space set to tell of messages while closed, Erevos no longer stops
+  without a word: the quiet **Locked** notice stays, and a tap on it opens Erevos for the password. While it waits for
+  those spaces, its notice now shows in the status bar too (a channel of its own, **Waiting since the phone turned
+  on**). The choice is now kept with the phone's other settings, so a backup restored, or a move to another edition,
+  keeps it (`lib/background.ts` `syncBootStart`, `lock/backup.ts`).
+- Chat options in reach (#44): in chats on Nostr, Matrix and XMPP and in SMS conversations, a sliders button beside
+  where you write opens **Chat options**, one tidy list in place of the rows of buttons above or below the thread:
+  **Notifications**, **Chat look**, the PIN, screenshots and disappearing messages under **This chat**, search, media,
+  a day and export under **Find**, and, on Nostr, the contact's own (public posts, a name, block, remove). Nostr's
+  **+** now holds what goes with a message, as Matrix's does (`components/ui.tsx` `OptionList`). Requested by the
+  maintainer.
+- New chat asks one thing (#45): **Where is the other person?** Each answer is a page of its own, and all three end on
+  **You are connected**, with their name to set and **Write a message**. **Near me**: tap it on both phones, and the
+  two find each other over Bluetooth or the Wi-Fi they share; each shows the same six pictures, both tap **Yes, the
+  same**, and you are each other's contacts, with no relay, no internet and nothing typed or scanned. The page looks
+  only while it is open, also with **Look for phones nearby** off, which stays off; under **If it is not found** it
+  keeps the QR code for their camera, the code of 8 digits and, on Android, the app itself for a phone with no Erevos.
+  **Far away**: an invite inside a message ready to send, with **Send with…**, its QR code, how far it has come
+  (ready, waiting, connected) and **Take this invite back**, which closes its link while no phone has taken it; where
+  this phone can make no invite, its contact link goes instead. **I have their code**: the 8 digits, their link or
+  invite pasted, or their QR code. Under these, three rows hold the rest: **My link** (this phone's own QR code and
+  link, a new contact link, a link for a website), **Blocked contacts** and **For advanced users** (the relay's
+  settings, and the switches of **Nearby, with no internet**, which moved there). What the pictures, or the code of 8
+  digits, hand over is taken as a contact link and as nothing else, never as an invite to a relay (`addPaired`). In
+  the first steps, **I have an invite** opens **I have their code**. An invite whose link opens only where Erevos is
+  already (a relay that lets this phone invite no one) now says so (`app/chat.tsx`, `components/new-chat-doors.tsx`,
+  `near-me.tsx`, `their-code.tsx`, `welcome-invite.tsx`). Requested by the maintainer.
+- Phone: speed dial can work with Erevos locked, if you choose. Under **Phone** → **Settings** → **Speed dial**, **Let
+  speed dial work with Erevos locked** (off at first, offered only while the Phone opens without the password) keeps a
+  copy of that space's speed dial numbers, without their names, on the phone outside the space (`lib/phone-open.ts`),
+  so holding 2 to 9 on the Phone opened without the password calls them. One space at a time; the space knows its copy
+  by a random `feed` kept sealed in its own data, so the copy does not say which space it is, though the option says
+  that the numbers called can show that the space exists. Never in a backup, and never longer than it is of use: the
+  copy is deleted when the Phone goes back behind the password, when a backup is restored (`lock/backup.ts`), when the
+  lock is turned off, and when a second password is removed or set again while another space is open (`lock/config.ts`
+  `dropOthersLockedSpeed`). Requested by the maintainer (#37).
+- A contact QR code or an invite link you take yourself is answered also with the invites by SMS turned off (**Turn
+  invites off**, under **Find Erevos on a number**). Turned off, the phone answered no invite at all, so the other
+  phone never heard back and nothing happened; now only what came by SMS waits for the switch (`lib/sms-relay.ts`
+  `invitesDue`, #35). Requested by the maintainer.
+
+### Under the hood
+
+- Unlocking with a fingerprint or face no longer turns itself off by mistake. It turned off whenever Erevos checked
+  its key while the phone itself was locked (an Erevos call showing over the lock screen, say), or when Android's
+  Keystore did not answer at once: both were taken for a key Android had dropped. Now a key Android really dropped
+  (`KeyPermanentlyInvalidatedException`), or one that does not open what it sealed, turns it off at once, and nothing
+  else does. A key broken in some other way, which Android only says it could not use, turns it off after three tries
+  in a row on an unlocked phone, so its button does not stay to fail every time (`modules/erevos-biometric`,
+  `lock/biometric.ts`).
+- **Near me** pairs over the links to phones nearby with a key the two phones agree on then (`lib/near-pair.ts`,
+  frames `EVP1:`, which an older Erevos leaves alone). The one that goes first gives the hash of its share before it
+  sees the other's, and opens it only after: neither can choose a share to make the pictures match. The six pictures
+  say 36 bits of the key; a phone makes 40 shares at most while the page stays open and keeps 8 pairings at once, so
+  a phone in between has about one chance in a hundred million of showing both owners the same six. Nothing that
+  names the owner goes before its yes, and then its contact link goes encrypted with that key
+  (`checks/near-pair.check.ts`). Not tried on two real phones yet.
+- The invite of **Far away** can be taken back from the relay while no phone used it (`lib/sms-relay.ts`
+  `takeBackShortInvite`), and a message pasted whole, the invite's words with its link, is read as the link alone
+  (`lib/open-link.ts`).
+
 ## 3.1.0-rc.1 (2026-11-23)
 
 The first release candidate of Erevos+: Erevos 3.0.0-rc.1 with every network, with what is below. Erevos+ 7.x

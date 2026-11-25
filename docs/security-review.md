@@ -11,7 +11,8 @@ the relay channel and queues, two-hop sending, MLS groups, password slots) are i
 [protocol.md](protocol.md), and the state diagrams of the ratchet, conversations, the lock screen
 with the panic password, hidden chats and group membership in [state-machines.md](state-machines.md).
 
-**Not audited.** Nothing here has been checked by anyone outside the project.
+**Not audited.** Nothing here has been checked by anyone outside the project. What an AI-assisted
+review of November 2026 found, and what was fixed, is in [ai-review-2026-11.md](ai-review-2026-11.md).
 
 ## Suggested scope
 

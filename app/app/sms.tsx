@@ -13,7 +13,7 @@ import { ChatTimer, useGoneAt } from '../components/chat-rules';
 import { canDial, DialTile } from '../components/dial-tile';
 import { IconButton, SendDisc } from '../components/composer';
 import { keptName, ownStickerPart, useKeep } from '../components/keep-actions';
-import { MoreIcon, PlusIcon } from '../components/icons';
+import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { KeyboardPaddedView } from '../components/keyboard';
 import { LaterPicker } from '../components/later-picker';
 import { MicButton, RecordingLine } from '../components/matrix-voice';
@@ -27,7 +27,7 @@ import { ContactsSheet } from '../components/sms-recipient';
 import { StickerPicker } from '../components/stickers';
 import { BELOW_TOP, ThreadArrows, useThreadAway } from '../components/thread-arrows';
 import { deleteSms, deleteSmsMany, erevosNumber, maySendSms, onSmsChangedElsewhere, sendSmsAgain, SmsForward } from '../components/sms-message';
-import { Button, Card, Chip, Input, Page, Row, Sheet, Text } from '../components/ui';
+import { Button, Card, Chip, Input, OptionList, Page, Row, Sheet, Text } from '../components/ui';
 import { UndoBar } from '../components/undo-bar';
 import { ask } from '../lib/alert';
 import { showOnScreen, showSmsOnScreen } from '../lib/background';
@@ -218,10 +218,10 @@ function conversationOf(raw: string): string {
  *  (components/sms-own.tsx): `tools` are the buttons for those, in it. */
 export default function SmsScreen() {
   const params = useLocalSearchParams<{ to?: string }>();
-  return <SmsOwnScreen to={conversationOf(typeof params.to === 'string' ? params.to : '')}>{(tools) => <Sms tools={tools} />}</SmsOwnScreen>;
+  return <SmsOwnScreen to={conversationOf(typeof params.to === 'string' ? params.to : '')}>{(tools, said) => <Sms tools={tools} said={said} />}</SmsOwnScreen>;
 }
 
-function Sms({ tools }: { tools: ReactNode }) {
+function Sms({ tools, said }: { tools: ReactNode; said: string }) {
   const params = useLocalSearchParams<{ to?: string; text?: string; plain?: string; at?: string }>();
   // With only the SMS open (app/_layout.tsx), a number of a contact stays a plain SMS conversation,
   // and nothing names the space's contacts.
@@ -272,6 +272,8 @@ function Sms({ tools }: { tools: ReactNode }) {
   const [menu, setMenu] = useState<SmsTarget | null>(null);
   // The sheet of what an MMS can carry, where you are being found, a contact being chosen to send.
   const [attaching, setAttaching] = useState(false);
+  // The conversation's options (#44): a sheet opened beside the field, where a long thread keeps them in reach.
+  const [optioning, setOptioning] = useState(false);
   // The sheet of quick texts (components/sms-quick.tsx): held +, or from Attach and more.
   const [quicking, setQuicking] = useState(false);
   const [atCarrier, setAtCarrier] = useState<WaitingMms[]>([]);
@@ -918,23 +920,7 @@ function Sms({ tools }: { tools: ReactNode }) {
             <Text variant="caption" color={colors.warning}>
               {t('Plain SMS: not encrypted. The phone company can read these messages.')}
             </Text>
-            {tools}
-            {order && !smsMirrored() && smsToolsReady() ? (
-              <Row>
-                <ChatTimer
-                  seconds={vanishTimer(rules)}
-                  note={t('New messages, sent or received, go from this phone that long after they were sent, or as soon as Erevos runs again. The other phone keeps them: an SMS cannot be deleted there. Messages already here stay.')}
-                  onChoose={(after) => {
-                    const kept = link.current;
-                    if (!kept) return;
-                    void kept
-                      .setVanish(to, after)
-                      .then((done) => (done ? setOrder(kept.state) : setNote(t('Not done'))))
-                      .catch(() => setNote(t('Not done')));
-                  }}
-                />
-              </Row>
-            ) : null}
+            {said ? <Text tone="muted">{said}</Text> : null}
             {contacts.length > 0 && !group && mayAnswer ? (
               choosing ? (
                 <>
@@ -1122,6 +1108,11 @@ function Sms({ tools }: { tools: ReactNode }) {
             <RecordingLine />
           ) : (
             <Input value={draft} onChangeText={setDraft} placeholder={part || group ? t('MMS (not encrypted)') : t('SMS (not encrypted)')} multiline style={styles.input} />
+          )}
+          {voice.recording ? null : (
+            <IconButton label={t('Chat options')} onPress={() => setOptioning(true)}>
+              <OptionsIcon color={colors.text} size={22} />
+            </IconButton>
           )}
           {/* With nothing typed, the microphone: held, it records a voice message for an MMS. */}
           {canPart && !draft.trim() && !part ? (
@@ -1363,6 +1354,26 @@ function Sms({ tools }: { tools: ReactNode }) {
             {stickerNote}
           </Text>
         ) : null}
+      </Sheet>
+      <Sheet visible={optioning} onClose={() => setOptioning(false)} title={t('Chat options')}>
+        <OptionList title={t('This chat')}>
+          {tools}
+            {order && !smsMirrored() && smsToolsReady() ? (
+                <ChatTimer
+                  seconds={vanishTimer(rules)}
+                  note={t('New messages, sent or received, go from this phone that long after they were sent, or as soon as Erevos runs again. The other phone keeps them: an SMS cannot be deleted there. Messages already here stay.')}
+                  onChoose={(after) => {
+                    const kept = link.current;
+                    if (!kept) return;
+                    void kept
+                      .setVanish(to, after)
+                      .then((done) => (done ? setOrder(kept.state) : setNote(t('Not done'))))
+                      .catch(() => setNote(t('Not done')));
+                  }}
+                />
+            ) : null}
+        </OptionList>
+        {said ? <Text tone="muted">{said}</Text> : null}
       </Sheet>
       <PlaceSheet visible={placing} onClose={() => setPlacing(false)} onSend={sendPlace} said={t('Plain SMS: not encrypted. The phone company can read these messages.')} />
       <ContactsSheet<CardRow> visible={choosingCard} onClose={() => setChoosingCard(false)} rows={contactRows} onPick={(row) => void pickCard(row.card)} phoneOnly />

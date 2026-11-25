@@ -6,33 +6,37 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, Share, StyleSheet, View } from 'react-native';
 
 import { QrCode } from './QrCode';
-import { Button, Field, Input, Row, Sheet, Text, TextButton } from './ui';
+import { Button, Field, Input, Row, Text, TextButton } from './ui';
+import { CAN_COPY, copyText } from '../lib/clipboard';
 import { WELCOME_DAYS, type E2E } from '../lib/e2e';
 import { t } from '../lib/i18n';
 import { laterLabel } from '../lib/later';
 import { makeInvite, type Relay } from '../lib/relay';
 import { oldToken } from '../lib/relay-signin';
 import { useNfcShare } from '../lib/nfc-share';
-import { makeShortInvite, nameShortInvite, shortInviteWaits, waitingShortInvite, type ShortInvite } from '../lib/sms-relay';
+import { makeShortInvite, nameShortInvite, shortInviteWaits, takeBackShortInvite, waitingShortInvite, type ShortInvite } from '../lib/sms-relay';
 import { textInviteLink } from '../lib/text-invite';
 import { welcomeLink } from '../lib/welcome';
 import { MAX_NAME } from '../lock/e2e-data';
 import { currentSpace } from '../lock/keys';
 import { loadCurrentSpaceData } from '../lock/space-data';
-import { space } from '../theme/colors';
+import { radius, space } from '../theme/colors';
+import { useColors } from '../theme/context';
 
 // Invite someone (lib/welcome.ts): one QR code or link, for one person, for 7 days. Their phone
 // opens it in Erevos and joins: it takes access of its own to this phone's relay (an invite to it,
 // when the relay lets this phone invite), and the two are each other's contacts at once. The name
 // typed for them stays here: their access on the relay has a name of random letters (E2E.lineFor).
-// The invite is made as the sheet opens, so one tap shows its QR code; who it is for and the name
-// this phone gives itself may be typed below it, or never (E2E.nameInvite). The relay lets a phone
-// make only a few invites a day, so the sheet opened again soon after, for the same one still
-// waiting, shows that one again; Invite someone else makes another.
+// On New chat (app/chat.tsx) it shows two ways. Far away is a page: the message that goes, to send
+// with any app, how far it has come, and who it is for and the name this phone gives itself, typed
+// below or never (E2E.nameInvite). Near me (components/near-me.tsx) has only its QR code, `inline`,
+// for the phone beside this one to scan. The invite is made as either opens. The relay lets a phone
+// make only a few invites a day, so one opened again soon after, for the same one still waiting,
+// shows that one again; Invite someone else makes another.
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error)).split('\n')[0];
 
-/** How long the invite last made shows again when the sheet opens, while no one took it. */
+/** How long the invite last made shows again when it opens, while no one took it. */
 const SHOWN_AGAIN_MS = 15 * 60_000;
 
 // A short invite (lib/sms-relay.ts makeShortInvite, `short`), small enough for any camera, or,
@@ -42,16 +46,13 @@ type Made = { link: string; hi: string; line: string; code: string | null; until
 // The invite last made while Erevos runs, by space and contact link: never kept anywhere else.
 let lastMade: { key: string; made: Made; name: string } | null = null;
 
-export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, onClose, e2e, relay, onOwnLine, contactLink, onNote }: {
+export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, onOwnLine, contactLink, onNote }: {
   visible: boolean;
-  /** On New chat's QR card itself, for someone new to Erevos: the invite's QR code, sharing it and
-   *  a new one, with no sheet around it. */
+  /** On Near me: the invite's QR code and a new one, with nothing around it. */
   inline?: boolean;
-  /** Opened from Show your QR code on New chat (#11): the same invite, said as this phone's QR code. */
-  asQr?: boolean;
-  /** With `asQr`, when no invite can be made: the contact link's QR code instead, saying nothing of relays. */
+  /** With `inline`, when no invite can be made (no internet, say): told, so the contact link's QR
+   *  code shows instead, which needs none. */
   onPlain?: () => void;
-  onClose: () => void;
   e2e: E2E | null;
   /** This phone's relay, with its token of its own; null when it has none to invite with. */
   relay: Relay | null;
@@ -67,6 +68,11 @@ export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, 
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState('');
   const [made, setMade] = useState<Made | null>(null);
+  // The page: whether its QR code shows, whether the invite still waits for its phone, and one taken back.
+  const [qrShown, setQrShown] = useState(false);
+  const [waits, setWaits] = useState(true);
+  const [back, setBack] = useState(false);
+  const colors = useColors();
   const making = useRef(false);
   // The short invite goes by touching phones too, while it shows (lib/nfc-share.ts).
   const nfc = useNfcShare(visible && made?.short ? made.link : null);
@@ -74,13 +80,33 @@ export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, 
 
   // As this phone's QR code, an invite that cannot be made is not said: its contact QR code shows instead.
   useEffect(() => {
-    if (visible && asQr && failed && onPlain) onPlain();
-  }, [visible, asQr, failed]);
+    if (visible && inline && failed && onPlain) onPlain();
+  }, [visible, inline, failed]);
+
+  // While the page shows: whether a phone took the invite, which this phone learns with its next look at the relay.
+  const madeKey = made ? (made.short?.secret ?? made.hi) : '';
+  useEffect(() => {
+    setWaits(true);
+    if (!visible || inline || !made) return;
+    let on = true;
+    const look = async () => {
+      const still = made.short ? await shortInviteWaits(made.short.secret).catch(() => true) : !!e2e?.inviteWaits(made.hi);
+      if (on) setWaits(still);
+    };
+    void look();
+    const timer = setInterval(() => void look(), 3000);
+    return () => {
+      on = false;
+      clearInterval(timer);
+    };
+  }, [visible, inline, madeKey, e2e]);
 
   // Each time it opens: the invite at once, the one still waiting from a moment ago or a new one.
   useEffect(() => {
     if (!visible) return;
     setFailed('');
+    setBack(false);
+    setQrShown(false);
     const as = e2e?.invitedAs() ?? '';
     setAs(as);
     const again = lastMade;
@@ -180,30 +206,46 @@ export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, 
     void e2e.inviteAs(as).catch((error) => onNote(errorText(error)));
   }
 
-  function close() {
-    keepName();
-    onClose();
-  }
-
   function another() {
     keepName();
     lastMade = null;
     setName('');
     setMade(null);
+    setBack(false);
     void make(as);
   }
 
-  async function share(link: string) {
+  // The invite goes with a few words before its link, so whoever gets it knows what it is: the
+  // words are the app's, and whoever pastes all of them in Erevos is taken by the link alone (lib/open-link.ts).
+  const message = (link: string) => t('Join me on Erevos, where what we write to each other is end-to-end encrypted: {link}', { link });
+
+  async function share(link: string, copy = Platform.OS === 'web') {
     try {
-      // A computer has no share sheet: the link is copied, to paste where it should go.
-      if (Platform.OS === 'web') {
-        await navigator.clipboard.writeText(link);
-        onNote(t('Invite copied.'));
+      // A computer has no share sheet: the message is copied, to paste where it should go.
+      if (copy) {
+        onNote((await copyText(message(link))) ? t('Invite copied.') : t('Not copied.'));
         return;
       }
-      await Share.share({ message: link });
+      await Share.share({ message: message(link) });
     } catch (error) {
       onNote(errorText(error));
+    }
+  }
+
+  // Sent to the wrong person, or not wanted any more: the link lets no one in from then on.
+  async function takeBack() {
+    if (!made?.short || busy) return;
+    setBusy(true);
+    try {
+      if (await takeBackShortInvite(made.short)) {
+        lastMade = null;
+        setMade(null);
+        setBack(true);
+      } else onNote(t('A phone has taken this invite already: it is not taken back.'));
+    } catch (error) {
+      onNote(errorText(error));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -211,21 +253,23 @@ export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, 
     return made ? (
       <View style={styles.inline}>
         <QrCode text={made.link} size={200} />
+        {/* The short invite's link is a web page that offers Erevos first; the long one opens only in Erevos. */}
         <Text variant="caption" tone="muted" style={styles.center}>
-          {t('They scan it with their phone’s camera. With no Erevos yet, it shows them where to get it; then it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.')}
+          {made.short
+            ? t('They scan it with their phone’s camera. With no Erevos yet, it shows them where to get it; then it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.')
+            : t('They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.')}
         </Text>
-        <Text variant="caption" tone="muted" style={styles.center}>
-          {t('For one person, until {when}. It works when they have Erevos already, too.', { when: laterLabel(made.until) })}
-        </Text>
+        {made.short ? (
+          <Text variant="caption" tone="muted" style={styles.center}>
+            {t('For one person, until {when}. It works when they have Erevos already, too.', { when: laterLabel(made.until) })}
+          </Text>
+        ) : null}
         {nfc === 'on' ? (
           <Text variant="caption" tone="muted" style={styles.center}>
             {t('Or hold the back of their phone to the back of yours: their phone opens the invite.')}
           </Text>
         ) : null}
-        <Row wrap style={styles.buttons}>
-          <Button title={Platform.OS === 'web' ? t('Copy the invite') : t('Share the invite')} onPress={() => void share(made.link)} />
-          <Button title={t('New QR code')} kind="secondary" onPress={another} />
-        </Row>
+        <TextButton title={t('New QR code')} onPress={another} />
       </View>
     ) : (
       <View style={styles.inline}>
@@ -237,60 +281,88 @@ export function WelcomeInvite({ visible, asQr = false, inline = false, onPlain, 
     );
   }
 
-  return (
-    <Sheet visible={visible} onClose={close} title={name.trim() ? t('Invite for {name}', { name: name.trim() }) : asQr ? t('Your QR code') : t('Invite someone')}>
-      {made ? (
-        <>
-          <QrCode text={made.link} size={260} />
-          <Text variant="caption" tone="muted">
-            {asQr
-              ? t('They scan it with the camera, and you are each other’s contacts at once. If Erevos is new on their phone, it gets ready by itself, with nothing to type. For one person, until {when}: for someone else, tap New QR code.', {
-                  when: laterLabel(made.until),
-                })
-              : t('For one person, until {when}. With Erevos on their phone, they scan it with the camera, or open the link you send them: their phone joins, and you are each other’s contacts at once. Whoever takes it first has it, so give it to them only.', {
-                  when: laterLabel(made.until),
-                })}
-          </Text>
-          {nfc === 'on' ? (
-            <Text variant="caption" tone="muted">
-              {t('Or hold the back of their phone to the back of yours: their phone opens the invite.')}
-            </Text>
-          ) : nfc === 'off' ? (
-            <Text variant="caption" tone="muted">
-              {t('Turn on NFC in Android\'s settings to give it by touching phones too.')}
-            </Text>
-          ) : null}
-          {made.access || asQr ? null : (
-            <Text variant="caption" tone="muted">
-              {t('Your relay lets this phone invite no one, so their phone uses it only as your contact link lets it: if it needs a token, they need one of their own.')}
-            </Text>
-          )}
-          <Row wrap>
-            <Button title={Platform.OS === 'web' ? t('Copy the invite') : t('Share the invite')} compact onPress={() => void share(made.link)} />
-            <Button title={t('Done')} kind="secondary" compact onPress={close} />
-          </Row>
-          <Field label={t('Who is it for?')} hint={t('Their name in your chats. Optional: you can name them once they join, too.')}>
-            <Input value={name} onChangeText={setName} onEndEditing={keepName} onSubmitEditing={keepName} placeholder={t('Maria')} maxLength={MAX_NAME} autoCorrect={false} />
-          </Field>
-          <Field label={t('Your name, for them')} hint={t('Goes in the invite, so their phone names you. Optional.')}>
-            <Input value={as} onChangeText={setAs} onEndEditing={keepAs} onSubmitEditing={keepAs} placeholder={t('Your name')} maxLength={MAX_NAME} autoCorrect={false} />
-          </Field>
-          <TextButton title={asQr ? t('New QR code') : t('Invite someone else')} onPress={another} />
-        </>
-      ) : (
-        <>
-          <Text tone="muted">
-            {t('One QR code or link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once.')}
-          </Text>
-          {busy ? <Text variant="caption" tone="muted">{t('Making the invite…')}</Text> : null}
-          {failed ? <Text variant="caption" tone="muted">{failed}</Text> : null}
-          <Row wrap>
-            {failed ? <Button title={t('Try again')} compact onPress={() => void make(as)} /> : null}
-            <TextButton title={t('Cancel')} onPress={onClose} />
-          </Row>
-        </>
+  // How far the invite has come: made, waiting for its phone, and taken.
+  const step = (label: string, state: 'done' | 'now' | 'later') => (
+    <View style={styles.step} accessible accessibilityLabel={label} accessibilityState={{ selected: state === 'now' }}>
+      <View style={[styles.stepDot, { borderColor: state === 'later' ? colors.border : colors.primary, backgroundColor: state === 'done' ? colors.primary : 'transparent' }]} />
+      <Text variant={state === 'now' ? 'bodyStrong' : 'body'} tone={state === 'later' ? 'muted' : undefined} style={styles.grow}>
+        {label}
+      </Text>
+    </View>
+  );
+
+  return made ? (
+    <View style={styles.page}>
+      <Text tone="muted">
+        {made.short
+          ? t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.')
+          : t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.')}
+      </Text>
+      <View style={[styles.bubble, { borderRadius: radius.lg, backgroundColor: colors.primarySoft }]}>
+        <Text selectable>{message(made.link)}</Text>
+      </View>
+      <Row wrap>
+        <Button title={Platform.OS === 'web' ? t('Copy the invite') : t('Send with…')} onPress={() => void share(made.link)} />
+        {Platform.OS !== 'web' && CAN_COPY ? <Button title={t('Copy')} kind="secondary" onPress={() => void share(made.link, true)} /> : null}
+        <Button title={qrShown ? t('Hide the QR code') : t('Its QR code')} kind="secondary" onPress={() => setQrShown(!qrShown)} />
+      </Row>
+      {qrShown ? (
+        <View style={styles.inline}>
+          <QrCode text={made.link} size={220} />
+        </View>
+      ) : null}
+      <Text variant="caption" tone="muted">
+        {t('For one person, until {when}. Whoever opens it first has it, so send it to them only.', { when: laterLabel(made.until) })}
+      </Text>
+      {qrShown && nfc === 'on' ? (
+        <Text variant="caption" tone="muted">
+          {t('Or hold the back of their phone to the back of yours: their phone opens the invite.')}
+        </Text>
+      ) : qrShown && nfc === 'off' ? (
+        <Text variant="caption" tone="muted">
+          {t('Turn on NFC in Android\'s settings to give it by touching phones too.')}
+        </Text>
+      ) : null}
+      {made.access ? null : (
+        <Text variant="caption" tone="muted">
+          {t('Your relay lets this phone invite no one, so their phone uses it only as your contact link lets it: if it needs a token, they need one of their own.')}
+        </Text>
       )}
-    </Sheet>
+      <View style={[styles.steps, { borderRadius: radius.lg, borderColor: colors.border }]}>
+        {step(t('The invite is ready'), 'done')}
+        {step(t('Waiting for them to open it'), waits ? 'now' : 'done')}
+        {step(t('You are connected'), waits ? 'later' : 'now')}
+        <Text variant="caption" tone="muted">
+          {waits
+            ? t('You may leave this page: once they open it, they show in your chats.')
+            : t('They opened the invite: they show in your chats as soon as their phone has joined.')}
+        </Text>
+      </View>
+      <Field label={t('Who is it for?')} hint={t('Their name in your chats. Optional: you can name them once they join, too.')}>
+        <Input value={name} onChangeText={setName} onEndEditing={keepName} onSubmitEditing={keepName} placeholder={t('Maria')} maxLength={MAX_NAME} autoCorrect={false} />
+      </Field>
+      <Field label={t('Your name, for them')} hint={t('Goes in the invite, so their phone names you. Optional.')}>
+        <Input value={as} onChangeText={setAs} onEndEditing={keepAs} onSubmitEditing={keepAs} placeholder={t('Your name')} maxLength={MAX_NAME} autoCorrect={false} />
+      </Field>
+      <Row wrap>
+        <TextButton title={t('Invite someone else')} onPress={another} />
+        {made.short && waits ? <TextButton title={t('Take this invite back')} onPress={() => void takeBack()} /> : null}
+      </Row>
+    </View>
+  ) : (
+    <View style={styles.page}>
+      <Text tone="muted">
+        {back
+          ? t('The invite is taken back: its link lets no one in any more.')
+          : t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.')}
+      </Text>
+      {busy ? <Text variant="caption" tone="muted">{t('Making the invite…')}</Text> : null}
+      {failed ? <Text variant="caption" tone="muted">{failed}</Text> : null}
+      <Row wrap>
+        {back && !busy ? <Button title={t('New invite')} compact onPress={another} /> : null}
+        {failed && !busy ? <Button title={t('Try again')} compact onPress={() => void make(as)} /> : null}
+      </Row>
+    </View>
   );
 }
 
@@ -303,7 +375,29 @@ const styles = StyleSheet.create({
   center: {
     textAlign: 'center',
   },
-  buttons: {
-    justifyContent: 'center',
+  page: {
+    gap: space.md,
+  },
+  bubble: {
+    padding: space.md,
+  },
+  steps: {
+    gap: space.xs,
+    padding: space.md,
+    borderWidth: 1,
+  },
+  step: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+  },
+  stepDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+  },
+  grow: {
+    flex: 1,
   },
 });

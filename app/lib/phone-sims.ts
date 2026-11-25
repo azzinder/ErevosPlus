@@ -8,6 +8,8 @@
 
 import { loadPhoneData, MAX_SIMS, savePhoneData, type PhoneData, type SpeedDial } from '../lock/phone-data';
 import type { PhoneAccount } from '../modules/erevos-phone';
+import { randomBytes, toHex } from './crypto';
+import { lockedSpeedIs, setLockedSpeedDials } from './phone-open';
 import { plainNumber, sameNumber } from './sms-invite';
 
 export class PhoneSims {
@@ -57,6 +59,30 @@ export class PhoneSims {
     const data = { ...this.data, speed: plain ? [...others, { key, number: plain, name: name.slice(0, 200) }] : others };
     await savePhoneData('space', this.space, this.key, data);
     this.data = data;
+    if (await this.feedsLocked()) await setLockedSpeedDials({ feed: data.lockedFeed, keys: data.speed });
+  }
+
+  /** Whether speed dial works with Erevos locked with this space's numbers (lib/phone-open.ts). */
+  feedsLocked(): Promise<boolean> {
+    return lockedSpeedIs(this.data.lockedFeed);
+  }
+
+  /** Lets this space's speed dial work with Erevos locked, with a copy of its numbers outside the
+   *  space, in place of another space's; or takes that copy away again. */
+  async setFeedsLocked(on: boolean): Promise<void> {
+    if (!on) {
+      if (await this.feedsLocked()) await setLockedSpeedDials(null);
+      if (this.data.lockedFeed) {
+        const data = { ...this.data, lockedFeed: '' };
+        await savePhoneData('space', this.space, this.key, data);
+        this.data = data;
+      }
+      return;
+    }
+    const data = { ...this.data, lockedFeed: toHex(randomBytes(16)) };
+    await savePhoneData('space', this.space, this.key, data);
+    this.data = data;
+    await setLockedSpeedDials({ feed: data.lockedFeed, keys: data.speed });
   }
 }
 

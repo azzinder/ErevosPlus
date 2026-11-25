@@ -16,6 +16,7 @@ import {
   turnOffBiometric,
   turnOnBiometric,
   unlockWithBiometric,
+  UNUSABLE_MOST,
   type BiometricSealer,
   type KeyState,
 } from '../lock/biometric';
@@ -42,10 +43,16 @@ class FakePhone implements BiometricSealer {
   key: Uint8Array | null = null;
   dropped = false;
   closePrompt = false;
+  // The phone itself locked, as when an Erevos call shows over its lock screen: the key cannot be
+  // used then, and Android says so in its own words, not as a dropped key.
+  phoneLocked = false;
+  // The key broken otherwise than dropped, or the Keystore not answering: its state cannot be
+  // told, and each use on an unlocked phone says only that the key could not be used.
+  broken = false;
   // Everything ever given to seal, to see what was sealed.
   sealed: string[] = [];
   available = () => true;
-  keyState = (): KeyState => (this.key ? (this.dropped ? 'invalidated' : 'valid') : 'none');
+  keyState = (): KeyState => (this.key ? (this.dropped ? 'invalidated' : this.phoneLocked || this.broken ? 'unknown' : 'valid') : 'none');
   async seal(data: string) {
     this.key = randomBytes(32);
     this.dropped = false;
@@ -55,6 +62,8 @@ class FakePhone implements BiometricSealer {
   }
   async open({ data }: { iv: string; data: string }) {
     if (!this.key || this.dropped) throw new BiometricError('invalidated');
+    if (this.phoneLocked) throw new BiometricError('failed', 'Unlock the phone');
+    if (this.broken) throw new BiometricError('unusable', 'Failed to obtain information about key');
     if (this.closePrompt) throw new BiometricError('cancelled');
     try {
       return decryptText(this.key, data);
@@ -149,6 +158,89 @@ test('when Android drops its key, as fingerprints change, it is off, the same as
   phone.dropped = true;
   assert.equal(await biometricOn(phone), false);
   assert.equal(store.get(ENTRY), undefined);
+});
+
+test('while the phone itself is locked, it stays on, and works again once the phone is unlocked', async () => {
+  await locked();
+  const phone = new FakePhone();
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  phone.phoneLocked = true;
+  assert.equal(await biometricOn(phone), true);
+  await assert.rejects(unlockWithBiometric(phone, PROMPT), (e) => e instanceof BiometricError && e.reason === 'failed');
+  assert.notEqual(store.get(ENTRY), undefined);
+  assert.notEqual(phone.key, null);
+  phone.phoneLocked = false;
+  assert.equal(await biometricOn(phone), true);
+  assert.deepEqual(opened(await unlockWithBiometric(phone, PROMPT)), { space: 0, key: toHex(real) });
+});
+
+const UNUSABLE = 'erevos.biometric-unusable';
+const unusable = (e: unknown) => e instanceof BiometricError && e.reason === 'unusable';
+// As many tries in a row as do not yet turn it off, each saying so in Android's words.
+async function almostOff(phone: FakePhone) {
+  for (let n = 1; n < UNUSABLE_MOST; n++) await assert.rejects(unlockWithBiometric(phone, PROMPT), unusable);
+}
+
+test('a key broken otherwise than dropped turns it off after a few tries in a row, so its button does not fail for ever', async () => {
+  await locked();
+  const phone = new FakePhone();
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  phone.broken = true;
+  // Its state cannot be told, so it stays on, and the first tries change nothing.
+  assert.equal(await biometricOn(phone), true);
+  await almostOff(phone);
+  assert.notEqual(store.get(ENTRY), undefined);
+  assert.notEqual(phone.key, null);
+  assert.equal(await biometricOn(phone), true);
+  // The next one in a row: off, as for a dropped key, and the password opens Erevos.
+  assert.equal(await unlockWithBiometric(phone, PROMPT), null);
+  assert.equal(store.get(ENTRY), undefined);
+  assert.equal(store.has(UNUSABLE), false);
+  assert.equal(phone.key, null);
+  assert.equal(await biometricOn(phone), false);
+  assert.ok(await unlock(await loadLockConfig(), 'real-1111'));
+});
+
+test('a Keystore that only misses an answer now and then does not turn it off: the count starts again each time the key is ready', async () => {
+  await locked();
+  const phone = new FakePhone();
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  // Misses, then a fingerprint that opens: as often as it likes.
+  for (let round = 0; round < 3; round++) {
+    phone.broken = true;
+    await almostOff(phone);
+    phone.broken = false;
+    assert.deepEqual(opened(await unlockWithBiometric(phone, PROMPT)), { space: 0, key: toHex(real) });
+    assert.equal(store.has(UNUSABLE), false);
+  }
+  // A prompt that showed and was closed says the key was ready as well.
+  phone.broken = true;
+  await almostOff(phone);
+  phone.broken = false;
+  phone.closePrompt = true;
+  await assert.rejects(unlockWithBiometric(phone, PROMPT), (e) => e instanceof BiometricError && e.reason === 'cancelled');
+  phone.closePrompt = false;
+  phone.broken = true;
+  await almostOff(phone);
+  assert.notEqual(store.get(ENTRY), undefined);
+  // The phone itself locked says nothing of the key: never counted, and what was counted stays.
+  phone.phoneLocked = true;
+  for (let n = 0; n < UNUSABLE_MOST * 2; n++) {
+    await assert.rejects(unlockWithBiometric(phone, PROMPT), (e) => e instanceof BiometricError && e.reason === 'failed');
+  }
+  assert.equal(store.get(UNUSABLE), String(UNUSABLE_MOST - 1));
+  assert.notEqual(store.get(ENTRY), undefined);
+  phone.phoneLocked = false;
+  // Turned on anew, it starts from nothing: a new key.
+  phone.broken = false;
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  assert.equal(store.has(UNUSABLE), false);
+  phone.broken = true;
+  await almostOff(phone);
+  assert.equal(await biometricOn(phone), true);
+  // And turning it off by hand leaves no count behind.
+  await turnOffBiometric(phone);
+  assert.equal(store.has(UNUSABLE), false);
 });
 
 test('closing the prompt changes nothing when unlocking, and leaves it off when turning on', async () => {

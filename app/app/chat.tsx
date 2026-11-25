@@ -10,6 +10,8 @@ import { takeCall } from '../lib/call-handoff';
 import { CAN_KEEP_PRIVATE, keepPrivate, loadScreenPrivacy } from '../lib/screen-privacy';
 import { notYoursToSee } from '../lib/see-once';
 import { CAN_DIRECT, canLora, HAS_LINKS, HAS_RADIO, lora, SAMSUNG } from '../lib/radio';
+import { CAN_GIVE } from '../lib/give-app';
+import { pastedLink } from '../lib/open-link';
 import { nearbyOn as nearbyOnNow, nearbySettings, setAwareKept, setCarryingKept, setDirectKept, setLanKept, setNearbyKept } from '../lib/nearby-links';
 import { nearby, SMS_LINK, TooLargeForSlowWayError, TooLargeForSmsError, type Delivery, type NearHeard } from '../lib/nearby';
 import { openHeldIn, openPlaceNearby, placeNear, unopenedNearby, type PlaceOpener } from '../lib/place-nearby';
@@ -56,6 +58,9 @@ import { RelaySignIn } from '../components/relay-signin';
 import { WebsiteLink } from '../components/website-link';
 import { WelcomeInvite } from '../components/welcome-invite';
 import { ConnectStatus, MyQrCard, WayCard } from '../components/connect-cards';
+import { Doors, Joined, Rest, type Door } from '../components/new-chat-doors';
+import { NearMe } from '../components/near-me';
+import { canPairWithCode, TheirCode } from '../components/their-code';
 import { RelayKeyNote, useRelayCheck } from '../components/relay-key-note';
 import { BackIcon, GlobeIcon, MoreIcon, PlusIcon, ShieldIcon, TimerIcon } from '../components/icons';
 import { canDial, DialTile } from '../components/dial-tile';
@@ -74,7 +79,6 @@ import { SwipeBack } from '../components/swipe-back';
 import { Pinned } from '../components/message-parts';
 import { PLAYS_LAST, StickerPicker } from '../components/stickers';
 import { PlaceSheet } from '../components/place-sheet';
-import { canPairWithCode, PairCodeSheet } from '../components/pair-code-sheet';
 import { CardSheet, saveCard } from '../components/card-share';
 import { SelectBar, selectAction, useSelection } from '../components/select-bar';
 import { PollSheet } from '../components/poll';
@@ -116,7 +120,6 @@ import { sendCopies } from '../lib/fanout';
 import { mediaText, SOURCE_LABELS } from '../lib/imports';
 import { packMeta, sharable, shareSize, takeAskToShare } from '../lib/chat-share';
 import { failed as buzzFailed } from '../lib/haptics';
-import { secureGet, secureSet } from '../lib/secure';
 import { beginShare, driveShares, dropReady, onShares, packCame, readyShare, roundsCame, shareLines, sharingNow, stopShare, takePack, takingCame, type ReadyShare, type ShareWay } from '../lib/share-rounds';
 import { chatMedia, dayKey, daysOf, IMPORTED_TAG, importedTag, soundEnding } from '../lib/chat-media';
 import { ChatMedia, DayCalendar } from '../components/chat-media';
@@ -202,7 +205,7 @@ import {
 import { announceReceived, answersAsk, appShown, awayPace, awayQueues, holdReceiver, isNews, lookNow, openNearby, shownPace, takeNearby, takeNostr, tellOpenLater, waitWhileAway, type Waited } from '../lib/receiver';
 import { nostrOwnTor, nostrReady, readNostr } from '../lib/nostr';
 import { netThroughTor } from '../lib/net-http';
-import { callIpWarning, ipGate } from '../components/ip-warning';
+import { callIpWarning, ipGate, IpQuiet } from '../components/ip-warning';
 import type { IpKeep } from '../lib/ip-warning';
 import { goesInPieces, NOSTR_FILE_LIMIT, NostrFileTooLargeError, offerOnNostr } from '../lib/nostr-send-files';
 import { onPiece } from '../lib/nostr-pieces';
@@ -299,8 +302,6 @@ import { QuickAction, DetailRow, SearchStep, dayOf, dayText, clock, dayLabel, ty
 
 
 /** How long a relay address stays the same before its queue is made by itself (#11). */
-// Whether New chat's QR card was last set for someone new to Erevos ('1') or one who has it ('0').
-const QR_FOR_NEW = 'erevos.qr-for-new';
 const AUTO_QUEUE_MS = 3000;
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -309,8 +310,8 @@ export default function ChatScreen() {
   // hidden chats opened from the home screen's search (their key handed over in memory), or New
   // chat (`setup=1`, which shows the same as with no contact), with For advanced users, the relay's
   // own settings, open (`setup=relay`), its phones nearby open (`setup=nearby`, from Ways and the
-  // home screen's Nearby phones while they are off), or with Invite someone's QR code (`setup=invite`, the home
-  // screen's Invite). `at`:
+  // home screen's Nearby phones while they are off), with Invite someone's QR code (`setup=invite`, the home
+  // screen's Invite), or on I have their code (`setup=code`, First steps' I have an invite). `at`:
   // the tag of a message to go to, starred or found. A call to start with the contact comes only
   // from a tap in Erevos (lib/call-handoff.ts), never from the address, which any app or web page
   // can open.
@@ -424,6 +425,7 @@ export default function ChatScreen() {
               relaySettings={setup === 'relay'}
               nearbyOpen={setup === 'nearby'}
               inviteNow={setup === 'invite'}
+              codeNow={setup === 'code'}
               shown={!hiddenKey}
               onLook={setChatLook}
             />
@@ -475,7 +477,7 @@ function BackButton({ onPress }: { onPress?: () => void }) {
 
 // One chat: the space's own (`hiddenKey` null), or hidden chats, sealed with that key, in the
 // space's `pocket` of them.
-function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = null, linkNumber = '', relaySettings = false, nearbyOpen = false, inviteNow = false, shown, callOnly = false, onHidden, onChangePassword, onLook }: {
+function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = null, linkNumber = '', relaySettings = false, nearbyOpen = false, inviteNow = false, codeNow = false, shown, callOnly = false, onHidden, onChangePassword, onLook }: {
   hiddenKey: Uint8Array | null;
   pocket?: number;
   initial?: string | null;
@@ -491,6 +493,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   nearbyOpen?: boolean;
   /** Opens with Invite someone's QR code showing (the home screen's Invite), when this phone can invite. */
   inviteNow?: boolean;
+  /** Opens on I have their code: an invite or a link to scan, paste or type (First steps' I have an invite). */
+  codeNow?: boolean;
   shown: boolean;
   /** Hidden chats run only for a call answered with no PIN (ChatScreen): its screen shows no name, and they close as it ends. */
   callOnly?: boolean;
@@ -612,13 +616,23 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const drafts = useRef(new Map<string, string>());
   const draftOf = useRef(selected);
   const [note, setNote] = useState('');
-  // With no chat open, New chat's parts (components/connect-cards.tsx): which way in shows what it
-  // needs, for a phone with no relay yet; and what opens under Nearby, Blocked contacts and For
-  // advanced users (the relay's own settings), each closed until asked for.
+  // With no chat open, New chat's pages (components/new-chat-doors.tsx): its first one asks where
+  // the other person is, and each answer, and each of the three small buttons under them, is a
+  // page of its own. Opened from elsewhere on one of them (the relay's settings, the phones nearby,
+  // the home screen's Invite, First steps' I have an invite), Back leaves New chat as it came, not
+  // for its first page.
+  const [door, setDoor] = useState<Door>(relaySettings || nearbyOpen ? 'advanced' : inviteNow ? 'far' : codeNow ? 'code' : 'root');
+  const doorFromOutside = useRef(relaySettings || nearbyOpen || inviteNow || codeNow);
+  const doorNow = useRef(door);
+  doorNow.current = door;
+  // You are connected, where the doors end: who was just added.
+  const [joined, setJoined] = useState<string | null>(null);
+  // Near me's own QR code: the contact link's, once an invite could not be made (with no internet, say).
+  const [nearPlain, setNearPlain] = useState(false);
+  // Under For advanced users: which way in shows what it needs, for a phone with no relay yet, and
+  // what opens under Nearby, with no internet.
   const [way, setWay] = useState<'invite' | 'own' | null>(null);
   const [nearbyShown, setNearbyShown] = useState(nearbyOpen);
-  const [blockedShown, setBlockedShown] = useState(false);
-  const [relayShown, setRelayShown] = useState(relaySettings);
   // Where a phone with no relay yet signs in: LPHL's relay, or another typed in its place (Another
   // relay…), whose own provider then names the card (components/relay-signin.tsx).
   const [signInAt, setSignInAt] = useState(START_RELAY);
@@ -678,9 +692,6 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const among: Among = hiddenKey ? hiddenLent : 'space';
   const canConnect = useCanConnect(among);
   const [showQr, setShowQr] = useState(false);
-  // Your contact link's row on New chat, open (#11).
-  const [linkShown, setLinkShown] = useState(false);
-  const [pairing, setPairing] = useState(false);
   // Whether the relay proved its key (components/relay-key-note.tsx): New chat says how this phone
   // connects only while something needs saying (#11).
   const relayKeyCheck = useRelayCheck(relayUrl.trim());
@@ -689,19 +700,6 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // link's QR code instead, which works with no internet, near.
   const [card, setCard] = useState<string | null>(null);
   const [bigQr, setBigQr] = useState(false);
-  // The sheet that makes an invite for someone new (components/welcome-invite.tsx).
-  // 'qr': opened from Show your QR code, where it stands for this phone's QR code (#11).
-  const [welcoming, setWelcoming] = useState<boolean | 'qr'>(false);
-  // New chat's QR card: for someone new to Erevos (an invite), or one who has it (the contact link),
-  // as last chosen on this phone.
-  const [qrForNew, setQrForNew] = useState(false);
-  useEffect(() => {
-    void secureGet(QR_FOR_NEW).then((said) => setQrForNew(said === '1'), () => undefined);
-  }, []);
-  function chooseQrForNew(on: boolean) {
-    setQrForNew(on);
-    void secureSet(QR_FOR_NEW, on ? '1' : '0').catch(() => undefined);
-  }
   // Link for a website (components/website-link.tsx), from the space's contact link.
   const [webLinking, setWebLinking] = useState(false);
   // An invite's link pasted on a phone with no relay yet.
@@ -826,6 +824,37 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     });
     return () => subscription.remove();
   }, [selection.on, threadRoot]);
+  // A page of New chat goes back to its first one, with the phone's Back too; a page New chat was
+  // opened on from elsewhere leaves it, as it came.
+  const doorBack = !selected && door !== 'root' && !doorFromOutside.current;
+  function leaveDoor() {
+    setDoor('root');
+    setJoined(null);
+  }
+  // To a page from the first one: New chat is its own from then on, wherever it was opened from.
+  function openDoor(to: Door) {
+    doorFromOutside.current = false;
+    setNote('');
+    setDoor(to);
+  }
+  useEffect(() => {
+    if (!doorBack || !shown) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      leaveDoor();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [doorBack, shown]);
+  useEffect(() => {
+    if (door !== 'near') setNearPlain(false);
+  }, [door]);
+  // A chat opened leaves New chat on its first page, for when the chat is left.
+  useEffect(() => {
+    if (!selected) return;
+    doorFromOutside.current = false;
+    setDoor('root');
+    setJoined(null);
+  }, [selected]);
   // How far above the chat's bottom its thread ends, where Undo shows (components/undo-bar.tsx).
   const edges = useRef({ height: 0, end: 0 });
   const [undoAt, setUndoAt] = useState(0);
@@ -1181,6 +1210,23 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     setDirectKept(on).catch(() => setNote(t('Changed until Erevos closes: the phone could not keep it.')));
   }
 
+  // You are connected (components/new-chat-doors.tsx) for a contact that has just joined, while New
+  // chat shows with no chat open: at once for one added here (`here`), and for one whose phone
+  // answered meanwhile (an invite taken, far away) only on the pages that wait for someone. Says
+  // whether it shows.
+  const selectedNow = useRef(selected);
+  selectedNow.current = selected;
+  const shownNow = useRef(shown);
+  shownNow.current = shown;
+  function showJoined(identity: string, here = false): boolean {
+    if (selectedNow.current !== null || !shownNow.current) return false;
+    const page = doorNow.current;
+    if (!here && page !== 'root' && page !== 'near' && page !== 'far' && page !== 'code') return false;
+    setJoined(identity);
+    setDoor('done');
+    return true;
+  }
+
   // Adds a contact from a code: typed or pasted here, or read from a photo of it (`asked`: offering
   // then to connect it to one of my contacts), or handed over (lib/contact-code.ts) with a contact
   // to link it to and the name it takes, which only these chats' own may give (offerFor).
@@ -1260,7 +1306,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       setContacts(e2e.contacts());
       // A contact of the phone's, or one kept only in Erevos, whose Erevos ID this was is linked to it.
       offer?.added?.(identity);
-      setSelected(`${CONTACT_PREFIX}${identity}`);
+      // Added from New chat, it ends on You are connected, where they get their name; added from a chat, theirs opens.
+      if (!showJoined(identity, true)) setSelected(`${CONTACT_PREFIX}${identity}`);
       if (asked && added && canConnect && !e2e.contacts().find((c) => c.identity === identity)?.name) setConnecting(identity);
       if (target) await sendPending(e2e, target);
       // With no relay between the two, the first message goes through Nostr when they read there, in
@@ -1270,10 +1317,10 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       const nearbyOnly = !onNostr && (!target || !code.senderHex);
       // Connected as it was added, from the screen a scanned link opens: said after the note.
       const linked = offer?.name && offer.added ? ` ${t('Connected to {name}.', { name: cleanName(offer.name) })}` : '';
-      // Nearby only, with phones nearby off here: said, and where to turn them on opened.
+      // Nearby only, with phones nearby off here: said, and where to turn them on opened for when it is looked for.
       const nearbyOff = added && nearbyOnly && HAS_LINKS && !nearbyOnNow();
       if (nearbyOff) setNearbyShown(true);
-      const turnOn = nearbyOff ? ` ${t('Phones nearby are off on this phone: turn on Look for phones nearby, under Nearby, with no internet.')}` : '';
+      const turnOn = nearbyOff ? ` ${t('Phones nearby are off on this phone: turn on Look for phones nearby, on New chat, under For advanced users.')}` : '';
       setNote(
         (added
           ? nearbyOnly
@@ -2216,6 +2263,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             // An invite shown as a QR code or shared as a link has no number: whoever took it joined.
             const added = e2e.contacts().find((c) => c.identity === invited.identity);
             const name = invited.number ? '' : (added?.name ?? '');
+            // New chat waiting for them, on Near me or Far away, says so on its last page.
+            if (added && !added.request && !invited.number) showJoined(invited.identity);
             setNote(
               invited.card
                 ? added?.request
@@ -2244,6 +2293,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                 ? t('Welcome to Erevos. {name} is your contact now: what you write to each other is end-to-end encrypted.', { name: inviter.name })
                 : t('Welcome to Erevos. Whoever invited you is your contact now: what you write to each other is end-to-end encrypted.'),
           );
+          // Their invite was answered from New chat (I have their code): it ends on its last page.
+          if (!inviter.number && received.kind === 'message') showJoined(received.identity);
         }
         return tookOf(received);
       };
@@ -5671,8 +5722,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     }
   }
 
-  // Whether the text was a link Erevos takes.
-  function addContact(text = contactDraft): boolean {
+  // Whether the text was a link Erevos takes: alone, or in a message pasted whole.
+  function addContact(pasted = contactDraft): boolean {
+    const text = pastedLink(pasted);
     const welcome = parseWelcome(text);
     if (welcome) {
       setContactDraft('');
@@ -5695,6 +5747,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       else void takeTextInvite(byText, byText.name);
       return true;
     }
+    return addContactLink(text);
+  }
+
+  // Their contact link, and nothing else, adds them as a contact of these chats. `said`: the name
+  // the other phone gave itself beside the link (Near me), for a link that names no one.
+  function addContactLink(text: string, said = ''): boolean {
     const code = parseContact(text);
     if (!code) {
       setNote(t('That is not an Erevos contact link.'));
@@ -5702,9 +5760,28 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     }
     setContactDraft('');
     // A link from a web page names its phone: the name it takes while it has none of its own.
-    const name = contactLinkName(text);
+    const name = contactLinkName(text) || said;
     void acceptContact(code, name ? { place: contactsPlace, name } : undefined, true);
     return true;
+  }
+
+  // What a pairing hands over, by Near me's pictures or by the code of 8 digits: the other phone's
+  // contact link, read as one and as nothing else. Its owner said yes to a contact, so an invite to
+  // a relay or a welcome in its place, which a link pasted by hand may be (addContact), is not
+  // taken: this phone would join a relay, or take a line there, that no one asked it about.
+  function addPaired(link: string, said = ''): boolean {
+    return addContactLink(link.trim(), said);
+  }
+
+  // The name typed on You are connected, for the contact just added: theirs in these chats from then on.
+  async function nameJoined(identity: string, name: string) {
+    if (!e2e) return;
+    try {
+      await e2e.rename(identity, name);
+      setContacts(e2e.contacts());
+    } catch (error) {
+      setNote(errorText(error));
+    }
   }
 
   // The contact just added here, connected to one of my contacts: linked to it, and named after it
@@ -6289,14 +6366,14 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const newcomer = loaded && !hiddenKey && !accountLink() && !relayUrl.trim();
   // With a relay queue, this phone invites someone new (lib/welcome.ts).
   const canWelcome = !hiddenKey && !accountLink() && !!relayUrl.trim() && !!ownQueue && !!ownLink;
-  // The contact card, for the space's own chats on the phone: a one-time one, new each time New chat
+  // The contact card, for the space's own chats on the phone: a one-time one, new each time My link
   // or My QR code opens; the first to answer it is a contact at once, anyone after writes a request.
   const cardsHere = canWelcome;
   // The small QR code goes by touching phones too, while it shows (lib/nfc-share.ts).
-  // New chat with no chat open shows the QR code itself (#12), as My QR code does.
-  const qrHere = (showQr || (!selected && !newcomer && !shownGroup)) && shown;
+  // My link, a page of New chat, shows the QR code itself, as My QR code does.
+  const qrHere = (showQr || (!selected && door === 'link' && !shownGroup)) && shown;
   const cardNfc = useNfcShare(qrHere && card && !bigQr ? card : null);
-  // The one-time card of this opening of New chat: made once, the same while it stays open.
+  // The one-time card of this opening of My link: made once, the same while it stays open.
   const cardOnce = useRef({ secret: '' });
   useEffect(() => {
     if (!qrHere) cardOnce.current = { secret: '' };
@@ -6313,13 +6390,6 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       on = false;
     };
   }, [qrHere, cardsHere, ownQueue, relayUrl, linkE2E]);
-  // The home screen's Invite: its QR code at once, once the chat knows this phone can invite.
-  const invitedNow = useRef(false);
-  useEffect(() => {
-    if (!inviteNow || invitedNow.current || !loaded || !canWelcome) return;
-    invitedNow.current = true;
-    setWelcoming(true);
-  }, [inviteNow, loaded, canWelcome]);
   // How this phone reaches its contacts now, said at the top of New chat.
   const reached = connectReach({
     linked: !!linkHere(),
@@ -6565,10 +6635,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     setUndoAt(Math.max(0, edges.current.height - edges.current.end));
   };
 
-  // What the back arrow and a swipe to the right do: out of a chat to the list of them when it was
-  // opened from there, out of hidden chats closes them, else the screen before.
-  const goBack =
-    selected && (hiddenKey || !initial)
+  // What the back arrow and a swipe to the right do: from a page of New chat to its first one, out
+  // of a chat to the list of them when it was opened from there, out of hidden chats closes them,
+  // else the screen before.
+  const goBack = doorBack
+    ? leaveDoor
+    : selected && (hiddenKey || !initial)
       ? () => setSelected(null)
       : hiddenKey && onHidden
         ? onHidden
@@ -7436,20 +7508,6 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             </SwipeBack>
           </ScreenBackdrop>
         </Modal>
-        <WelcomeInvite
-          visible={!!welcoming && shown && canWelcome}
-          asQr={welcoming === 'qr'}
-          onPlain={() => {
-            setWelcoming(false);
-            setShowQr(true);
-          }}
-          onClose={() => setWelcoming(false)}
-          e2e={linkE2E}
-          relay={relayUrl.trim() && relayToken.trim() && !isLentToken(relayToken) ? { url: relayUrl.trim(), token: relayToken.trim() } : null}
-          onOwnLine={(relay) => ownLine(relay.url, relay.token ?? '')}
-          contactLink={ownLink}
-          onNote={setNote}
-        />
         <WebsiteLink
           visible={webLinking && shown && !hiddenKey && !!ownLink}
           onClose={() => setWebLinking(false)}
@@ -7457,7 +7515,6 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           name={e2e?.invitedAs() ?? ''}
           onNote={setNote}
         />
-        <PairCodeSheet visible={pairing && shown && !!ownLink} onClose={() => setPairing(false)} ownLink={ownLink ?? ''} onLink={(link) => void addContact(link)} />
         <Sheet visible={showQr && shown && !!ownLink} onClose={() => setShowQr(false)} title={t('My QR code')}>
           {ownLink ? <QrCode text={card && !bigQr ? card : ownLink} size={240} /> : null}
           <Text variant="caption" tone="muted">
@@ -7542,8 +7599,22 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                   </View>
                 </Pressable>
               ) : (
-                <Text variant="title" style={styles.grow}>
-                  {hiddenKey ? t('Hidden chats') : t('New chat')}
+                <Text variant="title" numberOfLines={1} style={styles.grow}>
+                  {door === 'near'
+                    ? t('Near me')
+                    : door === 'far'
+                      ? t('Far away')
+                      : door === 'code'
+                        ? t('I have their code')
+                        : door === 'link'
+                          ? t('My link')
+                          : door === 'blocked'
+                            ? t('Blocked contacts')
+                            : door === 'advanced'
+                              ? t('For advanced users')
+                              : hiddenKey
+                                ? t('Hidden chats')
+                                : t('New chat')}
                 </Text>
               )}
               {selectedContact ? (
@@ -7564,7 +7635,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                     <MoreIcon color={colors.text} size={Platform.OS === 'web' ? 20 : 18} upright={Platform.OS !== 'web'} />
                   </IconButton>
                 </View>
-              ) : hiddenKey && onChangePassword ? (
+              ) : hiddenKey && onChangePassword && door === 'root' ? (
                 <View style={styles.headerLinks}>
                   {modules.has('collection') ? (
                     <ShortcutTile label={t('Collection')} tint="blue" onPress={() => router.push('/collection?hidden=1')}>
@@ -7579,471 +7650,508 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           )}
         </View>
         {!selected ? (
-          <ScrollView style={styles.top} contentContainerStyle={styles.topContent} keyboardShouldPersistTaps="handled">
-            {/* At the top (#12): a name finds a contact below, a pasted link adds them. Hidden chats list no faces, so there it is for a link only. */}
-            {/* Not before the place is read: a phone with no relay would show this screen for a moment, then the newcomer's. */}
-            {loaded && !newcomer ? (
-              <Row>
-                <Input
-                  value={contactDraft}
-                  onChangeText={setContactDraft}
-                  placeholder={hiddenKey ? t('Paste their contact link or invite') : t('Name, or paste a link')}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  style={styles.grow}
-                />
-                {draftIsLink || (hiddenKey && findTyped) ? <Button title={t('Add')} compact onPress={() => addContact()} /> : null}
-              </Row>
-            ) : null}
-            {hiddenKey ? (
-              // As home lists the space's chats (app/index.tsx), Chat with myself first.
-              <View>
-                {/* What is archived, in place of the list until tapped again. */}
-                {placeOrdered?.archived.length || placeArchive ? (
-                  <Row wrap>
-                    <Chip label={t('Archived · {n}', { n: placeOrdered?.archived.length ?? 0 })} selected={placeArchive} onPress={() => setPlaceArchive(!placeArchive)} />
-                  </Row>
-                ) : null}
-                {placeNotes !== null && !placeArchive ? <MyselfRow notes={placeNotes} onOpen={() => setMyselfShown(true)} /> : null}
-                {((placeArchive ? placeOrdered?.archived : placeOrdered?.list) ?? []).map((row) => (
-                  <ChatRow
-                    key={row.identity}
-                    row={row}
-                    now={now}
-                    online={!!e2e && contacts.some((c) => c.identity === row.identity && !c.hide) && e2e.onlineUntil(row.identity, now) > 0}
-                    hidden
-                    onLong={row.invited ? undefined : () => setPlaceTarget(row)}
-                    // A network's chat opens its own screen, for the place's account (components/chat-row.tsx).
-                    onOpen={
-                      row.network
-                        ? undefined
-                        : () => (row.identity.startsWith('group:') ? setShownGroup(row.identity.slice('group:'.length)) : setSelected(`${CONTACT_PREFIX}${row.identity}`))
-                    }
-                  />
-                ))}
-                {placeArchive && placeOrdered?.archived.length === 0 ? <Text tone="muted">{t('Nothing archived.')}</Text> : null}
-                {placeRows.length === 0 ? <Text tone="muted">{t('No hidden chats yet. Add a contact below, or move a chat here from its details.')}</Text> : null}
-                <ChatActions target={placeTarget} place={chatListPlace} where="place" onClose={() => setPlaceTarget(null)} onChanged={() => e2e && setContacts(e2e.contacts())} />
-                {(placeWhere && canGroup()) || canMatrix() || canXmpp() || canNostrChat() || hasCore() ? (
-                  // The place's own accounts on the networks (lib/place-networks.ts), apart from the space's,
-                  // and its own linked devices (app/devices.tsx), which the space's know nothing of. On a
-                  // linked device new groups stay on the phone, as the space's do.
-                  <Row wrap>
-                    {placeWhere && canGroup() && placeLinked()?.role() !== 'linked' ? <Button title={t('New group')} kind="secondary" compact onPress={() => setMakingGroup(true)} /> : null}
-                    {canMatrix() ? <Button title="Matrix" kind="secondary" compact onPress={() => router.push({ pathname: '/matrix', params: { hidden: '1' } })} /> : null}
-                    {canXmpp() ? <Button title="XMPP" kind="secondary" compact onPress={() => router.push({ pathname: '/xmpp', params: { hidden: '1' } })} /> : null}
-                    {canNostrChat() ? <Button title="Nostr" kind="secondary" compact onPress={() => router.push({ pathname: '/nostr-chats', params: { hidden: '1' } })} /> : null}
-                    {hasCore() ? <Button title={t('Linked devices')} kind="secondary" compact onPress={() => router.push({ pathname: '/devices', params: { hidden: '1' } })} /> : null}
-                  </Row>
-                ) : null}
-              </View>
-            ) : faceChips.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.faces} keyboardShouldPersistTaps="handled">
-                {faceChips.map((peer) => {
-                  const named = contactName(peer, shownContacts);
-                  return (
-                    <Pressable
-                      key={peer}
-                      onPress={() => setSelected(peer)}
-                      accessibilityRole="button"
-                      accessibilityLabel={label(peer, shownContacts)}
-                      style={styles.face}
-                    >
-                      <View style={styles.ring}>
-                        <KeyFace
-                          identity={peer.slice(CONTACT_PREFIX.length)}
-                          name={named ?? ''}
-                          size={48}
-                          avatar={contacts.find((c) => `${CONTACT_PREFIX}${c.identity}` === peer)?.avatar}
-                        />
-                      </View>
-                      <Text variant="caption" numberOfLines={1} style={[styles.faceName, !named && styles.monoSmall]}>
-                        {named ?? peer.slice(CONTACT_PREFIX.length, CONTACT_PREFIX.length + 8)}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            ) : findTyped && !draftIsLink && chips.length > 0 ? (
-              <Text variant="caption" tone="muted">
-                {t('No contact has “{query}” in it.', { query: findTyped })}
-              </Text>
-            ) : null}
-            {hiddenKey ? (
-              <View style={styles.panel}>
-                {placeName !== null ? (
-                  <Field label={t('My name')} hint={t("Starts empty and never takes the space's name. The same name as your space's tells whoever sees both that they are you.")}>
-                    <Input
-                      value={placeName}
-                      onChangeText={setPlaceName}
-                      onEndEditing={() => void savePlaceName()}
-                      onSubmitEditing={() => void savePlaceName()}
-                      placeholder={t('Name')}
-                      maxLength={MAX_NAME}
-                      autoCorrect={false}
-                    />
-                  </Field>
-                ) : null}
-                <DetailRow title={t('Receive while closed')} checked={receiving} onPress={() => void changeReceiving(!receiving)} />
-                <Text variant="caption" tone="muted">
-                  {receiving
-                    ? t('Closed, these hidden chats receive as your other chats do: their contacts see at once that a message came, a notice says only "New message", a call rings with no name, answered with the PIN, and a reminder of their Chat with myself says only "Reminder". For it, their key is kept encrypted with the space, so whoever opens the space and copies what the phone keeps could open them too; the PIN still keeps them out of sight.')
-                    : t('Closed, nothing reads these hidden chats: their key is only behind the PIN, and their messages wait on the relay until you open them.')}
-                </Text>
-                <Text variant="caption" tone="muted">
-                  {receiving
-                    ? t('Their own Matrix, XMPP and Nostr accounts stay connected too: what comes there says only "New message", and a call rings with no name.')
-                    : t('Their own Matrix, XMPP and Nostr accounts connect only while they are open.')}
-                </Text>
-                {receiving ? (
-                  <>
-                    <DetailRow title={t('Dot for unread messages')} checked={placeSign} onPress={() => changePlaceSign(!placeSign)} />
-                    <Text variant="caption" tone="muted">
-                      {placeSign
-                        ? t('While one of these hidden chats has a message unread, a small dot shows on the magnifier of Search chats in this space: never how many, nor where. Whoever sees the space\'s chats sees it too, and may guess there are hidden chats.')
-                        : t('Messages unread here show only once you open these hidden chats.')}
-                    </Text>
-                  </>
-                ) : null}
-                {canRingInBackground && !receiving ? (
-                  <>
-                    <DetailRow title={t('Say when a message comes')} checked={watched} onPress={() => void changeWatched(!watched)} />
-                    <Text variant="caption" tone="muted">
-                      {watched
-                        ? t('While these hidden chats are closed, with Erevos in the background or showing, a notice says only "New message", or how many came, as for the other chats; that a message came or was read makes none. Whoever sees it and finds nothing new in your chats may guess there are more.')
-                        : t('Closed, these hidden chats say nothing: their messages wait on the relay until you open them.')}
-                    </Text>
-                    {watched && background && !(background.on && background.notices) ? (
-                      <Text variant="caption" tone="muted">
-                        {t('Nothing says it for now: it needs Receive and ring and Say a message came, under Settings → Notifications → In the background.')}
-                      </Text>
-                    ) : null}
-                    {watchNote ? <Text variant="caption" tone="muted">{watchNote}</Text> : null}
-                    <DetailRow title={t('Ring calls when closed')} checked={ringing} onPress={() => void changeRinging(!ringing)} />
-                    <Text variant="caption" tone="muted">
-                      {ringing
-                        ? t('While these hidden chats are closed, with Erevos in the background or on any screen, a call from one of their contacts makes the phone ring and show "Incoming call" with no name. On the ringing screen, tap the small sign and type the PIN to answer. Whoever holds the phone sees a call that is in none of your chats, and may guess there are more.')
-                        : t('Closed, these hidden chats do not ring: a call from their contacts rings only while they are open.')}
-                    </Text>
-                    {ringing && background && !background.on ? (
-                      <Text variant="caption" tone="muted">{t('Nothing rings for now: it needs Receive and ring, under Settings → Notifications → In the background.')}</Text>
-                    ) : null}
-                    {ringNote ? <Text variant="caption" tone="muted">{ringNote}</Text> : null}
-                  </>
-                ) : null}
-              </View>
-            ) : null}
-            {/* How this phone connects, only when something is still missing or for a phone with no relay
-                yet: with everything working New chat starts with its two big ways (#11). */}
-            {loaded && (newcomer || reached.reach !== 'ready' || relayKeyCheck === 'none' || relayKeyCheck === 'refused') ? (
-              <ConnectStatus reach={reached.reach} title={reached.title} line={reached.line} detail={reached.detail}>
-                {relayUrl.trim() ? <RelayKeyNote url={relayUrl.trim()} /> : null}
-              </ConnectStatus>
-            ) : null}
-            {newcomer ? (
-              <View style={styles.section}>
-                {/* New chat on a phone with no relay yet (#12): an invite is the way in, scanned at once, its link pasted, or a photo of it. */}
-                <View style={styles.panel}>
-                  <Text variant="heading">{t('Start with an invite')}</Text>
-                  <Text tone="muted">{t('Ask someone who has Erevos to show you their QR code. Once you scan it, you are in and you are contacts, typing nothing.')}</Text>
-                  <Button title={t('Scan their QR code')} onPress={() => void addFromQr(CAN_TAKE_PHOTOS ? 'camera' : 'photos')} />
+          <ScrollView key={door} style={styles.top} contentContainerStyle={styles.topContent} keyboardShouldPersistTaps="handled">
+            {door === 'root' ? (
+              <>
+                {/* At the top (#12): a name finds a contact below, a pasted link adds them. Hidden chats list no faces, so there it is for a link only. */}
+                {/* Not before the place is read: a phone with no relay would show this screen for a moment, then the newcomer's. */}
+                {loaded && !newcomer ? (
                   <Row>
                     <Input
                       value={contactDraft}
                       onChangeText={setContactDraft}
-                      placeholder={t('Or paste the invite link')}
+                      placeholder={hiddenKey ? t('Paste their contact link or invite') : t('Name, or paste a link')}
                       autoCapitalize="none"
                       autoCorrect={false}
                       style={styles.grow}
                     />
-                    <Button title={t('Join')} compact onPress={() => addContact()} />
+                    {draftIsLink || (hiddenKey && findTyped) ? <Button title={t('Add')} compact onPress={() => addContact()} /> : null}
                   </Row>
-                  {CAN_TAKE_PHOTOS ? <TextButton title={t('From a photo of their QR code')} onPress={() => void addFromQr('photos')} /> : null}
-                </View>
-                {/* This phone's own QR code too: someone with Erevos may scan it; with no relay, messages go through Nostr or nearby. */}
-                {ownLink ? (
-                  <MyQrCard
-                    text={ownLink}
-                    shareTitle={Platform.OS === 'web' ? t('Copy') : t('Share')}
-                    onShare={() => void shareMine(ownLink)}
-                    onPhoto={() => void addFromQr('photos')}
-                  >
-                    <Text variant="caption" tone="muted" style={styles.centered}>
-                      {t('With no relay, messages go through Nostr, or nearby.')}
-                    </Text>
-                  </MyQrCard>
                 ) : null}
-                {/* An invite is the way in shown; the others, signing in, starting without a relay and a relay's address and token, are for whoever looks for them. */}
-                <DetailRow title={t('For advanced users')} open={relayShown} onPress={() => setRelayShown((on) => !on)} />
-                {!relayShown ? (
+                {hiddenKey ? (
+                  // As home lists the space's chats (app/index.tsx), Chat with myself first.
+                  <View>
+                    {/* What is archived, in place of the list until tapped again. */}
+                    {placeOrdered?.archived.length || placeArchive ? (
+                      <Row wrap>
+                        <Chip label={t('Archived · {n}', { n: placeOrdered?.archived.length ?? 0 })} selected={placeArchive} onPress={() => setPlaceArchive(!placeArchive)} />
+                      </Row>
+                    ) : null}
+                    {placeNotes !== null && !placeArchive ? <MyselfRow notes={placeNotes} onOpen={() => setMyselfShown(true)} /> : null}
+                    {((placeArchive ? placeOrdered?.archived : placeOrdered?.list) ?? []).map((row) => (
+                      <ChatRow
+                        key={row.identity}
+                        row={row}
+                        now={now}
+                        online={!!e2e && contacts.some((c) => c.identity === row.identity && !c.hide) && e2e.onlineUntil(row.identity, now) > 0}
+                        hidden
+                        onLong={row.invited ? undefined : () => setPlaceTarget(row)}
+                        // A network's chat opens its own screen, for the place's account (components/chat-row.tsx).
+                        onOpen={
+                          row.network
+                            ? undefined
+                            : () => (row.identity.startsWith('group:') ? setShownGroup(row.identity.slice('group:'.length)) : setSelected(`${CONTACT_PREFIX}${row.identity}`))
+                        }
+                      />
+                    ))}
+                    {placeArchive && placeOrdered?.archived.length === 0 ? <Text tone="muted">{t('Nothing archived.')}</Text> : null}
+                    {placeRows.length === 0 ? <Text tone="muted">{t('No hidden chats yet. Add a contact below, or move a chat here from its details.')}</Text> : null}
+                    <ChatActions target={placeTarget} place={chatListPlace} where="place" onClose={() => setPlaceTarget(null)} onChanged={() => e2e && setContacts(e2e.contacts())} />
+                    {(placeWhere && canGroup()) || canMatrix() || canXmpp() || canNostrChat() || hasCore() ? (
+                      // The place's own accounts on the networks (lib/place-networks.ts), apart from the space's,
+                      // and its own linked devices (app/devices.tsx), which the space's know nothing of. On a
+                      // linked device new groups stay on the phone, as the space's do.
+                      <Row wrap>
+                        {placeWhere && canGroup() && placeLinked()?.role() !== 'linked' ? <Button title={t('New group')} kind="secondary" compact onPress={() => setMakingGroup(true)} /> : null}
+                        {canMatrix() ? <Button title="Matrix" kind="secondary" compact onPress={() => router.push({ pathname: '/matrix', params: { hidden: '1' } })} /> : null}
+                        {canXmpp() ? <Button title="XMPP" kind="secondary" compact onPress={() => router.push({ pathname: '/xmpp', params: { hidden: '1' } })} /> : null}
+                        {canNostrChat() ? <Button title="Nostr" kind="secondary" compact onPress={() => router.push({ pathname: '/nostr-chats', params: { hidden: '1' } })} /> : null}
+                        {hasCore() ? <Button title={t('Linked devices')} kind="secondary" compact onPress={() => router.push({ pathname: '/devices', params: { hidden: '1' } })} /> : null}
+                      </Row>
+                    ) : null}
+                  </View>
+                ) : faceChips.length > 0 ? (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.faces} keyboardShouldPersistTaps="handled">
+                    {faceChips.map((peer) => {
+                      const named = contactName(peer, shownContacts);
+                      return (
+                        <Pressable
+                          key={peer}
+                          onPress={() => setSelected(peer)}
+                          accessibilityRole="button"
+                          accessibilityLabel={label(peer, shownContacts)}
+                          style={styles.face}
+                        >
+                          <View style={styles.ring}>
+                            <KeyFace
+                              identity={peer.slice(CONTACT_PREFIX.length)}
+                              name={named ?? ''}
+                              size={48}
+                              avatar={contacts.find((c) => `${CONTACT_PREFIX}${c.identity}` === peer)?.avatar}
+                            />
+                          </View>
+                          <Text variant="caption" numberOfLines={1} style={[styles.faceName, !named && styles.monoSmall]}>
+                            {named ?? peer.slice(CONTACT_PREFIX.length, CONTACT_PREFIX.length + 8)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                ) : findTyped && !draftIsLink && chips.length > 0 ? (
                   <Text variant="caption" tone="muted">
-                    {t('Other ways in: signing in to a relay, starting without one, a relay address and token')}
+                    {t('No contact has “{query}” in it.', { query: findTyped })}
                   </Text>
                 ) : null}
-                {relayShown ? <RelaySignIn url={signInAt} token="" onToken={(token, name) => void tookToken(signInAt, token, name, true)} onNote={setNote} card /> : null}
-                {relayShown && otherRelay === null ? (
-                  <Row wrap>
-                    <TextButton title={t('Sign in at another relay…')} onPress={() => setOtherRelay('')} />
-                    {signInAt !== START_RELAY ? <TextButton title={t('Back to {relay}', { relay: hostOf(START_RELAY) })} onPress={() => setSignInAt(START_RELAY)} /> : null}
-                  </Row>
-                ) : null}
-                {relayShown && otherRelay !== null ? (
-                  <Row>
-                    <Input
-                      value={otherRelay}
-                      onChangeText={setOtherRelay}
-                      placeholder="relay.example.org"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      keyboardType="url"
-                      style={styles.grow}
-                    />
-                    <Button
-                      title={t('Use')}
-                      compact
-                      onPress={() => {
-                        const url = signInRelay(otherRelay);
-                        if (!url) {
-                          setNote(t('That is not a relay address. Type it as its operator gave it, such as relay.example.org.'));
-                          return;
-                        }
-                        setSignInAt(url);
-                        setOtherRelay(null);
-                      }}
-                    />
-                    <TextButton title={t('Cancel')} onPress={() => setOtherRelay(null)} />
-                  </Row>
-                ) : null}
-                {relayShown && ownLink ? (
-                  <WayCard
-                    tint="green"
-                    sign={<GlobeIcon color="#ffffff" size={20} />}
-                    title={t('Start without a relay')}
-                    line={
-                      linkNostr
-                        ? t('Give someone who uses Erevos your QR code or link. Texts go through Nostr.')
-                        : t('Give someone who uses Erevos your QR code or link. You reach each other when near, over Wi-Fi or Bluetooth.')
-                    }
-                    open={way === 'own'}
-                    onPress={() => setWay((was) => (was === 'own' ? null : 'own'))}
-                  >
-                    <Row wrap>
-                      <Button title={t('Show my QR code')} compact onPress={() => setShowQr(true)} />
-                      <Button
-                        title={Platform.OS === 'web' ? t('Copy my contact link') : t('Share my contact link')}
-                        kind="secondary"
-                        compact
-                        onPress={() => void shareMine(ownLink)}
-                      />
-                    </Row>
-                    {linkNostr ? (
-                      <Text variant="caption" tone="muted">
-                        {t('If they have a relay, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')}
-                      </Text>
+                {hiddenKey ? (
+                  <View style={styles.panel}>
+                    {placeName !== null ? (
+                      <Field label={t('My name')} hint={t("Starts empty and never takes the space's name. The same name as your space's tells whoever sees both that they are you.")}>
+                        <Input
+                          value={placeName}
+                          onChangeText={setPlaceName}
+                          onEndEditing={() => void savePlaceName()}
+                          onSubmitEditing={() => void savePlaceName()}
+                          placeholder={t('Name')}
+                          maxLength={MAX_NAME}
+                          autoCorrect={false}
+                        />
+                      </Field>
                     ) : null}
-                    <Text tone="muted">{t('Or add them by their link or QR code:')}</Text>
-                    {addTheirs}
-                  </WayCard>
+                    <DetailRow title={t('Receive while closed')} checked={receiving} onPress={() => void changeReceiving(!receiving)} />
+                    <Text variant="caption" tone="muted">
+                      {receiving
+                        ? t('Closed, these hidden chats receive as your other chats do: their contacts see at once that a message came, a notice says only "New message", a call rings with no name, answered with the PIN, and a reminder of their Chat with myself says only "Reminder". For it, their key is kept encrypted with the space, so whoever opens the space and copies what the phone keeps could open them too; the PIN still keeps them out of sight.')
+                        : t('Closed, nothing reads these hidden chats: their key is only behind the PIN, and their messages wait on the relay until you open them.')}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      {receiving
+                        ? t('Their own Matrix, XMPP and Nostr accounts stay connected too: what comes there says only "New message", and a call rings with no name.')
+                        : t('Their own Matrix, XMPP and Nostr accounts connect only while they are open.')}
+                    </Text>
+                    {receiving ? (
+                      <>
+                        <DetailRow title={t('Dot for unread messages')} checked={placeSign} onPress={() => changePlaceSign(!placeSign)} />
+                        <Text variant="caption" tone="muted">
+                          {placeSign
+                            ? t('While one of these hidden chats has a message unread, a small dot shows on the magnifier of Search chats in this space: never how many, nor where. Whoever sees the space\'s chats sees it too, and may guess there are hidden chats.')
+                            : t('Messages unread here show only once you open these hidden chats.')}
+                        </Text>
+                      </>
+                    ) : null}
+                    {canRingInBackground && !receiving ? (
+                      <>
+                        <DetailRow title={t('Say when a message comes')} checked={watched} onPress={() => void changeWatched(!watched)} />
+                        <Text variant="caption" tone="muted">
+                          {watched
+                            ? t('While these hidden chats are closed, with Erevos in the background or showing, a notice says only "New message", or how many came, as for the other chats; that a message came or was read makes none. Whoever sees it and finds nothing new in your chats may guess there are more.')
+                            : t('Closed, these hidden chats say nothing: their messages wait on the relay until you open them.')}
+                        </Text>
+                        {watched && background && !(background.on && background.notices) ? (
+                          <Text variant="caption" tone="muted">
+                            {t('Nothing says it for now: it needs Receive and ring and Say a message came, under Settings → Notifications → In the background.')}
+                          </Text>
+                        ) : null}
+                        {watchNote ? <Text variant="caption" tone="muted">{watchNote}</Text> : null}
+                        <DetailRow title={t('Ring calls when closed')} checked={ringing} onPress={() => void changeRinging(!ringing)} />
+                        <Text variant="caption" tone="muted">
+                          {ringing
+                            ? t('While these hidden chats are closed, with Erevos in the background or on any screen, a call from one of their contacts makes the phone ring and show "Incoming call" with no name. On the ringing screen, tap the small sign and type the PIN to answer. Whoever holds the phone sees a call that is in none of your chats, and may guess there are more.')
+                            : t('Closed, these hidden chats do not ring: a call from their contacts rings only while they are open.')}
+                        </Text>
+                        {ringing && background && !background.on ? (
+                          <Text variant="caption" tone="muted">{t('Nothing rings for now: it needs Receive and ring, under Settings → Notifications → In the background.')}</Text>
+                        ) : null}
+                        {ringNote ? <Text variant="caption" tone="muted">{ringNote}</Text> : null}
+                      </>
+                    ) : null}
+                  </View>
                 ) : null}
-                {relayShown ? relayFields() : null}
+                {/* How this phone connects, only when something is still missing or for a phone with no relay
+                    yet: with everything working New chat starts with its question. */}
+                {loaded && (newcomer || reached.reach !== 'ready' || relayKeyCheck === 'none' || relayKeyCheck === 'refused') ? (
+                  <ConnectStatus reach={reached.reach} title={reached.title} line={reached.line} detail={reached.detail}>
+                    {relayUrl.trim() ? <RelayKeyNote url={relayUrl.trim()} /> : null}
+                  </ConnectStatus>
+                ) : null}
+                {/* Where is the other person (#45): one question, and each answer a page of its own. */}
+                {loaded ? (
+                  <>
+                    <Doors invites={canWelcome} onOpen={openDoor} />
+                    <Rest
+                      rows={[
+                        ...(ownLink ? [{ title: t('My link'), onPress: () => openDoor('link') }] : []),
+                        // On a linked computer the phone keeps who is blocked.
+                        ...(linkHere()
+                          ? []
+                          : [{ title: blocked.length > 0 ? t('Blocked contacts · {n}', { n: blocked.length }) : t('Blocked contacts'), onPress: () => openDoor('blocked') }]),
+                        { title: t('For advanced users'), onPress: () => openDoor('advanced') },
+                      ]}
+                    />
+                  </>
+                ) : null}
+              </>
+            ) : door === 'near' ? (
+              <NearMe
+                shown={shown}
+                search={HAS_LINKS && !hiddenKey}
+                held={!nearbyOn}
+                own={() => (ownLink ? { link: ownLink, name: linkE2E?.invitedAs() ?? '' } : null)}
+                onJoined={(end) => void addPaired(end.link, end.name)}
+                qr={
+                  canWelcome && !nearPlain ? (
+                    // An invite, which anyone's camera reads and which works with or without Erevos on their phone;
+                    // with no internet to make one, this phone's whole contact link, which needs none.
+                    <WelcomeInvite
+                      visible={shown}
+                      inline
+                      onPlain={() => setNearPlain(true)}
+                      e2e={linkE2E}
+                      relay={relayUrl.trim() && relayToken.trim() && !isLentToken(relayToken) ? { url: relayUrl.trim(), token: relayToken.trim() } : null}
+                      onOwnLine={(relay) => ownLine(relay.url, relay.token ?? '')}
+                      contactLink={ownLink}
+                      onNote={setNote}
+                    />
+                  ) : ownLink ? (
+                    <>
+                      <QrCode text={ownLink} size={200} />
+                      <Text variant="caption" tone="muted" style={styles.centered}>
+                        {t('They scan it with the camera, and you are each other’s contacts at once.')}
+                      </Text>
+                      {newcomer ? (
+                        <Text variant="caption" tone="muted" style={styles.centered}>
+                          {t('With no relay, messages go through Nostr, or nearby.')}
+                        </Text>
+                      ) : null}
+                    </>
+                  ) : null
+                }
+                ownLink={ownLink}
+                canCode={canPairWithCode()}
+                onCodeLink={(link) => void addPaired(link)}
+                onScan={() => void addFromQr(CAN_TAKE_PHOTOS ? 'camera' : 'photos')}
+                onType={() => openDoor('code')}
+                onGive={CAN_GIVE && !hiddenKey ? () => router.push('/give-app') : undefined}
+              />
+            ) : door === 'code' ? (
+              <View style={styles.section}>
+                {/* A phone with no relay yet: an invite is its way in, scanned, pasted, or from a photo of it. */}
+                {newcomer ? <Text tone="muted">{t('Ask someone who has Erevos to show you their QR code. Once you scan it, you are in and you are contacts, typing nothing.')}</Text> : null}
+                <TheirCode
+                  shown={shown}
+                  ownLink={ownLink}
+                  canCode={canPairWithCode()}
+                  onLink={(link) => void addPaired(link)}
+                  draft={contactDraft}
+                  onDraft={setContactDraft}
+                  onAdd={() => addContact()}
+                  onScan={() => void addFromQr(CAN_TAKE_PHOTOS ? 'camera' : 'photos')}
+                  onPhoto={CAN_TAKE_PHOTOS ? () => void addFromQr('photos') : undefined}
+                />
               </View>
-            ) : !loaded ? null : (
-              <>
-                {/* This phone's QR code on New chat itself, at once (#12): whoever scans it adds this phone,
-                    and scanning theirs is the button under it. With a relay that lets it, the small
-                    contact card; for someone with no Erevos yet, an invite, from the row under it. */}
+            ) : door === 'far' ? (
+              canWelcome ? (
+                <WelcomeInvite
+                  visible={shown}
+                  e2e={linkE2E}
+                  relay={relayUrl.trim() && relayToken.trim() && !isLentToken(relayToken) ? { url: relayUrl.trim(), token: relayToken.trim() } : null}
+                  onOwnLine={(relay) => ownLine(relay.url, relay.token ?? '')}
+                  contactLink={ownLink}
+                  onNote={setNote}
+                />
+              ) : !loaded ? null : ownLink ? (
+                // No invite to make here (no relay yet, hidden chats, a linked device): this phone's contact link goes instead.
+                <View style={styles.section}>
+                  <Text tone="muted">{t('Send them your contact link with any app. They open it in Erevos, or paste it under I have their code, and you are each other’s contacts.')}</Text>
+                  <Button title={Platform.OS === 'web' ? t('Copy my contact link') : t('Share my contact link')} onPress={() => void shareMine(ownLink)} />
+                  <Text variant="caption" tone="muted">
+                    {t('Whoever has it can write to you, so give it to whom you mean to: they add you with it.')}
+                  </Text>
+                  {newcomer ? (
+                    <Text variant="caption" tone="muted">
+                      {linkNostr
+                        ? t('If they have a relay, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')
+                        : t('With no relay, messages go through Nostr, or nearby.')}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : (
+                <Text tone="muted">{t('Getting it ready…')}</Text>
+              )
+            ) : door === 'done' ? (
+              joined ? (
+                <Joined
+                  face={<KeyFace identity={joined} name={contacts.find((c) => c.identity === joined)?.name ?? ''} size={72} avatar={contacts.find((c) => c.identity === joined)?.avatar} />}
+                  name={contacts.find((c) => c.identity === joined)?.name ?? ''}
+                  onName={(name) => void nameJoined(joined, name)}
+                  onWrite={() => setSelected(`${CONTACT_PREFIX}${joined}`)}
+                  onAnother={leaveDoor}
+                />
+              ) : null
+            ) : door === 'link' ? (
+              <View style={styles.section}>
+                {/* This phone's own QR code and link: whoever scans or opens it adds this phone. With a
+                    relay that lets it, the small contact card; the whole link for no internet. */}
                 <MyQrCard
                   text={ownLink ? (card && !bigQr ? card : ownLink) : null}
                   onScan={() => void addFromQr(CAN_TAKE_PHOTOS ? 'camera' : 'photos')}
                   shareTitle={Platform.OS === 'web' ? t('Copy') : t('Share')}
                   onShare={() => ownLink && void shareMine(ownLink)}
                   onPhoto={() => void addFromQr('photos')}
-                  forNew={
-                    canWelcome
-                      ? {
-                          on: qrForNew,
-                          onChoose: chooseQrForNew,
-                          invite: (
-                            <WelcomeInvite
-                              visible={qrForNew && shown}
-                              inline
-                              onClose={() => undefined}
-                              e2e={linkE2E}
-                              relay={relayUrl.trim() && relayToken.trim() && !isLentToken(relayToken) ? { url: relayUrl.trim(), token: relayToken.trim() } : null}
-                              onOwnLine={(relay) => ownLine(relay.url, relay.token ?? '')}
-                              contactLink={ownLink}
-                              onNote={setNote}
-                            />
-                          ),
-                        }
-                      : undefined
-                  }
                 >
+                  {card && !bigQr ? (
+                    <Text variant="caption" tone="muted" style={styles.centered}>
+                      {t('This small code works only when both phones have a relay. Otherwise use Near me, or an invite from Far away.')}
+                    </Text>
+                  ) : null}
                   {card && !bigQr && cardNfc === 'on' ? (
                     <Text variant="caption" tone="muted" style={styles.centered}>
                       {t('Or hold the back of their phone to the back of yours: their phone opens your contact link.')}
                     </Text>
                   ) : null}
+                  {newcomer ? (
+                    <Text variant="caption" tone="muted" style={styles.centered}>
+                      {t('With no relay, messages go through Nostr, or nearby.')}
+                    </Text>
+                  ) : null}
                   {card ? <TextButton title={bigQr ? t('Small QR code') : t('Large QR code, for no internet')} onPress={() => setBigQr(!bigQr)} /> : null}
                 </MyQrCard>
-              </>
-            )}
-            <View style={styles.panel}>
-              {/* The contact link's other ways, and inviting someone new, wait here as rows (#11): Show your QR code is above. */}
-              {!newcomer && ownLink ? (
-                <>
-                  <DetailRow title={t('Your contact link')} open={linkShown} onPress={() => setLinkShown((on) => !on)} />
-                  {linkShown ? (
-                    <View style={styles.section}>
-                      <Text variant="caption" tone="muted">
-                        {t('Whoever has it can write to you, so give it to whom you mean to: they add you with it.')}
-                      </Text>
-                      <Row wrap>
-                        <Button
-                          title={Platform.OS === 'web' ? t('Copy my contact link') : t('Share my contact link')}
-                          compact
-                          onPress={() => void shareMine(ownLink)}
+                {ownLink ? (
+                  <View style={styles.panel}>
+                    <Text variant="caption" tone="muted">
+                      {t('Whoever has it can write to you, so give it to whom you mean to: they add you with it.')}
+                    </Text>
+                    <Row wrap>
+                      {!hiddenKey ? <Button title={t('Link for a website')} kind="secondary" compact onPress={() => setWebLinking(true)} /> : null}
+                      {ownQueue && !linkHere() ? <Button title={t('New contact link')} kind="secondary" compact onPress={newContactLink} /> : null}
+                    </Row>
+                    {ownQueue && canSharePlace ? (
+                      <View>
+                        <DetailRow
+                          title={t('Share a place on my relay with this link')}
+                          checked={sharePlace}
+                          onPress={() => setSharePlace(!sharePlace)}
                         />
-                        {!hiddenKey ? <Button title={t('Link for a website')} kind="secondary" compact onPress={() => setWebLinking(true)} /> : null}
-                        {ownQueue && !linkHere() ? <Button title={t('New contact link')} kind="secondary" compact onPress={newContactLink} /> : null}
+                        <Text variant="caption" tone="muted">
+                          {sharePlace
+                            ? t('For a month, whoever adds you with this link and has no relay of their own can take a place on your relay. Anyone who sees the link can, so give it only to whom you mean to.')
+                            : t('The link has no place on your relay in it. Turn this on for someone with no relay of their own.')}
+                        </Text>
+                        {placeNote ? <Text variant="caption" tone="muted">{placeNote}</Text> : null}
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+              </View>
+            ) : door === 'blocked' ? (
+              <View style={styles.section}>
+                {blocked.length === 0 ? (
+                  <Text variant="caption" tone="muted">
+                    {t('No one is blocked.')}
+                  </Text>
+                ) : (
+                  blocked.map((b) => (
+                    <Row key={b.identity}>
+                      <Text style={[styles.grow, !b.name && styles.monoName]} numberOfLines={1}>
+                        {b.name || b.identity.slice(0, 16)}
+                      </Text>
+                      <TextButton title={t('Unblock')} onPress={() => void unblock(b.identity)} />
+                    </Row>
+                  ))
+                )}
+              </View>
+            ) : (
+              <View style={styles.section}>
+                {newcomer ? (
+                  <>
+                    {/* A phone with no relay yet: the other ways in than an invite, for whoever looks for them. */}
+                    <Text variant="caption" tone="muted">
+                      {t('Other ways in: signing in to a relay, starting without one, a relay address and token')}
+                    </Text>
+                    <RelaySignIn url={signInAt} token="" onToken={(token, name) => void tookToken(signInAt, token, name, true)} onNote={setNote} card />
+                    {otherRelay === null ? (
+                      <Row wrap>
+                        <TextButton title={t('Sign in at another relay…')} onPress={() => setOtherRelay('')} />
+                        {signInAt !== START_RELAY ? <TextButton title={t('Back to {relay}', { relay: hostOf(START_RELAY) })} onPress={() => setSignInAt(START_RELAY)} /> : null}
                       </Row>
-                      {ownQueue && canSharePlace ? (
-                        <View>
-                          <DetailRow
-                            title={t('Share a place on my relay with this link')}
-                            checked={sharePlace}
-                            onPress={() => setSharePlace(!sharePlace)}
+                    ) : null}
+                    {otherRelay !== null ? (
+                      <Row>
+                        <Input
+                          value={otherRelay}
+                          onChangeText={setOtherRelay}
+                          placeholder="relay.example.org"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          keyboardType="url"
+                          style={styles.grow}
+                        />
+                        <Button
+                          title={t('Use')}
+                          compact
+                          onPress={() => {
+                            const url = signInRelay(otherRelay);
+                            if (!url) {
+                              setNote(t('That is not a relay address. Type it as its operator gave it, such as relay.example.org.'));
+                              return;
+                            }
+                            setSignInAt(url);
+                            setOtherRelay(null);
+                          }}
+                        />
+                        <TextButton title={t('Cancel')} onPress={() => setOtherRelay(null)} />
+                      </Row>
+                    ) : null}
+                    {ownLink ? (
+                      <WayCard
+                        tint="green"
+                        sign={<GlobeIcon color="#ffffff" size={20} />}
+                        title={t('Start without a relay')}
+                        line={
+                          linkNostr
+                            ? t('Give someone who uses Erevos your QR code or link. Texts go through Nostr.')
+                            : t('Give someone who uses Erevos your QR code or link. You reach each other when near, over Wi-Fi or Bluetooth.')
+                        }
+                        open={way === 'own'}
+                        onPress={() => setWay((was) => (was === 'own' ? null : 'own'))}
+                      >
+                        <Row wrap>
+                          <Button title={t('Show my QR code')} compact onPress={() => setShowQr(true)} />
+                          <Button
+                            title={Platform.OS === 'web' ? t('Copy my contact link') : t('Share my contact link')}
+                            kind="secondary"
+                            compact
+                            onPress={() => void shareMine(ownLink)}
                           />
+                        </Row>
+                        {linkNostr ? (
                           <Text variant="caption" tone="muted">
-                            {sharePlace
-                              ? t('For a month, whoever adds you with this link and has no relay of their own can take a place on your relay. Anyone who sees the link can, so give it only to whom you mean to.')
-                              : t('The link has no place on your relay in it. Turn this on for someone with no relay of their own.')}
+                            {t('If they have a relay, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')}
                           </Text>
-                          {placeNote ? <Text variant="caption" tone="muted">{placeNote}</Text> : null}
+                        ) : null}
+                        <Text tone="muted">{t('Or add them by their link or QR code:')}</Text>
+                        {addTheirs}
+                      </WayCard>
+                    ) : null}
+                  </>
+                ) : null}
+                <View style={styles.panel}>
+                  {HAS_LINKS && !hiddenKey ? (
+                    <>
+                      <DetailRow title={t('Nearby, with no internet')} open={nearbyShown} onPress={() => setNearbyShown((on) => !on)} />
+                      {nearbyShown ? (
+                        <View>
+                          <DetailRow title={t('Look for phones nearby')} checked={nearbyOn} onPress={() => changeNearby(!nearbyOn)} />
+                          <Text variant="caption" tone="muted">
+                            {nearbyOn
+                              ? t('Erevos phones near this one find each other and talk with no internet, over Bluetooth and the ways below.')
+                              : t('Off: Erevos looks for no phone nearby, and everything goes through the relay. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.')}
+                          </Text>
+                          {nearbyOn && HAS_RADIO ? (
+                            <>
+                              <DetailRow title={t('Look with Wi-Fi Aware')} checked={awareOn} onPress={() => changeAware(!awareOn)} />
+                              <Text variant="caption" tone="muted">
+                                {awareOn
+                                  ? t('Besides Bluetooth, Erevos phones near each other find each other and talk over Wi-Fi Aware, faster and farther, with no internet. Anyone near can tell an Erevos phone is there, not whose.')
+                                  : t('Only Bluetooth looks for Erevos phones near this one, and the same Wi-Fi when that is on.')}
+                              </Text>
+                            </>
+                          ) : null}
+                          {nearbyOn ? (
+                            <>
+                          <DetailRow title={t('Find Erevos on the same Wi-Fi')} checked={lanOn} onPress={() => changeLan(!lanOn)} />
+                          <Text variant="caption" tone="muted">
+                            {lanOn
+                              ? t('While a space is open, Erevos phones and computers on the same Wi-Fi or hotspot find each other and talk directly, even with no internet. Anyone on that Wi-Fi can tell an Erevos app is there, not whose.')
+                              : HAS_RADIO
+                                ? awareOn
+                                  ? t('Only Bluetooth and Wi-Fi Aware look for phones nearby.')
+                                  : t('Only Bluetooth looks for phones nearby.')
+                                : t('Nothing looks for Erevos nearby.')}
+                          </Text>
+                          {CAN_DIRECT && lanOn ? (
+                            <>
+                              <DetailRow title={t('Make a Wi-Fi with phones nearby')} checked={directOn} onPress={() => changeDirect(!directOn)} />
+                              <Text variant="caption" tone="muted">
+                                {directOn
+                                  ? t('With no Wi-Fi in common, two Erevos phones near each other make a small Wi-Fi of their own (Wi-Fi Direct): faster than Bluetooth, and calls go over it with no internet. Anyone near can tell an Erevos phone is there and could join that Wi-Fi, getting only sealed bytes.')
+                                  : t('Erevos phones meet only on a Wi-Fi they share, or over Bluetooth and Wi-Fi Aware.')}
+                              </Text>
+                            </>
+                          ) : null}
+                          {SAMSUNG ? (
+                            <Text variant="caption" tone="muted">
+                              {t('On a Samsung phone, Wi-Fi Aware and the Wi-Fi with phones nearby stay off until you turn them on: while Erevos uses them, Samsung asks to turn off its own sharing.')}
+                            </Text>
+                          ) : null}
+                            </>
+                          ) : null}
+                          <DetailRow title={t('Carry messages for others')} checked={carrying} onPress={() => changeCarrying(!carrying)} />
+                          <Text variant="caption" tone="muted">
+                            {carrying
+                              ? t("When the relay cannot be reached, Erevos phones nearby give each other what they could not send, sealed for the contact's relay. This phone keeps those it gets, three days at most, and hands them to that relay through yours. It cannot read them, nor tell who they are from or for: it sees only the relay's address.")
+                              : t('Off: this phone keeps nothing for others. What it cannot send, phones nearby carry for you if theirs is on.')}
+                          </Text>
+                          {carrying ? (
+                            <Text variant="caption" tone="muted">
+                              {t('It also brings what waits for a phone beside it that has no internet, when that phone asks, never while it goes through Tor: from a relay other than its own only once you say yes, warned that the relay sees this phone\'s internet address. It learns the queue, never what the messages say.')}
+                            </Text>
+                          ) : null}
+                          {canLora() ? (
+                            <>
+                              <DetailRow title={t('LoRa radio')} value={t(LORA_SHOWN[lora.state().status])} onPress={() => router.push('/lora')} />
+                              <Text variant="caption" tone="muted">
+                                {t('With a Meshtastic radio, text goes kilometres with no internet, when nothing else takes it.')}
+                              </Text>
+                            </>
+                          ) : null}
                         </View>
                       ) : null}
-                    </View>
+                    </>
                   ) : null}
-                </>
-              ) : null}
-              {/* A phone with no relay yet pairs too: the phones meet on public Nostr relays and trade contact links. */}
-              {ownLink && canPairWithCode() ? <DetailRow title={t('Pair with a code')} onPress={() => setPairing(true)} /> : null}
-              {HAS_LINKS && !hiddenKey ? (
-                <>
-                  <DetailRow title={t('Nearby, with no internet')} open={nearbyShown} onPress={() => setNearbyShown((on) => !on)} />
-                  {nearbyShown ? (
-                    <View>
-                      <DetailRow title={t('Look for phones nearby')} checked={nearbyOn} onPress={() => changeNearby(!nearbyOn)} />
-                      <Text variant="caption" tone="muted">
-                        {nearbyOn
-                          ? t('Erevos phones near this one find each other and talk with no internet, over Bluetooth and the ways below.')
-                          : t('Off: Erevos looks for no phone nearby, and everything goes through the relay. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.')}
-                      </Text>
-                      {nearbyOn && HAS_RADIO ? (
-                        <>
-                          <DetailRow title={t('Look with Wi-Fi Aware')} checked={awareOn} onPress={() => changeAware(!awareOn)} />
-                          <Text variant="caption" tone="muted">
-                            {awareOn
-                              ? t('Besides Bluetooth, Erevos phones near each other find each other and talk over Wi-Fi Aware, faster and farther, with no internet. Anyone near can tell an Erevos phone is there, not whose.')
-                              : t('Only Bluetooth looks for Erevos phones near this one, and the same Wi-Fi when that is on.')}
-                          </Text>
-                        </>
-                      ) : null}
-                      {nearbyOn ? (
-                        <>
-                      <DetailRow title={t('Find Erevos on the same Wi-Fi')} checked={lanOn} onPress={() => changeLan(!lanOn)} />
-                      <Text variant="caption" tone="muted">
-                        {lanOn
-                          ? t('While a space is open, Erevos phones and computers on the same Wi-Fi or hotspot find each other and talk directly, even with no internet. Anyone on that Wi-Fi can tell an Erevos app is there, not whose.')
-                          : HAS_RADIO
-                            ? awareOn
-                              ? t('Only Bluetooth and Wi-Fi Aware look for phones nearby.')
-                              : t('Only Bluetooth looks for phones nearby.')
-                            : t('Nothing looks for Erevos nearby.')}
-                      </Text>
-                      {CAN_DIRECT && lanOn ? (
-                        <>
-                          <DetailRow title={t('Make a Wi-Fi with phones nearby')} checked={directOn} onPress={() => changeDirect(!directOn)} />
-                          <Text variant="caption" tone="muted">
-                            {directOn
-                              ? t('With no Wi-Fi in common, two Erevos phones near each other make a small Wi-Fi of their own (Wi-Fi Direct): faster than Bluetooth, and calls go over it with no internet. Anyone near can tell an Erevos phone is there and could join that Wi-Fi, getting only sealed bytes.')
-                              : t('Erevos phones meet only on a Wi-Fi they share, or over Bluetooth and Wi-Fi Aware.')}
-                          </Text>
-                        </>
-                      ) : null}
-                      {SAMSUNG ? (
-                        <Text variant="caption" tone="muted">
-                          {t('On a Samsung phone, Wi-Fi Aware and the Wi-Fi with phones nearby stay off until you turn them on: while Erevos uses them, Samsung asks to turn off its own sharing.')}
-                        </Text>
-                      ) : null}
-                        </>
-                      ) : null}
-                      <DetailRow title={t('Carry messages for others')} checked={carrying} onPress={() => changeCarrying(!carrying)} />
-                      <Text variant="caption" tone="muted">
-                        {carrying
-                          ? t("When the relay cannot be reached, Erevos phones nearby give each other what they could not send, sealed for the contact's relay. This phone keeps those it gets, three days at most, and hands them to that relay through yours. It cannot read them, nor tell who they are from or for: it sees only the relay's address.")
-                          : t('Off: this phone keeps nothing for others. What it cannot send, phones nearby carry for you if theirs is on.')}
-                      </Text>
-                      {carrying ? (
-                        <Text variant="caption" tone="muted">
-                          {t('It also brings what waits for a phone beside it that has no internet, when that phone asks, never while it goes through Tor: from a relay other than its own only once you say yes, warned that the relay sees this phone\'s internet address. It learns the queue, never what the messages say.')}
-                        </Text>
-                      ) : null}
-                      {canLora() ? (
-                        <>
-                          <DetailRow title={t('LoRa radio')} value={t(LORA_SHOWN[lora.state().status])} onPress={() => router.push('/lora')} />
-                          <Text variant="caption" tone="muted">
-                            {t('With a Meshtastic radio, text goes kilometres with no internet, when nothing else takes it.')}
-                          </Text>
-                        </>
-                      ) : null}
-                    </View>
-                  ) : null}
-                </>
-              ) : null}
-              {/* On a linked computer the phone keeps who is blocked. */}
-              {!linkHere() ? (
-                <>
-                  <DetailRow
-                    title={t('Blocked contacts')}
-                    value={blocked.length > 0 ? String(blocked.length) : undefined}
-                    open={blockedShown}
-                    onPress={() => setBlockedShown((on) => !on)}
-                  />
-                  {blockedShown ? (
-                    <View style={styles.section}>
-                      {blocked.length === 0 ? (
-                        <Text variant="caption" tone="muted">
-                          {t('No one is blocked.')}
-                        </Text>
-                      ) : (
-                        blocked.map((b) => (
-                          <Row key={b.identity}>
-                            <Text style={[styles.grow, !b.name && styles.monoName]} numberOfLines={1}>
-                              {b.name || b.identity.slice(0, 16)}
-                            </Text>
-                            <TextButton title={t('Unblock')} onPress={() => void unblock(b.identity)} />
-                          </Row>
-                        ))
-                      )}
-                    </View>
-                  ) : null}
-                </>
-              ) : null}
-              {/* For a newcomer they are under For advanced users at the top, with the other ways in. */}
-              {!newcomer ? (
-                <>
-                  <DetailRow title={t('For advanced users')} open={relayShown} onPress={() => setRelayShown((on) => !on)} />
-                  {relayShown ? (
-                    relayFields()
-                  ) : (
-                    <Text variant="caption" tone="muted">
-                      {t('Relay address and token, a second relay, invites to your relay')}
-                    </Text>
-                  )}
-                </>
-              ) : null}
-            </View>
+                  {relayFields()}
+                </View>
+              </View>
+            )}
           </ScrollView>
         ) : selectedContact && contacts.some((c) => c.request && `${CONTACT_PREFIX}${c.identity}` === selectedContact) ? (
           <View style={styles.panel}>
@@ -8293,6 +8401,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             />
             <TextButton title={t('Not now')} onPress={() => setConnecting(null)} />
           </Row>
+        ) : null}
+        {selectedContact && !isTorChat(selectedContact) && !throughTor() ? (
+          <IpQuiet fix={canTor() ? { label: t('Through Tor for this chat'), run: () => changeTor(selectedContact, true) } : undefined} />
         ) : null}
         {selectedContact ? (
           <View style={styles.dock}>

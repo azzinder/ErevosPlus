@@ -96,6 +96,7 @@ import { loadStars, starMessage } from '../lock/stars-data';
 import { prepareQueueEntries } from '../lock/queues-data';
 import { lastRestore, lostAt, lostMark, markLost, phoneId, restoredAt, restoredFromOther } from '../lock/restored';
 import { letGoOfPages, PAGE_PREFIX, sealedFile } from '../lock/sealed-file';
+import { lockedSpeedDials, phoneOpensLocked, setPhoneOpensLocked } from '../lib/phone-open';
 import { PhoneSims } from '../lib/phone-sims';
 import { loadMatrix, saveMatrix } from '../lock/matrix-data';
 import { loadNostrDm, saveNostrDm } from '../lock/nostr-dm-data';
@@ -108,6 +109,7 @@ import { changeAutoBackup, CHECK_MS, checkAutoBackup, isAutoBackupPassword, KEEP
 import { phoneCallsEntry } from '../lib/backup-calls';
 import { checkedWhole, loadChecks } from '../lib/backup-check';
 import { folderPlace, loadLedger, saveLedger, serverPlace, type Ledger } from '../lib/backup-ledger';
+import { backupMaking, beginBackupMaking, clearBackupMadeNote, forgetBackupMaking, onBackupMaking } from '../lib/backup-making';
 import { phoneSettingsForBackup, putPhoneSettings } from '../lib/backup-native';
 import { deleteBackupFiles, listBackupFiles, partsIn, writeBackup } from '../lib/backup-place';
 import { rulesFrom, rulesJson } from '../lib/phone-rules';
@@ -213,9 +215,11 @@ t('a backup made while a value in pages is saved holds every page its files name
 t('a restore that cannot write all of it (a full phone) leaves the phone as it was, never half of each', async () => {
   await phone();
   const file = await backUp(await backupKey('backup-pass'));
-  // The phone moves on after the backup: another space password, other files.
+  // The phone moves on after the backup: another space password, other files, and a space that
+  // keeps speed dial working with Erevos locked (lib/phone-open.ts).
   store.set('erevos.lock', 'the phone now');
   files.set('erevos-archive', 'the phone now');
+  store.set('erevos.phone-speed', '{"feed":"ab","keys":[{"key":"2","number":"6911111111"}]}');
   // And its photos and files are gone since, so the parts bring ones it does not have.
   const brought = [...blobs.keys()];
   for (const name of brought) blobs.delete(name);
@@ -249,6 +253,90 @@ t('a restore that cannot write all of it (a full phone) leaves the phone as it w
   // And the backup still restores whole once there is room.
   await restoreBackup(await openBackup(file, 'backup-pass'), fromShelf);
   assert.ok(await unlock(await loadLockConfig(), 'real-1111'));
+  assert.equal(store.has('erevos.phone-speed'), false);
+});
+
+// How far a backup made by hand is, and what came of it, are kept outside the screen
+// (lib/backup-making.ts): what came of it names the file and its folder and counts the phone's SMS
+// and calls, which a space opened after the one that made it is not to be shown.
+t('what a backup being made says shows only in the space it began in: gone when that space closes, and dropped after', async () => {
+  let told = 0;
+  const stop = onBackupMaking(() => told++);
+  const first = beginBackupMaking();
+  first.making({ step: 'Encrypting…', percent: 40 });
+  assert.deepEqual(backupMaking(), { making: { step: 'Encrypting…', percent: 40 }, note: null });
+  assert.equal(first.kept(), true);
+  // The space closes while it is made: the screen of the next one shows no backup going on.
+  forgetBackupMaking();
+  assert.deepEqual(backupMaking(), { making: null, note: null });
+  assert.equal(first.kept(), false);
+  const then = told;
+  // It ends later, unseen: its name, size, folder and counts reach no other space.
+  first.making({ step: 'Encrypting…', percent: 90 });
+  first.note({ text: 'Saved erevos-backup-2026-11-25-0001.erevos (120 MB) in Backups. It holds 3000 SMS and 12 MMS of the phone\'s.', bad: false });
+  first.making(null);
+  assert.deepEqual(backupMaking(), { making: null, note: null });
+  assert.equal(told, then);
+
+  // What came of one that ended while its space was open goes with the space as well.
+  const second = beginBackupMaking();
+  second.note({ text: 'Saved…', bad: false });
+  assert.equal(backupMaking().note?.text, 'Saved…');
+  forgetBackupMaking();
+  assert.equal(backupMaking().note, null);
+
+  // In the space open now it is said as before, and the screen saying something else clears its note.
+  const third = beginBackupMaking();
+  third.making({ step: 'Gathering…', percent: null });
+  third.note({ text: 'Not made.', bad: true });
+  third.making(null);
+  assert.deepEqual(backupMaking(), { making: null, note: { text: 'Not made.', bad: true } });
+  clearBackupMadeNote();
+  assert.deepEqual(backupMaking(), { making: null, note: null });
+  stop();
+
+  // The phone's notice, which names the backup, is for the space that made it as well (app/backup.tsx).
+  const screen = readFileSync(join(import.meta.dirname, '..', 'app', 'backup.tsx'), 'utf8');
+  assert.ok(screen.includes('if (made.kept()) tellBackupMade(name, sizeText(size), folder);'));
+  assert.equal(screen.split('tellBackupMade(').length, 2);
+
+  // And a space that closes does forget it, with the rest it forgets (app/_layout.tsx).
+  const layout = readFileSync(join(import.meta.dirname, '..', 'app', '_layout.tsx'), 'utf8');
+  const from = layout.indexOf('function closeSpace(): void {');
+  assert.ok(from > 0);
+  assert.ok(layout.slice(from, layout.indexOf('\n}\n', from)).includes('  forgetBackupMaking();\n'));
+});
+
+// The copy lies outside every space, and only the space that keeps it can take it away
+// (lib/phone-open.ts): after a restore the spaces are the backup's, and that space may be gone.
+t('no backup holds the copy of speed dial numbers the Phone calls with Erevos locked, and every restore takes it away', async () => {
+  const { key } = await phone();
+  await setPhoneOpensLocked(true);
+  const sims = await PhoneSims.open(0, key);
+  await sims.setSpeed('2', '+306911111111', 'Anna');
+  await sims.setFeedsLocked(true);
+  assert.deepEqual((await lockedSpeedDials())?.keys, [{ key: '2', number: '+306911111111' }]);
+  const file = await backUp(await backupKey('backup-pass'));
+  const opened = await openBackup(file, 'backup-pass');
+  assert.ok(!opened.entries.some((entry) => entry.name === 'erevos.phone-speed'));
+  assert.ok(opened.entries.some((entry) => entry.name === 'erevos.phone-open'));
+
+  // On the same phone, where the copy is this very space's: gone, and the space sees it is off.
+  await restoreBackup(opened, fromShelf);
+  assert.equal(store.has('erevos.phone-speed'), false);
+  assert.equal(await phoneOpensLocked(), true);
+  assert.equal(await (await PhoneSims.open(0, key)).feedsLocked(), false);
+  assert.equal((await PhoneSims.open(0, key)).speed('2')?.number, '+306911111111');
+
+  // On a phone where another space kept one: gone too, so no number of a space that is no longer there is called.
+  store.set('erevos.phone-speed', '{"feed":"cd","keys":[{"key":"3","number":"6922222222"}]}');
+  await restoreBackup(await openBackup(file, 'backup-pass'), fromShelf);
+  assert.equal(store.has('erevos.phone-speed'), false);
+  // One from before the parts, which deletes fewer of the phone's own settings, takes it away as well.
+  store.set('erevos.phone-speed', '{"feed":"cd","keys":[{"key":"3","number":"6922222222"}]}');
+  const { parts: _parts, ...whole } = await openBackup(file, 'backup-pass');
+  await restoreBackup({ ...whole, parts: null }, null);
+  assert.equal(store.has('erevos.phone-speed'), false);
 });
 
 // What the backup lacks that will not go (cleanup) leaves no phone half restored either.

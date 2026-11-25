@@ -4,7 +4,7 @@
 
 // Warnings that this phone's internet address (its IP address) may be seen, said before it may
 // be: by whom, what can be done instead, and the guide's section on it (Who sees your internet
-// address, {#ip}). Each is said once, by what it is of (ipKey): to go on is to have read it, and
+// address, {#ip}). Each is said once, by what it is of (ipKey; what is sent, once for the network): to go on is to have read it, and
 // it is not said again; turning Tor on instead says nothing is kept, so it is said again should
 // Tor be turned off. They are the same for every network of the app: Erevos says them before its
 // chats, calls and files, and any other network says its own, by its name. What asks is
@@ -56,9 +56,14 @@ export type IpFix = { label: string; run: () => Promise<unknown> | unknown };
 /** The guide's section on who sees the internet address, and how not to show it. */
 export const IP_GUIDE = '#ip';
 
-/** What a warning is kept by, once said. */
+/**
+ * What a warning is kept by, once said. What is sent is said once for the whole network, not for
+ * each chat or group: once gone on from, a chat that goes without Tor shows only a quiet line
+ * above where you write (components/ip-warning.tsx IpQuiet), with Tor for that chat beside it.
+ */
 export function ipKey(warning: IpWarning): string {
-  return `${warning.network.trim().toLowerCase()}|${warning.act}|${warning.of}`.slice(0, 200);
+  const of = warning.act === 'send' ? '*' : warning.of;
+  return `${warning.network.trim().toLowerCase()}|${warning.act}|${of}`.slice(0, 200);
 }
 
 /** A warning's title and words, for the network it names. */

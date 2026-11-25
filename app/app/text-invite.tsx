@@ -15,7 +15,7 @@ import { MAX_NAME } from '../lock/e2e-data';
 // link goes to opens it. Nothing is taken until the person says so, because any link can open this
 // screen; then the space's chat takes it: this phone joins the inviting phone's relay with access
 // of its own, and answers the invite, so the two are each other's contacts. A contact card (the
-// short QR code of Your contact link) only answers, from the relay this phone has already.
+// short QR code of My link) only answers, from the relay this phone has already.
 export default function TextInviteScreen() {
   const { d } = useLocalSearchParams<{ d?: string }>();
   const invite = textInviteOf(d);

@@ -6,4 +6,9 @@
 export const chatProtect: Record<string, string> = {
   'Allow screenshots': 'Bildschirmfotos erlauben',
   'Screenshots of this chat are now blocked here. The others are not told, and their apps can still take them.': 'Bildschirmfotos dieses Chats sind jetzt hier blockiert. Die anderen erfahren es nicht, und ihre Apps können weiter welche machen.',
+  'Chat options': 'Chat-Optionen',
+  'This chat': 'Dieser Chat',
+  'Find': 'Finden',
+  'This contact': 'Dieser Kontakt',
+  'This group': 'Diese Gruppe',
 };

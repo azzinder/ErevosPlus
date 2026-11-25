@@ -8,6 +8,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon as ShortcutIcon
+import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import expo.modules.kotlin.modules.Module
@@ -20,7 +25,10 @@ import expo.modules.kotlin.modules.ModuleDefinition
 // turning its alias on and the others off. The choice is the phone's, not a space's: the icons show
 // before Erevos is unlocked. A working calculator can stand in place of Erevos's own icon
 // (CalculatorActivity.kt): its alias goes on and every colour of Erevos's goes off, the colour
-// kept for when Erevos's icon comes back.
+// kept for when Erevos's icon comes back. The Camera's icon is off at first: the owner puts it
+// among the phone's apps (Camera), and it shows while the Collection is on and no calculator
+// stands in place of Erevos, as it would say Erevos is there. The Camera shortcut on Erevos's icon
+// (held down) follows the Collection and the calculator the same way, the owner's wish aside.
 class ErevosIconsModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ErevosIcons")
@@ -42,12 +50,16 @@ class ErevosIconsModule : Module() {
         Calculator.prefs(context).edit().putString(Calculator.EREVOS_COLOR, color).apply()
         return@Function true
       }
-      // An icon taken off while its part of Erevos is off: its colour is kept for when it is back.
-      if (offColor(context, icon) != null) {
+      // An icon taken off while its part of Erevos is off, or the Camera's while it is not shown:
+      // its colour is kept for when it is back.
+      if (offColor(context, icon) != null || (icon == "camera" && !isShown(context, "camera"))) {
         offPrefs(context).edit().putString(icon, color).apply()
+        if (icon == "camera") applyCamera(context)
         return@Function true
       }
       show(context, icon, color)
+      // The Camera shortcut hangs on Erevos's icon now on, in the Camera's colour.
+      applyCamera(context)
       recount(context)
       true
     }
@@ -76,6 +88,33 @@ class ErevosIconsModule : Module() {
       true
     }
 
+    // Whether the owner wants the Camera's icon among the phone's apps (it shows only while the
+    // Collection is on and no calculator stands in place of Erevos). Null where this app has no
+    // camera (Erevos Lite) or with no app context.
+    Function("camera") {
+      val context = context() ?: return@Function null
+      if (!exists(context, "camera")) return@Function null
+      Camera.prefs(context).getBoolean(Camera.WANTED, false)
+    }
+
+    // Puts the Camera's icon among the phone's apps, or takes it off. False where there is none.
+    Function("setCamera") { wanted: Boolean ->
+      val context = context() ?: return@Function false
+      if (!exists(context, "camera")) return@Function false
+      Camera.prefs(context).edit().putBoolean(Camera.WANTED, wanted).apply()
+      applyCamera(context)
+      true
+    }
+
+    // Whether the Collection is on, which the Camera's icon follows (lib/module-icons.ts).
+    Function("setCameraAllowed") { allowed: Boolean ->
+      val context = context() ?: return@Function false
+      if (!exists(context, "camera")) return@Function false
+      Camera.prefs(context).edit().putBoolean(Camera.ALLOWED, allowed).apply()
+      applyCamera(context)
+      true
+    }
+
     // Whether the calculator stands in place of Erevos's icon. Null with no app context.
     Function("calculator") {
       val context = context() ?: return@Function null
@@ -95,6 +134,7 @@ class ErevosIconsModule : Module() {
       for (each in COLORS) {
         packages.setComponentEnabledSetting(component(context, "erevos", each), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
       }
+      applyCamera(context)
       recount(context)
       true
     }
@@ -117,8 +157,69 @@ internal fun calculatorOff(context: Context) {
   context.packageManager.setComponentEnabledSetting(Calculator.component(context), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
   Calculator.forgetCode(context)
   Calculator.prefs(context).edit().remove(Calculator.EREVOS_COLOR).apply()
+  applyCamera(context)
   recount(context)
 }
+
+/** What the Camera's icon follows: the owner's wish, and the Collection being on (on at first). */
+private object Camera {
+  const val WANTED = "wanted"
+  const val ALLOWED = "allowed"
+  fun prefs(context: Context) = context.applicationContext.getSharedPreferences("erevos-icons-camera", Context.MODE_PRIVATE)
+}
+
+/** Shows the Camera's icon, in its colour, when the owner wants it, the Collection is on and no
+ *  calculator stands in place of Erevos; otherwise takes it off, its colour kept. */
+internal fun applyCamera(context: Context) {
+  if (!exists(context, "camera")) return
+  val prefs = Camera.prefs(context)
+  val on = prefs.getBoolean(Camera.WANTED, false) && prefs.getBoolean(Camera.ALLOWED, true) && !Calculator.isOn(context)
+  val shown = isShown(context, "camera")
+  applyShortcut(context, prefs.getBoolean(Camera.ALLOWED, true) && !Calculator.isOn(context))
+  if (on && !shown) {
+    show(context, "camera", offColor(context, "camera") ?: ICONS.getValue("camera").first)
+    offPrefs(context).edit().remove("camera").apply()
+  } else if (!on && shown) {
+    offPrefs(context).edit().putString("camera", colorOf(context, "camera")).apply()
+    for (each in COLORS) {
+      context.packageManager.setComponentEnabledSetting(component(context, "camera", each), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+    }
+  }
+}
+
+// The Camera shortcut on Erevos's icon, held down (Android 7.1 and later): on Erevos's own icon now
+// on, in the Camera's colour, opening CameraOpenActivity; none while the Collection is off or the
+// calculator stands in place of Erevos, and one pinned to the home screen then does nothing.
+private fun applyShortcut(context: Context, on: Boolean) {
+  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return
+  runCatching {
+    val shortcuts = context.getSystemService(ShortcutManager::class.java) ?: return
+    if (!on) {
+      shortcuts.removeDynamicShortcuts(listOf(CAMERA_SHORTCUT))
+      shortcuts.disableShortcuts(listOf(CAMERA_SHORTCUT))
+      return
+    }
+    val resources = context.resources
+    val label = resources.getIdentifier("erevos_camera_launcher", "string", context.packageName)
+    val picture = resources.getIdentifier("erevos_camera_launcher_${colorOf(context, "camera")}", "mipmap", context.packageName)
+    if (label == 0 || picture == 0) return
+    val open = Intent(Intent.ACTION_VIEW, Uri.parse("erevos://collection?camera=1")).setClassName(context.packageName, "expo.modules.erevoscollection.CameraOpenActivity")
+    val shortcut = ShortcutInfo.Builder(context, CAMERA_SHORTCUT)
+      .setShortLabel(context.getString(label))
+      .setIcon(ShortcutIcon.createWithResource(context, picture))
+      .setActivity(component(context, "erevos", colorOf(context, "erevos")))
+      .setIntent(open)
+      .build()
+    shortcuts.enableShortcuts(listOf(CAMERA_SHORTCUT))
+    shortcuts.setDynamicShortcuts(listOf(shortcut))
+  }
+}
+
+private const val CAMERA_SHORTCUT = "camera"
+
+// Whether one of the icon's colours is turned on here (the Camera's manifest turns none on).
+private fun isShown(context: Context, icon: String): Boolean =
+  COLORS.any { color -> context.packageManager.getComponentEnabledSetting(component(context, icon, color)) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED }
 
 // Shows the icon in that colour: the new alias goes on before the old one goes off, so the launcher
 // always has one.
@@ -151,6 +252,7 @@ private val ICONS = mapOf(
   "phone" to Icon("green") { _, color -> launcher("expo.modules.erevosphone.PhoneLauncher", color, "green") },
   "sms" to Icon("blue") { _, color -> launcher("expo.modules.erevossms.SmsLauncher", color, "blue") },
   "contacts" to Icon("violet") { _, color -> launcher("expo.modules.erevoscontacts.ContactsLauncher", color, "violet") },
+  "camera" to Icon("orange") { _, color -> launcher("expo.modules.erevoscollection.CameraLauncher", color, "orange") },
 )
 
 private fun launcher(prefix: String, color: String, first: String) =

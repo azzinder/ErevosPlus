@@ -28,7 +28,7 @@ import { Button, Row, Text } from './ui';
 // (lib/sms-notices.ts). Nothing of it shows until it is known whether it is locked. `children`
 // draws the conversation, given the buttons for these.
 
-export function SmsOwnScreen({ to, children }: { to: string; children: (tools: ReactNode) => ReactNode }) {
+export function SmsOwnScreen({ to, children }: { to: string; children: (tools: ReactNode, said: string) => ReactNode }) {
   // What it has of its own, as read: undefined until then.
   const [own, setOwn] = useState<SmsOwn | null | undefined>(undefined);
   const [styling, setStyling] = useState(false);
@@ -88,13 +88,12 @@ export function SmsOwnScreen({ to, children }: { to: string; children: (tools: R
         <Button title={t('Chat look')} kind="secondary" compact onPress={() => setStyling(true)} />
         {guard.buttons}
       </Row>
-      {note ? <Text tone="muted">{note}</Text> : null}
       <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={name} chat={lookChat} />
     </>
   );
   return (
     <ChatScreen chat={lookChat} header>
-      {own === undefined ? null : (guard.gate ?? children(tools))}
+      {own === undefined ? null : (guard.gate ?? children(tools, note))}
     </ChatScreen>
   );
 }

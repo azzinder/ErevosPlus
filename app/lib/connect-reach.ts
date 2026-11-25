@@ -61,9 +61,9 @@ export function connectReach(c: Connection): { reach: Reach; title: string; line
       : {
           reach: 'part',
           title: t('Texts only, for now'),
-          line: t('Your contacts reach you with texts, stickers and reactions. For photos, voice messages, calls and groups, ask someone who uses Erevos for an invite and tap I have an invite.'),
+          line: t('Your contacts reach you with texts, stickers and reactions. For photos, voice messages, calls and groups, ask someone who uses Erevos for an invite and tap I have their code.'),
         };
   }
   if (c.hidden) return { reach: 'none', title: t('No relay yet'), line: t('Hidden chats need a relay: type its address under For advanced users, then create their queue.') };
-  return { reach: 'none', title: t('Only nearby, for now'), line: t('Your contacts reach you only when near, over Wi-Fi or Bluetooth. To be reached from anywhere, ask someone who uses Erevos for an invite and tap I have an invite.') };
+  return { reach: 'none', title: t('Only nearby, for now'), line: t('Your contacts reach you only when near, over Wi-Fi or Bluetooth. To be reached from anywhere, ask someone who uses Erevos for an invite and tap I have their code.') };
 }

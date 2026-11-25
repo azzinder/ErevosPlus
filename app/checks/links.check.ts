@@ -12,7 +12,7 @@ import { test } from 'node:test';
 
 import { handOverCall, takeCall } from '../lib/call-handoff';
 import { splitLinks } from '../lib/links';
-import { dropLink, holdLink, setupKeepsLink, hrefLink, ICON_LINK, keepLink, KEEP_MS, linkHref, linkMove, linkParts, lockingKeepsLink, onLinkHeld, peekLink, RELOCK_MS, screenLink, screenParams, smsOnlyLink, SMS_ONLY_SCREENS, ONLY_SCREENS, onlyPartOf, takeLink } from '../lib/open-link';
+import { dropLink, holdLink, setupKeepsLink, hrefLink, ICON_LINK, keepLink, KEEP_MS, linkHref, linkMove, linkParts, lockingKeepsLink, onLinkHeld, peekLink, RELOCK_MS, screenLink, screenParams, smsOnlyLink, SMS_ONLY_SCREENS, ONLY_SCREENS, onlyPartOf, pastedLink, takeLink } from '../lib/open-link';
 
 import { templateFile } from './expo-template';
 
@@ -30,6 +30,23 @@ test('a sentence mark or an unopened bracket after it is not part of it', () => 
   assert.deepEqual(urls('(at https://example.org/x)'), ['https://example.org/x']);
   assert.deepEqual(urls('https://en.wikipedia.org/wiki/Foo_(bar)'), ['https://en.wikipedia.org/wiki/Foo_(bar)']);
   assert.deepEqual(urls('«https://example.org»'), ['https://example.org']);
+});
+
+test('a link pasted with the words around it is taken alone', () => {
+  const invite = 'https://erevos-web.lphl.nekten.eu/i#AbC-12_x';
+  assert.equal(pastedLink(`Join me on Erevos: ${invite}`), invite);
+  assert.equal(pastedLink(`Έλα στο Erevos (${invite}).`), invite);
+  assert.equal(pastedLink(`«${invite}»`), invite);
+  assert.equal(pastedLink(`first line\n${invite}\nlast line`), invite);
+  assert.equal(pastedLink('look: erevos://contact?id=ab&key=cd_ef-1, thanks'), 'erevos://contact?id=ab&key=cd_ef-1');
+  assert.equal(pastedLink('  https://erevos-web.lphl.nekten.eu/c/#id=1&n=Maria%20K  '), 'https://erevos-web.lphl.nekten.eu/c/#id=1&n=Maria%20K');
+  // The first one, when there are two; and what holds no Erevos link comes back as typed, trimmed.
+  assert.equal(pastedLink(`${invite} erevos://welcome?x=1`), invite);
+  assert.equal(pastedLink('  1234 5678 '), '1234 5678');
+  assert.equal(pastedLink('https://example.org/i#abc'), 'https://example.org/i#abc');
+  const started = performance.now();
+  assert.equal(pastedLink(`${invite}${')'.repeat(200000)}`), invite);
+  assert.ok(performance.now() - started < 2000);
 });
 
 test('a long run of marks or brackets after a link takes no longer than its length', () => {

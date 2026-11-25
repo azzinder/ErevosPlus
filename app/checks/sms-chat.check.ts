@@ -18,7 +18,7 @@ import { randomBytes, toHex } from '../lib/crypto';
 import { E2E, toBase64Url } from '../lib/e2e';
 import { fromHex } from '../lib/relay';
 import { collectInvites, inviteAnswer } from '../lib/sms-invite';
-import { forgetSmsLink, spaceSmsLink, takeInviteAnswer } from '../lib/sms-relay';
+import { forgetSmsLink, invitesDue, spaceSmsLink, takeInviteAnswer } from '../lib/sms-relay';
 import { setCurrentSpace } from '../lock/keys';
 import { buildInbox, showsIn } from '../lib/inbox';
 import { searchMessages } from '../lib/message-search';
@@ -256,6 +256,16 @@ test('linking a number sends its SMS conversation to the chat, and unlinking it 
   assert.equal(await opens('6900000001', true), null);
   await alice.linkPhone(identity, '');
   assert.equal(await opens('6900000001'), null);
+});
+
+test('with SMS invites turned off, an invite the owner took by hand is still answered, and one that came by SMS waits', () => {
+  // A contact QR code or an invite link taken here has no number; an invite by SMS has its sender's.
+  const taken = { from: '', name: 'Bob' };
+  const came = { from: '+306900000001' };
+  assert.deepEqual(invitesDue([taken, came], true), { now: [taken, came], later: [] });
+  assert.deepEqual(invitesDue([taken, came], false), { now: [taken], later: [came] });
+  assert.deepEqual(invitesDue([came], false), { now: [], later: [came] });
+  assert.deepEqual(invitesDue([], false), { now: [], later: [] });
 });
 
 test('the answer to an SMS invite from someone blocked here adds no one; anyone else’s adds them', { skip: !core }, async () => {

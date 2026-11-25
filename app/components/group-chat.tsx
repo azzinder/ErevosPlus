@@ -59,6 +59,8 @@ import { ContactPicker, groupableContacts } from './contact-picker';
 import { ChatMedia } from './chat-media';
 import { groupMedia } from '../lib/chat-media';
 import { IpStop } from '../lib/ip-warning';
+import { throughTor } from '../lib/relay';
+import { IpQuiet } from './ip-warning';
 
 // A group chat (lib/groups.ts), of the space or of a hidden place (components/groups-at.tsx): its messages, each of others' with the sender's name, notes of who
 // joined and left, and the message bar to write in (components/composer.tsx). Its members sheet,
@@ -635,6 +637,7 @@ export function GroupChat({ id, at, onBack, onLook }: { id: string; at?: string;
           ))}
         </ScrollView>
       )}
+      {out || throughTor() ? null : <IpQuiet />}
       {out ? null : (
         <DraftComposer
           draft={draft}

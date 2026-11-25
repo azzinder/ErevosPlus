@@ -187,7 +187,7 @@ const HEARD = [...Array.from({ length: MOST_SLOTS }, (_, n) => [`erevos.watch.${
 // The phone's own settings, the same in every space, that go with its owner to another phone: the
 // language (lib/i18n.ts), the modules on (lib/modules.ts), vibrate on touch (lib/haptics.ts), the
 // number on the icon (lib/icon-number.ts), ringing and the messages' notice in the background
-// (lib/background.ts), the battery mode (lib/battery-mode.ts), keeping the screen private
+// and starting as the phone turns on (lib/background.ts), the battery mode (lib/battery-mode.ts), keeping the screen private
 // (lib/screen-privacy.ts), the photos' quality (lib/photo-quality.ts), carrying for phones nearby,
 // the same Wi-Fi, Wi-Fi Direct and Wi-Fi Aware (lib/nearby-links.ts), the LoRa radio, which is the
 // owner's and not the phone's (lib/radio.ts), whether the Phone opens without the password
@@ -200,6 +200,7 @@ const SETTINGS = [
   'erevos.icon-number',
   'erevos.ring-background',
   'erevos.message-notices',
+  'erevos.boot-start',
   'erevos.battery',
   'erevos.screen-private',
   'erevos.photo-quality',
@@ -217,6 +218,11 @@ const CLOUD = 'erevos.backup-cloud';
 const LORA = 'erevos.lora';
 // The keystore entries a backup holds from PARTS on: restoring one deletes those it does not hold.
 const LATER_KEYS = [PANIC_KEY, ...SETTINGS, AUTO, CLOUD];
+// The keystore entries no backup holds and every restore deletes: the copy of one space's speed
+// dial numbers that the Phone calls with Erevos locked (lib/phone-open.ts). The spaces are the
+// backup's from then on, and the one that kept the copy may not be among them: nothing could take
+// it away then. A space that kept it turns it on again.
+const NEVER_KEPT = ['erevos.phone-speed'];
 
 // The sealed files that are text; voice messages' sounds, pictures and stickers' pictures are
 // bytes. A file not on the phone is left out, so the backup of a phone that keeps no contacts, or
@@ -974,6 +980,7 @@ export async function restoreBackup(
   for (const name of [...(await listFiles(AVATAR)), ...(await listFiles(PAGE))]) if (!keep.has(name)) gone.push({ kind: KIND_BYTES, name, value: await readBytes(name) });
   const heard = HEARD.some((name) => keep.has(name));
   for (const name of [...KEYS, ...(parts ? LATER_KEYS : []), ...(heard ? HEARD : [])]) if (!keep.has(name)) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
+  for (const name of NEVER_KEPT) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
   try {
     for (const entry of entries) {
       if (entry.kind === KIND_TEXT) await writeFile(entry.name, utf8Decode(entry.data));

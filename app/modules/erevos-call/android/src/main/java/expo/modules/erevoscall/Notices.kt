@@ -29,6 +29,9 @@ object Notices {
   const val MESSAGES_ID = 7103
   private const val STOPPED_ID = 7104
   private const val RECEIVING_CHANNEL = "erevos-receiving"
+  // Started by itself as the phone turned on (BootStart): its notice shows in the status bar, so it
+  // is seen to run, where the one while a space is open stays out of it.
+  private const val WAITING_CHANNEL = "erevos-waiting"
   const val CALLS_CHANNEL = "erevos-calls"
   const val MESSAGES_CHANNEL = "erevos-messages"
   // The same notice, for messages sent without sound: a channel that never sounds.
@@ -73,6 +76,7 @@ object Notices {
   // German, Spanish, French, Italian, Portuguese and Serbo-Croatian (Latin script, ijekavian), by the English.
   private val OTHERS: Map<String, Map<String, String>> = mapOf(
     "Receiving in the background" to t("Empfang im Hintergrund", "Recepción en segundo plano", "Réception en arrière-plan", "Ricezione in background", "Recepção em segundo plano", "Primanje u pozadini"),
+    "Waiting since the phone turned on" to t("Wartet seit dem Einschalten des Telefons", "En espera desde que se encendió el teléfono", "En attente depuis l’allumage du téléphone", "In attesa da quando il telefono si è acceso", "À espera desde que o telefone foi ligado", "Čeka otkako je telefon uključen"),
     "Calls" to t("Anrufe", "Llamadas", "Appels", "Chiamate", "Chamadas", "Pozivi"),
     "Messages" to t("Nachrichten", "Mensajes", "Messages", "Messaggi", "Mensagens", "Poruke"),
     "Messages without sound" to t("Nachrichten ohne Ton", "Mensajes sin sonido", "Messages sans son", "Messaggi senza suono", "Mensagens sem som", "Poruke bez zvuka"),
@@ -123,6 +127,7 @@ object Notices {
       named = lang
       // A channel made again under its id keeps its settings and takes the new name.
       manager.getNotificationChannel(RECEIVING_CHANNEL)?.let { it.name = say(context, "Receiving in the background", "Λήψη στο παρασκήνιο"); manager.createNotificationChannel(it) }
+      manager.getNotificationChannel(WAITING_CHANNEL)?.let { it.name = say(context, "Waiting since the phone turned on", "Σε αναμονή από το άνοιγμα του τηλεφώνου"); manager.createNotificationChannel(it) }
       manager.getNotificationChannel(CALLS_CHANNEL)?.let { it.name = say(context, "Calls", "Κλήσεις"); manager.createNotificationChannel(it) }
       manager.getNotificationChannel(MESSAGES_CHANNEL)?.let { it.name = say(context, "Messages", "Μηνύματα"); manager.createNotificationChannel(it) }
       manager.getNotificationChannel(QUIET_CHANNEL)?.let { it.name = say(context, "Messages without sound", "Μηνύματα χωρίς ήχο"); manager.createNotificationChannel(it) }
@@ -132,6 +137,16 @@ object Notices {
     if (manager.getNotificationChannel(RECEIVING_CHANNEL) == null) {
       manager.createNotificationChannel(
         NotificationChannel(RECEIVING_CHANNEL, say(context, "Receiving in the background", "Λήψη στο παρασκήνιο"), NotificationManager.IMPORTANCE_MIN).apply {
+          setShowBadge(false)
+          lockscreenVisibility = Notification.VISIBILITY_SECRET
+        },
+      )
+    }
+    if (manager.getNotificationChannel(WAITING_CHANNEL) == null) {
+      manager.createNotificationChannel(
+        NotificationChannel(WAITING_CHANNEL, say(context, "Waiting since the phone turned on", "Σε αναμονή από το άνοιγμα του τηλεφώνου"), NotificationManager.IMPORTANCE_LOW).apply {
+          setSound(null, null as AudioAttributes?)
+          enableVibration(false)
           setShowBadge(false)
           lockscreenVisibility = Notification.VISIBILITY_SECRET
         },
@@ -204,7 +219,7 @@ object Notices {
   fun receiving(context: Context, waiting: Boolean = false): Notification {
     channels(context)
     @Suppress("DEPRECATION")
-    return builder(context, RECEIVING_CHANNEL)
+    return builder(context, if (waiting) WAITING_CHANNEL else RECEIVING_CHANNEL)
       .setSmallIcon(R.drawable.erevos_call_notice)
       .setContentTitle("Erevos")
       .setContentText(
@@ -213,7 +228,7 @@ object Notices {
       )
       .setOngoing(true)
       .setShowWhen(false)
-      .setPriority(Notification.PRIORITY_MIN)
+      .setPriority(if (waiting) Notification.PRIORITY_LOW else Notification.PRIORITY_MIN)
       .setVisibility(Notification.VISIBILITY_SECRET)
       .setContentIntent(opening(context, 1))
       .build()

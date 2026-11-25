@@ -148,7 +148,6 @@ export const telegramText: Record<string, string> = {
   "Title": "Naslov",
   "Nobody with that name on Telegram.": "Nitko s tim imenom na Telegramu.",
   "Find by @name": "Traži po @imenu",
-  "Find": "Traži",
   "Retract vote": "Povuci glas",
   "Poll closed": "Anketa je zatvorena",
   "Anonymous poll": "Anonimna anketa",

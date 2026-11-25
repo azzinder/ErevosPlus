@@ -43,6 +43,7 @@ import {
   type CallHistory,
   type CallRow,
 } from '../lib/phone-log';
+import { lockedSpeedDials } from '../lib/phone-open';
 import { blockedUntil, liftGroup, liveGroups, rulesFrom, rulesJson, type PhoneRules } from '../lib/phone-rules';
 import { accountLabel, callAccount, PhoneSims } from '../lib/phone-sims';
 import { refreshSpamList } from '../lib/spam-list';
@@ -353,8 +354,21 @@ export function PhoneView({ params, locked }: { params: { number?: string; tab?:
   }
 
   // Speed dial, 2 to 9 held on an empty keypad: calls the key's number, or offers to choose one.
+  // With Erevos locked, only a number one space lets work so (lib/phone-open.ts) is called.
   function speedDial(key: string) {
-    if (locked || !sims) {
+    if (locked) {
+      void lockedSpeedDials().then((copy) => {
+        const kept = copy?.keys.find((k) => k.key === key);
+        if (kept) {
+          void call(kept.number);
+          return;
+        }
+        press();
+        setNote(t('Speed dial works with Erevos unlocked.'));
+      });
+      return;
+    }
+    if (!sims) {
       press();
       setNote(t('Speed dial works with Erevos unlocked.'));
       return;

@@ -147,8 +147,9 @@ touche-le encore pour revenir. Les discussions masquées ont leurs propres discu
   comment les photos et les cartes sont récupérées. Sous une publication : répondre, partager à nouveau, aimer et
   partager ; sous un message Matrix : répondre, réagir et partager. **Nouvelle publication**, le stylo en bas, écrit une
   publication publique, avec jusqu’à quatre photos. Voir [Discussions avec d’autres applis Nostr](#nostr-chats).
-- **Nouvelle discussion**, en bas, ouvre les réglages du relais et l’ajout d’un contact. **Me rappeler**, la cloche
-  orange à côté, t’écrit un rappel.
+- **Nouvelle discussion**, en bas, demande où est l’autre personne, **À côté de moi**, **Loin** ou **J’ai son code**,
+  et l’ajoute ; les lignes en dessous ouvrent ton propre lien, les contacts bloqués et les réglages du relais. **Me
+  rappeler**, la cloche orange à côté, t’écrit un rappel.
 - **{~Le combiné vert et la personne violette|La personne violette}** en haut, sur Android, {~ouvrent directement **Téléphone** et **Contacts**,
   aux couleurs de leurs icônes|ouvre directement **Contacts**, à la couleur de son icône} sur l’écran d’accueil du téléphone. {~Ils ne sont pas aussi|Elle n’est pas aussi} dans le menu sous les trois
   points.
@@ -228,9 +229,9 @@ Une bonne première heure :
    pour que personne qui prend le téléphone ne puisse ouvrir Erevos.
 2. Ouvre **Téléphones à proximité** depuis le menu sur deux téléphones proches l’un de l’autre, et autorise ce
    qu’Android demande.
-3. Ajoutez-vous l’un l’autre avec **Afficher mon code QR**, comme dans [Discuter avec un téléphone à
-   proximité](#nearby), et envoie un message : il part à proximité, chiffré de bout en bout, sans relais et sans
-   internet.
+3. Ajoutez-vous l’un l’autre avec **Nouvelle discussion** → **À côté de moi**, sur les deux téléphones, comme dans
+   [Discuter avec un téléphone à proximité](#nearby), et envoie un message : il part à proximité, chiffré de bout en
+   bout, sans relais et sans internet.
 4. Pour parler de plus loin, configure un relais comme dans [Discuter par un relais](#relay).
 
 ### Discussion avec moi-même et rappels
@@ -404,16 +405,18 @@ Bluetooth et, là où le téléphone l’a, par Wi-Fi Aware, et sur le Wi-Fi où
 internet, ni SIM, ni réseau Wi-Fi ne sont nécessaires. Il porte les messages à tes contacts, chiffrés de bout en bout
 comme ceux qui passent par le relais.
 
-Il ne cherche que lorsque **Chercher les téléphones à proximité** est activé, sous **À proximité, sans internet**,
-dans **Nouvelle discussion** : c’est désactivé jusqu’à ce que tu l’actives, sur les deux téléphones, et d’ici là tout
-passe par le relais.
+Il ne cherche que lorsque **Chercher les téléphones à proximité** est activé, sous **Pour les utilisateurs
+avancés** → **À proximité, sans internet**, dans **Nouvelle discussion** : c’est désactivé jusqu’à ce que tu
+l’actives, sur les deux téléphones, et d’ici là tout passe par le relais. Seul **À côté de moi**, dans Nouvelle
+discussion, cherche sans lui, tant que sa page est ouverte, pour ajouter un contact.
 
 1. Ouvre **Téléphones à proximité** depuis le menu sur les deux téléphones. La première fois, Android demande
    l’autorisation de trouver les appareils à proximité (sur Android 12 et plus ancien, aussi pour la position) ;
    autorise-la, sinon les téléphones ne peuvent pas se trouver.
-2. Si vous n’êtes pas encore contacts, ajoutez-vous l’un l’autre : sur un téléphone, appuie sur **Nouvelle discussion**,
-   où s’affiche **Ton code QR**, et scanne-le avec l’autre, comme dans [Discuter par un relais](#relay). Sans relais, le
-   code ne contient que tes clés, et vous ne vous joignez qu’à proximité, jusqu’à ce que tu en aies un.
+2. Si vous n’êtes pas encore contacts, ajoutez-vous l’un l’autre : sur les deux téléphones, appuie sur **Nouvelle
+   discussion** puis sur **À côté de moi**, et appuie sur **Oui, les mêmes** dès que les deux montrent les mêmes
+   images, comme dans [Discuter par un relais](#relay). Sans relais, chaque téléphone ne donne que ses clés, et vous
+   ne vous joignez qu’à proximité, jusqu’à ce que tu en aies un.
 3. Choisis le contact, tape dans la barre de message en bas et appuie sur la flèche d’envoi. Dès que son téléphone
    répond, le haut de la discussion indique **À proximité**.
 
@@ -430,10 +433,10 @@ passe par le relais.
   l’arrêter, désactive **Chercher avec Wi-Fi Aware**, au-dessus de **Trouver Erevos sur le même Wi-Fi**.
 - **Le même Wi-Fi ou un point d’accès :** les téléphones sur un même Wi-Fi, ou sur le point d’accès d’un téléphone, se
   trouvent et se parlent directement, même quand ce Wi-Fi n’a pas internet ; l’app pour ordinateur aussi. Si Android
-  demande s’il faut rester sur un Wi-Fi sans internet, reste. Toute personne sur ce Wi-Fi peut savoir qu’une app Erevos
-  est là, pas à qui elle est. Le pare-feu d’un ordinateur doit laisser entrer le port 47905 (UDP et TCP). Pour
-  l’arrêter, désactive **Trouver Erevos sur le même Wi-Fi** sous **À proximité, sans internet**, dans **Nouvelle
-  discussion**.
+  demande s’il faut rester sur un Wi-Fi sans internet, reste. Toute personne sur ce Wi-Fi peut savoir qu’une app
+  Erevos est là, pas à qui elle est. Le pare-feu d’un ordinateur doit laisser entrer le port 47905 (UDP et TCP). Pour
+  l’arrêter, désactive **Trouver Erevos sur le même Wi-Fi** sous **Pour les utilisateurs avancés** → **À proximité,
+  sans internet**, dans **Nouvelle discussion**.
 - **Un Wi-Fi à eux (Android 10 et plus récent) :** sans Wi-Fi commun, deux téléphones {=Erevos} proches l’un de l’autre
   créent un petit Wi-Fi à eux (Wi-Fi Direct) et se parlent par lui comme sur le même Wi-Fi : plus rapide que le
   Bluetooth, et un appel passe par lui sans internet. Il ne demande rien ; chaque téléphone reste aussi sur son propre
@@ -450,15 +453,15 @@ passe par le relais.
   copie qui arrive en second n’est pas affichée de nouveau. Si le relais est injoignable, c’est la copie à proximité qui
   compte.
 - **Transportés par d’autres téléphones :** quand le relais est injoignable et que ton contact n’est pas proche, les
-  téléphones {=Erevos} à proximité prennent aussi ton message, scellé pour le relais de ton contact. Chacun le garde, trois
-  jours au plus, le donne à deux autres téléphones au plus qu’il croise, et le remet à ce relais par son propre relais
-  dès qu’il le peut ; le tien fait de même. Ils ne peuvent pas le lire, ni savoir de qui il vient ni à qui il va : ils
-  ne voient que l’adresse du relais. Il reste quand Erevos se ferme, scellé sur le téléphone. Les tiens restent dans ton
-  espace, et ne partent que tant qu’il est ouvert. Transporter pour d’autres est activé tant que tu ne désactives pas
-  **Transporter des messages pour d’autres** sous **À proximité, sans internet**, dans **Nouvelle discussion**, et
-  seulement pour des relais sur internet en TLS (wss://) : un inconnu à proximité ne fait jamais joindre à ton
-  téléphone, ni à ton relais, un relais sur un réseau local ou sur le téléphone lui-même. Tes propres messages sont
-  transportés par les téléphones à proximité qui l’ont activé.
+  téléphones {=Erevos} à proximité prennent aussi ton message, scellé pour le relais de ton contact. Chacun le garde,
+  trois jours au plus, le donne à deux autres téléphones au plus qu’il croise, et le remet à ce relais par son propre
+  relais dès qu’il le peut ; le tien fait de même. Ils ne peuvent pas le lire, ni savoir de qui il vient ni à qui il
+  va : ils ne voient que l’adresse du relais. Il reste quand Erevos se ferme, scellé sur le téléphone. Les tiens
+  restent dans ton espace, et ne partent que tant qu’il est ouvert. Transporter pour d’autres est activé tant que tu
+  ne désactives pas **Transporter des messages pour d’autres** sous **Pour les utilisateurs avancés** → **À proximité,
+  sans internet**, dans **Nouvelle discussion**, et seulement pour des relais sur internet en TLS (wss://) : un
+  inconnu à proximité ne fait jamais joindre à ton téléphone, ni à ton relais, un relais sur un réseau local ou sur le
+  téléphone lui-même. Tes propres messages sont transportés par les téléphones à proximité qui l’ont activé.
 - **Apportés par d’autres téléphones :** dans l’autre sens, quand ton téléphone n’a pas internet, un téléphone Erevos
   à côté qui a internet, et transporte pour les autres, prend ce qui t’attend sur ton relais et te le donne à
   proximité. Erevos demande une fois pour chaque téléphone de ce genre, même celui d’un contact, car un inconnu peut
@@ -560,54 +563,81 @@ sans relais obtient une place sur celui de son contact, voir **Pas de relais à 
 personne n’a besoin de ton numéro de téléphone ou de ton e-mail pour te joindre : quiconque a ton lien de contact peut
 écrire dans ta file, et toi seul la lis.
 
-1. Sur l’écran d’accueil, appuie sur **Nouvelle discussion**. Tant qu’il manque quelque chose, **Comment tu te connectes maintenant** dit en haut en
-   mots simples comment tes contacts te joignent : par ton relais, par Nostr sans relais, ou seulement à proximité ; quand
-   tout fonctionne, il n’est pas affiché. Avec un relais, un champ tout en haut trouve un contact par son nom ou ajoute
-   un lien collé dedans, et en dessous viennent **Ton code QR**, avec **A déjà {=Erevos}** et **Nouveau sur {=Erevos}** au-dessus, et des lignes pour **Ton lien
-   de contact** et d’autres ; un téléphone qui n’a pas encore de relais commence par **Commence par une invitation**.
-   Les réglages propres du relais sont sous **Pour les utilisateurs avancés**,
-   en bas ; **Réglages** → **Relais et réseaux** → **Relais** ouvre Nouvelle discussion avec ceux-ci ouverts.
+1. Sur l’écran d’accueil, appuie sur **Nouvelle discussion**. Tant qu’il manque quelque chose, **Comment tu te
+   connectes maintenant** dit en haut en mots simples comment tes contacts te joignent : par ton relais, par Nostr
+   sans relais, ou seulement à proximité ; quand tout fonctionne, il n’est pas affiché. Avec un relais, un champ tout
+   en haut trouve un contact par son nom ou ajoute un lien collé dedans. Vient ensuite une question, **Où est l’autre
+   personne ?**, et chaque réponse ouvre une page à elle : **À côté de moi**, **Loin** et **J’ai son code**, comme aux
+   étapes 4 à 6 ci-dessous. Trois lignes en dessous ouvrent le reste : **Mon lien**, **Contacts bloqués** et **Pour
+   les utilisateurs avancés**, où sont les réglages propres du relais ; **Réglages** → **Relais et
+   réseaux** → **Relais** ouvre Nouvelle discussion avec ceux-ci ouverts.
 2. Sous **Pour les utilisateurs avancés**, tape l’**Adresse du relais** : \`ws://<adresse de l’ordinateur>:7879\` pour
    un relais sur ton propre réseau, ou \`wss://relay.example.org\` pour un relais sur internet. Ajoute le **Jeton** si
    le relais en demande un.
 3. Erevos crée ta file dessus tout seul, quelques secondes plus tard, et dit **File d’attente créée sur le relais** : tout fonctionne, textes, photos, messages vocaux, appels et
    groupes, et **Comment tu te connectes maintenant** disparaît, car il ne manque rien. S’il n’y arrive pas, la note dit pourquoi ; **Créer ma file d’attente sur le relais**, sous l’adresse, réessaie.
-4. **Ton code QR** est sur Nouvelle discussion même, dès qu’elle s’ouvre. Laisse l’autre téléphone le scanner avec son
-   appareil photo, puis ouvrir le lien dans Erevos. L’écran **Ajouter un contact** montre ce qu’il contient : appuie
-   sur **Ajouter à la discussion** seulement si tu l’as scanné toi-même. **Ajouter et associer à un de mes contacts**
-   l’ajoute aussi, relié au contact que tu choisis, dont la discussion prend le nom.
-   Le code est court, donc n’importe quel appareil photo le lit. Qui le scanne répond avec son propre lien de contact, puis ce téléphone lui écrit en premier. Le code est nouveau à chaque ouverture de Nouvelle discussion, et vaut une fois : le premier qui le scanne devient un contact aussitôt ; qui le scanne ensuite, ou prend le lien que tu partages, écrit d’abord une demande de message. **Grand code QR, sans internet** montre à la place le code entier, qui marche à proximité sans internet, et **Petit code QR** revient en arrière. **Partager**, en dessous, envoie un lien court que toute application laisse toucher ; sur Android, il ouvre Erevos, qui demande avant de le prendre. Pour ajouter quelqu’un avec son code QR de contact, ton téléphone a d’abord besoin d’un relais.
-   Ce code QR ne marche que si les deux téléphones ont un relais, comme le dit la carte. Pour quelqu’un qui n’a pas
-   encore {=Erevos}, ou dont le téléphone n’a pas de relais, choisis plutôt **Nouveau sur {=Erevos}**, au-dessus : la carte
-   montre **Invitation à {=Erevos}**, une invitation avec laquelle son téléphone rejoint ton relais, comme dans Inviter
-   quelqu’un de nouveau, plus bas. Nouvelle discussion montre ce que tu as choisi la dernière fois.
-   Il en va de même par contact : tant que le petit code de contact s’affiche et que le NFC est activé sur Android,
-   l’autre téléphone le prend si tu poses son dos contre le dos du tien. Cela ne marche que lorsqu’Erevos est au premier
-   plan, pas en arrière-plan, et jamais avec le grand code QR.
-5. Si son appareil photo ne montre que le texte, ou si la personne est loin, appuie sur **Partager** sous ton code QR,
-   ou ouvre **Ton lien de contact** et appuie sur **Partager mon lien de contact**, et envoie-le-lui. Elle le colle dans
-   le champ en haut de **Nouvelle discussion** et appuie sur **Ajouter**.
-6. Ou dans l’autre sens : appuie sur **Scanner le sien**, sous ton code QR, et photographie le code sur son écran, ou
-   appuie sur **Depuis une photo de son code QR** pour une capture d’écran ou une photo du code qu’elle t’a envoyée.
-   Erevos le lit et l’ajoute aussitôt. Sur un ordinateur, sur Sailfish OS et dans l’app web, **Scanner le sien**
-   demande une photo de ce code ; sur un iPhone, il propose aussi l’appareil photo.
-   Les discussions masquées ont aussi les deux ; là, le champ du haut ne prend qu’un lien.
-7. Ou, avec quelqu’un à côté de toi ou au téléphone : appuie sur **Associer avec un code** dans **Nouvelle
-   discussion**. L’un appuie sur **Montrer un code** et dit ou montre les 8 chiffres ; l’autre appuie sur **Taper son
-   code** et les tape. Chaque téléphone a alors l’autre pour contact, comme si chacun avait scanné le code QR de l’autre.
-   Le code lui-même ne quitte jamais les téléphones : ils se prouvent l’un à l’autre qu’ils le connaissent, et leurs
-   liens de contact partent chiffrés avec une clé que seul le même code donne. Ils se retrouvent sur des relais Nostr
-   publics, qui ne voient ni le code ni les liens, et qui devine a 3 essais avant que le code ne se ferme. Un code dure
-   10 minutes.
+4. **À côté de moi**, pour quelqu’un qui est près de toi : sur les deux téléphones, appuyez sur **Nouvelle
+   discussion** puis sur **À côté de moi**. Les deux téléphones se trouvent tout seuls, par Bluetooth ou par le Wi-Fi
+   qu’ils partagent, et chacun montre **Un téléphone a été trouvé** avec six images. Regardez les deux écrans : quand
+   les images sont les mêmes, dans le même ordre, chacun appuie sur **Oui, les mêmes**, et vous êtes contacts, sans
+   relais, sans internet et sans rien taper. **Non, d’autres** laisse ce téléphone de côté. Les images viennent d’une
+   clé que les deux téléphones créent entre eux, si bien qu’un téléphone placé entre eux en montrerait d’autres à
+   chacun ; chaque téléphone ne donne son lien de contact qu’une fois que son propriétaire a dit oui, chiffré avec
+   cette clé. La page ne cherche des téléphones que tant qu’elle est ouverte, même avec **Chercher les téléphones à
+   proximité** désactivé, qui le reste ; dans les discussions masquées et dans l’app web, rien ne cherche. Sous **S’il
+   n’est pas trouvé**, la page a les autres façons pour quelqu’un qui est près de toi : un code QR pour son appareil
+   photo, qui est une invitation là où ton relais laisse ce téléphone inviter, et sinon ton lien de contact ;
+   **Montrer un code à 8 chiffres**, que l’autre personne tape comme à l’étape 6 ; **Scanner le sien** et **Taper son
+   code**, pour le sien ; et, sur Android, **Pas d’Erevos sur son téléphone ?**, qui lui donne l’application
+   elle-même.
+5. **Loin**, pour quelqu’un qui n’est pas avec toi : la page crée une invitation, un lien pour une personne, dans un
+   message prêt à envoyer. Appuie sur **Envoyer avec…** et choisis l’application par laquelle elle part (dans un
+   navigateur et sur un ordinateur, **Copier l’invitation**), ou sur **Le code QR de l’invitation** pour la montrer
+   sous forme de code. La personne appuie sur le lien : avec Erevos sur son téléphone, il s’y ouvre, et sans lui le
+   lien montre d’abord où l’obtenir. Son téléphone rejoint alors ton relais avec un accès à lui, sans rien taper, et
+   vous êtes contacts. La page dit où on en est, **L’invitation est prête**, **En attente qu’elle l’ouvre**, **Vous
+   êtes connectés**, et tu peux la quitter entre-temps : dès que son téléphone a rejoint, la personne apparaît dans
+   tes discussions. Plus de détails sur les invitations dans Inviter quelqu’un de nouveau, plus bas. Là où ce
+   téléphone ne peut pas créer d’invitation, encore sans relais, dans les discussions masquées ou sur un ordinateur
+   associé, la page donne à la place ton lien de contact à envoyer : la personne l’ouvre dans Erevos, ou le colle sous
+   **J’ai son code**.
+6. **J’ai son code**, pour ce que l’autre personne t’a donné. Tape les 8 chiffres que son téléphone montre sous **À
+   côté de moi** → **Montrer un code à 8 chiffres**, près de toi ou dits au téléphone : chaque téléphone a alors
+   l’autre pour contact. Le code lui-même ne quitte jamais les téléphones : ils se prouvent l’un à l’autre qu’ils le
+   connaissent, et leurs liens de contact partent chiffrés avec une clé que seul le même code donne. Ils se retrouvent
+   sur des relais Nostr publics, qui ne voient ni le code ni les liens, et qui devine a 3 essais avant que le code ne
+   se ferme. Un code dure 10 minutes. Sous les chiffres, colle son lien de contact ou son invitation dans le champ et
+   appuie sur **Ajouter**, ou appuie sur **Scanner son code QR** et photographie le code sur son écran, ou sur
+   **Depuis une photo de son code QR** pour une capture d’écran ou une photo du code qu’elle t’a envoyée. Erevos le
+   lit et l’ajoute aussitôt. Sur un ordinateur, sur Sailfish OS et dans l’app web, **Scanner son code QR** demande une
+   photo de ce code ; sur un iPhone, il propose aussi l’appareil photo. Les discussions masquées ont aussi cette page.
+7. **Mon lien**, dans les lignes sous les trois, est le code QR et le lien de contact propres à ce téléphone. Laisse
+   l’autre téléphone scanner le code avec son appareil photo, puis ouvrir le lien dans Erevos. L’écran **Ajouter un
+   contact** montre ce qu’il contient : appuie sur **Ajouter à la discussion** seulement si tu l’as scanné toi-même.
+   **Ajouter et associer à un de mes contacts** l’ajoute aussi, relié au contact que tu choisis, dont la discussion
+   prend le nom. Le code est court, donc n’importe quel appareil photo le lit. Qui le scanne répond avec son propre
+   lien de contact, puis ce téléphone lui écrit en premier. Le code est nouveau à chaque ouverture de la page, et vaut
+   une fois : le premier qui le scanne devient un contact aussitôt ; qui le scanne ensuite, ou prend le lien que tu
+   partages, écrit d’abord une demande de message. **Grand code QR, sans internet** montre à la place le code entier,
+   qui marche à proximité sans internet, et **Petit code QR** revient en arrière. **Partager**, en dessous, envoie un
+   lien court que toute application laisse toucher ; sur Android, il ouvre Erevos, qui demande avant de le prendre.
+   Pour ajouter quelqu’un avec son code QR de contact, ton téléphone a d’abord besoin d’un relais. Ce code QR ne
+   marche que si les deux téléphones ont un relais, comme le dit la page : sinon, utilise **À côté de moi**, ou une
+   invitation depuis **Loin**. **Scanner le sien** et **Depuis une photo de son code QR**, en dessous, lisent d’ici le
+   code de l’autre téléphone. Il en va de même par contact : tant que le petit code de contact s’affiche et que le NFC
+   est activé sur Android, l’autre téléphone le prend si tu poses son dos contre le dos du tien. Cela ne marche que
+   lorsqu’Erevos est au premier plan, pas en arrière-plan, et jamais avec le grand code QR.
 
-La nouvelle discussion apparaît sur l’écran d’accueil nommée **contact** suivi des premiers caractères de sa clé,
-jusqu’à ce qu’elle ait un nom : **Renommer** dans ses détails lui en donne un. Juste après que tu l’as ajouté ici,
-**Associer à un de mes contacts** sous la note qui dit qu’il a été ajouté te permet de choisir plutôt un de tes contacts
-(**Pas maintenant** laisse comme c’est) : la discussion prend le nom de ce contact, si elle n’en a pas à elle, et la
-fiche du contact montre la discussion. Les discussions masquées ne proposent que leurs propres contacts, jamais ceux du
-téléphone. Il suffit qu’un téléphone ajoute l’autre : ajouter un lien démarre une conversation chiffrée et dit à l’autre
-téléphone comment répondre, si bien qu’il affiche la discussion la prochaine fois qu’il regarde sa file d’attente, ce
-qu’il fait toutes les quelques secondes.
+Quelle que soit la façon choisie, elle finit sur **Vous êtes connectés** : son image, **Son nom dans tes
+discussions**, que son téléphone a pu donner et que tu peux changer, et **Écrire un message** ou **Ajouter quelqu’un
+d’autre**. La nouvelle discussion apparaît sur l’écran d’accueil nommée **contact** suivi des premiers caractères de
+sa clé, jusqu’à ce qu’elle ait un nom : **Renommer** dans ses détails lui en donne un. Juste après que tu l’as ajouté
+ici, **Associer à un de mes contacts** sous la note qui dit qu’il a été ajouté te permet de choisir plutôt un de tes
+contacts (**Pas maintenant** laisse comme c’est) : la discussion prend le nom de ce contact, si elle n’en a pas à
+elle, et la fiche du contact montre la discussion. Les discussions masquées ne proposent que leurs propres contacts,
+jamais ceux du téléphone. Il suffit qu’un téléphone ajoute l’autre : ajouter un lien démarre une conversation chiffrée
+et dit à l’autre téléphone comment répondre, si bien qu’il affiche la discussion la prochaine fois qu’il regarde sa
+file d’attente, ce qu’il fait toutes les quelques secondes.
 
 **Ce que le relais voit d’une discussion :** tous tes contacts écrivent dans ton unique file d’attente. Dès que chaque
 téléphone a reçu un message de l’autre, chaque message entre eux est scellé une fois de plus pour le téléphone auquel il
@@ -658,43 +688,46 @@ qu’un jeton parti là où il ne devait pas ne peut pas remplir son fichier de 
 Un code QR ou un lien fait entrer quelqu’un de nouveau : son téléphone rejoint {=Erevos} sur ton relais, avec un accès à
 lui, sans rien taper, et vous êtes aussitôt contacts l’un de l’autre, sans demande de message.
 
-- **Pour inviter :** sur l’écran d’accueil, appuie sur **Inviter** à côté de la ligne du relais ou, sur **Nouvelle
-  discussion**, choisis **Nouveau sur {=Erevos}** au-dessus du code QR. Le code QR s’affiche tout de suite : quand {=Erevos}
-  est sur son téléphone, la personne le scanne avec l’appareil photo et ouvre le lien dans Erevos, ou appuie sur
-  **Partager l’invitation** et envoie-lui le lien. En dessous, tu peux taper pour qui c’est (son nom dans tes
-  discussions) et **Ton nom, pour cette personne**, ou laisser les deux vides. Rouverte tant que personne ne l’a prise
-  et qu’il lui reste au moins un jour, elle montre la même invitation, et n’use donc aucune des 5 en attente ni des 10
-  par jour ; **Inviter quelqu’un d’autre** en crée une nouvelle. Elle est pour une personne, pour 7 jours, ou moins si
+- **Pour inviter :** sur l’écran d’accueil, appuie sur **Inviter** à côté de la ligne du relais ou, dans **Nouvelle
+  discussion**, appuie sur **Loin**. L’invitation est créée tout de suite et s’affiche dans un message prêt à
+  envoyer : appuie sur **Envoyer avec…** et choisis l’application, ou appuie sur **Le code QR de l’invitation** et
+  laisse la personne le scanner avec l’appareil photo de son téléphone. En dessous, tu peux taper pour qui c’est (son
+  nom dans tes discussions) et **Ton nom, pour cette personne**, ou laisser les deux vides. Rouverte tant que personne
+  ne l’a prise et qu’il lui reste au moins un jour, elle montre la même invitation, et n’use donc aucune des 5 en
+  attente ni des 10 par jour ; **Inviter quelqu’un d’autre** en crée une nouvelle, et **Reprendre cette invitation**
+  ferme son lien tant qu’aucun téléphone ne l’a prise. Elle est pour une personne, pour 7 jours, ou moins si
   l’invitation du relais finit plus tôt. Celui qui la prend en premier l’a, donc donne-la à cette personne seulement.
-  Sur un téléphone Android dont le NFC est activé, tu peux aussi la lui donner par contact : pose le dos de son
-  téléphone contre le dos du tien pendant que le code s’affiche, et son téléphone ouvre le lien tout seul, dans Erevos
-  s’il est installé, sinon sur la page web d’Erevos, qui propose {=Erevos}. Si le NFC est désactivé, la fenêtre te dit de
-  l’activer dans les réglages d’Android.
-- **Pour rejoindre :** sur un téléphone qui n’a pas encore de relais, **Nouvelle discussion** commence par **Commence
-  par une invitation**. Appuie sur **Scanner son code QR** et photographie l’invitation sur son écran, ou appuie sur
-  **Depuis une photo de son code QR**, ou colle le lien dans le champ là et appuie sur **Rejoindre** ; la scanner avec
-  l’appareil photo et ouvrir le lien dans Erevos marche aussi. Le lien ouvre **… t’invite sur {=Erevos}** : appuie sur
-  **Rejoindre** seulement s’il vient de cette personne. Erevos prend un accès à lui sur son relais et une file
-  d’attente là-bas, l’ajoute et dit **Bienvenue sur Erevos**. Son premier message prévient le téléphone de la personne,
-  qui ajoute aussitôt celui-ci comme contact, nommé comme elle l’a tapé.
-- **Les autres façons d’entrer :** en dessous, **Pour les utilisateurs avancés** ouvre les autres, pour qui les
-  cherche : **Se connecter avec LPHL** connecte ce téléphone au relais de LPHL avec un compte LPHL, dans le navigateur
-  (voir Se connecter au relais ci-dessous), puis tu ajoutes tes contacts par leurs invitations ou leurs liens ;
-  **Commencer sans relais**, comme dans Sans aucun relais, sous Par Nostr ; et les réglages du relais, comme aux
-  étapes 1 à 6 ci-dessus. Une invitation est la façon la plus simple d’entrer, et sur le relais un téléphone invité
-  n’a qu’un nom de lettres et de chiffres au hasard.
+  Pour quelqu’un qui est près de toi, **À côté de moi** montre aussi une telle invitation en code QR. Sur un téléphone
+  Android dont le NFC est activé, tu peux aussi la lui donner par contact : pose le dos de son téléphone contre le dos
+  du tien pendant que le code s’affiche, et son téléphone ouvre le lien tout seul, dans Erevos s’il est installé,
+  sinon sur la page web d’Erevos, qui propose {=Erevos}. Si le NFC est désactivé, la page te dit de l’activer dans les
+  réglages d’Android.
+- **Pour rejoindre :** appuie sur le lien que la personne t’a envoyé, ou scanne l’invitation avec l’appareil photo et
+  ouvre le lien dans Erevos : il ouvre **… t’invite sur {=Erevos}**, et tu appuies sur **Rejoindre** seulement s’il vient
+  de cette personne. Dans Erevos, **J’ai son code** dans **Nouvelle discussion** prend aussi une invitation : appuie
+  sur **Scanner son code QR** et photographie l’invitation sur son écran, ou sur **Depuis une photo de son code QR**,
+  ou colle le lien dans le champ là et appuie sur **Ajouter**. Erevos prend un accès à lui sur son relais et une file
+  d’attente là-bas, l’ajoute et dit **Bienvenue sur {=Erevos}**. Son premier message prévient le téléphone de la
+  personne, qui ajoute aussitôt celui-ci comme contact, nommé comme elle l’a tapé.
+- **Les autres façons d’entrer :** dans **Nouvelle discussion**, **Pour les utilisateurs avancés** ouvre les autres,
+  pour qui les cherche : **Se connecter avec LPHL** connecte ce téléphone au relais de LPHL avec un compte LPHL, dans
+  le navigateur (voir Se connecter au relais ci-dessous), puis tu ajoutes tes contacts par leurs invitations ou leurs
+  liens ; **Commencer sans relais**, comme dans Sans aucun relais, sous Par Nostr ; et les réglages du relais, comme
+  aux étapes 1 à 3 ci-dessus. Une invitation est la façon la plus simple d’entrer, et sur le relais un téléphone
+  invité n’a qu’un nom de lettres et de chiffres au hasard.
 - **Un autre relais :** sous **Se connecter avec LPHL**, **Se connecter à un autre relais…** prend l’adresse d’un autre
   relais, telle que son responsable te l’a donnée, par exemple relay.example.org : la carte s’y connecte alors, au nom
   des comptes que ce relais accepte, ou dit qu’il ne propose pas de connexion, et son responsable peut alors te donner
   une invitation. **Revenir à** ramène celui de LPHL.
 - **Ce que ton relais doit permettre :** l’accès à lui est une invitation à ton relais (voir Invitations au relais
-  ci-dessous), donc il ne vient que d’un téléphone qui a son propre jeton sur un relais qui accepte les invitations. Il
-  compte parmi tes invitations, sous un nom de lettres et de chiffres au hasard, et reste même quand le tien disparaît.
-  Un téléphone qui a le jeton unique du relais pour tous l’échange d’abord contre un jeton à lui (voir Les façons
-  d’entrer sur le relais ci-dessus) ; là où le relais ne le fait pas, il ne crée pas d’invitation : connecte-toi d’abord
-  au relais (sous le **Jeton**, dans **Pour les utilisateurs avancés**), ou prends une invitation à celui-ci. Quand ton
-  relais n’accepte pas d’invitations, l’invitation fait quand même de vous des contacts, et son téléphone n’utilise ton
-  relais que dans la mesure où ton lien de contact le permet, comme dans Pas de relais à toi ci-dessous.
+  ci-dessous), donc il ne vient que d’un téléphone qui a son propre jeton sur un relais qui accepte les invitations.
+  Il compte parmi tes invitations, sous un nom de lettres et de chiffres au hasard, et reste même quand le tien
+  disparaît. Un téléphone qui a le jeton unique du relais pour tous l’échange d’abord contre un jeton à lui (voir Les
+  façons d’entrer sur le relais ci-dessus) ; là où le relais ne le fait pas, il ne crée pas d’invitation :
+  connecte-toi d’abord au relais (sous le **Jeton**, dans **Pour les utilisateurs avancés**), ou prends une invitation
+  à celui-ci. Quand ton relais n’accepte pas d’invitations, l’invitation fait quand même de vous des contacts, et son
+  téléphone n’utilise ton relais que dans la mesure où ton lien de contact le permet, comme dans Pas de relais à toi
+  ci-dessous. Une telle invitation ne s’ouvre que sur un téléphone qui a déjà Erevos.
 - **Un téléphone qui a déjà un relais** garde le sien : l’invitation ne fait que t’ajouter, et vous êtes aussitôt
   contacts tout de même.
 - **Ce qui est gardé :** ton téléphone garde le secret de chaque invitation et le nom de la personne, scellés dans
@@ -717,15 +750,15 @@ lui, sans rien taper, et vous êtes aussitôt contacts l’un de l’autre, sans
 Un téléphone sans relais discute tout de même par internet : en ajoutant le lien d’un contact dont le relais prête des
 places, il prend une place là-bas, sans jeton.
 
-- **Comment :** ajoute son lien comme aux étapes 4 et 5, sans rien sous **Relais**. Erevos dit que tu as maintenant une
-  place sur son relais, prêtée par son lien, et l’utilise désormais comme la tienne : ton propre lien la nomme, si bien
-  que d’autres te joignent là aussi.
-- **Qui prête :** ton lien porte un ticket pour une place sur ton relais seulement quand tu actives **Partager une place
-  sur mon relais avec ce lien**, sous **Ton lien de contact** dans **Nouvelle discussion**, et seulement pour le lien
+- **Comment :** ajoute son lien comme à l’étape 6, sans rien sous **Relais**. Erevos dit que tu as maintenant une
+  place sur son relais, prêtée par son lien, et l’utilise désormais comme la tienne : ton propre lien la nomme, si
+  bien que d’autres te joignent là aussi.
+- **Qui prête :** ton lien porte un ticket pour une place sur ton relais seulement quand tu actives **Partager une
+  place sur mon relais avec ce lien**, sous **Mon lien** dans **Nouvelle discussion**, et seulement pour le lien
   affiché à ce moment-là : la prochaine fois que la discussion s’ouvre, c’est de nouveau désactivé. Le relais a besoin
   d’une clé pour l’envoi en deux sauts, et ne prête qu’une fois que celui qui le fait tourner active le prêt ; il peut
-  aussi reprendre les places d’un ticket. Un ticket dure 30 jours et donne jusqu’à quatre places. Quiconque voit un lien
-  avec un ticket peut prendre une place avec, alors ne donne un tel lien qu’à qui tu le destines.
+  aussi reprendre les places d’un ticket. Un ticket dure 30 jours et donne jusqu’à quatre places. Quiconque voit un
+  lien avec un ticket peut prendre une place avec, alors ne donne un tel lien qu’à qui tu le destines.
 - **Ce qu’une place prêtée ne fait pas :** les messages à des contacts sur d’autres relais vont directement à leur
   relais, qui voit alors l’adresse de ton téléphone. Elle ne garde rien pour plus tard (un message envoyé plus tard
   attend sur le téléphone), ne donne pas de relais d’appel (les appels passent directement entre les téléphones), et
@@ -751,13 +784,13 @@ ce relais, avec un jeton propre à ce téléphone, si bien qu’aucun jeton n’
   envoie-la-lui. Elle vaut pour un téléphone pendant 7 jours, et qui la prend en premier l’a, alors ne la montre qu’à
   cette personne.
 - **Pour en prendre une :** le lien ouvre **Invitation à un relais**, avec l’adresse du relais : appuie sur **Utiliser
-  ce relais** seulement si elle vient de quelqu’un que tu connais. Dans Erevos, **Scanner le sien** et **Depuis une
-  photo de son code QR** sur Nouvelle discussion lisent aussi une invitation, et son lien peut être collé dans le champ
-  du haut. Erevos crée un jeton pour ce téléphone, le garde avec l’adresse du relais dans cet espace seulement
-  et y crée ta file d’attente. Si le téléphone utilise un autre relais, il demande d’abord, et tes contacts apprennent
-  ta nouvelle file d’attente par ton prochain message. Erevos accepte une invitation à un relais wss://, ou à un relais
-  ws:// sur un réseau domestique seulement (comme \`ws://192.168.1.10:7879\`). Les discussions masquées n’acceptent pas
-  d’invitations.
+  ce relais** seulement si elle vient de quelqu’un que tu connais. Dans Erevos, **J’ai son code** dans **Nouvelle
+  discussion** prend aussi une invitation : avec **Scanner son code QR**, **Depuis une photo de son code QR**, ou son
+  lien collé dans le champ là. Erevos crée un jeton pour ce téléphone, le garde avec l’adresse du relais dans cet
+  espace seulement et y crée ta file d’attente. Si le téléphone utilise un autre relais, il demande d’abord, et tes
+  contacts apprennent ta nouvelle file d’attente par ton prochain message. Erevos accepte une invitation à un relais
+  wss://, ou à un relais ws:// sur un réseau domestique seulement (comme \`ws://192.168.1.10:7879\`). Les discussions
+  masquées n’acceptent pas d’invitations.
 - **Tes invitations :** listées sous le bouton, en attente ou utilisées. **Reprendre** reprend une invitation encore en
   attente, ou coupe aussitôt le téléphone qui l’a prise, lui seul : les téléphones qu’il a invités à son tour gardent le
   leur.
@@ -1112,10 +1145,10 @@ contacts (voir [Sur un iPhone](#iphone)).
   même façon et le dit, au plus une fois par jour. Quand des indésirables remplissent la file que nomme ton lien de
   contact, tu obtiens plutôt un nouveau lien. Un déluge de demandes de message inventées compte aussi comme indésirable,
   tandis qu’un lot de vraies demandes arrive quand même.
-- **Nouveau lien de contact**, à côté de **Partager mon lien de contact**, te donne un nouveau lien : les liens et codes
-  QR que tu as donnés avant fonctionnent encore 14 jours, puis plus du tout. Tes contacts ne sont pas touchés. Si le
-  relais perdait la file que nomme ton lien, tu obtiendrais un nouveau lien de la même façon, mais ceux que tu as donnés
-  avant cesseraient aussitôt de fonctionner.
+- **Nouveau lien de contact**, sous **Mon lien** dans **Nouvelle discussion**, te donne un nouveau lien : les liens et
+  codes QR que tu as donnés avant fonctionnent encore 14 jours, puis plus du tout. Tes contacts ne sont pas touchés.
+  Si le relais perdait la file que nomme ton lien, tu obtiendrais un nouveau lien de la même façon, mais ceux que tu
+  as donnés avant cesseraient aussitôt de fonctionner.
 - **Lien pour un site web**, à côté, dans les discussions de l’espace, te donne un lien à mettre sur une page web, comme
   ta page de contact, avec le nom que tu choisis. Il ouvre une page qui propose {=Erevos} à qui ne l’a pas encore, sur
   Android, un iPhone ou un ordinateur, puis t’ajoute. Quiconque le voit peut t’écrire, donc ce qu’on envoie arrive comme
@@ -1566,7 +1599,8 @@ chiffré{~, pas plus qu’un SMS ordinaire}. Les discussions masquées et les or
   téléphone. Alors les espaces réglés sur **Aussi quand un autre espace est ouvert** disent déjà « New message », ou
   combien sont arrivés, jamais quel espace, ni qui ou quoi, et une notification discrète dit « Locked ». Les appels ne
   sonnent pas, et rien d’autre n’arrive, tant que tu n’ouvres pas un espace ; les espaces qui passent par Tor ne
-  disent rien jusque-là. S’il n’y a aucun espace de ce genre, ou avec **Pas de notification**, il s’arrête aussitôt.
+  disent rien jusque-là. S’il n’y a aucun espace de ce genre, ou avec **Pas de notification**,
+  seule une notification discrète dit qu’il est verrouillé, et un appui dessus ouvre Erevos.
   Android seulement.
 
   **Pourquoi :** après un redémarrage, Erevos ne pouvait pas te dire que des messages attendent avant que tu ne
@@ -2040,10 +2074,10 @@ relais).
 Un téléphone sans relais, sans invitation et sans compte LPHL peut quand même commencer : son lien de contact et son
 code QR disent où il lit sur Nostr, et cela suffit pour parler.
 
-- **Pour commencer :** dans **Nouvelle discussion**, appuie sur **Commencer sans relais**, puis sur **Afficher mon code
-  QR** ou **Partager mon lien de contact**, et donne-le à quelqu’un qui utilise {=Erevos}. Celui qui l’ajoute t’écrit par
-  Nostr, et apparaît comme une demande de message, que tu acceptes. Tu peux aussi ajouter son lien ou son code
-  QR, de la même façon.
+- **Pour commencer :** dans **Nouvelle discussion**, sous **Pour les utilisateurs avancés**, appuie sur **Commencer
+  sans relais**, puis sur **Afficher mon code QR** ou **Partager mon lien de contact**, et donne-le à quelqu’un qui
+  utilise {=Erevos}. Celui qui l’ajoute t’écrit par Nostr, et apparaît comme une demande de message, que tu acceptes. Tu
+  peux aussi ajouter son lien ou son code QR, de la même façon.
 - **Ce qui passe :** les textes, stickers, réactions, modifications, et les marques qu’un message est arrivé ou a été lu, tout par Nostr ; et les photos, fichiers et messages vocaux. Un message vocal passe en wraps comme un texte. Une photo jusqu’à 3 Mo passe en morceaux de 32 Ko, un wrap chacun, envoyés avant le message qui la propose ; l’autre téléphone les garde, chiffrés avec le reste de l’espace ou des discussions masquées pour lesquels ils sont venus, jusqu’à ce que tous soient arrivés, quatre jours au plus. Une photo plus grande, une vidéo ou tout autre fichier, jusqu’à 20 Mo, passe en un seul blob, chiffré sur le téléphone, vers un serveur de fichiers Blossom (blossom.primal.net, blossom.band ou nostr.download), via Tor comme le dit le choix Tor de l’espace (en direct avec **Rien**) : le serveur ne garde que ce qu’il ne peut pas lire. Les appels et les groupes ont besoin d’un relais, ou de l’autre téléphone à proximité. Les discussions masquées fonctionnent ainsi aussi, par Nostr seulement (voir [Discussions masquées](#hidden)).
 - **Quand il n’arrive pas :** les relais Nostr gardent un texte deux jours. Tant que le téléphone de ton contact n’a pas
   dit qu’il est arrivé, Erevos le lui redonne une fois par jour, pendant deux semaines.
@@ -2075,8 +2109,9 @@ ne montre pas ce que tu écris. Qui se connecte à ton téléphone la voit, sauf
 - **Les relais Nostr publics et les serveurs de fichiers Nostr :** ils la voient, sauf si la connexion passe par Tor.
   Active **Nostr par Tor** sous **Réglages** → **Relais et réseaux** → **Nostr**, ou **Par Tor** pour une discussion.
   Voir [Par Nostr](#nostr).
-- **S’associer par un code :** les deux téléphones se retrouvent sur ces mêmes relais Nostr publics, donc sans Nostr via
-  Tor ils voient l’adresse, mais pas le code ni les liens de contact. Erevos le dit avant la première fois.
+- **Un code à 8 chiffres**, sous **À côté de moi** et **J’ai son code** : les deux téléphones se retrouvent sur ces
+  mêmes relais Nostr publics, donc sans Nostr via Tor ils voient l’adresse, mais pas le code ni les liens de contact.
+  Erevos le dit avant la première fois.
 
 - [+] **Matrix :** seul ton propre serveur Matrix la voit, pas les serveurs de tes contacts : les photos et fichiers
   d’autres serveurs te parviennent aussi par le tien. Choisis **Tor pour ce compte Matrix** sur l’écran Matrix, ou
@@ -2122,8 +2157,10 @@ ne montre pas ce que tu écris. Qui se connecte à ton téléphone la voit, sauf
 
 Erevos prévient une fois avant chacun de ces cas, avec le titre **Ton adresse internet peut être vue**, un bouton
 **Guide** qui ouvre cette section et, quand c’est possible, un bouton qui y remédie, comme **Par Tor pour cette
-discussion**. **Continuer** poursuit ; pour une discussion, c’est dit une fois, et pas de nouveau pour cette
-discussion.
+discussion**. **Continuer** poursuit. Pour ce que tu envoies, c’est dit une fois pour tout le réseau, pas dans chaque
+discussion : ensuite, une discussion ou un groupe qui passe sans Tor montre seulement une ligne discrète au-dessus de
+là où tu écris, **Sans Tor : les relais voient ton adresse internet.**, avec **Par Tor pour cette discussion** et
+**Guide** à côté.
 
 Après le guide, la même question revient, et ce que tu envoyais, comme un message vocal ou un fichier, l’attend. Un
 appel qui sonne ici le dit sous l’appel, et répondre continue. Les discussions masquées gardent ce qui a été dit avec
@@ -2269,6 +2306,10 @@ Element : aucun pont ne se met entre les deux.
   comme dans les discussions d’Erevos lui-même, tant que cet espace est ouvert ; sur un ordinateur, tant qu’Erevos
   tourne. Sur Android, **Notifications**, en bas d’une discussion, la met en sourdine ou lui donne un son à elle ; une
   discussion en sourdine ne compte pas. **Apparence de la discussion**, à côté, donne à la discussion un aspect à elle.
+- **Options de la discussion :** le bouton à curseurs à côté de là où tu écris, ou **⋯** en haut, les ouvre toutes
+  dans une liste bien rangée, à portée quelle que soit la longueur de la discussion : **Notifications**, **Apparence
+  de la discussion**, le PIN, les captures et les messages éphémères sous **Cette discussion**, puis recherche,
+  médias, un jour et export sous **Trouver**.
 - **Tant que cet espace est fermé :** sur Android, **Signaler les nouveaux messages**, sous **Tant que cet espace est
   fermé** sur l’écran Matrix, laisse cet espace dire « New message » quand quelque chose arrive sur Matrix pendant
   qu’un autre espace est ouvert, comme le font ses propres discussions avec **Aussi quand un autre espace est ouvert**
@@ -2499,6 +2540,10 @@ XMPP, comme ces apps : aucun pont ne se met entre les deux.
   comme dans les discussions d’Erevos lui-même, tant que cet espace est ouvert ; sur un ordinateur, tant qu’Erevos
   tourne. Sur Android, **Notifications**, en bas d’une discussion, la met en sourdine ou lui donne un son à elle ; une
   discussion en sourdine ne compte pas. **Apparence de la discussion**, à côté, donne à la discussion un aspect à elle.
+- **Options de la discussion :** le bouton à curseurs à côté de là où tu écris, ou **⋯** en haut, les ouvre toutes
+  dans une liste bien rangée, à portée quelle que soit la longueur de la discussion : **Notifications**, **Apparence
+  de la discussion**, le PIN, les captures et les messages éphémères sous **Cette discussion**, puis recherche,
+  médias, un jour et export sous **Trouver**.
 - **Tant que cet espace est fermé :** sur Android, **Signaler les nouveaux messages**, sous **Tant que cet espace est
   fermé** sur l’écran XMPP, laisse cet espace dire « New message » quand quelque chose arrive sur XMPP pendant qu’un
   autre espace est ouvert, comme le font ses propres discussions avec **Aussi quand un autre espace est ouvert** dans
@@ -2710,6 +2755,10 @@ discussions propres à Erevos.
   comme dans les discussions d’Erevos lui-même, tant que cet espace est ouvert ; sur un ordinateur, tant qu’Erevos
   tourne. Sur Android, **Notifications**, en bas d’une discussion, la met en sourdine ou lui donne un son à elle ; une
   discussion en sourdine ne compte pas. **Apparence de la discussion**, à côté, donne à la discussion un aspect à elle.
+- **Options de la discussion :** le bouton à curseurs à côté de là où tu écris, ou **⋯** en haut, les ouvre toutes
+  dans une liste bien rangée, à portée quelle que soit la longueur de la discussion : **Notifications**, **Apparence
+  de la discussion**, le PIN, les captures et les messages éphémères sous **Cette discussion**, puis recherche,
+  médias, un jour et export sous **Trouver**.
 - **Pas encore :** les fichiers qu’une autre appli chiffre autrement (ils s’affichent comme un fichier qu’Erevos ne sait
   pas ouvrir).
 
@@ -3004,6 +3053,10 @@ dernier chemin, et seulement quand tu le choisis.
   discussion**, comme une discussion, et, avec un seul numéro, **Notifications** : la mettre en sourdine un moment ou
   toujours, ou lui donner un son à elle, ou aucun. Cela vaut tant que l’espace est ouvert ; fermé, chaque SMS notifie
   comme le disent les réglages.
+- **Options de la discussion :** le bouton à curseurs à côté de là où tu écris, ou **⋯** en haut, les ouvre toutes
+  dans une liste bien rangée, à portée quelle que soit la longueur de la discussion : **Notifications**, **Apparence
+  de la discussion**, le PIN, les captures et les messages éphémères sous **Cette discussion**, puis recherche,
+  médias, un jour et export sous **Trouver**.
 - **Corbeille :** une conversation supprimée attend 30 jours dans la **Corbeille**, puis Erevos la supprime des SMS du
   téléphone. D’ici là, **Récupérer** la remet dans la liste ; **Supprimer maintenant** et **Vider la corbeille**
   suppriment aussitôt, pour de bon. Un SMS qui arrive après qu’elle est partie dans la corbeille s’affiche de nouveau
@@ -3144,9 +3197,16 @@ montre que ce titre, et appuyer dessus ouvre les **Réglages** du Téléphone.
   **Supprimer ce message vocal**. **Appeler la messagerie vocale** en haut l’appelle. Erevos les lit depuis le
   stockage d’Android et n’en garde aucune copie ; Erevos verrouillé, l’onglet ne s’affiche pas.
 - **Numérotation rapide :** clavier vide, maintiens une touche de 2 à 9 pour appeler son numéro. Une touche sans
-  numéro te laisse en choisir un : tape un nom ou un numéro et appuie sur le contact, ou **Utiliser** le numéro
-  tapé. Sous **Téléphone** → **Réglages**, **Numérotation rapide** montre les huit touches ; appuie sur une pour la
-  changer ou la vider. La numérotation rapide est gardée chiffrée dans l’espace, et marche avec Erevos déverrouillé.
+  numéro te laisse en choisir un : tape un nom ou un numéro et appuie sur le contact, ou **Utiliser** le numéro tapé.
+  Sous **Téléphone** → **Réglages**, **Numérotation rapide** montre les huit touches ; appuie sur une pour la changer
+  ou la vider. La numérotation rapide est gardée chiffrée dans l’espace, et marche avec Erevos déverrouillé. Tant que
+  le Téléphone s’ouvre sans mot de passe, **Numérotation rapide aussi avec Erevos verrouillé** (éteint au début) la
+  fait marcher là aussi : une copie des numéros, sans leurs noms, est alors gardée sur le téléphone hors de l’espace,
+  et qui tient le téléphone déverrouillé peut les appeler. Un espace à la fois. Elle peut montrer que l’espace
+  existe : qui voit un autre de tes espaces trouve que les touches appellent des numéros qui ne sont pas de cet
+  espace-là. La copie est supprimée quand le Téléphone repasse derrière le mot de passe, quand une sauvegarde est
+  restaurée, quand le verrou est désactivé, et quand un second mot de passe est supprimé ou défini de nouveau alors
+  qu’un autre espace est ouvert ; rallume-la alors.
 - **Réglages d’appel :** sous **Téléphone** → **Réglages**, **Réglages d’appel** ouvre les écrans d’Android lui-même
   pour ce que ton opérateur garde des appels de chaque SIM : **Renvoi, double appel et ton numéro** et **Numéro de
   messagerie vocale** ; avec deux SIM, appuie d’abord sur la SIM. Sous **Demander à ton opérateur**, chaque bouton
@@ -3440,7 +3500,8 @@ peut aussi s’ouvrir avec. C’est désactivé tant que tu ne l’actives pas.
 - **Comment c’est gardé :** la clé du premier espace est scellée par une clé dans le matériel sécurisé du téléphone
   (l’Android Keystore) qui ne fonctionne que juste après une vérification forte de l’empreinte ou du visage, une fois
   pour chaque utilisation. Ajouter ou retirer une empreinte ou un visage fait abandonner cette clé par Android : c’est
-  alors désactivé, et tu l’actives de nouveau. Rien ne quitte le téléphone.
+  alors désactivé, et tu l’actives de nouveau. Une clé qui cesse de fonctionner d’une autre façon le désactive aussi,
+  après trois essais de suite où elle n’a pas pu servir. Rien ne quitte le téléphone.
 - **Quel visage :** un visage ne compte que là où Android classe son déverrouillage par le visage comme fort, comme sur
   le Pixel 8 et plus récent ; ailleurs, c’est l’empreinte.
 - **Les mots de passe erronés** sont comptés comme avant : une empreinte ne change pas le compte.
@@ -4287,6 +4348,12 @@ pour que le texte se lise toujours bien, sur le verre aussi.
   La couleur est celle du téléphone, pas de chaque espace, car les icônes s’affichent avant qu’Erevos soit déverrouillé.
   Après un changement, certains lanceurs retirent l’icône de l’écran d’accueil : ajoute-la de nouveau depuis la liste
   des applis.
+- [~] **Appareil photo** (Android, sous **Icônes du lanceur**) : l’appareil photo d’Erevos d’un geste. **Mettre
+  l’Appareil photo parmi les applications du téléphone** ajoute une icône à part (orange d’abord, de la couleur voulue),
+  et un appui long sur l’icône d’Erevos propose aussi **Appareil photo**, qu’on peut glisser sur l’écran d’accueil. Les
+  deux ouvrent l’appareil photo de la Collection, derrière le mot de passe d’Erevos et celui de la Collection, et ce
+  qu’il prend va droit dans la Collection. Aucun des deux ne s’affiche tant que la Collection est désactivée dans
+  **Modules** ou que la calculatrice tient la place d’Erevos.
 - **Points et nombres sur les icônes** (Android) : Android donne le point ou le nombre d’une notification à l’appli,
   pas à l’une de ses icônes ; sur la plupart des lanceurs, comme ceux des Pixel et de GrapheneOS, celui de Samsung,
   celui de Xiaomi et Kvaesitso, chaque notification d’Erevos (un message, {~un SMS, |}un appel, un anniversaire) s’affiche

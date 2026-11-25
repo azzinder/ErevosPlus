@@ -7,6 +7,8 @@
 // on one of them, a word that it is kept for Erevos+ (lib/edition-notice.ts). Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
 import { EREVOS_SECTIONS, guideFor, PLUS_SECTIONS } from '../guide/index';
@@ -181,4 +183,35 @@ test("Erevos Lite's guide and What's new leave out the Phone, the SMS and the Co
   assert.equal(inErevosLite('**Quick texts** for SMS. See [SMS](#sms).'), false);
   assert.equal(inErevosLite('**Speed dial** on the Phone.'), false);
   assert.equal(inErevosLite('**The day stands out in every chat**.'), true);
+});
+
+test("Erevos Lite's app has no Camera: its icon among the phone's apps and what it opens leave its manifest", () => {
+  type Node = { $: Record<string, string> };
+  type Manifest = { manifest: { $: Record<string, string>; application: [Record<string, Node[]> & { $: Record<string, string> }] } };
+  const plugin = createRequire(import.meta.url)('../plugins/with-edition-modules.js') as {
+    CAMERA_NOT_IN_LITE: Record<'activity' | 'activity-alias', string[]>;
+    removing: (manifest: Manifest, names: Record<string, string[]>) => Manifest;
+  };
+  // Everything the Collection's manifest declares for the camera is named to be removed, and nothing else of it.
+  const theirs = readFileSync('modules/erevos-collection/android/src/main/AndroidManifest.xml', 'utf8');
+  const declared = (kind: string) =>
+    [...theirs.matchAll(new RegExp(`<${kind}\\s+android:name="([^"]+)"`, 'g'))].map((m) => m[1]!).filter((name) => /\.Camera[A-Z]/.test(name)).sort();
+  assert.equal(declared('activity').length, 1);
+  assert.equal(declared('activity-alias').length, 6);
+  assert.deepEqual([...plugin.CAMERA_NOT_IN_LITE.activity].sort(), declared('activity'));
+  assert.deepEqual([...plugin.CAMERA_NOT_IN_LITE['activity-alias']].sort(), declared('activity-alias'));
+  // Each alias has the activity that goes with it for its target, so none is left pointing at nothing.
+  for (const target of theirs.matchAll(/android:targetActivity="([^"]+\.Camera[^"]*)"/g)) assert.ok(plugin.CAMERA_NOT_IN_LITE.activity.includes(target[1]!));
+  // The app's manifest tells the merge to remove each of them, once however often it is asked, and keeps what it had.
+  const app: Manifest = { manifest: { $: { 'xmlns:android': 'http://schemas.android.com/apk/res/android' }, application: [{ $: {}, activity: [{ $: { 'android:name': '.MainActivity' } }] } as never] } };
+  const made = plugin.removing(plugin.removing(app, plugin.CAMERA_NOT_IN_LITE), plugin.CAMERA_NOT_IN_LITE);
+  assert.equal(made.manifest.$['xmlns:tools'], 'http://schemas.android.com/tools');
+  const application = made.manifest.application[0];
+  const removed = (kind: string) => (application[kind] ?? []).filter((node) => node.$['tools:node'] === 'remove').map((node) => node.$['android:name']).sort();
+  assert.deepEqual(removed('activity'), declared('activity'));
+  assert.deepEqual(removed('activity-alias'), declared('activity-alias'));
+  assert.deepEqual((application.activity ?? []).filter((node) => !node.$['tools:node']).map((node) => node.$['android:name']), ['.MainActivity']);
+  // And the Collection, whose camera it is, is no part of Erevos Lite: its card under Launcher icons shows only with it.
+  assert.equal(inEdition('collection', 'lite'), false);
+  assert.equal(inEdition('collection', 'erevos'), true);
 });

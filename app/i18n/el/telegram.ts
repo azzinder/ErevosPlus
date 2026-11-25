@@ -148,7 +148,6 @@ export const telegramText: Record<string, string> = {
   "Title": "Τίτλος",
   "Nobody with that name on Telegram.": "Κανείς με αυτό το όνομα στο Telegram.",
   "Find by @name": "Εύρεση με @όνομα",
-  "Find": "Εύρεση",
   "Retract vote": "Ανάκληση ψήφου",
   "Poll closed": "Η δημοσκόπηση έκλεισε",
   "Anonymous poll": "Ανώνυμη δημοσκόπηση",

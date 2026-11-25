@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-// Pair with a code (components/pair-code-sheet.tsx, lib/pair-code.ts) in Italian (i18n/it/index.ts).
+// A code of 8 digits to show or type (components/near-me.tsx, their-code.tsx, lib/pair-code.ts) in Italian (i18n/it/index.ts).
 export const pairCodeText: Record<string, string> = {
-  "Pair with a code": "Abbina con un codice",
-  "For someone you are with or on the phone with: one of you shows a code of 8 digits, the other types it, and you are each other’s contacts. The code itself never leaves the phones.": "Per qualcuno con cui sei o al telefono: uno mostra un codice di 8 cifre, l’altro lo digita, e siete l’uno il contatto dell’altro. Il codice non lascia mai i telefoni.",
-  "Show a code": "Mostra un codice",
   "Type their code": "Digita il suo codice",
-  "Tell them the code, or let them read it. They type it under Pair with a code, Type their code. It lasts {minutes} minutes.": "Digli il codice o faglielo leggere. Lo digita in Abbina con un codice, Digita il suo codice. Dura {minutes} minuti.",
   "This code is closed.": "Questo codice è chiuso.",
   "New code": "Nuovo codice",
   "Pair": "Abbina",

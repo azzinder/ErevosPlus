@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -198,6 +198,7 @@ export function Button({ title, onPress, onLongPress, kind = 'primary', disabled
 }) {
   const colors = useColors();
   const c = buttonColors(kind, colors);
+  if (useContext(ButtonsAs) === 'rows' && !loading) return <OptionRow title={title} onPress={onPress} onLongPress={onLongPress} disabled={disabled} danger={kind === 'danger'} />;
   return (
     <Pressable
       accessibilityRole="button"
@@ -358,6 +359,9 @@ export function Chip({ label, selected, onPress, onLongPress, disabled, mono, fi
 }
 
 export function Row({ children, style, wrap, onLayout }: { children: ReactNode; style?: StyleProp<ViewStyle>; wrap?: boolean; onLayout?: ViewProps['onLayout'] }) {
+  // In a list of options, a row of buttons that wraps is a list of rows, one under the other.
+  const rows = useContext(ButtonsAs) === 'rows';
+  if (rows && wrap) return <View onLayout={onLayout}>{children}</View>;
   return (
     <View onLayout={onLayout} style={[{ flexDirection: 'row', alignItems: 'center', gap: space.sm }, wrap && { flexWrap: 'wrap' }, style]}>
       {children}
@@ -469,6 +473,75 @@ export function SectionTitle({ title }: { title: string }) {
   );
 }
 
+// Buttons in a list of options (OptionList) are drawn as its rows: the same buttons, from the same
+// parts of a chat (its notices, its timer, its PIN…), in one tidy column wherever they are. A sheet
+// opened from one draws its own buttons as buttons again.
+const ButtonsAs = createContext<'buttons' | 'rows'>('buttons');
+
+/**
+ * A chat's options as a list (#44): every button in it is a row the width of the list, its label at
+ * the start and what it is set to (after " · ") at the end, with a line between rows.
+ */
+export function OptionList({ title, children }: { title?: string; children: ReactNode }) {
+  const colors = useColors();
+  return (
+    <View style={{ gap: 6 }}>
+      {title ? <SectionTitle title={title} /> : null}
+      <ButtonsAs.Provider value="rows">
+        <View style={{ borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: shape.cardBorder, borderColor: colors.border }}>{children}</View>
+      </ButtonsAs.Provider>
+    </View>
+  );
+}
+
+/** One row of an OptionList: tapped, it does what its button would. */
+export function OptionRow({ title, onPress, onLongPress, disabled, danger }: { title: string; onPress: () => void; onLongPress?: () => void; disabled?: boolean; danger?: boolean }) {
+  const colors = useColors();
+  const at = title.lastIndexOf(' · ');
+  const label = at > 0 ? title.slice(0, at) : title;
+  const value = at > 0 ? title.slice(at + 3) : '';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={
+        disabled
+          ? undefined
+          : () => {
+              tap();
+              onPress();
+            }
+      }
+      onLongPress={onLongPress}
+      disabled={disabled && !onLongPress}
+      style={({ pressed }) => ({
+        minHeight: 50,
+        paddingHorizontal: space.lg,
+        paddingVertical: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm,
+        backgroundColor: pressed ? withAlpha(colors.text, 0.06) : 'transparent',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.border,
+        opacity: disabled ? 0.45 : 1,
+      })}
+    >
+      <Text color={danger ? colors.danger : undefined} style={{ flex: 1 }}>
+        {label}
+      </Text>
+      {value ? (
+        <Text variant="caption" tone="muted" numberOfLines={1} style={{ maxWidth: '45%' }}>
+          {value}
+        </Text>
+      ) : null}
+      <Text tone="faint" importantForAccessibility="no">
+        ›
+      </Text>
+    </Pressable>
+  );
+}
+
 /** A sheet that rises from the bottom over a dimmed screen. */
 export function Sheet({ visible, onClose, title, children }: {
   visible: boolean;
@@ -512,7 +585,7 @@ export function Sheet({ visible, onClose, title, children }: {
             </Text>
           ) : null}
           <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ gap: 10 }} keyboardShouldPersistTaps="handled">
-            {children}
+            <ButtonsAs.Provider value="buttons">{children}</ButtonsAs.Provider>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>

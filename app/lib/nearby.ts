@@ -399,6 +399,11 @@ export class Nearby {
     return [...this.links].filter((link) => !isSlow(link)).length;
   }
 
+  /** The links up now, not the slow ones: for what talks on them besides messages (lib/near-pair.ts). */
+  fastLinks(): string[] {
+    return [...this.links].filter((link) => !isSlow(link));
+  }
+
   /** Whether a slow link (a LoRa radio) is up. */
   hasSlow(): boolean {
     return [...this.links].some(isSlow);

@@ -9,10 +9,12 @@ import { mark, t } from '../lib/i18n';
 import {
   calculatorOff,
   calculatorOn,
+  cameraIconOn,
   LAUNCHER_COLORS,
   LAUNCHER_ICONS,
   launcherColors,
   setCalculator,
+  setCameraIcon,
   setLauncherColor,
   type LauncherColor,
   type LauncherIcon,
@@ -21,14 +23,15 @@ import { radius, space, type Colors } from '../theme/colors';
 import { useStyles, useTheme } from '../theme/context';
 import { PasswordSheet } from './PasswordSheet';
 import { Button, Card, Row, SectionTitle, Text } from './ui';
-import { EDITION, editionName } from '../lib/edition';
+import { EDITION, editionName, inEdition } from '../lib/edition';
 
 // Appearance → Launcher icons: the colour of each of Erevos's icons in the phone's apps (Erevos,
-// Phone, SMS, Contacts), each drawn in every colour to pick from. Android only, and the phone's
-// choice, not a space's (modules/erevos-icons). Below them, a working calculator can stand in place
-// of Erevos's icon (CalculatorChoice): its code, then =, opens Erevos.
+// Phone, SMS, Contacts, Camera), each drawn in every colour to pick from. Android only, and the
+// phone's choice, not a space's (modules/erevos-icons). The Camera's is off at first: a button puts
+// it among the phone's apps. Below them, a working calculator can stand in place of Erevos's icon
+// (CalculatorChoice): its code, then =, opens Erevos.
 
-const ICON_LABELS: Record<LauncherIcon, string> = { erevos: editionName(), phone: mark('Phone'), sms: 'SMS', contacts: mark('Contacts') };
+const ICON_LABELS: Record<LauncherIcon, string> = { erevos: editionName(), phone: mark('Phone'), sms: 'SMS', contacts: mark('Contacts'), camera: mark('Camera') };
 const COLOR_LABELS: Record<LauncherColor, string> = {
   // Erevos+'s first colour is its own purple: it says the app's name.
   red: EDITION === 'plus' ? 'Erevos+' : mark('Red'),
@@ -73,6 +76,14 @@ const PICTURES: Record<LauncherIcon, Record<LauncherColor, ImageSourcePropType>>
     violet: require('../assets/icon/launcher/contacts-violet.png'),
     dark: require('../assets/icon/launcher/contacts-dark.png'),
   },
+  camera: {
+    red: require('../assets/icon/launcher/camera-red.png'),
+    orange: require('../assets/icon/launcher/camera-orange.png'),
+    green: require('../assets/icon/launcher/camera-green.png'),
+    blue: require('../assets/icon/launcher/camera-blue.png'),
+    violet: require('../assets/icon/launcher/camera-violet.png'),
+    dark: require('../assets/icon/launcher/camera-dark.png'),
+  },
 };
 
 /** The Launcher icons section, or nothing where the phone offers no choice; `titled` false on a screen of its own. */
@@ -80,7 +91,15 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const [chosen, setChosen] = useState(launcherColors);
+  const [cameraOn, setCameraOn] = useState(cameraIconOn);
   if (!chosen) return null;
+  // An icon this app has; the Camera's only where the Collection is part of the edition, never in Erevos Lite.
+  const shown = (icon: LauncherIcon) => chosen[icon] !== undefined && (icon !== 'camera' || inEdition('collection'));
+
+  function toggleCamera() {
+    if (cameraOn === null) return;
+    if (setCameraIcon(!cameraOn)) setCameraOn(cameraIconOn());
+  }
 
   function choose(icon: LauncherIcon, color: LauncherColor) {
     if (chosen?.[icon] === color) return;
@@ -93,7 +112,7 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
       <Text variant="caption" tone="muted" style={styles.hint}>
         {t("The color of each icon among the phone's apps. It is the phone's, not each space's, as the icons show before Erevos is unlocked.")}
       </Text>
-      {LAUNCHER_ICONS.filter((icon) => chosen[icon] !== undefined).map((icon) => (
+      {LAUNCHER_ICONS.filter(shown).map((icon) => (
         <Card key={icon}>
           <Text variant="bodyStrong">{t(ICON_LABELS[icon])}</Text>
           <View style={styles.row}>
@@ -113,6 +132,21 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
               );
             })}
           </View>
+          {icon === 'camera' && cameraOn !== null ? (
+            <>
+              <Text variant="caption" tone="muted" style={styles.hint}>
+                {t("Erevos's camera at a tap, behind Erevos's password and the Collection's, as from the Collection. Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.")}
+              </Text>
+              <Row wrap>
+                <Button
+                  title={cameraOn ? t("Take the Camera off the phone's apps") : t("Put the Camera among the phone's apps")}
+                  kind={cameraOn ? 'secondary' : 'primary'}
+                  compact
+                  onPress={toggleCamera}
+                />
+              </Row>
+            </>
+          ) : null}
         </Card>
       ))}
       <Text variant="caption" tone="muted" style={styles.hint}>

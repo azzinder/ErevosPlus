@@ -21,8 +21,8 @@ export const guard: Record<string, string> = {
   // Starting when the phone turns on.
   "Start when the phone turns on": "Iniciar al encender el teléfono",
   "Wait until I open it": "Esperar a que yo lo abra",
-  "After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say \"New message\", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says \"Locked\". Spaces that go through Tor say nothing until a space is open. With no such space, it stops at once.":
-    "Tras encender el teléfono, o al actualizar Erevos, Erevos se inicia solo, sin ningún espacio abierto: los espacios configurados para avisar de que llegó un mensaje también mientras otro está abierto ya dicen «New message», nunca qué espacio, ni quién o qué. Todo lo demás espera una contraseña, porque Erevos no guarda ninguna clave en el teléfono. Mientras tanto, un aviso discreto dice «Locked». Los espacios que van por Tor no dicen nada hasta que se abre un espacio. Si no hay ningún espacio así, se detiene enseguida.",
+  "After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say \"New message\", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says \"Locked\". Spaces that go through Tor say nothing until a space is open. With no such space, only a quiet notice says it is locked, and a tap on it opens Erevos.":
+    "Tras encender el teléfono, o al actualizar Erevos, Erevos se inicia solo, sin ningún espacio abierto: los espacios configurados para avisar de que llegó un mensaje también mientras otro está abierto ya dicen «New message», nunca qué espacio, ni quién o qué. Todo lo demás espera una contraseña, porque Erevos no guarda ninguna clave en el teléfono. Mientras tanto, un aviso discreto dice «Locked». Los espacios que van por Tor no dicen nada hasta que se abre un espacio. Si no hay ningún espacio así, solo un aviso discreto dice que está bloqueado, y al tocarlo se abre Erevos.",
   "After the phone turns on, Erevos waits until you open it.": "Tras encender el teléfono, Erevos espera a que lo abras.",
   // The calculator in place of Erevos.
   "Calculator in place of Erevos": "Calculadora en lugar de Erevos",
@@ -41,4 +41,10 @@ export const guard: Record<string, string> = {
     "Hecho. En unos segundos el icono de Erevos sale de las apps del teléfono y la calculadora ocupa su lugar: a partir de ahora abre Erevos desde ella.",
   "Erevos's icon is back among the phone's apps.": "El icono de Erevos ha vuelto a las apps del teléfono.",
   "Hide Erevos's icon behind a calculator that works": "Ocultar el icono de Erevos tras una calculadora que funciona",
+  "Erevos's camera at a tap, behind Erevos's password and the Collection's, as from the Collection. Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.":
+    "La cámara de Erevos con un toque, tras la contraseña de Erevos y la de la Colección, como desde la Colección. Si mantienes pulsado el icono de Erevos, también ofrece Cámara. Ninguno se muestra mientras la Colección está desactivada o la calculadora ocupa el lugar de Erevos.",
+  "Put the Camera among the phone's apps":
+    "Poner la Cámara entre las apps del teléfono",
+  "Take the Camera off the phone's apps":
+    "Quitar la Cámara de las apps del teléfono",
 };

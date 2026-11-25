@@ -50,6 +50,8 @@ let applyLinks: (() => Promise<void>) | null = null;
 // Whether the links run now; and the switch as turned on or off while Erevos runs, should the phone not keep it.
 let linksUp = false;
 let nearbyNow: boolean | null = null;
+// How many screens ask for the links whatever the switch says (holdNearbyLinks).
+let held = 0;
 // The switch as last read or set, for screens that say it before reading it (off until then).
 let nearbyLast = false;
 
@@ -123,7 +125,7 @@ export function startNearbyLinks(): () => void {
   const apply = async () => {
     const { on, lan, direct, aware } = await nearbySettings();
     if (!active) return;
-    linksUp = on && !paused;
+    linksUp = (on || held > 0) && !paused;
     if (linksUp) startLinks({ lan, direct, aware });
     else {
       stopLinks();
@@ -180,6 +182,24 @@ export function startNearbyLinks(): () => void {
     forgetBridges();
     stopLinks();
     stopOwn();
+  };
+}
+
+/**
+ * Keeps the links up while a screen needs them, whatever Look for phones nearby says: Near me, on
+ * New chat, where two phones beside each other become contacts (lib/near-pair.ts). The function it
+ * gives lets go: with the switch off the links stop again then. Links that run already are left as
+ * they are, as starting them again would drop them for a moment.
+ */
+export function holdNearbyLinks(): () => void {
+  held += 1;
+  if (!linksUp) void applyLinks?.();
+  let over = false;
+  return () => {
+    if (over) return;
+    over = true;
+    held -= 1;
+    if (held === 0 && linksUp && !nearbyLast) void applyLinks?.();
   };
 }
 

@@ -18,10 +18,12 @@ import {
   toHex,
   type HardCost,
 } from '../lib/crypto';
+import { lockedSpeedIs, setLockedSpeedDials } from '../lib/phone-open';
 import { secureGet, secureSet } from '../lib/secure';
 
 import { shutDoorsPast } from './doors';
 import { deleteOpenKey, saveOpenKey } from './keys';
+import { loadPhoneData } from './phone-data';
 import { SLOTS } from './slots';
 import { countedCheck, KEY_TRIES } from './tries';
 
@@ -348,8 +350,23 @@ export async function lockWithPassword(space: number, password: string, spaceKey
   return null;
 }
 
-/** Makes the second password set in this space (and any set beyond it) stop working. */
-export async function removeSecondPassword(space: number): Promise<void> {
+// A space no password opens any more may be the one that keeps speed dial working with Erevos
+// locked (lib/phone-open.ts): its copy of the numbers would go on being called, and nothing could
+// take it away. So the copy goes with the password, unless the space open now (`space`, with its
+// key) is the one that keeps it. The copy does not say whose it is, so one kept by a space before
+// this one goes too, and is turned on there again. Before the password goes: should the copy not
+// go, the password stays as it was.
+export async function dropOthersLockedSpeed(space: number, spaceKey: Uint8Array): Promise<void> {
+  const own = await loadPhoneData('space', space, spaceKey).then(
+    (data) => lockedSpeedIs(data.lockedFeed),
+    () => false,
+  );
+  if (!own) await setLockedSpeedDials(null);
+}
+
+/** Makes the second password set in this space (and any set beyond it) stop working. `spaceKey` is this space's key. */
+export async function removeSecondPassword(space: number, spaceKey: Uint8Array): Promise<void> {
+  await dropOthersLockedSpeed(space, spaceKey);
   const config = await current();
   await save({ ...config, slots: config.slots.map((slot, j) => (j > space ? unusedSlot(config.iter) : slot)) });
   // The spaces it opened say nothing more while closed (lock/doors.ts).
@@ -358,8 +375,11 @@ export async function removeSecondPassword(space: number): Promise<void> {
 
 // Turns the password lock off. `spaceKey` is the open space's key, kept in the keystore from now
 // on. In the first space that removes every password. In any other, that space opens directly
-// from now on, its second password stops working, and the spaces before it stay locked.
+// from now on, its second password stops working, and the spaces before it stay locked. With no
+// lock screen the Phone never opens locked, so the copy of speed dial numbers it calls then
+// (lib/phone-open.ts) goes, whichever space kept it.
 export async function removePasswordLock(space: number, spaceKey: Uint8Array): Promise<void> {
+  await setLockedSpeedDials(null);
   await saveOpenKey(space, spaceKey);
   await shutDoorsPast(space).catch(() => undefined);
   // With no lock screen, no panic password: should the lock come back, none waits in it.

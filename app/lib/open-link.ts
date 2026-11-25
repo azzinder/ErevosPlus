@@ -50,6 +50,22 @@ export function webLinkHref(url: string): string {
   return /^[A-Za-z0-9_%.~+=&-]+$/.test(data) ? `/contact?${data}` : '';
 }
 
+// An Erevos link wherever it stands in a text: its own kind (erevos://...), or one of its two pages.
+const LINK_IN = /(?:erevos:\/\/[a-z-]+\?|https:\/\/erevos-web\.lphl\.nekten\.eu\/[ci]\/?#)[^\s<>"'«»]+/i;
+
+/**
+ * What was pasted where a link is asked for, as the link in it: a whole message someone sent, with
+ * words around its link, gives the link alone, without the full stop or bracket that ends the
+ * sentence. Text with no Erevos link in it comes back as it is, trimmed.
+ */
+export function pastedLink(text: string): string {
+  const found = LINK_IN.exec(text);
+  if (!found) return text.trim();
+  let end = found[0].length;
+  while (end > 0 && '.,;:!?)]'.includes(found[0][end - 1])) end -= 1;
+  return found[0].slice(0, end);
+}
+
 /** A link's screen, and its details as the screen's params: /phone?number=%2B30 is /phone and { number: '+30' }. */
 export function linkParts(href: string): { path: string; params: Record<string, string> } {
   const read = (text: string) => {

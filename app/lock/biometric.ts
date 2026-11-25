@@ -23,7 +23,19 @@ import { opensSpace } from './space-data';
 // not the first space's key, or Android has dropped its key, it turns itself off, the same way in
 // both cases, and the password opens Erevos.
 
-export type KeyState = 'none' | 'valid' | 'invalidated';
+// 'unknown': it cannot be told now (the phone itself is locked, as when an Erevos call shows over
+// its lock screen, or the Keystore did not answer). That never turns it off by itself.
+//
+// A key broken in a way Android does not call invalidated stays 'unknown', and never gets better:
+// each use only says that the key could not be used on an unlocked phone ('unusable'), as it also
+// does when the Keystore merely did not answer. Those are counted when unlocking: UNUSABLE_MOST in
+// a row, with no use of the key in between, turn it off as a dropped key does, so the button does
+// not stay to fail for ever. Not counted: the phone itself locked, where the key cannot work, and
+// Android's prompt saying no or being closed, where the key was ready.
+export type KeyState = 'none' | 'valid' | 'invalidated' | 'unknown';
+
+/** How many times in a row the key may be unusable on an unlocked phone before unlocking turns itself off. */
+export const UNUSABLE_MOST = 3;
 
 /** What the Keystore key sealed: its IV and the sealed data, base64. */
 export interface Sealed {
@@ -41,7 +53,7 @@ export interface BiometricPrompt {
 export interface BiometricSealer {
   /** Android 11 or later, with a strong fingerprint or face set up. */
   available(): boolean;
-  /** Whether the Keystore key is there, and still works. */
+  /** Whether the Keystore key is there, and still works, or 'unknown' when that cannot be told now. */
   keyState(): KeyState;
   /** Makes a new Keystore key, asks for a fingerprint or face and seals `data` (base64). */
   seal(data: string, prompt: BiometricPrompt): Promise<Sealed>;
@@ -52,17 +64,32 @@ export interface BiometricSealer {
 }
 
 // Why a fingerprint did not open anything: the prompt was closed, the key is gone or opens
-// nothing, or Android said no (too many tries, say), in its own words.
-export class BiometricError extends Error {
-  reason: 'cancelled' | 'invalidated' | 'failed';
+// nothing, the key could not be used though the phone is unlocked, or Android said no (too many
+// tries, say, or the phone itself locked), in its own words.
+export type BiometricReason = 'cancelled' | 'invalidated' | 'unusable' | 'failed';
 
-  constructor(reason: 'cancelled' | 'invalidated' | 'failed', message?: string) {
+export class BiometricError extends Error {
+  reason: BiometricReason;
+
+  constructor(reason: BiometricReason, message?: string) {
     super(message ?? reason);
     this.reason = reason;
   }
 }
 
 const ENTRY = 'erevos.biometric';
+// How many times in a row the key was unusable: a number only, the same whichever space is open.
+const UNUSABLE = 'erevos.biometric-unusable';
+
+async function unusableSoFar(): Promise<number> {
+  const n = Number(await secureGet(UNUSABLE).catch(() => null));
+  return Number.isInteger(n) && n > 0 ? n : 0;
+}
+
+/** The key did its work, or was ready to: nothing counted stays. */
+async function usable(): Promise<void> {
+  if ((await secureGet(UNUSABLE).catch(() => null)) !== null) await secureDelete(UNUSABLE);
+}
 
 function parse(raw: string | null): Sealed | null {
   if (!raw) return null;
@@ -77,7 +104,8 @@ function parse(raw: string | null): Sealed | null {
 /** Whether a fingerprint or face can open Erevos: shown the same in every space. */
 export async function biometricOn(sealer: BiometricSealer): Promise<boolean> {
   if (!sealer.available() || !parse(await secureGet(ENTRY))) return false;
-  if (sealer.keyState() === 'valid' && isPasswordLocked(await loadLockConfig())) return true;
+  const state = sealer.keyState();
+  if ((state === 'valid' || state === 'unknown') && isPasswordLocked(await loadLockConfig())) return true;
   // Android dropped the key, or the lock is off: it is off too.
   await turnOffBiometric(sealer);
   return false;
@@ -96,21 +124,35 @@ export async function turnOnBiometric(
   const key = await ownSpaceKey(space, password, now);
   if (!key) return false;
   await secureDelete(ENTRY);
+  await secureDelete(UNUSABLE);
   const sealed = await sealer.seal(toBase64(space === 0 ? key : randomBytes(32)), prompt);
   await secureSet(ENTRY, JSON.stringify(sealed));
   return true;
 }
 
 // The first space and its key, opened with a fingerprint or face. Null when that no longer works:
-// it is then off. Throws BiometricError when the prompt was closed or Android said no.
+// it is then off. Throws BiometricError when the prompt was closed, Android said no, or the key
+// could not be used this time (UNUSABLE_MOST times in a row is "no longer works").
 export async function unlockWithBiometric(sealer: BiometricSealer, prompt: BiometricPrompt): Promise<Unlocked | null> {
   const sealed = parse(await secureGet(ENTRY));
   if (!sealed) return null;
   let key: Uint8Array | null = null;
   try {
     key = fromBase64(await sealer.open(sealed, prompt));
+    await usable();
   } catch (e) {
-    if (!(e instanceof BiometricError) || e.reason !== 'invalidated') throw e;
+    if (!(e instanceof BiometricError)) throw e;
+    if (e.reason === 'unusable') {
+      const times = (await unusableSoFar()) + 1;
+      if (times < UNUSABLE_MOST) {
+        await secureSet(UNUSABLE, String(times));
+        throw e;
+      }
+    } else {
+      // The prompt showed, so the key was ready; the phone locked, or the prompt saying no, says nothing of it.
+      if (e.reason === 'cancelled') await usable();
+      if (e.reason !== 'invalidated') throw e;
+    }
   }
   if (key && key.length === 32 && (await opensSpace(0, key))) return { space: 0, key };
   await turnOffBiometric(sealer);
@@ -120,6 +162,7 @@ export async function unlockWithBiometric(sealer: BiometricSealer, prompt: Biome
 /** Turns it off: the sealed key and the Keystore key are removed. */
 export async function turnOffBiometric(sealer: BiometricSealer): Promise<void> {
   await secureDelete(ENTRY);
+  await secureDelete(UNUSABLE);
   sealer.forget();
 }
 

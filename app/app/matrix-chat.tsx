@@ -34,8 +34,8 @@ import { useSayTyping } from '../components/say-typing';
 import { SelectBar, selectAction, useSelection } from '../components/select-bar';
 import { PhoneSign, ShortcutTile, VideoSign } from '../components/shortcut-tile';
 import { IconButton } from '../components/composer';
-import { MoreIcon, PlusIcon } from '../components/icons';
-import { Button, Chip, Input, Page, Row, Sheet, Text } from '../components/ui';
+import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { Button, Chip, Input, OptionList, Page, Row, Sheet, Text } from '../components/ui';
 import { WhoRead } from '../components/who-read';
 import { ask } from '../lib/alert';
 import { vanishTimer } from '../lib/chat-rules';
@@ -877,6 +877,10 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
             {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
           </>
         )}
+        {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
+        <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+          <OptionsIcon color={colors.text} size={22} />
+        </IconButton>
         <MicButton voice={voice} disabled={sending || !!changed} />
       </Row>
       {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
@@ -914,11 +918,11 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           </Row>
         </View>
       </Sheet>
-      <Sheet visible={more} onClose={() => setMore(false)} title={t('More')}>
+      <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
           {!room.direct && !room.invitedBy ? <InviteCard roomId={roomId} say={setNote} /> : null}
           {!room.invitedBy ? (
-            <Row wrap>
+            <OptionList title={t('This chat')}>
               <NetworkChatNotify notify={checkedChatNotify(room.notify)} hidden={where !== 'space'} onChange={(next) => matrixSetNotify(roomId, next)} />
               <Button title={t('Chat look')} kind="secondary" compact onPress={() => {
                   setMore(false);
@@ -936,9 +940,13 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
                 onChoose={(after) => void matrixAct(async (state) => setTimerIn(state, roomId, after)).catch(fail)}
                 onChosen={() => setMore(false)}
               />
-            </Row>
+            </OptionList>
           ) : null}
-          {!room.invitedBy ? <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} /> : null}
+          {!room.invitedBy ? (
+            <OptionList title={t('Find')}>
+              <HistoryButtons tools={history} exportable={where === 'space'} onRun={() => setMore(false)} />
+            </OptionList>
+          ) : null}
           {/* «Through Tor»: Matrix has one connection for the account, so on, the whole account goes only through Tor (lib/matrix.ts matrixWayOf). */}
           {!room.invitedBy && !thread ? <ChatTorSwitch network="Matrix" on={room.tor === true} onChange={(on) => void matrixSetRoomTor(roomId, on).catch(fail)} /> : null}
           {/* A name of our own for it, on this device only: nobody is told. */}

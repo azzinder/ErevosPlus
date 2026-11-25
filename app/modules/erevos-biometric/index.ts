@@ -19,11 +19,11 @@ type Native = {
 
 const native = requireOptionalNativeModule<Native>('ErevosBiometric');
 
-// The module's rejections carry "cancelled", "invalidated" or "failed" as their code.
+// The module's rejections carry "cancelled", "invalidated", "unusable" or "failed" as their code.
 function reason(e: unknown): BiometricError {
   const code = (e as { code?: unknown } | null)?.code;
   const message = e instanceof Error ? e.message : String(e);
-  return new BiometricError(code === 'cancelled' || code === 'invalidated' ? code : 'failed', message);
+  return new BiometricError(code === 'cancelled' || code === 'invalidated' || code === 'unusable' ? code : 'failed', message);
 }
 
 export const biometricSealer: BiometricSealer = {
@@ -35,8 +35,13 @@ export const biometricSealer: BiometricSealer = {
     }
   },
   keyState: () => {
-    const state = native?.keyState();
-    return state === 'valid' || state === 'invalidated' ? (state as KeyState) : 'none';
+    let state: string | undefined;
+    try {
+      state = native?.keyState();
+    } catch {
+      return 'unknown';
+    }
+    return state === 'valid' || state === 'invalidated' || state === 'unknown' ? (state as KeyState) : 'none';
   },
   async seal(data, { title, cancel }) {
     if (!native) throw new BiometricError('failed', 'Not on this phone');

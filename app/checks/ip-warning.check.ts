@@ -19,7 +19,8 @@ import { IP_SEEN_MOST, loadCurrentSpaceData, loadHiddenData, updateCurrentSpaceD
 import './secure-memory';
 
 test('a warning is kept by its network, what happens and what of; its words name the network, and each act has its own', () => {
-  assert.equal(ipKey({ network: ' Erevos ', act: 'send', of: 'abc' }), 'erevos|send|abc');
+  assert.equal(ipKey({ network: ' Erevos ', act: 'call', of: 'abc' }), 'erevos|call|abc');
+  assert.equal(ipKey({ network: 'Erevos', act: 'send', of: 'abc' }), 'erevos|send|*', 'what is sent, once for the network');
   assert.notEqual(ipKey({ network: 'Erevos', act: 'send', of: 'abc' }), ipKey({ network: 'Erevos', act: 'call', of: 'abc' }));
   assert.notEqual(ipKey({ network: 'Erevos', act: 'send', of: 'abc' }), ipKey({ network: 'Matrix', act: 'send', of: 'abc' }));
   assert.ok(ipKey({ network: 'Erevos', act: 'send', of: 'x'.repeat(500) }).length <= 200);
@@ -53,6 +54,10 @@ test('a warning is said once in a space: kept as said once gone on from, the lat
   await ipGoneOn(one);
   assert.equal(await ipSaid(one), true);
   assert.equal(await ipSaid(two), false, 'a call is said apart from what is sent');
+  assert.equal(await ipSaid({ ...one, of: 'chat-two' }), true, 'what is sent is said once for all chats');
+  assert.equal(await ipSaid({ ...one, of: 'group g', keep: 'memory' }), false, 'not for what is kept elsewhere');
+  assert.equal(await ipSaid({ ...one, network: 'Matrix' }), false, 'each network its own');
+  assert.equal(await ipSaid({ ...two, of: 'chat-two' }), false, 'calls still each their own');
   assert.deepEqual((await loadCurrentSpaceData()).ipSeen, [ipKey(one)], 'kept once');
 
   // Another space has its own.
@@ -61,12 +66,12 @@ test('a warning is said once in a space: kept as said once gone on from, the lat
 
   // The latest IP_SEEN_MOST are kept, and what is stored of the wrong shape is left out.
   setCurrentSpace(21, randomBytes(32));
-  await updateCurrentSpaceData({ ipSeen: Array.from({ length: IP_SEEN_MOST }, (_, i) => `erevos|send|${i}`) });
+  await updateCurrentSpaceData({ ipSeen: Array.from({ length: IP_SEEN_MOST }, (_, i) => `erevos|call|${i}`) });
   await ipGoneOn(two);
   const seen = (await loadCurrentSpaceData()).ipSeen!;
   assert.equal(seen.length, IP_SEEN_MOST);
   assert.equal(seen.at(-1), ipKey(two));
-  assert.equal(seen.includes('erevos|send|0'), false, 'the oldest went');
+  assert.equal(seen.includes('erevos|call|0'), false, 'the oldest went');
   await updateCurrentSpaceData({ ipSeen: ['', 7, 'erevos|link|', 'erevos|link|'] as unknown as string[] });
   assert.deepEqual((await loadCurrentSpaceData()).ipSeen, ['erevos|link|']);
   setCurrentSpace(null);

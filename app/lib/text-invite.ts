@@ -45,7 +45,7 @@ export type TextInvite = {
   name: string;
   /** When it is over, milliseconds; 0 for a contact card, which lasts. */
   expires: number;
-  /** A contact card (Your contact link's short QR code, contactCard in lib/sms-relay.ts): no invite to
+  /** A contact card (My link's short QR code, contactCard in lib/sms-relay.ts): no invite to
    *  the relay (`code` is ''), never over, and whoever takes it writes a message request, as with a
    *  contact link. Flag bit 2 (4), with no `code` and the time 0 in the body. */
   card?: true;

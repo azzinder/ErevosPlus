@@ -141,8 +141,9 @@ nascoste hanno le proprie chat fissate e archiviate.
   schede. Sotto un post: rispondere, condividere di nuovo, mettere Mi piace e condividere; sotto un messaggio Matrix:
   rispondere, reagire e condividere. **Nuovo post**, la penna in basso, scrive un post pubblico, con fino a quattro
   foto. Vedi [Chat con altre app Nostr](#nostr-chats).
-- **Nuova chat**, in basso, apre le impostazioni del relay e l’aggiunta di un contatto. **Ricordamelo**, la campanella
-  arancione accanto, scrive un promemoria per te.
+- **Nuova chat**, in basso, chiede dov’è l’altra persona, **Accanto a me**, **Lontano** o **Ho il suo codice**, e la
+  aggiunge; le righe sotto aprono il tuo link, i contatti bloccati e le impostazioni del relay. **Ricordamelo**, la
+  campanella arancione accanto, scrive un promemoria per te.
 - **{~La cornetta verde e la persona viola|La persona viola}** in alto, su Android, {~aprono subito **Telefono** e **Contatti**, nei colori
   delle loro icone|apre subito **Contatti**, nel colore
   della sua icona} sulla schermata Home del telefono. {~Non sono|Non è} anche nel menu dei tre puntini.
@@ -219,8 +220,8 @@ Una buona prima ora:
 1. Apri **Impostazioni** → **Privacy e sicurezza** → **Blocco e seconda password** e imposta una password, così nessuno
    che prenda in mano il telefono può aprire Erevos.
 2. Apri **Telefoni vicini** dal menu su due telefoni vicini tra loro, e consenti quello che chiede Android.
-3. Aggiungetevi a vicenda con **Mostra il mio codice QR**, come in [Chat con un telefono vicino](#nearby), e invia un
-   messaggio: va da vicino, crittografato end-to-end, senza relay e senza internet.
+3. Aggiungetevi a vicenda con **Nuova chat** → **Accanto a me**, su entrambi i telefoni, come in [Chat con un telefono
+   vicino](#nearby), e invia un messaggio: va da vicino, crittografato end-to-end, senza relay e senza internet.
 4. Per parlare da più lontano, imposta un relay come in [Chat tramite un relay](#relay).
 
 ### Chat con me stesso e promemoria
@@ -384,14 +385,16 @@ e, dove il telefono ce l’ha, Wi-Fi Aware, e sulla rete Wi-Fi a cui è collegat
 Non servono internet, SIM o una rete Wi-Fi. Porta i messaggi ai tuoi contatti, crittografati end-to-end come quelli
 tramite il relay.
 
-Cerca solo quando **Cerca telefoni vicini** è attivo, in **Vicino, senza internet**, in **Nuova chat**: è spento
-finché non lo attivi, su entrambi i telefoni, e fino ad allora tutto passa dal relay.
+Cerca solo quando **Cerca telefoni vicini** è attivo, in **Per utenti esperti** → **Vicino, senza internet**, in
+**Nuova chat**: è spento finché non lo attivi, su entrambi i telefoni, e fino ad allora tutto passa dal relay. Solo
+**Accanto a me**, in Nuova chat, cerca anche senza, finché la sua pagina è aperta, per aggiungere un contatto.
 
 1. Apri **Telefoni vicini** dal menu su entrambi i telefoni. La prima volta, Android chiede di trovare i dispositivi
    vicini (su Android 12 e precedenti, anche per la posizione); consentilo, o i telefoni non possono trovarsi.
-2. Se non siete ancora contatti, aggiungetevi a vicenda: su un telefono tocca **Nuova chat**, dove si vede **Il tuo
-   codice QR**, e scansionalo con l’altro, come in [Chat tramite un relay](#relay). Senza un relay il codice contiene
-   solo le tue chiavi, e vi raggiungete solo da vicino, finché non ne avete uno.
+2. Se non siete ancora contatti, aggiungetevi a vicenda: su entrambi i telefoni tocca **Nuova chat** e poi **Accanto a
+   me**, e tocca **Sì, le stesse** appena entrambi mostrano le stesse immagini, come in [Chat tramite un
+   relay](#relay). Senza un relay ogni telefono dà solo le sue chiavi, e vi raggiungete solo da vicino, finché non ne
+   avete uno.
 3. Scegli il contatto, scrivi nella barra dei messaggi in basso e tocca la freccia di invio. Appena il suo telefono
    risponde, in cima alla chat c’è scritto **Vicino**.
 
@@ -410,7 +413,8 @@ finché non lo attivi, su entrambi i telefoni, e fino ad allora tutto passa dal 
   trovano e si parlano direttamente, anche quando quella rete Wi-Fi non ha internet; anche l’app desktop. Se Android
   chiede se restare su una rete Wi-Fi senza internet, resta. Chiunque sia su quella rete Wi-Fi può capire che lì c’è
   un’app Erevos, non di chi. Il firewall di un computer deve lasciar entrare la porta 47905 (UDP e TCP). Per fermarlo,
-  disattiva **Trova Erevos sulla stessa rete Wi-Fi** sotto **Vicino, senza internet**, in **Nuova chat**.
+  disattiva **Trova Erevos sulla stessa rete Wi-Fi** sotto **Per utenti esperti** → **Vicino, senza internet**, in
+  **Nuova chat**.
 - **Una rete Wi-Fi tutta loro (Android 10 e successivi):** senza una rete Wi-Fi in comune, due telefoni con {=Erevos}
   vicini creano una piccola rete Wi-Fi tutta loro (Wi-Fi Direct) e si parlano attraverso di essa come sulla stessa
   rete Wi-Fi: più veloce del Bluetooth, e una chiamata ci passa senza internet. Non chiede nulla; dove può, ogni
@@ -431,9 +435,9 @@ finché non lo attivi, su entrambi i telefoni, e fino ad allora tutto passa dal 
   proprio relay appena può; lo stesso fa il tuo. Non possono leggerlo, né capire da chi viene o per chi è: vedono solo
   l’indirizzo del relay. Resta anche quando Erevos si chiude, sigillato sul telefono. I tuoi restano nel tuo spazio, e
   partono solo mentre è aperto. Il trasporto per altri è attivo finché non disattivi **Trasporta messaggi per altri**
-  sotto **Vicino, senza internet**, in **Nuova chat**, e solo per relay su internet tramite TLS (wss://):
-  uno sconosciuto vicino non fa mai raggiungere al tuo telefono, o al tuo relay, uno su una rete locale o sul telefono
-  stesso. I tuoi messaggi vengono trasportati dai telefoni vicini che lo hanno attivo.
+  sotto **Per utenti esperti** → **Vicino, senza internet**, in **Nuova chat**, e solo per relay su internet tramite
+  TLS (wss://): uno sconosciuto vicino non fa mai raggiungere al tuo telefono, o al tuo relay, uno su una rete locale
+  o sul telefono stesso. I tuoi messaggi vengono trasportati dai telefoni vicini che lo hanno attivo.
 - **Portati da altri telefoni:** al contrario, quando il tuo telefono non ha internet, un telefono con {=Erevos} accanto
   che ha internet, e trasporta per gli altri, prende ciò che ti aspetta sul tuo relay e te lo dà da vicino. Erevos
   chiede una volta per ogni telefono così, anche per quello di un contatto, perché uno sconosciuto può passare i
@@ -531,45 +535,71 @@ contatto, vedi **Nessun relay tuo** più sotto.
 numero di telefono o della tua email per raggiungerti: chi ha il tuo link di contatto può scrivere nella tua coda, e
 solo tu la leggi.
 
-1. Nella schermata principale, tocca **Nuova chat**. Finché manca qualcosa, in alto **Come ti colleghi ora** dice in parole semplici come ti
-   raggiungono i tuoi contatti: tramite il tuo relay, tramite Nostr senza relay, o solo da vicino; quando tutto funziona,
-   non viene mostrato. Con un relay, un campo in cima trova un contatto per nome o aggiunge un link incollato lì, e
-   sotto vengono **Il tuo codice QR**, con **Ha già {=Erevos}** e **Nuovo su {=Erevos}** sopra, e righe per **Il tuo link di contatto** e altro; un
-   telefono ancora senza relay inizia con **Inizia con un invito**. Le impostazioni del relay stesso sono in **Per
-   utenti esperti**, in fondo; **Impostazioni** → **Relay e reti** → **Relay** apre Nuova chat con queste impostazioni aperte.
+1. Nella schermata principale, tocca **Nuova chat**. Finché manca qualcosa, in alto **Come ti colleghi ora** dice in
+   parole semplici come ti raggiungono i tuoi contatti: tramite il tuo relay, tramite Nostr senza relay, o solo da
+   vicino; quando tutto funziona, non viene mostrato. Con un relay, un campo in cima trova un contatto per nome o
+   aggiunge un link incollato lì. Poi viene una domanda, **Dov’è l’altra persona?**, e ogni risposta apre una pagina a
+   sé: **Accanto a me**, **Lontano** e **Ho il suo codice**, come in 4–6 sotto. Tre righe sotto aprono il resto: **Il
+   mio link**, **Contatti bloccati** e **Per utenti esperti**, dove sono le impostazioni del relay stesso;
+   **Impostazioni** → **Relay e reti** → **Relay** apre Nuova chat con queste impostazioni aperte.
 2. In **Per utenti esperti**, scrivi l’**Indirizzo del relay**: \`ws://<indirizzo del computer>:7879\` per un relay sulla tua
    rete, o \`wss://relay.example.org\` per uno su internet. Aggiungi il **Token** se il relay lo richiede.
 3. Erevos crea da solo la tua coda sul relay, qualche secondo dopo, e dice **Coda sul relay creata**: funziona tutto, testi, foto, messaggi vocali,
    chiamate e gruppi, e **Come ti colleghi ora** scompare, perché non manca nulla. Se non ci riesce, la nota dice perché; **Crea la mia coda sul relay**, sotto l’indirizzo, riprova.
-4. **Il tuo codice QR** è su Nuova chat stessa, appena si apre. Fallo scansionare all’altro telefono con la fotocamera,
-   poi apri il link in Erevos. La schermata **Aggiungi un contatto** mostra cosa contiene: tocca **Aggiungi alla chat**
-   solo se l’hai scansionato tu stesso. **Aggiungi e collega a uno dei miei contatti** aggiunge anche lui, collegato al
-   contatto che scegli, di cui la chat prende il nome.
-   Il codice è corto, così qualsiasi fotocamera lo legge. Chi lo scansiona risponde con il proprio link di contatto, e poi questo telefono gli scrive per primo. Il codice è nuovo ogni volta che si apre Nuova chat, e vale una volta: il primo che lo scansiona diventa subito un contatto; chi lo scansiona dopo, o prende il link che condividi, scrive prima una richiesta di messaggio. **Codice QR grande, senza internet** mostra invece il codice intero, che funziona vicino senza internet, e **Codice QR piccolo** torna indietro. **Condividi**, sotto, invia un link corto che qualsiasi app lascia toccare; su Android apre Erevos, che chiede prima di accettarlo. Per aggiungere qualcuno con il suo codice QR di contatto, il tuo telefono ha prima bisogno di un relay.
-   Questo codice QR funziona solo se entrambi i telefoni hanno un relay, come dice la scheda. Per qualcuno che non ha
-   ancora {=Erevos}, o il cui telefono non ha un relay, scegli invece **Nuovo su {=Erevos}**, sopra: la scheda mostra
-   **Invito a {=Erevos}**, un invito con cui il suo telefono entra nel tuo relay, come in Invitare qualcuno di nuovo, più
-   sotto. Nuova chat mostra ciò che hai scelto l’ultima volta.
-   Lo stesso vale per contatto: finché è mostrato il codice di contatto piccolo e l’NFC è attivo su Android, l’altro
-   telefono lo prende se appoggi il suo retro al retro del tuo. Funziona solo con Erevos in primo piano, non in
-   background, e mai con il codice QR grande.
-5. Se la sua fotocamera mostra solo il testo, o se è lontano, tocca **Condividi** sotto il tuo codice QR, oppure apri
-   **Il tuo link di contatto** e tocca **Condividi il mio link di contatto**, e mandaglielo.
-   Lo incolla nel campo in cima a **Nuova chat** e tocca **Aggiungi**.
-6. Oppure al contrario: tocca **Scansiona il suo**, sotto il tuo codice QR, e fotografa il codice QR sul suo schermo,
-   oppure tocca **Da una foto del suo codice QR** per uno screenshot o una sua foto che ti ha mandato. Erevos lo legge
-   e lo aggiunge subito. Su un computer, su Sailfish OS e nella web app **Scansiona il suo** chiede una foto; su iPhone
-   offre anche la fotocamera.
-   Anche le chat nascoste li hanno entrambi; lì il campo in cima accetta solo un link.
-7. Oppure, con qualcuno accanto a te o al telefono: tocca **Abbina con un codice** in **Nuova chat**. Uno tocca
-   **Mostra un codice** e dice o mostra le 8 cifre; l’altro tocca **Digita il suo codice** e le digita. Allora ogni
-   telefono ha l’altro come contatto, come se ciascuno avesse scansionato il codice QR dell’altro. Il codice non lascia
-   mai i telefoni: si dimostrano l’un l’altro di conoscerlo, e i loro link di contatto partono cifrati con una chiave che
-   solo lo stesso codice dà. Si incontrano su relay Nostr pubblici, che non vedono né il codice né i link, e chi tira a
-   indovinare ha 3 tentativi prima che il codice si chiuda. Un codice dura 10 minuti.
+4. **Accanto a me**, per qualcuno che ti sta vicino: su entrambi i telefoni, toccate **Nuova chat** e poi **Accanto a
+   me**. I due telefoni si trovano da soli, via Bluetooth o sulla rete Wi-Fi che condividono, e ciascuno mostra **È
+   stato trovato un telefono** con sei immagini. Guardate entrambi gli schermi: quando le immagini sono le stesse,
+   nello stesso ordine, ciascuno tocca **Sì, le stesse**, e siete contatti, senza relay, senza internet e senza
+   digitare nulla. **No, altre** lascia da parte quel telefono. Le immagini vengono da una chiave che i due telefoni
+   creano tra loro, così un telefono che si mettesse in mezzo ne mostrerebbe a ciascuno di diverse; ogni telefono dà
+   il suo link di contatto solo dopo che il suo proprietario ha detto sì, cifrato con quella chiave. La pagina cerca
+   telefoni solo finché è aperta, anche con **Cerca telefoni vicini** spento, che resta spento; nelle chat nascoste e
+   nella web app non cerca nulla. Sotto **Se non viene trovato** la pagina ha gli altri modi per qualcuno che ti sta
+   vicino: un codice QR per la sua fotocamera, che è un invito dove il tuo relay lascia invitare questo telefono, e
+   altrimenti il tuo link di contatto; **Mostra un codice di 8 cifre**, che l’altra persona digita come in 6;
+   **Scansiona il suo** e **Digita il suo codice**, per il suo; e, su Android, **Niente Erevos sul suo telefono?**,
+   che le dà l’app stessa.
+5. **Lontano**, per qualcuno che non è con te: la pagina crea un invito, un link per una persona, dentro un messaggio
+   pronto da inviare. Tocca **Invia con…** e scegli l’app con cui parte (in un browser e su un computer, **Copia
+   l’invito**), oppure **Il codice QR dell’invito** per mostrarlo come codice. L’altra persona tocca il link: con
+   Erevos sul suo telefono si apre lì, e senza il link le mostra prima dove prenderlo. Il suo telefono entra poi nel
+   tuo relay con un accesso tutto suo, senza digitare nulla, e siete contatti. La pagina dice a che punto si è,
+   **L’invito è pronto**, **In attesa che lo apra**, **Siete collegati**, e intanto puoi lasciarla: appena il suo
+   telefono è entrato, compare nelle tue chat. Altro sugli inviti in Invitare qualcuno di nuovo, più sotto. Dove
+   questo telefono non può creare un invito, ancora senza relay, nelle chat nascoste o su un computer collegato, la
+   pagina dà invece il tuo link di contatto da inviare: l’altra persona lo apre in Erevos, o lo incolla in **Ho il suo
+   codice**.
+6. **Ho il suo codice**, per ciò che l’altra persona ti ha dato. Digita le 8 cifre che il suo telefono mostra in
+   **Accanto a me** → **Mostra un codice di 8 cifre**, accanto a te o dette al telefono: allora ogni telefono ha
+   l’altro come contatto. Il codice non lascia mai i telefoni: si dimostrano l’un l’altro di conoscerlo, e i loro link
+   di contatto partono cifrati con una chiave che solo lo stesso codice dà. Si incontrano su relay Nostr pubblici, che
+   non vedono né il codice né i link, e chi tira a indovinare ha 3 tentativi prima che il codice si chiuda. Un codice
+   dura 10 minuti. Sotto le cifre, incolla il suo link di contatto o il suo invito nel campo e tocca **Aggiungi**,
+   oppure tocca **Scansiona il suo codice QR** e fotografa il codice QR sul suo schermo, o **Da una foto del suo
+   codice QR** per uno screenshot o una sua foto che ti ha mandato. Erevos lo legge e lo aggiunge subito. Su un
+   computer, su Sailfish OS e nella web app **Scansiona il suo codice QR** chiede una foto; su iPhone offre anche la
+   fotocamera. Anche le chat nascoste hanno questa pagina.
+7. **Il mio link**, nelle righe sotto le tre, è il codice QR e il link di contatto di questo telefono. Fai scansionare
+   il codice all’altro telefono con la fotocamera, poi apri il link in Erevos. La schermata **Aggiungi un contatto**
+   mostra cosa contiene: tocca **Aggiungi alla chat** solo se l’hai scansionato tu stesso. **Aggiungi e collega a uno
+   dei miei contatti** aggiunge anche lui, collegato al contatto che scegli, di cui la chat prende il nome. Il codice
+   è corto, così qualsiasi fotocamera lo legge. Chi lo scansiona risponde con il proprio link di contatto, e poi
+   questo telefono gli scrive per primo. Il codice è nuovo ogni volta che si apre la pagina, e vale una volta: il
+   primo che lo scansiona diventa subito un contatto; chi lo scansiona dopo, o prende il link che condividi, scrive
+   prima una richiesta di messaggio. **Codice QR grande, senza internet** mostra invece il codice intero, che funziona
+   vicino senza internet, e **Codice QR piccolo** torna indietro. **Condividi**, sotto, invia un link corto che
+   qualsiasi app lascia toccare; su Android apre Erevos, che chiede prima di accettarlo. Per aggiungere qualcuno con
+   il suo codice QR di contatto, il tuo telefono ha prima bisogno di un relay. Questo codice QR funziona solo se
+   entrambi i telefoni hanno un relay, come dice la pagina: altrimenti usa **Accanto a me**, o un invito da
+   **Lontano**. **Scansiona il suo** e **Da una foto del suo codice QR**, sotto, leggono da qui il codice dell’altro
+   telefono. Lo stesso vale per contatto: finché è mostrato il codice di contatto piccolo e l’NFC è attivo su Android,
+   l’altro telefono lo prende se appoggi il suo retro al retro del tuo. Funziona solo con Erevos in primo piano, non
+   in background, e mai con il codice QR grande.
 
-La nuova chat appare nella schermata principale con il nome **contatto** e i primi caratteri della sua chiave, finché
-non ha un nome: **Rinomina** nei suoi dettagli gliene dà uno. Subito dopo averlo aggiunto qui, **Collega a uno dei miei
+Qualunque modo tu scelga, finisce su **Siete collegati**: la sua immagine, **Il suo nome nelle tue chat**, che il suo
+telefono può aver detto e che puoi cambiare, e **Scrivi un messaggio** o **Aggiungi un’altra persona**. La nuova chat
+appare nella schermata principale con il nome **contatto** e i primi caratteri della sua chiave, finché non ha un
+nome: **Rinomina** nei suoi dettagli gliene dà uno. Subito dopo averlo aggiunto qui, **Collega a uno dei miei
 contatti** sotto l’avviso che è stato aggiunto ti lascia scegliere invece uno dei tuoi contatti (**Non ora** lo lascia
 così): la chat prende il nome di quel contatto, se non ne ha uno suo, e la scheda del contatto mostra la chat. Le chat
 nascoste offrono solo i loro contatti, mai quelli del telefono. Basta che un telefono aggiunga l’altro: aggiungere un
@@ -624,40 +654,41 @@ non può riempire il suo file dei token.
 Un codice QR o un link fa entrare qualcuno di nuovo: il suo telefono entra in {=Erevos} sul tuo relay, con un accesso
 tutto suo, senza scrivere nulla, e siete subito l’uno contatto dell’altro, senza richiesta di messaggio.
 
-- **Per invitare:** nella schermata iniziale, tocca **Invita** accanto alla riga del relay oppure, su **Nuova chat**,
-  scegli **Nuovo su {=Erevos}** sopra il codice QR. Il codice QR compare subito: quando {=Erevos} è sul suo telefono, lo
-  scansiona con la fotocamera e apre il link in Erevos, oppure tocca **Condividi l’invito** e mandagli il link. Sotto
-  puoi scrivere per chi è (il suo nome nelle tue chat) e **Il tuo nome, per quella persona**, oppure lasciare vuoti
-  entrambi. Riaperto finché nessuno l’ha preso e gli resta almeno un giorno, mostra lo stesso invito, quindi non
-  consuma nessuno dei 5 in attesa né dei 10 al giorno; **Invita un’altra persona** ne crea uno nuovo. È per una
-  persona, per 7 giorni, o meno se l’invito al relay finisce prima. Chi lo prende per primo lo
-  ha, quindi dallo solo a quella persona.
-  Su un telefono Android con l’NFC attivo puoi anche darlo per contatto: appoggia il retro del suo telefono al retro del
-  tuo mentre il codice è mostrato, e il suo telefono apre il link da solo, in Erevos se è installato, altrimenti sulla
-  pagina web di Erevos, che offre {=Erevos}. Se l’NFC è spento, la schermata ti dice di attivarlo nelle impostazioni di
-  Android.
-- **Per entrare:** su un telefono ancora senza relay, **Nuova chat** inizia con **Inizia con un invito**. Tocca
-  **Scansiona il suo codice QR** e fotografa l’invito sul suo schermo, oppure tocca **Da una foto del suo codice QR**, o
-  incolla il link nel campo lì e tocca **Partecipa**; funziona anche scansionarlo con la fotocamera e aprire il link in
-  Erevos. Il link apre **… ti invita su {=Erevos}**: tocca **Partecipa** solo se è arrivato da quella persona. Erevos
-  prende un accesso tutto suo al suo relay e una coda lì, la aggiunge e dice **Benvenuto su Erevos**. Il suo primo
-  messaggio lo dice al suo telefono, che aggiunge subito questo come contatto, con il nome che ha scritto.
-- **Gli altri modi per entrare:** sotto, **Per utenti esperti** apre gli altri, per chi li cerca: **Accedi con LPHL**
-  fa accedere questo telefono al relay di LPHL con un account LPHL, nel browser (vedi Accedere al relay più sotto), e
-  poi aggiungi i tuoi contatti con i loro inviti o link; **Inizia senza relay**, come in Senza nessun relay, in
-  Tramite Nostr; e le impostazioni del relay, come in 1–6 sopra. Un invito è il modo più semplice per entrare, e sul
-  relay un telefono invitato ha solo un nome di lettere e cifre a caso.
+- **Per invitare:** nella schermata iniziale, tocca **Invita** accanto alla riga del relay oppure, in **Nuova chat**,
+  tocca **Lontano**. L’invito viene creato subito e compare dentro un messaggio pronto da inviare: tocca **Invia
+  con…** e scegli l’app, oppure tocca **Il codice QR dell’invito** e faglielo scansionare con la fotocamera del suo
+  telefono. Sotto puoi scrivere per chi è (il suo nome nelle tue chat) e **Il tuo nome, per quella persona**, oppure
+  lasciare vuoti entrambi. Riaperto finché nessuno l’ha preso e gli resta almeno un giorno, mostra lo stesso invito,
+  quindi non consuma nessuno dei 5 in attesa né dei 10 al giorno; **Invita un’altra persona** ne crea uno nuovo, e
+  **Ritira questo invito** chiude il suo link finché nessun telefono l’ha preso. È per una persona, per 7 giorni, o
+  meno se l’invito al relay finisce prima. Chi lo prende per primo lo ha, quindi dallo solo a quella persona. Per
+  qualcuno che ti sta vicino, anche **Accanto a me** mostra un invito così come codice QR. Su un telefono Android con
+  l’NFC attivo puoi anche darlo per contatto: appoggia il retro del suo telefono al retro del tuo mentre il codice è
+  mostrato, e il suo telefono apre il link da solo, in Erevos se è installato, altrimenti sulla pagina web di Erevos,
+  che offre {=Erevos}. Se l’NFC è spento, la pagina ti dice di attivarlo nelle impostazioni di Android.
+- **Per entrare:** tocca il link che ti ha mandato, oppure scansiona l’invito con la fotocamera e apri il link in
+  Erevos: apre **… ti invita su {=Erevos}**, e tocchi **Partecipa** solo se è arrivato da quella persona. Dentro Erevos,
+  anche **Ho il suo codice** in **Nuova chat** accetta un invito: tocca **Scansiona il suo codice QR** e fotografa
+  l’invito sul suo schermo, o **Da una foto del suo codice QR**, o incolla il link nel campo lì e tocca **Aggiungi**.
+  Erevos prende un accesso tutto suo al suo relay e una coda lì, la aggiunge e dice **Benvenuto su {=Erevos}**. Il suo
+  primo messaggio lo dice al suo telefono, che aggiunge subito questo come contatto, con il nome che ha scritto.
+- **Gli altri modi per entrare:** in **Nuova chat**, **Per utenti esperti** apre gli altri, per chi li cerca: **Accedi
+  con LPHL** fa accedere questo telefono al relay di LPHL con un account LPHL, nel browser (vedi Accedere al relay più
+  sotto), e poi aggiungi i tuoi contatti con i loro inviti o link; **Inizia senza relay**, come in Senza nessun relay,
+  in Tramite Nostr; e le impostazioni del relay, come in 1–3 sopra. Un invito è il modo più semplice per entrare, e
+  sul relay un telefono invitato ha solo un nome di lettere e cifre a caso.
 - **Un altro relay:** sotto **Accedi con LPHL**, **Accedi a un altro relay…** prende l’indirizzo di un altro relay,
   come te l’ha dato chi lo gestisce, ad esempio relay.example.org: la scheda accede allora lì, col nome degli account
   che quel relay accetta, o dice che non offre l’accesso, e allora chi lo gestisce può darti un invito. **Torna a**
   riporta quello di LPHL.
-- **Cosa deve permettere il tuo relay:** l’accesso tutto suo è un invito al tuo relay (vedi Inviti al relay più sotto),
-  quindi arriva solo da un telefono con un token tutto suo su un relay che accetta inviti. Conta tra i tuoi inviti, con
-  un nome di lettere e cifre a caso, e resta anche quando il tuo se ne va. Un telefono con l’unico token condiviso del
-  relay lo scambia prima con uno tutto suo (vedi Modi per entrare nel relay sopra); dove il relay non lo fa, non crea
-  nessun invito: prima accedi al relay (sotto il **Token**, in **Per utenti esperti**), o prendi un invito per il relay.
-  Quando il tuo relay non accetta inviti, l’invito vi rende comunque contatti, e il suo telefono usa il tuo relay solo
-  come glielo permette il tuo link di contatto, come in Nessun relay tuo più sotto.
+- **Cosa deve permettere il tuo relay:** l’accesso tutto suo è un invito al tuo relay (vedi Inviti al relay più
+  sotto), quindi arriva solo da un telefono con un token tutto suo su un relay che accetta inviti. Conta tra i tuoi
+  inviti, con un nome di lettere e cifre a caso, e resta anche quando il tuo se ne va. Un telefono con l’unico token
+  condiviso del relay lo scambia prima con uno tutto suo (vedi Modi per entrare nel relay sopra); dove il relay non lo
+  fa, non crea nessun invito: prima accedi al relay (sotto il **Token**, in **Per utenti esperti**), o prendi un
+  invito per il relay. Quando il tuo relay non accetta inviti, l’invito vi rende comunque contatti, e il suo telefono
+  usa il tuo relay solo come glielo permette il tuo link di contatto, come in Nessun relay tuo più sotto. Un invito
+  così si apre solo su un telefono che ha già Erevos.
 - **Un telefono che ha già un relay** tiene il suo: l’invito aggiunge solo te, e siete subito contatti lo stesso.
 - **Che cosa viene conservato:** il tuo telefono conserva il segreto di ogni invito e il nome per quella persona,
   sigillati nello spazio, finché non viene usato o finiscono i suoi 7 giorni, al massimo 20 insieme. Sul relay non c’è
@@ -678,15 +709,15 @@ tutto suo, senza scrivere nulla, e siete subito l’uno contatto dell’altro, s
 Un telefono senza relay chatta via internet lo stesso: aggiungendo il link di un contatto il cui relay presta posti,
 prende un posto lì, senza token.
 
-- **Come:** aggiungi il suo link come in 4 e 5, senza niente in **Relay**. Erevos dice che ora hai un posto sul suo
-  relay, prestato tramite il suo link, e da allora lo usa come se fosse suo: il tuo link lo nomina, così anche gli altri
-  ti raggiungono lì.
-- **Chi presta:** il tuo link porta un biglietto per un posto sul tuo relay solo quando attivi **Condividi un posto sul
-  mio relay con questo link**, in **Il tuo link di contatto** in **Nuova chat**, e solo per il link mostrato in quel
-  momento: la prossima volta che si apre la chat, è di nuovo disattivato. Il relay ha bisogno di una chiave per l’invio
-  in due passaggi, e presta solo dopo che chi lo gestisce attiva il prestito; può anche ritirare i posti di un
-  biglietto. Un biglietto dura 30 giorni e dà fino a quattro posti. Chiunque veda un link con un biglietto può prendere
-  un posto con esso, quindi dai un link del genere solo a chi intendi darlo.
+- **Come:** aggiungi il suo link come in 6, senza niente in **Relay**. Erevos dice che ora hai un posto sul suo relay,
+  prestato tramite il suo link, e da allora lo usa come se fosse suo: il tuo link lo nomina, così anche gli altri ti
+  raggiungono lì.
+- **Chi presta:** il tuo link porta un biglietto per un posto sul tuo relay solo quando attivi **Condividi un posto
+  sul mio relay con questo link**, in **Il mio link** in **Nuova chat**, e solo per il link mostrato in quel momento:
+  la prossima volta che si apre la chat, è di nuovo disattivato. Il relay ha bisogno di una chiave per l’invio in due
+  passaggi, e presta solo dopo che chi lo gestisce attiva il prestito; può anche ritirare i posti di un biglietto. Un
+  biglietto dura 30 giorni e dà fino a quattro posti. Chiunque veda un link con un biglietto può prendere un posto con
+  esso, quindi dai un link del genere solo a chi intendi darlo.
 - **Che cosa non fa un posto prestato:** i messaggi ai contatti su altri relay vanno direttamente al loro relay, che
   allora vede l’indirizzo del tuo telefono. Non conserva niente per dopo (un messaggio inviato più tardi aspetta sul
   telefono), non dà un relay per le chiamate (le chiamate vanno direttamente tra i telefoni), e crea al massimo altre 4
@@ -710,13 +741,13 @@ con un token tutto di quel telefono, così nessun token viene scritto o passato 
   per chi è e tocca **Crea l’invito**. Si apre un codice QR: fallo scansionare al suo telefono con la fotocamera e
   aprire il link in Erevos, oppure tocca **Condividi l’invito** e mandaglielo. Vale per un telefono per 7 giorni, e chi
   lo prende per primo lo ha, quindi mostralo solo a quella persona.
-- **Per prenderne uno:** il link apre **Invito a un relay**, con l’indirizzo del relay: tocca **Usa questo relay** solo
-  se è arrivato da qualcuno che conosci. In Erevos, anche **Scansiona il suo** e **Da una foto del suo codice QR** in
-  Nuova chat leggono un invito, e il suo link si può incollare nel campo in cima. Erevos crea un token per
-  questo telefono, lo conserva con l’indirizzo del relay solo in questo spazio e crea lì la tua coda. Se il telefono usa
-  un altro relay, prima chiede, e i contatti conoscono la tua nuova coda dal tuo prossimo messaggio. Erevos accetta un
-  invito a un relay wss://, o a uno ws:// solo su una rete di casa (come \`ws://192.168.1.10:7879\`). Le chat nascoste
-  non accettano inviti.
+- **Per prenderne uno:** il link apre **Invito a un relay**, con l’indirizzo del relay: tocca **Usa questo relay**
+  solo se è arrivato da qualcuno che conosci. In Erevos, anche **Ho il suo codice** in **Nuova chat** accetta un
+  invito: con **Scansiona il suo codice QR**, **Da una foto del suo codice QR**, o il suo link incollato nel campo lì.
+  Erevos crea un token per questo telefono, lo conserva con l’indirizzo del relay solo in questo spazio e crea lì la
+  tua coda. Se il telefono usa un altro relay, prima chiede, e i contatti conoscono la tua nuova coda dal tuo prossimo
+  messaggio. Erevos accetta un invito a un relay wss://, o a uno ws:// solo su una rete di casa (come
+  \`ws://192.168.1.10:7879\`). Le chat nascoste non accettano inviti.
 - **I tuoi inviti:** elencati sotto il pulsante, in attesa o in uso. **Ritira** ritira uno ancora in attesa, o esclude
   subito il telefono che l’ha preso, solo quello: i telefoni che ha invitato a loro volta tengono il loro.
 - **Il loro resta:** un telefono che hai invitato tiene la sua riga sul relay anche quando la tua se ne va, perché il
@@ -1047,10 +1078,10 @@ un indirizzo push per tutte le code dei tuoi contatti (vedi [Su iPhone](#iphone)
   stesso modo e lo dice, al massimo una volta al giorno. Quando la spazzatura riempie la coda che nomina il tuo link di
   contatto, ricevi invece un nuovo link. Anche un’ondata di richieste di messaggio inventate conta come spazzatura,
   mentre un gruppo di richieste vere arriva comunque.
-- **Nuovo link di contatto**, accanto a **Condividi il mio link di contatto**, ti dà un nuovo link: i link e i codici
-  QR che hai dato prima funzionano per altri 14 giorni, poi non più. I tuoi contatti non ne risentono. Se il relay
-  perde la coda che nomina il tuo link, ricevi un nuovo link allo stesso modo, ma quelli che hai dato prima smettono
-  subito di funzionare.
+- **Nuovo link di contatto**, in **Il mio link** in **Nuova chat**, ti dà un nuovo link: i link e i codici QR che hai
+  dato prima funzionano per altri 14 giorni, poi non più. I tuoi contatti non ne risentono. Se il relay perde la coda
+  che nomina il tuo link, ricevi un nuovo link allo stesso modo, ma quelli che hai dato prima smettono subito di
+  funzionare.
 - **Link per un sito web**, accanto, nelle chat dello spazio, ti dà un link da mettere su una pagina web, come la tua
   pagina dei contatti, con il nome che scegli. Apre una pagina che offre {=Erevos} a chi non ce l’ha ancora, su Android, un
   iPhone o un computer, e poi ti aggiunge. Chiunque lo veda può scriverti, quindi ciò che invia arriva come richiesta di
@@ -1487,7 +1518,8 @@ computer non ce l’hanno.
   chiave sul telefono. Allora gli spazi con **Anche mentre è aperto un altro spazio** dicono già «New message», o
   quanti ne sono arrivati, mai quale spazio, né chi o cosa, e una notifica silenziosa dice «Locked». Le chiamate non
   squillano, e nient’altro arriva, finché non apri uno spazio; gli spazi che passano da Tor non dicono nulla fino ad
-  allora. Se non c’è nessuno spazio così, o con **Nessun avviso**, si ferma subito. Solo su Android.
+  allora. Se non c’è nessuno spazio così, o con **Nessun avviso**, solo una notifica silenziosa dice che è bloccato, e
+  toccarla apre Erevos. Solo su Android.
 
   **Perché:** dopo un riavvio Erevos non poteva dirti che dei messaggi aspettano finché non ti capitava di aprirlo.
   Senza la tua password non può comunque leggerli, quindi non dice più di quanto dice uno spazio chiuso.
@@ -1950,9 +1982,10 @@ Senza alcun relay).
 Un telefono senza relay, senza invito e senza account LPHL può comunque iniziare: il suo link di contatto e il suo
 codice QR dicono dove legge su Nostr, e basta questo per parlare.
 
-- **Per iniziare:** in **Nuova chat**, tocca **Inizia senza relay**, poi **Mostra il mio codice QR** o **Condividi il
-  mio link di contatto**, e dallo a qualcuno che usa {=Erevos}. Chi lo aggiunge ti scrive tramite Nostr, e appare
-  come richiesta di messaggio, che accetti. Puoi anche aggiungere il suo link o codice QR, allo stesso modo.
+- **Per iniziare:** in **Nuova chat**, in **Per utenti esperti**, tocca **Inizia senza relay**, poi **Mostra il mio
+  codice QR** o **Condividi il mio link di contatto**, e dallo a qualcuno che usa {=Erevos}. Chi lo aggiunge ti scrive
+  tramite Nostr, e appare come richiesta di messaggio, che accetti. Puoi anche aggiungere il suo link o codice QR,
+  allo stesso modo.
 - **Che cosa passa:** testi, sticker, reazioni, modifiche, e i segni che un messaggio è arrivato o è stato letto, tutto tramite Nostr; e foto, file e messaggi vocali. Un messaggio vocale passa in wrap come un testo. Una foto fino a 3 MB passa in pezzi da 32 KB, un wrap ciascuno, inviati prima del messaggio che la offre; l’altro telefono li tiene, cifrati con il resto dello spazio o delle chat nascoste per cui sono arrivati, finché non sono arrivati tutti, quattro giorni al massimo. Una foto più grande, un video o qualsiasi altro file, fino a 20 MB, passa come un unico blob, cifrato sul telefono, verso un server di file Blossom (blossom.primal.net, blossom.band o nostr.download), tramite Tor come dice la scelta Tor dello spazio (direttamente con **Niente**): il server tiene solo ciò che non può leggere. Chiamate e gruppi hanno bisogno di un relay, o dell’altro telefono vicino. Anche le chat nascoste funzionano così, solo tramite Nostr (vedi [Chat nascoste](#hidden)).
 - **Quando non arriva:** i relay Nostr conservano un testo per due giorni. Finché il telefono del tuo contatto non dice
   che è arrivato, Erevos glielo ridà una volta al giorno, per due settimane.
@@ -1982,8 +2015,9 @@ mostra quello che scrivi. Chi si collega al tuo telefono lo vede, a meno che la 
 - **I relay Nostr pubblici e i server di file Nostr:** lo vedono, a meno che la connessione passi da Tor. Attiva
   **Nostr tramite Tor** in **Impostazioni** → **Relay e reti** → **Nostr**, oppure **Tramite Tor** per una chat. Vedi
   [Tramite Nostr](#nostr).
-- **Abbinarsi con un codice:** i due telefoni si incontrano su quegli stessi relay Nostr pubblici, quindi senza Nostr
-  tramite Tor vedono l’indirizzo, ma non il codice né i link di contatto. Erevos lo dice prima della prima volta.
+- **Un codice di 8 cifre**, in **Accanto a me** e **Ho il suo codice**: i due telefoni si incontrano su quegli stessi
+  relay Nostr pubblici, quindi senza Nostr tramite Tor vedono l’indirizzo, ma non il codice né i link di contatto.
+  Erevos lo dice prima della prima volta.
 
 - [+] **Matrix:** la vede solo il tuo server Matrix, non i server dei tuoi contatti: foto e file da altri server ti
   arrivano anch’essi tramite il tuo. Scegli **Tor per questo account Matrix** nella schermata Matrix, o attiva
@@ -2029,7 +2063,9 @@ mostra quello che scrivi. Chi si collega al tuo telefono lo vede, a meno che la 
 
 Erevos avvisa una volta prima di ciascuno di questi casi, con il titolo **Il tuo indirizzo internet può essere
 visto**, un pulsante **Guida** che apre questa sezione e, dove può, un pulsante che lo risolve, come **Tramite Tor per
-questa chat**. **Vai avanti** prosegue; per una chat viene detto una volta e non di nuovo per quella chat.
+questa chat**. **Vai avanti** prosegue. Per ciò che invii, viene detto una volta per tutta la rete, non in ogni chat:
+dopo, una chat o un gruppo che va senza Tor mostra solo una riga discreta sopra dove scrivi, **Senza Tor: i relay
+vedono il tuo indirizzo internet.**, con **Tramite Tor per questa chat** e **Guida** accanto.
 
 Dopo la guida torna la stessa domanda, e quello che stavi inviando, come un messaggio vocale o un file, la aspetta.
 Una chiamata che squilla qui lo dice sotto la chiamata, e rispondere va avanti. Le chat nascoste tengono ciò che è
@@ -2170,6 +2206,9 @@ sta nel mezzo.
   Erevos stesso, finché questo spazio è aperto; su un computer, finché Erevos è in funzione. Su Android, **Notifiche**,
   in fondo a una chat, la silenzia o le dà un suono suo; una chat silenziata non conta. **Aspetto della chat**, accanto,
   dà alla chat un aspetto suo.
+- **Opzioni della chat:** il pulsante a cursori accanto a dove scrivi, o **⋯** in alto, le apre tutte in un elenco
+  ordinato, a portata per quanto lunga sia la chat: **Notifiche**, **Aspetto della chat**, il PIN, gli screenshot e i
+  messaggi che scompaiono in **Questa chat**, poi ricerca, media, un giorno ed esportazione in **Trova**.
 - **Mentre questo spazio è chiuso:** su Android, **Avvisa dei nuovi messaggi**, in **Mentre questo spazio è chiuso**
   nella schermata di Matrix, lascia che questo spazio dica «New message» quando arriva qualcosa su Matrix mentre è
   aperto un altro spazio, come fanno le sue chat con **Anche mentre è aperto un altro spazio** in **Impostazioni** →
@@ -2387,6 +2426,9 @@ app: nessun ponte sta nel mezzo.
   Erevos stesso, finché questo spazio è aperto; su un computer, finché Erevos è in funzione. Su Android, **Notifiche**,
   in fondo a una chat, la silenzia o le dà un suono suo; una chat silenziata non conta. **Aspetto della chat**, accanto,
   dà alla chat un aspetto suo.
+- **Opzioni della chat:** il pulsante a cursori accanto a dove scrivi, o **⋯** in alto, le apre tutte in un elenco
+  ordinato, a portata per quanto lunga sia la chat: **Notifiche**, **Aspetto della chat**, il PIN, gli screenshot e i
+  messaggi che scompaiono in **Questa chat**, poi ricerca, media, un giorno ed esportazione in **Trova**.
 - **Mentre questo spazio è chiuso:** su Android, **Avvisa dei nuovi messaggi**, in **Mentre questo spazio è chiuso**
   nella schermata di XMPP, lascia che questo spazio dica «New message» quando arriva qualcosa su XMPP mentre è aperto un
   altro spazio, come fanno le sue chat con **Anche mentre è aperto un altro spazio** in **Impostazioni** →
@@ -2582,6 +2624,9 @@ privati come chiede NIP-17. Non è [Tramite Nostr](#nostr), che porta le chat pr
   Erevos stesso, finché questo spazio è aperto; su un computer, finché Erevos è in funzione. Su Android, **Notifiche**,
   in fondo a una chat, la silenzia o le dà un suono suo; una chat silenziata non conta. **Aspetto della chat**, accanto,
   dà alla chat un aspetto suo.
+- **Opzioni della chat:** il pulsante a cursori accanto a dove scrivi, o **⋯** in alto, le apre tutte in un elenco
+  ordinato, a portata per quanto lunga sia la chat: **Notifiche**, **Aspetto della chat**, il PIN, gli screenshot e i
+  messaggi che scompaiono in **Questa chat**, poi ricerca, media, un giorno ed esportazione in **Trova**.
 - **Non ancora:** file che un’altra app cifra in un altro modo (appaiono come un file che Erevos non apre).
 
 **Perché:** tante persone sono su Nostr e ci resteranno. Così scrivi loro da Erevos, a parte e segnato, perché una
@@ -2865,6 +2910,9 @@ la scegli tu.
 - **Il proprio di una conversazione:** sotto la riga **SMS normale**, una conversazione ha **Aspetto della chat**,
   come una chat, e, con un solo numero, **Notifiche**: silenziala per un po’ o sempre, o dalle un suono suo, o
   nessuno. Valgono mentre lo spazio è aperto; chiuso, ogni SMS avvisa come dicono le impostazioni.
+- **Opzioni della chat:** il pulsante a cursori accanto a dove scrivi, o **⋯** in alto, le apre tutte in un elenco
+  ordinato, a portata per quanto lunga sia la chat: **Notifiche**, **Aspetto della chat**, il PIN, gli screenshot e i
+  messaggi che scompaiono in **Questa chat**, poi ricerca, media, un giorno ed esportazione in **Trova**.
 - **Cestino:** una conversazione eliminata aspetta nel **Cestino** 30 giorni, poi Erevos la elimina dagli SMS del
   telefono. Fino ad allora **Recupera** la rimette nell’elenco; **Elimina ora** e **Svuota il cestino** eliminano
   subito, per sempre. Un SMS che arriva dopo che è finita nel Cestino la fa riapparire nell’elenco. Solo l’app per gli
@@ -3004,7 +3052,13 @@ telefono piccolo mostra solo quel titolo, e toccarlo apre le **Impostazioni** de
 - **Chiamata rapida:** a tastierino vuoto, tieni premuto un tasto da 2 a 9 per chiamarne il numero. Un tasto senza
   numero ti fa sceglierne uno: scrivi un nome o un numero e tocca il contatto, oppure **Usa** il numero scritto. In
   **Telefono** → **Impostazioni**, **Chiamata rapida** mostra gli otto tasti; toccane uno per cambiarlo o svuotarlo.
-  La chiamata rapida è conservata cifrata nello spazio e funziona con Erevos sbloccato.
+  La chiamata rapida è conservata cifrata nello spazio e funziona con Erevos sbloccato. Finché il Telefono si apre
+  senza password, **Chiamata rapida anche con Erevos bloccato** (spento all’inizio) la fa funzionare anche lì: una
+  copia dei numeri, senza i nomi, resta allora sul telefono fuori dallo spazio, e chi tiene il telefono sbloccato può
+  chiamarli. Uno spazio alla volta. Può mostrare che lo spazio esiste: chi vede un altro tuo spazio trova che i tasti
+  chiamano numeri che non sono di quello spazio. La copia viene cancellata quando il Telefono torna dietro la
+  password, quando si ripristina un backup, quando si disattiva il blocco e quando una seconda password viene rimossa
+  o impostata di nuovo con un altro spazio aperto; riattivala allora.
 - **Impostazioni chiamate:** in **Telefono** → **Impostazioni**, **Impostazioni chiamate** apre le schermate di
   Android stesso per ciò che il tuo operatore tiene delle chiamate di ogni SIM: **Inoltro, avviso e il tuo numero**
   e **Numero di segreteria**; con due SIM, tocca prima la SIM. In **Chiedi al tuo operatore**, ogni pulsante compone
@@ -3289,7 +3343,8 @@ anche così. È disattivato finché non lo attivi.
 - **Come è conservata:** la chiave del primo spazio è sigillata da una chiave nell’hardware sicuro del telefono
   (l’Android Keystore) che funziona solo subito dopo un controllo forte dell’impronta o del volto, una volta per ogni
   uso. Aggiungere o rimuovere un’impronta o un volto fa scartare ad Android quella chiave: allora è disattivata, e la
-  riattivi. Niente lascia il telefono.
+  riattivi. Anche una chiave che smette di funzionare in altro modo porta alla disattivazione, dopo tre tentativi di
+  fila in cui non si è potuta usare. Niente lascia il telefono.
 - **Quale volto:** un volto conta solo dove Android considera forte il suo sblocco con il volto, come sul Pixel 8 e
   successivi; altrove vale l’impronta.
 - **Le password sbagliate** vengono contate come prima: un’impronta non cambia il conteggio.
@@ -4078,6 +4133,11 @@ perché il testo si legga sempre bene, anche sul vetro.
   quello che la sua icona nomina, anche quando Erevos mostrava un’altra di esse. Il colore è del telefono, non di ogni
   spazio, perché le icone appaiono prima che Erevos sia sbloccato. Dopo una modifica alcuni launcher tolgono l’icona
   dalla schermata Home: aggiungila di nuovo dall’elenco delle app.
+- [~] **Fotocamera** (Android, sotto **Icone del launcher**): la fotocamera di Erevos con un tocco. **Metti la Fotocamera
+  tra le app del telefono** aggiunge un’icona tutta sua (arancione all’inizio, nel colore che vuoi), e tenendo premuta
+  l’icona di Erevos compare anche **Fotocamera**, che si può trascinare nella schermata Home. Entrambe aprono la
+  fotocamera della Raccolta, dietro la password di Erevos e quella della Raccolta, e ciò che scatta va dritto nella
+  Raccolta. Nessuna delle due si vede finché la Raccolta è spenta in **Moduli** o la calcolatrice sta al posto di Erevos.
 - **Punti e numeri sulle icone** (Android): Android dà il punto o il numero di una notifica all’app, non a una delle
   sue icone, quindi nella maggior parte dei launcher, come quelli dei Pixel e di GrapheneOS, quello di Samsung, quello
   di Xiaomi e Kvaesitso, ogni notifica di Erevos (un messaggio, {~un SMS, |}una chiamata, un compleanno) appare uguale

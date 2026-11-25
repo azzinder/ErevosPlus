@@ -113,6 +113,7 @@ its files.
 ## Honest limits
 
 - **Not audited.** The cryptography follows published designs, but no independent expert has checked the code.
+  An [AI-assisted review](#ai-assisted-security-review-november-2026) is not a substitute for one.
 - **The other networks see what they always see.** A Telegram, Messenger, Signal, Session, Matrix or XMPP chat is
   as private in Erevos+ as that network makes it, no more. Erevos+ is not made or approved by any of them.
 - **Not everything has been tried on real phones.** The newest features among them; the changelog and the guide say
@@ -139,6 +140,20 @@ library, with this project's own API id; a build of your own needs an API id of 
 reached the way their own web and desktop apps are, with code from mautrix-meta and presage. A network may not allow
 other apps, and may limit or close an account it finds using one: use them knowing that. Your Erevos contacts are not
 affected by any of this.
+
+## AI-assisted security review (November 2026)
+
+In November 2026 the code was reviewed for security with the help of an AI model (ChatGPT), using
+these workflows: VIDOC Security Review (code review and validation of suspected findings),
+Security Advisory Scout (dependency advisories from OSV and NVD, with FIRST EPSS and CISA KEV), and
+Authorized Security Review. It was a static review, with some tests run. **It is not an audit or a
+certification:** no person outside the project checked the code. The workflows ran only on the
+source we supplied; the VIDOC one does not connect to Vidoc's platform or scanning service.
+
+Every finding was checked against the code before anything changed. Of the 18 that held as problems
+(three more were choices made on purpose), 13 are fixed and one more is reduced, in Erevos
+3.0.0-beta.2 and 3.0.0-rc.1, with tests for the code changes. The rest, and what the review did
+not cover, are listed in [docs/ai-review-2026-11.md](docs/ai-review-2026-11.md).
 
 ## Build it
 

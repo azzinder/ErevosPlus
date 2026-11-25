@@ -32,9 +32,11 @@ import {
   storedRules,
   TELEMARKETING,
 } from '../lib/phone-rules';
+import { lockedSpeedDials, phoneOpensLocked, setLockedSpeedDials, setPhoneOpensLocked } from '../lib/phone-open';
 import { accountLabel, callAccount, PhoneSims } from '../lib/phone-sims';
 import type { LoggedCall, PhoneAccount } from '../modules/erevos-phone';
 import { files } from './files-memory';
+import { store } from './secure-memory';
 import { ROOT } from './words';
 
 test('what is typed or pasted keeps only what can be called', () => {
@@ -116,6 +118,83 @@ test('the SIM chosen for a number is kept, sealed in the space, whichever way th
   assert.ok(![...files.values()].some((v) => v.includes('6911111111') || v.includes('2101234567')));
   assert.equal((await PhoneSims.open(0, randomBytes(32))).accountFor('6911111111'), '');
   assert.equal((await PhoneSims.open(1, key)).accountFor('6911111111'), '');
+});
+
+test("speed dial with Erevos locked calls one space's numbers from a copy without their names, another space taking its place", async () => {
+  files.clear();
+  store.clear();
+  await setPhoneOpensLocked(true);
+  const [keyA, keyB] = [randomBytes(32), randomBytes(32)];
+  const a = await PhoneSims.open(0, keyA);
+  await a.setSpeed('2', '+30 691 111 1111', 'Anna');
+  assert.equal(await a.feedsLocked(), false);
+  assert.equal(await lockedSpeedDials(), null);
+  await a.setFeedsLocked(true);
+  assert.equal(await a.feedsLocked(), true);
+  assert.deepEqual((await lockedSpeedDials())?.keys, [{ key: '2', number: '+306911111111' }]);
+  assert.ok(!store.get('erevos.phone-speed')!.includes('Anna'));
+  // It follows the space's keys as they change, and the space finds it again when it next opens.
+  await (await PhoneSims.open(0, keyA)).setSpeed('3', '2101234567', '');
+  assert.deepEqual((await lockedSpeedDials())?.keys.map((k) => k.key), ['2', '3']);
+
+  // Another space's numbers stay its own until it asks; then they take the first one's place.
+  const b = await PhoneSims.open(1, keyB);
+  await b.setSpeed('5', '6922222222', 'Vera');
+  assert.equal(await b.feedsLocked(), false);
+  assert.deepEqual((await lockedSpeedDials())?.keys.map((k) => k.key), ['2', '3']);
+  await b.setFeedsLocked(true);
+  assert.deepEqual((await lockedSpeedDials())?.keys, [{ key: '5', number: '6922222222' }]);
+  assert.equal(await (await PhoneSims.open(0, keyA)).feedsLocked(), false);
+  // The space that lost its place changes nothing of the copy, by a key or by turning its own off.
+  await (await PhoneSims.open(0, keyA)).setSpeed('4', '6933333333', '');
+  await (await PhoneSims.open(0, keyA)).setFeedsLocked(false);
+  assert.deepEqual((await lockedSpeedDials())?.keys, [{ key: '5', number: '6922222222' }]);
+  await (await PhoneSims.open(1, keyB)).setFeedsLocked(false);
+  assert.equal(store.has('erevos.phone-speed'), false);
+});
+
+test('the copy of speed dial numbers is there only while the Phone opens without the password', async () => {
+  files.clear();
+  store.clear();
+  await setPhoneOpensLocked(true);
+  const key = randomBytes(32);
+  const sims = await PhoneSims.open(0, key);
+  await sims.setSpeed('2', '6911111111', '');
+  await sims.setFeedsLocked(true);
+  assert.ok(store.has('erevos.phone-speed'));
+
+  // Back behind the password: the copy goes with it, whichever space kept it, and that space sees so.
+  await setPhoneOpensLocked(false);
+  assert.equal(await phoneOpensLocked(), false);
+  assert.equal(store.has('erevos.phone-speed'), false);
+  assert.equal(await (await PhoneSims.open(0, key)).feedsLocked(), false);
+  // None is written meanwhile: not by a key that changes, not by asking for it, not from outside a space.
+  await (await PhoneSims.open(0, key)).setSpeed('3', '6922222222', '');
+  assert.equal(store.has('erevos.phone-speed'), false);
+  const asked = await PhoneSims.open(0, key);
+  await asked.setFeedsLocked(true);
+  assert.equal(await asked.feedsLocked(), false);
+  await setLockedSpeedDials({ feed: 'ab', keys: [{ key: '2', number: '6911111111' }] });
+  assert.equal(store.has('erevos.phone-speed'), false);
+  // Opening without the password again brings no copy back by itself: the space is asked again.
+  await setPhoneOpensLocked(true);
+  assert.equal(await lockedSpeedDials(), null);
+  await (await PhoneSims.open(0, key)).setFeedsLocked(true);
+  assert.deepEqual((await lockedSpeedDials())?.keys.map((k) => k.key), ['2', '3']);
+});
+
+test('the screens offer speed dial with Erevos locked only while the Phone opens without the password, and a second password set anew drops the copy first', () => {
+  // The option, under Phone → Settings.
+  const settings = readFileSync(join(ROOT, 'app', 'phone-settings.tsx'), 'utf8');
+  assert.ok(settings.includes("{passwordLock && opensLocked ? (\n        <>\n          <Text variant=\"bodyStrong\">{t('Speed dial with Erevos locked')}</Text>"));
+  assert.ok(settings.includes('<SpeedDials opensLocked={opensLocked === true} />'));
+  // Setting a second password replaces the one before, whose space may be the one that kept the copy.
+  const security = readFileSync(join(ROOT, 'app', 'security.tsx'), 'utf8');
+  const from = security.indexOf("} else if (editing === 'second') {");
+  const to = security.indexOf('await setLockPassword(next, password, nextKey);', from);
+  assert.ok(from > 0 && to > from);
+  assert.ok(security.slice(from, to).includes('await dropOthersLockedSpeed(space, key);'));
+  assert.ok(security.includes('await removeSecondPassword(space, currentSpace().key);'));
 });
 
 let nextId = 1;

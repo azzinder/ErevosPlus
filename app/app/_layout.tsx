@@ -16,8 +16,9 @@ import { ScreenBackdrop, useBackdropSpec } from '../components/backdrop';
 import { KeyboardProvider } from '../components/keyboard';
 import { SwipeBack } from '../components/swipe-back';
 import { Button, Text } from '../components/ui';
-import { startBackground } from '../lib/background';
+import { startBackground, syncBootStart } from '../lib/background';
 import { CHECK_MS as BACKUP_CHECK_MS, checkAutoBackup, runAutoBackup } from '../lib/backup-folder';
+import { forgetBackupMaking } from '../lib/backup-making';
 import { currentCall } from '../lib/call';
 import { endCall, onCallChange } from '../lib/calls';
 import { forgetOffered } from '../lib/contact-code';
@@ -266,6 +267,7 @@ export default function RootLayout() {
     // Password slots from before Argon2id get it now, while the password screen shows (after a
     // backup is restored too); whatever changes the lock waits for it.
     void hardenLock().catch(() => undefined);
+    void syncBootStart().catch(() => undefined);
     await loadLang();
     // Moved to another edition (lib/edition-move.ts): nothing opens here, so that nothing comes in
     // that it does not get; a move not taken within a day goes, and Erevos opens as before.
@@ -1072,6 +1074,7 @@ function closeSpace(): void {
   forgetOpenedQueues();
   forgetWelcome();
   forgetTextInvite();
+  forgetBackupMaking();
   leaveTor();
   setNostr(null);
   setRelayStopped(false);

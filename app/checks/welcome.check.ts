@@ -9,6 +9,8 @@
 // Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { contactLink, parseContact } from '../lib/contact-code';
@@ -93,4 +95,20 @@ test('an invite goes to the chat of the space it was opened in, and to no other'
   forgetWelcome();
   onWelcomeOffered(2, (w) => got.push([2, w]))();
   assert.equal(got.length, 2);
+});
+
+// New chat's first page asks where the other person is; someone setting Erevos up with an invite in
+// hand is past that question. The card's own words are what I have their code takes: its QR code
+// scanned, its link pasted.
+test("First steps' I have an invite opens the page that takes one, not the question before it", () => {
+  const read = (name: string) => readFileSync(join(import.meta.dirname, '..', 'app', name), 'utf8');
+  const steps = read('first-steps.tsx');
+  const card = steps.slice(steps.indexOf("{t('I have an invite')}"), steps.indexOf("{t('Other ways in')}"));
+  assert.ok(card.includes("t('Scan its QR code, or open or paste the link they sent you.')"));
+  assert.ok(card.includes("router.push('/chat?setup=code')"));
+  // The chat opens on that page for it, and Back there leaves New chat as it came.
+  const chat = read('chat.tsx');
+  assert.ok(chat.includes("codeNow={setup === 'code'}"));
+  assert.ok(chat.includes("inviteNow ? 'far' : codeNow ? 'code' : 'root'"));
+  assert.ok(chat.includes('useRef(relaySettings || nearbyOpen || inviteNow || codeNow)'));
 });

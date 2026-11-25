@@ -73,6 +73,24 @@ export function MoreIcon({ color, size = 20, upright = false }: Props & { uprigh
   );
 }
 
+/** Two sliders: a chat's options, beside the field (#44). */
+export function OptionsIcon({ color, size = 22 }: Props) {
+  const bar = Math.max(2, Math.round(size / 11));
+  const knob = Math.max(6, Math.round(size / 3.2));
+  const line = (top: number, at: number) => (
+    <View style={{ position: 'absolute', top, left: 0, right: 0, height: knob, justifyContent: 'center' }}>
+      <View style={{ height: bar, borderRadius: bar, backgroundColor: color }} />
+      <View style={{ position: 'absolute', left: at, width: knob, height: knob, borderRadius: knob, backgroundColor: color }} />
+    </View>
+  );
+  return (
+    <View style={{ width: size, height: size }}>
+      {line(size * 0.12, size * 0.55)}
+      {line(size * 0.58, size * 0.12)}
+    </View>
+  );
+}
+
 /** A clock face: for chats whose messages disappear. */
 export function TimerIcon({ color, size = 14 }: Props) {
   const line = Math.max(1.2, size / 10);
