@@ -974,6 +974,8 @@ export default function Backups() {
         const phoneSms = await phoneSmsForBackup();
         const phoneCalls = await phoneCallsForBackup();
         const native = await phoneSettingsForBackup();
+        // Erevos+: Session's account and Signal's history, kept sealed for it now, as into a folder.
+        const networks = await keepNetworksForBackup();
         const skip = await openCollectionSkips();
         const out = await openCollectionsLeftOut();
         made.making({ step: t("Encrypting and sending…"), percent: null });
@@ -1022,6 +1024,7 @@ export default function Backups() {
                 }),
             timesText(start, end, false),
             (smsText(phoneSms) + callsText(phoneCalls)).trim(),
+            networksText(networks).trim(),
             notInText(out),
             t("Keep its password: nothing opens the backup without it."),
           ]
