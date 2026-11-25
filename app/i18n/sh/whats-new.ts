@@ -158,4 +158,6 @@ export const whatsNew: Record<string, string> = {
     "**Signal nalazi vaše kontakte**: u Erevos+, **Novi razgovor** na Signalu nudi dok kucate kontakte s telefona koji odgovaraju, a otkucani broj kao **Novi broj**. Signal se pita samo za onaj koji dodirnete. Vidi [Signal](#signal).",
   "**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below.":
     "**Kandidat za izdanje 2**: Erevos+ sa svim što je donio Erevos 3.0.0-rc.2, i onim što slijedi.",
+  "**Messenger's old chats no longer come back unread**: in Erevos+, after the phone restarted, Erevos+ showed old Messenger, Signal or Session chats as not read again, each with one message, although nothing new had come. Only a message that really comes now, or one that came while Erevos+ was closed, makes a chat unread. See [Messenger](#messenger).":
+    "**Stari Messenger razgovori se više ne vraćaju kao nepročitani**: u Erevos+, nakon ponovnog pokretanja telefona, Erevos+ je opet prikazivao stare razgovore iz Messengera, Signala ili Sessiona kao nepročitane, svaki s jednom porukom, iako ništa novo nije stiglo. Razgovor postaje nepročitan samo porukom koja zaista stiže sada, ili koja je stigla dok je Erevos+ bio zatvoren. Vidi [Messenger](#messenger).",
 };
