@@ -510,7 +510,7 @@ object Session {
         var wasOk = false
         while (running && gen == generation) {
             try {
-                pollOnce()
+                pollOnce(gen)
                 if (!wasOk) emit(JSONObject().put("type", "status").put("network", "session").put("status", "συνδέθηκε"))
                 wasOk = true
                 // Often while the app is on screen; less often behind, for battery and data.
@@ -531,7 +531,8 @@ object Session {
         }
     }
 
-    private fun pollOnce() {
+    /** One round of polling, of generation [gen]: what comes back after a stop (stopPolling) is not taken. */
+    private fun pollOnce(gen: Int) {
         val acc = me()
         do {
             val ts = net.now()
@@ -541,6 +542,7 @@ object Session {
             val from = synchronized(lock) { lastHash }
             if (from.isNotEmpty()) p.put("last_hash", from)
             val r = net.toSwarm(acc.id, "retrieve", p)
+            if (gen != generation) return
             val list = r.optJSONArray("messages") ?: JSONArray()
             for (i in 0 until list.length()) {
                 val m = list.getJSONObject(i)
@@ -552,7 +554,8 @@ object Session {
                 synchronized(lock) { lastHash = hash }
             }
             if (list.length() > 0) save()
-        } while (r.optBoolean("more") && running)
+        } while (r.optBoolean("more") && running && gen == generation)
+        if (gen != generation) return
         pollGroups()
     }
 

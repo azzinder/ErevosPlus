@@ -6,8 +6,6 @@
 export const settings: Record<string, string> = {
   "Session's account is not in this backup: {error}":
     "Le compte Session n’est pas dans cette sauvegarde : {error}",
-  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
-    "Le compte Session y est tel que le premier espace l’a gardé la dernière fois : faites la sauvegarde avec le premier espace ouvert pour qu’il y entre tel qu’il est maintenant.",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
     "Ce téléphone a un autre compte Session, donc celui de la sauvegarde n’a pas pris sa place. Pour récupérer celui de la sauvegarde, déconnectez-vous de Session ici et restaurez de nouveau la sauvegarde.",
   "Session's account could not go back: {error}":

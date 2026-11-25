@@ -82,7 +82,8 @@ async function readOwn(): Promise<void> {
     ownKey = key;
     tellSessionMuted();
     changed();
-    void restoredSession(key);
+    // Before Session starts (startMessenger), so its engine starts once, with the account restored.
+    await restoredSession(key);
   } catch {
     // No space open, or none that opens it: no chat has notifications of its own.
   }
@@ -528,6 +529,8 @@ async function restoredSession(key: Uint8Array): Promise<void> {
       );
       return;
     }
+    // Running before (its engine stopped for the restore): started again; otherwise as Session's module starts.
+    const wasOn = started.has('session');
     set('session', emptyMsgState());
     cameSince.session.clear();
     readTo.session.clear();
@@ -535,7 +538,7 @@ async function restoredSession(key: Uint8Array): Promise<void> {
     started.delete('session');
     startedAt.delete('session');
     hearNow('session');
-    await msgSignedIn('session');
+    if (wasOn) await startOne('session');
   } catch {
     // Tried again as the first space next opens, while the mark stays.
   } finally {

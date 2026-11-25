@@ -6,8 +6,6 @@
 export const settings: Record<string, string> = {
   "Session's account is not in this backup: {error}":
     "Ο λογαριασμός Session δεν είναι σε αυτό το αντίγραφο: {error}",
-  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
-    "Ο λογαριασμός Session είναι μέσα όπως τον κράτησε τελευταία φορά ο πρώτος χώρος: κάνε το αντίγραφο με ανοιχτό τον πρώτο χώρο για να μπει όπως είναι τώρα.",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
     "Αυτό το κινητό έχει άλλον λογαριασμό Session, γι' αυτό ο λογαριασμός του αντιγράφου δεν μπήκε στη θέση του. Για να επιστρέψει του αντιγράφου, αποσυνδέσου από το Session εδώ και κάνε ξανά την επαναφορά.",
   "Session's account could not go back: {error}":

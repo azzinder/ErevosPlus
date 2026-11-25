@@ -6,8 +6,6 @@
 export const settings: Record<string, string> = {
   "Session's account is not in this backup: {error}":
     "Session nalog nije u ovoj kopiji: {error}",
-  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
-    "Session nalog je unutra onakav kakvim ga je prvi prostor zadnji put sačuvao: napravi kopiju s otvorenim prvim prostorom da uđe kakav je sada.",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
     "Ovaj telefon ima drugi Session nalog, pa nalog iz kopije nije stavljen na njegovo mjesto. Da vratiš onaj iz kopije, odjavi se iz Sessiona ovdje i ponovo vrati kopiju.",
   "Session's account could not go back: {error}":

@@ -764,9 +764,7 @@ export default function Backups() {
     const session =
       kept.kind === "failed"
         ? ` ${t("Session's account is not in this backup: {error}", { error: kept.error })}`
-        : kept.kind === "earlier"
-          ? ` ${t("Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.")}`
-          : "";
+        : "";
     return ` ${t(NETWORKS_LEFT)}${session}`;
   }
 

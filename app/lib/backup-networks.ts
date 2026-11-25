@@ -6,14 +6,15 @@ import { currentSpace } from '../lock/keys';
 import { saveNetworksBackup } from '../lock/networks-backup-data';
 import { lastRestore } from '../lock/restored';
 
-import { msgCall, msgEnginesHere, messengerNow } from './messenger-store';
-import { secureSet } from './secure';
+import { msgCall, msgEnginesHere } from './messenger-store';
+import { secureGet, secureSet } from './secure';
 
 // Erevos+'s other networks in backups (#67): Session's account, as its engine keeps it (seed,
 // names, chats with their messages, groups with their keys: Session.kt backupState), kept sealed
 // with the first space's key among the sealed files every backup holds (lock/networks-backup-data.ts),
 // never in the clear and never in another space's reach. Before each backup, while the first space
-// is open, it is kept anew; from another space the backup holds it as the first space last kept it.
+// is open, it is kept anew; from another space the backup holds it as the first space last kept it, and says
+// nothing of it there.
 // Reading it never stops a backup: what went wrong is said with the backup instead. After a restore
 // from Backups, it goes back to the engine once the first space opens (lib/messenger-store.ts
 // restoredSession), only where there is no Session account or the same one. Its media files stay
@@ -23,7 +24,7 @@ import { secureSet } from './secure';
 export { checkedNetworks, type Networks } from './backup-networks-data';
 
 /** How Session's account went into a backup about to be made. */
-export type NetworksKept = { kind: 'none' } | { kind: 'in' } | { kind: 'earlier' } | { kind: 'failed'; error: string };
+export type NetworksKept = { kind: 'none' } | { kind: 'in' } | { kind: 'failed'; error: string };
 
 // The engine's answer when there is no Session in this build: nothing to keep, not an error.
 const NOT_HERE = /not available|not here/;
@@ -37,7 +38,11 @@ export async function keepNetworksForBackup(now = Date.now()): Promise<NetworksK
   } catch {
     open = null;
   }
-  if (!open || open.space !== 0) return messengerNow('session').signedIn ? { kind: 'earlier' } : { kind: 'none' };
+  // From another space nothing is said of Session at all: that space does not know of it.
+  if (!open || open.space !== 0) return { kind: 'none' };
+  // A restore whose account waits for the first space (restoredSession): what is kept stays as the
+  // backup brought it until it went back, or a backup made meanwhile would lose it.
+  if (await secureGet(RESTORE_PENDING)) return { kind: 'none' };
   try {
     const state = await msgCall<string | null>('session', 'backupState');
     const session = typeof state === 'string' ? state : '';
