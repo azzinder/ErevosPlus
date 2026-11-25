@@ -21,3 +21,16 @@ export function checkedNetworks(value: unknown): Networks | null {
   return { session: v.session };
 }
 
+
+/** Signal's history as its engine makes it (messenger/signal/src/history.rs: chats and messages,
+ *  no keys), checked: null for anything else, or one that holds no message. */
+export function checkedSignalHistory(value: unknown): string | null {
+  if (typeof value !== 'string' || !value) return null;
+  try {
+    const h = JSON.parse(value) as { v?: unknown; chats?: unknown; messages?: unknown };
+    if (typeof h?.v !== 'number' || !Array.isArray(h.chats) || !Array.isArray(h.messages) || h.messages.length === 0) return null;
+  } catch {
+    return null;
+  }
+  return value;
+}

@@ -499,7 +499,8 @@ let restoring = false;
  * After a restore from Backups, once the first space opens: Session's account the backup held
  * (lock/networks-backup-data.ts) goes back to the engine, sealed anew with this phone's Keystore,
  * and Session starts again with it. Only where there is no Session account, or the same one:
- * another account here is never replaced, and that is said. Once, for that restore.
+ * another account here is never replaced, and that is said. Signal's history it held (#68) is
+ * added to what Signal's engine keeps, on its own. Once, for that restore.
  */
 async function restoredSession(key: Uint8Array): Promise<void> {
   if (restoring || !native) return;
@@ -511,38 +512,56 @@ async function restoredSession(key: Uint8Array): Promise<void> {
       await secureDelete(RESTORE_PENDING);
       return;
     }
-    const { session } = await loadNetworksBackup(key);
+    const { session, signal } = await loadNetworksBackup(key);
     await secureDelete(RESTORE_PENDING);
-    if (!session) return;
-    try {
-      await msgCall('session', 'restoreState', { state: session });
-    } catch (error) {
-      const said = error instanceof Error ? error.message : String(error);
-      // Loaded here, not with this file: it needs the app around it.
-      const { ask } = await import('./alert');
-      ask(
-        SERVICE_NAMES.session,
-        said === 'other-account'
-          ? t("This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.")
-          : t("Session's account could not go back: {error}", { error: said }),
-        [{ text: t('OK') }],
-      );
-      return;
-    }
-    // Running before (its engine stopped for the restore): started again; otherwise as Session's module starts.
-    const wasOn = started.has('session');
-    set('session', emptyMsgState());
-    cameSince.session.clear();
-    readTo.session.clear();
-    countedTo.session.clear();
-    started.delete('session');
-    startedAt.delete('session');
-    hearNow('session');
-    if (wasOn) await startOne('session');
+    if (session) await putSession(session);
+    if (signal) await putSignalHistory(signal);
   } catch {
     // Tried again as the first space next opens, while the mark stays.
   } finally {
     restoring = false;
+  }
+}
+
+// What a restore could not put back, said once (loaded here, not with this file: it needs the app around it).
+async function sayNotBack(service: MsgService, text: string): Promise<void> {
+  const { ask } = await import('./alert');
+  ask(SERVICE_NAMES[service], text, [{ text: t('OK') }]);
+}
+
+async function putSession(session: string): Promise<void> {
+  try {
+    await msgCall('session', 'restoreState', { state: session });
+  } catch (error) {
+    const said = error instanceof Error ? error.message : String(error);
+    await sayNotBack(
+      'session',
+      said === 'other-account'
+        ? t("This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.")
+        : t("Session's account could not go back: {error}", { error: said }),
+    );
+    return;
+  }
+  // Running before (its engine stopped for the restore): started again; otherwise as Session's module starts.
+  const wasOn = started.has('session');
+  set('session', emptyMsgState());
+  cameSince.session.clear();
+  readTo.session.clear();
+  countedTo.session.clear();
+  started.delete('session');
+  startedAt.delete('session');
+  hearNow('session');
+  if (wasOn) await startOne('session');
+}
+
+// Signal's history: added to what the engine keeps, never in place of it; its chats show as the
+// engine reads them (messenger/signal/src/engine.rs historyImport, and its chat list as it starts).
+async function putSignalHistory(history: string): Promise<void> {
+  try {
+    await msgCall('signal', 'historyImport', { history });
+  } catch (error) {
+    const said = error instanceof Error ? error.message : String(error);
+    await sayNotBack('signal', t("Signal's history could not go back: {error}", { error: said }));
   }
 }
 

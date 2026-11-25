@@ -159,9 +159,9 @@ type Asking =
 
 // A backup file larger than this is not one Erevos made: every space's chats are far smaller. One
 // from a server comes up to 100 MB only (CLOUD_RESTORE_MOST), as any download (lib/net-http.ts).
-// What Erevos+ says of the networks a backup leaves out (#67): each keeps its own, and how they come back.
+// What Erevos+ says of the networks in a backup (#67, #68): what goes in, what does not, and how they come back.
 const NETWORKS_LEFT = mark(
-  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.",
 );
 const MAX_BYTES = 200 * 1024 * 1024;
 
@@ -765,7 +765,11 @@ export default function Backups() {
       kept.kind === "failed"
         ? ` ${t("Session's account is not in this backup: {error}", { error: kept.error })}`
         : "";
-    return ` ${t(NETWORKS_LEFT)}${session}`;
+    // Signal's history, where it could not be read: the backup is made without it, and says so (#68).
+    const signal = kept.signalFailed
+      ? ` ${t("Signal's history is NOT in this backup: {error}", { error: kept.signalFailed })}`
+      : "";
+    return ` ${t(NETWORKS_LEFT)}${session}${signal}`;
   }
 
   function smsText(sms: Uint8Array | null): string {

@@ -18,9 +18,9 @@ and 0.1.15 never came out.
   end-to-end encrypted (a secret Telegram chat, Signal, Session) (`components/composer.tsx`, `app/telegram-chat.tsx`,
   `components/msg-chat.tsx`). Requested by the maintainer.
 - Erevos+: a backup says what it holds of the other networks (#67). **Backups**, the message after a backup and the
-  guide say that Session's account and chats are in it, and that Telegram, Signal and Messenger are not, with what each
-  needs after a restore: sign in again to Telegram and Messenger, register or link Signal again (`app/backup.tsx`).
-  Requested by the maintainer.
+  guide say that Session's account and chats are in it, and Signal's history but not its link to the account, and that
+  Telegram and Messenger are not, with what each needs after a restore: sign in again to Telegram and Messenger,
+  register or link Signal again (`app/backup.tsx`). Requested by the maintainer.
 - Erevos+: Session's account and chats go into backups. The engine gives its whole account as it keeps it (seed,
   names, chats with up to 1000 messages each, groups with their keys: `backupState` in `Session.kt`), kept before each
   backup, while the first space is open, in a sealed file of the first space's (`lock/networks-backup-data.ts`) that
@@ -31,6 +31,15 @@ and 0.1.15 never came out.
   (`restoreState`). Session's polling now stops and is waited for before it starts again. Its media files stay out,
   and Telegram, Signal's account and Messenger too (`lib/backup-networks.ts`, `lib/messenger-store.ts`). Requested by
   the maintainer.
+- Erevos+: Signal's history goes into backups, without its keys (#68). Signal's engine gives its chats and messages
+  as it reads them from its store, with edits and deletions applied (`historyExport`,
+  `messenger/signal/src/history.rs`), kept before each backup beside Session's account in the first space's sealed
+  file (`lock/networks-backup-data.ts`), so the backup's integrity check covers it. Nothing of the registration goes
+  in: no identity key, no sessions, no safety numbers, and for now no photos or files. Reading it never stops a
+  backup: the backup then says Signal's history is not in it, and why. After a restore from Backups, once the first
+  space opens, it is added to what the engine keeps (`historyImport`), checked: only chats and messages of the shape
+  the engine makes. Once Signal is registered or linked again, the old messages show in their chats beside the new
+  ones, to read only. Signing out of Signal deletes it with the rest. Requested by the maintainer.
 - Erevos+: a Signal search that could not ask Signal says why (#69), as «Signal was not searched: …», and no longer
   that the number is not on Signal. Looking a number or a username up on Signal's servers failed in silence and gave
   no one found (`search_people` in `messenger/signal/src/engine.rs`, `components/msg-account.tsx`). The list as you

@@ -38,8 +38,31 @@ test("only Session goes in: what another network might say is not read", () => {
 
 test("what the first space keeps for backups: Session's account as it was, or none", async () => {
   const { checkedNetworksBackup } = await import('../lock/networks-backup-data');
-  assert.deepEqual(checkedNetworksBackup({ session: state, at: 5 }), { session: state, at: 5 });
-  assert.deepEqual(checkedNetworksBackup({ session: 'not json', at: 5 }), { session: '', at: 5 });
-  assert.deepEqual(checkedNetworksBackup({ session: state, at: -1 }), { session: state, at: 0 });
-  assert.deepEqual(checkedNetworksBackup(null), { session: '', at: 0 });
+  assert.deepEqual(checkedNetworksBackup({ session: state, at: 5 }), { session: state, signal: '', at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: 'not json', at: 5 }), { session: '', signal: '', at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: state, at: -1 }), { session: state, signal: '', at: 0 });
+  assert.deepEqual(checkedNetworksBackup(null), { session: '', signal: '', at: 0 });
+});
+
+// Signal's history (#68): chats and messages as its engine makes them, nothing else.
+const history = JSON.stringify({ v: 1, chats: [{ key: 7, name: 'Ada', group: false, person: '' }], messages: [{ id: 'sg:1:a', thread: 7, ms: 1, text: 'hi' }] });
+
+test("Signal's history is kept beside Session's account, each on its own", async () => {
+  const { checkedNetworksBackup } = await import('../lock/networks-backup-data');
+  assert.deepEqual(checkedNetworksBackup({ session: state, signal: history, at: 5 }), { session: state, signal: history, at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: 'not json', signal: history, at: 5 }), { session: '', signal: history, at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: state, signal: 'not json', at: 5 }), { session: state, signal: '', at: 5 });
+});
+
+test("a Signal history not as its engine makes it is left out", async () => {
+  const { checkedSignalHistory } = await import('../lib/backup-networks-data');
+  assert.equal(checkedSignalHistory(history), history);
+  assert.equal(checkedSignalHistory(''), null);
+  assert.equal(checkedSignalHistory(42), null);
+  assert.equal(checkedSignalHistory({ v: 1 }), null);
+  assert.equal(checkedSignalHistory('not json'), null);
+  assert.equal(checkedSignalHistory(JSON.stringify({ v: 1, chats: [] })), null);
+  assert.equal(checkedSignalHistory(JSON.stringify({ chats: [], messages: [{}] })), null);
+  // One with no messages holds nothing.
+  assert.equal(checkedSignalHistory(JSON.stringify({ v: 1, chats: [], messages: [] })), null);
 });
