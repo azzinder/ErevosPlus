@@ -36,6 +36,13 @@ test('by name, without accents or case, one row per number', () => {
 test('by number, written any way', () => {
   assert.deepEqual(contactMatches(cards, '6943334444'), [{ name: 'Ada Lovelace', number: '6943334444' }]);
   assert.deepEqual(contactMatches(cards, '+30 694 111 2222'), [{ name: 'Ελένη Παπαδοπούλου', number: '+30 694 111 2222' }]);
+  // From three digits, as they are typed.
+  assert.deepEqual(contactMatches(cards, '694'), [
+    { name: 'Ελένη Παπαδοπούλου', number: '+30 694 111 2222' },
+    { name: 'Ada Lovelace', number: '6943334444' },
+  ]);
+  assert.deepEqual(contactMatches(cards, '694 333'), [{ name: 'Ada Lovelace', number: '6943334444' }]);
+  assert.deepEqual(contactMatches(cards, '69'), []);
   // Numbers too short to call are not offered.
   assert.deepEqual(contactMatches(cards, 'Short'), []);
 });

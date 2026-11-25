@@ -32,7 +32,8 @@ export function typedNumber(query: string): string | null {
 export function contactMatches(cards: readonly { name: string; phones: readonly { value: string }[] }[], query: string, max = 8): ContactNumber[] {
   const q = folded(query.trim());
   const digits = digitsOf(query);
-  const byNumber = digits.length >= 3 && typedNumber(query) !== null;
+  // Only digits (with +, spaces, dashes, brackets, dots or slashes): a number, matched from three digits.
+  const byNumber = digits.length >= 3 && /^\+?[\d\s\-()./]+$/.test(query.trim());
   if (!byNumber && q.length < 2) return [];
   const out: ContactNumber[] = [];
   const seen = new Set<string>();
