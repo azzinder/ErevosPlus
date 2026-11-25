@@ -8,6 +8,30 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
+## 3.1.0-rc.2 (2026-11-25)
+
+The second release candidate of Erevos+: Erevos 3.0.0-rc.2 with every network, with what is below.
+
+### For you
+
+- Everything Erevos 3.0.0-rc.2 brought (below), in Erevos+: New chat that asks where the other person is, chat
+  options beside where you write, the camera at a tap, speed dial with Erevos+ locked, the warning without Tor said
+  once for a network, **Start when the phone turns on** with a notice, and backup progress that stays in sight.
+- Chat options in reach in Erevos+'s own networks too (#54): Telegram, Signal, Messenger and Session chats get the
+  same sliders button beside where you write. On Signal, Messenger and Session it opens the chat's **Notifications**
+  and **Through Tor** under **This chat**; on Telegram, **Notifications** and **Chat info** under **This chat**, and
+  **Search** and **Go to a day** under **Find** (`components/msg-chat.tsx`, `app/telegram-chat.tsx`). In Nostr,
+  Matrix and XMPP chats, **Through Tor** stays in the same list. Requested by the maintainer.
+- Erevos+: Messenger's chats read stay read (`messenger/core`: `inboxFolder`, only Meta's inbox, or no folder, can be unread, so a message request, an archived chat or the old open half of a chat moved to encryption, whose read mark stays where it was when it moved, never is; `markAllRead` keeps a floor, `allRead` in `read.json`, so the older chats Meta sends a few at a time later come read too, also after a restart; `lib/read-all.ts` asks for it whenever Messenger chats are read with the others). With Messenger in its case, its card in Services opens the case and leaves home on the part it showed (`app/index.tsx`). Requested by the maintainer.
+- Erevos+: Signal's **New chat** finds the phone's contacts (#39). As you type, the contacts that match by name or
+  number show, and a typed number shows as **New number**; Signal is asked only about the one you tap, never the
+  whole address book (`lib/signal-new-chat.ts`, `components/msg-account.tsx`). Requested by the maintainer.
+
+### Under the hood
+
+- Erevos's main merged in, with Erevos 3.0.0-rc.2 and Erevos Lite 3.2.0-rc.2. The words of New chat that speak of the
+  other person's app keep «Erevos» in Erevos+ (`lib/edition-keeps.ts`), and **Find** is one word for every chat.
+
 ## 3.2.0-rc.2 (2026-11-25)
 
 The second release candidate of Erevos Lite: Erevos 3.0.0-rc.2 for Erevos's own chats and calls, with what is below.
@@ -107,11 +131,6 @@ The second release candidate of Erevos Lite: Erevos 3.0.0-rc.2 for Erevos's own 
   `takeBackShortInvite`), and a message pasted whole, the invite's words with its link, is read as the link alone
   (`lib/open-link.ts`).
 
-- Erevos+: Messenger's chats read stay read (`messenger/core`: `inboxFolder`, only Meta's inbox, or no folder, can be unread, so a message request, an archived chat or the old open half of a chat moved to encryption, whose read mark stays where it was when it moved, never is; `markAllRead` keeps a floor, `allRead` in `read.json`, so the older chats Meta sends a few at a time later come read too, also after a restart; `lib/read-all.ts` asks for it whenever Messenger chats are read with the others). With Messenger in its case, its card in Services opens the case and leaves home on the part it showed (`app/index.tsx`). Requested by the maintainer.
-
-- Erevos+: Signal's **New chat** finds the phone's contacts (#39). As you type, the contacts that match by name or
-  number show, and a typed number shows as **New number**; Signal is asked only about the one you tap, never the
-  whole address book (`lib/signal-new-chat.ts`, `components/msg-account.tsx`). Requested by the maintainer.
 
 ## 3.1.0-rc.1 (2026-11-23)
 

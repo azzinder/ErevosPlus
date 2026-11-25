@@ -22,15 +22,21 @@ export type Changes = { forYou: string[]; underTheHood: string[] };
 export type WhatsNew = Changes & { version: string };
 
 export const NEXT: Changes = {
-  forYou: [
-    mark("**Messenger's chats stay read**: in Erevos+, a Messenger chat you read no longer comes back unread after a while, and Mark all as read also covers the older chats Meta sends later. Only chats in Meta's inbox count as not read, as on Meta's own page: message requests and archived chats do not. With Messenger in its case, its card opens the case and home stays as you left it. See [Messenger](#messenger)."),
-    mark("**Chat options in reach**: in Erevos+'s Telegram, Signal, Messenger and Session chats too, a sliders button beside where you write opens the chat's options in one tidy list, as in Erevos's own. See [Telegram](#telegram)."),
-    mark("**Signal finds your contacts**: in Erevos+, **New chat** on Signal offers the phone's contacts that match as you type, and a typed number as **New number**. Signal is asked only about the one you tap. See [Signal](#signal)."),
-  ],
+  forYou: [],
   underTheHood: [],
 };
 
 export const VERSIONS: WhatsNew[] = [
+  {
+    version: '3.1.0-rc.2',
+    forYou: [
+      mark("**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below."),
+      mark("**Messenger's chats stay read**: in Erevos+, a Messenger chat you read no longer comes back unread after a while, and Mark all as read also covers the older chats Meta sends later. Only chats in Meta's inbox count as not read, as on Meta's own page: message requests and archived chats do not. With Messenger in its case, its card opens the case and home stays as you left it. See [Messenger](#messenger)."),
+      mark("**Chat options in reach**: in Erevos+'s Telegram, Signal, Messenger and Session chats too, a sliders button beside where you write opens the chat's options in one tidy list, as in Erevos's own. See [Telegram](#telegram)."),
+      mark("**Signal finds your contacts**: in Erevos+, **New chat** on Signal offers the phone's contacts that match as you type, and a typed number as **New number**. Signal is asked only about the one you tap. See [Signal](#signal)."),
+    ],
+    underTheHood: [],
+  },
   {
     version: '3.2.0-rc.2',
     forYou: [

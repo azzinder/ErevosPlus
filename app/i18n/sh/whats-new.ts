@@ -150,4 +150,6 @@ export const whatsNew: Record<string, string> = {
     "**Opcije razgovora pri ruci**: i u razgovorima Telegrama, Signala, Messengera i Sessiona u Erevos+, dugme s klizačima pored mjesta gdje pišete otvara opcije razgovora u jednoj urednoj listi, kao u Erevosovim. Vidi [Telegram](#telegram).",
   "**Signal finds your contacts**: in Erevos+, **New chat** on Signal offers the phone's contacts that match as you type, and a typed number as **New number**. Signal is asked only about the one you tap. See [Signal](#signal).":
     "**Signal nalazi vaše kontakte**: u Erevos+, **Novi razgovor** na Signalu nudi dok kucate kontakte s telefona koji odgovaraju, a otkucani broj kao **Novi broj**. Signal se pita samo za onaj koji dodirnete. Vidi [Signal](#signal).",
+  "**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below.":
+    "**Kandidat za izdanje 2**: Erevos+ sa svim što je donio Erevos 3.0.0-rc.2, i onim što slijedi.",
 };

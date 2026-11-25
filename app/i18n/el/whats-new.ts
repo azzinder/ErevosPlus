@@ -150,4 +150,6 @@ export const whatsNew: Record<string, string> = {
     "**Επιλογές συνομιλίας πάντα κοντά**: και στις συνομιλίες Telegram, Signal, Messenger και Session του Erevos+, ένα κουμπί με ρυθμιστές δίπλα στο πεδίο γραφής ανοίγει τις επιλογές της συνομιλίας σε μία τακτοποιημένη λίστα, όπως στις δικές του Erevos. Δες [Telegram](#telegram).",
   "**Signal finds your contacts**: in Erevos+, **New chat** on Signal offers the phone's contacts that match as you type, and a typed number as **New number**. Signal is asked only about the one you tap. See [Signal](#signal).":
     "**Το Signal βρίσκει τις επαφές σου**: στο Erevos+, η **Νέα συνομιλία** του Signal προτείνει όσο γράφεις τις επαφές του τηλεφώνου που ταιριάζουν, και έναν αριθμό που γράφεις ως **Νέος αριθμός**. Το Signal ρωτιέται μόνο για όποια πατήσεις. Δες [Signal](#signal).",
+  "**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below.":
+    "**Υποψήφια έκδοση 2**: το Erevos+ με ό,τι έφερε το Erevos 3.0.0-rc.2, και όσα ακολουθούν.",
 };

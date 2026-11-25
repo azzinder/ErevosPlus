@@ -150,4 +150,6 @@ export const whatsNew: Record<string, string> = {
     "**Options de la discussion à portée**: dans les discussions Telegram, Signal, Messenger et Session d'Erevos+ aussi, un bouton à curseurs à côté de là où tu écris ouvre les options de la discussion dans une liste bien rangée, comme dans celles d'Erevos. Voir [Telegram](#telegram).",
   "**Signal finds your contacts**: in Erevos+, **New chat** on Signal offers the phone's contacts that match as you type, and a typed number as **New number**. Signal is asked only about the one you tap. See [Signal](#signal).":
     "**Signal trouve tes contacts**: dans Erevos+, **Nouvelle discussion** sur Signal propose pendant que tu tapes les contacts du téléphone qui correspondent, et un numéro tapé comme **Nouveau numéro**. Signal n'est interrogé que sur celui que tu touches. Voir [Signal](#signal).",
+  "**Release candidate 2**: Erevos+ with everything Erevos 3.0.0-rc.2 brought, and what is below.":
+    "**Version candidate 2** : Erevos+ avec tout ce qu’Erevos 3.0.0-rc.2 a apporté, et ce qui suit.",
 };
