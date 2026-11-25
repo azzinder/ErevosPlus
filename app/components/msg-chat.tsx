@@ -22,6 +22,7 @@ import { usePhotoQuality } from './network-carry';
 import { XmppStickerSheet } from './xmpp-stickers';
 import { Button, Input, OptionList, Row, Sheet, Text } from './ui';
 import { ComposerPanel, IconButton } from './composer';
+import { beforePanel, usePanelBack } from './panel-close';
 import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from './icons';
 import { PhoneSign, ShortcutTile, VideoSign } from './shortcut-tile';
 import { ask, confirm } from '../lib/alert';
@@ -111,6 +112,7 @@ function MsgChat({ service }: { service: MsgService }) {
   // «+»: a file, or a sticker (the sheet below).
   const [more, setMore] = useState(false);
   const [adding, setAdding] = useState(false);
+  usePanelBack(adding, () => setAdding(false));
   const [stickering, setStickering] = useState(false);
   const stickerPlace = useMemo<StickerPlace | null>(() => {
     try {
@@ -211,6 +213,7 @@ function MsgChat({ service }: { service: MsgService }) {
   // A photo from the phone's photos or its camera, in the quality chosen for photos (as in the other chats).
   // "+" opens and closes the panel under the field; open, the end of the chat comes into view.
   function openAdding(open: boolean) {
+    if (open) beforePanel();
     setAdding(open);
     if (open) setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 50);
   }
@@ -382,6 +385,7 @@ function MsgChat({ service }: { service: MsgService }) {
         {adding && !voice.recording ? (
           <ComposerPanel
             encrypted={chat?.encrypted ?? service !== 'messenger'}
+            quality={{ value: photos.quality, onChange: photos.choose }}
             tiles={[
               { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto('photos') },
               ...(CAN_TAKE_PHOTOS ? [{ key: 'camera', title: t('Camera'), icon: 'camera' as const, onPress: () => void sendPhoto('camera') }] : []),

@@ -4,6 +4,7 @@
 
 // The words of Telegram (app/telegram.tsx, app/telegram-chat.tsx) in Portuguese (i18n/pt/index.ts).
 export const telegramText: Record<string, string> = {
+  "Write the message first, then choose when it goes.": "Escreve primeiro a mensagem e depois escolhe quando sai.",
   "Telegram": "Telegram",
   "Chats with people on Telegram: Telegram can read them, unless both use ErevosGram encryption": "Conversas com pessoas no Telegram: o Telegram pode lê-las, a menos que ambos usem a cifragem ErevosGram",
   "Your Telegram chats, through Telegram. Telegram can read them, unless both of you use ErevosGram encryption. Not made by Telegram.": "As tuas conversas do Telegram, através do Telegram. O Telegram pode lê-las, a menos que ambos usem a cifragem ErevosGram. Não é feito pelo Telegram.",

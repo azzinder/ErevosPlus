@@ -25,6 +25,7 @@ import { hiddenOnScreen, useNetworkChatShown } from '../components/network-chat-
 import { MicButton, RecordingLine } from '../components/matrix-voice';
 import { useNetworkThread } from '../components/network-thread';
 import { ComposerPanel, IconButton } from '../components/composer';
+import { beforePanel, usePanelBack } from '../components/panel-close';
 import { CloseIcon, OptionsIcon, PhoneIcon, PlusIcon, SearchIcon, VideoIcon } from '../components/icons';
 import { NetworkChatNotify } from '../components/network-chat-notify';
 import { SelectBar } from '../components/select-bar';
@@ -221,6 +222,7 @@ function TelegramChat() {
   const [editId, setEditId] = useState<number | null>(null);
   editing.current = editId !== null;
   const [attach, setAttach] = useState(false);
+  usePanelBack(attach, () => setAttach(false));
   const [more, setMore] = useState(false);
   const [forwardIds, setForwardIds] = useState<number[] | null>(null);
   const [selecting, setSelecting] = useState<number[] | null>(null);
@@ -541,6 +543,7 @@ function TelegramChat() {
   // The ErevosGram encryption covers only text, so with it on the owner is asked first.
   // "+" opens and closes the panel under the field; open, the end of the chat comes into view.
   function openAttach(open: boolean) {
+    if (open) beforePanel();
     setAttach(open);
     if (open) setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 50);
   }
@@ -1145,15 +1148,16 @@ function TelegramChat() {
               ...(chat.type !== 'private' && chat.type !== 'secret' ? [{ key: 'poll', title: t('Poll'), icon: 'poll' as const, onPress: () => attachThen(setPollForm) }] : []),
             ]}
             ways={
-              // As before, only once there is a message to send later.
-              !seal?.sealed && draft.trim()
+              !seal?.sealed
                 ? [
                     {
                       key: 'later',
                       title: t('Send later'),
-                      description: t('Goes at the time you choose'),
+                      // Always in view, so it is found; with nothing typed yet it says so (#59).
+                      description: draft.trim() ? t('Goes at the time you choose') : t('Write the message first, then choose when it goes.'),
                       icon: 'later',
                       onPress: () => {
+                        if (!draft.trim()) return;
                         setAttach(false);
                         setChoosingLater(true);
                       },
