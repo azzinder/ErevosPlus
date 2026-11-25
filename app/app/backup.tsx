@@ -95,6 +95,7 @@ import { takeHandedServer } from "../lib/backup-pieces";
 import { pickFile, TooLargeError } from "../lib/pick-file";
 import { SHELL } from "../lib/shell";
 import { EDITION } from "../lib/edition";
+import { sessionRestoreError } from "../lib/backup-networks";
 import { holdReceiver } from "../lib/receiver";
 import {
   backupKey,
@@ -156,7 +157,7 @@ type Asking =
 // from a server comes up to 100 MB only (CLOUD_RESTORE_MOST), as any download (lib/net-http.ts).
 // What Erevos+ says of the networks a backup leaves out (#67): each keeps its own, and how they come back.
 const NETWORKS_LEFT = mark(
-  "Telegram, Signal, Messenger and Session are not in a backup. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words. Their messages come back only as far as each network keeps them.",
+  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.",
 );
 const MAX_BYTES = 200 * 1024 * 1024;
 
@@ -1023,10 +1024,21 @@ export default function Backups() {
               { name: left[0] },
             )
           : "";
-        if (leftText || told || toldCalls)
+        // Erevos+: Session's account, where the backup held one that did not go back (lib/backup-networks.ts).
+        const sessionError = sessionRestoreError();
+        const sessionText = sessionError
+          ? t("Session's account could not go back: {error}", {
+              error: sessionError,
+            })
+          : "";
+        if (leftText || told || toldCalls || sessionText)
           ask(
-            leftText || toldCalls ? t("Restore a backup") : t("SMS"),
-            [leftText, told, toldCalls].filter(Boolean).join("\n\n"),
+            leftText || toldCalls || sessionText
+              ? t("Restore a backup")
+              : t("SMS"),
+            [leftText, told, toldCalls, sessionText]
+              .filter(Boolean)
+              .join("\n\n"),
             [{ text: t("OK") }],
           );
       }

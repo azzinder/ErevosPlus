@@ -2703,7 +2703,7 @@ Só no Erevos+, no Android, o Erevos pode ter uma conta do Session e conversar c
 - **Notificações e leitura:** como no Messenger e no Signal, com as **Notificações** próprias de cada conversa e um toque próprio para as chamadas.
 - **Opções da conversa:** como no Messenger, o botão de controles deslizantes ao lado de onde você escreve, ou **⋯** no topo.
 - **Pelo Tor:** **Tor para esta conta do Session** funciona como no Messenger e no Signal, **Desativado** por padrão. O encaminhamento em cebola do Session já esconde o teu endereço de internet de quem escreves; o primeiro nó do Session vê-o, a não ser que a conta vá pelo Tor.
-- **Terminar sessão:** **Terminar sessão no Session neste telemóvel** pergunta primeiro, porque sem as tuas 13 palavras de recuperação a conta não pode voltar. As cópias de segurança não guardam a conta: depois de restaurar, recupera-a com as suas palavras.
+- **Terminar sessão:** **Terminar sessão no Session neste telemóvel** pergunta primeiro, porque sem as tuas 13 palavras de recuperação a conta não pode voltar. As cópias de segurança do Erevos+ guardam a conta e as suas conversas, cifradas com a palavra-passe da cópia, e restaurar trá-las de volta; sem cópia, as suas palavras recuperam a conta.
 
 ## SMS {#sms}
 
@@ -3587,7 +3587,7 @@ cada, cujos nomes começam como o dele; um backup automático usa também os arq
 pasta toda. Fica em **Configurações** → **Dados e dispositivos** →
 **Backups**.
 
-[+] Telegram, Signal, Messenger e Session não estão numa cópia de segurança: as suas contas e conversas ficam em cada rede. Depois de restaurar, inicia sessão de novo no Telegram e no Messenger, regista ou liga o Signal de novo e recupera o Session com as suas 13 palavras de recuperação; as mensagens voltam só até onde cada rede as guarda. O que o Erevos guarda delas entra: as notificações de cada conversa, a escolha do Tor e as chaves da cifragem ErevosGram.
+[+] A conta e as conversas do Session entram numa cópia de segurança, cifradas com a sua palavra-passe, e restaurar trá-las de volta, cifradas de novo no telemóvel novo; as fotos e os ficheiros não, voltam do Session enquanto ele os guardar. Telegram, Signal e Messenger não estão numa cópia: as suas sessões são de cada telemóvel. Depois de restaurar, inicia sessão de novo no Telegram e no Messenger, e regista ou liga o Signal de novo; as mensagens voltam só até onde cada rede as guarda. O que o Erevos guarda delas entra: as notificações de cada conversa, a escolha do Tor e as chaves da cifragem ErevosGram.
 
 1. **Fazer um backup:** toque em **Fazer um backup**, escolha uma pasta (no celular, num cartão de memória, ou num app
    de nuvem que mostre as pastas dele ali; num computador, qualquer pasta), digite duas vezes uma senha para o backup

@@ -2895,7 +2895,7 @@ Nur in Erevos+, auf Android, kann Erevos ein Session-Konto halten und mit Mensch
 - **Benachrichtigungen und Lesen:** wie bei Messenger und Signal, mit den eigenen **Benachrichtigungen** jedes Chats und einem eigenen Klingelton für Anrufe.
 - **Chat-Optionen:** wie bei Messenger, die Regler-Taste neben dem Schreibfeld, oder **⋯** oben.
 - **Über Tor:** **Tor für dieses Session-Konto** funktioniert wie bei Messenger und Signal, standardmäßig **Aus**. Das Onion-Routing von Session hält deine Internetadresse schon vor den Menschen fern, denen du schreibst; der erste Session-Knoten sieht sie, außer das Konto geht über Tor.
-- **Abmelden:** **Auf diesem Telefon von Session abmelden** fragt zuerst, denn ohne deine 13 Wiederherstellungswörter kann das Konto nicht zurückkommen. Sicherungen behalten das Konto nicht: hole es nach einer Wiederherstellung mit seinen Wörtern zurück.
+- **Abmelden:** **Auf diesem Telefon von Session abmelden** fragt zuerst, denn ohne deine 13 Wiederherstellungswörter kann das Konto nicht zurückkommen. Die Sicherungen von Erevos+ behalten das Konto und seine Chats, verschlüsselt mit dem Passwort der Sicherung, und eine Wiederherstellung bringt sie zurück; ohne Sicherung holen seine Wörter das Konto zurück.
 
 ## SMS {#sms}
 
@@ -3833,7 +3833,7 @@ eigenen Passwort versiegelt, und das Backup wird noch einmal mit einem eigenen P
 und Sprachnachrichten kommen in eigene Dateien daneben, bis zu 4 MB jede, deren Namen wie der des Backups anfangen;
 ein automatisches Backup nutzt auch die Dateien der früheren: Halte den ganzen Ordner zusammen. Backups findest du unter **Einstellungen** → **Daten und Geräte** → **Backups**.
 
-[+] Telegram, Signal, Messenger und Session sind nicht in einer Sicherung: ihre Konten und Chats bleiben beim jeweiligen Netz. Nach dem Wiederherstellen meldest du dich bei Telegram und Messenger wieder an, registrierst oder verknüpfst Signal neu und holst Session mit seinen 13 Wiederherstellungswörtern zurück; ihre Nachrichten kommen nur so weit zurück, wie jedes Netz sie aufbewahrt. Was Erevos von ihnen hält, kommt mit: die Benachrichtigungen jedes Chats, die Tor-Wahl und die Schlüssel der ErevosGram-Verschlüsselung.
+[+] Das Konto und die Chats von Session kommen in eine Sicherung, verschlüsselt mit ihrem Passwort, und eine Wiederherstellung bringt sie zurück, auf dem neuen Telefon neu verschlüsselt; seine Fotos und Dateien nicht, sie kommen wieder von Session, solange es sie aufbewahrt. Telegram, Signal und Messenger sind nicht in einer Sicherung: ihre Anmeldungen gehören jedem Telefon selbst. Nach dem Wiederherstellen meldest du dich bei Telegram und Messenger wieder an und registrierst oder verknüpfst Signal neu; ihre Nachrichten kommen nur so weit zurück, wie jedes Netz sie aufbewahrt. Was Erevos von ihnen hält, kommt mit: die Benachrichtigungen jedes Chats, die Tor-Wahl und die Schlüssel der ErevosGram-Verschlüsselung.
 
 1. **Backup erstellen:** Tippe auf **Backup erstellen**, wähle einen Ordner (auf dem Telefon, einer Speicherkarte oder
    einer Cloud-App, die dort ihre Ordner zeigt; auf einem Computer jeden Ordner), gib zweimal ein Passwort für das

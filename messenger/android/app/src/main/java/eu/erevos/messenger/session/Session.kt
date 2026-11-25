@@ -200,6 +200,8 @@ object Session {
             "sessionId" -> me().id
             "start" -> start()
             "logout" -> { logout(); true }
+            "backupState" -> backupState()
+            "restoreState" -> { restoreState(a.optString("state")); true }
             "log" -> synchronized(log) { log.joinToString("\n") }
             "setProfile" -> { synchronized(lock) { myName = a.optString("given").trim() }; save(); true }
             "messages" -> messages(a.optLong("thread"))
@@ -375,8 +377,48 @@ object Session {
     }
 
     private fun saveNow() {
-        val text = synchronized(lock) {
-            val acc = account ?: return
+        val text = stateText() ?: return
+        runCatching {
+            dir.mkdirs()
+            val tmp = File(dir, "state.tmp")
+            tmp.writeBytes(seal(text.toByteArray()))
+            tmp.renameTo(stateFile)
+        }.onFailure { note("save: ${it.message}") }
+    }
+
+    // ---- backups (Erevos+'s lib/backup-networks.ts) ----
+
+    /**
+     * The whole account as it is kept, in the clear, for a backup that seals it with its own
+     * password: the seed, names, chats with their messages and the groups with their keys. Media
+     * files are not in it (they come again from Session while it keeps them). Null with no account.
+     */
+    private fun backupState(): String? {
+        open()
+        synchronized(lock) { saveTask?.cancel(false) }
+        return stateText()
+    }
+
+    /**
+     * Puts an account from a backup in place of this phone's, sealed with a new key of this phone's
+     * Keystore. It is read as open() reads it (a seed that does not make an account is refused
+     * before anything here is touched); the next open() starts it.
+     */
+    @Synchronized
+    private fun restoreState(text: String) {
+        val o = JSONObject(text)
+        SessionAccount(SessionNet.hex(o.getString("seed")))
+        logout()
+        dir.mkdirs()
+        val tmp = File(dir, "state.tmp")
+        tmp.writeBytes(seal(text.toByteArray()))
+        if (!tmp.renameTo(stateFile)) throw IllegalStateException("could not keep the Session account")
+    }
+
+    /** The state as saveNow() keeps it, in the clear; null with no account. */
+    private fun stateText(): String? {
+        return synchronized(lock) {
+            val acc = account ?: return null
             val o = JSONObject().put("seed", SessionNet.hexOf(acc.seed)).put("name", myName).put("lastHash", lastHash)
             o.put("seen", JSONArray(seen.toList().takeLast(KEEP_SEEN)))
             o.put("gone", JSONArray(gone.toList().takeLast(KEEP_SEEN)))
@@ -410,12 +452,6 @@ object Session {
             }
             o.put("chats", cs).put("groups", gs).toString()
         }
-        runCatching {
-            dir.mkdirs()
-            val tmp = File(dir, "state.tmp")
-            tmp.writeBytes(seal(text.toByteArray()))
-            tmp.renameTo(stateFile)
-        }.onFailure { note("save: ${it.message}") }
     }
 
     // ---- start and receiving ----

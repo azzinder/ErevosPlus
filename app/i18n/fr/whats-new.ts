@@ -4,8 +4,8 @@
 
 // The French of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/fr/index.ts).
 export const whatsNew: Record<string, string> = {
-  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
-    "**Ce qu’une sauvegarde laisse de côté** : dans Erevos+, **Sauvegardes** et le message après une sauvegarde disent que Telegram, Signal, Messenger et Session n’y sont pas, et ce qu’il faut à chacun après une restauration. Voir [Sauvegardes](#backup).",
+  "**Session in backups**: in Erevos+, a backup now holds Session's account and chats, sealed with its password, and a restore brings them back. **Backups** and the message after a backup say that Telegram, Signal and Messenger are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Session dans les sauvegardes** : dans Erevos+, une sauvegarde garde maintenant le compte et les conversations de Session, chiffrés avec son mot de passe, et une restauration les ramène. **Sauvegardes** et le message après une sauvegarde disent que Telegram, Signal et Messenger n’y sont pas, et ce qu’il faut à chacun après une restauration. Voir [Sauvegardes](#backup).",
   "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
     "**Un + pour chaque conversation** : dans les conversations Telegram, Signal, Messenger et Session d’Erevos+, **+** à côté de là où vous écrivez ouvre une grille d’icônes, comme dans les conversations d’Erevos, à la place des boutons gris. Voir [Telegram](#telegram).",
   "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":

@@ -2514,7 +2514,7 @@ Only in Erevos+, on Android, Erevos can hold a Session account and chat with peo
 - **Notifications and reading:** as for Messenger and Signal, with each chat's own **Notifications** and a ringtone of its own for calls.
 - **Chat options:** as for Messenger, the sliders button beside where you write, or **⋯** at the top.
 - **Through Tor:** **Tor for this Session account** works as for Messenger and Signal, **Off** by default. Session's onion routing already keeps your internet address from the people you write to; the first Session node sees it unless the account goes through Tor.
-- **Signing out:** **Sign out of Session on this phone** asks first, because without your 13 recovery words the account cannot come back. Backups do not keep the account: after a restore, bring it back with its words.
+- **Signing out:** **Sign out of Session on this phone** asks first, because without your 13 recovery words the account cannot come back. Erevos+'s backups keep the account and its chats, sealed with the backup's password, and a restore brings them back; without a backup, its words bring the account back.
 
 ## SMS {#sms}
 
@@ -3327,7 +3327,7 @@ each space stays sealed with its own password, and the backup is sealed again wi
 files and voice messages go in files of their own beside it, up to 4 MB each, whose names start as the backup's; an
 automatic backup uses the files of the ones before it too: keep the whole folder together. It is under **Settings** → **Data and devices** → **Backups**.
 
-[+] Telegram, Signal, Messenger and Session are not in a backup: their accounts and chats stay with each network. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words; their messages come back only as far as each network keeps them. What Erevos keeps of them goes in: each chat's notifications, the Tor choices, and the keys of the ErevosGram encryption.
+[+] Session's account and chats go into a backup, sealed with its password, and a restore brings them back, sealed again on the new phone; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: their sign-ins are each phone's own. After a restore, sign in to Telegram and Messenger again, and register or link Signal again; their messages come back only as far as each network keeps them. What Erevos keeps of them goes in: each chat's notifications, the Tor choices, and the keys of the ErevosGram encryption.
 
 1. **Make a backup:** tap **Make a backup**, choose a folder (on the phone, a memory card, or a cloud app that shows
    its folders there; on a computer, any folder), type a password for the backup twice (at least 12 characters, or

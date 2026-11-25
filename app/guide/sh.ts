@@ -2611,7 +2611,7 @@ Samo u Erevos+, na Androidu, Erevos može držati Session račun i razgovarati s
 - **Obavijesti i čitanje:** kao za Messenger i Signal, s vlastitim **Obavijesti** svakog razgovora i vlastitim zvukom zvona za pozive.
 - **Opcije razgovora:** kao kod Messengera, dugme s klizačima pored mjesta gdje pišete, ili **⋯** gore.
 - **Preko Tora:** **Tor za ovaj Session račun** radi kao za Messenger i Signal, po zadanom **Isključeno**. Sessionovo onion rutiranje već krije tvoju internet adresu od ljudi kojima pišeš; prvi Session čvor je vidi, osim ako račun ide preko Tora.
-- **Odjava:** **Odjavi se sa Session na ovom telefonu** prvo pita, jer bez tvojih 13 reči za oporavak račun ne može da se vrati. Sigurnosne kopije ne čuvaju račun: nakon vraćanja, vrati ga njegovim riječima.
+- **Odjava:** **Odjavi se sa Session na ovom telefonu** prvo pita, jer bez tvojih 13 reči za oporavak račun ne može da se vrati. Sigurnosne kopije Erevos+ čuvaju račun i njegove razgovore, šifrovane lozinkom kopije, a vraćanje ih donosi nazad; bez kopije, njegove riječi vraćaju račun.
 
 ## SMS {#sms}
 
@@ -3463,7 +3463,7 @@ zapečaćena vlastitom lozinkom. Njene fotografije, datoteke i glasovne poruke i
 svaka, čija imena počinju kao njeno; automatska kopija koristi i datoteke prethodnih: držite zajedno cijeli folder. Nalazi se pod **Postavke** → **Podaci i uređaji** →
 **Rezervne kopije**.
 
-[+] Telegram, Signal, Messenger i Session nisu u sigurnosnoj kopiji: njihovi nalozi i razgovori ostaju kod svake mreže. Nakon vraćanja ponovo se prijavi na Telegram i Messenger, ponovo registruj ili poveži Signal, i vrati Session s njegovih 13 riječi za oporavak; njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva. Ono što Erevos čuva o njima ulazi: obavještenja svakog razgovora, izbor Tora i ključevi ErevosGram šifriranja.
+[+] Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom, a vraćanje ih donosi nazad, ponovo šifrovane na novom telefonu; njegove fotografije i datoteke ne, vraćaju se iz Sessiona dok ih čuva. Telegram, Signal i Messenger nisu u kopiji: njihove prijave su svakog telefona posebno. Nakon vraćanja ponovo se prijavi na Telegram i Messenger, i ponovo registruj ili poveži Signal; njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva. Ono što Erevos čuva o njima ulazi: obavještenja svakog razgovora, izbor Tora i ključevi ErevosGram šifriranja.
 
 1. **Napravi rezervnu kopiju:** dodirnite **Napravi rezervnu kopiju**, izaberite folder (na telefonu, memorijskoj
    kartici ili u aplikaciji za oblak koja tamo prikazuje svoje foldere; na računaru, bilo koji folder), upišite

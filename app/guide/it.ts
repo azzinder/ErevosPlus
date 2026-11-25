@@ -2734,7 +2734,7 @@ Solo in Erevos+, su Android, Erevos può tenere un account Session e chattare co
 - **Notifiche e lettura:** come per Messenger e Signal, con le **Notifiche** di ogni chat e una suoneria sua per le chiamate.
 - **Opzioni della chat:** come per Messenger, il pulsante a cursori accanto a dove scrivi, o **⋯** in alto.
 - **Tramite Tor:** **Tor per questo account Session** funziona come per Messenger e Signal, **Disattivato** per impostazione predefinita. L’instradamento a cipolla di Session già nasconde il tuo indirizzo internet a chi scrivi; il primo nodo di Session lo vede, a meno che l’account passi da Tor.
-- **Uscire:** **Esci da Session su questo telefono** chiede prima, perché senza le tue 13 parole di recupero l’account non può tornare. I backup non conservano l’account: dopo un ripristino, recuperalo con le sue parole.
+- **Uscire:** **Esci da Session su questo telefono** chiede prima, perché senza le tue 13 parole di recupero l’account non può tornare. I backup di Erevos+ conservano l’account e le sue chat, cifrati con la password del backup, e un ripristino li riporta; senza backup, le sue parole recuperano l’account.
 
 ## SMS {#sms}
 
@@ -3629,7 +3629,7 @@ ciascuno, il cui nome comincia come il suo; un backup automatico usa anche i fil
 la cartella. Si trova in **Impostazioni** → **Dati e dispositivi** →
 **Backup**.
 
-[+] Telegram, Signal, Messenger e Session non sono in un backup: i loro account e le loro chat restano presso ciascuna rete. Dopo un ripristino, accedi di nuovo a Telegram e Messenger, registra o collega di nuovo Signal e recupera Session con le sue 13 parole di recupero; i loro messaggi tornano solo per quanto ciascuna rete li conserva. Ciò che Erevos tiene di loro entra: le notifiche di ogni chat, la scelta di Tor e le chiavi della cifratura ErevosGram.
+[+] L’account e le chat di Session entrano in un backup, cifrati con la sua password, e un ripristino li riporta, cifrati di nuovo sul nuovo telefono; le sue foto e i suoi file no, tornano da Session finché li conserva. Telegram, Signal e Messenger non sono in un backup: i loro accessi sono di ciascun telefono. Dopo un ripristino, accedi di nuovo a Telegram e Messenger, e registra o collega di nuovo Signal; i loro messaggi tornano solo per quanto ciascuna rete li conserva. Ciò che Erevos tiene di loro entra: le notifiche di ogni chat, la scelta di Tor e le chiavi della cifratura ErevosGram.
 
 1. **Crea un backup:** tocca **Crea un backup**, scegli una cartella (sul telefono, su una scheda di memoria, o in
    un’app cloud che vi mostra le sue cartelle; su un computer, qualsiasi cartella), scrivi due volte una password per

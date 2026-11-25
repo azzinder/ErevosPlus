@@ -481,6 +481,27 @@ export async function msgSignedIn(service: MsgService): Promise<void> {
   started.add(service);
 }
 
+/** Whether the engines are on this phone (Erevos+ on Android): what a backup of their accounts needs. */
+export function msgEnginesHere(): boolean {
+  return native !== null;
+}
+
+/**
+ * Session's account from a backup (lib/backup-networks.ts) in place of this phone's: the engine
+ * keeps it sealed anew, the chats shown so far go, and it starts again with the account restored.
+ */
+export async function sessionRestore(state: string): Promise<void> {
+  await msgCall('session', 'restoreState', { state });
+  set('session', emptyMsgState());
+  cameSince.session.clear();
+  readTo.session.clear();
+  countedTo.session.clear();
+  started.delete('session');
+  startedAt.delete('session');
+  hearNow('session');
+  await msgSignedIn('session');
+}
+
 /** Signs a service out on this phone: the engine forgets its account. */
 export async function msgSignOut(service: MsgService): Promise<void> {
   await msgCall(service, 'logout');

@@ -4,8 +4,8 @@
 
 // The Greek of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/el/index.ts).
 export const whatsNew: Record<string, string> = {
-  "**What a backup leaves out**: in Erevos+, **Backups** and the message after a backup say that Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore. See [Backups](#backup).":
-    "**Τι αφήνει έξω το αντίγραφο**: στο Erevos+, τα **Αντίγραφα ασφαλείας** και το μήνυμα μετά από ένα αντίγραφο λένε ότι τα Telegram, Signal, Messenger και Session δεν μπαίνουν σε αυτό, και τι χρειάζεται το καθένα μετά την επαναφορά. Δες [Αντίγραφα ασφαλείας](#backup).",
+  "**Session in backups**: in Erevos+, a backup now holds Session's account and chats, sealed with its password, and a restore brings them back. **Backups** and the message after a backup say that Telegram, Signal and Messenger are not in it, and what each needs after a restore. See [Backups](#backup).":
+    "**Το Session στα αντίγραφα**: στο Erevos+, το αντίγραφο ασφαλείας κρατά πλέον τον λογαριασμό και τις συνομιλίες του Session, κρυπτογραφημένα με τον κωδικό του, και η επαναφορά τα φέρνει πίσω. Τα **Αντίγραφα ασφαλείας** και το μήνυμα μετά από ένα αντίγραφο λένε ότι τα Telegram, Signal και Messenger δεν μπαίνουν, και τι χρειάζεται το καθένα μετά την επαναφορά. Δες [Αντίγραφα ασφαλείας](#backup).",
   "**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram).":
     "**Ένα + για κάθε συνομιλία**: στις συνομιλίες Telegram, Signal, Messenger και Session του Erevos+, το **+** δίπλα στο πεδίο γραφής ανοίγει πλέγμα με εικονίδια, όπως στις συνομιλίες του ίδιου του Erevos, στη θέση των γκρι κουμπιών. Δες [Telegram](#telegram).",
   "**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen.":

@@ -4,8 +4,10 @@
 
 // German for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
-  "Telegram, Signal, Messenger and Session are not in a backup. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words. Their messages come back only as far as each network keeps them.":
-    "Telegram, Signal, Messenger und Session sind nicht in einer Sicherung. Nach dem Wiederherstellen meldest du dich bei Telegram und Messenger wieder an, registrierst oder verknüpfst Signal neu und holst Session mit seinen 13 Wiederherstellungswörtern zurück. Ihre Nachrichten kommen nur so weit zurück, wie jedes Netz sie aufbewahrt.",
+  "Session's account could not go back: {error}":
+    "Das Session-Konto konnte nicht zurück: {error}",
+  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
+    "Das Konto und die Chats von Session kommen in eine Sicherung, verschlüsselt mit ihrem Passwort; seine Fotos und Dateien nicht, sie kommen wieder von Session, solange es sie aufbewahrt. Telegram, Signal und Messenger sind nicht in einer Sicherung: nach dem Wiederherstellen meldest du dich bei Telegram und Messenger wieder an und registrierst oder verknüpfst Signal neu. Ihre Nachrichten kommen nur so weit zurück, wie jedes Netz sie aufbewahrt.",
   'Turn off the lock': 'Sperre ausschalten',
   'Erevos will open without a password. The second password stops working too.': 'Erevos öffnet sich dann ohne Passwort. Auch das zweite Passwort funktioniert dann nicht mehr.',
   'The lock is off.': 'Die Sperre ist aus.',

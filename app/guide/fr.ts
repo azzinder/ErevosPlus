@@ -2870,7 +2870,7 @@ Uniquement dans Erevos+, sur Android, Erevos peut tenir un compte Session et dis
 - **Notifications et lecture :** comme pour Messenger et Signal, avec les **Notifications** propres à chaque discussion et une sonnerie à elle pour les appels.
 - **Options de la discussion :** comme pour Messenger, le bouton à curseurs à côté de là où tu écris, ou **⋯** en haut.
 - **Par Tor :** **Tor pour ce compte Session** fonctionne comme pour Messenger et Signal, **Désactivé** par défaut. Le routage en oignon de Session cache déjà ton adresse internet aux personnes à qui tu écris ; le premier nœud Session la voit, sauf si le compte passe par Tor.
-- **Déconnexion :** **Se déconnecter de Session sur ce téléphone** demande d’abord, car sans tes 13 mots de récupération le compte ne peut pas revenir. Les sauvegardes ne gardent pas le compte : après une restauration, récupère-le avec ses mots.
+- **Déconnexion :** **Se déconnecter de Session sur ce téléphone** demande d’abord, car sans tes 13 mots de récupération le compte ne peut pas revenir. Les sauvegardes d’Erevos+ gardent le compte et ses conversations, chiffrés avec le mot de passe de la sauvegarde, et une restauration les ramène ; sans sauvegarde, ses mots récupèrent le compte.
 
 ## SMS {#sms}
 
@@ -3804,7 +3804,7 @@ fichiers à part, à côté d’elle, de 4 Mo au plus chacun, dont le nom commen
 automatique utilise aussi les fichiers de celles d’avant : garde tout le dossier ensemble. C’est
 sous **Réglages** → **Données et appareils** → **Sauvegardes**.
 
-[+] Telegram, Signal, Messenger et Session ne sont pas dans une sauvegarde : leurs comptes et conversations restent chez chaque réseau. Après une restauration, reconnectez-vous à Telegram et Messenger, réinscrivez ou reliez de nouveau Signal, et récupérez Session avec ses 13 mots de récupération ; leurs messages ne reviennent que dans la mesure où chaque réseau les garde. Ce qu’Erevos garde d’eux y entre : les notifications de chaque conversation, le choix de Tor et les clés du chiffrement ErevosGram.
+[+] Le compte et les conversations de Session entrent dans une sauvegarde, chiffrés avec son mot de passe, et une restauration les ramène, chiffrés de nouveau sur le nouveau téléphone ; ses photos et fichiers non, ils reviennent de Session tant qu’il les garde. Telegram, Signal et Messenger ne sont pas dans une sauvegarde : leurs connexions sont propres à chaque téléphone. Après une restauration, reconnectez-vous à Telegram et Messenger, et réinscrivez ou reliez de nouveau Signal ; leurs messages ne reviennent que dans la mesure où chaque réseau les garde. Ce qu’Erevos garde d’eux y entre : les notifications de chaque conversation, le choix de Tor et les clés du chiffrement ErevosGram.
 
 1. **Créer une sauvegarde :** appuie sur **Créer une sauvegarde**, choisis un dossier (sur le téléphone, une carte
    mémoire, ou une app cloud qui y montre ses dossiers ; sur un ordinateur, n’importe quel dossier), tape deux fois un

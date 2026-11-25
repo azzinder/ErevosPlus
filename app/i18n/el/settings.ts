@@ -4,8 +4,10 @@
 
 // Greek for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
-  "Telegram, Signal, Messenger and Session are not in a backup. After a restore, sign in to Telegram and Messenger again, register or link Signal again, and bring Session back with its 13 recovery words. Their messages come back only as far as each network keeps them.":
-    "Τα Telegram, Signal, Messenger και Session δεν μπαίνουν στο αντίγραφο ασφαλείας. Μετά την επαναφορά, συνδέσου ξανά στο Telegram και στο Messenger, κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal, και φέρε πίσω το Session με τις 13 λέξεις ανάκτησης. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
+  "Session's account could not go back: {error}":
+    "Ο λογαριασμός Session δεν μπόρεσε να επιστρέψει: {error}",
+  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
+    "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του· οι φωτογραφίες και τα αρχεία του όχι, ξανάρχονται από το Session όσο τα κρατά. Τα Telegram, Signal και Messenger δεν μπαίνουν: μετά την επαναφορά, συνδέσου ξανά στο Telegram και στο Messenger, και κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
   'Turn off the lock': 'Απενεργοποίηση κλειδώματος',
   'Erevos will open without a password. The second password stops working too.': 'Το Erevos θα ανοίγει χωρίς κωδικό. Θα σταματήσει να λειτουργεί και ο δεύτερος κωδικός.',
   'The lock is off.': 'Το κλείδωμα απενεργοποιήθηκε.',

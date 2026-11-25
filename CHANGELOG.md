@@ -17,10 +17,16 @@ and 0.1.15 never came out.
   Telegram **Send later** sits under **How it goes**. The panel's «encrypted» mark shows only where what is sent is
   end-to-end encrypted (a secret Telegram chat, Signal, Session) (`components/composer.tsx`, `app/telegram-chat.tsx`,
   `components/msg-chat.tsx`). Requested by the maintainer.
-- Erevos+: a backup says what it leaves out (#67). **Backups**, the message after a backup and the guide say that
-  Telegram, Signal, Messenger and Session are not in it, and what each needs after a restore: sign in again to Telegram
-  and Messenger, register or link Signal again, Session back with its 13 words (`app/backup.tsx`). Requested by the
-  maintainer.
+- Erevos+: a backup says what it holds of the other networks (#67). **Backups**, the message after a backup and the
+  guide say that Session's account and chats are in it, and that Telegram, Signal and Messenger are not, with what each
+  needs after a restore: sign in again to Telegram and Messenger, register or link Signal again (`app/backup.tsx`).
+  Requested by the maintainer.
+- Erevos+: Session's account and chats go into backups. The engine gives its whole account as it keeps it (seed,
+  names, chats with up to 1000 messages each, groups with their keys: `backupState` in `Session.kt`), which goes into
+  the backup's sealed native entry beside the phone module's settings (`lib/backup-networks.ts`,
+  `lib/backup-native.ts`); a restore puts it back sealed with a new key of the new phone's Keystore
+  (`restoreState`) and starts Session again, and says so if it could not. Its media files stay out, and Telegram,
+  Signal and Messenger too. Requested by the maintainer.
 - Erevos+: where you write stays at the bottom of a Telegram, Signal, Messenger or Session chat with few messages
   (#61), not under the last message. Requested by the maintainer.
 - Erevos+: Messenger's old chats no longer come back unread after the phone restarts (#55; the fix in 3.1.0-rc.2 was in the engine, and the cause was not there). As its engine starts, it sends each chat again with its last message, and the list of older chats later as it goes further back; `lib/messenger.ts` `applyEvent` took every such message from someone else for a new one and marked its chat unread, whatever the account said. What hid it was only in memory (`readTo`, `keepRead`), so Mark all as read held until Erevos+ truly started afresh, as after the phone restarted. Now a message makes its chat unread only when it is new here, by the rule that already counts messages for the notice (`newHere` in `lib/messenger-store.ts`, `countsAsNew`): not one from before the engine's start, not one read here, not one sent again when its attachments came. What came while Erevos+ was closed the account itself says (the engine's `unread`). The same for Signal and Session, whose engines keep their own. `checks/messenger-store.check.ts` starts the store afresh and lets the engine send its chats again: it fails on the old code. Requested by the maintainer.
