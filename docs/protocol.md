@@ -377,5 +377,32 @@ key    = Seal_A( Seal_K( hex(spaceKey) ) )
   search forgets after 15 minutes and waits at most 5 minutes.
 - **Sealed files.** Each space's data is one sealed value per slot, every value the same size.
   History is 16 KB pages mixed for all holders, behind a 64 KB page index.
+- **The locked camera** (`camera-drop.ts`). With the password lock, the camera opens with Erevos
+  locked and takes for the space opened last. A photo or video goes into chunks as a Collection
+  file does, under a random file key. That key, with the file's name, type, size and time, is
+  sealed as in 7.3 to `D_pub`, with the 24 bytes that carry the sender id there holding the mark
+  `"erevos camera drop v1"` padded with zeros, in a note `erevos-drop-<16 random bytes, hex>`
+  beside the chunks. A note is taken only with that mark.
+
+```text
+d      = HKDF-SHA256(ikm = spaceKey, salt = none, info = "erevos camera drop v1", 32)
+D_pub  = X25519 public key of d    (keystore entry erevos.camera-drop, never in a backup)
+note   = { v: 1, files: [{ id, count }...], sealed: relaySeal(D_pub, mark, JSON { file, thumb, at }) }
+```
+
+  `d` is made again as the space opens and is kept nowhere, so the locked camera holds no key
+  that opens anything, not even what it just took. A note the open space's `d` does not open stays
+  for its own space. The switch `erevos.camera-open` is the phone's, the same in every space; a
+  backup restored deletes the notes with their chunks, and `D_pub`.
+
+  What waits is not hidden from whoever reads Erevos's folder. A note is a file of its own, and
+  says in the clear the ids of its chunks: while one waits for a space, another space that opens
+  leaves it and its chunks where they are, so someone shown that other space who also reads the
+  folder can tell that there is a space they were not shown. Nothing in the app shows it; the
+  search for leftovers counts every note's chunks as named, so it neither shows nor deletes them.
+  The guide says so, and that the switch is the way out. When the first space removes its second
+  password or turns its lock off, no other space opens any more, and the notes its `d` does not
+  open are deleted with their chunks. From any other space, and when a second password is set
+  again, a note that does not open may be for a space that still opens, so it stays.
 
 The flows are drawn in [state-machines.md](state-machines.md).

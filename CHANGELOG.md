@@ -8,10 +8,16 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
-## Unreleased
+## 3.1.0-rc.3 (2026-11-25)
+
+The third release candidate of Erevos+: Erevos 3.0.0-rc.3 with every network, with what is below.
 
 ### For you
 
+- Everything Erevos 3.0.0-rc.3 brought (below), in Erevos+: it starts by itself after the phone turns on,
+  shows nothing of a space before its password, the camera before the password, backups to your own server by hand
+  too with clear numbers, the Collection's server checked and brought back, New chat as it was meant to look, and
+  your own server from the first start.
 - Erevos+: the same **+** as in Erevos (#59). In Telegram, Signal, Messenger and Session chats, **+** beside where you
   write opens `ComposerPanel`, the grid with icons of Erevos's own chats, in place of rows of grey buttons; on
   Telegram **Send later** sits under **How it goes**. The panel's «encrypted» mark shows only where what is sent is
@@ -50,8 +56,162 @@ and 0.1.15 never came out.
   type stays the phone's own contacts: Signal is asked only about the one you tap. Requested by the maintainer.
 - Erevos+: where you write stays at the bottom of a Telegram, Signal, Messenger or Session chat with few messages
   (#61), not under the last message. Requested by the maintainer.
-- Erevos+: Messenger's old chats no longer come back unread after the phone restarts (#55; the fix in 3.1.0-rc.2 was in the engine, and the cause was not there). As its engine starts, it sends each chat again with its last message, and the list of older chats later as it goes further back; `lib/messenger.ts` `applyEvent` took every such message from someone else for a new one and marked its chat unread, whatever the account said. What hid it was only in memory (`readTo`, `keepRead`), so Mark all as read held until Erevos+ truly started afresh, as after the phone restarted. Now a message makes its chat unread only when it is new here, by the rule that already counts messages for the notice (`newHere` in `lib/messenger-store.ts`, `countsAsNew`): not one from before the engine's start, not one read here, not one sent again when its attachments came. What came while Erevos+ was closed the account itself says (the engine's `unread`). The same for Signal and Session, whose engines keep their own. `checks/messenger-store.check.ts` starts the store afresh and lets the engine send its chats again: it fails on the old code. Requested by the maintainer.
+- Erevos+: Messenger's old chats no longer come back unread after the phone restarts (#55; the fix in 3.1.0-rc.2 was in the engine, and the cause was not there). Requested by the maintainer.. As its engine starts, it sends each chat again with its last message, and the list of older chats later as it goes further back; `lib/messenger.ts` `applyEvent` took every such message from someone else for a new one and marked its chat unread, whatever the account said. What hid it was only in memory (`readTo`, `keepRead`), so Mark all as read held until Erevos+ truly started afresh, as after the phone restarted. Now a message makes its chat unread only when it is new here, by the rule that already counts messages for the notice (`newHere` in `lib/messenger-store.ts`, `countsAsNew`): not one from before the engine's start, not one read here, not one sent again when its attachments came. What came while Erevos+ was closed the account itself says (the engine's `unread`). The same for Signal and Session, whose engines keep their own. `checks/messenger-store.check.ts` starts the store afresh and lets the engine send its chats again: it fails on the old code. Requested by the maintainer.
 
+### Under the hood
+
+- Erevos's main merged in, with Erevos 3.0.0-rc.3 and Erevos Lite 3.2.0-rc.3. The **+** of Erevos's own chats
+  (`components/composer.tsx`) and the panel's keyboard and back button (`components/panel-close.ts`) are one code
+  for every edition.
+
+## 3.2.0-rc.3 (2026-11-25)
+
+The third release candidate of Erevos Lite: Erevos 3.0.0-rc.3 for Erevos's own chats and calls, with what is below.
+
+### For you
+
+- What Erevos 3.0.0-rc.3 brought to chats: Erevos starts by itself after the phone turns on, unless **Wait until I
+  open it** is chosen; nothing of a space shows before its password; **Make a backup** sends to a server (WebDAV) by
+  hand too, and says how big the backup is, when it began and ended, and what is not in it; New chat as the mockups
+  drew it; and a first start that asks where your messages wait, with **I have a server of my own** and **Start
+  without a server**. The camera before the password, the Collection's server and the + panel of the SMS are the
+  Collection's and the SMS's, which Erevos Lite has not.
+
+### Under the hood
+
+- Home no longer says for a few seconds that there is no relay yet; each backup made by hand is checked as it is made;
+  the lock's 30 seconds are counted on the clock nobody can set; and a contact link made for a website is read
+  whatever web server its page is on, as in Erevos 3.0.0-rc.3.
+
+## 3.0.0-rc.3 (2026-11-25)
+
+### For you
+
+- **Start when the phone turns on** is now the default (#57): where Erevos receives in the background, it starts by
+  itself after the phone turns on, or after Erevos is updated, unless the owner chooses **Wait until I open it** under
+  **Settings** → **Notifications** → **In the background**. Until now it started only once turned on there, so after a
+  restart nothing came until Erevos was opened. A phone where the owner never chose starts too; one where they chose
+  keeps that, and the choice still goes with a backup and a move to another edition (`lib/boot-choice.ts`
+  `bootChoiceAtStart`, `modules/erevos-call` `BootStart` `chosen`, `want`, `lib/background.ts`). The guide now says
+  plainly what happens then, before any password: nothing is read, shown or rung; only the spaces set to **Also while
+  another space is open** ask their relay whether something came, without taking it, and the notice says only that
+  something did. Requested by the maintainer.
+- Nothing of a space shows before its password (#63, #60): on Android, while a space with a password lock shows, the
+  phone itself covers Erevos's screens, with a plain cover in the look's ground colour, the moment they go out of
+  sight. Back within the lock's 30 seconds, the cover is gone before anything is drawn; back later, it stays until the
+  password screen is drawn under it, so the chats no longer show for a second or two first. A window of its own covers
+  what React Native's Modal opens too (`modules/erevos-device` `Curtain.kt`, `lib/curtain.ts`, `app/_layout.tsx`).
+  **Lock now** covers at once, before the password screen is made. Requested by the maintainer.
+- The fingerprint button is there at once (#65): the password screen no longer asks Android's Keystore whether its key
+  still works before it shows **Fingerprint or face**, which on some phones took seconds and only a few may do at
+  once; it shows from its first picture as it did last, and a key Android dropped is found out as the button is
+  pressed, which turns it off and says so (`lock/biometric.ts` `biometricOffered`, `biometricOfferedBefore`;
+  `modules/erevos-biometric` answers off the app's thread). Requested by the maintainer.
+- Camera before the password (#70): on Android, with the password lock, the camera's icon and **Camera** on Erevos's
+  icon open Erevos's camera at once, with Erevos locked. What it takes, photos and videos, is encrypted as it is taken
+  and shows only after the password of the space opened last, in its Collection, which takes it in as it opens; the
+  camera says how many it took, and opens nothing else, not even what it just took (`lock/camera-drop.ts`,
+  `lib/camera-drops.ts` `takeDrops`, `lib/collection-camera.ts`, `components/erevos-camera.tsx`,
+  `modules/erevos-collection` `CameraOpenActivity`). **Open the camera without the password**, in the Collection's
+  settings, is on unless turned off, the phone's own, the same in every space; off, the icon waits for the password as
+  before, and the **Launcher icons** card says which (`components/launcher-icons.tsx`). What waits is in no backup: a
+  backup restored deletes it. The search for leftovers counts what waits as named, whichever places were opened in it,
+  so it is never taken for one (`lib/leftovers.ts` `idsOfDrops`); and when the first space removes its second password
+  or turns its lock off, what still waited for the spaces that stop opening is deleted (`lib/camera-drops.ts`
+  `dropsOfClosedSpaces`). The guide says that what waits lies on the phone as files, which can show someone who reads
+  the phone that there is a space they were not shown, and that the switch is the way out. Not in Erevos Lite, which
+  has no camera. Requested by the maintainer.
+- Backups to a server by hand (#58): **Make a backup** offers **To a server (WebDAV)** beside **Into a folder**, also
+  with automatic backups off and in the web app, and adds a server as **Add a server** does. Once one is set, the
+  button reads **To** and the server's name and sends a backup there now, with a password typed each time, or, with
+  automatic backups on, one of them, with their password, and none into the folder (`app/backup.tsx`,
+  `lib/backup-folder.ts` `runAutoBackup` `serverOnly`). Turning automatic backups off now keeps the server, for the
+  backups sent by hand, with those already there; **Stop sending** forgets it (`stopAutoBackup`). A backup sent with a
+  password of its own has a key of its own, so every part of it goes each time: the sheet that asks for its password
+  says so before it starts, with about how much that is where the phone can measure it, and that the server keeps the
+  3 newest whole (`lib/app-space.ts` `wholeBackupAtMost`). Requested by the maintainer.
+- Clear numbers for a backup (#67): once one is made, its card says how big it is in all, with the files beside it,
+  when it began and when it ended (the time in its name is when it began), and what is not in it: Erevos itself and
+  what it keeps only for a while, the Collection's files that are whole on its server, which a restore fetches from
+  there, or a Collection kept out of backups. A backup sent to a server says its size and times too
+  (`app/backup.tsx`). Requested by the maintainer.
+- The Collection's server, checked and brought back (#66): under the server, in the Collection's settings, a line says
+  how much of this Collection's own files is there, encrypted, and when the last copy began and ended. **Check** looks
+  without changing anything: every piece the catalogue names is listed there, of its size, and 4, picked at random,
+  are fetched and opened with their file's key, so one the server changed or swapped shows (`lib/collection-webdav.ts`
+  `checkCollectionServer`). **Bring back the files not on this phone** fetches at once every file not whole here, as
+  after a backup restored on a new phone, with **Cancel**, keeping what came, and says how many came back and how many
+  the server does not have whole either (`bringBackAll`, `app/collection-settings.tsx`). Requested by the maintainer.
+- New chat as the mockups drew it (#56): **Near me**, **Far away** and **I have their code** are three large doors,
+  with **My link**, **Blocked contacts** and **For advanced users** as small buttons under them
+  (`components/new-chat-doors.tsx`). The QR code under **If it is not found** shows small, and large at a tap
+  (`components/connect-cards.tsx` `QR_TILE`, `components/near-me.tsx`); an invite's link shows short on the page, its
+  middle left out, while what is sent, copied or shown as a QR code is always the whole link (`lib/shown-link.ts`);
+  and **Who is it for?** opens its two fields only when tapped (`components/welcome-invite.tsx`). Requested by the
+  maintainer.
+- SMS and the chats on other networks like Erevos's own (#59, #61): in SMS conversations and in chats on Nostr, Matrix
+  and XMPP, **+** opens Erevos's own panel under the message field, where a sheet of plain buttons was, with what the
+  chat can send as tiles and the ways its next message can go: **Send later**, with the message typed, and in the
+  chats **Disappearing message**. Android's back closes it first (`components/network-panel.tsx`,
+  `components/panel-close.ts`, `components/composer.tsx` `ComposerPanel`). The panel says "encrypted" only where what
+  is sent is end-to-end encrypted. In a short conversation the field now stays at the bottom of the screen, as in
+  Erevos's own chats (`components/network-thread.tsx`). Requested by the maintainer.
+- Servers of one's own from the first start (#71): a phone with no relay yet is asked where its messages wait, in
+  plain words. **I have no invite**, at the first start and among the small buttons of **New chat**, opens the page
+  **For advanced users** opens, which on such a phone begins with **Where your messages wait**: what a server is, in
+  one line, and under it every way to begin, as equals. An account at a server (**Sign in with LPHL**, or **My account
+  is at another server…**); **I have a server of my own**, which takes the server's address, typed as it was given,
+  and its code, and tries them at once, keeping nothing unless the server answered; or **Start without a server**,
+  which a line says is the way for whoever has neither (`components/own-server.tsx`, `lib/own-server.ts`
+  `ownServerAddress`, `app/chat.tsx` `joinOwnServer`, `app/first-steps.tsx`). **Start without a relay** is now **Start
+  without a server**, and **Sign in at another relay…** is **My account is at another server…**. Requested by the
+  maintainer.
+- The speech and translation models from a web folder of one's own (#71): where Erevos asks to download a model,
+  **Download from another server…** takes the address of a web folder that holds the same files under the same names,
+  and **Back to the usual server** returns to the one Erevos comes with. The core still checks every file against the
+  hash it knows and refuses one that differs; what changes is which server sees the phone's IP address as it
+  downloads, and the sheet says so (`components/models-server.tsx`, `lib/models-server.ts`, `lib/speech.ts`,
+  `lib/translate.ts`). The folder is the phone's own, the same in every space, and in no backup. Requested by the
+  maintainer.
+- The guide has **Erevos on your own servers**, in its 8 languages (#71): for messages, calls, backups, the
+  Collection, the models and no server at all, where each is set in the app, and what still reaches LPHL.
+  `docs/servers.md` and its Greek say the same beside the list of every server Erevos talks to. Requested by the
+  maintainer.
+
+### Under the hood
+
+- Home no longer says **No relay yet · tap to set one** for a few seconds after the password on a phone with many
+  chats (#62): the line says nothing until the space's own data says what holds, that data is read at once and alone,
+  and what it said is remembered while the space is open, so home shows it from its first drawing
+  (`lib/relay-line.ts`, `app/index.tsx`).
+- Each backup made by hand is checked as it is made, as automatic ones are: on Android and in the desktop app, read
+  back from the folder, opened with its password, every file beside it there, of its size, and two read through
+  (`lib/backup-folder.ts` `checkMadeBackup`); one sent to a server, by the server's listing, with nothing downloaded:
+  the backup itself, of the size it was sent with, and every part it names (`checkSentBackup`, `lib/backup-check.ts`
+  `checkListed`). Automatic backups sent to a server are now checked for the backup's own size too.
+- After each copy of a Collection to its WebDAV server, Erevos lists the folder again: the copy counts as whole only
+  once every chunk sent is there, of its size, and one that is not goes again with the next copy
+  (`lib/collection-webdav.ts`).
+- On Android, the lock's 30 seconds are counted on the clock nobody can set (`SystemClock.elapsedRealtime`), by the
+  phone as Erevos goes out of sight and comes back, and the app takes its count, so moving the phone's date and time
+  back no longer keeps a space open past them (`lib/curtain.ts` `curtainBack`, `app/_layout.tsx`).
+- What the locked camera takes is encrypted into chunks as a file of the Collection is, with a key of its own made at
+  random; that key, with the file's name, type and size, is sealed by the core's relaySeal (X25519, HKDF-SHA-256,
+  ChaCha20-Poly1305) for the public key of the space opened last, which is kept outside every space as it is read
+  while locked. Its secret is made from the space's key, so only that space's password gives it, and a note another
+  space's key does not open stays for its own space (`lock/camera-drop.ts`, `docs/protocol.md`).
+- LPHL's addresses are in one place (#71; `lib/servers.ts` `LPHL_RELAY`, `LPHL_WEB`), and whoever builds Erevos for a
+  community can name its own instead with two settings of the build: `EREVOS_WEB_ORIGIN`, the web server with the
+  contact and invite pages and the models, which Android then opens in Erevos, and `EREVOS_START_RELAY`, the relay a
+  phone with no relay yet is offered to sign in at (`app.config.js`, which refuses one not shaped as an origin or a
+  relay). Two things stay LPHL's in every build: an invite by SMS with no relay in it names LPHL's relay, so every
+  build reads it alike, and Erevos's own release notices stay on LPHL's server, as they go with its release key, asked
+  only by phones whose relay is LPHL's (`lib/release-notice.ts` `mayAsk`, `lib/update-signature.ts`).
+- A contact page and an invite by SMS are read when pasted or scanned whatever web server they are on (#71;
+  `lib/servers.ts` `pageLink`, `lib/contact-code.ts`, `lib/text-invite.ts`, `lib/open-link.ts`); only the build's own
+  server and LPHL's open a screen by themselves. What follows # never reaches the server, and the screen it opens asks
+  before anything is taken, as before. The pages name the server they are served from (`pwa/c/contact.js`,
+  `pwa/i/invite.js`).
 ## 3.1.0-rc.2 (2026-11-25)
 
 The second release candidate of Erevos+: Erevos 3.0.0-rc.2 with every network, with what is below.

@@ -12,8 +12,10 @@ import android.os.Bundle
 /**
  * Erevos's camera at a tap: its icon among the phone's apps, when the owner put it there
  * (Appearance → Launcher icons), and the Camera shortcut on Erevos's icon. It opens the
- * Collection's camera (erevos://collection?camera=1), behind Erevos's lock and the Collection's
- * own, and closes at once.
+ * Collection's camera (erevos://collection?camera=1) and closes at once. Whether the camera then
+ * waits for Erevos's password and the Collection's own is Erevos's to say, never this activity's:
+ * unless the owner keeps it behind them, it opens before them, and what it takes shows only
+ * behind them (lock/camera-drop.ts).
  */
 class CameraOpenActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {

@@ -10,6 +10,7 @@ import { openDoors } from '../lock/doors';
 import { currentSpace } from '../lock/keys';
 import { callAudio, type BackgroundState } from '../modules/erevos-call';
 import { onSmsEvent, smsShowOnScreen } from '../modules/erevos-sms';
+import { BOOT_BEFORE_KEY, BOOT_CHOICE_KEY, bootChoiceAtStart } from './boot-choice';
 import { currentCall, RING_MS } from './call';
 import { CONTACT_PREFIX } from './calls';
 import { chatNotify } from './chat-notices';
@@ -108,7 +109,17 @@ const changes = new Set<() => void>();
 /** Keeps the choice, and starts or stops the receiving in the open space at once. */
 export async function saveRingInBackground(on: boolean): Promise<void> {
   await secureSet(KEY, on ? 'on' : 'off');
+  // Starting by itself as the phone turns on is for receiving in the background only (BootStart.kt).
+  wantBootStart(on);
   changes.forEach((change) => change());
+}
+
+function wantBootStart(wanted: boolean): void {
+  try {
+    callAudio?.wantBootStart?.(wanted);
+  } catch {
+    // A build from before it.
+  }
 }
 
 /** Whether a notice says that messages came, while Erevos shows too: on unless turned off. */
@@ -369,17 +380,18 @@ export function noticesAsked(): Promise<void> {
 }
 
 // Erevos started by itself as the phone turned on, or after an update (modules/erevos-call,
-// BootStart.kt), as the owner chose: no space is open, and none can be without its password, so
-// only the closed spaces that asked to say a message came while another is open are waited on
-// (lib/closed-notices.ts), with the same notice, never which space, until a space opens
-// (startBackground). With none, or the messages notice off, it stops at once. Android runs it as a
-// task with no screen (registered in index.js), which lasts as long.
+// BootStart.kt), where it receives in the background, unless the owner turned that off: no space
+// is open, and none can be without its password, so only the closed spaces that asked to say a
+// message came while another is open are waited on (lib/closed-notices.ts), with the same notice,
+// never which space, until a space opens (startBackground). With none, or the messages notice off,
+// it stops at once and a quiet notice says it is locked. Android runs it as a task with no screen
+// (registered in index.js), which lasts as long.
 let bootStop: (() => void) | null = null;
 
 /** Whether Erevos can start by itself as the phone turns on: Android, in a build with it. */
 export const canStartAtBoot = canRingInBackground && !!callAudio?.setBootStart;
 
-/** Whether Erevos starts by itself as the phone turns on: the phone's choice, off unless chosen. */
+/** Whether Erevos starts by itself as the phone turns on, where it receives in the background: the phone's choice, on unless turned off. */
 export function loadBootStart(): boolean {
   try {
     return callAudio?.bootStart?.() ?? false;
@@ -391,36 +403,46 @@ export function loadBootStart(): boolean {
 // The choice is kept by the phone (BootStart.kt), as it is read before anything of Erevos runs,
 // and here too, with the phone's other settings that go with a copy of Erevos (SETTINGS in the
 // lock): so a restore, or a move to another edition (lib/edition-move.ts), keeps it as it was.
-const BOOT_KEY = 'erevos.boot-start';
-
+// Only what the owner chose is kept (lib/boot-choice.ts).
 export function saveBootStart(on: boolean): void {
   try {
     callAudio?.setBootStart?.(on);
   } catch {
     // A build from before it: nothing to keep.
   }
-  void secureSet(BOOT_KEY, on ? 'on' : 'off').catch(() => undefined);
+  void secureSet(BOOT_CHOICE_KEY, on ? 'on' : 'off').catch(() => undefined);
+  // And as a build before the choice reads it, for a copy restored there.
+  void secureSet(BOOT_BEFORE_KEY, on ? 'on' : 'off').catch(() => undefined);
 }
 
 /**
- * As Erevos starts: the phone's choice made what the kept one says, after a restore or a move to
- * another edition; with none kept yet (before it was kept, or one restored from before), the phone's
- * is kept.
+ * As Erevos starts: the phone is told whether Erevos receives in the background at all, and its
+ * choice is made what the kept one says, after a restore or a move to another edition; a choice
+ * made on this phone before it was kept apart is kept now (lib/boot-choice.ts).
  */
 export async function syncBootStart(): Promise<void> {
   if (!canStartAtBoot) return;
-  const kept = await secureGet(BOOT_KEY).catch(() => null);
-  if (kept === 'on' || kept === 'off') {
-    if (loadBootStart() !== (kept === 'on')) {
-      try {
-        callAudio?.setBootStart?.(kept === 'on');
-      } catch {
-        // A build from before it.
-      }
-    }
-    return;
+  const [receives, kept, before] = await Promise.all([
+    loadRingInBackground(),
+    secureGet(BOOT_CHOICE_KEY).catch(() => null),
+    secureGet(BOOT_BEFORE_KEY).catch(() => null),
+  ]);
+  wantBootStart(receives);
+  let phone: boolean | null = null;
+  try {
+    phone = callAudio?.bootChosen?.() ?? null;
+  } catch {
+    // A build from before it.
   }
-  await secureSet(BOOT_KEY, loadBootStart() ? 'on' : 'off').catch(() => undefined);
+  const { set, keep } = bootChoiceAtStart(kept, phone, before);
+  if (set !== null) {
+    try {
+      callAudio?.setBootStart?.(set);
+    } catch {
+      // A build from before it.
+    }
+  }
+  if (keep) await secureSet(BOOT_CHOICE_KEY, keep).catch(() => undefined);
 }
 
 const spaceOpen = () => {
@@ -455,8 +477,19 @@ export function startBootNotices(): Promise<void> {
         // A build from before it.
       }
       await cryptoReady();
-      const [notices, doors] = await Promise.all([loadMessageNotices(), openDoors(-1).catch(() => [])]);
+      const [receives, notices, doors] = await Promise.all([loadRingInBackground(), loadMessageNotices(), openDoors(-1).catch(() => [])]);
       if (spaceOpen()) return done();
+      if (!receives) {
+        // Receiving in the background was turned off, and the phone was not told yet (a copy
+        // restored, say): nothing starts, and no notice stays.
+        wantBootStart(false);
+        try {
+          callAudio?.stopReceiving?.();
+        } catch {
+          // Gone with Erevos anyway.
+        }
+        return done();
+      }
       if (!notices || doors.length === 0) {
         // Nothing to say while closed: the service and its notice go, and the quiet "Locked" notice
         // stays, so that Erevos is seen to have started and a tap on it opens Erevos for a password,

@@ -207,7 +207,6 @@ export const smsTools: Record<string, string> = {
   "At most {n} quick texts.": "Au plus {n} textes rapides.",
   "Tap one to put it in the field. Hold one down to remove it.": "Touche-en un pour le mettre dans le champ. Garde-en un appuyé pour le retirer.",
   "A new quick text": "Un nouveau texte rapide",
-  "Or hold + down.": "Ou garde + appuyé.",
   "Fetch (may cost)": "Récupérer (peut coûter)",
   "MMS · {size} KB": "MMS · {size} Ko",
   "MMS waiting · {n}": "MMS en attente · {n}",

@@ -80,7 +80,6 @@ export const settings: Record<string, string> = {
   'A newer Erevos made this backup, so this one cannot restore it. Update Erevos to the latest version, then restore it.':
     'Αυτό το αντίγραφο το έφτιαξε νεότερο Erevos και δεν μπορεί να επαναφερθεί εδώ. Αναβάθμισε το Erevos στην τελευταία έκδοση και μετά κάνε την επαναφορά.',
   'Could not read that file. {error}': 'Δεν ήταν δυνατή η ανάγνωση του αρχείου. {error}',
-  'Saved {name} ({size}) in {folder}. Keep its password: nothing opens the backup without it.': 'Αποθηκεύτηκε το {name} ({size}) στο {folder}. Κράτα τον κωδικό του: τίποτα δεν ανοίγει το αντίγραφο χωρίς αυτόν.',
   'Replace everything': 'Αντικατάσταση όλων',
   'Every space on {device}, with its contacts, messages and hidden chats, will be replaced by what the backup holds. What is here now and not in the backup is gone for good. Then Erevos opens as it was when the backup was made, with the passwords used then.': 'Κάθε χώρος σε {device}, με τις επαφές, τα μηνύματα και τις κρυφές συνομιλίες του, θα αντικατασταθεί από ό,τι περιέχει το αντίγραφο ασφαλείας. Ό,τι υπάρχει τώρα εδώ και δεν είναι στο αντίγραφο χάνεται οριστικά. Μετά το Erevos ανοίγει όπως ήταν όταν έγινε το αντίγραφο, με τους κωδικούς που ίσχυαν τότε.',
   "A backup holds everything Erevos keeps on {device}: every space, with its contacts, messages, photos, files, voice messages, imported chats and hidden chats, each still sealed with its own password, and the settings that go with you to another device. The backup has a password of its own too. Its photos, files and voice messages go in files of their own beside it. An automatic backup also needs files of the ones before it: keep the whole folder.":
@@ -439,4 +438,15 @@ export const settings: Record<string, string> = {
   "Fetched at once, but while roaming only on a tap.": "Λήψη αμέσως, αλλά σε περιαγωγή μόνο με πάτημα.",
   "Fetched only on a tap.": "Λήψη μόνο με πάτημα.",
   "MMS from {from} · {size} KB": "MMS από {from} · {size} KB",
+  'Began {start}, ended {end}.': 'Ξεκίνησε στις {start} και τελείωσε στις {end}.',
+  'The time in its name is when it began.': 'Η ώρα στο όνομά του είναι η ώρα που ξεκίνησε.',
+  'Not in it: Erevos itself, and what it keeps only for a while, such as its cache and Tor’s files.': 'Δεν περιέχει: το ίδιο το Erevos, και ό,τι κρατά μόνο για λίγο, όπως την κρυφή μνήμη του και τα αρχεία του Tor.',
+  'Nor the Collection’s files that are whole on its WebDAV server: a restore fetches them from there.': 'Ούτε τα αρχεία της Συλλογής που είναι ολόκληρα στον server WebDAV της: η επαναφορά τα φέρνει από εκεί.',
+  'Nor the Collection you keep out of backups.': 'Ούτε η Συλλογή που κρατάς έξω από τα αντίγραφα.',
+  'Checking the backup…': 'Έλεγχος του αντιγράφου…',
+  'Saved {name} in {folder}: {total}.': 'Αποθηκεύτηκε το {name} στο {folder}: {total}.',
+  'Keep its password: nothing opens the backup without it.': 'Κράτα τον κωδικό του: τίποτα δεν ανοίγει το αντίγραφο χωρίς αυτόν.',
+  'Into a folder': 'Σε φάκελο',
+  'Saved {name} in {folder}, with {n} file beside it: {total} in all.': 'Αποθηκεύτηκε το {name} στο {folder}, με {n} αρχείο δίπλα του: {total} συνολικά.',
+  'Saved {name} in {folder}, with {n} files beside it: {total} in all.': 'Αποθηκεύτηκε το {name} στο {folder}, με {n} αρχεία δίπλα του: {total} συνολικά.',
 };

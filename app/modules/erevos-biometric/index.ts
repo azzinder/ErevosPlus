@@ -11,7 +11,8 @@ import { BiometricError, type BiometricSealer, type KeyState, type Sealed } from
 // or in a build made before this module was added.
 type Native = {
   available(): boolean;
-  keyState(): string;
+  /** A build from before 3.0.0-rc.3 answers at once, on the app's own thread. */
+  keyState(): string | Promise<string>;
   seal(data: string, title: string, cancel: string): Promise<Sealed>;
   open(iv: string, data: string, title: string, cancel: string): Promise<string>;
   forget(): void;
@@ -34,10 +35,10 @@ export const biometricSealer: BiometricSealer = {
       return false;
     }
   },
-  keyState: () => {
+  keyState: async () => {
     let state: string | undefined;
     try {
-      state = native?.keyState();
+      state = await native?.keyState();
     } catch {
       return 'unknown';
     }

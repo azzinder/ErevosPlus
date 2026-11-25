@@ -6,6 +6,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { translateCore } from './core';
 import { t } from './i18n';
+import { loadModelsServer } from './models-server';
 import { steps, type Language, type Model } from './translate-ways';
 import { DOWNLOAD_TRIES, stalled } from './updates';
 
@@ -13,14 +14,9 @@ import { DOWNLOAD_TRIES, stalled } from './updates';
 // German, Spanish, French and Italian (lib/translate-ways.ts). The models (Helsinki-NLP's OPUS-MT,
 // CC-BY 4.0) are run by the core (crates/erevos-speech marian.rs). As with the speech model
 // (lib/speech.ts), none is in the app: each is downloaded once, when the owner asks for it, from
-// MODELS_AT, and checked by the core against the SHA-256 it knows for it before it is opened.
+// the models' folder (lib/models-server.ts), and checked by the core against the SHA-256 it knows for it before it is opened.
 // Downloading is the only thing that leaves the phone, and it says nothing of any message; the
 // message and its translation never do. Android only (the core has it there alone).
-
-/** Where the models are downloaded from. */
-export const MODELS_AT = 'https://erevos-web.lphl.nekten.eu/models/';
-/** Its host, as the owner is told before downloading. */
-export const MODELS_HOST = new URL(MODELS_AT).host;
 
 const folder = () => new Directory(Paths.document, 'translate');
 const modelFile = (m: Model) => new File(folder(), m.file);
@@ -72,10 +68,11 @@ async function downloadOne(m: Model, onProgress: (received: number) => void, sig
   const dir = folder();
   if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
   const part = partFile(m);
+  const from = (await loadModelsServer()) + m.file;
   for (let tries = 1; ; tries++) {
     try {
       if (part.exists) part.delete();
-      await File.downloadFileAsync(MODELS_AT + m.file, part, {
+      await File.downloadFileAsync(from, part, {
         idempotent: true,
         signal,
         onProgress: ({ bytesWritten }) => onProgress(bytesWritten),

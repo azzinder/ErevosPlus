@@ -85,7 +85,6 @@ export const relayInvites: Record<string, string> = {
   "With your {name} account, in the browser: you type the password there only, and whoever runs the server sees your user name.": "Con il tuo account {name}, nel browser: la password la scrivi solo lì, e chi gestisce il server vede il tuo nome utente.",
   "Sign in on the page the browser opened, then tap Open Erevos there. If nothing opens, type here the code it shows.": "Accedi nella pagina che ha aperto il browser, poi tocca lì «Apri Erevos». Se non si apre nulla, scrivi qui il codice che mostra.",
   "{relay} offers no sign-in, or cannot be reached now. Whoever runs it can give you an invite instead.": "{relay} non offre l’accesso o non risponde ora. Chi lo gestisce può darti un invito al suo posto.",
-  "Sign in at another relay…": "Accedi a un altro relay…",
   "Back to {relay}": "Torna a {relay}",
   "Use": "Usa",
   "That is not a relay address. Type it as its operator gave it, such as relay.example.org.": "Non è un indirizzo di relay. Scrivilo come te l’ha dato chi lo gestisce, ad esempio relay.example.org.",

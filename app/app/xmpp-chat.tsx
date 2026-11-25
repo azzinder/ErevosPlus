@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardAwareScrollView } from '../components/keyboard';
+import { KeyboardPaddedView } from '../components/keyboard';
 import { LinkedText } from '../components/linked-text';
 import { ChatTorSwitch } from '../components/account-tor';
 import { accountNeverStraight, accountThroughTor } from '../lib/account-tor';
@@ -29,14 +29,16 @@ import { HeldBubbles, keepForLater, LaterSheet, RemindSheet, remindPlace, useKep
 import { useChatProtect } from '../components/chat-protect';
 import { askDelete, ChatTimer, CheckInPerson, SwitchLine, useGoneAt, useVanishOnce, VanishStrip } from '../components/chat-rules';
 import { hiddenOnScreen, NetworkChatNotify, useNetworkChatShown } from '../components/network-chat-notify';
-import { CarryButtons, MentionChips, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
+import { MentionChips, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
+import { laterWay, NetworkPanel, vanishWay } from '../components/network-panel';
 import { OwnName } from '../components/own-name';
 import { NetworkFile } from '../components/network-file';
-import { useNetworkThread } from '../components/network-thread';
+import { THREAD_FOOT, THREAD_GROWS, THREAD_PAGE, THREAD_SIDE, useNetworkThread } from '../components/network-thread';
+import { beforePanel } from '../components/panel-close';
 import { useSayTyping } from '../components/say-typing';
 import { PhoneSign, ShortcutTile, VideoSign } from '../components/shortcut-tile';
 import { IconButton } from '../components/composer';
-import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { Button, Card, Chip, Input, OptionList, Page, Row, SectionTitle, Sheet, Text, TextButton } from '../components/ui';
 import { ask } from '../lib/alert';
 import { currentCall } from '../lib/call';
@@ -62,7 +64,7 @@ import type { Nameable } from '../lib/mentions';
 import { cardFile, withNick } from '../lib/message-carry';
 import { actingWhere, useNetworkWhere } from '../lib/network-place';
 import { pickFile } from '../lib/pick-file';
-import { pickPhoto } from '../lib/pick-photo';
+import { CAN_TAKE_PHOTOS, pickPhoto } from '../lib/pick-photo';
 import { useSharedFiles, useSharedWords } from '../lib/shared-here';
 import { pickVideo } from '../lib/pick-video';
 import { stickerMeta } from '../lib/own-stickers';
@@ -332,7 +334,9 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   useGoneAt(nextGoesIn(chat));
   // The thread opens at its last message, with the arrows to its start, to where it was left and to its
   // end (components/network-thread.tsx).
-  const { scroll, scrollProps, threadProps, endProps, place, goTo, withArrows } = useNetworkThread({
+  const { scroll, scrollProps, threadProps, endProps, place, goTo, toEnd, withArrows } = useNetworkThread({
+    // The screen ends above the keyboard, as the Erevos chat's does (KeyboardPaddedView, below).
+    padded: true,
     list: shownList,
     idOf: (message) => message.id,
     mine: (message) => message.mine,
@@ -383,6 +387,18 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function throughTorNow(to: string) {
     await xmppSetChatTor(to, true);
     for (let waited = 0; waited < 60_000 && !xmppNow(where).online; waited += 500) await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  // "+" opens its panel under the field, as in an Erevos chat (components/network-panel.tsx): the
+  // keyboard goes first, or the panel would open behind it, and the thread is read at its end, so
+  // the panel comes into view as it is laid out.
+  function openPanel(open: boolean) {
+    if (open) {
+      beforePanel();
+      setNote('');
+      toEnd();
+    }
+    setAttaching(open);
   }
 
   // The preview of the first link in words typed: only in a chat without encryption (the preview
@@ -495,6 +511,8 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const answered = replying && !replying.deleted ? replying : undefined;
   const editing = editId ? byId.get(editId) : undefined;
   const changed = editing && !editing.deleted && editing.mine ? editing : undefined;
+  // The "+" panel shows only while the chat does, never while a message is being changed, nor while one waits for an answer on encryption.
+  const panelOpen = attaching && shown && !changed && unsent === null;
   const menuMessage = menuFor ? byId.get(menuFor) : undefined;
   const me = state.jid;
   const writerOf = (message: XmppMessage) => (message.mine ? t('You') : chat?.room ? message.by || jid : nameOf(state, jid));
@@ -779,7 +797,7 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardPaddedView bottom={insets.bottom} style={{ flex: 1 }}>
       {selection.on ? (
         <SelectBar
           count={selection.chosen.size}
@@ -810,13 +828,14 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         say={setNote}
       />
       {withArrows(
-        <KeyboardAwareScrollView
+        <ScrollView
           ref={scroll}
           style={{ flex: 1, backgroundColor: colors.ground }}
-          // As Page (components/ui.tsx) has it.
-          contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingBottom: insets.bottom + space.xl, gap: space.md }}
+          // As Page (components/ui.tsx) has it, and as tall as the screen, so the field sits at the
+          // bottom of a chat with few messages. The open panel ends it. A plain scrolling view: the
+          // screen itself ends above the keyboard (KeyboardPaddedView, above).
+          contentContainerStyle={[THREAD_PAGE, { paddingBottom: panelOpen ? 0 : THREAD_FOOT }]}
           keyboardShouldPersistTaps="handled"
-          bottomOffset={space.xl}
           {...scrollProps}
         >
           <Text variant="caption" tone="muted">
@@ -855,7 +874,7 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
             />
           ) : null}
 
-          <View style={{ gap: space.md }} {...threadProps}>
+          <View style={THREAD_GROWS} {...threadProps}>
             {shownList.map((message) => {
               // While messages are chosen, a tap or a hold on one adds it or takes it out.
               const choose = selection.on && menuable(message) ? () => selection.toggle(message.id) : undefined;
@@ -938,6 +957,8 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
               multiline
               placeholder={t('Message')}
               accessibilityLabel={changed ? t('Edit message') : t('Message')}
+              // The keyboard comes: the panel under the field gives way to it.
+              onFocus={() => setAttaching(false)}
             />
             <Button
               title={changed ? t('Save') : t('Send')}
@@ -950,26 +971,56 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           </Row>
           <LaterSheet visible={choosingLater} where={where} onClose={() => setChoosingLater(false)} onPick={(at) => void sendLater(at)} />
           <RemindSheet of={reminding} where={where} onClose={() => setReminding(null)} say={setNote} />
-          <Row {...endProps}>
-            {voice.recording ? (
-              <RecordingLine />
-            ) : (
-              <>
-                {!changed ? (
-                  <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} disabled={sending || unsent !== null}>
-                    <PlusIcon color={colors.text} size={22} />
-                  </IconButton>
-                ) : null}
-                {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
-              </>
-            )}
-            {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
-            <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
-              <OptionsIcon color={colors.text} size={22} />
-            </IconButton>
-            <MicButton voice={voice} disabled={sending || unsent !== null || !!changed} />
-          </Row>
-          {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
+          {/* Under the field: what goes with a message ("+"), the chat's options and the microphone;
+              under them the panel "+" opens, which ends the page while it is open. */}
+          <View style={{ gap: space.md }} {...endProps}>
+            <Row>
+              {voice.recording ? (
+                <RecordingLine />
+              ) : (
+                <>
+                  {!changed ? (
+                    <IconButton label={attaching ? t('Close') : t('Attach and more')} onPress={() => openPanel(!attaching)} disabled={sending || unsent !== null} state={{ expanded: attaching }}>
+                      {attaching ? <CloseIcon color={colors.text} size={22} /> : <PlusIcon color={colors.text} size={22} />}
+                    </IconButton>
+                  ) : null}
+                  {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
+                </>
+              )}
+              {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
+              <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+                <OptionsIcon color={colors.text} size={22} />
+              </IconButton>
+              <MicButton voice={voice} disabled={sending || unsent !== null || !!changed} />
+            </Row>
+            {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
+            <NetworkPanel
+              open={panelOpen}
+              onClose={() => setAttaching(false)}
+              shown={shown}
+              // With OMEMO what is sent is encrypted to them, files too; a channel, and a chat written without it, are not.
+              encrypted={!channel && !plain}
+              style={{ marginHorizontal: -THREAD_SIDE }}
+              tiles={[
+                { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto() },
+                CAN_TAKE_PHOTOS && { key: 'camera', title: t('Camera'), icon: 'camera', onPress: () => void sendPhoto('camera') },
+                { key: 'video', title: t('Video'), icon: 'photo', onPress: () => void sendVideo() },
+                { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendAnyFile() },
+                stickerPlace && { key: 'sticker', title: t('Sticker'), icon: 'sticker', onPress: () => setStickering(true) },
+                { key: 'place', title: t('Location'), icon: 'place', onPress: () => setPlacing(true) },
+              ]}
+              card={{ among, foot: channel || plain ? how : undefined, onSend: (card) => void sendCard(card) }}
+              photos={photos}
+              ways={[
+                vanishWay(vanish, () => setAttaching(false)),
+                laterWay(() => {
+                  if (!draft.trim()) return setNote(t('Write the message first, then choose when it goes.'));
+                  setAttaching(false);
+                  setChoosingLater(true);
+                }),
+              ]}
+            />
+          </View>
           <PlaceSheet visible={placing} onClose={() => setPlacing(false)} onSend={sendPlace} said={channel ? t('Everyone in this group can see it, and the servers.') : t('Everyone in this chat can see it.')} />
           <XmppStickerSheet
             visible={stickering}
@@ -996,26 +1047,6 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
             </ScrollView>
           </Sheet>
           <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={name} chat={lookChat} />
-          <Sheet visible={attaching} onClose={() => setAttaching(false)} title={t('Attach and more')}>
-            <View style={{ gap: space.sm }}>
-              <Row wrap>
-                <Button title={t('Photo')} kind="secondary" compact disabled={sending || unsent !== null || !!changed} onPress={() => { setAttaching(false); void sendPhoto(); }} />
-                <Button title={t('File')} kind="secondary" compact disabled={sending || unsent !== null || !!changed} onPress={() => { setAttaching(false); void sendAnyFile(); }} />
-                <Button title={t('Location')} kind="secondary" compact disabled={sending || unsent !== null} onPress={() => { setAttaching(false); setPlacing(true); }} />
-                <Button title={t('Sticker')} kind="secondary" compact disabled={sending || unsent !== null || !stickerPlace} onPress={() => { setAttaching(false); setStickering(true); }} />
-                <CarryButtons
-                  disabled={sending || unsent !== null}
-                  photos={photos}
-                  among={among}
-                  foot={channel || plain ? how : undefined}
-                  onCamera={() => { setAttaching(false); void sendPhoto('camera'); }}
-                  onVideo={() => { setAttaching(false); void sendVideo(); }}
-                  onCard={(card) => { setAttaching(false); void sendCard(card); }}
-                />
-                {vanish.on ? null : <Button title={t('Disappear')} kind="secondary" compact onPress={() => { setAttaching(false); vanish.toggle(); }} />}
-              </Row>
-            </View>
-          </Sheet>
           <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
             <View style={{ gap: space.md }}>
               {channel ? (
@@ -1162,10 +1193,10 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
             onReact={menuMessage && menuable(menuMessage) && (!room || menuMessage.sid) ? (emoji) => react(menuMessage.id, emoji) : undefined}
             actions={menuMessage ? actionsOf(menuMessage) : []}
           />
-        </KeyboardAwareScrollView>,
+        </ScrollView>,
         top,
       )}
-    </View>
+    </KeyboardPaddedView>
   );
 }
 

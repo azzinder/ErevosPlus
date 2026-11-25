@@ -54,7 +54,6 @@ export const newChatText: Record<string, string> = {
   "A phone has taken this invite already: it is not taken back.": "Jedan telefon je već uzeo ovu pozivnicu: ne može se povući.",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.": "Jedan link, za jednu osobu: njen telefon se njime pridružuje Erevosu, bez kucanja, i odmah ste kontakti. Ako još nema Erevos, pokaže joj gdje da ga nabavi.",
   "Send with…": "Pošalji pomoću…",
-  "Hide the QR code": "Sakrij QR kod",
   "Its QR code": "QR kod pozivnice",
   "For one person, until {when}. Whoever opens it first has it, so send it to them only.": "Za jednu osobu, do {when}. Ko je prvi otvori, ima je, zato je pošalji samo toj osobi.",
   "The invite is ready": "Pozivnica je spremna",
@@ -66,4 +65,5 @@ export const newChatText: Record<string, string> = {
   "New invite": "Nova pozivnica",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.": "Jedan link, za jednu osobu: njen telefon se njime pridružuje Erevosu, bez kucanja, i odmah ste kontakti. Otvara se samo na telefonu koji već ima Erevos.",
   "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.": "Skenira ga kamerom svog telefona, koji već ima Erevos: sam se podesi, bez relaya i kodova za kucanje, i postajete kontakti.",
+  "Their phone’s camera scans it. Tap it to show it large.": "Kamera drugog telefona ga skenira. Dodirnite ga da se prikaže veliko.",
 };

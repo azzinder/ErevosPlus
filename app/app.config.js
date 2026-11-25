@@ -26,6 +26,13 @@ const INSTALL_PACKAGES = 'android.permission.REQUEST_INSTALL_PACKAGES';
 // update and which then moves to app.erevos.plus (lib/update-channel.ts wireOf).
 const PACKAGES = { erevos: 'app.erevos', lite: 'app.erevos.lite', plus: process.env.EREVOS_BRIDGE === '1' ? 'app.erevos' : 'app.erevos.plus' };
 const NAMES = { erevos: 'Erevos', lite: 'Erevos Lite', plus: 'Erevos+' };
+// EREVOS_WEB_ORIGIN and EREVOS_START_RELAY name a community's own servers instead of LPHL's
+// (lib/servers.ts): the web server with Erevos's pages and models, which Android then opens in
+// Erevos for /c and /i (that server needs its own .well-known/assetlinks.json for this build's
+// key), and the relay a phone with no relay yet is offered to sign in at. Left out, LPHL's.
+const LPHL_WEB_HOST = 'erevos-web.lphl.nekten.eu';
+const WEB_ORIGIN = /^https:\/\/[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:[0-9]{1,5})?$/;
+const START_RELAY = /^wss:\/\/[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:[0-9]{1,5})?$/;
 
 module.exports = ({ config }) => {
   const build = Number(process.env.EREVOS_BUILD || 0);
@@ -38,6 +45,15 @@ module.exports = ({ config }) => {
   const erevosgram = process.env.EREVOS_TELEGRAM === '1';
   if (erevosgram && fdroid) throw new Error('The F-Droid build has no Telegram: EREVOS_TELEGRAM and EREVOS_DISTRIBUTION=fdroid do not go together');
   if (erevosgram && edition !== 'plus') throw new Error('Only Erevos+ has Telegram: EREVOS_TELEGRAM goes only with EREVOS_EDITION=plus');
+  const webOrigin = process.env.EREVOS_WEB_ORIGIN || '';
+  if (webOrigin && !WEB_ORIGIN.test(webOrigin)) throw new Error(`EREVOS_WEB_ORIGIN is "${webOrigin}": it must be an origin, like https://erevos.example.org, with no path`);
+  const startRelay = process.env.EREVOS_START_RELAY || '';
+  if (startRelay && !START_RELAY.test(startRelay)) throw new Error(`EREVOS_START_RELAY is "${startRelay}": it must be a relay, like wss://relay.example.org, with no path`);
+  const webHost = webOrigin ? new URL(webOrigin).host : LPHL_WEB_HOST;
+  const intentFilters = (config.android?.intentFilters || []).map((filter) => ({
+    ...filter,
+    data: (filter.data || []).map((data) => (data.host === LPHL_WEB_HOST ? { ...data, host: webHost } : data)),
+  }));
   return {
     ...config,
     // The name under the icon is the edition's: Erevos+, Erevos, or Erevos Lite.
@@ -46,6 +62,7 @@ module.exports = ({ config }) => {
     android: {
       ...config.android,
       package: PACKAGES[edition],
+      intentFilters,
       ...(build > 0 ? { versionCode: build } : {}),
       ...(fdroid
         ? {
@@ -54,7 +71,7 @@ module.exports = ({ config }) => {
           }
         : {}),
     },
-    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(erevosgram ? { edition: 'erevosgram' } : edition !== 'plus' ? { edition } : {}), ...(process.env.EREVOS_BRIDGE === '1' && edition === 'plus' ? { bridge: true } : {}) },
+    extra: { ...config.extra, ...(build > 0 ? { build } : {}), ...(fdroid ? { distribution } : {}), ...(erevosgram ? { edition: 'erevosgram' } : edition !== 'plus' ? { edition } : {}), ...(process.env.EREVOS_BRIDGE === '1' && edition === 'plus' ? { bridge: true } : {}), ...(webOrigin ? { webOrigin } : {}), ...(startRelay ? { startRelay } : {}) },
     plugins: [...(config.plugins || []), './plugins/with-release-signing', './plugins/with-native-programs', './plugins/with-unshrunk-release', './plugins/with-no-gms-entry', './plugins/with-launcher-icons', './plugins/with-movable-views', './plugins/with-latest-intent', './plugins/with-notices', ['./plugins/with-edition-modules', { edition }], ...(edition === 'plus' ? ['./plugins/with-session-maven'] : [])],
   };
 };

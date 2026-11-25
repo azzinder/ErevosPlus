@@ -55,9 +55,10 @@ import { QrCode } from '../components/QrCode';
 import { ContactPicker } from '../components/contact-picker';
 import { RelayInvites } from '../components/relay-invites';
 import { RelaySignIn } from '../components/relay-signin';
+import { OwnServerCard, ServerChoice } from '../components/own-server';
 import { WebsiteLink } from '../components/website-link';
 import { WelcomeInvite } from '../components/welcome-invite';
-import { ConnectStatus, MyQrCard, WayCard } from '../components/connect-cards';
+import { ConnectStatus, MyQrCard, QrTile, WayCard } from '../components/connect-cards';
 import { Doors, Joined, Rest, type Door } from '../components/new-chat-doors';
 import { NearMe } from '../components/near-me';
 import { canPairWithCode, TheirCode } from '../components/their-code';
@@ -110,6 +111,7 @@ import { forgetOffer, keepOffer, keptOffer, offerOf, takesOffer } from '../lib/r
 import { onWelcomeOffered, parseWelcome, START_RELAY, type Welcome } from '../lib/welcome';
 import { connectReach } from '../lib/connect-reach';
 import { oldToken, ownToken, signInRelay } from '../lib/relay-signin';
+import { ownServerAddress } from '../lib/own-server';
 import { hostOf } from '../lib/relay-host';
 import { circuitOf } from '../lib/tor-chats';
 import { canGroup, canMatrix, canNostrChat, canRelaySeal, canSealOpen, canTor, canXmpp, hasCore } from '../lib/core';
@@ -631,7 +633,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const [nearPlain, setNearPlain] = useState(false);
   // Under For advanced users: which way in shows what it needs, for a phone with no relay yet, and
   // what opens under Nearby, with no internet.
-  const [way, setWay] = useState<'invite' | 'own' | null>(null);
+  const [way, setWay] = useState<'invite' | 'own' | 'server' | null>(null);
   const [nearbyShown, setNearbyShown] = useState(nearbyOpen);
   // Where a phone with no relay yet signs in: LPHL's relay, or another typed in its place (Another
   // relay…), whose own provider then names the card (components/relay-signin.tsx).
@@ -1557,6 +1559,25 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     } catch (error) {
       setOwnQueue(null);
       setNote(`${joined} ${t('Its queue could not be made yet: {error}. Tap Create my relay queue.', { error: errorText(error) })}`);
+    }
+  }
+
+  // A phone with no relay yet, given a server of its own in plain words (components/own-server.tsx):
+  // its address and code are the relay's address and token, tried before anything is kept, so a
+  // mistyped one leaves the phone as it was. What went wrong, or null once the phone is on it.
+  async function joinOwnServer(typed: string, code: string): Promise<string | null> {
+    const url = ownServerAddress(typed);
+    if (!url) return t('That is not a server address. Type it as you were given it, such as relay.example.org.');
+    const token = code.trim();
+    try {
+      const ids = await createQueue({ url, token: token || undefined });
+      setRelayUrl(url);
+      setRelayToken(token);
+      setOwnQueue({ recipientHex: toHex(ids.recipientId), senderHex: toHex(ids.senderId) });
+      setNote(t('You are in, with the server at {server}. Now add your contacts: by their invite, or by the contact link or QR code they give you.', { server: hostOf(url) || url }));
+      return null;
+    } catch (error) {
+      return t('Erevos could not connect to {server}: {error}. Check the address and the code, and that the server is running.', { server: hostOf(url) || url, error: errorText(error) });
     }
   }
 
@@ -7819,6 +7840,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                     <Doors invites={canWelcome} onOpen={openDoor} />
                     <Rest
                       rows={[
+                        // A phone with no relay yet and no invite: its other ways in, by a name that says so.
+                        ...(newcomer ? [{ title: t('I have no invite'), onPress: () => openDoor('advanced') }] : []),
                         ...(ownLink ? [{ title: t('My link'), onPress: () => openDoor('link') }] : []),
                         // On a linked computer the phone keeps who is blocked.
                         ...(linkHere()
@@ -7852,8 +7875,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                       onNote={setNote}
                     />
                   ) : ownLink ? (
-                    <>
-                      <QrCode text={ownLink} size={200} />
+                    // A small tile beside what it is for; tapped, it shows large, with what it is under it.
+                    <QrTile text={ownLink} shown={shown}>
                       <Text variant="caption" tone="muted" style={styles.centered}>
                         {t('They scan it with the camera, and you are each other’s contacts at once.')}
                       </Text>
@@ -7862,7 +7885,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                           {t('With no relay, messages go through Nostr, or nearby.')}
                         </Text>
                       ) : null}
-                    </>
+                    </QrTile>
                   ) : null
                 }
                 ownLink={ownLink}
@@ -8004,13 +8027,11 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                 {newcomer ? (
                   <>
                     {/* A phone with no relay yet: the other ways in than an invite, for whoever looks for them. */}
-                    <Text variant="caption" tone="muted">
-                      {t('Other ways in: signing in to a relay, starting without one, a relay address and token')}
-                    </Text>
+                    <ServerChoice none={!!ownLink} />
                     <RelaySignIn url={signInAt} token="" onToken={(token, name) => void tookToken(signInAt, token, name, true)} onNote={setNote} card />
                     {otherRelay === null ? (
                       <Row wrap>
-                        <TextButton title={t('Sign in at another relay…')} onPress={() => setOtherRelay('')} />
+                        <TextButton title={t('My account is at another server…')} onPress={() => setOtherRelay('')} />
                         {signInAt !== START_RELAY ? <TextButton title={t('Back to {relay}', { relay: hostOf(START_RELAY) })} onPress={() => setSignInAt(START_RELAY)} /> : null}
                       </Row>
                     ) : null}
@@ -8041,11 +8062,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                         <TextButton title={t('Cancel')} onPress={() => setOtherRelay(null)} />
                       </Row>
                     ) : null}
+                    <OwnServerCard open={way === 'server'} onPress={() => setWay((was) => (was === 'server' ? null : 'server'))} onUse={joinOwnServer} />
                     {ownLink ? (
                       <WayCard
                         tint="green"
                         sign={<GlobeIcon color="#ffffff" size={20} />}
-                        title={t('Start without a relay')}
+                        title={t('Start without a server')}
                         line={
                           linkNostr
                             ? t('Give someone who uses Erevos your QR code or link. Texts go through Nostr.')

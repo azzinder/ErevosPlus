@@ -4,7 +4,6 @@
 
 // The words of Telegram (app/telegram.tsx, app/telegram-chat.tsx) in Serbo-Croatian (i18n/sh/index.ts).
 export const telegramText: Record<string, string> = {
-  "Write the message first, then choose when it goes.": "Prvo napiši poruku, pa izaberi kada ide.",
   "Telegram": "Telegram",
   "Chats with people on Telegram: Telegram can read them, unless both use ErevosGram encryption": "Razgovori s ljudima na Telegramu: Telegram ih može čitati, osim ako oboje koristite ErevosGram šifriranje",
   "Your Telegram chats, through Telegram. Telegram can read them, unless both of you use ErevosGram encryption. Not made by Telegram.": "Tvoji razgovori na Telegramu, preko Telegrama. Telegram ih može čitati, osim ako oboje koristite ErevosGram šifriranje. Nije napravljeno u Telegramu.",

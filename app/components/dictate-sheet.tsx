@@ -3,12 +3,13 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { useEffect, useRef, useState } from 'react';
+import { ModelsServer, useModelsHost } from './models-server';
 import { View } from 'react-native';
 
 import { useVoiceRecorder } from '../lib/audio';
 import { errorText } from '../lib/chat-screen';
 import { t } from '../lib/i18n';
-import { downloadModel, letGoOfModel, MODEL_BYTES, MODEL_HOST, modelHere, writeOut } from '../lib/speech';
+import { downloadModel, letGoOfModel, MODEL_BYTES, modelHere, writeOut } from '../lib/speech';
 import { useColors } from '../theme/context';
 import { MicIcon } from './icons';
 import { Button, Row, Sheet, Text } from './ui';
@@ -41,6 +42,8 @@ export function DictateSheet({ open, onWords, onClose }: {
   onWords: (words: string) => void;
   onClose: () => void;
 }) {
+  // Where the model comes from: LPHL's server, or a web folder the owner named (lib/models-server.ts).
+  const host = useModelsHost();
   const colors = useColors();
   const recorder = useVoiceRecorder();
   // The latest of what the bar gave, for a result that comes after it drew again.
@@ -143,12 +146,13 @@ export function DictateSheet({ open, onWords, onClose }: {
       {step.at === 'need' ? (
         <>
           <Text>
-            {t('To write what you say, Erevos needs a speech model ({size} MB), once. It is downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: your voice and its words never leave it.', { size: MB(MODEL_BYTES), host: MODEL_HOST })}
+            {t('To write what you say, Erevos needs a speech model ({size} MB), once. It is downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: your voice and its words never leave it.', { size: MB(MODEL_BYTES), host })}
           </Text>
           <Text variant="caption" tone="muted">
             {t('It hears about a hundred languages, Greek among them, and finds the one spoken. Best over Wi-Fi.')}
           </Text>
           <Button title={t('Download ({size} MB)', { size: MB(MODEL_BYTES) })} onPress={() => void download()} />
+          <ModelsServer />
         </>
       ) : step.at === 'downloading' ? (
         <>

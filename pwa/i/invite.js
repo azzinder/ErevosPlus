@@ -27,8 +27,10 @@
   const NAME_MAX = 120;
   const SHORTEST = 84;
   const LONGEST = 600;
-  // The link the app takes when pasted: TEXT_INVITE_PAGE in lib/text-invite.ts.
-  const PAGE = 'https://erevos-web.lphl.nekten.eu/i';
+  // The link the app takes when pasted: TEXT_INVITE_PAGE in lib/text-invite.ts, on any server.
+  // This page's own server: LPHL's, or a community's that serves Erevos's pages (lib/servers.ts).
+  const ORIGIN = typeof location === 'object' && /^https:\/\//.test(location.origin) ? location.origin : 'https://erevos-web.lphl.nekten.eu';
+  const PAGE = `${ORIGIN}/i`;
   const APK = 'https://github.com/azzinder/erevos-releases/releases/latest/download/erevos-android.apk';
   const DOWNLOADS = 'https://github.com/azzinder/erevos-releases/releases/latest';
 

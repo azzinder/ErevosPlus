@@ -47,4 +47,7 @@ export const guard: Record<string, string> = {
     "Βάλε την Κάμερα στις εφαρμογές του κινητού",
   "Take the Camera off the phone's apps":
     "Βγάλε την Κάμερα από τις εφαρμογές του κινητού",
+  "After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open, and a quiet notice says it is locked: a tap on it opens Erevos. Nothing comes until a space is open.": "Αφού ανάψει το τηλέφωνο, ή αφού ενημερωθεί το Erevos, το Erevos ξεκινά μόνο του, χωρίς ανοιχτό χώρο, και μια ήσυχη ειδοποίηση λέει ότι είναι κλειδωμένο: ένα πάτημα πάνω της ανοίγει το Erevos. Τίποτα δεν έρχεται μέχρι να ανοίξει ένας χώρος.",
+  "Erevos's camera at a tap, even while Erevos and the Collection are locked: what it takes shows only after the password, in the Collection (Open the camera without the password, in its settings). Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.":
+    "Η κάμερα του Erevos με ένα πάτημα, ακόμα και με το Erevos και τη Συλλογή κλειδωμένα: ό,τι τραβά φαίνεται μόνο μετά τον κωδικό, στη Συλλογή («Άνοιγμα κάμερας χωρίς κωδικό», στις ρυθμίσεις της). Κρατώντας πατημένο το εικονίδιο του Erevos εμφανίζεται επίσης η Κάμερα. Κανένα από τα δύο δεν φαίνεται όσο η Συλλογή είναι κλειστή ή η αριθμομηχανή στέκεται στη θέση του Erevos.",
 };

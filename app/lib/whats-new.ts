@@ -22,16 +22,55 @@ export type Changes = { forYou: string[]; underTheHood: string[] };
 export type WhatsNew = Changes & { version: string };
 
 export const NEXT: Changes = {
-  forYou: [
-    mark("**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram)."),
-    mark("**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen."),
-    mark("**Session and Signal in backups**: in Erevos+, a backup now holds Session's account and chats, sealed with its password, and a restore brings them back. It holds Signal's history too, but not its link to the account: register or link Signal again, and the old messages show beside the new ones, to read only. **Backups** and the message after a backup say that Telegram and Messenger are not in it, and what each needs after a restore. See [Backups](#backup)."),
-    mark("**Messenger's old chats no longer come back unread**: in Erevos+, after the phone restarted, Erevos+ showed old Messenger, Signal or Session chats as not read again, each with one message, although nothing new had come. Only a message that really comes now, or one that came while Erevos+ was closed, makes a chat unread. See [Messenger](#messenger)."),
-  ],
+  forYou: [],
   underTheHood: [],
 };
 
 export const VERSIONS: WhatsNew[] = [
+  {
+    version: '3.1.0-rc.3',
+    forYou: [
+      mark("**Release candidate 3**: Erevos+ with everything Erevos 3.0.0-rc.3 brought, and what is below."),
+      mark("**One + for every chat**: in Erevos+'s Telegram, Signal, Messenger and Session chats, **+** beside where you write opens a grid with icons, as in Erevos's own chats, in place of the grey buttons. See [Telegram](#telegram)."),
+      mark("**Where you write stays at the bottom**: in a Telegram, Signal, Messenger or Session chat with few messages, the field no longer sits under the last message in the middle of the screen."),
+      mark("**Session and Signal in backups**: in Erevos+, a backup now holds Session's account and chats, sealed with its password, and a restore brings them back. It holds Signal's history too, but not its link to the account: register or link Signal again, and the old messages show beside the new ones, to read only. **Backups** and the message after a backup say that Telegram and Messenger are not in it, and what each needs after a restore. See [Backups](#backup)."),
+      mark("**Messenger's old chats no longer come back unread**: in Erevos+, after the phone restarted, Erevos+ showed old Messenger, Signal or Session chats as not read again, each with one message, although nothing new had come. Only a message that really comes now, or one that came while Erevos+ was closed, makes a chat unread. See [Messenger](#messenger)."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.2.0-rc.3',
+    forYou: [
+      mark("**Release candidate 3**: Erevos Lite with what Erevos 3.0.0-rc.3 brought to its chats: it starts by itself after the phone turns on, shows nothing of a space before its password, sends backups to your own server by hand too, and can begin with a server of your own."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.0.0-rc.3',
+    forYou: [
+      mark("**Erevos starts by itself after the phone turns on**: where it receives in the background, it now does so unless you choose **Wait until I open it**, under **Settings** → **Notifications** → **In the background**; until now, only once you turned it on there. Before you open a space it reads no message and rings for no call: the spaces set to **Also while another space is open** say only that something came. See [Chat through a relay](#relay)."),
+      mark("**Nothing of a space shows before its password**: on Android, the phone covers Erevos's screens as it goes to the background, and back after the 30 seconds they show only after the password. **Lock now** covers them at once, and **Fingerprint or face** is there as soon as the password screen shows. See [Password lock](#lock)."),
+      mark("**Camera before the password**: on Android, with Erevos locked, the camera's icon opens the camera at once. What it takes is encrypted as it is taken and shows only after the password, in the Collection; to have the camera wait for the password, turn off **Open the camera without the password** in the Collection's settings. See [Collection](#collection)."),
+      mark("**Backups to your own server, by hand too**: **Make a backup** offers **To a server (WebDAV)** beside **Into a folder**, also with automatic backups off; once a server is set, its button sends a backup there at once. See [Backups](#backup)."),
+      mark("**Clear numbers for a backup**: once one is made, Erevos says how big it is in all, with the files beside it, when it began and when it ended, and what is not in it. See [Backups](#backup)."),
+      mark("**The Collection's server, checked and brought back**: in the Collection's settings, **Check** looks whether every piece of its files is on its WebDAV server, whole, and opens 4 picked at random; **Bring back the files not on this phone** fetches at once every file this phone lacks. See [Collection](#collection)."),
+      mark("**New chat, as it was meant to look**: **Near me**, **Far away** and **I have their code** are three large buttons, with **My link**, **Blocked contacts** and **For advanced users** small under them; the QR code for someone beside you shows small, and large at a tap, and an invite's link shows short on the page, though what is sent is always the whole link. See [Chat through a relay](#relay)."),
+      mark("**SMS conversations like Erevos's own chats**: **+** opens under the field as in them, with **Send later** among the rest, and in a short conversation the field stays at the bottom. See [SMS](#sms)."),
+      mark("**Nostr, Matrix and XMPP chats like Erevos's own**: **+** opens under the field as in them, with **Disappearing message** and **Send later**, and in a short chat the field stays at the bottom."),
+      mark("**Your own server from the first start**: on a phone with no relay yet, **I have no invite**, at the first start and on **New chat**, opens one screen that says where your messages wait and offers every way to begin: an account at a server such as LPHL, **I have a server of my own**, with its address and the code you were given, or **Start without a server**. See [Erevos on your own servers](#own-servers)."),
+      mark("**Speech and translation models from a server of yours**: where Erevos asks to download them, **Download from another server…** takes a web folder of yours that holds the same files; Erevos checks every file and refuses one that was changed. See [Erevos on your own servers](#own-servers)."),
+    ],
+    underTheHood: [
+      mark("The home screen no longer says, for a few seconds after the password on a phone with many chats, that there is no relay yet: the line waits until it knows."),
+      mark("On Android and in the desktop app, a backup made by hand is now read back from its folder, as the automatic ones are, and a backup sent to a server is checked there: it and every part it names are there, each of the size it was sent with."),
+      mark("After each copy of the Collection to its WebDAV server, Erevos lists the folder again: a piece that is not there whole goes again with the next copy."),
+      mark("On Android, the lock's 30 seconds are counted on a clock that changing the phone's date and time does not move."),
+      mark("What the camera takes with Erevos locked is encrypted for the Collection of the space opened last, with a key of its own: the locked camera keeps no key that opens anything."),
+      mark("A contact link made for a website is read when pasted or scanned whatever web server its page is on; until now, only from LPHL's."),
+      mark("An invite by SMS is read the same way, whatever web server its page is on."),
+      mark("LPHL's addresses are now in one place in the code: a community that builds Erevos for itself can name its own web server and first relay instead."),
+    ],
+  },
   {
     version: '3.1.0-rc.2',
     forYou: [

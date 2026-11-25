@@ -47,4 +47,7 @@ export const guard: Record<string, string> = {
     "Pôr a Câmera entre os apps do celular",
   "Take the Camera off the phone's apps":
     "Tirar a Câmera dos apps do celular",
+  "After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open, and a quiet notice says it is locked: a tap on it opens Erevos. Nothing comes until a space is open.": "Depois que o celular liga, ou que o Erevos é atualizado, o Erevos inicia sozinho, sem nenhum espaço aberto, e um aviso discreto diz que está bloqueado: um toque nele abre o Erevos. Nada chega até um espaço ser aberto.",
+  "Erevos's camera at a tap, even while Erevos and the Collection are locked: what it takes shows only after the password, in the Collection (Open the camera without the password, in its settings). Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.":
+    "A câmera do Erevos com um toque, mesmo com o Erevos e a Coleção bloqueados: o que ela captura só aparece depois da senha, na Coleção (“Abrir a câmera sem a senha”, nas configurações dela). Segurando o ícone do Erevos, também aparece Câmera. Nenhum dos dois aparece enquanto a Coleção está desligada ou a calculadora está no lugar do Erevos.",
 };

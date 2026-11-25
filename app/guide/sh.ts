@@ -526,9 +526,10 @@ e-mail da bi vas dosegao: ko god ima vaš link za kontakt može pisati u vaš re
    jednostavnim riječima kaže kako vas kontakti dosežu: preko vašeg relaya, preko Nostra bez relaya ili samo u
    blizini; kad sve radi, ne prikazuje se. S relayem, polje na samom vrhu nalazi kontakt po imenu ili dodaje link
    zalijepljen u njega. Zatim dolazi jedno pitanje, **Gdje je druga osoba?**, a svaki odgovor otvara vlastitu
-   stranicu: **Pored mene**, **Daleko** i **Imam njegov kod**, kao u koracima od 4 do 6 ispod. Tri reda ispod otvaraju
-   ostalo: **Moj link**, **Blokirani kontakti** i **Za napredne korisnike**, gdje su vlastite postavke relaya;
-   **Postavke** → **Relay i mreže** → **Relay** otvara Novi razgovor s tim postavkama otvorenim.
+   stranicu: **Pored mene**, **Daleko** i **Imam njegov kod**, kao u koracima od 4 do 6 ispod. Tri mala dugmeta ispod
+   otvaraju ostalo: **Moj link**, **Blokirani kontakti** i **Za napredne korisnike**, gdje su vlastite postavke
+   relaya, a telefon koji još nema relay ima još jedno, **Nemam pozivnicu**, koje otvara istu stranicu; **Postavke** →
+   **Relay i mreže** → **Relay** otvara Novi razgovor s tim postavkama otvorenim.
 2. Pod **Za napredne korisnike** upišite adresu u polje **Adresa relaya**: \`ws://<adresa računara>:7879\` za relay na
    vlastitoj mreži ili \`wss://relay.example.org\` za relay na internetu. Dodajte **Token** ako ga relay traži.
 3. Erevos sam pravi vaš red na njemu, nekoliko sekundi kasnije, i kaže **Red na relayu je napravljen**: sve radi, tekstovi, fotografije, glasovne poruke,
@@ -544,7 +545,7 @@ e-mail da bi vas dosegao: ko god ima vaš link za kontakt može pisati u vaš re
    nekoga ko je pored vas: QR kod za njegovu kameru, koji je pozivnica tamo gdje vaš relay dopušta ovom telefonu da
    poziva, a inače vaš link za kontakt; **Pokaži kod od 8 cifara**, koji druga osoba ukuca kao u koraku 6; **Skeniraj
    njegov** i **Ukucaj njegov kod**, za njen; i, na Androidu, **Nema Erevos na svom telefonu?**, koje joj daje samu
-   aplikaciju.
+   aplikaciju. QR kod se tamo prikazuje malen; dodir ga prikazuje velikim.
 5. **Daleko**, za nekoga ko nije s vama: stranica pravi pozivnicu, jedan link za jednu osobu, unutar poruke spremne za
    slanje. Dodirnite **Pošalji pomoću…** i izaberite aplikaciju kojom ide (u pregledniku i na računaru, **Kopiraj
    pozivnicu**), ili **QR kod pozivnice** da je pokažete kao kod. Ta osoba dodirne link: s Erevosom na njenom telefonu
@@ -554,7 +555,8 @@ e-mail da bi vas dosegao: ko god ima vaš link za kontakt može pisati u vaš re
    pridruži, ona se prikaže u vašim razgovorima. Više o pozivnicama u Pozivanje nekoga novog, niže. Tamo gdje ovaj
    telefon ne može napraviti pozivnicu, još bez relaya, u skrivenim razgovorima ili na povezanom računaru, stranica
    umjesto toga daje vaš link za kontakt za slanje: ta osoba ga otvori u Erevosu, ili ga zalijepi pod **Imam njegov
-   kod**.
+   kod**. Na stranici se link u poruci prikazuje skraćeno, bez sredine; ono što se šalje, kopira ili prikazuje kao QR
+   kod uvijek je cijeli link.
 6. **Imam njegov kod**, za ono što vam je druga osoba dala. Ukucajte 8 cifara koje njen telefon prikazuje pod **Pored
    mene** → **Pokaži kod od 8 cifara**, pored vas ili izgovorenih u pozivu: tada svaki telefon ima drugi kao kontakt.
    Sam kod nikad ne napušta telefone: dokazuju jedan drugom da ga znaju, a njihovi linkovi za kontakt idu šifrirani
@@ -564,9 +566,9 @@ e-mail da bi vas dosegao: ko god ima vaš link za kontakt može pisati u vaš re
    ekranu, ili **Iz fotografije njegovog QR koda** za snimak ekrana ili fotografiju koda koju vam je poslala. Erevos
    ga čita i odmah je dodaje. Na računaru, na Sailfish OS-u i u web-aplikaciji **Skeniraj njegov QR kod** traži
    fotografiju koda; na iPhoneu nudi i kameru. I skriveni razgovori imaju ovu stranicu.
-7. **Moj link**, u redovima ispod ta tri, je vlastiti QR kod i link za kontakt ovog telefona. Neka drugi telefon
-   skenira kod kamerom, a zatim otvori link u Erevosu. Ekran **Dodaj kontakt** pokazuje šta sadrži: dodirnite **Dodaj
-   u razgovore** samo ako ste ga sami skenirali. **Dodaj i poveži s jednim od mojih kontakata** također dodaje osobu,
+7. **Moj link**, ispod ta tri, je vlastiti QR kod i link za kontakt ovog telefona. Neka drugi telefon skenira kod
+   kamerom, a zatim otvori link u Erevosu. Ekran **Dodaj kontakt** pokazuje šta sadrži: dodirnite **Dodaj u
+   razgovore** samo ako ste ga sami skenirali. **Dodaj i poveži s jednim od mojih kontakata** također dodaje osobu,
    povezanu s kontaktom koji izaberete, čije ime razgovor preuzima. Kod je kratak, pa ga čita svaka kamera. Ko ga
    skenira, odgovara svojim linkom za kontakt, a zatim mu ovaj telefon prvi piše. Kod je nov svaki put kad se stranica
    otvori i vrijedi jednom: ko ga prvi skenira, odmah postaje kontakt; ko ga skenira poslije, ili uzme link koji
@@ -637,16 +639,16 @@ ikakvog upisivanja, a vi ste odmah kontakti jedno drugom, bez zahtjeva za razgov
 
 - **Da pozovete:** na početnom ekranu dodirnite **Pozovi** pored retka relaya ili, u **Novom razgovoru**, dodirnite
   **Daleko**. Pozivnica se napravi odmah i prikaže unutar poruke spremne za slanje: dodirnite **Pošalji pomoću…** i
-  izaberite aplikaciju, ili dodirnite **QR kod pozivnice** i pustite je da ga skenira kamerom svog telefona. Ispod
-  možete upisati za koga je (ime te osobe u vašim razgovorima) i **Vaše ime, za tu osobu**, ili oba polja ostaviti
-  prazna. Ako je opet otvorite dok je niko nije uzeo i dok joj ostaje bar jedan dan, prikazuje istu pozivnicu, pa ne
-  troši nijednu od 5 na čekanju ni od 10 dnevno; **Pozovite nekog drugog** pravi novu, a **Povuci ovu pozivnicu**
-  zatvara njen link dok je nijedan telefon nije uzeo. Pozivnica je za jednu osobu, na 7 dana, ili kraće ako pozivnica
-  za relay ističe ranije. Ko je prvi iskoristi, njegova je, pa je dajte samo toj osobi. Za nekoga ko je pored vas, i
-  **Pored mene** prikazuje takvu pozivnicu kao QR kod. Na Android telefonu s uključenim NFC-om možete je dati i
-  dodirom: prislonite poleđinu njenog telefona uz poleđinu svog dok se kod prikazuje, a njen telefon sam otvori link,
-  u Erevosu ako je instaliran, a inače na web stranici Erevosa, koja nudi {=Erevos}. Ako je NFC isključen, na stranici
-  piše da ga uključite u postavkama Androida.
+  izaberite aplikaciju, ili dodirnite **QR kod pozivnice** i pustite je da ga skenira kamerom svog telefona. **Za koga
+  je?**, ispod, otvara dva polja, ime te osobe u vašim razgovorima i **Vaše ime, za tu osobu**: popunite ih, ili oba
+  ostavite prazna. Ako je opet otvorite dok je niko nije uzeo i dok joj ostaje bar jedan dan, prikazuje istu
+  pozivnicu, pa ne troši nijednu od 5 na čekanju ni od 10 dnevno; **Pozovite nekog drugog** pravi novu, a **Povuci ovu
+  pozivnicu** zatvara njen link dok je nijedan telefon nije uzeo. Pozivnica je za jednu osobu, na 7 dana, ili kraće
+  ako pozivnica za relay ističe ranije. Ko je prvi iskoristi, njegova je, pa je dajte samo toj osobi. Za nekoga ko je
+  pored vas, i **Pored mene** prikazuje takvu pozivnicu kao QR kod. Na Android telefonu s uključenim NFC-om možete je
+  dati i dodirom: prislonite poleđinu njenog telefona uz poleđinu svog dok se kod prikazuje, a njen telefon sam otvori
+  link, u Erevosu ako je instaliran, a inače na web stranici Erevosa, koja nudi {=Erevos}. Ako je NFC isključen, na
+  stranici piše da ga uključite u postavkama Androida.
 - **Da se pridružite:** dodirnite link koji vam je ta osoba poslala, ili skenirajte pozivnicu kamerom i otvorite link
   u Erevosu: otvara **… vas poziva u Erevos**, a **Pridruži se** dodirnite samo ako je stigao od te osobe. Unutar
   Erevosa, i **Imam njegov kod** u **Novom razgovoru** prima pozivnicu: dodirnite **Skeniraj njegov QR kod** i snimite
@@ -656,10 +658,11 @@ ikakvog upisivanja, a vi ste odmah kontakti jedno drugom, bez zahtjeva za razgov
   osoba upisala.
 - **Ostali načini ulaska:** u **Novom razgovoru**, **Za napredne korisnike** otvara ostale, za one koji ih traže:
   **Prijava preko LPHL** prijavljuje ovaj telefon na LPHL-ov relay s LPHL nalogom, u pregledniku (pogledajte Prijava
-  na relay ispod), a zatim dodajete svoje kontakte putem njihovih pozivnica ili linkova; **Počnite bez relaya**, kao u
+  na relay ispod), a zatim dodajete svoje kontakte putem njihovih pozivnica ili linkova; **Počnite bez servera**, kao u
   Bez ikakvog relaya, pod Preko Nostra; i postavke relaya, kao u koracima od 1 do 3 iznad. Pozivnica je
   najjednostavniji način ulaska, a na relayu pozvani telefon ima samo ime od nasumičnih slova i cifara.
-- **Drugi relay:** ispod **Prijava preko LPHL**, **Prijava na drugi relay…** prima adresu drugog relaya, kako vam ju
+- **Vlastiti server:** na istom ekranu, pod **Gdje čekaju vaše poruke**, **Imam vlastiti server** prima adresu relaya koji je vaš, ili vaše porodice, grupe ili posla, i kod koji ste za njega dobili (token relaya; ostavite prazno ako ga relay nema). **Poveži** ga odmah isproba, i ništa se ne čuva ako server ne odgovori. Dok ovaj telefon još nema relay, i **Nemam pozivnicu** u **Novom razgovoru** otvara ovaj ekran.
+- **Drugi relay:** ispod **Prijava preko LPHL**, **Moj račun je na drugom serveru…** prima adresu drugog relaya, kako vam ju
   je dao onaj ko ga vodi, na primjer relay.example.org: kartica se tada prijavljuje tamo, s imenom naloga koje taj relay
   prima, ili kaže da nema prijavu, i tada vam onaj ko ga vodi može dati pozivnicu. **Nazad na** vraća LPHL-ov.
 - **Šta vaš relay mora dozvoliti:** vlastiti pristup je pozivnica na vaš relay (pogledajte Pozivnice na relay ispod),
@@ -1448,14 +1451,18 @@ Skriveni razgovori i računari to nemaju.
   Androidu, dok otvoreni prostor ima uključeno **Primaj i zvoni** i **Javi da je stigla poruka**. Za to telefon čuva,
   pored adresa gore, samo je li stigla poruka. Ko vidi razgovore otvorenog prostora vidi i tačku, i može pretpostaviti
   da postoji još jedan prostor.
-- **Kad se telefon uključi:** nakon pokretanja telefona Erevos ne radi dok ga ne otvorite. S **Pokreni kad se telefon
-  uključi** pod **Postavke** → **Obavijesti** → **U pozadini** (zadano je **Čekaj dok ga ne otvorim**) pokreće se sam
-  nakon što se telefon uključi, ili nakon ažuriranja Erevosa, bez otvorenog prostora: nijedan prostor se ne može
-  otvoriti bez svoje lozinke, jer Erevos ne čuva nijedan ključ na telefonu. Tada prostori s **I dok je otvoren drugi
-  prostor** već kažu „New message“, ili koliko ih je stiglo, nikad koji prostor, ni od koga ni što, a tiha obavijest
-  kaže „Locked“. Pozivi ne zvone, i ništa drugo ne stiže, dok ne otvorite neki prostor; prostori koji idu preko Tora
-  do tada ne kažu ništa. Ako takvog prostora nema, ili s **Bez obavijesti**, samo tiha obavijest kaže da je
-  zaključano, a dodir na nju otvara Erevos. Samo na Androidu.
+- **Kad se telefon uključi:** gdje Erevos prima u pozadini, pokreće se sam nakon što se telefon uključi, ili nakon
+  ažuriranja Erevosa: **Pokreni kad se telefon uključi**, pod **Postavke** → **Obavijesti** → **U pozadini**, zadana
+  je postavka, a **Čekaj dok ga ne otvorim** tamo ga ostavlja zatvorenim dok ga ne otvorite. Pokreće se bez otvorenog
+  prostora, jer se prostor s lozinkom otvara samo njome, a Erevos ne čuva nijedan ključ na telefonu. Zato, dok ne
+  otvorite neki prostor, ne čita nijednu poruku, ne prikazuje ništa od onoga što je stiglo i ne zvoni ni za jedan
+  poziv. Samo prostori s **I dok je otvoren drugi prostor** pitaju svoj relay je li nešto stiglo, a da to ne
+  preuzimaju: tiha obavijest kaže „Zaključano: samo javlja da su stigle poruke“, a kad nešto stigne, prikaže se „Nova
+  poruka“, ili koliko ih je stiglo, nikad koji prostor, ni od koga ni što; poziv se računa kao nešto što je stiglo, i
+  ne zvoni. Prostori koji idu preko Tora ne kažu ništa dok se neki prostor ne otvori. Ako takvog prostora nema, ili s
+  **Bez obavijesti**, samo tiha obavijest kaže „Zaključano. Otvori ga da opet primaš pozive i poruke.“, a dodir na nju
+  otvara Erevos. Ni Erevos bez lozinke se ne otvara sam: i on kaže da je zaključan dok ga ne otvorite. Čim je neki
+  prostor otvoren, prima i zvoni kao i uvijek. Samo na Androidu.
 
   **Zašto:** nakon ponovnog pokretanja Erevos vam nije mogao reći da poruke čekaju dok ga slučajno ne otvorite. Bez
   vaše lozinke ih i dalje ne može pročitati, pa ne kaže ništa više od onoga što kaže zatvoren prostor.
@@ -1682,6 +1689,21 @@ Svaki put je šifriran s kraja na kraj: nijedan relay ni telefon između ne mož
 | **Nije poslano. Relay više nema red ovog kontakta.** | Zamolite tu osobu da vam piše ili da vam da svoj novi link za kontakt. |
 | **Ova verzija ne može šifrirati, pa su razgovori preko relaya isključeni.** | Ponovo izgradite aplikaciju: ova verzija je starija od svog šifriranja. |
 
+## Erevos na vlastitim serverima {#own-servers}
+
+Erevosu nisu potrebni serveri onoga ko ga pravi. LPHL-ovi su samo ono što nudi prvo: za svaku stvar ispod možete koristiti svoj, iz aplikacije, bez instaliranja ičega drugog na telefon.
+
+- **Poruke, fotografije i datoteke:** čekaju, šifrirane s kraja na kraj, na malom serveru koji se zove relay. Da koristite svoj, ili svoje grupe: u **Novom razgovoru**, **Nemam pozivnicu**, zatim **Imam vlastiti server**, i upišite njegovu adresu i kod koji ste dobili. Kasnije su to dvoje adresa relaya i token pod **Za napredne korisnike**.
+- **Pozivi:** ništa više za podesiti. Relay za pozive dolazi s vašim relayem, pa s vlastitim relayem i vaši pozivi idu preko vašeg servera.
+- **Rezervne kopije:** pod **Rezervne kopije**, **I na server** šalje svaku kopiju, šifriranu, u folder na serveru koji izaberete, na primjer vaš Nextcloud. Pogledajte [Rezervne kopije](#backup).
+- [~] **Zbirka:** u njenim postavkama, **I na WebDAV serveru** čuva njene šifrirane datoteke na serveru koji izaberete. Pogledajte [Zbirka](#collection).
+- **Modeli za govor i prevođenje:** tamo gdje Erevos traži da ih preuzme, **Preuzmi s drugog servera…** prima vaš web folder s istim datotekama. Erevos provjerava svaku datoteku i odbija onu koja je izmijenjena.
+- **Bez ikakvog servera:** **Počnite bez servera**, na istom ekranu. Tekstovi tada idu preko javnih Nostr relaya, ili direktno između telefona koji su blizu. Pogledajte [Bez ikakvog relaya](#nostr).
+
+**Šta još stiže do LPHL-a:** samo telefon čiji je relay LPHL-ov pita LPHL-ov web server, jednom dnevno, je li izašla nova verzija (pogledajte [Obavijest kad izađe nova verzija](#updates)); **Provjeri ažuriranja** pita GitHub. {~Link za kontakt za web stranicu i pozivnica SMS-om otvaraju|Link za kontakt za web stranicu otvara} stranicu na LPHL-ovom web serveru, koji ne dobija ništa od onoga što link kaže: taj dio nikad ne napušta telefon. Iste stranice na drugom serveru također se čitaju, kad ih zalijepite ili skenirate.
+
+**Da sami postavite relay:** pogledajte [Vlastiti relay](#own-relay), odmah ispod.
+
 ## Vlastiti relay {#own-relay}
 
 Relay koji sami pokrećete je najsigurniji, jer onaj ko vodi relay vidi ko se na njega povezuje. Izvorni kôd sadrži
@@ -1890,7 +1912,7 @@ vas, tamo idu i slike, datoteke i glasovne poruke (pogledajte Bez ikakvog relaya
 Telefon bez relaya, bez pozivnice i bez LPHL naloga ipak može početi: njegov link za kontakt i QR kod kažu gdje čita na
 Nostru, i to je dovoljno za razgovor.
 
-- **Da počnete:** u ekranu **Novi razgovor**, pod **Za napredne korisnike**, dodirnite **Počnite bez relaya**, zatim
+- **Da počnete:** u ekranu **Novi razgovor**, pod **Za napredne korisnike**, dodirnite **Počnite bez servera**, zatim
   **Prikaži moj QR kod** ili **Podijeli moj link za kontakt**, i dajte ga nekome ko koristi {=Erevos}. Onaj ko ga doda
   piše vam preko Nostra i prikazuje se kao zahtjev za razgovor, koji prihvatate. I vi možete dodati njegov link ili QR
   kod, na isti način.
@@ -2116,9 +2138,9 @@ između.
 - **Niti:** zadržite poruku i izaberite **Odgovori u niti** da odgovorite u niti. Nit se otvara na zasebnom ekranu, a
   poruka s odgovorima kaže koliko ih ima; dodirnite je da otvorite nit. Aplikacije bez niti prikazuju odgovore kao
   obične odgovore.
-- **Ankete:** **Anketa**, ispod polja za poruku, postavlja pitanje s više opcija. Dodirnite opciju u oblačiću da je
-  izaberete, a ponovo da je povučete; svi vide ko je šta izabrao. Ko je napravio anketu može je zadržati i izabrati
-  **Završi anketu**: poslije toga nijedan glas ne važi.
+- **Ankete:** **Anketa**, pod **+**, postavlja pitanje s više opcija. Dodirnite opciju u oblačiću da je izaberete, a
+  ponovo da je povučete; svi vide ko je šta izabrao. Ko je napravio anketu može je zadržati i izabrati **Završi
+  anketu**: poslije toga nijedan glas ne važi.
 - **Lokacije:** **Lokacija** šalje gdje ste, jednom, kao Element; ide šifrovana kao razgovor i prikazuje se s **Otvori
   u kartama** na Androidu.
 - **Pregledi linkova:** kad su **Pregledi linkova** uključeni, kao za razgovore s kontaktima, prvi link u poruci ide s
@@ -2164,21 +2186,21 @@ razgovori odvojeni i označeni, za ljude do kojih biste inače došli samo preko
 - **Nacrti:** ono što upišete, a ne pošaljete, ostaje kao nacrt razgovora, šifrovano samo na ovom telefonu. Vraća se
   kad ponovo otvorite razgovor, i nakon što se Erevos zatvorio, a popis početnog ekrana ga pokazuje u redu razgovora
   kao **Nacrt**. Matrix nit nema svoj nacrt.
-- **Pošalji kasnije:** zadržite **Pošalji**, izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00**
-  ili bilo koji dan i vrijeme) i dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano
-  nakon poruka razgovora s njenim vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu
-  i u pozadini; inače čim se ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim
-  razgovorima odlazi samo dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna
-  kopija, a čije je vrijeme bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već
-  poslao.
+- **Pošalji kasnije:** zadržite **Pošalji**, ili, kad je poruka napisana, dodirnite **+**, a zatim **Pošalji
+  kasnije**, i izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00** ili bilo koji dan i vrijeme) i
+  dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano nakon poruka razgovora s njenim
+  vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu i u pozadini; inače čim se
+  ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim razgovorima odlazi samo
+  dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna kopija, a čije je vrijeme
+  bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već poslao.
 - **Pošalji ponovo:** vaša poruka koja pokazuje **Nije poslano** ima u svom meniju **Pošalji ponovo** i **Obriši**.
 - **Podsjeti me:** meni poruke ima **Podsjeti me**. Izaberite vrijeme: poruka, s imenom svog razgovora, ide u
   **Razgovor sa sobom** i tada vas podsjeti. Potrebno je da je **Erevos** uključen u [Moduli](#modules).
-- **Poruke koje nestaju:** **Poruke koje nestaju**, ispod polja za poruku, postavlja vrijeme za nove poruke, poslane
+- **Poruke koje nestaju:** **Poruke koje nestaju**, u **Opcije razgovora**, postavlja vrijeme za nove poruke, poslane
   ili primljene: 5 minuta, 1 sat, 1 dan ili 1 sedmicu nakon što je svaka poslana. Tada odlaze s ovog telefona, a vaše
   se povlače i za sve u razgovoru (njihove aplikacije ih prikazuju kao obrisane), ili čim Erevos ponovo radi. Ono što
-  su drugi poslali ostaje kod njih. **Nestajanje**, pored **Anketa** i **Lokacija**, to radi samo za sljedeću poruku.
-  Poruke koje su već u razgovoru ostaju.
+  su drugi poslali ostaje kod njih. **Poruka koja nestaje**, pod **+**, to radi samo za sljedeću poruku. Poruke koje
+  su već u razgovoru ostaju.
 - **Blokiranje:** **Blokiraj**, u razgovoru s jednom osobom, dodaje je na popis ignorisanih vašeg računa: ništa njeno
   ne stiže do vašeg Matrix računa, ni u jednoj od njegovih aplikacija, i ne javlja joj se. **Blokirani kontakti**, na
   Matrix ekranu, navodi ih, s **Odblokiraj**.
@@ -2236,15 +2258,14 @@ aplikacije: nikakav most nije između.
 - **Poruke od prije:** ono što je stiglo dok je Erevos bio zatvoren preuzima se iz arhive servera pri povezivanju, ako
   je server čuva. Poruka poslana prije nego što se ovaj uređaj prijavio, ili nije bila za njega, prikazuje se
   zaključana.
-- **Fotografije i datoteke:** **Fotografija** i **Datoteka**, ispod polja za poruku, šalju jednu do 50 MB, ili manje
-  ako vaš XMPP server prima manje, preko slanja datoteka servera. U šifrovanom razgovoru prvo se šifruje na ovom
-  telefonu, ključem napravljenim samo za nju, a ključ ide u poruci, šifrovan OMEMO-om, pa server čuva samo ono što ne
-  može pročitati; Conversations, Monal, Gajim i Dino je otvaraju. U razgovoru pisanom bez šifrovanja datoteka ide
-  kakva jeste. Fotografija, zvuk ili datoteka koja stigne preuzima se tek kad dodirnete **Prikaži fotografiju**,
-  **Pusti** ili **Sačuvaj**. Na Androidu, datoteke idu preko Tora kao i razgovor.
-  Dodirnite prikazanu fotografiju da je vidite preko cijelog ekrana, kao u razgovoru s kontaktom: dva prsta ili
-  dvostruki dodir je uvećavaju, okreće se s telefonom, a **Sačuvaj** je čuva (pogledajte Fotografije i datoteke, pod
-  [Razgovor preko relaya](#relay)).
+- **Fotografije i datoteke:** **Fotografija** i **Datoteka**, pod **+**, šalju jednu do 50 MB, ili manje ako vaš XMPP
+  server prima manje, preko slanja datoteka servera. U šifrovanom razgovoru prvo se šifruje na ovom telefonu, ključem
+  napravljenim samo za nju, a ključ ide u poruci, šifrovan OMEMO-om, pa server čuva samo ono što ne može pročitati;
+  Conversations, Monal, Gajim i Dino je otvaraju. U razgovoru pisanom bez šifrovanja datoteka ide kakva jeste.
+  Fotografija, zvuk ili datoteka koja stigne preuzima se tek kad dodirnete **Prikaži fotografiju**, **Pusti** ili
+  **Sačuvaj**. Na Androidu, datoteke idu preko Tora kao i razgovor. Dodirnite prikazanu fotografiju da je vidite preko
+  cijelog ekrana, kao u razgovoru s kontaktom: dva prsta ili dvostruki dodir je uvećavaju, okreće se s telefonom, a
+  **Sačuvaj** je čuva (pogledajte Fotografije i datoteke, pod [Razgovor preko relaya](#relay)).
 - **Naljepnice:** **Naljepnica** šalje vaše naljepnice napravljene od fotografija (**Moje**) kao fotografije, šifrirane
   kao i razgovor; druge XMPP aplikacije ih prikazuju kao fotografije. Tu su i ugrađeni kompleti: svaka naljepnica ide
   kao njena slika, napravljena na vašem uređaju. Paket naljepnica koji pošalje druga aplikacija (XEP-0449) ne preuzima
@@ -2348,19 +2369,19 @@ odvojeni i označeni, za ljude do kojih biste inače došli samo preko XMPP-a.
 - **Nacrti:** ono što upišete, a ne pošaljete, ostaje kao nacrt razgovora, šifrovano samo na ovom telefonu. Vraća se
   kad ponovo otvorite razgovor, i nakon što se Erevos zatvorio, a popis početnog ekrana ga pokazuje u redu razgovora
   kao **Nacrt**.
-- **Pošalji kasnije:** zadržite **Pošalji**, izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00**
-  ili bilo koji dan i vrijeme) i dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano
-  nakon poruka razgovora s njenim vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu
-  i u pozadini; inače čim se ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim
-  razgovorima odlazi samo dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna
-  kopija, a čije je vrijeme bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već
-  poslao.
+- **Pošalji kasnije:** zadržite **Pošalji**, ili, kad je poruka napisana, dodirnite **+**, a zatim **Pošalji
+  kasnije**, i izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00** ili bilo koji dan i vrijeme) i
+  dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano nakon poruka razgovora s njenim
+  vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu i u pozadini; inače čim se
+  ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim razgovorima odlazi samo
+  dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna kopija, a čije je vrijeme
+  bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već poslao.
 - **Pošalji ponovo:** vaša poruka koja pokazuje **Nije poslano** ima u svom meniju **Pošalji ponovo** i **Obriši**.
 - **Podsjeti me:** meni poruke ima **Podsjeti me**. Izaberite vrijeme: poruka, s imenom svog razgovora, ide u
   **Razgovor sa sobom** i tada vas podsjeti. Potrebno je da je **Erevos** uključen u [Moduli](#modules).
-- **Poruke koje nestaju:** **Poruke koje nestaju**, ispod polja za poruku, briše nove poruke s ovog telefona toliko
-  nakon slanja, a **Nestajanje** to radi samo za sljedeću poruku. Druga strana ih zadržava: XMPP nema načina da ih
-  tamo obriše. Poruke koje su već ovdje ostaju.
+- **Poruke koje nestaju:** **Poruke koje nestaju**, u **Opcije razgovora**, briše nove poruke s ovog telefona toliko
+  nakon slanja, a **Poruka koja nestaje**, pod **+**, to radi samo za sljedeću poruku. Druga strana ih zadržava: XMPP
+  nema načina da ih tamo obriše. Poruke koje su već ovdje ostaju.
 - **Prikazuj me kao da nisam na mreži:** na dnu razgovora s jednom osobom, **Prikazuj me kao da nisam na mreži**
   pokazuje vas toj osobi kao da niste na mreži, šta god vaš račun pokazuje svima ostalima, i ne govori joj ništa o
   tome šta čitate ili pišete, niti da su njene poruke stigle. Zajednička grupa vas i dalje pokazuje. Vrijedi samo za
@@ -2396,16 +2417,15 @@ privatne poruke kako traži NIP-17. To nije [Preko Nostra](#nostr), koji prenosi
   njih, šifrirana za svakoga, i nikoga se kasnije ne može dodati ni ukloniti; grupa s drugim ljudima je nova grupa.
   **Dajte ime grupi** preimenuje je za sve, s vašom sljedećom porukom. Poruka koju druga aplikacija pošalje vama i
   drugima također se prikazuje kao grupa, svaka poruka s onim tko ju je napisao.
-- **Fotografije i datoteke:** **Fotografija** i **Datoteka**, ispod polja za poruku u razgovoru, šalju jednu do 20 MB.
-  Šifrira se na ovom telefonu ključem napravljenim samo za nju (AES-GCM, kako traži NIP-17) i stavlja na Blossom
-  poslužitelj datoteka, koji čuva samo ono što ne može pročitati; njezin ključ ide u poruci, šifriran kao i poruke, a
-  slanje potpisuje ključ napravljen samo za to, pa poslužitelj ne saznaje čija je. Na Androidu datoteke idu preko Tora
-  kao i ovi razgovori. **Poslužitelji datoteka** kažu kamo idu, na prvi koji je primi: blossom.primal.net, blossom.band
-  i nostr.download, ako ih ne promijenite. Fotografija ili datoteka koja stigne dohvaća se tek kad dodirnete **Prikaži
-  fotografiju** ili **Sačuvaj**, i otvara se samo ako je ona koja je poslana.
-  Dodirnite prikazanu fotografiju da je vidite preko cijelog ekrana, kao u razgovoru s kontaktom: dva prsta ili
-  dvostruki dodir je uvećavaju, okreće se s telefonom, a **Sačuvaj** je čuva (pogledajte Fotografije i datoteke, pod
-  [Razgovor preko relaya](#relay)).
+- **Fotografije i datoteke:** **Fotografija** i **Datoteka**, pod **+**, šalju jednu do 20 MB. Šifrira se na ovom
+  telefonu ključem napravljenim samo za nju (AES-GCM, kako traži NIP-17) i stavlja na Blossom poslužitelj datoteka,
+  koji čuva samo ono što ne može pročitati; njezin ključ ide u poruci, šifriran kao i poruke, a slanje potpisuje ključ
+  napravljen samo za to, pa poslužitelj ne saznaje čija je. Na Androidu datoteke idu preko Tora kao i ovi razgovori.
+  **Poslužitelji datoteka** kažu kamo idu, na prvi koji je primi: blossom.primal.net, blossom.band i nostr.download,
+  ako ih ne promijenite. Fotografija ili datoteka koja stigne dohvaća se tek kad dodirnete **Prikaži fotografiju** ili
+  **Sačuvaj**, i otvara se samo ako je ona koja je poslana. Dodirnite prikazanu fotografiju da je vidite preko cijelog
+  ekrana, kao u razgovoru s kontaktom: dva prsta ili dvostruki dodir je uvećavaju, okreće se s telefonom, a
+  **Sačuvaj** je čuva (pogledajte Fotografije i datoteke, pod [Razgovor preko relaya](#relay)).
 - **Reakcije:** zadržite poruku da otvorite njen meni i reagirate s 👍, ❤️, 😂, 😮, 😢 ili 🙏, ili jednom od ostalih iza
   **+**; ispod se vide reakcije, posljednja od svake osobe, kako ih šalju druge Nostr aplikacije (NIP-25). Dodirnite
   reakciju ispod poruke da dodate istu, ili svoju da je povučete; aplikacije ostalih se mole da je uklone.
@@ -2516,19 +2536,19 @@ isti za sve kojima pišete, dok Erevosovi vlastiti razgovori skrivaju tko s kim 
 - **Nacrti:** ono što upišete, a ne pošaljete, ostaje kao nacrt razgovora, šifrovano samo na ovom telefonu. Vraća se
   kad ponovo otvorite razgovor, i nakon što se Erevos zatvorio, a popis početnog ekrana ga pokazuje u redu razgovora
   kao **Nacrt**.
-- **Pošalji kasnije:** zadržite **Pošalji**, izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00**
-  ili bilo koji dan i vrijeme) i dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano
-  nakon poruka razgovora s njenim vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu
-  i u pozadini; inače čim se ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim
-  razgovorima odlazi samo dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna
-  kopija, a čije je vrijeme bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već
-  poslao.
+- **Pošalji kasnije:** zadržite **Pošalji**, ili, kad je poruka napisana, dodirnite **+**, a zatim **Pošalji
+  kasnije**, i izaberite vrijeme (**Za 1 sat**, **Večeras u 20:00**, **Sutra u 09:00** ili bilo koji dan i vrijeme) i
+  dodirnite **Pošalji kasnije**. Poruka čeka na ovom telefonu, šifrovana, isprekidano nakon poruka razgovora s njenim
+  vremenom, i odlazi s ovog telefona u to vrijeme dok je Erevos otključan, na Androidu i u pozadini; inače čim se
+  ponovo otključa. Samo tekst. Dodirnite je da je pošaljete odmah ili obrišete. U skrivenim razgovorima odlazi samo
+  dok su otvoreni, osim ako primaju i zatvoreni. Poruka koju je vratila vraćena sigurnosna kopija, a čije je vrijeme
+  bilo prije vraćanja, ne odlazi sama: telefon s kojeg je kopija došla možda ju je već poslao.
 - **Podsjeti me:** meni poruke ima **Podsjeti me**. Izaberite vrijeme: poruka, s imenom svog razgovora, ide u
   **Razgovor sa sobom** i tada vas podsjeti. Potrebno je da je **Erevos** uključen u [Moduli](#modules).
-- **Poruke koje nestaju:** **Poruke koje nestaju**, ispod polja za poruku, briše nove poruke, poslane ili primljene, s
-  ovog telefona toliko nakon slanja. Vaše nose to vrijeme (NIP-40), pa ih njihova aplikacija i relayi koji ga poštuju
-  tada brišu; oni koji ga ne poštuju ih zadržavaju. **Nestajanje** to radi samo za sljedeću poruku. Poruka koja stigne
-  sa svojim vremenom odlazi u to vrijeme.
+- **Poruke koje nestaju:** **Poruke koje nestaju**, u **Opcije razgovora**, briše nove poruke, poslane ili primljene,
+  s ovog telefona toliko nakon slanja. Vaše nose to vrijeme (NIP-40), pa ih njihova aplikacija i relayi koji ga
+  poštuju tada brišu; oni koji ga ne poštuju ih zadržavaju. **Poruka koja nestaje**, pod **+**, to radi samo za
+  sljedeću poruku. Poruka koja stigne sa svojim vremenom odlazi u to vrijeme.
 - **Blokiranje:** **Blokiraj**, na dnu razgovora, odbacuje na ovom telefonu ono što taj ključ šalje, nepročitano; ne
   vraća se ako ga odblokirate. Ne javlja mu se: Nostr ne može nikoga spriječiti da vam piše. **Blokirani kontakti**,
   na ekranu Nostr razgovora, navodi ih, s **Odblokiraj**.
@@ -2722,13 +2742,13 @@ Pozivnica je podatkovni SMS, koji aplikacije za poruke ne prikazuju, pa telefon 
 - **Dvije SIM kartice:** SIM kartica za slanje prikazuje se iznad polja za poruku; jednom dodirnite **Izaberi SIM
   karticu** da Erevosu dozvolite da ih vidi. Vaš izbor se čuva za taj broj; do tada Erevos odgovara preko SIM kartice
   na koju je stigla posljednja poruka. Svaka poruka prikazuje svoju SIM karticu.
-- **SMS kasnije:** zadržite prst na okruglom dugmetu **Pošalji** iza polja i izaberite vrijeme, kao u razgovoru. SMS
-  se prikazuje na kraju razgovora označen sa **Zakazano**; dodirnite ga da ga otkažete. Odlazi u to vrijeme, i kad je
-  Erevos zatvoren i zaključan; ako je telefon tada isključen, čim se ponovo uključi i otključa. Do tada nije u SMS
-  porukama telefona, gdje bi ga druge aplikacije vidjele, a telefonska kompanija ga nema. Čeka zaključan ključem samog
-  telefona (Android Keystore), a ne lozinkom vašeg prostora, jer ga Android mora poslati dok je Erevos zaključan: to
-  je zaštita koju svaki SMS ima kad se pošalje, jer poslani SMS ostaju u SMS porukama telefona. Samo tekst, na jedan
-  broj.
+- **SMS kasnije:** zadržite prst na okruglom dugmetu **Pošalji** iza polja, ili, kad je SMS napisan, dodirnite **+**,
+  a zatim **Pošalji kasnije**, i izaberite vrijeme, kao u razgovoru. SMS se prikazuje na kraju razgovora označen sa
+  **Zakazano**; dodirnite ga da ga otkažete. Odlazi u to vrijeme, i kad je Erevos zatvoren i zaključan; ako je telefon
+  tada isključen, čim se ponovo uključi i otključa. Do tada nije u SMS porukama telefona, gdje bi ga druge aplikacije
+  vidjele, a telefonska kompanija ga nema. Čeka zaključan ključem samog telefona (Android Keystore), a ne lozinkom
+  vašeg prostora, jer ga Android mora poslati dok je Erevos zaključan: to je zaštita koju svaki SMS ima kad se
+  pošalje, jer poslani SMS ostaju u SMS porukama telefona. Samo tekst, na jedan broj.
 - **Linkovi:** web adresa u SMS-u je podvučena i otvara se kao u razgovoru, kad je vidite cijelu.
 - **Imena iz vaših kontakata:** na početku isključeno, pa se SMS brojevi prikazuju kao brojevi. **Imena**, iznad
   popisa u dijelu **SMS**, ih otključava (kao i **Prikazuj imena iz mojih kontakata** pod **Postavke** → **Telefon i SMS** → **SMS** →
@@ -2739,9 +2759,9 @@ Pozivnica je podatkovni SMS, koji aplikacije za poruke ne prikazuju, pa telefon 
   odgovoriti.
 - **Podsjeti me:** zadržite poruku za **Podsjeti me**: ide u **Razgovor sa sobom** s imenom razgovora, i podsjeti vas
   u vrijeme koje izaberete.
-- **Poruke koje nestaju:** s Erevosom kao SMS aplikacijom, **Poruke koje nestaju**, ispod reda **Običan SMS**
-  razgovora, briše njegove nove SMS-ove s ovog telefona toliko nakon slanja, ili čim Erevos ponovo radi. Drugi telefon
-  ih zadržava: SMS se tamo ne može obrisati. Poruke koje su već ovdje ostaju.
+- **Poruke koje nestaju:** s Erevosom kao SMS aplikacijom, **Poruke koje nestaju**, u **Opcije razgovora**, briše nove
+  SMS-ove tog razgovora s ovog telefona toliko nakon slanja, ili čim Erevos ponovo radi. Drugi telefon ih zadržava:
+  SMS se tamo ne može obrisati. Poruke koje su već ovdje ostaju.
 
 ### Šifrirani SMS kad ništa drugo ne radi
 
@@ -2782,7 +2802,7 @@ operateru ko s kim razgovara, što Erevos inače skriva; zato je SMS posljednji 
   kad od te osobe stigne novi SMS, ili s **Vrati iz arhive**.
 - **Imena grupnih MMS-ova:** zadržite grupni MMS i izaberite **Imenujte ga ovdje** da mu date vaše ime, samo na ovom
   telefonu.
-- **Ono što je razgovora:** ispod reda **Običan SMS**, razgovor ima **Izgled razgovora**, kao razgovor, i, s jednim
+- **Ono što je razgovora:** u **Opcije razgovora**, razgovor ima **Izgled razgovora**, kao razgovor, i, s jednim
   brojem, **Obavijesti**: utišajte ga na neko vrijeme ili zauvijek, ili mu dajte vlastiti zvuk, ili nijedan. To
   vrijedi dok je prostor otvoren; kad je zatvoren, svaki SMS obavještava kako kažu postavke.
 - **Opcije razgovora:** dugme s klizačima pored mjesta gdje pišete, ili **⋯** gore, otvara ih sve u jednoj urednoj
@@ -3114,8 +3134,8 @@ Pod **Postavke** → **Privatnost i sigurnost** → **Zaključavanje i druga loz
 Erevosa** ima dva izbora: **Bez zaključavanja** i **Lozinka**.
 
 1. Dodirnite **Lozinka**, upišite je dvaput (najmanje 4 znaka) i dodirnite **Sačuvaj**.
-2. Od tada Erevos traži lozinku svaki put kad se otvori, i ponovo nakon 30 sekundi u pozadini.
-3. **Promijeni lozinku** je mijenja, a **Zaključaj sada** odmah zaključava Erevos.
+2. Od tada Erevos traži lozinku svaki put kad se otvori, i ponovo nakon 30 sekundi u pozadini. Na Androidu, čim Erevos ode u pozadinu, telefon prekrije njegove ekrane običnim pokrivačem u boji njihove pozadine: ako se vratite u roku od 30 sekundi, pokrivač nestane prije nego što se išta vidi; ako se vratite kasnije, ostaje dok se ne pojavi ekran za lozinku, pa se ništa od prostora ne vidi prije lozinke. Tih 30 sekundi broji sat koji promjena vremena na telefonu ne pomjera.
+3. **Promijeni lozinku** je mijenja, a **Zaključaj sada** odmah zaključava Erevos: na Androidu se njegov ekran istog trena prekrije.
 
 - **Rečenica, ne kratak PIN:** ono što proverava lozinku čuva se u skladištu ključeva telefona, pa kopija memorije
   nije dovoljna za isprobavanje lozinki. Ali ko probije bezbednost samog telefona, kao što to rade forenzički alati na
@@ -3187,7 +3207,7 @@ Isključeno je dok to ne uključite.
 1. S uključenim zaključavanjem lozinkom, pod **Otisak prsta ili lice** dodirnite **Uključi**.
 2. Upišite lozinku prostora u kojem ste, dodirnite **Uključi** i dodirnite senzor (ili pogledajte telefon).
 3. Od tada ekran za lozinku ima dugme **Otisak prsta ili lice**. Lozinka uvijek radi, a
-   **Isključi** to isključuje.
+   **Isključi** to isključuje. Dugme je tu čim se pojavi ekran za lozinku.
 
 - **Samo prostor prve lozinke:** otisak prsta nikad ne otvara prostor druge lozinke, ni skrivene razgovore. Uključen
   u prostoru koji otvara druga lozinka, ne otvara ništa: prvi put kad se isproba, sam se isključuje, a lozinka otvara
@@ -3234,7 +3254,9 @@ postoje.
   razgovor i daje tom prostoru ovaj relay da ga zadrži, a relay tada može znati da su oba prostora na jednom telefonu.
 - **Diskrecija:** radi privatnosti, aplikacija nikad ne pokazuje je li postavljena druga lozinka. U web-aplikaciji s
   uključenim obavijestima dok je Erevos zatvoren, broj na ikoni Erevosa ostaje dok je Erevos zatvoren: ako se ne slaže
-  s prostorom koji otvarate, može nagovijestiti drugi (**Broj na ikoni** to isključuje).
+  s prostorom koji otvarate, može nagovijestiti drugi (**Broj na ikoni** to isključuje).{~ Na Androidu i ono što je
+  kamera snimila dok je Erevos bio zaključan može nagovijestiti drugi prostor dok čeka svoj: vidite **Kamera prije
+  lozinke** u [Zbirka](#collection).}
 
 ## Skriveni razgovori {#hidden}
 
@@ -3427,12 +3449,13 @@ Zbirka je šifrirano mjesto za vaše fotografije, datoteke i foldere, u svakom p
 - **Iz Zbirke van:** fotografija se otvara preko cijelog ekrana, za listanje i zumiranje, s **Pošalji u razgovor**, **Spremi na telefon**, **Informacije** i **Izbriši**. Spremanje na telefon ili otvaranje datoteke drugom aplikacijom izvodi je nešifriranu, a Erevos to kaže unaprijed. Slanje u razgovor ostavlja kopiju u Zbirci. Iz Zbirke skrivenog mjesta datoteke idu samo u razgovore i grupe tog skrivenog mjesta, nikad u one prostora, a Zbirka prostora nikad u skriveno mjesto. Prevucite, ili koristite strelice, za sljedeću ili prethodnu fotografiju; **Projekcija slajdova** gore ih prikazuje jednu za drugom, svake 4 sekunde, do dodira.
 - **Iz razgovora:** **+** ispod polja poruke, pa **Zbirka**, otvara Zbirku mjesta tog razgovora: dodirnite fotografije ili datoteke za slanje, pa **Pošalji**, i idu u taj razgovor.
 - **Sigurnosne kopije:** sigurnosna kopija sadrži Zbirku s ostatkom telefona. **Postavke** → **Podaci i uređaji** → **Zbirka**, ili tri tačke u Zbirci, mogu ostaviti tu Zbirku izvan kopija napravljenih dok je otvorena: svaka Zbirka ima svoj izbor.
-- **Na WebDAV serveru:** u podešavanjima Zbirke, **I na WebDAV serveru** kopira datoteke te Zbirke kakve jesu, i dalje šifrovane, u folder na serveru koji izabereš, Nextcloud, ownCloud ili bilo koji koji govori WebDAV: upiši adresu foldera, korisničko ime i, najbolje, lozinku za aplikaciju, pa dodirni **Poveži**; **Provjeri vezu** ih prvo provjeri. Svaki prostor i svako skriveno mjesto ima svoj izbor i svoj server; prvo se nudi server sigurnosnih kopija. Ide samo ono čega tamo još nema, dio po dio, dok je mjesto otvoreno, i nastavlja gdje je stalo kad mreža padne; datoteka obrisana ovdje briše se i tamo. Ništa drugo u folderu se ne dira. Server vidi samo dijelove sa nasumičnim imenima, u podfolderu sa nasumičnim imenom, i ne može ih otvoriti. Telefon kojem nedostaje datoteka, kao nakon sigurnosne kopije vraćene na novi telefon, uzima je odande kad je otvori, i čuva samo dijelove koji se otvaraju ključem datoteke. Erevos pokazuje koliko je od nje stiglo, s **Otkaži**: ono što je stiglo ostaje, a sljedeći put stiže samo ostatak; muzika, video snimci, PDF-ovi i **Otvori drugom aplikacijom** je takođe prvo preuzimaju. Dok je sve kopirano, sigurnosne kopije napravljene dok je mjesto otvoreno mogu izostaviti njegove dijelove, i nakon ponovnog pokretanja Erevosa, dok se ne doda ili obriše neka datoteka. Ima svoj prekidač **Preko Tora**, isključen dok ga ne uključite: uključen, kopija ide samo preko Tora, bez obzira na Tor podešavanje prostora, pa server ne vidi vašu IP adresu; sporije je i čeka dok se Tor pokreće. Gdje nema Tora, u aplikaciji za računar i u web-aplikaciji, server s uključenim prekidačem ne dobija ništa.
+- **Na WebDAV serveru:** u podešavanjima Zbirke, **I na WebDAV serveru** kopira datoteke te Zbirke kakve jesu, i dalje šifrovane, u folder na serveru koji izabereš, Nextcloud, ownCloud ili bilo koji koji govori WebDAV: upiši adresu foldera, korisničko ime i, najbolje, lozinku za aplikaciju, pa dodirni **Poveži**; **Provjeri vezu** ih prvo provjeri. Svaki prostor i svako skriveno mjesto ima svoj izbor i svoj server; prvo se nudi server sigurnosnih kopija. Ide samo ono čega tamo još nema, dio po dio, dok je mjesto otvoreno, i nastavlja gdje je stalo kad mreža padne; datoteka obrisana ovdje briše se i tamo. Ništa drugo u folderu se ne dira. Server vidi samo dijelove sa nasumičnim imenima, u podfolderu sa nasumičnim imenom, i ne može ih otvoriti. Telefon kojem nedostaje datoteka, kao nakon sigurnosne kopije vraćene na novi telefon, uzima je odande kad je otvori, i čuva samo dijelove koji se otvaraju ključem datoteke. Erevos pokazuje koliko je od nje stiglo, s **Otkaži**: ono što je stiglo ostaje, a sljedeći put stiže samo ostatak; muzika, video snimci, PDF-ovi i **Otvori drugom aplikacijom** je takođe prvo preuzimaju. Dok je sve kopirano, sigurnosne kopije napravljene dok je mjesto otvoreno mogu izostaviti njegove dijelove, i nakon ponovnog pokretanja Erevosa, dok se ne doda ili obriše neka datoteka. Ima svoj prekidač **Preko Tora**, isključen dok ga ne uključite: uključen, kopija ide samo preko Tora, bez obzira na Tor podešavanje prostora, pa server ne vidi vašu IP adresu; sporije je i čeka dok se Tor pokreće. Gdje nema Tora, u aplikaciji za računar i u web-aplikaciji, server s uključenim prekidačem ne dobija ništa. Ispod servera, red kaže koliko je vlastitih datoteka ove Zbirke, šifrovanih, tamo, i kad je posljednja kopija počela i završila; fotografije iz razgovora i rezervne kopije nisu među njima. Nakon svake kopije Erevos ponovo izlista folder, a dio koji tamo nije cijel ide ponovo sa sljedećom kopijom. **Provjeri** gleda bez ikakve promjene: svaki dio je tu, svoje veličine, a 4 od njih, nasumično izabrana, preuzimaju se i otvaraju svojim ključem, pa se vidi dio koji je server promijenio ili zamijenio. **Vrati datoteke kojih nema na ovom telefonu** odmah preuzima svaku datoteku koja ovdje nije cijela, kao nakon rezervne kopije vraćene na novi telefon, s **Otkaži**: ono što je stiglo ostaje, a Erevos kaže koliko ih se vratilo i koliko ih ni server nema cijelih.
 - **Sa Nextcloudom, kao LPHL-ovim:** u tom obrascu, i u **Dodaj server** rezervnih kopija, upiši adresu svog Nextclouda pod **Tvoj Nextcloud** i dodirni **Prijava preko Nextclouda**: prijavi se u pregledaču, kao u Fasouliju, preko Authentika ili kako se već tamo prijavljuje, i izaberi **Odobri pristup**. Erevos dobija svoju lozinku za aplikaciju i popunjava obrazac svojom fasciklom u tvojim datotekama, **Erevos/Collection** ili **Erevos/Backups**, napravljenom ako je nema, pored Fasoulijeve, koju nikad ne čita; zatim dodirni **Poveži**. Tu lozinku opozivaš u Nextcloud → Podešavanja → Bezbednost. Prijava slijedi prekidač **Preko Tora** servera za koji se prijavljuje: uključen, Erevos pita vaš Nextcloud samo preko Tora, ali sama stranica u pregledaču ide kao i uvijek.
 - **Na tvojim povezanim uređajima:** u podešavanjima Zbirke, **I na mojim povezanim uređajima** šalje tu Zbirku na [povezane uređaje](#devices) njenog prostora ili skrivenog mjesta, a prekidač važi za sve. Datoteka dodana, preimenovana, premještena ili obrisana na jednom takva je na svima. Sličice stižu odmah; sama datoteka stiže odmah na istom Wi-Fi-ju, inače kad je otvoriš, sa WebDAV servera ako ga Zbirka ima, ili preko relaya do 100 MB. Svaki komad se čuva tek kad se otvori ključem datoteke, a prekinut prijenos nastavlja od komada koji je falio. Datoteka se drugdje briše samo kad se obriše na jednom od tvojih uređaja, nikad zato što tamo fali. Zbirka skrivenog mjesta ide samo na povezane uređaje tog mjesta.
 - **Muzika, video i PDF:** PDF se čita stranicu po stranicu unutar Erevosa (Android 11 i noviji), dešifriran samo u memoriji. Muzika i video se reproduciraju direktno iz svojih šifriranih dijelova, nikad iz kopije: video preko cijelog ekrana, muzika sa sljedećima iz foldera, i nastavlja s ugašenim ekranom, s reprodukcijom, pauzom, sljedećim i prethodnim u obavještenju i na zaključanom ekranu telefona, i tamo samo s tim. Popis nastavlja nakon što se prostor zaključa, osim ako je u postavkama Zbirke uključeno **Zaustavi reprodukciju kad se prostor zaključa**; **Zaustavi** i dugme za paniku ga završavaju. Obavještenje pokazuje samo **Reprodukcija**, osim ako je uključeno **Prikaži naslov u obavještenju**. **Otvori drugom aplikacijom** predaje datoteku dok se dešifrira, bez kopije na telefonu, dok ne izađete iz Zbirke; druga aplikacija može zadržati svoju.
 - **Originali u galeriji:** s uključenim **Izbriši original iz galerije nakon uvoza**, fotografija ili video izabran iz datoteka telefona briše se iz galerije čim je u Zbirci, nakon što Android zatraži da potvrdite. Potreban je Android 11 ili noviji. Fotografija iz kamere nikad ne ide u galeriju. Ako Android ne kaže koja je to fotografija galerije (kao iz **Nedavnih** u biraču datoteka), original ostaje i Erevos to kaže: izaberite je iz **Slika** ili iz memorije telefona.
 - **Fotografije i video:** u **+**, **Kamera** je Erevosova vlastita: fotografije i video jedno za drugim, s blicem i prednjom kamerom, pravo u Zbirku, nikad u galeriju, i nijedna druga aplikacija ih ne vidi; fotografija se nikad nigdje ne zapisuje, ni na trenutak, i ne nosi ništa osim slike. Gdje ih proizvođač telefona nudi, kao na Pixelu, uz **Fotografija** stoje **Noć** i **Portret**, a gore **HDR uključen**: to su telefonovi vlastiti, rade se na njemu, i ništa ne izlazi. Dodir izoštrava i podešava svjetlo tamo; dva prsta zumiraju, a dugmad iznad okidača prelaze na široki objektiv (**0.5×**), **1×**, **2×** i **5×** gdje ih telefon ima. **Više** ima tajmer od 3 ili 10 sekundi, mrežu, okidač bez zvuka gdje zakon to dozvoljava, **Tamnije** i **Svjetlije** i, za video, HD, Full HD ili 4K, i **HDR video uključen** gdje ga telefon snima; u videu svjetlo može ostati uključeno. **Iz galerije** unosi mnogo fotografija i video snimaka odjednom; s uključenim **Izbriši original iz galerije nakon uvoza**, Android pita jednom za sve. HEIC i AVIF fotografije se vide među **Fotografijama** (Android prikazuje HEIC od 9 i AVIF od 12); ona koju uređaj ne može prikazati nudi **Otvori drugom aplikacijom**. Ispod fotografije, **Uredi** je okreće za po četvrtinu i reže okvirom koji vučete za uglove: čuva se kao nova fotografija, a ona od koje je nastala ostaje kakva je bila. **Informacije** kažu da li fotografija ili video govori gdje je snimljen. JPEG, PNG, WebP ili GIF fotografija sačuvana van ili otvorena drugom aplikacijom izlazi bez mjesta i vremena snimanja i bez telefona, osim ako je u postavkama Zbirke uključeno **Fotografije izlaze s mjestom i vremenom**; video ili HEIC fotografija izlazi kakva jeste, a Erevos prvo kaže ako navodi mjesto. Kamera, galerija i **Uredi** su na Androidu; u desktop aplikaciji i u pregledniku vide se i AVIF fotografije.
+- **Kamera prije lozinke:** dok je Erevos zaključan, ikona kamere i **Kamera** na ikoni Erevosa odmah otvaraju kameru, bez lozinke. Ono što snimi, fotografije i video snimci, šifrira se dok se snima, za prostor otvoren posljednji put, i vidi se tek nakon lozinke tog prostora, u njegovoj Zbirci; kamera kaže koliko je snimila. Ništa se drugo odande ne otvara, čak ni ono što je upravo snimila: zaključana kamera ne drži nijedan ključ koji išta otvara, pa ko drži telefon može dodati onome što čeka, a ništa od toga ne vidjeti. Ono što je snimljeno za jedan prostor nikad se ne vidi u drugom, a ono što čeka nije ni u jednoj rezervnoj kopiji: vraćanje rezervne kopije ga briše. **Otvori kameru bez lozinke**, u postavkama Zbirke, uključeno je dok ga ne isključite, i važi za ovaj telefon, isto u svakom prostoru; isključeno, ikona kamere čeka lozinku. Uključeno, može pokazati da neki prostor postoji: dok nešto čeka neki prostor, leži na telefonu kao datoteke koje drugi prostor, kad se otvori, ostavlja tamo, pa ko vidi taj drugi prostor i pročita telefon forenzičkim alatom nalazi ih. Gdje druga lozinka mora ostati neprimijećena, isključite ga. Ono što još čeka druge prostore briše se kad prostor prve lozinke ukloni svoju drugu lozinku ili isključi svoje zaključavanje. Radi kad se na telefonu jednom otvori prostor s lozinkom. Samo na Androidu.
 - **U aplikaciji za računar:** na Linuxu, macOS-u i Windowsu Zbirka radi i tamo, s datotekama šifriranim u Erevosovom vlastitom folderu na računaru. **+** donosi datoteku s računara, šifriranu dio po dio; kamere nema. Fotografije, tekstovi, PDF-ovi (u ugrađenom pregledniku PDF-a), muzika i video otvaraju se samo u memoriji Erevosa, nikad kao nešifrirana kopija na disku, do 1 GB svaki, a muzika i video bilo koje veličine, čitani dio po dio iz svojih šifriranih dijelova dok se puštaju; datoteka se zatvara, a muzika ili video staje, kad se prostor zaključa ili dugmetom za paniku. **Spremi na računar** prvo pita, kao na telefonu; **Otvori drugom aplikacijom** tu nema.
 - **U pregledniku i na Sailfish OS-u:** web aplikacija, i na početnom ekranu iPhonea, i {=Erevos} na Sailfish OS-u takođe imaju Zbirku. **+** donosi datoteku biračem datoteka samog preglednika, čitanu i šifriranu dio po dio, pa velika nikad nije cijela u memoriji; njeni dijelovi čuvaju se u prostoru preglednika, ili na Sailfish OS-u u Erevosovom vlastitom folderu. Preglednik daje stranici samo ograničen prostor: kad ga nestane, ništa od datoteke se ne čuva, i {=Erevos} to kaže. Fotografije, tekstovi, muzika i video otvaraju se samo u memoriji, do 256 MB svaki, i zatvaraju se kad se prostor zaključa; PDF se tu ne prikazuje: spremite ga da ga čitate drugom aplikacijom. **Spremi na ovaj uređaj** (na Sailfish OS-u **Spremi na telefon**) prvo pita; u pregledniku prima do 256 MB, dok Sailfish OS u Preuzimanja upisuje datoteku bilo koje veličine dio po dio. U pregledniku WebDAV server mora pustiti web aplikaciju, kao za rezervne kopije; Sailfish OS nema kopiju na WebDAV-u.
 - **Formati:** na Androidu se puštaju MP3, AAC i M4A, FLAC, Ogg i Opus, WAV, AMR, MP4, MKV, WebM i 3GP, i datoteka koja je stigla bez tipa, prepoznata po nastavku imena, kako datoteke iz drugih aplikacija često stižu. U aplikaciji za računar i u pregledniku, ono što preglednik od toga pušta: ni 3GP ni AMR.
@@ -3465,10 +3488,16 @@ svaka, čija imena počinju kao njeno; automatska kopija koristi i datoteke pret
 
 [+] Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom i lozinkom prvog prostora (kopija iz drugog prostora ih ima kakve ih je prvi prostor zadnji put sačuvao), a vraćanje ih donosi nazad, ponovo šifrovane na novom telefonu, čim se otvori prvi prostor; telefon s drugim Session nalogom zadržava svoj, i Erevos to kaže; njegove fotografije i datoteke ne, vraćaju se iz Sessiona dok ih čuva. Ulazi i istorija Signala, šifrovana na isti način: razgovori i poruke, bez svojih fotografija i datoteka, i ne njegova veza s nalogom, ključevi ni sigurnosni brojevi. Nakon vraćanja ponovo registruj ili poveži Signal; čim se otvori prvi prostor, stare poruke se vide u svojim razgovorima pored novih, samo za čitanje. Telegram i Messenger nisu u kopiji: njihove prijave su svakog telefona posebno. Nakon vraćanja ponovo se prijavi na njih; njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva. Ono što Erevos čuva o njima ulazi: obavještenja svakog razgovora, izbor Tora i ključevi ErevosGram šifriranja.
 
-1. **Napravi rezervnu kopiju:** dodirnite **Napravi rezervnu kopiju**, izaberite folder (na telefonu, memorijskoj
-   kartici ili u aplikaciji za oblak koja tamo prikazuje svoje foldere; na računaru, bilo koji folder), upišite
-   lozinku za rezervnu kopiju dvaput (najmanje 12 znakova, ili četiri riječi) i dodirnite **Sačuvaj**. U pregledniku rezervna kopija i njene datoteke idu u meni za dijeljenje ili u preuzimanja: prva odmah, a svaka sljedeća nakon dodira na **Sačuvaj**.
-   Dok se pravi, njena kartica kaže šta radi i dokle je stigla; kad završi, to kaže obavještenje.
+1. **Napravi rezervnu kopiju:** pod **Napravi rezervnu kopiju** dodirnite **U folder**, izaberite folder (na telefonu,
+   memorijskoj kartici ili u aplikaciji za oblak koja tamo prikazuje svoje foldere; na računaru, bilo koji folder),
+   upišite lozinku za rezervnu kopiju dvaput (najmanje 12 znakova, ili četiri riječi) i dodirnite **Sačuvaj**. U
+   pregledniku dugme je **Napravi rezervnu kopiju**, a rezervna kopija i njene datoteke idu u meni za dijeljenje ili u
+   preuzimanja: prva odmah, a svaka sljedeća nakon dodira na **Sačuvaj**. Dok se pravi, njena kartica kaže šta radi i
+   dokle je stigla. Zatim kaže kolika je ukupno, s datotekama pored nje, kad je počela i kad je završila (vrijeme u
+   njenom imenu je vrijeme početka), i šta nije u njoj: sam Erevos i ono što čuva samo neko vrijeme{~, ni datoteke
+   Zbirke koje su cijele na njenom WebDAV serveru, koje vraćanje uzima odande, ni Zbirka koju držite izvan rezervnih
+   kopija}. Na Androidu i u aplikaciji za računar Erevos je zatim ponovo čita iz foldera, kao nakon svake automatske
+   kopije (vidi **Provjera rezervnih kopija** niže), i kaže šta je našao. Kad završi, to kaže obavještenje.
 2. **Automatske rezervne kopije:** izaberite **Svakih 6 sati**, **Svaki dan** ili **Svake sedmice**, zatim folder i
    lozinku. Erevos pravi kopiju dok je otvoren, čim je posljednja starija od toga: kad se otvori prostor, svakih 15
    minuta, i kad ode u pozadinu, prije nego što se zaključa; nikad bez otvorenog prostora. Svaka upisuje samo
@@ -3477,15 +3506,20 @@ svaka, čija imena počinju kao njeno; automatska kopija koristi i datoteke pret
    koje ne treba nijedna od njih. Ona koja nije uspjela pokušava se ponovo kad se otvori prostor, ili sat kasnije.
    Ispod njih su **Napravi kopiju
    sada**, **Promijeni folder** i **Promijeni lozinku**; **Isključeno** ih zaustavlja, a napravljene ostaju u folderu.
-3. **I na server:** na Androidu i u aplikaciji za računar, s uključenim automatskim rezervnim kopijama, **Dodaj
-   server** pod **I na server** šalje svaku i u folder na serveru koji izaberete i koji govori WebDAV, kao vaš
-   vlastiti Nextcloud: upišite adresu foldera, korisničko ime i, najbolje, lozinku aplikacije samo za Erevos, pa
-   dodirnite **Poveži**. Server čuva 3 najnovije, sa svakom datotekom koja im treba, a svaka šalje samo ono što je
-   novo; **Prestani slati** to zaustavlja, a one koje su tamo ostaju. U web
-   aplikaciji, koja ne pravi rezervne kopije sama, **Pošalji rezervnu kopiju sada** šalje jednu tamo, s lozinkom koju
-   upisujete svaki put.
-   Svaki server ima prekidač **Preko Tora**, na svojoj kartici i u obrascu koji ga dodaje, isključen dok ga ne
-   uključite (vidi **Na serveru** niže).
+3. **I na server:** rezervna kopija može ići i u folder na serveru koji izaberete i koji govori WebDAV, kao vaš
+   vlastiti Nextcloud. **Dodaj server** pod **I na server**, ili **Na server (WebDAV)** pod **Napravi rezervnu
+   kopiju**, traži adresu foldera, korisničko ime i, najbolje, lozinku aplikacije samo za Erevos: dodirnite
+   **Poveži**, i prva kopija ide tamo. S uključenim automatskim rezervnim kopijama, na Androidu i u aplikaciji za
+   računar, svaka ide i tamo: server čuva 3 najnovije, sa svakom datotekom koja im treba, a svaka šalje samo ono što
+   je novo. Bez njih, i u web aplikaciji, koja ne pravi rezervne kopije sama, jedna ide tamo kad je pošaljete, s
+   lozinkom koju upisujete svaki put: **Pošalji rezervnu kopiju sada**, pod **I na server**. Pod **Napravi rezervnu
+   kopiju** dugme tada kaže **Na** i ime servera, i odmah šalje jednu; s uključenim automatskim kopijama šalje jednu
+   od njih, s njihovom lozinkom, i nijednu u folder. Erevos je zatim provjeri na serveru (vidi **Provjera rezervnih
+   kopija** niže) i kaže kolika je ukupno i kad je počela i završila. Kopija poslana s vlastitom lozinkom ide cijela
+   svaki put, sa svakom fotografijom i datotekom, a server čuva 3 najnovije cijele: Erevos to kaže dok traži lozinku,
+   a na Androidu i koliko je to otprilike. Isključivanje automatskih kopija zadržava server, za kopije koje šaljete;
+   **Prestani slati** ga zaboravlja, a one koje su tamo ostaju. Svaki server ima prekidač **Preko Tora**, na svojoj
+   kartici i u obrascu koji ga dodaje, isključen dok ga ne uključite (vidi **Na serveru** niže).
 4. **Vrati:** dodirnite **Vrati rezervnu kopiju**, izaberite datoteku i upišite njenu lozinku. Erevos pita još jednom,
    nađe datoteke rezervne kopije pored nje ili traži da ih izaberete, ili njihov folder (za automatsku kopiju
    izaberite svaku datoteku foldera, jer neke njegove datoteke mogu počinjati kao ime ranije kopije), a zatim stavlja rezervnu
@@ -3501,8 +3535,8 @@ svaka, čija imena počinju kao njeno; automatska kopija koristi i datoteke pret
 - **Automatske rezervne kopije čuvaju svoju lozinku na telefonu,** pa im lozinka ne treba svaki put. Onome ko otvori
   njihov folder i dalje trebaju lozinke prostora da bi čitao razgovore.
 - **Šta zauzima prostor:** na Androidu, **Izmjeri** pod **Šta zauzima prostor** pokazuje koliko prostora Erevos zauzima na telefonu, po vrsti: {~Zbirka s fotografijama i datotekama|fotografije i datoteke} iz razgovora, glasovne poruke, historija razgovora, Tor i ostaci nedovršenih upisa. Svaka automatska rezervna kopija sadrži sve to, pa se tako vidi zašto je velika. Gledaju se samo imena i veličine datoteka, na telefonu, i ništa se ne šalje.
-- **Ostaci:** fotografije i datoteke koje više ne navodi nijedan razgovor{~, Zbirka|} ni uvoz, poput onih iz uvoza prekinutog na pola, ostaju na telefonu i u svakoj rezervnoj kopiji. Pod **Ostaci** upiši jedan po jedan, ili više odjednom odvojenih zarezom ili razmakom, PIN svakog svog skrivenog razgovora i lozinku svakog drugog prostora, pa dodirni **Pronađi ostatke**: Erevos čita koje datoteke navodi svako od njih i ovaj prostor, i pokazuje koliko ne navodi nijedno. **Obriši ih** ih briše, nakon još jedne potvrde. Mjesto koje tamo nisi otvorio gubi svoje fotografije i datoteke: prvo otvori sva. Datoteka upisana u posljednjem danu nikad se ne uzima, a već napravljene rezervne kopije čuvaju sve.
-- **Provjera rezervnih kopija:** nakon svake automatske kopije Erevos je ponovo čita iz mape: otvara se svojom lozinkom, svaki dio koji navodi je tu, svoje veličine, a dva nasumično odabrana dijela čitaju se cijela. Na serveru tada gleda samo popis, pa se ništa ne preuzima. **Provjeri sada** uz to preuzima najnoviju kopiju sa servera i deset njenih dijelova. Dio koji nedostaje ili je oštećen prikazuje se crveno: napravi kopiju sada, pa provjeri ponovo. **Potpuna provjera mape** čita cijeli svaki dio tamo i uspoređuje ga sa SHA-256 koji je kopija za njega zapisala: nekoliko minuta za mnogo GB, i ništa ne napušta telefon.
+- **Ostaci:** fotografije i datoteke koje više ne navodi nijedan razgovor{~, Zbirka|} ni uvoz, poput onih iz uvoza prekinutog na pola, ostaju na telefonu i u svakoj rezervnoj kopiji. Pod **Ostaci** upiši jedan po jedan, ili više odjednom odvojenih zarezom ili razmakom, PIN svakog svog skrivenog razgovora i lozinku svakog drugog prostora, pa dodirni **Pronađi ostatke**: Erevos čita koje datoteke navodi svako od njih i ovaj prostor, i pokazuje koliko ne navodi nijedno. **Obriši ih** ih briše, nakon još jedne potvrde. Mjesto koje tamo nisi otvorio gubi svoje fotografije i datoteke: prvo otvori sva. Datoteka upisana u posljednjem danu nikad se ne uzima{~, kao ni ono što je kamera snimila dok je Erevos bio zaključan, dok čeka svoj prostor}, a već napravljene rezervne kopije čuvaju sve.
+- **Provjera rezervnih kopija:** nakon svake kopije u mapu, automatske ili napravljene ručno, na Androidu i u aplikaciji za računar, Erevos je ponovo čita iz mape: otvara se svojom lozinkom, svaki dio koji navodi je tu, svoje veličine, a dva nasumično odabrana dijela čitaju se cijela. Na serveru tada gleda samo popis: kopija i svaki dio koji navodi su tu, svaki veličine s kojom je poslan, pa se ništa ne preuzima. **Provjeri sada** uz to preuzima najnoviju kopiju sa servera i deset njenih dijelova. Dio koji nedostaje ili je oštećen prikazuje se crveno: napravi kopiju sada, pa provjeri ponovo. **Potpuna provjera mape** čita cijeli svaki dio tamo i uspoređuje ga sa SHA-256 koji je kopija za njega zapisala: nekoliko minuta za mnogo GB, i ništa ne napušta telefon.
 - **Na serveru:** rezervna kopija koja ide tamo zapečaćena je svojom lozinkom kao i ostale, a ta lozinka nikad ne
   napušta telefon, pa je server ne može otvoriti. Ime joj je nasumično, a datoteka izgleda kao nasumični bajtovi,
   jedne od nekoliko veličina, pa ni jedno ni drugo ne kaže da je Erevosova niti koliko tačno sadrži. Njene
@@ -3962,9 +3996,10 @@ tekst uvijek bio dobro čitljiv, i na staklu.
   ikonu s početnog ekrana: ponovo je dodajte s popisa aplikacija.
 - [~] **Kamera** (Android, pod **Ikone u pokretaču**): kamera Erevosa jednim dodirom. **Stavi Kameru među aplikacije
   telefona** dodaje posebnu ikonu (narandžastu na početku, u bilo kojoj boji), a kad držite ikonu Erevosa, nudi i
-  **Kameru**, koju možete prevući i na početni ekran. Oboje otvara kameru Zbirke, iza lozinke Erevosa i Zbirke, a ono
-  što snimi ide pravo u Zbirku. Nijedno se ne vidi dok je Zbirka isključena u **Moduli** ili dok kalkulator stoji
-  umjesto Erevosa.
+  **Kameru**, koju možete prevući i na početni ekran. Oboje otvara kameru Zbirke, a ono što snimi ide pravo u Zbirku:
+  dok je Erevos zaključan, odmah, a ono što je snimila vidi se tek nakon lozinke (**Otvori kameru bez lozinke**, u
+  postavkama Zbirke); kad je to isključeno, iza lozinke Erevosa i Zbirke. Nijedno se ne vidi dok je Zbirka isključena
+  u **Moduli** ili dok kalkulator stoji umjesto Erevosa.
 - **Tačke i brojevi na ikonama** (Android): Android daje tačku ili broj obavijesti aplikaciji, a ne jednoj od njenih
   ikona, pa na većini pokretača, poput onih na Pixelu i GrapheneOS-u, Samsungovog, Xiaomijevog i Kvaesitsa, svaka
   obavijest Erevosa (poruka, {~SMS, |}poziv, rođendan) izgleda jednako na ikonama Erevos{~, Telefon, SMS i| i} Kontakti; tu

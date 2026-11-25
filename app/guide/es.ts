@@ -539,8 +539,10 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    cerca; cuando todo funciona, no se muestra. Con un relay, un campo arriba del todo encuentra un contacto por su
    nombre o añade un enlace pegado en él. Luego viene una pregunta, **¿Dónde está la otra persona?**, y cada respuesta
    abre una página propia: **A mi lado**, **Lejos** y **Tengo su código**, como en los pasos 4 a 6 de abajo. Tres
-   filas debajo abren lo demás: **Mi enlace**, **Contactos bloqueados** y **Para usuarios avanzados**, donde están los
-   ajustes propios del relay; **Ajustes** → **Relay y redes** → **Relay** abre Chat nuevo con ellos abiertos.
+   botones pequeños debajo abren lo demás: **Mi enlace**, **Contactos bloqueados** y **Para usuarios avanzados**,
+   donde están los ajustes propios del relay, y un teléfono que aún no tiene relay tiene uno más, **No tengo
+   invitación**, que abre la misma página; **Ajustes** → **Relay y redes** → **Relay** abre Chat nuevo con ellos
+   abiertos.
 2. En **Para usuarios avanzados**, escribe la **Dirección del relay**: \`ws://<dirección del ordenador>:7879\` para un
    relay en tu propia red, o \`wss://relay.example.org\` para uno en internet. Añade el **Token** si el relay lo pide.
 3. Erevos crea tu cola en él por sí solo, unos segundos después, y dice **Cola del relay creada**: todo funciona, textos, fotos, mensajes de voz,
@@ -557,6 +559,7 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    código QR para su cámara, que es una invitación donde tu relay deja invitar a este teléfono, y si no tu enlace de
    contacto; **Mostrar un código de 8 dígitos**, que la otra persona escribe como en el paso 6; **Escanear el suyo** y
    **Escribir su código**, para el suyo; y, en Android, **¿No tiene Erevos en su teléfono?**, que le da la app misma.
+   El código QR de ahí se ve pequeño; un toque lo muestra grande.
 5. **Lejos**, para alguien que no está contigo: la página crea una invitación, un enlace para una persona, dentro de
    un mensaje listo para enviar. Toca **Enviar con…** y elige la app con la que va (en un navegador y en un ordenador,
    **Copiar la invitación**), o **El código QR de la invitación** para mostrarla como código. La otra persona toca el
@@ -566,7 +569,8 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    ella: en cuanto su teléfono se ha unido, aparece en tus chats. Más sobre las invitaciones en Invitar a alguien
    nuevo, más abajo. Donde este teléfono no puede crear una invitación, aún sin relay, en los chats ocultos o en un
    ordenador vinculado, la página da en su lugar tu enlace de contacto para enviar: la otra persona lo abre en Erevos,
-   o lo pega en **Tengo su código**.
+   o lo pega en **Tengo su código**. En la página, el enlace del mensaje se ve corto, sin su parte central; lo que se
+   envía, se copia o se muestra como código QR es siempre el enlace entero.
 6. **Tengo su código**, para lo que te ha dado la otra persona. Escribe los 8 dígitos que su teléfono muestra en **A
    mi lado** → **Mostrar un código de 8 dígitos**, a tu lado o dichos en una llamada: entonces cada teléfono tiene al
    otro como contacto. El código nunca sale de los teléfonos: se demuestran el uno al otro que lo conocen, y sus
@@ -577,13 +581,13 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    código QR** para una captura o una foto del código que te haya enviado. Erevos lo lee y lo añade al instante. En un
    ordenador, en Sailfish OS y en la app web, **Escanear su código QR** pide una foto de él; en un iPhone también
    ofrece la cámara. Los chats ocultos también tienen esta página.
-7. **Mi enlace**, en las filas bajo las tres, es el código QR y el enlace de contacto propios de este teléfono. Deja
-   que el otro teléfono escanee el código con su cámara, y que luego abra el enlace en Erevos. La pantalla **Añadir un
-   contacto** muestra lo que contiene: toca **Añadir al chat** solo si lo escaneaste tú. **Añadir y vincular a uno de
-   mis contactos** también lo añade, vinculado al contacto que elijas, cuyo nombre toma el chat. El código es corto,
-   así que cualquier cámara lo lee. Quien lo escanea responde con su propio enlace de contacto, y luego este teléfono
-   le escribe primero. El código es nuevo cada vez que se abre la página, y vale una vez: el primero que lo escanea es
-   un contacto al instante; quien lo escanee después, o tome el enlace que compartes, escribe primero una solicitud de
+7. **Mi enlace**, bajo las tres, es el código QR y el enlace de contacto propios de este teléfono. Deja que el otro
+   teléfono escanee el código con su cámara, y que luego abra el enlace en Erevos. La pantalla **Añadir un contacto**
+   muestra lo que contiene: toca **Añadir al chat** solo si lo escaneaste tú. **Añadir y vincular a uno de mis
+   contactos** también lo añade, vinculado al contacto que elijas, cuyo nombre toma el chat. El código es corto, así
+   que cualquier cámara lo lee. Quien lo escanea responde con su propio enlace de contacto, y luego este teléfono le
+   escribe primero. El código es nuevo cada vez que se abre la página, y vale una vez: el primero que lo escanea es un
+   contacto al instante; quien lo escanee después, o tome el enlace que compartes, escribe primero una solicitud de
    mensaje. **Código QR grande, sin internet** muestra en su lugar el código entero, que funciona cerca sin internet,
    y **Código QR pequeño** vuelve atrás. **Compartir**, debajo, envía un enlace corto que cualquier app te deja tocar;
    en Android abre Erevos, que pregunta antes de aceptarlo. Para añadir a alguien con su código QR de contacto, tu
@@ -653,17 +657,17 @@ nada, y sois contactos el uno del otro al instante, sin solicitud de mensaje.
 
 - **Para invitar:** en la pantalla de inicio, toca **Invitar** junto a la línea del relay o, en **Chat nuevo**, toca
   **Lejos**. La invitación se crea al instante y aparece dentro de un mensaje listo para enviar: toca **Enviar con…**
-  y elige la app, o toca **El código QR de la invitación** y deja que lo escanee con la cámara de su teléfono. Debajo
-  puedes escribir para quién es (su nombre en tus chats) y **Tu nombre, para esa persona**, o dejar ambos vacíos. Si
-  la abres de nuevo mientras nadie la haya tomado y le quede al menos un día, muestra la misma invitación, así que no
-  gasta ninguna de las 5 en espera ni de las 10 al día; **Invitar a otra persona** crea una nueva, y **Retirar esta
-  invitación** cierra su enlace mientras ningún teléfono la haya tomado. Es para una persona, por 7 días, o menos si
-  la invitación del relay termina antes. Quien la toma primero la tiene, así que dásela solo a esa persona. Para
-  alguien que está a tu lado, **A mi lado** también muestra una invitación así como código QR. En un teléfono Android
-  con NFC activado también puedes dársela por contacto: apoya la parte trasera de su teléfono contra la trasera del
-  tuyo mientras se muestra el código, y su teléfono abre el enlace solo, en Erevos si está instalado, y si no en la
-  página web de Erevos, que ofrece {=Erevos}. Si el NFC está apagado, la página te dice que lo actives en los ajustes de
-  Android.
+  y elige la app, o toca **El código QR de la invitación** y deja que lo escanee con la cámara de su teléfono. **¿Para
+  quién es?**, debajo, abre dos campos, su nombre en tus chats y **Tu nombre, para esa persona**: rellénalos, o deja
+  ambos vacíos. Si la abres de nuevo mientras nadie la haya tomado y le quede al menos un día, muestra la misma
+  invitación, así que no gasta ninguna de las 5 en espera ni de las 10 al día; **Invitar a otra persona** crea una
+  nueva, y **Retirar esta invitación** cierra su enlace mientras ningún teléfono la haya tomado. Es para una persona,
+  por 7 días, o menos si la invitación del relay termina antes. Quien la toma primero la tiene, así que dásela solo a
+  esa persona. Para alguien que está a tu lado, **A mi lado** también muestra una invitación así como código QR. En un
+  teléfono Android con NFC activado también puedes dársela por contacto: apoya la parte trasera de su teléfono contra
+  la trasera del tuyo mientras se muestra el código, y su teléfono abre el enlace solo, en Erevos si está instalado, y
+  si no en la página web de Erevos, que ofrece {=Erevos}. Si el NFC está apagado, la página te dice que lo actives en los
+  ajustes de Android.
 - **Para unirse:** toca el enlace que te ha enviado, o escanea la invitación con la cámara y abre el enlace en Erevos:
   abre **… te invita a Erevos**, y tocas **Unirse** solo si viene de esa persona. Dentro de Erevos, **Tengo su
   código** en **Chat nuevo** también acepta una invitación: toca **Escanear su código QR** y haz una foto de la
@@ -674,10 +678,11 @@ nada, y sois contactos el uno del otro al instante, sin solicitud de mensaje.
 - **Las otras formas de entrar:** en **Chat nuevo**, **Para usuarios avanzados** abre las demás, para quien las
   busque: **Iniciar sesión con LPHL** inicia sesión en el relay de LPHL desde este teléfono con una cuenta LPHL, en el
   navegador (ver Iniciar sesión en el relay más abajo), y luego añades a tus contactos con sus invitaciones o enlaces;
-  **Empezar sin relay**, como en Sin ningún relay, en A través de Nostr; y los ajustes del relay, como en los pasos 1
+  **Empezar sin servidor**, como en Sin ningún relay, en A través de Nostr; y los ajustes del relay, como en los pasos 1
   a 3 de arriba. Una invitación es la forma más sencilla de entrar, y en el relay un teléfono invitado solo tiene un
   nombre de letras y cifras al azar.
-- **Otro relay:** debajo de **Iniciar sesión con LPHL**, **Iniciar sesión en otro relay…** toma la dirección de otro
+- **Un servidor propio:** en la misma pantalla, bajo **Dónde esperan tus mensajes**, **Tengo un servidor propio** toma la dirección de un relay que es tuyo, o de tu familia, tu grupo o tu trabajo, y el código que te dieron para él (el token del relay; déjalo vacío si el relay no tiene). **Conectar** lo prueba al momento, y no se guarda nada si el servidor no responde. Mientras este teléfono no tiene relay todavía, **No tengo invitación** en **Chat nuevo** abre también esta pantalla.
+- **Otro relay:** debajo de **Iniciar sesión con LPHL**, **Mi cuenta está en otro servidor…** toma la dirección de otro
   relay, tal como te la dio quien lo gestiona, por ejemplo relay.example.org: la tarjeta inicia sesión allí, con el
   nombre de las cuentas que acepta ese relay, o dice que no ofrece inicio de sesión, y entonces quien lo gestiona puede
   darte una invitación. **Volver a** trae de nuevo el de LPHL.
@@ -1504,15 +1509,18 @@ que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
   sonar** y **Avisar de mensajes nuevos** activados. Para ello el teléfono guarda, junto a las direcciones de arriba,
   solo si llegó un mensaje. Quien vea los chats del espacio abierto ve también el punto, y puede sospechar que hay
   otro espacio.
-- **Cuando se enciende el teléfono:** después de que el teléfono arranca, Erevos no funciona hasta que lo abres. Con
-  **Iniciar al encender el teléfono** en **Ajustes** → **Notificaciones** → **En segundo plano** (por defecto es
-  **Esperar a que yo lo abra**), se inicia solo tras encender el teléfono, o tras actualizar Erevos, sin ningún
-  espacio abierto: ningún espacio puede abrirse sin su contraseña, ya que Erevos no guarda ninguna clave en el
-  teléfono. Entonces los espacios con **También mientras otro espacio está abierto** ya dicen «New message», o cuántos
-  llegaron, nunca qué espacio, ni quién o qué, y un aviso discreto dice «Locked». Las llamadas no suenan, y nada más
-  llega, hasta que abras un espacio; los espacios que van por Tor no dicen nada hasta entonces. Si no hay ningún
-  espacio así, o con **Sin aviso**, solo un aviso discreto dice que está bloqueado, y al tocarlo se abre
-  Erevos. Solo en Android.
+- **Cuando se enciende el teléfono:** donde Erevos recibe en segundo plano, se inicia solo tras encender el teléfono,
+  o tras actualizar Erevos: **Iniciar al encender el teléfono**, en **Ajustes** → **Notificaciones** → **En segundo
+  plano**, es lo predeterminado, y **Esperar a que yo lo abra** ahí lo deja cerrado hasta que lo abras. Se inicia sin
+  ningún espacio abierto, ya que un espacio con contraseña solo se abre con ella y Erevos no guarda ninguna clave en
+  el teléfono. Así que, hasta que abras un espacio, no lee ningún mensaje, no muestra nada de lo que llegó y no suena
+  para ninguna llamada. Solo los espacios con **También mientras otro espacio está abierto** preguntan a su relay si
+  llegó algo, sin recogerlo: un aviso discreto dice «Bloqueado: solo avisa de que llegaron mensajes», y cuando llega
+  algo se ve «Mensaje nuevo», o cuántos llegaron, nunca qué espacio, ni quién o qué; una llamada cuenta como algo que
+  llegó, y no suena. Los espacios que van por Tor no dicen nada hasta que se abre un espacio. Si no hay ningún espacio
+  así, o con **Sin aviso**, solo un aviso discreto dice «Bloqueado. Ábrelo para volver a recibir llamadas y
+  mensajes.», y al tocarlo se abre Erevos. Un Erevos sin contraseña tampoco se abre solo: también dice que está
+  bloqueado hasta que lo abras. En cuanto hay un espacio abierto, recibe y suena como siempre. Solo en Android.
 
   **Por qué:** tras un reinicio, Erevos no podía decirte que había mensajes esperando hasta que por casualidad lo
   abrías. Sin tu contraseña sigue sin poder leerlos, así que no dice más de lo que dice un espacio cerrado.
@@ -1753,6 +1761,21 @@ envías.
 | **No enviado. El relay ya no tiene la cola de este contacto.** | Pídele que te escriba, o su nuevo enlace de contacto. |
 | **Esta versión no puede cifrar, así que los chats por el relay están desactivados.** | Vuelve a compilar la app: esta compilación es anterior a su cifrado. |
 
+## Erevos en tus propios servidores {#own-servers}
+
+Erevos no necesita los servidores de quien lo hace. Los de LPHL son solo los que ofrece primero: para cada cosa de abajo puedes usar el tuyo, desde la app, sin instalar nada más en el teléfono.
+
+- **Mensajes, fotos y archivos:** esperan, cifrados de extremo a extremo, en un servidor pequeño llamado relay. Para usar el tuyo, o el de tu grupo: en **Chat nuevo**, **No tengo invitación**, luego **Tengo un servidor propio**, y escribe su dirección y el código que te dieron. Más tarde, esos dos son la dirección del relay y el token en **Para usuarios avanzados**.
+- **Llamadas:** nada más que ajustar. El relay de llamadas viene con tu relay, así que con un relay propio tus llamadas pasan también por tu servidor.
+- **Copias de seguridad:** en **Copias de seguridad**, **También a un servidor** envía cada copia, cifrada, a una carpeta en un servidor que eliges, como tu propio Nextcloud. Ver [Copias de seguridad](#backup).
+- [~] **La Colección:** en sus ajustes, **También en un servidor WebDAV** guarda sus archivos cifrados en un servidor que eliges. Ver [Colección](#collection).
+- **Modelos de voz y de traducción:** donde Erevos pide descargarlos, **Descargar de otro servidor…** toma una carpeta web tuya que tiene los mismos archivos. Erevos comprueba cada archivo y rechaza el que haya cambiado.
+- **Sin ningún servidor:** **Empezar sin servidor**, en la misma pantalla. Los textos van entonces por relays públicos de Nostr, o directamente entre teléfonos que están cerca. Ver [Sin ningún relay](#nostr).
+
+**Qué llega todavía a LPHL:** solo un teléfono cuyo relay es el de LPHL pregunta al servidor web de LPHL, una vez al día, si ha salido una versión nueva (ver [Aviso cuando sale una versión nueva](#updates)); **Buscar actualizaciones** pregunta a GitHub. {~Un enlace de contacto para un sitio web y una invitación por SMS abren|Un enlace de contacto para un sitio web abre} una página en el servidor web de LPHL, que no recibe nada de lo que dice el enlace: esa parte nunca sale del teléfono. Las mismas páginas en otro servidor también se leen, cuando las pegas o las escaneas.
+
+**Para montar un relay tú:** ver [Tener tu propio relay](#own-relay), a continuación.
+
 ## Tener tu propio relay {#own-relay}
 
 Un relay que gestionas tú es el más seguro, ya que quien gestiona un relay ve quién se conecta a él. El código fuente
@@ -1966,7 +1989,7 @@ relay entre vosotros, las imágenes, los archivos y los mensajes de voz van tamb
 Un teléfono sin relay, sin invitación y sin cuenta LPHL igualmente puede empezar: su enlace de contacto y su código QR
 dicen dónde lee en Nostr, y eso basta para hablar.
 
-- **Para empezar:** en **Chat nuevo**, en **Para usuarios avanzados**, toca **Empezar sin relay**, luego **Mostrar mi
+- **Para empezar:** en **Chat nuevo**, en **Para usuarios avanzados**, toca **Empezar sin servidor**, luego **Mostrar mi
   código QR** o **Compartir mi enlace de contacto**, y dáselo a alguien que use {=Erevos}. Quien lo añada te escribe por
   Nostr, y aparece como solicitud de mensaje, que aceptas. Tú también puedes añadir su enlace o su código QR, de la
   misma manera.
@@ -2205,9 +2228,9 @@ ningún puente se pone en medio.
 - **Hilos:** mantén pulsado un mensaje y elige **Responder en el hilo** para responder en un hilo. Un hilo se abre en
   su propia pantalla, y un mensaje con respuestas dice cuántas hay; tócalo para abrir el hilo. Las apps sin hilos
   muestran las respuestas como respuestas normales.
-- **Encuestas:** **Encuesta**, bajo el cuadro de mensaje, hace una pregunta con varias opciones. Toca una opción en la
-  burbuja para elegirla, y otra vez para retirarla; todos ven quién eligió qué. Quien hizo una encuesta puede
-  mantenerla pulsada y elegir **Terminar la encuesta**: después no cuenta ningún voto.
+- **Encuestas:** **Encuesta**, bajo **+**, hace una pregunta con varias opciones. Toca una opción en la burbuja para
+  elegirla, y otra vez para retirarla; todos ven quién eligió qué. Quien hizo una encuesta puede mantenerla pulsada y
+  elegir **Terminar la encuesta**: después no cuenta ningún voto.
 - **Ubicaciones:** **Ubicación** envía dónde estás, una vez, como hace Element; va cifrada como el chat y se muestra
   con **Abrir en mapas** en Android.
 - **Vistas previas de enlaces:** con **Vistas previas de enlaces** activadas, como en los chats con tus contactos, el
@@ -2257,21 +2280,22 @@ chats de Matrix van aparte y marcados, para las personas a las que solo llegarí
 - **Borradores:** lo que escribes y no envías queda como borrador del chat, cifrado solo en este teléfono. Vuelve
   cuando abres el chat otra vez, también después de que Erevos se cerró, y la lista de la pantalla de inicio lo
   muestra en la fila del chat como **Borrador**. Un hilo de Matrix no guarda borrador propio.
-- **Enviar más tarde:** mantén pulsado **Enviar**, elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana
-  09:00** o cualquier día y hora) y toca **Enviar más tarde**. El mensaje espera en este teléfono, cifrado, con borde
-  discontinuo después de los mensajes del chat y con su hora, y sale de este teléfono a esa hora mientras Erevos está
-  desbloqueado, en Android también en segundo plano; si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para
-  enviarlo ya o eliminarlo. En los chats ocultos sale solo mientras están abiertos, salvo que reciban también
-  cerrados. Uno que trajo de vuelta una copia de seguridad restaurada, cuya hora llegó antes de restaurarla, no sale
-  solo: el teléfono del que vino la copia puede haberlo enviado ya.
+- **Enviar más tarde:** mantén pulsado **Enviar**, o, con el mensaje escrito, toca **+** y luego **Enviar más tarde**,
+  y elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana 09:00** o cualquier día y hora) y toca **Enviar más
+  tarde**. El mensaje espera en este teléfono, cifrado, con borde discontinuo después de los mensajes del chat y con
+  su hora, y sale de este teléfono a esa hora mientras Erevos está desbloqueado, en Android también en segundo plano;
+  si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para enviarlo ya o eliminarlo. En los chats ocultos sale
+  solo mientras están abiertos, salvo que reciban también cerrados. Uno que trajo de vuelta una copia de seguridad
+  restaurada, cuya hora llegó antes de restaurarla, no sale solo: el teléfono del que vino la copia puede haberlo
+  enviado ya.
 - **Volver a enviar:** un mensaje tuyo que muestra **No enviado** tiene **Volver a enviar** y **Eliminar** en su menú.
 - **Recordarme:** el menú de un mensaje tiene **Recordarme**. Elige una hora: el mensaje, con el nombre de su chat, va
   a **Chat conmigo** y te lo recuerda entonces. Necesita **Erevos** activado en [Módulos](#modules).
-- **Mensajes temporales:** **Mensajes temporales**, bajo el campo de mensaje, fija un tiempo para los mensajes nuevos,
+- **Mensajes temporales:** **Mensajes temporales**, en **Opciones del chat**, fija un tiempo para los mensajes nuevos,
   enviados o recibidos: 5 minutos, 1 hora, 1 día o 1 semana después de enviarse cada uno. Entonces se van de este
   teléfono, y los tuyos se retiran también para todos en el chat (sus apps los muestran como eliminados), o en cuanto
-  Erevos vuelva a funcionar. Lo que enviaron los demás se queda con ellos. **Temporal**, junto a **Encuesta** y
-  **Ubicación**, lo hace solo para el siguiente mensaje. Los mensajes que ya están en el chat se quedan.
+  Erevos vuelva a funcionar. Lo que enviaron los demás se queda con ellos. **Mensaje temporal**, bajo **+**, lo hace
+  solo para el siguiente mensaje. Los mensajes que ya están en el chat se quedan.
 - **Bloquear:** **Bloquear**, en un chat con una persona, la añade a la lista de ignorados de tu cuenta: nada suyo
   llega a tu cuenta de Matrix, en ninguna de sus apps, y no se le avisa. **Contactos bloqueados**, en la pantalla de
   Matrix, los lista, con **Desbloquear**.
@@ -2333,15 +2357,14 @@ como esas apps: ningún puente se pone en medio.
 - **Mensajes de antes:** lo que llegó mientras Erevos estaba cerrado se trae del archivo del servidor al conectar, si el
   servidor lo guarda. Un mensaje enviado antes de que este dispositivo iniciara sesión, o no pensado para él, sale
   bloqueado.
-- **Fotos y archivos:** **Foto** y **Archivo**, bajo la caja del mensaje, envían uno de hasta 50 MB, o menos si tu
-  servidor de XMPP acepta menos, por la subida de archivos del servidor. En un chat cifrado se cifra antes en este
-  teléfono, con una clave hecha solo para él, y la clave va en el mensaje, cifrada con OMEMO, así que el servidor
-  guarda solo lo que no puede leer; Conversations, Monal, Gajim y Dino lo abren. En un chat escrito sin cifrado el
-  archivo va tal cual. Una foto, un sonido o un archivo que llega se descarga solo al tocar **Mostrar foto**,
-  **Reproducir** o **Guardar**. En Android, los archivos van por Tor como el chat.
-  Toca una foto que se muestra para verla en toda la pantalla, como en el chat de un contacto: dos dedos o un doble
-  toque la amplían, gira con el teléfono, y **Guardar** la conserva (ver Fotos y archivos, en [Chatear a través de un
-  relay](#relay)).
+- **Fotos y archivos:** **Foto** y **Archivo**, bajo **+**, envían uno de hasta 50 MB, o menos si tu servidor de XMPP
+  acepta menos, por la subida de archivos del servidor. En un chat cifrado se cifra antes en este teléfono, con una
+  clave hecha solo para él, y la clave va en el mensaje, cifrada con OMEMO, así que el servidor guarda solo lo que no
+  puede leer; Conversations, Monal, Gajim y Dino lo abren. En un chat escrito sin cifrado el archivo va tal cual. Una
+  foto, un sonido o un archivo que llega se descarga solo al tocar **Mostrar foto**, **Reproducir** o **Guardar**. En
+  Android, los archivos van por Tor como el chat. Toca una foto que se muestra para verla en toda la pantalla, como en
+  el chat de un contacto: dos dedos o un doble toque la amplían, gira con el teléfono, y **Guardar** la conserva (ver
+  Fotos y archivos, en [Chatear a través de un relay](#relay)).
 - **Stickers:** **Sticker** envía tus propios stickers hechos con fotos (**Míos**) como fotos, cifradas como el chat;
   otras apps XMPP los muestran como fotos. Los grupos que trae Erevos también están: cada sticker va como su imagen,
   hecha en tu dispositivo. Un paquete de stickers que envía otra app (XEP-0449) no se descarga: muestra sus palabras.
@@ -2450,19 +2473,20 @@ de XMPP van aparte y marcados, para las personas a las que solo llegarías por X
 - **Borradores:** lo que escribes y no envías queda como borrador del chat, cifrado solo en este teléfono. Vuelve
   cuando abres el chat otra vez, también después de que Erevos se cerró, y la lista de la pantalla de inicio lo
   muestra en la fila del chat como **Borrador**.
-- **Enviar más tarde:** mantén pulsado **Enviar**, elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana
-  09:00** o cualquier día y hora) y toca **Enviar más tarde**. El mensaje espera en este teléfono, cifrado, con borde
-  discontinuo después de los mensajes del chat y con su hora, y sale de este teléfono a esa hora mientras Erevos está
-  desbloqueado, en Android también en segundo plano; si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para
-  enviarlo ya o eliminarlo. En los chats ocultos sale solo mientras están abiertos, salvo que reciban también
-  cerrados. Uno que trajo de vuelta una copia de seguridad restaurada, cuya hora llegó antes de restaurarla, no sale
-  solo: el teléfono del que vino la copia puede haberlo enviado ya.
+- **Enviar más tarde:** mantén pulsado **Enviar**, o, con el mensaje escrito, toca **+** y luego **Enviar más tarde**,
+  y elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana 09:00** o cualquier día y hora) y toca **Enviar más
+  tarde**. El mensaje espera en este teléfono, cifrado, con borde discontinuo después de los mensajes del chat y con
+  su hora, y sale de este teléfono a esa hora mientras Erevos está desbloqueado, en Android también en segundo plano;
+  si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para enviarlo ya o eliminarlo. En los chats ocultos sale
+  solo mientras están abiertos, salvo que reciban también cerrados. Uno que trajo de vuelta una copia de seguridad
+  restaurada, cuya hora llegó antes de restaurarla, no sale solo: el teléfono del que vino la copia puede haberlo
+  enviado ya.
 - **Volver a enviar:** un mensaje tuyo que muestra **No enviado** tiene **Volver a enviar** y **Eliminar** en su menú.
 - **Recordarme:** el menú de un mensaje tiene **Recordarme**. Elige una hora: el mensaje, con el nombre de su chat, va
   a **Chat conmigo** y te lo recuerda entonces. Necesita **Erevos** activado en [Módulos](#modules).
-- **Mensajes temporales:** **Mensajes temporales**, bajo el campo de mensaje, elimina de este teléfono los mensajes
-  nuevos ese tiempo después de enviarse, y **Temporal** lo hace solo para el siguiente mensaje. El otro lado los
-  guarda: XMPP no tiene forma de eliminarlos allí. Los mensajes que ya están aquí se quedan.
+- **Mensajes temporales:** **Mensajes temporales**, en **Opciones del chat**, elimina de este teléfono los mensajes
+  nuevos ese tiempo después de enviarse, y **Mensaje temporal**, bajo **+**, lo hace solo para el siguiente mensaje.
+  El otro lado los guarda: XMPP no tiene forma de eliminarlos allí. Los mensajes que ya están aquí se quedan.
 - **Aparecer sin conexión:** al pie de un chat con una persona, **Aparecer sin conexión** te muestra sin conexión para
   ella, muestre lo que muestre tu cuenta a los demás, y no le dice nada de lo que lees o escribes, ni que sus mensajes
   llegaron. Un grupo que compartís aún te muestra. Vale solo para la conexión de este teléfono.
@@ -2498,16 +2522,15 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   cada mensaje va a cada una, cifrado para cada una, y nadie puede añadirse ni quitarse después; un grupo con otras
   personas es un grupo nuevo. **Ponle nombre al grupo** le cambia el nombre para todos, con tu próximo mensaje. Un
   mensaje que otra app te envía a ti y a otros se muestra también como grupo, cada mensaje con quién lo escribió.
-- **Fotos y archivos:** **Foto** y **Archivo**, bajo el campo del mensaje de un chat, envían uno de hasta 20 MB. Se
-  cifra en este teléfono con una clave hecha solo para él (AES-GCM, como pide NIP-17) y se pone en un servidor de
-  archivos Blossom, que guarda solo lo que no puede leer; su clave va en el mensaje, cifrada como los mensajes, y la
-  subida la firma una clave hecha solo para ella, así que el servidor no sabe de quién es. En Android, los archivos van
-  por Tor como estos chats. **Servidores de archivos** dice adónde van, al primero que acepte uno: blossom.primal.net,
-  blossom.band y nostr.download si no los cambias. Una foto o un archivo que llega se trae solo cuando tocas **Mostrar
-  foto** o **Guardar**, y se abre solo si es el que se envió.
-  Toca una foto que se muestra para verla en toda la pantalla, como en el chat de un contacto: dos dedos o un doble
-  toque la amplían, gira con el teléfono, y **Guardar** la conserva (ver Fotos y archivos, en [Chatear a través de un
-  relay](#relay)).
+- **Fotos y archivos:** **Foto** y **Archivo**, bajo **+**, envían uno de hasta 20 MB. Se cifra en este teléfono con
+  una clave hecha solo para él (AES-GCM, como pide NIP-17) y se pone en un servidor de archivos Blossom, que guarda
+  solo lo que no puede leer; su clave va en el mensaje, cifrada como los mensajes, y la subida la firma una clave
+  hecha solo para ella, así que el servidor no sabe de quién es. En Android, los archivos van por Tor como estos
+  chats. **Servidores de archivos** dice adónde van, al primero que acepte uno: blossom.primal.net, blossom.band y
+  nostr.download si no los cambias. Una foto o un archivo que llega se trae solo cuando tocas **Mostrar foto** o
+  **Guardar**, y se abre solo si es el que se envió. Toca una foto que se muestra para verla en toda la pantalla, como
+  en el chat de un contacto: dos dedos o un doble toque la amplían, gira con el teléfono, y **Guardar** la conserva
+  (ver Fotos y archivos, en [Chatear a través de un relay](#relay)).
 - **Reacciones:** mantén pulsado un mensaje para abrir su menú y reaccionar con 👍, ❤️, 😂, 😮, 😢 o 🙏, o con una de las que
   hay tras **+**; debajo se ven las reacciones, la última de cada persona, como las envían otras apps de Nostr (NIP-25).
   Toca una reacción bajo un mensaje para añadir la misma, o toca la tuya para retirarla; a las apps de los demás se les
@@ -2627,19 +2650,20 @@ quién.
 - **Borradores:** lo que escribes y no envías queda como borrador del chat, cifrado solo en este teléfono. Vuelve
   cuando abres el chat otra vez, también después de que Erevos se cerró, y la lista de la pantalla de inicio lo
   muestra en la fila del chat como **Borrador**.
-- **Enviar más tarde:** mantén pulsado **Enviar**, elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana
-  09:00** o cualquier día y hora) y toca **Enviar más tarde**. El mensaje espera en este teléfono, cifrado, con borde
-  discontinuo después de los mensajes del chat y con su hora, y sale de este teléfono a esa hora mientras Erevos está
-  desbloqueado, en Android también en segundo plano; si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para
-  enviarlo ya o eliminarlo. En los chats ocultos sale solo mientras están abiertos, salvo que reciban también
-  cerrados. Uno que trajo de vuelta una copia de seguridad restaurada, cuya hora llegó antes de restaurarla, no sale
-  solo: el teléfono del que vino la copia puede haberlo enviado ya.
+- **Enviar más tarde:** mantén pulsado **Enviar**, o, con el mensaje escrito, toca **+** y luego **Enviar más tarde**,
+  y elige una hora (**En 1 hora**, **Esta noche 20:00**, **Mañana 09:00** o cualquier día y hora) y toca **Enviar más
+  tarde**. El mensaje espera en este teléfono, cifrado, con borde discontinuo después de los mensajes del chat y con
+  su hora, y sale de este teléfono a esa hora mientras Erevos está desbloqueado, en Android también en segundo plano;
+  si no, en cuanto vuelve a desbloquearse. Solo texto. Tócalo para enviarlo ya o eliminarlo. En los chats ocultos sale
+  solo mientras están abiertos, salvo que reciban también cerrados. Uno que trajo de vuelta una copia de seguridad
+  restaurada, cuya hora llegó antes de restaurarla, no sale solo: el teléfono del que vino la copia puede haberlo
+  enviado ya.
 - **Recordarme:** el menú de un mensaje tiene **Recordarme**. Elige una hora: el mensaje, con el nombre de su chat, va
   a **Chat conmigo** y te lo recuerda entonces. Necesita **Erevos** activado en [Módulos](#modules).
-- **Mensajes temporales:** **Mensajes temporales**, bajo el campo de mensaje, elimina de este teléfono los mensajes
+- **Mensajes temporales:** **Mensajes temporales**, en **Opciones del chat**, elimina de este teléfono los mensajes
   nuevos, enviados o recibidos, ese tiempo después de enviarse. Los tuyos llevan ese tiempo (NIP-40), así que su app y
-  los relays que lo respetan los eliminan entonces; los que no, los guardan. **Temporal** lo hace solo para el
-  siguiente mensaje. Un mensaje que llega con su propio tiempo se va a esa hora.
+  los relays que lo respetan los eliminan entonces; los que no, los guardan. **Mensaje temporal**, bajo **+**, lo hace
+  solo para el siguiente mensaje. Un mensaje que llega con su propio tiempo se va a esa hora.
 - **Bloquear:** **Bloquear**, al pie de un chat, descarta en este teléfono lo que envía esa clave, sin leer; no vuelve
   si la desbloqueas. No se le avisa: Nostr no puede impedir que nadie te escriba. **Contactos bloqueados**, en la
   pantalla de chats de Nostr, los lista, con **Desbloquear**.
@@ -2839,13 +2863,14 @@ que conozca números. La invitación es un SMS de datos, que las apps de mensaje
 - **Dos SIM:** la SIM con la que enviar aparece encima del campo de mensaje; toca **Elegir la SIM** una vez para que
   Erevos las vea. Tu elección se guarda para ese número; hasta entonces, Erevos responde con la SIM por la que llegó el
   último mensaje. Cada mensaje muestra su SIM.
-- **SMS más tarde:** mantén pulsado el botón redondo **Enviar** tras el campo y elige una hora, como en un chat. El SMS
-  aparece al final de la conversación marcado como **Programado**; tócalo para cancelarlo. Sale a esa hora, también con
-  Erevos cerrado y bloqueado; si el teléfono está apagado entonces, en cuanto se vuelva a encender y desbloquear. Hasta
-  entonces no está en los SMS del teléfono, donde otras apps lo verían, y la compañía telefónica no lo tiene. Espera
-  bloqueado con una clave del propio teléfono (Android Keystore), no con la contraseña de tu espacio, ya que Android
-  tiene que enviarlo mientras Erevos está bloqueado: la protección que tiene cualquier SMS una vez enviado, ya que los
-  SMS enviados se quedan en los SMS del teléfono. Solo texto, a un número.
+- **SMS más tarde:** mantén pulsado el botón redondo **Enviar** tras el campo, o, con el SMS escrito, toca **+** y
+  luego **Enviar más tarde**, y elige una hora, como en un chat. El SMS aparece al final de la conversación marcado
+  como **Programado**; tócalo para cancelarlo. Sale a esa hora, también con Erevos cerrado y bloqueado; si el teléfono
+  está apagado entonces, en cuanto se vuelva a encender y desbloquear. Hasta entonces no está en los SMS del teléfono,
+  donde otras apps lo verían, y la compañía telefónica no lo tiene. Espera bloqueado con una clave del propio teléfono
+  (Android Keystore), no con la contraseña de tu espacio, ya que Android tiene que enviarlo mientras Erevos está
+  bloqueado: la protección que tiene cualquier SMS una vez enviado, ya que los SMS enviados se quedan en los SMS del
+  teléfono. Solo texto, a un número.
 - **Enlaces:** una dirección web en un SMS aparece subrayada, y se abre como en un chat, después de haberla visto
   entera.
 - **Nombres de tus contactos:** desactivado al principio, así que los números de los SMS aparecen como números.
@@ -2858,7 +2883,7 @@ que conozca números. La invitación es un SMS de datos, que las apps de mensaje
   no se puede responder.
 - **Recordarme:** mantén pulsado un mensaje para **Recordarme**: va a **Chat conmigo** con el nombre de la
   conversación, y te lo recuerda a la hora que elijas.
-- **Mensajes temporales:** con Erevos como app de SMS, **Mensajes temporales**, bajo la línea **SMS normal** de una
+- **Mensajes temporales:** con Erevos como app de SMS, **Mensajes temporales**, en las **Opciones del chat** de una
   conversación, elimina de este teléfono sus SMS nuevos ese tiempo después de enviarse, o en cuanto Erevos vuelva a
   funcionar. El otro teléfono los guarda: un SMS no puede eliminarse allí. Los mensajes que ya están aquí se quedan.
 
@@ -2902,7 +2927,7 @@ cuando tú lo eliges.
   a la lista cuando llega un SMS nuevo de ese número, o con **Desarchivar**.
 - **Nombres de MMS de grupo:** mantén pulsado un MMS de grupo y elige **Darle un nombre aquí** para darle un nombre
   tuyo, solo en este teléfono.
-- **Lo propio de una conversación:** bajo su línea **SMS normal**, una conversación tiene **Apariencia del chat**,
+- **Lo propio de una conversación:** en sus **Opciones del chat**, una conversación tiene **Apariencia del chat**,
   como un chat, y, con un número, **Notificaciones**: siléncialo un rato o siempre, o dale un sonido propio, o
   ninguno. Valen mientras el espacio está abierto; con él cerrado, cada SMS avisa como dicen los ajustes.
 - **Opciones del chat:** el botón de los deslizadores junto a donde escribes, o **⋯** arriba, las abre todas en una
@@ -3249,8 +3274,8 @@ En **Ajustes** → **Privacidad y seguridad** → **Bloqueo y segunda contraseñ
 opciones: **Sin bloqueo** y **Contraseña**.
 
 1. Toca **Contraseña**, escríbela dos veces (al menos 4 caracteres) y toca **Guardar**.
-2. A partir de entonces Erevos la pide cada vez que se abre, y otra vez después de 30 segundos en segundo plano.
-3. **Cambiar contraseña** la cambia, y **Bloquear ahora** bloquea Erevos al instante.
+2. A partir de entonces Erevos la pide cada vez que se abre, y otra vez después de 30 segundos en segundo plano. En Android, en cuanto Erevos pasa a segundo plano, el teléfono tapa sus pantallas con una cubierta lisa del color de su fondo: si vuelves dentro de los 30 segundos, la cubierta se va antes de que se vea nada; si vuelves más tarde, se queda hasta que aparece la pantalla de la contraseña, así que nada del espacio se ve antes de la contraseña. Los 30 segundos se cuentan en un reloj que cambiar la hora del teléfono no mueve.
+3. **Cambiar contraseña** la cambia, y **Bloquear ahora** bloquea Erevos al instante: en Android su pantalla se tapa en ese mismo momento.
 
 - **Una frase, no un PIN corto:** lo que comprueba la contraseña se guarda en el almacén de claves del teléfono, así
   que una copia de su almacenamiento no sirve para probar contraseñas. Pero quien rompa la seguridad del propio
@@ -3322,7 +3347,7 @@ abrirse con ella. Está desactivado salvo que lo actives.
 1. Con el bloqueo con contraseña activado, en **Huella o cara**, toca **Activar**.
 2. Escribe la contraseña del espacio en el que estás, toca **Activar**, y toca el sensor (o mira al teléfono).
 3. A partir de entonces la pantalla de la contraseña tiene un botón **Huella o cara**. La contraseña siempre funciona
-   también, y **Desactivar** lo desactiva.
+   también, y **Desactivar** lo desactiva. El botón está ahí en cuanto aparece la pantalla de la contraseña.
 
 - **Solo el espacio de la primera contraseña:** una huella nunca abre el espacio de una segunda contraseña, ni los
   chats ocultos. Activada en el espacio que abre una segunda contraseña, no abre nada: la primera vez que se prueba se
@@ -3372,7 +3397,9 @@ con sus propios contactos, relay y aspecto. Tus chats reales siguen ocultos, y n
   un mismo teléfono.
 - **Discreción:** por privacidad, la app nunca muestra si hay una segunda contraseña puesta. En la app web con las
   notificaciones con la app cerrada activadas, el número en el icono de Erevos se queda mientras Erevos está cerrado:
-  si no coincide con el espacio que abres, puede delatar otro (**Número en el icono** lo desactiva).
+  si no coincide con el espacio que abres, puede delatar otro (**Número en el icono** lo desactiva).{~ En Android, lo
+  que la cámara tomó con Erevos bloqueado también puede delatar otro espacio mientras espera al suyo: mira **Cámara
+  antes de la contraseña** en [Colección](#collection).}
 
 ## Chats ocultos {#hidden}
 
@@ -3573,12 +3600,13 @@ La Colección es un lugar cifrado para tus fotos, archivos y carpetas, en cada e
 - **Fuera de la Colección:** una foto se abre a pantalla completa, para deslizar y hacer zoom, con **Enviar a un chat**, **Guardar en el teléfono**, **Información** y **Borrar**. Guardar en el teléfono o abrir un archivo con otra app lo saca sin cifrar, y Erevos lo avisa antes. Enviar a un chat deja la copia de la Colección donde está. Desde la Colección de un lugar oculto los archivos van solo a los chats y grupos de ese lugar oculto, nunca a los del espacio, y la Colección del espacio nunca a un lugar oculto. Desliza, o usa las flechas, para la foto siguiente o la anterior; **Presentación** arriba las muestra una tras otra, cada 4 segundos, hasta un toque.
 - **Desde un chat:** **+** bajo el campo del mensaje y luego **Colección** abre la Colección del lugar de ese chat: toca las fotos o archivos que quieras enviar y luego **Enviar**, y van a ese chat.
 - **Copias de seguridad:** una copia guarda la Colección con el resto del teléfono. **Ajustes** → **Datos y dispositivos** → **Colección**, o los tres puntos dentro de la Colección, pueden dejar esa Colección fuera de las copias que se hacen mientras está abierta: cada Colección tiene su propia elección.
-- **En un servidor WebDAV:** en los ajustes de la Colección, **También en un servidor WebDAV** copia los archivos de esa Colección tal como están, cifrados, a una carpeta en un servidor que eliges, Nextcloud, ownCloud o cualquiera que hable WebDAV: da la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de aplicación, y toca **Conectar**; **Probar la conexión** los comprueba antes. Cada espacio y cada lugar oculto tiene su propia elección y su propio servidor; primero se propone el servidor de las copias de seguridad. Solo va lo que aún no está allí, una pieza cada vez, mientras el lugar está abierto, y sigue donde se quedó si cae la red; un archivo borrado aquí se borra también allí. Nada más de la carpeta se toca. El servidor solo ve piezas con nombres al azar, en una subcarpeta con un nombre al azar, y no puede abrirlas. Un teléfono al que le falta un archivo, como tras restaurar una copia en un teléfono nuevo, lo trae de allí al abrirlo, y solo guarda piezas que se abren con la clave del archivo. Erevos muestra cuánto ha llegado ya, con **Cancelar**: lo que llegó se queda, y la próxima vez solo llega el resto; la música, los vídeos, los PDF y **Abrir con otra aplicación** también lo traen primero. Mientras todo está copiado, las copias de seguridad hechas con el lugar abierto pueden dejar fuera sus piezas, también después de que Erevos vuelva a arrancar, hasta que se añada o se borre un archivo. Tiene su propio interruptor **Por Tor**, desactivado salvo que lo actives: activado, la copia va solo por Tor, diga lo que diga el ajuste de Tor del espacio, así que el servidor no ve tu dirección IP; es más lento y espera mientras Tor arranca. Donde no hay Tor, en la aplicación de escritorio y en la app web, un servidor con él activado no recibe nada.
+- **En un servidor WebDAV:** en los ajustes de la Colección, **También en un servidor WebDAV** copia los archivos de esa Colección tal como están, cifrados, a una carpeta en un servidor que eliges, Nextcloud, ownCloud o cualquiera que hable WebDAV: da la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de aplicación, y toca **Conectar**; **Probar la conexión** los comprueba antes. Cada espacio y cada lugar oculto tiene su propia elección y su propio servidor; primero se propone el servidor de las copias de seguridad. Solo va lo que aún no está allí, una pieza cada vez, mientras el lugar está abierto, y sigue donde se quedó si cae la red; un archivo borrado aquí se borra también allí. Nada más de la carpeta se toca. El servidor solo ve piezas con nombres al azar, en una subcarpeta con un nombre al azar, y no puede abrirlas. Un teléfono al que le falta un archivo, como tras restaurar una copia en un teléfono nuevo, lo trae de allí al abrirlo, y solo guarda piezas que se abren con la clave del archivo. Erevos muestra cuánto ha llegado ya, con **Cancelar**: lo que llegó se queda, y la próxima vez solo llega el resto; la música, los vídeos, los PDF y **Abrir con otra aplicación** también lo traen primero. Mientras todo está copiado, las copias de seguridad hechas con el lugar abierto pueden dejar fuera sus piezas, también después de que Erevos vuelva a arrancar, hasta que se añada o se borre un archivo. Tiene su propio interruptor **Por Tor**, desactivado salvo que lo actives: activado, la copia va solo por Tor, diga lo que diga el ajuste de Tor del espacio, así que el servidor no ve tu dirección IP; es más lento y espera mientras Tor arranca. Donde no hay Tor, en la aplicación de escritorio y en la app web, un servidor con él activado no recibe nada. Bajo el servidor, una línea dice cuánto de los archivos propios de esta Colección, cifrados, está en él, y cuándo empezó y terminó la última copia; las fotos de los chats y las copias de seguridad no están entre ellos. Tras cada copia, Erevos vuelve a listar la carpeta, y una parte que no está entera allí vuelve a ir con la siguiente copia. **Comprobar** mira sin cambiar nada: cada parte está ahí, con su tamaño, y 4 de ellas, elegidas al azar, se descargan y se abren con su clave, así que se nota una que el servidor cambió o sustituyó. **Traer de vuelta los archivos que no están en este teléfono** trae al instante cada archivo que no está entero aquí, como tras restaurar una copia en un teléfono nuevo, con **Cancelar**: lo que llegó se queda, y Erevos dice cuántos volvieron y cuántos tampoco tiene enteros el servidor.
 - **Con Nextcloud, como el de LPHL:** en ese formulario, y en **Añadir un servidor** de las copias de seguridad, escribe la dirección de tu Nextcloud en **Tu Nextcloud** y toca **Iniciar sesión con Nextcloud**: inicia sesión en el navegador, como en Fasouli, con Authentik o como se inicie allí, y elige **Conceder acceso**. Erevos obtiene una contraseña de aplicación propia y rellena el formulario con su propia carpeta en tus archivos, **Erevos/Collection** o **Erevos/Backups**, creada si no existe, junto a la de Fasouli, que nunca lee; luego toca **Conectar**. Esa contraseña se retira en Nextcloud → Configuración → Seguridad. El inicio de sesión sigue el interruptor **Por Tor** del servidor para el que se hace: activado, Erevos pregunta a tu Nextcloud solo por Tor, pero la página del navegador en sí va como siempre.
 - **En tus dispositivos vinculados:** en los ajustes de la Colección, **También en mis dispositivos vinculados** envía esa Colección a los [dispositivos vinculados](#devices) de su espacio o lugar oculto, y el interruptor vale para todos. Un archivo añadido, renombrado, movido o borrado en uno lo está en todos. Las miniaturas llegan enseguida; el archivo en sí llega enseguida en la misma Wi-Fi, si no cuando lo abres, desde el servidor WebDAV si la Colección tiene uno, o por el relay hasta 100 MB. Cada trozo se guarda solo cuando abre con la clave del archivo, y una transferencia cortada sigue desde el trozo que faltaba. Un archivo se borra en otro lugar solo cuando se borra en uno de tus dispositivos, nunca porque falte allí. La Colección de un lugar oculto va solo a los dispositivos vinculados de ese lugar.
 - **Música, vídeos y PDF:** un PDF se lee página a página dentro de Erevos (Android 11 y posteriores), descifrado solo en la memoria. La música y los vídeos se reproducen directamente desde sus trozos cifrados, nunca desde una copia: un vídeo a pantalla completa, la música con las siguientes de la carpeta, sin parar con la pantalla apagada, con reproducir, pausa, siguiente y anterior en la notificación y en la pantalla de bloqueo del teléfono, y solo eso allí. La lista sigue después de que el espacio se bloquee, salvo que **Detener la reproducción cuando el espacio se bloquea** esté activado en los ajustes de la Colección; **Detener** y el botón de pánico la terminan. La notificación solo dice **Reproduciendo**, salvo que **Mostrar el título en la notificación** esté activado. **Abrir con otra aplicación** entrega el archivo a medida que se descifra, sin copia en el teléfono, hasta que salgas de la Colección; la otra aplicación puede quedarse con una propia.
 - **Originales de la galería:** con **Borrar el original de la galería tras importarlo** activado, una foto o un vídeo elegido de los archivos del teléfono se borra de la galería en cuanto está en la Colección, después de que Android te pida confirmarlo. Hace falta Android 11 o posterior. Una foto de la cámara nunca va a la galería. Si Android no dice qué foto de la galería es (como desde **Recientes** en el selector de archivos), el original se queda y Erevos lo dice: elígela en **Imágenes** o en el almacenamiento del teléfono.
 - **Fotos y vídeos:** en **+**, **Cámara** es la propia de Erevos: fotos y vídeos uno tras otro, con flash y cámara frontal, directo a la Colección, nunca a la galería, y ninguna otra aplicación los ve; una foto nunca se escribe en ningún sitio, ni por un momento, y no lleva nada más que su imagen. Donde el fabricante del teléfono los ofrece, como en un Pixel, **Noche** y **Retrato** están junto a **Foto**, y arriba **HDR activado**: son del propio teléfono, se hacen en él, y nada sale. Un toque enfoca y ajusta la luz ahí; con dos dedos haces zoom, y los botones sobre el obturador van al gran angular (**0.5×**), a **1×**, **2×** y **5×** donde el teléfono los tiene. **Más** tiene un temporizador de 3 o 10 segundos, una cuadrícula, un obturador silencioso donde la ley lo permite, **Más oscuro** y **Más claro** y, para vídeos, HD, Full HD o 4K, y **Vídeo HDR activado** donde el teléfono lo graba; en vídeo la luz puede quedarse encendida. **De la galería** trae muchas fotos y vídeos a la vez; con **Borrar el original de la galería tras importarlo** activado, Android pregunta una sola vez por todos. Las fotos HEIC y AVIF aparecen en **Fotos** (Android muestra HEIC desde 9 y AVIF desde 12); una que el dispositivo no puede mostrar ofrece **Abrir con otra aplicación**. Bajo una foto, **Editar** la gira un cuarto cada vez y la recorta con un marco que arrastras por las esquinas: se guarda como foto nueva, y la original se queda como estaba. **Información** dice si una foto o un vídeo dice dónde se tomó. Una foto JPEG, PNG, WebP o GIF guardada fuera o abierta con otra aplicación sale sin dónde ni cuándo se tomó ni el teléfono, salvo que **Las fotos salen con lugar y hora** esté activado en los ajustes de la Colección; un vídeo o una foto HEIC sale tal cual, y Erevos avisa antes si nombra un lugar. La cámara, la galería y **Editar** están en Android; en la app de escritorio y en un navegador también se ven las fotos AVIF.
+- **Cámara antes de la contraseña:** con Erevos bloqueado, el icono de la cámara y **Cámara** en el icono de Erevos abren la cámara al instante, sin contraseña. Lo que toma, fotos y vídeos, se cifra al tomarlo, para el espacio abierto por última vez, y solo se ve tras la contraseña de ese espacio, en su Colección; la cámara dice cuántas tomó. Nada más se abre desde ahí, ni siquiera lo que acaba de tomar: la cámara bloqueada no tiene ninguna clave que abra nada, así que quien tenga el teléfono puede añadir a lo que espera, y no ver nada de ello. Lo tomado para un espacio nunca se ve en otro, y lo que espera no va en ninguna copia de seguridad: restaurar una copia lo borra. **Abrir la cámara sin la contraseña**, en los ajustes de la Colección, está activado salvo que lo desactives, y es de este teléfono, igual en todos los espacios; desactivado, el icono de la cámara espera la contraseña. Activado, puede mostrar que un espacio existe: mientras algo espera a un espacio, está en el teléfono como archivos que otro espacio, una vez abierto, deja ahí, y quien vea ese otro espacio y lea el teléfono con una herramienta forense los encuentra. Donde una segunda contraseña deba pasar inadvertida, desactívalo. Lo que aún espera a los otros espacios se borra cuando el espacio de la primera contraseña quita su segunda contraseña o desactiva su bloqueo. Funciona una vez que se ha abierto en el teléfono un espacio con contraseña. Solo en Android.
 - **En la aplicación de escritorio:** en Linux, macOS y Windows la Colección también funciona, con sus archivos cifrados en la carpeta propia de Erevos en el ordenador. **+** trae un archivo del ordenador, cifrado trozo a trozo; no hay cámara. Fotos, textos, PDF (en el visor de PDF integrado), música y vídeos se abren solo en la memoria de Erevos, nunca como copia sin cifrar en el disco, hasta 1 GB cada uno, y música y vídeos de cualquier tamaño, leídos trozo a trozo de sus partes cifradas mientras suenan; el archivo se cierra, y la música o un vídeo se detiene, cuando el espacio se bloquea o con el botón de pánico. **Guardar en el ordenador** pregunta antes, como en el teléfono; **Abrir con otra aplicación** no está.
 - **En un navegador y en Sailfish OS:** la app web, también en la pantalla de inicio de un iPhone, y {=Erevos} en Sailfish OS tienen también la Colección. **+** trae un archivo con el selector del propio navegador, leído y cifrado trozo a trozo, así que uno grande nunca se tiene entero en memoria; sus trozos se guardan en el almacenamiento del navegador, o en Sailfish OS en la carpeta propia de Erevos. Un navegador da a un sitio un espacio limitado: cuando se acaba, no se guarda nada del archivo, y Erevos lo dice. Fotos, textos, música y vídeos se abren solo en memoria, hasta 256 MB cada uno, y se cierran cuando el espacio se bloquea; un PDF no se muestra allí: guárdalo para leerlo con otra aplicación. **Guardar en este dispositivo** (en Sailfish OS **Guardar en el teléfono**) pregunta antes; en un navegador admite hasta 256 MB, mientras que Sailfish OS escribe en Descargas un archivo de cualquier tamaño trozo a trozo. En un navegador el servidor WebDAV tiene que dejar entrar a la app web, como para las copias de seguridad; Sailfish OS no tiene copia en WebDAV.
 - **Formatos:** en Android se reproducen MP3, AAC y M4A, FLAC, Ogg y Opus, WAV, AMR, MP4, MKV, WebM y 3GP, también un archivo que llegó sin tipo, reconocido por la terminación de su nombre, como suelen llegar los archivos de otras apps. En la app de escritorio y en un navegador, lo que el navegador reproduce de ellos: ni 3GP ni AMR.
@@ -3612,10 +3640,17 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
 
 [+] La cuenta y los chats de Session entran en una copia de seguridad, cifrados con su contraseña y la del primer espacio (una copia hecha desde otro espacio los tiene como el primer espacio los guardó la última vez), y restaurar los devuelve, cifrados de nuevo en el teléfono nuevo, en cuanto se abre el primer espacio; un teléfono con otra cuenta de Session conserva la suya, y Erevos lo dice; sus fotos y archivos no, vuelven de Session mientras los guarde. También entra el historial de Signal, cifrado del mismo modo: sus chats y mensajes, sin sus fotos y archivos, y no su enlace con la cuenta, sus claves ni sus números de seguridad. Tras restaurar, registra o vincula Signal de nuevo; en cuanto se abre el primer espacio, los mensajes antiguos se ven en sus chats junto a los nuevos, solo para leer. Telegram y Messenger no están en una copia: sus inicios de sesión son de cada teléfono. Tras restaurar, vuelve a iniciar sesión en ellos; sus mensajes vuelven solo hasta donde cada red los guarda. Lo que Erevos guarda de ellos sí entra: las notificaciones de cada chat, la elección de Tor y las claves del cifrado ErevosGram.
 
-1. **Hacer una copia de seguridad:** toca **Hacer una copia de seguridad**, elige una carpeta (en el teléfono, una
-   tarjeta de memoria, o una app en la nube que muestre ahí sus carpetas; en un ordenador, cualquier carpeta), escribe
-   dos veces una contraseña para la copia (al menos 12 caracteres, o cuatro palabras) y toca **Guardar**. En un navegador, la copia y sus archivos van al menú de compartir o a las descargas: el primero enseguida, y cada uno de los siguientes tras un toque en **Guardar**.
-   Mientras se hace, su tarjeta dice qué hace y cuánto lleva; cuando termina, lo dice un aviso.
+1. **Hacer una copia de seguridad:** en **Hacer una copia de seguridad**, toca **En una carpeta**, elige una carpeta
+   (en el teléfono, una tarjeta de memoria, o una app en la nube que muestre ahí sus carpetas; en un ordenador,
+   cualquier carpeta), escribe dos veces una contraseña para la copia (al menos 12 caracteres, o cuatro palabras) y
+   toca **Guardar**. En un navegador el botón es **Hacer una copia de seguridad**, y la copia y sus archivos van al
+   menú de compartir o a las descargas: el primero enseguida, y cada uno de los siguientes tras un toque en
+   **Guardar**. Mientras se hace, su tarjeta dice qué hace y cuánto lleva. Después dice cuánto ocupa en total, con los
+   archivos que van a su lado, cuándo empezó y cuándo terminó (la hora de su nombre es la de su inicio), y qué no
+   lleva: Erevos mismo y lo que guarda solo un tiempo{~, ni los archivos de la Colección que están enteros en su
+   servidor WebDAV, que una restauración trae de allí, ni una Colección que dejas fuera de las copias}. En Android y
+   en la app de escritorio, Erevos la vuelve a leer luego de la carpeta, como tras cada copia automática (mira
+   **Comprobar las copias** más abajo), y dice lo que encontró. Cuando termina, lo dice un aviso.
 2. **Copias automáticas:** elige **Cada 6 horas**, **Cada día** o **Cada semana**, y luego una carpeta y una
    contraseña. Erevos hace una mientras está abierto, en cuanto la última es más antigua que eso: cuando se abre un
    espacio, cada 15 minutos y al pasar a segundo plano, antes de bloquearse; nunca sin un espacio abierto. Cada una
@@ -3625,15 +3660,22 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
    intentar cuando se abre un espacio, o una hora después. Debajo están **Hacer
    copia ahora**, **Cambiar carpeta** y **Cambiar contraseña**; **Desactivado** las detiene, y las ya hechas se quedan
    en la carpeta.
-3. **También a un servidor:** en Android y en la app de escritorio, con las copias automáticas activadas, **Añadir un
-   servidor** en **También a un servidor** envía cada una también a una carpeta en un servidor que elijas y que hable
-   WebDAV, como tu propio Nextcloud: da la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de
-   aplicación solo para Erevos, y toca **Conectar**. El servidor guarda las 3 más recientes, con todos los archivos
-   que necesitan, y cada una envía solo lo nuevo; **Dejar de enviar** lo
-   detiene, y las que hay allí se quedan. En la web app, que no hace copias por sí sola, **Enviar una copia ahora**
-   envía una allí, con una contraseña que escribes cada vez.
-   Cada servidor tiene un interruptor **Por Tor**, en su tarjeta y en el formulario que lo añade, desactivado salvo
-   que lo actives (mira **En un servidor** más abajo).
+3. **También a un servidor:** una copia puede ir también a una carpeta en un servidor que elijas y que hable WebDAV,
+   como tu propio Nextcloud. **Añadir un servidor** en **También a un servidor**, o **A un servidor (WebDAV)** en
+   **Hacer una copia de seguridad**, pide la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de
+   aplicación solo para Erevos: toca **Conectar**, y la primera copia va allí. Con las copias automáticas activadas,
+   en Android y en la app de escritorio, cada una va también allí: el servidor guarda las 3 más recientes, con todos
+   los archivos que necesitan, y cada una envía solo lo nuevo. Sin ellas, y en la web app, que no hace copias por sí
+   sola, una va allí cuando la envías, con una contraseña que escribes cada vez: **Enviar una copia ahora**, en
+   **También a un servidor**. En **Hacer una copia de seguridad**, el botón dice entonces **A** y el nombre del
+   servidor, y envía una al instante; con las copias automáticas activadas, envía una de ellas, con su contraseña, y
+   ninguna a la carpeta. Luego Erevos la comprueba en el servidor (mira **Comprobar las copias** más abajo) y dice
+   cuánto ocupa en total y cuándo empezó y terminó. Una enviada con contraseña propia va entera cada vez, con cada
+   foto y archivo, y el servidor guarda enteras las 3 más recientes: Erevos lo dice al pedir la contraseña, y en
+   Android también cuánto es aproximadamente. Si desactivas las copias automáticas, el servidor se queda, para las
+   copias que envías; **Dejar de enviar** lo olvida, y las que hay allí se quedan. Cada servidor tiene un interruptor
+   **Por Tor**, en su tarjeta y en el formulario que lo añade, desactivado salvo que lo actives (mira **En un
+   servidor** más abajo).
 4. **Restaurar:** toca **Restaurar una copia de seguridad**, elige el archivo y escribe su contraseña. Erevos pregunta
    una vez más, encuentra los archivos de la copia junto a ella, o te pide que los elijas a ellos o su carpeta (para
    una copia automática, elige todos los archivos de la carpeta, pues algunos de sus archivos pueden empezar como el
@@ -3651,8 +3693,8 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
 - **Las copias automáticas guardan su contraseña en el teléfono,** así que no necesitan contraseña cada vez. Quien abra
   su carpeta sigue necesitando las contraseñas de los espacios para leer los chats.
 - **Qué ocupa espacio:** en Android, **Medir** en **Qué ocupa espacio** muestra cuánto espacio ocupa Erevos en el teléfono, por tipo: {~la Colección con |}las fotos y archivos de los chats, los mensajes de voz, el historial de chats, Tor y los restos de escrituras que no terminaron. Cada copia automática lo contiene todo, así se ve por qué una es grande. Solo se miran los nombres y tamaños de los archivos, en el teléfono, y no se envía nada.
-- **Restos:** las fotos y archivos que ya ningún chat{~, Colección ni| ni} importación nombra, como los de una importación que se cortó a medias, se quedan en el teléfono y en cada copia. En **Restos**, escribe uno a uno, o varios a la vez separados por comas o espacios, el PIN de cada uno de tus chats ocultos y la contraseña de cualquier otro espacio, y toca **Buscar restos**: Erevos lee qué archivos nombra cada uno y este espacio, y muestra cuánto no nombra ninguno. **Borrarlos** los borra, después de que lo confirmes una vez más. Un lugar que no abriste allí pierde sus fotos y archivos: abre todos primero. Un archivo escrito en el último día nunca se toma, y las copias ya hechas lo conservan todo.
-- **Comprobar las copias:** tras cada copia automática, Erevos la vuelve a leer de la carpeta: se abre con su contraseña, cada parte que nombra está ahí, con su tamaño, y dos partes elegidas al azar se leen enteras. De un servidor solo mira entonces la lista, así que no se descarga nada. **Comprobar ahora** además descarga la copia más reciente del servidor y diez de sus partes. Una parte que falta o está dañada se ve en rojo: haz una copia ahora y vuelve a comprobar. **Comprobación completa de la carpeta** lee entera cada parte de ahí y la compara con el SHA-256 que la copia anotó para ella: unos minutos con muchos GB, y nada sale del teléfono.
+- **Restos:** las fotos y archivos que ya ningún chat{~, Colección ni| ni} importación nombra, como los de una importación que se cortó a medias, se quedan en el teléfono y en cada copia. En **Restos**, escribe uno a uno, o varios a la vez separados por comas o espacios, el PIN de cada uno de tus chats ocultos y la contraseña de cualquier otro espacio, y toca **Buscar restos**: Erevos lee qué archivos nombra cada uno y este espacio, y muestra cuánto no nombra ninguno. **Borrarlos** los borra, después de que lo confirmes una vez más. Un lugar que no abriste allí pierde sus fotos y archivos: abre todos primero. Un archivo escrito en el último día nunca se toma{~, ni lo que la cámara tomó con Erevos bloqueado mientras espera a su espacio}, y las copias ya hechas lo conservan todo.
+- **Comprobar las copias:** tras cada copia en una carpeta, automática o hecha a mano, en Android y en la app de escritorio, Erevos la vuelve a leer de la carpeta: se abre con su contraseña, cada parte que nombra está ahí, con su tamaño, y dos partes elegidas al azar se leen enteras. De un servidor solo mira entonces la lista: la copia y cada parte que nombra están ahí, cada una con el tamaño con que se envió, así que no se descarga nada. **Comprobar ahora** además descarga la copia más reciente del servidor y diez de sus partes. Una parte que falta o está dañada se ve en rojo: haz una copia ahora y vuelve a comprobar. **Comprobación completa de la carpeta** lee entera cada parte de ahí y la compara con el SHA-256 que la copia anotó para ella: unos minutos con muchos GB, y nada sale del teléfono.
 - **En un servidor:** la copia que va allí está sellada con su contraseña como las demás, y esa contraseña nunca sale
   del teléfono, así que el servidor no puede abrirla. Su nombre es aleatorio y el archivo parece bytes aleatorios, de
   uno de pocos tamaños, así que ninguno dice que es de Erevos ni cuánto guarda exactamente. Sus fotos, archivos y
@@ -4127,8 +4169,10 @@ para que el texto siempre se lea bien, también sobre cristal.
 - [~] **Cámara** (Android, en **Iconos del lanzador**): la cámara de Erevos con un toque. **Poner la Cámara entre las apps
   del teléfono** añade un icono propio (naranja al principio, en cualquier color), y si mantienes pulsado el icono de
   Erevos también ofrece **Cámara**, que puedes arrastrar a la pantalla de inicio. Ambos abren la cámara de la Colección,
-  tras la contraseña de Erevos y la de la Colección, y lo que toma va directo a la Colección. Ninguno se muestra
-  mientras la Colección está desactivada en **Módulos** o la calculadora ocupa el lugar de Erevos.
+  y lo que toma va directo a la Colección: con Erevos bloqueado, al instante, y lo que tomó solo se ve tras la
+  contraseña (**Abrir la cámara sin la contraseña**, en los ajustes de la Colección); con eso desactivado, tras la
+  contraseña de Erevos y la de la Colección. Ninguno se muestra mientras la Colección está desactivada en **Módulos**
+  o la calculadora ocupa el lugar de Erevos.
 - **Puntos y números en los iconos** (Android): Android da el punto o el número de un aviso a la app, no a uno de sus
   iconos, así que en la mayoría de los lanzadores, como los de los Pixel y GrapheneOS, el de Samsung, el de Xiaomi y
   Kvaesitso, cada aviso de Erevos (un mensaje, {~un SMS, |}una llamada, un cumpleaños) aparece igual en los iconos Erevos{~,

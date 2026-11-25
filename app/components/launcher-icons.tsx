@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import { mark, t } from '../lib/i18n';
@@ -24,6 +24,7 @@ import { useStyles, useTheme } from '../theme/context';
 import { PasswordSheet } from './PasswordSheet';
 import { Button, Card, Row, SectionTitle, Text } from './ui';
 import { EDITION, editionName, inEdition } from '../lib/edition';
+import { cameraOpensLocked } from '../lock/camera-drop';
 
 // Appearance → Launcher icons: the colour of each of Erevos's icons in the phone's apps (Erevos,
 // Phone, SMS, Contacts, Camera), each drawn in every colour to pick from. Android only, and the
@@ -92,6 +93,18 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
   const styles = useStyles(makeStyles);
   const [chosen, setChosen] = useState(launcherColors);
   const [cameraOn, setCameraOn] = useState(cameraIconOn);
+  // Whether the camera opens before the password (lock/camera-drop.ts), as its words then say.
+  const [cameraFirst, setCameraFirst] = useState(false);
+  useEffect(() => {
+    let live = true;
+    cameraOpensLocked().then(
+      (on) => live && setCameraFirst(on),
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
   if (!chosen) return null;
   // An icon this app has; the Camera's only where the Collection is part of the edition, never in Erevos Lite.
   const shown = (icon: LauncherIcon) => chosen[icon] !== undefined && (icon !== 'camera' || inEdition('collection'));
@@ -135,7 +148,9 @@ export function LauncherIcons({ titled = true }: { titled?: boolean }) {
           {icon === 'camera' && cameraOn !== null ? (
             <>
               <Text variant="caption" tone="muted" style={styles.hint}>
-                {t("Erevos's camera at a tap, behind Erevos's password and the Collection's, as from the Collection. Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.")}
+                {cameraFirst
+                  ? t("Erevos's camera at a tap, even while Erevos and the Collection are locked: what it takes shows only after the password, in the Collection (Open the camera without the password, in its settings). Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.")
+                  : t("Erevos's camera at a tap, behind Erevos's password and the Collection's, as from the Collection. Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.")}
               </Text>
               <Row wrap>
                 <Button

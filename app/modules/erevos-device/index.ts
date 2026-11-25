@@ -61,6 +61,16 @@ type Device = {
   stopPlace?(): void;
   /** Keeps the app out of screenshots and the recent apps preview while on. False with no screen showing. Missing in a build before it. */
   setSecure?(on: boolean): boolean;
+  /** The curtain over a space with a password lock (Curtain.kt, lib/curtain.ts): from now on the phone covers the screens as they go out of sight, in the colour `ground` (Android's own number for it), and keeps them covered when they come back after more than `after` ms; under 0, no longer. Missing in a build before it, as the four below. */
+  curtainArm?(after: number, ground: number): void;
+  /** Covers the screens now, until curtainLift. */
+  curtainLower?(): void;
+  /** Takes the cover away: at once, or with `onScreen` once a screen marked CURTAIN_END is drawn under it. */
+  curtainLift?(onScreen: boolean): void;
+  /** What happened as the screens last came back, once: how long Erevos was away (ms, on the clock nobody can set) and whether the cover stayed. Null when they were not out of sight since. */
+  curtainBack?(): { away: number; kept: boolean } | null;
+  /** Whether the cover is there now. */
+  curtainDown?(): boolean;
   /** While on, the screen turns with the phone even with its auto-rotate off; off, it follows the setting again. False with no screen showing. Missing in a build before it. */
   turnWithPhone?(on: boolean): boolean;
   /** Keeps a reminder of Chat with myself for `at` (ms), told with Erevos closed; one with this id is replaced. False when too many wait. Missing in a build before it. */

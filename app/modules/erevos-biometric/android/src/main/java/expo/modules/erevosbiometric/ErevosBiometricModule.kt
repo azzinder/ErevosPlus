@@ -10,6 +10,8 @@ import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
+import android.os.Handler
+import android.os.Looper
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
@@ -20,11 +22,13 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import java.security.GeneralSecurityException
 import java.security.KeyStore
+import java.util.concurrent.Executors
 import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 // Unlocking with a fingerprint or face (lock/biometric.ts), on Android 11 and later. A key in the
 // Android Keystore, kept in the phone's secure hardware, seals what the app gives it with AES-GCM.
@@ -32,7 +36,17 @@ import javax.crypto.spec.GCMParameterSpec
 // and drops it for good when fingerprints or faces are added or removed. A new key is made each
 // time unlocking is turned on. The sealed data stays with the app (lock/biometric.ts), and nothing
 // leaves the phone.
+//
+// Where the key is in the phone's separate security chip (StrongBox), each use of it takes a while,
+// and the chip lets only a few be started at once. So all of it runs on a thread of its own, never
+// on the app's, nor on the one the phone's modules share; and a cipher that was started and then
+// not used (the prompt closed, or only whether the key still works was asked) is let go at once
+// (letGo, release): Android ends what it started only when it finds the cipher gone, and until
+// then the next use of the key waits, for seconds once a few are left so.
 class ErevosBiometricModule : Module() {
+  private val keystore = Executors.newSingleThreadExecutor { work -> Thread(work, "erevos-biometric").apply { isDaemon = true } }
+  private val main = Handler(Looper.getMainLooper())
+
   override fun definition() = ModuleDefinition {
     Name("ErevosBiometric")
 
@@ -52,38 +66,32 @@ class ErevosBiometricModule : Module() {
     // shows over the lock screen, and the key works only on an unlocked phone), or when the
     // Keystore did not answer. Only "none" and "invalidated" turn unlocking off here; a key that
     // stays "unknown" because it is broken is found out when it is used (open, below).
-    // Starting a cipher needs no fingerprint, and tells whether the key still works.
-    Function("keyState") {
-      val locked = phoneLocked()
-      try {
-        val key = storedKey()
-        when {
-          key == null -> "none"
-          locked -> "unknown"
-          else -> {
-            Cipher.getInstance(TRANSFORMATION).init(Cipher.ENCRYPT_MODE, key)
-            "valid"
-          }
-        }
-      } catch (e: KeyPermanentlyInvalidatedException) {
-        "invalidated"
-      } catch (e: GeneralSecurityException) {
-        "unknown"
+    // Starting a cipher needs no fingerprint, and tells whether the key still works; it is let go
+    // at once. Asked only where the setting shows (Lock), never by the password screen, whose
+    // button needs nothing of the Keystore (lock/biometric.ts biometricOffered).
+    AsyncFunction("keyState") { promise: Promise ->
+      keystore.execute {
+        val state = keyStateNow()
+        letGo()
+        promise.resolve(state)
       }
     }
 
     // Makes a new key in place of any before it, asks for a fingerprint or face, and seals `data`
     // (base64) with it: resolves with the IV and the sealed data, both base64.
     AsyncFunction("seal") { data: String, title: String, cancel: String, promise: Promise ->
-      val cipher = try {
-        Cipher.getInstance(TRANSFORMATION).apply { init(Cipher.ENCRYPT_MODE, newKey()) }
-      } catch (e: Exception) {
-        promise.reject("failed", e.message, e)
-        return@AsyncFunction
-      }
-      authenticate(cipher, title, cancel, promise) { done ->
-        val sealed = done.doFinal(Base64.decode(data, Base64.NO_WRAP))
-        mapOf("iv" to encode(done.iv), "data" to encode(sealed))
+      keystore.execute {
+        val cipher = try {
+          Cipher.getInstance(TRANSFORMATION).apply { init(Cipher.ENCRYPT_MODE, newKey()) }
+        } catch (e: Exception) {
+          promise.reject("failed", e.message, e)
+          letGo()
+          return@execute
+        }
+        authenticate(cipher, title, cancel, promise) { done ->
+          val sealed = done.doFinal(Base64.decode(data, Base64.NO_WRAP))
+          mapOf("iv" to encode(done.iv), "data" to encode(sealed))
+        }
       }
     }
 
@@ -95,25 +103,29 @@ class ErevosBiometricModule : Module() {
     // (the phone itself locked, the prompt saying no). "invalidated" turns unlocking off at once,
     // "unusable" only after a few in a row (lock/biometric.ts): a broken key never gets better.
     AsyncFunction("open") { iv: String, data: String, title: String, cancel: String, promise: Promise ->
-      val cipher = try {
-        val key = storedKey()
-        if (key == null) {
-          promise.reject("invalidated", "No key", null)
-          return@AsyncFunction
+      keystore.execute {
+        val cipher = try {
+          val key = storedKey()
+          if (key == null) {
+            promise.reject("invalidated", "No key", null)
+            return@execute
+          }
+          Cipher.getInstance(TRANSFORMATION).apply {
+            init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, Base64.decode(iv, Base64.NO_WRAP)))
+          }
+        } catch (e: KeyPermanentlyInvalidatedException) {
+          promise.reject("invalidated", e.message, e)
+          letGo()
+          return@execute
+        } catch (e: Exception) {
+          // The phone is locked: the key works only on an unlocked phone, so this says nothing of it.
+          // Unlocked: the Keystore did not answer, or the key is broken.
+          promise.reject(if (phoneLocked()) "failed" else "unusable", e.message, e)
+          letGo()
+          return@execute
         }
-        Cipher.getInstance(TRANSFORMATION).apply {
-          init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, Base64.decode(iv, Base64.NO_WRAP)))
-        }
-      } catch (e: KeyPermanentlyInvalidatedException) {
-        promise.reject("invalidated", e.message, e)
-        return@AsyncFunction
-      } catch (e: Exception) {
-        // The phone is locked: the key works only on an unlocked phone, so this says nothing of it.
-        // Unlocked: the Keystore did not answer, or the key is broken.
-        promise.reject(if (phoneLocked()) "failed" else "unusable", e.message, e)
-        return@AsyncFunction
+        authenticate(cipher, title, cancel, promise) { done -> encode(done.doFinal(Base64.decode(data, Base64.NO_WRAP))) }
       }
-      authenticate(cipher, title, cancel, promise) { done -> encode(done.doFinal(Base64.decode(data, Base64.NO_WRAP))) }
     }
 
     // Removes the key: what it sealed can never be opened again.
@@ -133,6 +145,7 @@ class ErevosBiometricModule : Module() {
     val activity: Activity? = appContext.currentActivity
     if (activity == null) {
       promise.reject("failed", "Erevos is not showing", null)
+      release(cipher)
       return
     }
     activity.runOnUiThread {
@@ -148,7 +161,10 @@ class ErevosBiometricModule : Module() {
       val prompt = BiometricPrompt.Builder(activity)
         .setTitle(title)
         .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-        .setNegativeButton(cancel, executor) { _, _ -> settle { promise.reject("cancelled", "Cancelled", null) } }
+        .setNegativeButton(cancel, executor) { _, _ ->
+          settle { promise.reject("cancelled", "Cancelled", null) }
+          release(cipher)
+        }
         .build()
       val callback = object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -174,14 +190,63 @@ class ErevosBiometricModule : Module() {
               errorCode == BiometricPrompt.BIOMETRIC_ERROR_CANCELED
             promise.reject(if (cancelled) "cancelled" else "failed", errString.toString(), null)
           }
+          release(cipher)
         }
       }
       try {
         prompt.authenticate(BiometricPrompt.CryptoObject(cipher), signal, executor, callback)
       } catch (e: Exception) {
         settle { promise.reject("failed", e.message, e) }
+        release(cipher)
       }
     }
+  }
+
+  // Whether the key is there and still works (keyState, above). The cipher it starts is its own,
+  // gone when it returns, so that letGo finds it.
+  private fun keyStateNow(): String {
+    val locked = phoneLocked()
+    return try {
+      val key = storedKey()
+      when {
+        key == null -> "none"
+        locked -> "unknown"
+        else -> {
+          Cipher.getInstance(TRANSFORMATION).init(Cipher.ENCRYPT_MODE, key)
+          "valid"
+        }
+      }
+    } catch (e: KeyPermanentlyInvalidatedException) {
+      "invalidated"
+    } catch (e: Exception) {
+      // The Keystore did not answer, in whatever way: the one who asked still gets an answer.
+      "unknown"
+    }
+  }
+
+  // A cipher started and not used keeps what it started in the Keystore until Android finds the
+  // cipher itself gone, which it looks for only now and then. Asked to look now: nothing else ends
+  // it, as a cipher cannot be told to stop.
+  @Suppress("DEPRECATION")
+  private fun letGo() {
+    runCatching {
+      Runtime.getRuntime().gc()
+      System.runFinalization()
+    }
+  }
+
+  // A cipher whose prompt closed with nothing opened. Android's prompt keeps hold of the cipher for
+  // as long as the phone's own side keeps the prompt, which can be long, so waiting for the cipher
+  // to be gone is not enough. It is given another key first, one that is not in the Keystore: with
+  // that it puts down what it had started there, which is then let go. A little later, so that
+  // the prompt closes smoothly; the next use of the key does not wait for it.
+  private fun release(cipher: Cipher) {
+    main.postDelayed({
+      keystore.execute {
+        runCatching { cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(ByteArray(KEY_BYTES), KeyProperties.KEY_ALGORITHM_AES)) }
+        letGo()
+      }
+    }, LET_GO_AFTER_MS)
   }
 
   // Whether the phone itself is locked now: the key works only on an unlocked phone.
@@ -225,5 +290,7 @@ class ErevosBiometricModule : Module() {
     const val ALIAS = "erevos.biometric"
     const val TRANSFORMATION = "AES/GCM/NoPadding"
     const val TAG_BITS = 128
+    const val KEY_BYTES = 32
+    const val LET_GO_AFTER_MS = 600L
   }
 }

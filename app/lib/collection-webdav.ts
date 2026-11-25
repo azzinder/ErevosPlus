@@ -7,6 +7,7 @@ import {
   chunkFiles,
   collectionGeneration,
   FillStoppedError,
+  itemsWhole,
   loadCollection,
   noteServerWhole,
   openPlaces,
@@ -26,6 +27,7 @@ import { openChunk } from './attachments';
 import { CAN_CLOUD_BACKUP } from './backup-place';
 import { askServer, cloudFolder, CloudError, cloudStatusText, listFolder, type CloudAnswer, type CloudServer } from './backup-cloud';
 import { fromHex, randomBytes, toHex } from './crypto';
+import { plural } from './i18n';
 
 // The Collection on a WebDAV server: each space's and hidden place's own choice, off until its
 // owner gives a server (lock/collection-data.ts CollectionServer), which may be any that speaks
@@ -38,10 +40,16 @@ import { fromHex, randomBytes, toHex } from './crypto';
 // A copy runs while the place is open, a while after its Collection changed, and soon after it
 // opens; it stops when the place closes or locks, and with the panic button. It lists the
 // subfolder (PROPFIND), sends each chunk not there, or there with another size, one at a time
-// (PUT), each tried again a few times after a while when the network fails, and deletes there the
-// chunks the catalogue no longer names (DELETE). Nothing else in the subfolder is touched: only
+// (PUT), each tried again a few times after a while when the network fails, lists it again to see
+// that every chunk sent is there, of its size, before the copy counts as whole, and deletes there
+// the chunks the catalogue no longer names (DELETE). Nothing else in the subfolder is touched: only
 // names of chunks. So a copy cut short goes on where it stopped the next time, and one with
 // nothing new changes nothing.
+//
+// The owner can check the copies there (checkCollectionServer): every chunk the catalogue names is
+// listed, of its size, and a few, picked at random, are fetched and opened with their file's key.
+// And bring back at once every file not whole on this phone (bringBackAll), as after a backup
+// restored without them, rather than one at a time as each is opened.
 //
 // A file whose chunks are not on this phone, as after a backup restored without them on a new
 // phone, is fetched from there as it is opened (fillItem): each chunk only if its size is a
@@ -53,8 +61,9 @@ import { fromHex, randomBytes, toHex } from './crypto';
 // (Collection.serverTor, off unless turned on) sends them only through Tor instead, whatever the
 // way, starting Tor for them, and never straight: the test, the copies and the files fetched back.
 
-/** How a place's copying to its server goes: bytes of chunks there out of all, whether it runs now, when it was last whole, and why it last failed. */
-export type ServerStatus = { running: boolean; done: number; total: number; last: number; error: string };
+/** How a place's copying to its server goes: bytes of chunks there out of all, whether it runs now,
+ *  when the last copy of this run of Erevos began (0 if none), when it was last whole, and why it last failed. */
+export type ServerStatus = { running: boolean; done: number; total: number; began: number; last: number; error: string };
 
 const CHUNK_FILE = /^erevos-file-[0-9a-f]{32}-\d+$/;
 
@@ -208,14 +217,14 @@ export async function copyToServer(place: CollectionPlace, signal?: AbortSignal,
   const server = collection.server;
   const tor = collection.serverTor === true;
   if (!server?.on) {
-    const idle = { running: false, done: 0, total: 0, last: server?.last ?? 0, error: '' };
+    const idle = { running: false, done: 0, total: 0, began: 0, last: server?.last ?? 0, error: '' };
     setStatus(place, idle);
     return idle;
   }
   const wanted = chunkFiles(collection);
   let total = 0;
   for (const size of wanted.values()) total += size;
-  let status: ServerStatus = { running: true, done: 0, total, last: server.last, error: '' };
+  let status: ServerStatus = { running: true, done: 0, total, began: now(), last: server.last, error: '' };
   setStatus(place, status);
   try {
     await ensureFolder(server, tor, signal);
@@ -229,18 +238,32 @@ export async function copyToServer(place: CollectionPlace, signal?: AbortSignal,
     }
     status = { ...status, done };
     setStatus(place, status);
+    // Those not on this phone either: nothing to send, nor to look for after.
+    const lost = new Set<string>();
     for (const [name, size] of missing) {
       if (signal?.aborted) throw new Stopped();
       const [id, n] = [name.slice(PREFIX.length, PREFIX.length + 32), Number(name.slice(PREFIX.length + 33))];
       const bytes = await readChunk(id, n);
-      // Not on this phone either: nothing to send, nor to count.
       if (!bytes || bytes.length !== size) {
+        lost.add(name);
         status = { ...status, total: status.total - size };
         continue;
       }
       await retried(async () => check(await askServer(folder, 'PUT', name, { headers: { 'Content-Type': 'application/octet-stream' }, body: bytes })), signal);
       status = { ...status, done: status.done + size };
       setStatus(place, status);
+    }
+    // Read back as the server lists them: each chunk sent there, of its size (where it says sizes),
+    // before the copy counts as whole. One that is not goes again next time.
+    if (missing.length > lost.size) {
+      const after = new Map((await retried(() => listFolder(folder, (name) => CHUNK_FILE.test(name)), signal)).map((file) => [file.name, file.size]));
+      let short = 0;
+      for (const [name, size] of missing) {
+        if (lost.has(name)) continue;
+        const listed = after.get(name);
+        if (listed === undefined || (listed > 0 && listed !== size)) short++;
+      }
+      if (short > 0) throw new CloudError(plural(short, 'After the copy, {n} of its pieces is not on the server whole: the next copy sends it again.', 'After the copy, {n} of its pieces are not on the server whole: the next copy sends them again.'));
     }
     // Only names of chunks, and only those the catalogue has not named for a while.
     const prefix = `${nameOf(place)}|${server.folder}|`;
@@ -269,6 +292,95 @@ export async function copyToServer(place: CollectionPlace, signal?: AbortSignal,
   }
   setStatus(place, status);
   return status;
+}
+
+/** What a check of a place's copies on its server found (checkCollectionServer): when; how many
+ *  files and pieces (chunks) the catalogue names; how many pieces are not there, and how many are
+ *  not as made (of another size, or fetched and not opening with their file's key); how many were
+ *  fetched and opened; and why it could not be checked, '' when it could. */
+export type ServerCheck = { at: number; files: number; pieces: number; missing: number; damaged: number; read: number; error: string };
+
+/** How many pieces a check fetches from the server and opens. */
+export const SERVER_SAMPLE = 4;
+
+// Up to `count` of `items`, picked at random.
+function pick<T>(items: T[], count: number, random: () => number): T[] {
+  const left = [...items];
+  const picked: T[] = [];
+  while (picked.length < count && left.length) picked.push(left.splice(Math.floor(random() * left.length), 1)[0]);
+  return picked;
+}
+
+/**
+ * Checks the place's copies on its server: every piece the catalogue names is listed there, of its
+ * size, and `sample` of them, picked at random, are fetched and opened with their file's key, so
+ * one the server changed or swapped shows. Nothing is changed, here or there.
+ */
+export async function checkCollectionServer(place: CollectionPlace, { sample = SERVER_SAMPLE, random = Math.random, now = Date.now }: { sample?: number; random?: () => number; now?: () => number } = {}): Promise<ServerCheck> {
+  const collection = await loadCollection(place);
+  const checked: ServerCheck = { at: now(), files: collection.items.length, pieces: 0, missing: 0, damaged: 0, read: 0, error: '' };
+  const server = collection.server;
+  if (!server) return checked;
+  const folder = serverFolder(server, collection.serverTor === true);
+  // Each piece the catalogue names, with the file it is of and its number there.
+  const pieces = new Map<string, { ref: FileRef; n: number }>();
+  for (const item of collection.items) for (const ref of item.thumb ? [item.file, item.thumb] : [item.file]) for (let n = 0; n < ref.count; n++) pieces.set(`${PREFIX}${ref.id}-${n}`, { ref, n });
+  checked.pieces = pieces.size;
+  try {
+    const there = new Map((await listFolder(folder, (name) => CHUNK_FILE.test(name))).map((file) => [file.name, file.size]));
+    const listed: string[] = [];
+    for (const [name, { ref }] of pieces) {
+      const size = there.get(name);
+      if (size === undefined) checked.missing++;
+      else if (size > 0 && size !== ref.chunk) checked.damaged++;
+      else listed.push(name);
+    }
+    for (const name of pick(listed, sample, random)) {
+      const { ref, n } = pieces.get(name)!;
+      if (await fetchChunk(folder, ref, n)) checked.read++;
+      else checked.damaged++;
+    }
+  } catch (error) {
+    return { ...checked, error: errorText(error) };
+  }
+  return checked;
+}
+
+/** What bringing back a place's files from its server did: how many were not whole on this phone,
+ *  how many are whole here now, and how many the server does not have whole either. */
+export type BroughtBack = { wanted: number; came: number; failed: number };
+
+/**
+ * Fetches from the place's server every file of its Collection not whole on this phone, with its
+ * small picture, one after another, keeping each chunk that opens with its file's key: what came.
+ * How many of them are done goes to `progress`; `signal` stops it (FillStoppedError) between
+ * chunks, keeping what came. Throws CloudError when the server cannot be reached.
+ */
+export async function bringBackAll(place: CollectionPlace, { signal, progress }: { signal?: AbortSignal; progress?: (done: number, all: number) => void } = {}): Promise<BroughtBack> {
+  const collection = await loadCollection(place);
+  const server = collection.server;
+  if (!server) return { wanted: 0, came: 0, failed: 0 };
+  const folder = serverFolder(server, collection.serverTor === true);
+  const whole = new Set((await itemsWhole(collection.items)).map((item) => item.id));
+  const thumbs = collection.items.filter((item) => item.thumb);
+  const thumbsWhole = new Set((await itemsWhole(thumbs.map((item) => ({ ...item, file: item.thumb! })))).map((item) => item.id));
+  const wanted = collection.items.filter((item) => !whole.has(item.id));
+  let came = 0;
+  let failed = 0;
+  progress?.(0, wanted.length);
+  for (const item of wanted) {
+    if (signal?.aborted) throw new FillStoppedError();
+    if ((await fetchMissingChunks(folder, item.file, { signal })) === 0) came++;
+    else failed++;
+    progress?.(came + failed, wanted.length);
+  }
+  // The small pictures missing here, of every file, whole or not.
+  for (const item of thumbs) {
+    if (thumbsWhole.has(item.id)) continue;
+    if (signal?.aborted) throw new FillStoppedError();
+    await fetchMissingChunks(folder, item.thumb!, { signal });
+  }
+  return { wanted: wanted.length, came, failed };
 }
 
 /** The chunk `n` of the file `ref` from the server's folder `folder`, if it is there whole and opens with the file's key as that chunk; else null. Throws CloudError when the server cannot be reached. */

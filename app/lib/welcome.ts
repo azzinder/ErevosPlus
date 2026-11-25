@@ -27,8 +27,8 @@ export type Welcome = {
   name: string;
 };
 
-/** Where a phone with no relay yet signs in, with an account there (lib/relay-signin.ts): LPHL's relay. */
-export const START_RELAY = 'wss://erevos.lphl.nekten.eu';
+/** Where a phone with no relay yet signs in, with an account there (lib/relay-signin.ts): LPHL's relay, or the one this build names (lib/servers.ts). */
+export { START_RELAY } from './servers';
 
 const LINK = 'erevos://welcome?';
 const CONTACT = 'erevos://contact?';

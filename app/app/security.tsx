@@ -12,6 +12,7 @@ import { PasswordSheet } from '../components/PasswordSheet';
 import { Button, Card, Chip, Field, Input, Page, Row, SectionTitle, Text } from '../components/ui';
 import { confirm } from '../lib/alert';
 import { loadBatteryMode, saveBatteryMode, type BatteryMode } from '../lib/battery-mode';
+import { dropsOfClosedSpaces } from '../lib/camera-drops';
 import { doorIsOpen, followDoor, setDoorOpen } from '../lib/closed-notices';
 import { DESKTOP } from '../lib/desktop';
 import { iconNumberOn, setIconNumberOn } from '../lib/icon-number';
@@ -136,6 +137,8 @@ export default function Security() {
     const ok = await confirm(t('Turn off the lock'), t('Erevos will open without a password. The second password stops working too.'));
     if (!ok) return;
     await removePasswordLock(space, currentSpace().key);
+    // What the locked camera took for the spaces that no longer open goes (lib/camera-drops.ts).
+    await dropsOfClosedSpaces(space, currentSpace().key).catch(() => undefined);
     await turnOffBiometric(biometricSealer);
     setPasswordLock(false);
     await reload();
@@ -149,6 +152,7 @@ export default function Security() {
     );
     if (!ok) return;
     await removeSecondPassword(space, currentSpace().key);
+    await dropsOfClosedSpaces(space, currentSpace().key).catch(() => undefined);
     await reload();
     setNote(t('Saved.'));
   }
@@ -419,7 +423,7 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
   const [sign, setSign] = useState(false);
   const [allowed, setAllowed] = useState(backgroundState);
   const [battery, setBattery] = useState<BatteryMode>('normal');
-  // Whether Erevos starts by itself as the phone turns on (lib/background.ts): the phone's choice.
+  // Whether Erevos starts by itself as the phone turns on (lib/background.ts): the phone's choice, on until turned off.
   const [boot, setBoot] = useState(loadBootStart);
 
   useEffect(() => {
@@ -536,16 +540,19 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
           ) : null}
         </>
       ) : null}
-      {on && notices && canStartAtBoot ? (
+      {/* Where Erevos receives in the background it starts by itself, until turned off here (lib/boot-choice.ts). */}
+      {on && canStartAtBoot ? (
         <>
           <Row wrap>
             <Chip label={t('Start when the phone turns on')} selected={boot} onPress={() => chooseBoot(true)} />
             <Chip label={t('Wait until I open it')} selected={!boot} onPress={() => chooseBoot(false)} />
           </Row>
           <Text variant="caption" tone="muted" style={hint}>
-            {boot
-              ? t('After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say "New message", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says "Locked". Spaces that go through Tor say nothing until a space is open. With no such space, only a quiet notice says it is locked, and a tap on it opens Erevos.')
-              : t('After the phone turns on, Erevos waits until you open it.')}
+            {!boot
+              ? t('After the phone turns on, Erevos waits until you open it.')
+              : notices
+                ? t('After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open: the spaces set to say a message came also while another is open already say "New message", never which space, nor who or what. Everything else waits for a password, as Erevos keeps no key on the phone. Meanwhile a quiet notice says "Locked". Spaces that go through Tor say nothing until a space is open. With no such space, only a quiet notice says it is locked, and a tap on it opens Erevos.')
+                : t('After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open, and a quiet notice says it is locked: a tap on it opens Erevos. Nothing comes until a space is open.')}
           </Text>
         </>
       ) : null}

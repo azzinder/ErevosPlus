@@ -50,8 +50,6 @@ export const cloudBackup: Record<string, string> = {
     "U pregledniku server mora pustiti web aplikaciju (CORS), a ovaj nije, ili nije bio dostupan.",
   "Erevos forgets the server and its password here. The backups already on it stay there until you delete them.":
     "Erevos ovdje zaboravlja server i njegovu lozinku. Rezervne kopije koje su već na njemu ostaju tamo dok ih ne obrišete.",
-  "Sent a backup to {server}. Keep its password: nothing opens the backup without it.":
-    "Rezervna kopija je poslana na {server}. Čuvajte njenu lozinku: ništa ne otvara kopiju bez nje.",
   "Send a backup there now and then; the server keeps the {n} newest.":
     "Šaljite tamo rezervnu kopiju s vremena na vrijeme; server čuva {n} najnovije.",
   "The last one did not go: {error}":
@@ -220,4 +218,23 @@ export const cloudBackup: Record<string, string> = {
   "Keep Erevos open until it is done: a notice says when.": "Držite Erevos otvoren dok ne završi: obavještenje će reći kada.",
   "Backup made": "Rezervna kopija je napravljena",
   "{name} ({size}) is saved in {folder}.": "{name} ({size}) je sačuvan u {folder}.",
+  "Encrypting and sending…": "Šifriranje i slanje…",
+  "Sent a backup to {server}: {total}.": "Rezervna kopija poslana na {server}: {total}.",
+  "Or to {server}, your server: it gets the backup encrypted, under a random name.": "Ili na {server}, vaš server: dobiva rezervnu kopiju šifriranu, pod nasumičnim imenom.",
+  "Or to a folder on a server of yours over WebDAV, such as Nextcloud: it gets the backup encrypted, under a random name.": "Ili u folder na vašem serveru preko WebDAV-a, kao što je Nextcloud: dobiva rezervnu kopiju šifriranu, pod nasumičnim imenom.",
+  "To a server (WebDAV)": "Na server (WebDAV)",
+  "Sent a backup to {server}, with {n} file beside it: {total} in all.": "Rezervna kopija poslana na {server}, s {n} datotekom pored nje: ukupno {total}.",
+  "Sent a backup to {server}, with {n} files beside it: {total} in all.": "Rezervna kopija poslana na {server}, s {n} datotekom pored nje: ukupno {total}. | Rezervna kopija poslana na {server}, s {n} datoteke pored nje: ukupno {total}. | Rezervna kopija poslana na {server}, s {n} datoteka pored nje: ukupno {total}.",
+  "The backup itself is there, but not of the size it was sent with.": "Sama rezervna kopija je tamo, ali nije veličine s kojom je poslana.",
+  "A backup of {total} in all went to {server}.": "Rezervna kopija od ukupno {total} poslana je na {server}.",
+  "{name} and {n} file beside it, {total} in all, are saved in {folder}.": "{name} i {n} datoteka pored nje, ukupno {total}, sačuvani su u {folder}.",
+  "{name} and {n} files beside it, {total} in all, are saved in {folder}.": "{name} i {n} datoteka pored nje, ukupno {total}, sačuvani su u {folder}. | {name} i {n} datoteke pored nje, ukupno {total}, sačuvani su u {folder}. | {name} i {n} datoteka pored nje, ukupno {total}, sačuvani su u {folder}.",
+  "A backup sent by hand goes whole each time, with every photo and file: up to about {size} now.":
+    "Rezervna kopija poslana ručno ide cijela svaki put, sa svakom fotografijom i datotekom: sada do oko {size}.",
+  "A backup sent by hand goes whole each time, with every photo and file.":
+    "Rezervna kopija poslana ručno ide cijela svaki put, sa svakom fotografijom i datotekom.",
+  "With automatic backups on, only what is new goes each time.":
+    "S uključenim automatskim kopijama svaki put ide samo ono što je novo.",
+  "The server keeps the {n} newest whole.":
+    "Server čuva {n} najnovije cijele.",
 };

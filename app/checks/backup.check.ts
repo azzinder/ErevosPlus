@@ -105,9 +105,9 @@ import type { MatrixState } from '../lib/matrix';
 import { newNostrDm, type NostrDmState } from '../lib/nostr-dm';
 import type { XmppState } from '../lib/xmpp';
 import { cloudRequest as browserRequest } from '../lib/backup-http.web';
-import { changeAutoBackup, CHECK_MS, checkAutoBackup, isAutoBackupPassword, KEEP, loadAutoBackup, runAutoBackup, startAutoBackup } from '../lib/backup-folder';
+import { changeAutoBackup, CHECK_MS, checkAutoBackup, checkMadeBackup, checkSentBackup, isAutoBackupPassword, KEEP, loadAutoBackup, runAutoBackup, startAutoBackup, stopAutoBackup } from '../lib/backup-folder';
 import { phoneCallsEntry } from '../lib/backup-calls';
-import { checkedWhole, loadChecks } from '../lib/backup-check';
+import { checkedWhole, checkListed, loadChecks } from '../lib/backup-check';
 import { folderPlace, loadLedger, saveLedger, serverPlace, type Ledger } from '../lib/backup-ledger';
 import { backupMaking, beginBackupMaking, clearBackupMadeNote, forgetBackupMaking, onBackupMaking } from '../lib/backup-making';
 import { phoneSettingsForBackup, putPhoneSettings } from '../lib/backup-native';
@@ -295,10 +295,13 @@ t('what a backup being made says shows only in the space it began in: gone when 
   assert.deepEqual(backupMaking(), { making: null, note: null });
   stop();
 
-  // The phone's notice, which names the backup, is for the space that made it as well (app/backup.tsx).
+  // The phone's notice, which names the backup, is for the space that made it as well (app/backup.tsx),
+  // and so is the one of a backup sent to the server by hand.
   const screen = readFileSync(join(import.meta.dirname, '..', 'app', 'backup.tsx'), 'utf8');
-  assert.ok(screen.includes('if (made.kept()) tellBackupMade(name, sizeText(size), folder);'));
+  assert.ok(screen.includes('if (made.kept()) tellBackupMade(name, spaceText(size + partsSize), folder, parts);'));
   assert.equal(screen.split('tellBackupMade(').length, 2);
+  assert.ok(screen.includes('if (made.kept()) tellBackupSent(cloudLabel(sent), total);'));
+  assert.equal(screen.split('tellBackupSent(').length, 2);
 
   // And a space that closes does forget it, with the rest it forgets (app/_layout.tsx).
   const layout = readFileSync(join(import.meta.dirname, '..', 'app', '_layout.tsx'), 'utf8');
@@ -1334,6 +1337,8 @@ t("holds the panic password, the phone's settings, and automatic backups' and th
     'erevos.icon-number': 'no',
     'erevos.ring-background': '1',
     'erevos.message-notices': '0',
+    'erevos.boot-start': 'off',
+    'erevos.boot-choice': 'off',
     'erevos.battery': 'sleep',
     'erevos.screen-private': 'off',
     'erevos.photo-quality': 'small',
@@ -1343,6 +1348,7 @@ t("holds the panic password, the phone's settings, and automatic backups' and th
     'erevos.aware': '1',
     'erevos.lora': '{"address":"AA:BB","name":"Mesh"}',
     'erevos.phone-open': 'yes',
+    'erevos.camera-open': 'no',
     'erevos.backup-sms': '1',
     'erevos.backup-calls': '1',
   };
@@ -1375,13 +1381,21 @@ t("holds the panic password, the phone's settings, and automatic backups' and th
   const sent = { ...cloud, password: 'old', names: ['fedcba9876543210'], parts: {}, unfinished: [{ seed: 'cd'.repeat(16), count: 16 }], last: 11 };
   store.set('erevos.backup-auto', JSON.stringify(mine));
   store.set('erevos.backup-cloud', JSON.stringify(sent));
-  // And settings the backup does not hold go.
+  // And settings the backup does not hold go: all but whether the camera opens with Erevos locked,
+  // which a backup from before it could not say, and which stays as this phone has it. Whom the
+  // locked camera takes for is in no backup, and goes with every restore.
   store.delete('erevos.haptics');
+  store.delete('erevos.camera-open');
+  store.set('erevos.camera-drop', 'ab'.repeat(32));
   const without = await backUp(await backupKey('backup-pass'));
+  assert.ok(!(await openBackup(without, 'backup-pass')).entries.some((entry) => entry.name === 'erevos.camera-drop' || entry.name === 'erevos.camera-open'));
   store.set('erevos.haptics', 'yes');
+  store.set('erevos.camera-open', 'no');
   store.set('erevos.backup-auto', JSON.stringify({ ...mine, folder: 'content://elsewhere', last: 12 }));
   await restoreBackup(await openBackup(without, 'backup-pass'), fromShelf);
   assert.equal(store.has('erevos.haptics'), false);
+  assert.equal(store.get('erevos.camera-open'), 'no');
+  assert.equal(store.has('erevos.camera-drop'), false);
   assert.deepEqual(JSON.parse(store.get('erevos.backup-auto')!), { ...mine, folder: 'content://elsewhere', last: 12, error: '' });
   assert.deepEqual(JSON.parse(store.get('erevos.backup-cloud')!), { ...sent, error: '' });
   await restoreBackup(await openBackup(file, 'backup-pass'), fromShelf);
@@ -1661,7 +1675,11 @@ t('into a folder on the phone: the parts as they are made, then the backup; the 
   looks.count = 0;
   for (const n of [1, 2, 3, 4]) {
     const written = await writeBackup(uri, (parts) => makeBackup(key, { parts }), day(n), 3);
-    assert.deepEqual(written, { name: `erevos-backup-2026-11-0${n}-0312.erevos`, size: written.size, parts: 2 });
+    assert.deepEqual(written, { name: `erevos-backup-2026-11-0${n}-0312.erevos`, size: written.size, parts: 2, partsSize: written.partsSize });
+    // The files beside it, as large together as they lie in the folder.
+    const beside = [1, 2].map((part) => folders.get(uri)!.get(partFileName(`erevos-backup-2026-11-0${n}-0312`, part))!.length);
+    assert.equal(written.partsSize, beside[0] + beside[1]);
+    assert.ok(written.partsSize > 5 * 1024 * 1024);
   }
   const folder = folders.get(uri)!;
   assert.deepEqual(
@@ -1708,7 +1726,7 @@ t('a build before the folder functions writes, lists and deletes in the folder t
   try {
     for (const n of [1, 2, 3, 4]) {
       const written = await writeBackup(uri, (parts) => makeBackup(key, { parts }), day(n), 3);
-      assert.deepEqual(written, { name: `erevos-backup-2026-11-0${n}-0312.erevos`, size: written.size, parts: 2 });
+      assert.deepEqual(written, { name: `erevos-backup-2026-11-0${n}-0312.erevos`, size: written.size, parts: 2, partsSize: written.partsSize });
     }
     const folder = folders.get(uri)!;
     const kept = [2, 3, 4].flatMap((n) => [`erevos-backup-2026-11-0${n}-0312.erevos`, `erevos-backup-2026-11-0${n}-0312.part1.erevos`, `erevos-backup-2026-11-0${n}-0312.part2.erevos`]);
@@ -2606,7 +2624,7 @@ t('every 6 hours: Erevos looks every 15 minutes while a space is open and as it 
   // the space is still open; never in a task in the background.
   const layout = readFileSync(join(import.meta.dirname, '../app/_layout.tsx'), 'utf8');
   assert.match(layout, /if \(!spaceOpen\) return;\n\s+const timer = setInterval\(\(\) => void awakeWhile\(checkAutoBackup\(\)\)\.catch\(\(\) => undefined\), BACKUP_CHECK_MS\);/);
-  assert.match(layout, /backgroundAt\.current = Date\.now\(\);[\s\S]{0,300}if \(current\.kind === 'open'\) void checkAutoBackup\(\)/);
+  assert.match(layout, /backgroundAt\.current = awayClock\(\);[\s\S]{0,300}if \(current\.kind === 'open'\) void checkAutoBackup\(\)/);
   assert.doesNotMatch(readFileSync(join(import.meta.dirname, '../lib/background.ts'), 'utf8'), /backup/i);
 });
 
@@ -2701,3 +2719,165 @@ t("the desktop app's shell tells each of the app's files' size and when it was w
   }
   assert.match(shell, /if \(url\.pathname === '\/__files'\) return files\(url\.searchParams\.get\('prefix'\), url\.searchParams\.get\('stamps'\) === '1'\);/);
 });
+
+t('a backup made by hand into a folder is checked as it is made: read back, opened with its password, every file beside it there, two read through', async () => {
+  await phone();
+  photos(9);
+  const uri = 'content://com.android.externalstorage.documents/tree/primary%3AByHand';
+  folders.set(uri, new Map());
+  const key = await backupKey('hand-pass');
+  const stem = 'erevos-backup-2026-11-25-0939';
+  const written = await writeBackup(uri, (parts) => makeBackup(key, { parts }), new Date(2026, 10, 25, 9, 39).getTime());
+  assert.equal(written.name, `${stem}.erevos`);
+  assert.equal(written.parts, 3);
+  const whole = await checkMadeBackup(uri, written.name, key);
+  assert.ok(whole && checkedWhole(whole));
+  assert.deepEqual({ ...whole, at: 0 }, { at: 0, parts: 3, read: 2, missing: 0, damaged: 0, opened: true, error: '' });
+  // With another password it cannot be checked, and says why.
+  const other = await checkMadeBackup(uri, written.name, await backupKey('other-pass'));
+  assert.ok(other && !checkedWhole(other));
+  assert.match(other.error, /password/);
+  // A file beside it gone: found, and not whole.
+  const folder = folders.get(uri)!;
+  const second = folder.get(partFileName(stem, 2))!;
+  folder.delete(partFileName(stem, 2));
+  const missing = await checkMadeBackup(uri, written.name, key);
+  assert.equal(missing?.missing, 1);
+  assert.equal(missing && checkedWhole(missing), false);
+  folder.set(partFileName(stem, 2), second);
+  // Each changed where it lies, of the same size: the two read through find it.
+  for (const n of [1, 2, 3]) {
+    const bytes = folder.get(partFileName(stem, n))!.slice();
+    bytes[100] ^= 1;
+    folder.set(partFileName(stem, n), bytes);
+  }
+  const damaged = await checkMadeBackup(uri, written.name, key);
+  assert.equal(damaged?.damaged, 2);
+  assert.equal(damaged && checkedWhole(damaged), false);
+  // The backup itself gone: said so.
+  folder.delete(written.name);
+  assert.match((await checkMadeBackup(uri, written.name, key))?.error ?? '', /not there/);
+});
+
+t('a backup sent to the server by hand is checked there by what the server lists, of its size and every part', async () => {
+  const there = new Map<string, Uint8Array>();
+  setCloudHttp(async (method, url, headers, body) => davServer(there, () => 'app-pass')(method, url, headers, body));
+  try {
+    await phone();
+    photos(5);
+    const cloud = await startCloudBackup('https://cloud.example/dav/Backups', 'me', 'app-pass');
+    const key = await backupKey('hand-pass');
+    let size = 0;
+    let named: PartMade[] = [];
+    const sent = await sendToCloud(
+      cloud,
+      async (parts) => {
+        const bytes = await makeBackup(key, { parts, bare: true, made: (list) => (named = list) });
+        size = bytes.length;
+        return bytes;
+      },
+      KEEP,
+    );
+    assert.equal(sent.error, '');
+    assert.equal(named.length, 2);
+    const whole = await checkSentBackup(sent, named, size);
+    assert.ok(whole && checkedWhole(whole));
+    assert.equal(whole.parts, 2);
+    // The total said is what the server holds of it.
+    assert.equal(size + named.reduce((sum, part) => sum + part.size, 0), [...there.values()].reduce((sum, bytes) => sum + bytes.length, 0));
+    // A part gone there: missing.
+    const name = sent.names.at(-1)!;
+    const part = there.get(named[1].name)!;
+    there.delete(named[1].name);
+    assert.equal((await checkSentBackup(sent, named, size))?.missing, 1);
+    there.set(named[1].name, part);
+    // The backup there of another size: not whole.
+    there.set(name, there.get(name)!.slice(0, size - 1));
+    assert.match((await checkSentBackup(sent, named, size))?.error ?? '', /not of the size/);
+    // Not sent: nothing to check.
+    assert.equal(await checkSentBackup({ ...sent, error: 'no network' }, named, size), null);
+    // As listed, with the size given or not said there.
+    assert.equal(checkListed(new Map([[name, 10]]), name, [], 0, 10).error, '');
+    assert.equal(checkListed(new Map([[name, -1]]), name, [], 0, 10).error, '');
+    assert.notEqual(checkListed(new Map([[name, 9]]), name, [], 0, 10).error, '');
+    assert.equal(checkListed(new Map([[name, 9]]), name, [], 0).error, '');
+  } finally {
+    setCloudHttp(null);
+    await stopCloudBackup();
+  }
+});
+
+t('the server stays when automatic backups stop, and Make a backup sends one there alone with their password', async () => {
+  const there = new Map<string, Uint8Array>();
+  setCloudHttp(async (method, url, headers, body) => davServer(there, () => 'app-pass')(method, url, headers, body));
+  const uri = 'content://com.android.externalstorage.documents/tree/primary%3AAuto';
+  folders.set(uri, new Map());
+  try {
+    await phone();
+    photos(3);
+    const start = new Date(2026, 5, 1, 3, 12).getTime();
+    await startAutoBackup(1, uri, await backupKey('auto-pass'));
+    await startCloudBackup('https://cloud.example/dav/Backups', 'me', 'app-pass');
+    await runAutoBackup(false, start);
+    const inFolder = folders.get(uri)!.size;
+    const onServer = (await loadCloudBackup())!.names.length;
+    // To the server alone, now: nothing new in the folder, one more there, checked as listed.
+    const run = await runAutoBackup(false, start + 60_000, { serverOnly: true });
+    assert.equal(run.cloud?.error, '');
+    assert.equal(folders.get(uri)!.size, inFolder);
+    assert.equal(run.cloud?.names.length, onServer + 1);
+    assert.equal(run.cloud?.last, start + 60_000);
+    assert.equal(run.auto?.last, start);
+    const checked = (await loadChecks()).server;
+    assert.ok(checked && checkedWhole(checked));
+    assert.equal(checked.at, start + 60_000);
+    // Automatic backups off: the server stays, with what went there.
+    await stopAutoBackup();
+    assert.equal(await loadAutoBackup(), null);
+    assert.equal((await loadCloudBackup())?.names.length, onServer + 1);
+    assert.deepEqual(await loadChecks(), { folder: null, server: null });
+  } finally {
+    setCloudHttp(null);
+    await stopCloudBackup();
+  }
+});
+
+t('the backup screen says of a backup made by hand its size in all, when it began and ended, and what is not in it; and offers a server there', async () => {
+  const screen = readFileSync(join(import.meta.dirname, '..', 'app', 'backup.tsx'), 'utf8');
+  // Into a folder and to a server, side by side; the server's fields there when there is none yet.
+  assert.match(screen, /: t\("Into a folder"\)/);
+  assert.match(screen, /: t\("To a server \(WebDAV\)"\)/);
+  assert.match(screen, /onPress=\{toServer\}/);
+  assert.match(screen, /\{form === "make" \? addForm : null\}/);
+  assert.match(screen, /if \(!cloud\) setForm\("make"\);\n\s+else if \(CAN_AUTO_BACKUP && auto\) void serverNow\(\);\n\s+else setAsking\(\{ kind: "cloud" \}\);/);
+  // The server's card wherever backups can go to one, with automatic backups on or not.
+  assert.match(screen, /\{CAN_CLOUD_BACKUP \? \(\n\s+<>\n\s+<SectionTitle title=\{t\("To a server too"\)\} \/>/);
+  assert.doesNotMatch(screen, /CAN_CLOUD_BACKUP && \(auto \|\| !CAN_AUTO_BACKUP\)/);
+  // The size in all, the files beside it with it; begun and done; what is not in it; then checked.
+  assert.match(screen, /total: spaceText\(size \+ partsSize\)/);
+  assert.match(screen, /timesText\(start, end\)/);
+  assert.match(screen, /notInText\(out\)/);
+  assert.match(screen, /const checked = await checkMadeBackup\(asking\.folder, name, key\);/);
+  assert.match(screen, /const checked = await checkSentBackup\(sent, named, size\);/);
+  assert.match(screen, /writeBackup\(\n\s+asking\.folder,[\s\S]*?\n\s+start,\n\s+\);/);
+  // What the check found shows under what is said.
+  assert.match(screen, /\{madeNote\?\.checked && !making \? \(\n\s+<CheckLine/);
+});
+
+t('a backup sent to the server by hand says before it starts that all of it goes each time, and about how much', async () => {
+  // Its key is its own, even with the same password: no part of an earlier one can be named again.
+  const [one, two] = [await backupKey('the same password', undefined, 1000, null), await backupKey('the same password', undefined, 1000, null)];
+  assert.notDeepEqual(one.key, two.key);
+  const screen = readFileSync(join(import.meta.dirname, '..', 'app', 'backup.tsx'), 'utf8');
+  // So it is sent with no book of earlier parts, as automatic backups have (lib/backup-folder.ts).
+  assert.match(screen, /const sent = await sendToCloud\(\n\s+cloud,\n\s+async \(parts\) => \{[\s\S]{0,500}?\n\s+\},\n\s+KEEP,\n\s+\);/);
+  // Its password sheet says it, with about how much where the phone measures it, and how many the server keeps.
+  assert.match(screen, /sheet\?\.kind === "cloud"\n\s+\? \[\n\s+byHandText\(whole\),\n\s+t\("The server keeps the \{n\} newest whole\.", \{ n: KEEP \}\),/);
+  assert.match(screen, /if \(askingKind !== "cloud"\) return;[\s\S]{0,200}wholeBackupAtMost\(\)/);
+  assert.match(screen, /"A backup sent by hand goes whole each time, with every photo and file: up to about \{size\} now\.",\n\s+\{ size: spaceText\(bytes\) \},/);
+  // The server's card says it too where backups go there only by hand.
+  assert.match(screen, /"Send a backup there now and then; the server keeps the \{n\} newest\.",[\s\S]{0,120}byHandText\(null\),/);
+  // Automatic backups are pointed at only where there are any.
+  assert.match(screen, /CAN_AUTO_BACKUP\n\s+\? t\("With automatic backups on, only what is new goes each time\."\)/);
+});
+

@@ -11,6 +11,7 @@ import { t } from '../lib/i18n';
 import { FILE as ARCHIVE } from './archive';
 import { FILE as CHAT_LIST } from './chat-list-data';
 import { PREFIX as ATTACHMENT } from './attachment-files';
+import { CAMERA_DROP_KEY, CAMERA_OPEN_KEY, discardDrops } from './camera-drop';
 import { ITER, PANIC_KEY } from './config';
 import { FILE as COLLECTION } from './collection-data';
 import { FILE as CONTACTS } from './contacts-data';
@@ -188,12 +189,13 @@ const HEARD = [...Array.from({ length: MOST_SLOTS }, (_, n) => [`erevos.watch.${
 // The phone's own settings, the same in every space, that go with its owner to another phone: the
 // language (lib/i18n.ts), the modules on (lib/modules.ts), vibrate on touch (lib/haptics.ts), the
 // number on the icon (lib/icon-number.ts), ringing and the messages' notice in the background
-// and starting as the phone turns on (lib/background.ts), the battery mode (lib/battery-mode.ts), keeping the screen private
+// and starting as the phone turns on (lib/background.ts; as a build before 3.0.0-rc.3 kept it,
+// and the owner's choice, lib/boot-choice.ts), the battery mode (lib/battery-mode.ts), keeping the screen private
 // (lib/screen-privacy.ts), the photos' quality (lib/photo-quality.ts), carrying for phones nearby,
 // the same Wi-Fi, Wi-Fi Direct and Wi-Fi Aware (lib/nearby-links.ts), the LoRa radio, which is the
 // owner's and not the phone's (lib/radio.ts), whether the Phone opens without the password
-// (lib/phone-open.ts), and whether backups hold the phone's SMS (lib/backup-sms.ts) and its calls
-// (lib/backup-calls.ts).
+// (lib/phone-open.ts), whether the camera does (lock/camera-drop.ts), and whether backups hold the
+// phone's SMS (lib/backup-sms.ts) and its calls (lib/backup-calls.ts).
 const SETTINGS = [
   'erevos.lang',
   'erevos.modules',
@@ -202,6 +204,7 @@ const SETTINGS = [
   'erevos.ring-background',
   'erevos.message-notices',
   'erevos.boot-start',
+  'erevos.boot-choice',
   'erevos.battery',
   'erevos.screen-private',
   'erevos.photo-quality',
@@ -211,6 +214,7 @@ const SETTINGS = [
   'erevos.aware',
   'erevos.lora',
   'erevos.phone-open',
+  CAMERA_OPEN_KEY,
   'erevos.backup-sms',
   'erevos.backup-calls',
 ];
@@ -222,8 +226,14 @@ const LATER_KEYS = [PANIC_KEY, ...SETTINGS, AUTO, CLOUD];
 // The keystore entries no backup holds and every restore deletes: the copy of one space's speed
 // dial numbers that the Phone calls with Erevos locked (lib/phone-open.ts). The spaces are the
 // backup's from then on, and the one that kept the copy may not be among them: nothing could take
-// it away then. A space that kept it turns it on again.
-const NEVER_KEPT = ['erevos.phone-speed'];
+// it away then. A space that kept it turns it on again. And the public key the camera seals for
+// with Erevos locked (lock/camera-drop.ts), which is one space's too: the next space that opens
+// gives its own, and what was taken for the old one goes with the restore (discardDrops).
+const NEVER_KEPT = ['erevos.phone-speed', CAMERA_DROP_KEY];
+// A setting a restore leaves as the phone has it when the backup holds none (one made before the
+// setting was): whether the camera opens without the password, which is on unless turned off, so a
+// backup that says nothing must not turn it on again.
+const STAYS_UNSAID = [CAMERA_OPEN_KEY];
 
 // The sealed files that are text; voice messages' sounds, pictures and stickers' pictures are
 // bytes. A file not on the phone is left out, so the backup of a phone that keeps no contacts, or
@@ -981,7 +991,7 @@ export async function restoreBackup(
   for (const name of [...TEXT_FILES, ...PHONE_FILES, ...(parts ? LATER_FILES : [])]) if (!keep.has(name)) gone.push({ kind: KIND_TEXT, name, value: await readFile(name) });
   for (const name of [...(await listFiles(AVATAR)), ...(await listFiles(PAGE))]) if (!keep.has(name)) gone.push({ kind: KIND_BYTES, name, value: await readBytes(name) });
   const heard = HEARD.some((name) => keep.has(name));
-  for (const name of [...KEYS, ...(parts ? LATER_KEYS : []), ...(heard ? HEARD : [])]) if (!keep.has(name)) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
+  for (const name of [...KEYS, ...(parts ? LATER_KEYS : []), ...(heard ? HEARD : [])]) if (!keep.has(name) && !STAYS_UNSAID.includes(name)) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
   for (const name of NEVER_KEPT) gone.push({ kind: KIND_KEY, name, value: await secureGet(name) });
   try {
     for (const entry of entries) {
@@ -1008,6 +1018,9 @@ export async function restoreBackup(
   for (const name of [...(own ? [] : await listFiles(VOICE)), ...(parts && !own ? await listFiles(ATTACHMENT) : [])]) {
     if (!keep.has(name)) await deleteFile(name).catch(() => undefined);
   }
+  // What the camera took with Erevos locked and no space has taken in yet (lock/camera-drop.ts):
+  // sealed for a space of before the restore, nothing will open it now.
+  await discardDrops().catch(() => undefined);
   // One made before the queues entries were, or that held fewer spaces, has none for some: each is
   // there again, sealed with a random key, before anything opens, so which are used shows nowhere.
   await prepareQueueEntries();

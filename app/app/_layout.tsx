@@ -11,6 +11,7 @@ import { AlertHost } from '../components/alert-host';
 import { CallHost, watchCalls } from '../components/call-host';
 import { SignalCallHost } from '../components/signal-call';
 import { TelegramCallHost } from '../components/telegram-call';
+import { ErevosCamera } from '../components/erevos-camera';
 import { HiddenRingHost } from '../components/hidden-ring-screen';
 import { ScreenBackdrop, useBackdropSpec } from '../components/backdrop';
 import { KeyboardProvider } from '../components/keyboard';
@@ -22,6 +23,7 @@ import { forgetBackupMaking } from '../lib/backup-making';
 import { currentCall } from '../lib/call';
 import { endCall, onCallChange } from '../lib/calls';
 import { forgetOffered } from '../lib/contact-code';
+import { armCurtain, awayClock, awayLong, CURTAIN_END, curtainBack, curtainDown, liftCurtain, lowerCurtain, type CurtainBack } from '../lib/curtain';
 import { cryptoReady, setupCrypto } from '../lib/crypto-setup';
 import { forgetLinks } from '../lib/devices';
 import { endGroupCall } from '../lib/group-calls';
@@ -48,6 +50,8 @@ import { startSmsLater } from '../lib/sms-later';
 import { startChatLater } from '../lib/chat-later';
 import { startSmsNotices } from '../lib/sms-notices';
 import { clearCameraCache } from '../lib/camera-cache';
+import { takeDrops } from '../lib/camera-drops';
+import { spaceCollection } from '../lib/collection-place';
 import { StickerImageHost } from '../lib/sticker-image';
 import { forgetSmsLink } from '../lib/sms-relay';
 import { forgetSpaceChats, shareLastSeen } from '../lib/space-chats';
@@ -57,8 +61,10 @@ import { startShellWatch } from '../lib/shell-watch';
 import { keepSpaceRunning, onSpaceGatedChange, restartSpaceRunning, setSpaceGated, spaceGated, stopSpaceRunning } from '../lib/space-running';
 import { watchStoppedPlaces } from '../lib/forget-me';
 import { relayStopped, setRelayStopped } from '../lib/relay';
+import { forgetRelayLine } from '../lib/relay-line';
 import { forgetSpare } from '../lib/spare';
 import { callAudio } from '../modules/erevos-call';
+import { cameraView } from '../modules/erevos-collection';
 import { clearKnownNames, forgetKnownNamesAfter } from '../modules/erevos-phone';
 import { refreshWidget, setIconNumbers } from '../modules/erevos-widget';
 import { forgetSpaceGroups } from '../lib/space-groups';
@@ -83,7 +89,9 @@ import { loadModules, moduleOn, MSG_MODULES, modulesChosen, onModulesChange, scr
 import { keepSetupAfter } from '../lib/setup-after';
 import { watchPlaceNetworks } from '../lib/place-networks';
 import { forgetTextInvite } from '../lib/text-invite';
+import { forgetWays } from '../lib/ways-read';
 import { forgetWelcome } from '../lib/welcome';
+import { dropKey, forgetDropKey, publishDropKey } from '../lock/camera-drop';
 import { hardenLock, loadLockConfig, type LockConfig, type Unlocked } from '../lock/config';
 import { LockContext, useLock, type LockState } from '../lock/context';
 import { PasswordGate } from '../lock/gate';
@@ -117,6 +125,11 @@ callAudio?.noCookies?.();
 
 // Lock again after the app has been in the background this long.
 const RELOCK_AFTER_MS = 30_000;
+// A password screen asked for (gate) that has not come after this long: Erevos starts again from
+// the password, with the space closed, sooner than stay under the phone's cover (lib/curtain.ts).
+const GATE_STUCK_MS = 8_000;
+// The phone's cover still over an open space this long after Erevos came back: it locks.
+const COVER_LEFT_MS = 5_000;
 // An automatic backup, when one is due, waits this long after a space opens, so the chats show first.
 // Then, while it is open, Erevos looks every BACKUP_CHECK_MS whether one is due, and as it goes to
 // the background, before it locks (lib/backup-folder.ts); never with no space open.
@@ -152,7 +165,11 @@ let left: { space: number; passwordLock: boolean; look: Look; at: number; gated:
 // The password screen shows the look last used. With the password lock, locking puts the password
 // screen in front of the open space, which goes on behind it, taking messages and ringing calls
 // (lib/space-running.ts): its screens go, and with them the hidden chats. Its password shows it
-// again; another space's closes it first. A password given for the SMS (their icon, the widget's
+// again; another space's closes it first. On Android the phone itself covers such a space's
+// screens as they go out of sight, and keeps them covered when Erevos comes back after the lock's
+// time, until the password screen is drawn: nothing of the space shows before it (lib/curtain.ts).
+// Where the app goes on running out of sight, it locks there at its time, and the password screen
+// is ready as Erevos comes back. A password given for the SMS (their icon, the widget's
 // SMS button, an SMS notice) or the Contacts (their icon, the widget's button) shows only them; any
 // other screen asks for it again, and then shows. What the Collection has open in Android (links
 // other apps read its files by, PDFs, lib/collection-play.ts) goes when the space locks or closes,
@@ -167,6 +184,13 @@ export default function RootLayout() {
   // The password screen came from only the SMS or the Contacts, for something else: the password opens all.
   const wantsAll = useRef(false);
   const relockAfterCall = useRef(false);
+  // The password screen was asked for and is not there yet (gate): the phone's cover stays, and
+  // nothing asks for it again. `gateRun` tells one asking from the next.
+  const gating = useRef(false);
+  const gateRun = useRef(0);
+  // What the phone counted as the screens came back (lib/curtain.ts), taken once and kept until
+  // Erevos is told it is in front.
+  const backTaken = useRef<CurtainBack | null>(null);
   // Another space to open, its password just given in the open one (LockState.openSpace): it opens
   // once the screens of the one that closed are gone.
   const switching = useRef<Unlocked | null>(null);
@@ -236,6 +260,9 @@ export default function RootLayout() {
       setTimeout(() => void runAutoBackup().catch(() => undefined), BACKUP_AFTER_MS);
       // The Collection copied to its server, when it has one (lib/collection-webdav.ts).
       collectionServerOpened();
+      // What the camera took for this space while Erevos was locked comes in, and it takes for
+      // this space from now on (lock/camera-drop.ts).
+      cameraFollows(passwordLock);
       // A new Erevos is told at the top of the chats (lib/release-look.ts).
       watchReleases();
     },
@@ -340,6 +367,13 @@ export default function RootLayout() {
   // when given ('' for none): the screen that asked for the password again, with only the SMS or the Contacts open.
   const gate = useCallback(
     async (space: number, link?: string) => {
+      // Covered first, at once: the password screen takes a moment to make (lib/curtain.ts).
+      lowerCurtain();
+      gating.current = true;
+      const run = ++gateRun.current;
+      setTimeout(() => {
+        if (gating.current && gateRun.current === run) start().catch(fail);
+      }, GATE_STUCK_MS);
       setSpaceGated(true);
       clearKnownNames();
       collectionLocked();
@@ -356,8 +390,16 @@ export default function RootLayout() {
       if (config.direct !== null || config.slots.length === 0) return start();
       setPhase({ kind: 'locked', config, behind: space });
     },
-    [start],
+    [start, fail],
   );
+
+  // The phone's cover goes once a screen that is not the space's is drawn under it: the password
+  // screen, or whatever else shows in its place (Shell marks each with CurtainEnd).
+  useEffect(() => {
+    if (error === null && phase.kind === 'open') return;
+    gating.current = false;
+    liftCurtain(true);
+  }, [phase, error]);
 
   // Locks the space that shows: behind the password screen with the password lock, otherwise as Erevos starts.
   const relock = useCallback(() => {
@@ -380,6 +422,8 @@ export default function RootLayout() {
         void refreshKnownNames();
         setPhase({ kind: 'open', space, passwordLock: true, only });
         collectionServerOpened();
+        // What the camera took in front of the password screen comes in.
+        cameraFollows(true);
         return;
       }
       if (behind !== undefined) closeSpace();
@@ -394,7 +438,7 @@ export default function RootLayout() {
   const goOn = useCallback(
     async (was: NonNullable<typeof left>) => {
       await show(was.look);
-      if (was.passwordLock && Date.now() - was.at > RELOCK_AFTER_MS) relockAfterCall.current = true;
+      if (was.passwordLock && awayClock() - was.at > RELOCK_AFTER_MS) relockAfterCall.current = true;
       else if (was.passwordLock) {
         forgetKnownNamesAfter(-1);
         collectionLockAfter(-1);
@@ -414,7 +458,7 @@ export default function RootLayout() {
       // No space is open.
     }
     if (was === null || was.space !== open) start().catch(fail);
-    else if (!was.gated && (!was.passwordLock || Date.now() - was.at <= RELOCK_AFTER_MS || currentCall() !== null || hiddenRingHoldsLock()))
+    else if (!was.gated && (!was.passwordLock || awayClock() - was.at <= RELOCK_AFTER_MS || currentCall() !== null || hiddenRingHoldsLock()))
       // Only the SMS or the Contacts showed, and another icon or a notice brings Erevos back: the
       // password first, as when it is locked, which then opens what that one names. The part
       // showed a moment before otherwise.
@@ -432,7 +476,7 @@ export default function RootLayout() {
   useEffect(
     () => () => {
       const current = phaseRef.current;
-      const at = backgroundAt.current ?? Date.now();
+      const at = backgroundAt.current ?? awayClock();
       if (current.kind === 'open') left = { space: current.space, passwordLock: current.passwordLock, look: lookRef.current, at, gated: false, only: current.only };
       else if (current.kind === 'locked' && current.behind !== undefined && spaceGated()) left = { space: current.behind, passwordLock: true, look: lookRef.current, at, gated: true };
       else left = null;
@@ -480,10 +524,25 @@ export default function RootLayout() {
   }, [spaceOpen]);
 
   useEffect(() => {
+    let lockTimer: ReturnType<typeof setTimeout> | null = null;
+    let coverTimer: ReturnType<typeof setTimeout> | null = null;
+    // The lock's time has passed with Erevos still out of sight, where the app goes on running
+    // there (it takes messages in the background): it locks now, behind the phone's cover, so the
+    // password screen is ready as Erevos comes back. Back already: decided as it is told so, below.
+    const lockAway = () => {
+      lockTimer = null;
+      const current = phaseRef.current;
+      if (backgroundAt.current === null || gating.current || current.kind !== 'open' || !current.passwordLock) return;
+      backTaken.current ??= curtainBack();
+      if (backTaken.current) return;
+      if (currentCall() || hiddenRingHoldsLock()) relockAfterCall.current = true;
+      else gate(current.space).catch(fail);
+    };
     const subscription = AppState.addEventListener('change', (state) => {
       const current = phaseRef.current;
       if (state === 'background') {
-        backgroundAt.current = Date.now();
+        backgroundAt.current = awayClock();
+        backTaken.current = null;
         // What was read here is no longer new on the widget.
         refreshWidget();
         // An automatic backup that is due is made now, while the space is still open.
@@ -493,22 +552,44 @@ export default function RootLayout() {
         if (current.kind === 'open' && current.passwordLock) {
           forgetKnownNamesAfter(RELOCK_AFTER_MS);
           collectionLockAfter(RELOCK_AFTER_MS);
+          if (lockTimer) clearTimeout(lockTimer);
+          lockTimer = setTimeout(lockAway, RELOCK_AFTER_MS);
         }
       }
-      if (state !== 'active' || backgroundAt.current === null) return;
-      const away = Date.now() - backgroundAt.current;
+      if (state !== 'active') return;
+      if (lockTimer) clearTimeout(lockTimer);
+      lockTimer = null;
+      // How long Erevos was away: by the phone's count where it keeps one, on the clock nobody can
+      // set, which is what it kept its cover by (lib/curtain.ts); else by the app's own.
+      const back = backTaken.current ?? curtainBack();
+      backTaken.current = null;
+      const since = backgroundAt.current;
       backgroundAt.current = null;
-      if (current.kind !== 'open' || !current.passwordLock) return;
-      if (away <= RELOCK_AFTER_MS) {
+      if (back === null && since === null) return;
+      // Locked already, or locking: the cover goes with the password screen.
+      if (gating.current || current.kind !== 'open' || !current.passwordLock) return;
+      // The cover is never left over an open space: one still there in a while locks it.
+      if (coverTimer) clearTimeout(coverTimer);
+      coverTimer = setTimeout(() => {
+        coverTimer = null;
+        const now = phaseRef.current;
+        if (AppState.currentState !== 'active' || !curtainDown() || gating.current || now.kind !== 'open') return;
+        if (now.passwordLock) gate(now.space).catch(fail);
+        else liftCurtain(false);
+      }, COVER_LEFT_MS);
+      if (!awayLong(back, since === null ? null : awayClock() - since, RELOCK_AFTER_MS)) {
         forgetKnownNamesAfter(-1);
         collectionLockAfter(-1);
+        liftCurtain(false);
         return;
       }
       // A call that rang in the background, or goes on, would lose its screen behind the password:
       // it locks once the call ends. So does a hidden call that rings, or that its PIN answered
       // and that has not come yet (lib/hidden-ring.ts).
-      if (currentCall() || hiddenRingHoldsLock()) relockAfterCall.current = true;
-      else gate(current.space).catch(fail);
+      if (currentCall() || hiddenRingHoldsLock()) {
+        relockAfterCall.current = true;
+        liftCurtain(false);
+      } else gate(current.space).catch(fail);
     });
     let answerTimer: ReturnType<typeof setTimeout> | null = null;
     const relockWhenDone = () => {
@@ -531,6 +612,8 @@ export default function RootLayout() {
       stopCalls();
       stopRings();
       if (answerTimer) clearTimeout(answerTimer);
+      if (lockTimer) clearTimeout(lockTimer);
+      if (coverTimer) clearTimeout(coverTimer);
     };
   }, [gate, relock, fail]);
 
@@ -584,7 +667,12 @@ export default function RootLayout() {
     () => ({
       space: phase.kind === 'open' ? phase.space : 0,
       passwordLock: phase.kind === 'open' && phase.passwordLock,
-      setPasswordLock: (on) => setPhase((p) => (p.kind === 'open' ? { ...p, passwordLock: on } : p)),
+      setPasswordLock: (on) => {
+        setPhase((p) => (p.kind === 'open' ? { ...p, passwordLock: on } : p));
+        // The lock was turned on or off in the open space: the locked camera takes for it from
+        // now on, or for none, without waiting for the space to open again.
+        cameraFollows(on);
+      },
       lockNow: () => {
         relock().catch(fail);
       },
@@ -671,6 +759,33 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [colors, scheme, look.textSize, look.bubbles, specKey, caseFonts],
   );
+  // While a space with a password lock shows, the phone covers its screens as they go out of sight
+  // (lib/curtain.ts), in the look's ground colour. Not while a call rings or goes on, nor a hidden
+  // one: its screen shows at once as Erevos comes back, and the space locks when it ends.
+  const covered = phase.kind === 'open' && phase.passwordLock && !error;
+  const ground = colors.ground;
+  useEffect(() => {
+    if (!covered) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const arm = () => {
+      if (timer) clearTimeout(timer);
+      timer = null;
+      const holds = !!currentCall() || hiddenRingHoldsLock();
+      armCurtain(holds ? null : RELOCK_AFTER_MS, ground);
+      // A hidden call its PIN answered stops holding the lock by itself, with nothing said (lib/hidden-ring.ts).
+      const ends = hiddenAnswerEndsAt();
+      if (holds && ends !== null) timer = setTimeout(arm, Math.max(0, ends - Date.now()) + 50);
+    };
+    arm();
+    const stopCalls = onCallChange(arm);
+    const stopRings = onHiddenRingingChange(arm);
+    return () => {
+      stopCalls();
+      stopRings();
+      if (timer) clearTimeout(timer);
+      armCurtain(null, ground);
+    };
+  }, [covered, ground]);
 
   if (error) {
     return (
@@ -684,6 +799,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
           </Text>
           <Button title={t('Try again')} kind="secondary" compact onPress={onRetry} />
         </View>
+        <CurtainEnd />
         {bar}
       </ScreenBackdrop>
     );
@@ -692,6 +808,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
     return (
       <ScreenBackdrop>
         <View style={{ flex: 1, backgroundColor: colors.ground }} />
+        <CurtainEnd />
         {bar}
       </ScreenBackdrop>
     );
@@ -700,6 +817,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
     return (
       <ScreenBackdrop>
         <MovedOut key={lang} to={phase.to} taken={phase.taken} onChanged={onRetry} />
+        <CurtainEnd />
         <AlertHost />
         {bar}
       </ScreenBackdrop>
@@ -709,6 +827,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
     return (
       <ScreenBackdrop>
         <MoveFound key={lang} move={phase.move} onDone={onRetry} onLater={onMoveLater} />
+        <CurtainEnd />
         <AlertHost />
         {bar}
       </ScreenBackdrop>
@@ -718,6 +837,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
     return (
       <ScreenBackdrop>
         <Setup key={lang} onDone={onSetup} />
+        <CurtainEnd />
         <AlertHost />
         {bar}
       </ScreenBackdrop>
@@ -733,6 +853,7 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
         {/* Signal's calls are the phone's, not a space's: they show over the password screen too. */}
         <SignalCallHost />
         {phase.behind !== undefined ? <HiddenRingHost key={`ring-${phase.behind}`} locked /> : null}
+        <CurtainEnd />
         <AlertHost />
         {bar}
       </ScreenBackdrop>
@@ -804,6 +925,12 @@ function Shell({ lang, phase, error, lockState, onUnlock, onRetry, onMoveLater, 
   );
 }
 
+// The mark on every screen that is not a space's: once it is drawn, the phone's cover over the
+// space's screens goes (lib/curtain.ts, Curtain.kt finds it by its name). It takes no room and no touch.
+function CurtainEnd() {
+  return <View nativeID={CURTAIN_END} pointerEvents="none" collapsable={false} style={{ position: 'absolute', left: 0, top: 0, width: 1, height: 1 }} />;
+}
+
 // The screens that draw their own bar, so have no header (below).
 const HEADERLESS = new Set(['index', 'chat', 'group', 'myself', 'collection', 'first-steps']);
 
@@ -816,12 +943,20 @@ const CALL_LEAVES_MS = 10_000;
 
 // With Erevos locked: the password screen, or the Phone, when a link asks for it and it opens
 // without the password (lib/phone-open.ts): its icon, a tel: link, the notice of a missed call.
+// Or the camera, when its icon or shortcut asks for it and it opens without the password
+// (lock/camera-drop.ts): it takes for the space opened last, with no key of it in hand, and shows
+// nothing of what was taken, nor of the Collection, nor any other screen; closed, or back, the
+// password screen shows, and the password then opens the Collection, where what was taken is.
 // Any other link waits for the password. Back from the background after Erevos would have locked,
 // the password screen shows again, unless a call made on the Phone took it there, or the Phone's
-// link brought it back.
+// link brought it back; the camera closes as Erevos leaves the screen.
 function Locked({ lang, config, onUnlock }: { lang: Lang; config: LockConfig; onUnlock: (space: { space: number; key: Uint8Array }) => Promise<void> }) {
   const [phone, setPhone] = useState<Record<string, string> | null>(null);
+  // The camera open: the public key it seals what it takes for.
+  const [camera, setCamera] = useState<Uint8Array | null>(null);
   const opens = useRef(false);
+  const sealTo = useRef<Uint8Array | null>(null);
+  const took = useRef(false);
   const linkAt = useRef(0);
   const calledAt = useRef(0);
   const awayAt = useRef<number | null>(null);
@@ -831,18 +966,33 @@ function Locked({ lang, config, onUnlock }: { lang: Lang; config: LockConfig; on
     const look = () => {
       const href = peekLink();
       if (!href) return;
-      if (linkParts(href).path !== '/phone' || !opens.current) {
-        setPhone(null);
+      const { path, params } = linkParts(href);
+      if (path === '/phone' && opens.current) {
+        takeLink();
+        linkAt.current = Date.now();
+        setCamera(null);
+        setPhone(screenParams(href, linkAt.current));
         return;
       }
-      takeLink();
-      linkAt.current = Date.now();
-      setPhone(screenParams(href, linkAt.current));
+      if (path === '/collection' && params.camera === '1' && sealTo.current) {
+        takeLink();
+        took.current = false;
+        setPhone(null);
+        setCamera(sealTo.current);
+        return;
+      }
+      setPhone(null);
+      setCamera(null);
     };
     void phoneOpensLocked().then((on) => {
       if (!active) return;
       // Not while the Phone is off (lib/modules.ts).
       opens.current = on && moduleOn('phone');
+      look();
+    });
+    void lockedCameraKey().then((key) => {
+      if (!active) return;
+      sealTo.current = key;
       look();
     });
     const stop = onLinkHeld(look);
@@ -864,7 +1014,54 @@ function Locked({ lang, config, onUnlock }: { lang: Lang; config: LockConfig; on
   if (phone) {
     return <PhoneView params={phone} locked={{ onOpen: () => setPhone(null), onCalled: () => (calledAt.current = Date.now()) }} />;
   }
+  if (camera) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        <ErevosCamera
+          visible
+          place={null}
+          folder=""
+          sealTo={camera}
+          onTaken={() => {
+            took.current = true;
+          }}
+          onClose={() => {
+            // What was taken is in the Collection once the password is given: it opens there.
+            if (took.current) keepLink('erevos://collection');
+            took.current = false;
+            setCamera(null);
+          }}
+        />
+      </View>
+    );
+  }
   return <PasswordGate key={lang} config={config} onUnlock={onUnlock} />;
+}
+
+// Whether Erevos's camera is in this build (Android, with the Collection's module).
+const CAMERA_HERE = Platform.OS === 'android' && cameraView() !== null;
+
+// The public key the camera seals for while Erevos is locked, or null when it waits for the
+// password as every other link does: no camera here, the Collection off (lib/modules.ts), turned
+// off in the Collection's settings, or no space opened yet (lock/camera-drop.ts).
+async function lockedCameraKey(): Promise<Uint8Array | null> {
+  return CAMERA_HERE && moduleOn('collection') ? dropKey() : null;
+}
+
+// A space opened, or shows again from behind the password screen: what the camera took for it
+// while Erevos was locked comes into its Collection (lib/camera-drops.ts), and, behind a password,
+// the locked camera takes for it from now on. A space that opens without a password has no
+// password screen for the camera to open in front of, so no key is kept for it.
+function cameraFollows(passwordLock: boolean): void {
+  if (!CAMERA_HERE || !moduleOn('collection')) return;
+  let place: ReturnType<typeof spaceCollection>;
+  try {
+    place = spaceCollection();
+  } catch {
+    return;
+  }
+  void (passwordLock ? publishDropKey(place.key) : forgetDropKey()).catch(() => undefined);
+  void takeDrops(place).catch(() => undefined);
 }
 
 // With only the SMS or the Contacts open, a screen of the rest of the space: the password again, to open all of it,
@@ -1079,6 +1276,8 @@ function closeSpace(): void {
   setNostr(null);
   setRelayStopped(false);
   stopReleases();
+  forgetRelayLine();
+  forgetWays();
 }
 
 function openKey(): Uint8Array | null {

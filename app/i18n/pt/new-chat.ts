@@ -54,7 +54,6 @@ export const newChatText: Record<string, string> = {
   "A phone has taken this invite already: it is not taken back.": "Um celular já pegou este convite: não dá para pegá-lo de volta.",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.": "Um link, para uma pessoa: o celular dela entra no Erevos com ele, sem digitar nada, e vocês viram contatos na hora. Se ela ainda não tem o Erevos, ele mostra onde conseguir.",
   "Send with…": "Enviar com…",
-  "Hide the QR code": "Ocultar o código QR",
   "Its QR code": "O código QR do convite",
   "For one person, until {when}. Whoever opens it first has it, so send it to them only.": "Para uma pessoa, até {when}. Quem abrir primeiro fica com ele, então envie só para essa pessoa.",
   "The invite is ready": "O convite está pronto",
@@ -66,4 +65,5 @@ export const newChatText: Record<string, string> = {
   "New invite": "Novo convite",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.": "Um link, para uma pessoa: o celular dela entra no Erevos com ele, sem digitar nada, e vocês viram contatos na hora. Ele só abre num celular que já tem o Erevos.",
   "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.": "Ela escaneia com a câmera do celular, que já tem o Erevos: ele se prepara sozinho, sem relay nem códigos para digitar, e vocês viram contatos.",
+  "Their phone’s camera scans it. Tap it to show it large.": "A câmera do outro celular o lê. Toque nele para mostrá-lo grande.",
 };

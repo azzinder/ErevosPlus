@@ -47,6 +47,27 @@ export function spaceRows(rows: AppSpaceRow[]): SpaceRow[] {
     .sort((a, b) => b.bytes - a.bytes);
 }
 
+// The kinds a backup's parts are made of: photos and files, and voice messages (lock/backup.ts).
+const IN_PARTS = new Set(["erevos-file-", "erevos-voice-"]);
+
+/** Of the measured kinds, the bytes of those a backup holds in its parts. */
+export function partsBytes(rows: AppSpaceRow[]): number {
+  return rows
+    .filter(({ kind }) => IN_PARTS.has(kind))
+    .reduce((sum, row) => sum + row.bytes, 0);
+}
+
+/**
+ * About how much a backup made whole now holds, at most: the photos, files and voice messages on
+ * the phone, which are nearly all of one. More than it holds when a Collection is kept out of
+ * backups. Null where it cannot be measured, or there is none of them.
+ */
+export async function wholeBackupAtMost(): Promise<number | null> {
+  if (!device?.appSpace) return null;
+  const rows = await device.appSpace();
+  return (rows && partsBytes(rows)) || null;
+}
+
 /** "15.3 GB", "240 MB", "12 KB". */
 export function spaceText(bytes: number): string {
   if (bytes >= 1e9) {

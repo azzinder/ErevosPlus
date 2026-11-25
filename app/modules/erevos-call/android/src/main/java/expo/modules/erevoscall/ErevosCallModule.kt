@@ -255,13 +255,24 @@ class ErevosCallModule : Module() {
       null
     }
 
-    // Whether Erevos starts by itself as the phone turns on (BootStart), and the choice.
+    // Whether Erevos starts by itself as the phone turns on (BootStart): what the setting shows,
+    // the owner's own choice (null while they made none), the choice made, and whether Erevos
+    // receives in the background at all, which starting by itself is for.
     Function("bootStart") {
-      context?.let { BootStart.on(it) } ?: false
+      context?.let { BootStart.shown(it) } ?: false
+    }
+
+    Function("bootChosen") {
+      context?.let { BootStart.chosen(it) }
     }
 
     Function("setBootStart") { on: Boolean ->
       context?.let { BootStart.set(it, on) }
+      null
+    }
+
+    Function("wantBootStart") { wanted: Boolean ->
+      context?.let { BootStart.want(it, wanted) }
       null
     }
 

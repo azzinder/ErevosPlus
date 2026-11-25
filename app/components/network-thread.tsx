@@ -18,6 +18,21 @@ const TOP = { width: '100%', maxWidth: 760, alignSelf: 'center', paddingHorizont
 // message field together): the thread opens at its last message with the message field under it,
 // follows what comes while it is read at the end, and has the arrows to its start, to where it was
 // last seen and to its end (components/thread-arrows.tsx).
+//
+// With the keyboard open they do as the Erevos chat does: the screen ends above the keyboard
+// (KeyboardPaddedView, components/keyboard.tsx: `padded`), so the message field and the buttons
+// under it sit on the keyboard, and the few messages of a short chat stay where they were, at the
+// top. A scrolling view that moved its content up for the keyboard instead took those messages out
+// of sight, once the content was as tall as the screen.
+
+/** The scrolling view's content, as Page (components/ui.tsx) has it, and at least as tall as the screen. */
+export const THREAD_PAGE = { flexGrow: 1, width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, gap: space.md } as const;
+/** The room under the buttons at the page's end, as the Erevos chat's field has it: not the page's own, which is for a page that ends in the air. */
+export const THREAD_FOOT = space.md;
+/** The thread in it: its messages from the top, and the room a short one leaves, so what is under it sits at the bottom. */
+export const THREAD_GROWS = { flexGrow: 1, gap: space.md } as const;
+/** How far the page's content is from the sides: what opens under the field (the "+" panel) reaches them. */
+export const THREAD_SIDE = space.xl - 4;
 
 /** How far from its start or end the thread counts as away from it: half of what shows of it. */
 const AWAY = 0.5;
@@ -29,11 +44,17 @@ type Place = { y: number; height: number };
 /**
  * The scrolling of a chat screen made of its head, the thread (`threadProps`), and what is under it
  * (the message field and its buttons, the last of which takes `endProps`), all in one scrolling
- * view (`scrollProps`) that `withArrows` draws the arrows over. `list` is the thread, the oldest
+ * view (`scrollProps`) that `withArrows` draws the arrows over. The view's content fills the screen
+ * (THREAD_PAGE) and the thread takes what room is left (THREAD_GROWS), so in a chat with few
+ * messages the message field still sits at the bottom, as in an Erevos chat. `toEnd` reads the
+ * thread at its end from now on: what opens under the field (the "+" panel) is then brought into
+ * view as it is laid out. `list` is the thread, the oldest
  * first, and `unread` how many of the newest, not `mine`, were not read when the chat opened. `held`
  * says when something else keeps the place (older messages coming in above): the thread then
  * follows nothing. Opened at a message (`at`, a starred one), the thread opens there instead, once
- * it is laid out, and `onAt` is told whether it was here.
+ * it is laid out, and `onAt` is told whether it was here. `padded` says the screen ends above the
+ * keyboard by itself (KeyboardPaddedView): all of the view shows then, and it is a plain scrolling
+ * view; without it the view is one the keyboard covers (KeyboardAwareScrollView).
  */
 export function useNetworkThread<T>({
   list,
@@ -43,6 +64,7 @@ export function useNetworkThread<T>({
   held,
   at: openAt,
   onAt,
+  padded = false,
 }: {
   list: readonly T[];
   idOf: (message: T) => string;
@@ -51,6 +73,7 @@ export function useNetworkThread<T>({
   held?: () => boolean;
   at?: string;
   onAt?: (found: boolean) => void;
+  padded?: boolean;
 }) {
   const scroll = useRef<KeyboardAwareScrollViewRef>(null);
   const view = useRef({ y: 0, height: 0 });
@@ -76,9 +99,10 @@ export function useNetworkThread<T>({
     setFootHeight((before) => (Math.abs(before - height) < 1 ? before : height));
   }
 
-  // How much of the view shows: the keyboard, while it is open, covers its lower part, as the screen
-  // does not shrink for it (components/keyboard.tsx).
-  const shows = () => view.current.height - (Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0);
+  // How much of the view shows: all of it on a screen that ends above the keyboard (`padded`);
+  // otherwise the keyboard, while it is open, covers its lower part, as the screen does not shrink
+  // for it (components/keyboard.tsx).
+  const shows = () => view.current.height - (!padded && Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0);
 
   // Scrolls so that the message field ends what shows, and the last message is just above it.
   function toFoot(animated = false) {
@@ -279,5 +303,5 @@ export function useNetworkThread<T>({
     </View>
   );
 
-  return { scroll, scrollProps, threadProps, endProps, place, goTo, withArrows };
+  return { scroll, scrollProps, threadProps, endProps, place, goTo, toEnd, withArrows };
 }

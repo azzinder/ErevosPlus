@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { addSealedToCollection, addToCollection, CollectionFileTooLargeError, MAX_COLLECTION_FILE, type CollectionItem, type CollectionPlace } from '../lock/collection-data';
 import { cleanFileName, cleanMime, mimeOf, type FileRef } from '../lock/attachment-files';
-import { bytesSource, readFile, refSource } from './attachments';
+import { bytesSource, readFile, refSource, type Source } from './attachments';
 import { fromBase64, randomBytes, toHex } from './crypto';
 import { plural, t } from './i18n';
 import { NoCameraError, preparePhoto } from './pick-photo';
@@ -108,6 +108,14 @@ export async function importFromCamera(place: CollectionPlace, folder: string, p
  * time, and deletes that copy at once, whether it went in or not.
  */
 export async function keepVideoFile(place: CollectionPlace, folder: string, uri: string, name: string, mime: string, progress?: Progress): Promise<CollectionItem> {
+  return withRecording(uri, (source) => addToCollection(place, source, { name, mime, kind: 'file' }, { folder, progress }));
+}
+
+/**
+ * A video the camera recorded into the app's cache (`uri`), read a piece at a time by `keep` as it
+ * is encrypted, and that copy deleted whatever comes of it.
+ */
+export async function withRecording<T>(uri: string, keep: (source: Source) => Promise<T>): Promise<T> {
   const copy = new File(uri);
   try {
     if (copy.size > MAX_COLLECTION_FILE) throw new CollectionFileTooLargeError();
@@ -117,7 +125,7 @@ export async function keepVideoFile(place: CollectionPlace, folder: string, uri:
         if (handle.offset !== at) handle.offset = at;
         return handle.readBytesSync(length);
       };
-      return await addToCollection(place, { size: copy.size, read }, { name, mime, kind: 'file' }, { folder, progress });
+      return await keep({ size: copy.size, read });
     } finally {
       handle.close();
     }

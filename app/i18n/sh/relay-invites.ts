@@ -85,7 +85,6 @@ export const relayInvites: Record<string, string> = {
   "With your {name} account, in the browser: you type the password there only, and whoever runs the server sees your user name.": "Svojim {name} nalogom, u pregledniku: lozinku kucate samo tamo, a onaj ko vodi server vidi vaše korisničko ime.",
   "Sign in on the page the browser opened, then tap Open Erevos there. If nothing opens, type here the code it shows.": "Prijavite se na stranici koju je preglednik otvorio, a zatim tamo dodirnite „Otvorite Erevos“. Ako se ništa ne otvori, ovdje upišite kôd koji pokazuje.",
   "{relay} offers no sign-in, or cannot be reached now. Whoever runs it can give you an invite instead.": "{relay} nema prijavu ili se sada ne može dosegnuti. Ko ga vodi može ti umjesto toga dati pozivnicu.",
-  "Sign in at another relay…": "Prijava na drugi relay…",
   "Back to {relay}": "Nazad na {relay}",
   "Use": "Koristi",
   "That is not a relay address. Type it as its operator gave it, such as relay.example.org.": "To nije adresa relaya. Upiši je kako ti ju je dao onaj ko ga vodi, na primjer relay.example.org.",

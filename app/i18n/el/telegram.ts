@@ -4,7 +4,6 @@
 
 // Τα ελληνικά του Telegram (app/telegram.tsx, app/telegram-chat.tsx, lib/telegram-store.ts) (i18n/el/index.ts).
 export const telegramText: Record<string, string> = {
-  "Write the message first, then choose when it goes.": "Γράψε πρώτα το μήνυμα, μετά διάλεξε πότε θα φύγει.",
   "Telegram": "Telegram",
   "Chats with people on Telegram: Telegram can read them, unless both use ErevosGram encryption": "Συνομιλίες με ανθρώπους στο Telegram: το Telegram μπορεί να τις διαβάσει, εκτός αν και οι δύο χρησιμοποιείτε την κρυπτογράφηση ErevosGram",
   "Your Telegram chats, through Telegram. Telegram can read them, unless both of you use ErevosGram encryption. Not made by Telegram.": "Οι συνομιλίες σου στο Telegram, μέσα από το Telegram. Το Telegram μπορεί να τις διαβάσει, εκτός αν και οι δύο χρησιμοποιείτε την κρυπτογράφηση ErevosGram. Δεν φτιάχτηκε από το Telegram.",

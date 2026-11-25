@@ -21,9 +21,6 @@ export const setupText: Record<string, string> = {
   'How you join': 'Πώς μπαίνεις',
   'Scan its QR code, or open or paste the link they sent you.':
     'Σάρωσε τον κωδικό QR του, ή άνοιξε ή επικόλλησε τον σύνδεσμο που σου έστειλαν.',
-  'Other ways in': 'Άλλοι τρόποι εισόδου',
-  'Sign in with LPHL, start without a relay, or use a relay of your own: under For advanced users.':
-    'Σύνδεση με LPHL, «Ξεκίνα χωρίς relay» ή δικό σου relay: στο «Για προχωρημένους».',
   'Your account there: set it up now, or later from {module}.':
     'Ο λογαριασμός σου εκεί: ρύθμισέ τον τώρα, ή αργότερα από την ενότητα {module}.',
   'Set up {module}': 'Ρύθμιση: {module}',

@@ -13,8 +13,10 @@ import { ChatTimer, useGoneAt } from '../components/chat-rules';
 import { canDial, DialTile } from '../components/dial-tile';
 import { IconButton, SendDisc } from '../components/composer';
 import { keptName, ownStickerPart, useKeep } from '../components/keep-actions';
-import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { KeyboardPaddedView } from '../components/keyboard';
+import { laterWay, NetworkPanel } from '../components/network-panel';
+import { beforePanel } from '../components/panel-close';
 import { LaterPicker } from '../components/later-picker';
 import { MicButton, RecordingLine } from '../components/matrix-voice';
 import { Pinned } from '../components/message-parts';
@@ -270,11 +272,12 @@ function Sms({ tools, said }: { tools: ReactNode; said: string }) {
   const [reminding, setReminding] = useState<RemindOf | null>(null);
   const [forwarding, setForwarding] = useState<SmsMessage | null>(null);
   const [menu, setMenu] = useState<SmsTarget | null>(null);
-  // The sheet of what an MMS can carry, where you are being found, a contact being chosen to send.
+  // What an MMS can carry: the panel "+" opens under the field, as in an Erevos chat
+  // (components/network-panel.tsx); where you are being found, a contact being chosen to send.
   const [attaching, setAttaching] = useState(false);
   // The conversation's options (#44): a sheet opened beside the field, where a long thread keeps them in reach.
   const [optioning, setOptioning] = useState(false);
-  // The sheet of quick texts (components/sms-quick.tsx): held +, or from Attach and more.
+  // The sheet of quick texts (components/sms-quick.tsx): held +, or from its panel.
   const [quicking, setQuicking] = useState(false);
   const [atCarrier, setAtCarrier] = useState<WaitingMms[]>([]);
   const [placing, setPlacing] = useState(false);
@@ -1100,14 +1103,24 @@ function Sms({ tools, said }: { tools: ReactNode; said: string }) {
       {mayAnswer ? (
         <View style={styles.composer}>
           {!voice.recording ? (
-            <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} onLongPress={() => setQuicking(true)}>
-              <PlusIcon color={colors.text} size={22} />
+            <IconButton
+              label={attaching ? t('Close') : t('Attach and more')}
+              onPress={() => {
+                // The keyboard goes first, or the panel would open behind it.
+                if (!attaching) beforePanel();
+                setAttaching(!attaching);
+              }}
+              onLongPress={() => setQuicking(true)}
+              state={{ expanded: attaching }}
+            >
+              {attaching ? <CloseIcon color={colors.text} size={22} /> : <PlusIcon color={colors.text} size={22} />}
             </IconButton>
           ) : null}
           {voice.recording ? (
             <RecordingLine />
           ) : (
-            <Input value={draft} onChangeText={setDraft} placeholder={part || group ? t('MMS (not encrypted)') : t('SMS (not encrypted)')} multiline style={styles.input} />
+            // The keyboard comes: the panel under the field gives way to it.
+            <Input value={draft} onChangeText={setDraft} placeholder={part || group ? t('MMS (not encrypted)') : t('SMS (not encrypted)')} multiline style={styles.input} onFocus={() => setAttaching(false)} />
           )}
           {voice.recording ? null : (
             <IconButton label={t('Chat options')} onPress={() => setOptioning(true)}>
@@ -1133,6 +1146,46 @@ function Sms({ tools, said }: { tools: ReactNode; said: string }) {
           </Text>
         </View>
       )}
+      {/* What "+" opens, under the field: an SMS is not encrypted, so the panel does not say it is. */}
+      <NetworkPanel
+        open={attaching && mayAnswer}
+        onClose={() => setAttaching(false)}
+        encrypted={false}
+        tiles={[
+          { key: 'quick', title: t('Quick texts'), icon: 'sms', onPress: () => setQuicking(true) },
+          canPart && { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void addPhoto() },
+          canPart && { key: 'record', title: t('Record a video'), icon: 'camera', onPress: () => void addVideo(true) },
+          canPart && { key: 'video', title: t('Video from the phone'), icon: 'photo', onPress: () => void addVideo(false) },
+          CAN_PLACE && { key: 'place', title: t('Location'), icon: 'place', onPress: () => setPlacing(true) },
+          canPart && { key: 'card', title: t('Contact card'), icon: 'contact', onPress: () => setChoosingCard(true) },
+          canPart && {
+            key: 'sticker',
+            title: t('Sticker'),
+            icon: 'sticker',
+            onPress: () => {
+              setStickerNote('');
+              setStickering(true);
+            },
+          },
+        ]}
+        // What is typed goes later as the send button, held down, has it: an SMS alone, to one number.
+        ways={
+          !group && !part && !smsMirrored()
+            ? [
+                laterWay(() => {
+                  if (!draft.trim()) return setNote(t('Write the message first, then choose when it goes.'));
+                  setAttaching(false);
+                  setLaterMenu(true);
+                }),
+              ]
+            : []
+        }
+        foot={
+          canPart
+            ? `${t('Record a video')}: ${t("Up to {n} seconds, in the small picture an MMS takes. The camera app keeps it in the phone's videos too.", { n: String(MMS_VIDEO_SECONDS) })} ${t('Video from the phone')}: ${t('Only one small enough for an MMS, about {n} KB.', { n: String(Math.round(MMS_MAX / 1024)) })}`
+            : undefined
+        }
+      />
       <UndoBar bottom={84} />
       <Sheet visible={laterMenu} onClose={() => setLaterMenu(false)} title={t('SMS later')}>
         {laterMenu ? <LaterPicker onPick={(at) => void sendLater(at)} /> : null}
@@ -1240,100 +1293,6 @@ function Sms({ tools, said }: { tools: ReactNode; said: string }) {
         onClose={() => setQuicking(false)}
         onPick={(text) => setDraft((typed) => (typed.trim() ? `${typed.trimEnd()} ${text}` : text))}
       />
-      <Sheet visible={attaching} onClose={() => setAttaching(false)} title={t('Attach and more')}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => {
-            setAttaching(false);
-            setQuicking(true);
-          }}
-          style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-        >
-          <Text variant="bodyStrong">{t('Quick texts')}</Text>
-          <Text variant="caption" tone="muted">
-            {t('Or hold + down.')}
-          </Text>
-        </Pressable>
-        {canPart ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              void addPhoto();
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Photo')}</Text>
-          </Pressable>
-        ) : null}
-        {canPart ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              void addVideo(true);
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Record a video')}</Text>
-            <Text variant="caption" tone="muted">
-              {t("Up to {n} seconds, in the small picture an MMS takes. The camera app keeps it in the phone's videos too.", { n: String(MMS_VIDEO_SECONDS) })}
-            </Text>
-          </Pressable>
-        ) : null}
-        {canPart ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              void addVideo(false);
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Video from the phone')}</Text>
-            <Text variant="caption" tone="muted">
-              {t('Only one small enough for an MMS, about {n} KB.', { n: String(Math.round(MMS_MAX / 1024)) })}
-            </Text>
-          </Pressable>
-        ) : null}
-        {CAN_PLACE ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              setPlacing(true);
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Location')}</Text>
-          </Pressable>
-        ) : null}
-        {canPart ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              setChoosingCard(true);
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Contact card')}</Text>
-          </Pressable>
-        ) : null}
-        {canPart ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setAttaching(false);
-              setStickerNote('');
-              setStickering(true);
-            }}
-            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-          >
-            <Text variant="bodyStrong">{t('Sticker')}</Text>
-          </Pressable>
-        ) : null}
-      </Sheet>
       <Sheet visible={stickering} onClose={() => setStickering(false)} title={t('Send a sticker')}>
         <StickerPicker
           onPick={(name) => void sendSticker(name)}

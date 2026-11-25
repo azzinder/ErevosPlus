@@ -142,6 +142,22 @@ While the space sends everything through Tor, no preview is made at all.
 - **SMS when nothing else works** (Android, off unless turned on): your phone company sees which number wrote to
   which, when, and how many SMS, never the words.
 
+- **Speech and translation models** (Android, only when you ask for them): downloaded from LPHL's web server, or from
+  a web folder you name instead (**Download from another server…**). That server sees your IP address and which model
+  you fetch; Erevos checks every file against the hash it knows, and refuses one that differs.
+
+## Your own servers instead of LPHL's
+
+Nothing above needs LPHL. In the app: a relay of your own or your group's (**New chat** → **I have no invite** → **I
+have a server of my own**; calls come with it), a WebDAV server for backups and the Collection, a web folder for the
+models, or no server at all (**Start without a server**). A contact page or an invite by SMS served from another web
+server is read when pasted or scanned; only the build's own server and LPHL's open in Erevos by themselves.
+
+Whoever builds Erevos for a community can also change what the app offers first, with two settings of the build
+(`app/lib/servers.ts`): `EREVOS_WEB_ORIGIN` (the web server with the contact and invite pages and the models) and
+`EREVOS_START_RELAY` (the relay a phone with no relay yet is offered to sign in at). Erevos's own release notices stay
+on LPHL's server, as they go with its release key, and are asked only by phones whose relay is LPHL's.
+
 ## Out of reach for any server
 
 A server cannot read your messages, but someone who watches **both ends** of the internet at once can match messages

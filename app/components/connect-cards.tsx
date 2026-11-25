@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { Reach } from '../lib/connect-reach';
@@ -13,7 +13,7 @@ import { useColors } from '../theme/context';
 import { ChevronIcon, PersonIcon } from './icons';
 import { QrCode } from './QrCode';
 import { Tile, type TileTint } from './shortcut-tile';
-import { Button, Row, Text, TextButton } from './ui';
+import { Button, Row, Sheet, Text, TextButton } from './ui';
 
 // The parts of New chat (app/chat.tsx, with no chat open) that say how this phone connects: a card
 // with how its contacts reach it now, in plain words, and the ways in for a phone with no relay yet,
@@ -121,6 +121,40 @@ export function MyQrCard({ text, onScan, onShare, shareTitle, onPhoto, children 
   );
 }
 
+/** How large a QR code shows as a tile beside what it is for, and in the sheet a tap opens. */
+export const QR_TILE = 112;
+const QR_LARGE = 260;
+
+/**
+ * A QR code as a small tile, beside what it is for (Near me, on New chat): a long link makes a
+ * dense code, heavy on a page whose first thing is something else. Tapped, it shows large in a
+ * sheet, for the other phone's camera, with `children` under it: what it is, how long it lasts, a
+ * new one. `shown`: whether its page shows; the sheet closes when it does not.
+ */
+export function QrTile({ text, shown, children }: { text: string; shown: boolean; children?: ReactNode }) {
+  const colors = useColors();
+  const [large, setLarge] = useState(false);
+  useEffect(() => {
+    if (!shown) setLarge(false);
+  }, [shown]);
+  return (
+    <>
+      <Pressable
+        onPress={() => setLarge(true)}
+        accessibilityRole="button"
+        accessibilityLabel={t('Your QR code')}
+        style={({ pressed }) => [styles.qrTile, { borderRadius: radius.md, borderColor: colors.border }, pressed && styles.pressed]}
+      >
+        <QrCode text={text} size={QR_TILE} fixed />
+      </Pressable>
+      <Sheet visible={large && shown} onClose={() => setLarge(false)} title={t('Your QR code')}>
+        <QrCode text={text} size={QR_LARGE} />
+        {children}
+      </Sheet>
+    </>
+  );
+}
+
 /** A row that opens what it says, with a person and a plus: on New chat, an invite for someone with no Erevos yet. */
 export function InviteRow({ title, line, onPress }: { title: string; line: string; onPress: () => void }) {
   const colors = useColors();
@@ -221,6 +255,11 @@ const styles = StyleSheet.create({
   },
   qrButtons: {
     justifyContent: 'center',
+  },
+  qrTile: {
+    overflow: 'hidden',
+    borderWidth: 1,
+    backgroundColor: WHITE,
   },
   inviteRow: {
     flexDirection: 'row',

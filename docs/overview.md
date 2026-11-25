@@ -133,7 +133,7 @@ cryptography. Do not rely on it to protect anyone yet.
   call relay or the XMPP server's TURN server, or straight with neither, never through Tor. A hidden
   place's own accounts call too, while its chats are open.
 - **Erevos's own way through Nostr**, for when there is no relay between two contacts (Android): a
-  phone with no relay taps **Start without a relay**, and its contact link and QR code say where it
+  phone with no relay taps **Start without a server**, and its contact link and QR code say where it
   reads on Nostr. Texts, stickers, reactions, edits and the marks go through public Nostr relays
   (three unless changed, five at most), through Tor when the space's Tor is on and straight when it
   is off, sealed once more for a key made for that chat alone, so the relays see neither who wrote

@@ -5,15 +5,25 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { encryptBytes, randomBytes, toHex, utf8Encode } from "../lib/crypto";
-import { writeBytes } from "../lib/files";
+import {
+  encryptBytes,
+  randomBytes,
+  toBase64,
+  toHex,
+  utf8Encode,
+} from "../lib/crypto";
+import { writeBytes, writeFile } from "../lib/files";
 import {
   idsIn,
+  idsOfDrops,
   idsOfPlace,
   leftoversOf,
   LEFTOVER_AGE_MS,
+  namedBy,
 } from "../lib/leftovers";
+import { DROP_PREFIX } from "../lock/camera-drop";
 import { PAGE_PREFIX, sealedFile } from "../lock/sealed-file";
+import { files as kept } from "./files-memory";
 
 const id = () => toHex(randomBytes(16));
 
@@ -119,5 +129,86 @@ test("a place names the files of all its sealed values and of its history pages,
       now,
     ).ids.sort(),
     [inHidden, nowhere].sort(),
+  );
+});
+
+test("what the locked camera took, and no space took in yet, is named by its note whichever places are read", async () => {
+  const space = randomBytes(32);
+  const [taken, small, inCollection, nowhere] = [id(), id(), id(), id()];
+  // A note as the camera writes it (lock/camera-drop.ts): its chunks' ids in the clear, the rest
+  // sealed for the space it was taken for, which is not the one read here.
+  const note = DROP_PREFIX + id();
+  await writeFile(
+    note,
+    JSON.stringify({
+      v: 1,
+      files: [
+        { id: taken, count: 3 },
+        { id: small, count: 1 },
+      ],
+      sealed: toBase64(randomBytes(240)),
+    }),
+  );
+  const store = sealedFile<unknown>({
+    name: "erevos-collection-n",
+    empty: null,
+    checked: (v) => v,
+    block: 4096,
+  });
+  await store.save("space", 0, space, {
+    items: [{ file: { id: inCollection, count: 1 } }],
+  });
+
+  const ofNotes = await idsOfDrops();
+  assert.ok(ofNotes.has(taken) && ofNotes.has(small));
+  assert.ok(!ofNotes.has(inCollection));
+  // The search names with them, though the place read does not hold them.
+  const stores = ["erevos-collection-n"];
+  const place = { holder: "space" as const, space: 0, key: space };
+  assert.ok(!(await idsOfPlace(place, stores)).has(taken));
+  const named = await namedBy([place], stores);
+  assert.ok(named.has(taken) && named.has(small) && named.has(inCollection));
+
+  // More than a day old, as after a day and more in another space: still not a leftover.
+  const now = 10 * LEFTOVER_AGE_MS;
+  const old = now - 2 * LEFTOVER_AGE_MS;
+  const files = [taken, small, inCollection, nowhere].map((f) => ({
+    id: f,
+    bytes: 100,
+    files: 1,
+    at: old,
+  }));
+  assert.deepEqual(leftoversOf(files, named, now).ids, [nowhere]);
+
+  // A note that cannot be read may name any file: the search stops, and nothing is deleted.
+  const get = kept.get.bind(kept);
+  kept.get = (name) => {
+    if (name === note) throw new Error("cannot read");
+    return get(name);
+  };
+  try {
+    await assert.rejects(namedBy([place], stores), /could not be read/);
+  } finally {
+    kept.get = get;
+  }
+
+  // Once its space took it in, the note is gone and the Collection names it instead.
+  kept.delete(note);
+  assert.ok(!(await idsOfDrops()).has(taken));
+});
+
+test("the search for leftovers names through the notes too, before the places", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(
+    new URL("../lib/leftovers.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    source,
+    /const named = await namedBy\(places, await storeFiles\(\)\);\s*return leftoversOf\(/,
+  );
+  assert.match(
+    source,
+    /const named = await idsOfDrops\(\);\s*for \(const place of places\) await idsOfPlace\(place, stores, named\);/,
   );
 });

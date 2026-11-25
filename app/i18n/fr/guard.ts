@@ -47,4 +47,7 @@ export const guard: Record<string, string> = {
     "Mettre l’Appareil photo parmi les applications du téléphone",
   "Take the Camera off the phone's apps":
     "Retirer l’Appareil photo des applications du téléphone",
+  "After the phone turns on, or Erevos is updated, Erevos starts by itself, with no space open, and a quiet notice says it is locked: a tap on it opens Erevos. Nothing comes until a space is open.": "Une fois le téléphone allumé, ou Erevos mis à jour, Erevos démarre tout seul, sans espace ouvert, et une notification discrète dit qu’il est verrouillé : un appui dessus ouvre Erevos. Rien n’arrive tant qu’aucun espace n’est ouvert.",
+  "Erevos's camera at a tap, even while Erevos and the Collection are locked: what it takes shows only after the password, in the Collection (Open the camera without the password, in its settings). Holding Erevos's icon down also offers Camera. Neither shows while the Collection is off or the calculator stands in place of Erevos.":
+    "L’appareil photo d’Erevos d’un geste, même quand Erevos et la Collection sont verrouillés : ce qu’il prend ne s’affiche qu’après le mot de passe, dans la Collection (« Ouvrir l’appareil photo sans le mot de passe », dans ses réglages). Un appui long sur l’icône d’Erevos propose aussi Appareil photo. Aucun des deux ne s’affiche tant que la Collection est désactivée ou que la calculatrice tient la place d’Erevos.",
 };

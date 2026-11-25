@@ -11,12 +11,16 @@ import { t } from '../lib/i18n';
 // Dark modules on white with a quiet zone of four modules, as scanners expect, even in the
 // app's dark theme. One picture at the screen's own pixels (lib/qr.ts), so it shows sharp and is
 // light to draw even on an older phone, made once while the screen shows it.
-export function QrCode({ text, size = 260 }: { text: string | Uint8Array; size?: number }) {
+//
+// A module is never under two of the screen's pixels, so a code of many modules comes out wider
+// than it was asked on a screen of few pixels. `fixed` holds it to the size asked, for a small
+// picture of the code that is tapped to show it large, and is not what a camera reads.
+export function QrCode({ text, size = 260, fixed = false }: { text: string | Uint8Array; size?: number; fixed?: boolean }) {
   const ratio = PixelRatio.get();
   const shown = useMemo(() => {
     const { png, size: pixels } = qrPng(text, Math.floor(size * ratio));
-    return { uri: `data:image/png;base64,${toBase64(png)}`, side: pixels / ratio };
-  }, [text, size, ratio]);
+    return { uri: `data:image/png;base64,${toBase64(png)}`, side: fixed ? size : pixels / ratio };
+  }, [text, size, ratio, fixed]);
   return (
     <Image
       source={{ uri: shown.uri }}

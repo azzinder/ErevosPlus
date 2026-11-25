@@ -200,15 +200,30 @@ test("the Collection's server goes only through Tor while the place's switch for
   torCore(() => ({ status: 500 }));
   const ROOT = 'https://cloud.example/dav/Erevos/';
   const made = new Set<string>([ROOT]);
+  // What was put there, by its address, with its size: the server lists it, as the copy reads back.
+  const put = new Map<string, number>();
   const asked: string[] = [];
-  setCloudHttp(async (method, url, _headers, _body, _most, tor) => {
+  setCloudHttp(async (method, url, headers, body, _most, tor) => {
     asked.push(`${method} ${tor === true}`);
-    if (method === 'PROPFIND') return said(made.has(url) ? 207 : 404);
+    if (method === 'PROPFIND') {
+      if (!made.has(url)) return said(404);
+      if (headers.Depth !== '1') return said(207);
+      const entry = (href: string, size: number) =>
+        `<d:response><d:href>${href}</d:href><d:propstat><d:prop><d:getlastmodified>Thu, 01 Oct 2026 12:00:00 GMT</d:getlastmodified><d:getcontentlength>${size}</d:getcontentlength></d:prop></d:propstat></d:response>`;
+      const path = (address: string) => new URL(address).pathname;
+      const inside = [...put].filter(([address]) => address.startsWith(url) && !address.slice(url.length).includes('/'));
+      const listing = `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:">${entry(path(url), 0)}${inside.map(([address, size]) => entry(path(address), size)).join('')}</d:multistatus>`;
+      return { status: 207, bytes: utf8Encode(listing) };
+    }
     if (method === 'MKCOL') {
       made.add(url);
       return said(201);
     }
-    return said(method === 'PUT' ? 201 : 404);
+    if (method === 'PUT') {
+      put.set(url, body?.length ?? 0);
+      return said(201);
+    }
+    return said(404);
   });
   const place: CollectionPlace = { holder: 'space', space: 0, key: randomBytes(32) };
   await setCollectionOption(place, 'serverTor', true);

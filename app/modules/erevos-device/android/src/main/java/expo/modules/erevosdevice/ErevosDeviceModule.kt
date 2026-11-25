@@ -5,6 +5,7 @@
 package expo.modules.erevosdevice
 
 import android.Manifest
+import android.app.Application
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
@@ -83,6 +84,37 @@ class ErevosDeviceModule : Module() {
         else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
       }
       true
+    }
+
+    // The curtain over a space with a password lock (Curtain.kt, lib/curtain.ts): the phone covers
+    // the space's screens as they go out of sight, and keeps them covered when they come back after
+    // the lock's time, until the app's password screen is drawn; the lock button covers them at once.
+    // `after` in ms, under 0 for no longer; `ground` the look's ground colour, as Android has colours.
+    OnCreate {
+      Curtain.register(context?.applicationContext as? Application)
+    }
+
+    Function("curtainArm") { after: Double, ground: Double ->
+      Curtain.arm(appContext.currentActivity, after.toLong(), ground.toLong().toInt())
+    }
+
+    Function("curtainLower") {
+      Curtain.lower(appContext.currentActivity)
+    }
+
+    // At once, or with `onScreen` once a screen that is not a space's is drawn under it.
+    Function("curtainLift") { onScreen: Boolean ->
+      Curtain.lift(onScreen)
+    }
+
+    // What happened as the screens last came back, once: how long Erevos was away, ms, on the clock
+    // nobody can set, and whether the cover stayed. Null when they were not out of sight since.
+    Function("curtainBack") {
+      Curtain.takeBack()
+    }
+
+    Function("curtainDown") {
+      Curtain.isDown()
     }
 
     // Whether Android shows the keyboard over Erevos's window now, read from the window's own insets

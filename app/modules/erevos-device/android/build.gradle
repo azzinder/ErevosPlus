@@ -16,3 +16,8 @@ android {
     versionName '0.0.1'
   }
 }
+
+dependencies {
+  // Finding a screen of the app by the name it gave it (Curtain.kt).
+  implementation 'com.facebook.react:react-android'
+}

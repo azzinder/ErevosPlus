@@ -5,6 +5,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
+import { currentSpace } from '../lock/keys';
 import { loadCurrentSpaceData } from '../lock/space-data';
 import { smsPacketsReady, smsReady, smsStatus } from '../modules/erevos-sms';
 import { canTor } from './core';
@@ -75,12 +76,39 @@ const shownKey = ({ input, waiting }: { input: WaysInput; waiting: number }) =>
 /** Reads of the ways at most this often, however often a way changes. */
 const WAYS_GAP_MS = 1000;
 
+type WaysRead = { input: WaysInput; waiting: number };
+
+// The last read of the space open now: home is drawn anew each time the space comes back from its
+// password screen, and shows this at once, instead of a relay drawn as off until the first read
+// ends. Nothing of it stays as the space closes (forgetWays).
+let lastRead: { space: number; read: WaysRead } | null = null;
+
+const spaceNow = (): number | null => {
+  try {
+    return currentSpace().space;
+  } catch {
+    return null;
+  }
+};
+
+/** What was last read of the ways of the space open now, null when nothing was. */
+export function knownWays(): WaysRead | null {
+  const space = spaceNow();
+  return space !== null && lastRead?.space === space ? lastRead.read : null;
+}
+
+/** As the space closes. */
+export function forgetWays(): void {
+  lastRead = null;
+}
+
 /**
  * The ways now, read while the screen shows: every `every` ms, and as one of them changes, at
- * most once a second; it changes only when a dot or the count waiting does.
+ * most once a second; it changes only when a dot or the count waiting does. Null until they were
+ * read once for the space open now.
  */
-export function useWays(every: number): { input: WaysInput; waiting: number } | null {
-  const [read, setRead] = useState<{ input: WaysInput; waiting: number } | null>(null);
+export function useWays(every: number): WaysRead | null {
+  const [read, setRead] = useState<WaysRead | null>(knownWays);
   useFocusEffect(
     useCallback(() => {
       let stopped = false;
@@ -89,8 +117,11 @@ export function useWays(every: number): { input: WaysInput; waiting: number } | 
       let key = '';
       const read = () => {
         last = Date.now();
+        const space = spaceNow();
         readWays()
           .then((next) => {
+            // Kept only for the space it was read of, though this screen is gone meanwhile.
+            if (space !== null && spaceNow() === space) lastRead = { space, read: next };
             if (stopped) return;
             const nextKey = shownKey(next);
             if (nextKey === key) return;

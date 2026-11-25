@@ -7,7 +7,7 @@ import { AppState, Modal, PanResponder, PermissionsAndroid, Pressable, StyleShee
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { effectFor, pinchedZoom, troubleOf, zoomName, zoomStops, type CameraMode as Mode, type CameraTrouble } from '../lib/camera-controls';
-import { keepPicture, keepRecording } from '../lib/collection-camera';
+import { dropPicture, dropRecording, keepPicture, keepRecording } from '../lib/collection-camera';
 import { t } from '../lib/i18n';
 import { isPicking, whilePicking } from '../lib/picking';
 import { type CollectionItem, type CollectionPlace } from '../lock/collection-data';
@@ -24,6 +24,11 @@ import { Button, Text } from './ui';
 // by its own system. A tap focuses there; two fingers zoom, down to the wide lens where there is
 // one. The camera stays open for the next one, and closes when Erevos goes to the background,
 // and so with the space.
+//
+// With Erevos locked (`sealTo`: app/_layout.tsx) it takes the same way, with no space's key in
+// hand: each photo or video is encrypted as it is taken and its key sealed for the space opened
+// last (lock/camera-drop.ts), so it shows in that space's Collection once its password is given.
+// Nothing of the Collection shows here then, nor of what was taken: only how many were.
 
 type Quality = CameraProps['quality'];
 type Flash = CameraProps['flash'];
@@ -68,14 +73,21 @@ export function ErevosCamera({
   visible,
   place,
   folder,
+  sealTo = null,
   onClose,
   onAdded,
+  onTaken,
 }: {
   visible: boolean;
+  /** The Collection it takes into; null with Erevos locked, when `sealTo` says whom it takes for. */
   place: CollectionPlace | null;
   folder: string;
+  /** With Erevos locked: the public key of the space it takes for. */
+  sealTo?: Uint8Array | null;
   onClose: () => void;
-  onAdded: (item: CollectionItem) => void;
+  onAdded?: (item: CollectionItem) => void;
+  /** One more was taken and kept. */
+  onTaken?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const Camera = cameraView();
@@ -248,16 +260,17 @@ export function ErevosCamera({
   }
 
   async function shoot() {
-    if (!camera.current || !place || busy || !ready) return;
+    if (!camera.current || (!place && !sealTo) || busy || !ready) return;
     setBusy(true);
     setNote('');
     if (mode === 'night') setProcessing(0);
     try {
       const photo = await camera.current.takePhoto(silent);
       setProcessing(-1);
-      const item = await keepPicture(place, folder, photo);
+      if (sealTo) await dropPicture(sealTo, photo);
+      else if (place) onAdded?.(await keepPicture(place, folder, photo));
       setTaken((n) => n + 1);
-      onAdded(item);
+      onTaken?.();
     } catch (error) {
       setNote(cameraTrouble(troubleOf(error, 'photo')));
     }
@@ -266,7 +279,7 @@ export function ErevosCamera({
   }
 
   async function film() {
-    if (!camera.current || !place || !ready) return;
+    if (!camera.current || (!place && !sealTo) || !ready) return;
     if (recording) {
       void camera.current.stopRecording().catch(() => undefined);
       return;
@@ -290,9 +303,10 @@ export function ErevosCamera({
     if (!uri) return;
     setBusy(true);
     try {
-      const item = await keepRecording(place, folder, uri);
+      if (sealTo) await dropRecording(sealTo, uri);
+      else if (place) onAdded?.(await keepRecording(place, folder, uri));
       setTaken((n) => n + 1);
-      onAdded(item);
+      onTaken?.();
     } catch (error) {
       setNote(cameraTrouble(troubleOf(error, 'video')));
     }
@@ -317,9 +331,13 @@ export function ErevosCamera({
       ? processing > 0
         ? t('Hold still… {n}%', { n: processing })
         : t('Hold still…')
-      : taken > 0
-        ? t('{n} in the Collection', { n: taken })
-        : t('Straight into the Collection, encrypted');
+      : sealTo
+        ? taken > 0
+          ? t('Taken: {n}. Shown after the password.', { n: taken })
+          : t('Encrypted as it is taken. Shown after the password.')
+        : taken > 0
+          ? t('{n} in the Collection', { n: taken })
+          : t('Straight into the Collection, encrypted');
 
   return (
     <Modal

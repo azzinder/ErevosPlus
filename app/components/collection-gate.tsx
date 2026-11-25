@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { t } from '../lib/i18n';
-import { biometricOn, BiometricError, confirmWithBiometric } from '../lock/biometric';
+import { biometricOffered, BiometricError, confirmWithBiometric } from '../lock/biometric';
 import { ownSpaceKey } from '../lock/config';
 import { currentSpace } from '../lock/keys';
 import { biometricSealer } from '../modules/erevos-biometric';
@@ -34,7 +34,7 @@ export function CollectionGate({ onOpen, onBack }: { onOpen: () => void; onBack:
   // way; otherwise the field for the password shows at once.
   useEffect(() => {
     let live = true;
-    biometricOn(biometricSealer).then(
+    biometricOffered(biometricSealer).then(
       (on) => {
         if (!live) return;
         setBiometric(on);

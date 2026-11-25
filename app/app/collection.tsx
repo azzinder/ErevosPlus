@@ -26,7 +26,8 @@ import { CAN_EDIT, editPhoto, type Cut, type Turn } from '../lib/collection-edit
 import { cleanedPhoto, itemPlace } from '../lib/collection-export';
 import { copyToSend, dropOpened, openBytesWithOtherApp, openWithOtherApp } from '../lib/collection-out';
 import { placeShown, usePlayer } from '../lib/collection-play';
-import { useCollectionPlace } from '../lib/collection-place';
+import { takeDrops } from '../lib/camera-drops';
+import { spaceCollection, useCollectionPlace } from '../lib/collection-place';
 import { enterHiddenScreen } from '../lib/hidden-contacts';
 import { fileLook, folderTiles, folderTilesFor, gridEntries, inFolder, isPhoto, playKind, search, tabOf, type FileLook, type FileTab, type GridEntry } from '../lib/collection-view';
 import { locale, t } from '../lib/i18n';
@@ -51,6 +52,7 @@ import {
   type CollectionItem,
 } from '../lock/collection-data';
 import { RELOCK_MS } from '../lock/chat-pin';
+import { cameraOpensLocked } from '../lock/camera-drop';
 import { isPasswordLocked, loadLockConfig } from '../lock/config';
 import { space, radius, withAlpha, type Colors } from '../theme/colors';
 import { useColors, useStyles } from '../theme/context';
@@ -134,11 +136,29 @@ function Thumb({ item, size }: { item: CollectionItem; size: number }) {
 
 // Where the space has a password, the Collection asks for it again each time it opens, and once
 // Erevos was away more than RELOCK_MS (the owner's word, 2026-11-16): until then nothing of it is
-// read (components/collection-gate.tsx). Not in hidden chats, which close as soon as Erevos is
+// shown (components/collection-gate.tsx). Not in hidden chats, which close as soon as Erevos is
 // left and are opened with their own PIN.
+//
+// The camera's icon and shortcut (`camera`) open the camera first, before that password, unless
+// the owner keeps the camera behind it (lock/camera-drop.ts, the owner's word, 2026-11-25): what it
+// takes goes straight into the Collection, and shows only once the password is given (CameraFirst).
 export default function CollectionScreen() {
-  const { hidden } = useLocalSearchParams<{ hidden?: string }>();
+  const { hidden, camera } = useLocalSearchParams<{ hidden?: string; camera?: string }>();
   const [open, setOpen] = useState<boolean | null>(hidden === '1' ? true : null);
+  // Whether the camera opens before the password: null until read.
+  const [cameraFirst, setCameraFirst] = useState<boolean | null>(null);
+  const forCamera = camera === '1' && hidden !== '1' && CAN_TAKE_PHOTO;
+  useEffect(() => {
+    if (!forCamera) return;
+    let live = true;
+    cameraOpensLocked().then(
+      (on) => live && setCameraFirst(on),
+      () => live && setCameraFirst(false),
+    );
+    return () => {
+      live = false;
+    };
+  }, [forCamera]);
   useEffect(() => {
     if (hidden === '1') return;
     let live = true;
@@ -171,6 +191,8 @@ export default function CollectionScreen() {
   }, [hidden]);
   if (open === null) return null;
   if (!open) {
+    if (forCamera && cameraFirst === null) return null;
+    if (forCamera && cameraFirst) return <CameraFirst onClose={() => router.setParams({ camera: undefined })} />;
     return (
       <CollectionGate
         onOpen={() => setOpen(true)}
@@ -182,6 +204,24 @@ export default function CollectionScreen() {
     );
   }
   return <OpenCollection />;
+}
+
+// The camera before the Collection's password: it takes straight into the open space's Collection,
+// at its top, and shows nothing of it. Closed, or as Erevos leaves the screen, the Collection asks
+// for its password.
+function CameraFirst({ onClose }: { onClose: () => void }) {
+  const place = useMemo(() => {
+    try {
+      return spaceCollection();
+    } catch {
+      return null;
+    }
+  }, []);
+  return (
+    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+      <ErevosCamera visible place={place} folder="" onClose={onClose} />
+    </View>
+  );
 }
 
 function OpenCollection() {
@@ -274,6 +314,19 @@ function OpenCollection() {
   useEffect(() => {
     void reload();
   }, [reload]);
+  // What the camera took for this space while Erevos was locked comes in as it opens, should it
+  // not have yet (lib/camera-drops.ts): the list is read again then.
+  useEffect(() => {
+    if (!place || inHidden || !CAN_TAKE_PHOTO) return;
+    let live = true;
+    takeDrops(place).then(
+      (came) => live && came > 0 && void reload(),
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [place, inHidden, reload]);
 
   const searching = query !== null;
   const choosing = chosen.size > 0;

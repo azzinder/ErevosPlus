@@ -7,13 +7,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardAwareScrollView } from '../components/keyboard';
+import { KeyboardPaddedView } from '../components/keyboard';
 import { LinkedText } from '../components/linked-text';
 import { keptName, StarredHere, useKeep } from '../components/keep-actions';
 import { Missing, type Answered } from '../components/matrix-message';
 import { MicButton, RecordingLine, useVoiceCapture, VoiceClip } from '../components/matrix-voice';
 import { IconButton } from '../components/composer';
-import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { MessageMenu, type MenuAction } from '../components/message-menu';
 import { Pinned, PlaceCard, Quote, Reactions } from '../components/message-parts';
 import { ChatLookSheet, ChatScreen } from '../components/chat-look';
@@ -22,10 +22,12 @@ import { HeldBubbles, keepForLater, LaterSheet, RemindSheet, remindPlace, useKep
 import { useChatProtect } from '../components/chat-protect';
 import { askDelete, ChatTimer, CheckInPerson, useGoneAt, useVanishOnce, VanishStrip } from '../components/chat-rules';
 import { hiddenOnScreen, NetworkChatNotify, useNetworkChatShown } from '../components/network-chat-notify';
-import { CarryButtons, MentionChips, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
+import { MentionChips, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
 import { NetworkFile } from '../components/network-file';
-import { useNetworkThread } from '../components/network-thread';
+import { laterWay, NetworkPanel, vanishWay } from '../components/network-panel';
+import { THREAD_FOOT, THREAD_GROWS, THREAD_PAGE, THREAD_SIDE, useNetworkThread } from '../components/network-thread';
 import { NostrStickers } from '../components/nostr-stickers';
+import { beforePanel } from '../components/panel-close';
 import { PlaceSheet } from '../components/place-sheet';
 import { chosenStyle, SelectBar, selectAction, useSelection } from '../components/select-bar';
 import { Button, Input, OptionList, Page, Row, Sheet, Text } from '../components/ui';
@@ -81,7 +83,7 @@ import { IpStop } from '../lib/ip-warning';
 import { NOSTR_FILE_MOST, type NostrDmFile } from '../lib/nostr-files';
 import { stickerMeta } from '../lib/own-stickers';
 import { pickFile, TooLargeError } from '../lib/pick-file';
-import { pickPhoto } from '../lib/pick-photo';
+import { CAN_TAKE_PHOTOS, pickPhoto } from '../lib/pick-photo';
 import { useSharedFiles, useSharedWords } from '../lib/shared-here';
 import { pickVideo } from '../lib/pick-video';
 import { placesIn } from '../lib/sms-parts';
@@ -179,7 +181,8 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
   // Whether the chat's own look shows its choices (components/chat-look.tsx).
   const [styling, setStyling] = useState(false);
-  // The chat's options (#44), and what goes with a message: each a sheet, opened beside the field.
+  // The chat's options (#44), a sheet opened beside the field, and what goes with a message: the
+  // panel "+" opens under the field, as in an Erevos chat (components/network-panel.tsx).
   const [more, setMore] = useState(false);
   const [attaching, setAttaching] = useState(false);
   // The messages being forwarded, while the chats to forward them to show; the stickers' sheet;
@@ -243,7 +246,9 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   useGoneAt(chat ? nextGoesIn(chat) : 0);
   // The thread opens at its last message, with the arrows to its start, to where it was left and to its
   // end (components/network-thread.tsx).
-  const { scroll, scrollProps, threadProps, endProps, place, goTo, withArrows } = useNetworkThread({
+  const { scroll, scrollProps, threadProps, endProps, place, goTo, toEnd, withArrows } = useNetworkThread({
+    // The screen ends above the keyboard, as the Erevos chat's does (KeyboardPaddedView, below).
+    padded: true,
     list: shownList,
     idOf: (message) => message.id,
     mine: (message) => message.mine,
@@ -290,6 +295,17 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
       throw new IpStop();
     }
     return nostrDmFile(file, key);
+  }
+
+  // "+" opens its panel under the field: the keyboard goes first, or the panel would open behind
+  // it, and the thread is read at its end, so the panel comes into view as it is laid out.
+  function openPanel(open: boolean) {
+    if (open) {
+      beforePanel();
+      setNote('');
+      toEnd();
+    }
+    setAttaching(open);
   }
 
   // A photo, file or voice message goes as an answer too, to the message chosen while it is still there.
@@ -521,14 +537,17 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     </Row>
   );
 
+  // The "+" panel shows only while the chat does.
+  const panelOpen = attaching && shown;
   const thread = withArrows(
-    <KeyboardAwareScrollView
+    <ScrollView
       ref={scroll}
       style={{ flex: 1, backgroundColor: colors.ground }}
-      // As Page (components/ui.tsx) has it, but with a hold on the scrolling.
-      contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingBottom: insets.bottom + space.xl, gap: space.md }}
+      // As Page (components/ui.tsx) has it, but with a hold on the scrolling, and as tall as the
+      // screen, so the field sits at the bottom of a chat with few messages. The open panel ends it.
+      // A plain scrolling view: the screen itself ends above the keyboard (KeyboardPaddedView, below).
+      contentContainerStyle={[THREAD_PAGE, { paddingBottom: panelOpen ? 0 : THREAD_FOOT }]}
       keyboardShouldPersistTaps="handled"
-      bottomOffset={space.xl}
       {...scrollProps}
     >
       {group ? (
@@ -560,7 +579,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         />
       ) : null}
 
-      <View style={{ gap: space.md }} {...threadProps}>
+      <View style={THREAD_GROWS} {...threadProps}>
         {shownList.map((message) => (
           <Bubble
             fetchFile={(file) => fetchTheirs(file, message.mine)}
@@ -598,48 +617,61 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           multiline
           placeholder={t('Message')}
           accessibilityLabel={t('Message')}
+          // The keyboard comes: the panel under the field gives way to it.
+          onFocus={() => setAttaching(false)}
         />
         {/* Held down: what is typed goes later. */}
         <Button title={t('Send')} compact disabled={!draft.trim()} onPress={() => void send()} onLongPress={draft.trim() ? () => setChoosingLater(true) : undefined} />
       </Row>
       <LaterSheet visible={choosingLater && shown} where={where} onClose={() => setChoosingLater(false)} onPick={(at) => void sendLater(at)} />
       <RemindSheet of={shown ? reminding : null} where={where} onClose={() => setReminding(null)} say={setNote} />
-      {/* Under the field, one line: what goes with a message ("+"), the chat's options, and the microphone (#44). */}
-      <Row {...endProps}>
-        {voice.recording ? (
-          <RecordingLine />
-        ) : (
-          <>
-            <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} disabled={sending}>
-              <PlusIcon color={colors.text} size={22} />
-            </IconButton>
-            {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
-          </>
-        )}
-        <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
-          <OptionsIcon color={colors.text} size={22} />
-        </IconButton>
-        <MicButton voice={voice} disabled={sending} />
-      </Row>
-      {note ? <Text tone="muted">{note}</Text> : null}
-      <Sheet visible={attaching && shown} onClose={() => setAttaching(false)} title={t('Attach and more')}>
-        <Row wrap>
-          <Button title={t('Photo')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); void sendPhoto(); }} />
-          <Button title={t('File')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); void sendAnyFile(); }} />
-          <Button title={t('Location')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setPlacing(true); }} />
-          {stickerPlace ? <Button title={t('Sticker')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setStickering(true); }} /> : null}
-          <CarryButtons
-            disabled={sending}
-            photos={photos}
-            among={among}
-            shown={shown}
-            onCamera={() => { setAttaching(false); void sendPhoto('camera'); }}
-            onVideo={() => { setAttaching(false); void sendVideo(); }}
-            onCard={(card) => { setAttaching(false); void sendCard(card); }}
-          />
-          {vanish.on ? null : <Button title={t('Disappear')} kind="secondary" compact onPress={() => { setAttaching(false); vanish.toggle(); }} />}
+      {/* Under the field, one line: what goes with a message ("+"), the chat's options, and the
+          microphone (#44); under it the panel "+" opens, which ends the page while it is open. */}
+      <View style={{ gap: space.md }} {...endProps}>
+        <Row>
+          {voice.recording ? (
+            <RecordingLine />
+          ) : (
+            <>
+              <IconButton label={attaching ? t('Close') : t('Attach and more')} onPress={() => openPanel(!attaching)} disabled={sending} state={{ expanded: attaching }}>
+                {attaching ? <CloseIcon color={colors.text} size={22} /> : <PlusIcon color={colors.text} size={22} />}
+              </IconButton>
+              {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
+            </>
+          )}
+          <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+            <OptionsIcon color={colors.text} size={22} />
+          </IconButton>
+          <MicButton voice={voice} disabled={sending} />
         </Row>
-      </Sheet>
+        {note ? <Text tone="muted">{note}</Text> : null}
+        <NetworkPanel
+          open={panelOpen}
+          onClose={() => setAttaching(false)}
+          shown={shown}
+          // NIP-17: what is sent is encrypted to them, files too.
+          encrypted
+          style={{ marginHorizontal: -THREAD_SIDE }}
+          tiles={[
+            { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto() },
+            CAN_TAKE_PHOTOS && { key: 'camera', title: t('Camera'), icon: 'camera', onPress: () => void sendPhoto('camera') },
+            { key: 'video', title: t('Video'), icon: 'photo', onPress: () => void sendVideo() },
+            { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendAnyFile() },
+            stickerPlace && { key: 'sticker', title: t('Sticker'), icon: 'sticker', onPress: () => setStickering(true) },
+            { key: 'place', title: t('Location'), icon: 'place', onPress: () => setPlacing(true) },
+          ]}
+          card={{ among, onSend: (card) => void sendCard(card) }}
+          photos={photos}
+          ways={[
+            vanishWay(vanish, () => setAttaching(false)),
+            laterWay(() => {
+              if (!draft.trim()) return setNote(t('Write the message first, then choose when it goes.'));
+              setAttaching(false);
+              setChoosingLater(true);
+            }),
+          ]}
+        />
+      </View>
       <Sheet visible={more && shown} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
           <OptionList title={t('This chat')}>
@@ -785,12 +817,12 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           <NostrStickers place={stickerPlace} onPick={sendSticker} onBuiltIn={sendBuiltIn} />
         </Sheet>
       ) : null}
-    </KeyboardAwareScrollView>,
+    </ScrollView>,
     top,
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardPaddedView bottom={insets.bottom} style={{ flex: 1 }}>
       {bar}
       <ChatHistory
         tools={history}
@@ -805,7 +837,7 @@ function NostrChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         say={setNote}
       />
       {thread}
-    </View>
+    </KeyboardPaddedView>
   );
 }
 

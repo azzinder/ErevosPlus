@@ -7,15 +7,18 @@
 // copied too, nothing else there touched; a file missing on the phone fetched back from there,
 // only chunks that open with its key, with how far it is, stopped and gone on with; and a backup
 // made while the copies are whole leaving the chunks out, also after Erevos starts again, until
-// the catalogue names other chunks.
+// the catalogue names other chunks. A copy is read back as the server lists it before it counts as
+// whole; the owner can check what is there, and bring back at once every file not on the phone.
 // Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { bytesSource } from '../lib/attachments';
 import { setCloudHttp } from '../lib/backup-cloud';
-import { connectCollectionServer, copyToServer, fillItem, serverFolder, serverStatus, setServerRetry, testCollectionServer, turnCollectionServer } from '../lib/collection-webdav';
+import { bringBackAll, checkCollectionServer, connectCollectionServer, copyToServer, fillItem, serverFolder, serverStatus, SERVER_SAMPLE, setServerRetry, testCollectionServer, turnCollectionServer } from '../lib/collection-webdav';
 import { randomBytes } from '../lib/crypto';
 import { PREFIX } from '../lock/attachment-files';
 import {
@@ -26,9 +29,11 @@ import {
   FillStoppedError,
   forgetCollectionRuns,
   loadCollection,
+  openCollectionsLeftOut,
   openItem,
   openThumb,
   renameItem,
+  setCollectionBackup,
   type CollectionPlace,
   type FillProgress,
 } from '../lock/collection-data';
@@ -424,3 +429,127 @@ t('a file fetched from the server says how far it is; stopped, it keeps what cam
   early.abort();
   await assert.rejects(openItem(item, { signal: early.signal }), FillStoppedError);
 });
+
+t('a copy is read back as the server lists it before it counts as whole: a chunk the server took and did not keep goes again', async () => {
+  const dav = davServer();
+  const p = place();
+  setCurrentSpace(0, p.key);
+  await connectCollectionServer(p, ROOT, 'me', 'app-pass');
+  await addToCollection(p, bytesSource(randomBytes(2500 * 1024)), photo);
+  // The server says it took every chunk, and keeps all but the first.
+  const keep = dav.there.set.bind(dav.there);
+  let dropped = '';
+  dav.there.set = (path: string, bytes: Uint8Array) => {
+    if (!dropped && path.includes(PREFIX)) {
+      dropped = path;
+      return dav.there;
+    }
+    return keep(path, bytes);
+  };
+  const short = await copyToServer(p, undefined, () => 5000);
+  assert.match(short.error, /1 of its pieces is not on the server whole/);
+  assert.equal(short.began, 5000);
+  // Not whole: a backup made now takes its chunks, and says nothing of the server.
+  assert.equal((await backupSkips([p])).size, 0);
+  assert.deepEqual(await openCollectionsLeftOut(), { byChoice: false, onServer: false });
+  dav.there.set = keep;
+  const again = await copyToServer(p, undefined, () => 6000);
+  assert.equal(again.error, '');
+  assert.equal(again.began, 6000);
+  assert.equal(again.last, 6000);
+  assert.deepEqual(await chunksThere(dav, p), localChunks());
+  // Whole now: a backup leaves them out, and the backup screen can say why.
+  assert.deepEqual(await openCollectionsLeftOut(), { byChoice: false, onServer: true });
+  await setCollectionBackup(p, false);
+  assert.deepEqual(await openCollectionsLeftOut(), { byChoice: true, onServer: false });
+  setCurrentSpace(null);
+  assert.deepEqual(await openCollectionsLeftOut(), { byChoice: false, onServer: false });
+});
+
+t('a check finds every piece there, of its size, and opens a few with their key; one missing or changed there is found, and nothing is changed', async () => {
+  const dav = davServer();
+  const p = place();
+  await connectCollectionServer(p, ROOT, 'me', 'app-pass');
+  const item = await addToCollection(p, bytesSource(randomBytes(2500 * 1024)), photo, { thumb: randomBytes(700) });
+  await addToCollection(p, bytesSource(randomBytes(4000)), { ...photo, name: 'b.jpg' });
+  await copyToServer(p);
+  const pieces = localChunks().size;
+  assert.ok(pieces > SERVER_SAMPLE);
+  assert.deepEqual(await checkCollectionServer(p, { now: () => 7000 }), { at: 7000, files: 2, pieces, missing: 0, damaged: 0, read: SERVER_SAMPLE, error: '' });
+  // Only looked at and fetched: nothing sent, nothing deleted.
+  const before = dav.asked.length;
+  await checkCollectionServer(p);
+  assert.deepEqual(dav.asked.slice(before).filter((a) => !a.startsWith('PROPFIND') && !a.startsWith('GET')), []);
+  // One gone there.
+  const { folder } = (await loadCollection(p)).server!;
+  const name = `${folder}/${PREFIX}${item.file.id}-1`;
+  const good = dav.there.get(name)!;
+  dav.there.delete(name);
+  const gone = await checkCollectionServer(p);
+  assert.equal(gone.missing, 1);
+  assert.equal(gone.damaged, 0);
+  // One changed there, of its size: found once it is among those fetched, here all of them.
+  const tampered = good.slice();
+  tampered[100] ^= 1;
+  dav.there.set(name, tampered);
+  const changed = await checkCollectionServer(p, { sample: pieces });
+  assert.equal(changed.damaged, 1);
+  assert.equal(changed.read, pieces - 1);
+  // One of another size, without fetching it.
+  dav.there.set(name, good.slice(0, 10));
+  assert.equal((await checkCollectionServer(p, { sample: 0 })).damaged, 1);
+  // The server out of reach: said.
+  dav.setDown(true);
+  assert.match((await checkCollectionServer(p)).error, /Could not reach/);
+});
+
+t('every file not on this phone comes back from the server at once, with its small picture; one the server lacks is said, and a stop keeps what came', async () => {
+  const dav = davServer();
+  const p = place();
+  await connectCollectionServer(p, ROOT, 'me', 'app-pass');
+  const a = randomBytes(2500 * 1024);
+  const b = randomBytes(5000);
+  const one = await addToCollection(p, bytesSource(a), photo, { thumb: randomBytes(700) });
+  const two = await addToCollection(p, bytesSource(b), { ...photo, name: 'b.jpg' });
+  const three = await addToCollection(p, bytesSource(randomBytes(3000)), { ...photo, name: 'c.jpg' });
+  await copyToServer(p);
+  // All here: nothing to bring.
+  assert.deepEqual(await bringBackAll(p), { wanted: 0, came: 0, failed: 0 });
+  // As on a new phone with the catalogue from a backup and none of the chunks; and one file lost on the server too.
+  blobs.clear();
+  for (const path of [...dav.there.keys()]) if (path.includes(three.file.id)) dav.there.delete(path);
+  const told: [number, number][] = [];
+  assert.deepEqual(await bringBackAll(p, { progress: (done, all) => told.push([done, all]) }), { wanted: 3, came: 2, failed: 1 });
+  assert.deepEqual(told, [
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3],
+  ]);
+  // They open here now, the server gone.
+  dav.setDown(true);
+  assert.deepEqual(await openItem(one), a);
+  assert.deepEqual(await openItem(two), b);
+  assert.equal((await openThumb(one))?.length, 700);
+  // Stopped: says so.
+  dav.setDown(false);
+  const stop = new AbortController();
+  stop.abort();
+  await assert.rejects(bringBackAll(p, { signal: stop.signal }), FillStoppedError);
+  // Out of reach: said, with nothing lost of what came.
+  dav.setDown(true);
+  await assert.rejects(bringBackAll(p), /Could not reach/);
+  assert.deepEqual(await openItem(one), a);
+});
+
+t('the Collection’s server card says it holds only this Collection’s files and when the last copy began and ended, and offers a check and bringing them all back', async () => {
+  const screen = readFileSync(join(import.meta.dirname, '..', 'app', 'collection-settings.tsx'), 'utf8');
+  assert.match(screen, /t\('Only this Collection’s files, encrypted: \{done\} of \{total\} are on the server\.'/);
+  assert.match(screen, /t\('The last copy began \{start\} and ended \{end\}\.'/);
+  assert.doesNotMatch(screen, /Uploaded \{done\} of \{total\}/);
+  assert.match(screen, /onPress=\{\(\) => void check\(\)\}/);
+  assert.match(screen, /onPress=\{\(\) => void bringBack\(\)\}/);
+  assert.match(screen, /setChecked\(await checkCollectionServer\(place\)\)/);
+  assert.match(screen, /await bringBackAll\(place, \{ signal: stop\.signal, progress: \(done, all\) => setBringing\(\{ done, all \}\) \}\)/);
+});
+

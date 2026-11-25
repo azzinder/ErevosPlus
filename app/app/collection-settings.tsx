@@ -13,14 +13,17 @@ import { fileSize } from '../lib/attachments';
 import { cloudLabel, loadCloudBackup } from '../lib/backup-cloud';
 import { CAN_CLOUD_BACKUP } from '../lib/backup-place';
 import { canTorHttp } from '../lib/core';
-import { CAN_DELETE_ORIGINALS } from '../lib/collection-import';
+import { CAN_DELETE_ORIGINALS, CAN_TAKE_PHOTO } from '../lib/collection-import';
 import { useCollectionPlace } from '../lib/collection-place';
 import { canPlayThroughTor, PLAY_CHOICES, playsThroughTor, stopOnLockChanged } from '../lib/collection-play';
-import { connectCollectionServer, scheduleServerCopy, serverStatus, testCollectionServer, turnCollectionServer, watchServerStatus, type ServerStatus } from '../lib/collection-webdav';
+import { bringBackAll, checkCollectionServer, connectCollectionServer, scheduleServerCopy, serverStatus, testCollectionServer, turnCollectionServer, watchServerStatus, type ServerCheck, type ServerStatus } from '../lib/collection-webdav';
 import { tap } from '../lib/haptics';
-import { locale, t } from '../lib/i18n';
+import { locale, plural, t } from '../lib/i18n';
 import { throughTorNow } from '../lib/net-http';
-import { loadCollection, setCollectionBackup, setCollectionOption, type Collection, type CollectionOption, type CollectionPlace, type CollectionServer } from '../lock/collection-data';
+import { cameraOpensLocked, setCameraOpensLocked } from '../lock/camera-drop';
+import { FillStoppedError, loadCollection, setCollectionBackup, setCollectionOption, type Collection, type CollectionOption, type CollectionPlace, type CollectionServer } from '../lock/collection-data';
+import { useLock } from '../lock/context';
+import { currentSpace } from '../lock/keys';
 import { space } from '../theme/colors';
 import { useColors } from '../theme/context';
 
@@ -35,12 +38,16 @@ import { useColors } from '../theme/context';
 // no notice (lib/collection-play.ts); the other choices stay kept for the phone.
 // Where backups can go to a server, the place's Collection can be copied to a WebDAV server too
 // (lib/collection-webdav.ts): its address, user name and password, kept sealed with the place,
-// first those of the backups' server if there is one, with how the copying goes, and its own Tor
+// first those of the backups' server if there is one, with how the copying goes (only this
+// Collection's files, how much of them is there, when the last copy began and ended, this phone's
+// time), a check of what is there, bringing back every file not on this phone, and its own Tor
 // switch. The radio and TV lists have one too (components/collection-radio.tsx, collection-tv.tsx),
 // for what Erevos asks of their servers; and the stations and channels themselves Play through Tor
 // (lib/collection-play.ts), off until turned on, which the Android app with Tor shows: off, they
 // play straight, unless the space sends everything through Tor, and Erevos says first that they
 // see this phone's internet address.
+// And, in a space behind a password, whether Erevos's camera opens without it (lock/camera-drop.ts):
+// the phone's own choice, the same in every space, on until turned off; not shown in hidden chats.
 
 const DESK = Platform.OS === 'web';
 
@@ -51,6 +58,25 @@ export default function CollectionSettingsScreen() {
   const [backup, setBackup] = useState<boolean | null>(null);
   const [options, setOptions] = useState<Pick<Collection, CollectionOption> | null>(null);
   const [note, setNote] = useState('');
+  const { passwordLock } = useLock();
+  // Whether the camera opens without the password; null until read.
+  const [cameraOpen, setCameraOpen] = useState<boolean | null>(null);
+  useEffect(() => {
+    void cameraOpensLocked().then(setCameraOpen);
+  }, []);
+
+  async function turnCamera() {
+    if (cameraOpen === null) return;
+    tap();
+    const next = !cameraOpen;
+    setCameraOpen(next);
+    try {
+      await setCameraOpensLocked(next, currentSpace().key);
+    } catch (error) {
+      setCameraOpen(!next);
+      setNote(error instanceof Error ? error.message : String(error));
+    }
+  }
 
   useEffect(() => {
     if (!place) {
@@ -159,6 +185,17 @@ export default function CollectionSettingsScreen() {
           />
         </Card>
       )}
+      {!DESK && CAN_TAKE_PHOTO && passwordLock && hidden !== '1' ? (
+        <Card>
+          <Switch
+            title={t('Open the camera without the password')}
+            text={t('With Erevos locked, the camera’s icon opens the camera at once. What it takes is encrypted as it is taken and shows only after the password, in the Collection of the space opened last. Nothing else opens from there. This phone’s choice, the same in every space.')}
+            on={cameraOpen === true}
+            disabled={cameraOpen === null}
+            onPress={() => void turnCamera()}
+          />
+        </Card>
+      ) : null}
       <Card>
         <Switch
           title={t('Photos leave with their place and time')}
@@ -244,15 +281,36 @@ function playTorLine(on: boolean): string {
 }
 
 const whenText = (ms: number) => new Date(ms).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+// The time alone when it is of the same day as `since`.
+const clockText = (ms: number, since: number) =>
+  new Date(ms).toDateString() === new Date(since).toDateString() ? new Date(ms).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' }) : whenText(ms);
 
 function statusText(server: CollectionServer, status: ServerStatus | null): string {
   if (status?.running) return t('Copying… {done} of {total}', { done: fileSize(status.done), total: fileSize(status.total) });
   const parts: string[] = [];
-  if (status && status.total) parts.push(t('Uploaded {done} of {total}.', { done: fileSize(status.done), total: fileSize(status.total) }));
+  // Only this Collection's files: not the chats' photos, nor anything of a backup.
+  if (status && status.total) parts.push(t('Only this Collection’s files, encrypted: {done} of {total} are on the server.', { done: fileSize(status.done), total: fileSize(status.total) }));
   const last = Math.max(status?.last ?? 0, server.last);
-  parts.push(last ? t('Last copied {when}.', { when: whenText(last) }) : t('Not copied yet.'));
+  // The last copy of this run, whole: when it began and when it ended.
+  if (status?.began && status.last >= status.began && !status.error) parts.push(t('The last copy began {start} and ended {end}.', { start: whenText(status.began), end: clockText(status.last, status.began) }));
+  else parts.push(last ? t('Last copied {when}.', { when: whenText(last) }) : t('Not copied yet.'));
   if (status?.error) parts.push(t('It did not go: {error}', { error: status.error }));
   return parts.join(' ');
+}
+
+// What a check of the copies on the server found, in words; whether all is there as made.
+function checkText(checked: ServerCheck): { text: string; whole: boolean } {
+  const when = whenText(checked.at);
+  if (checked.error) return { text: t('Checked {when}: {error}', { when, error: checked.error }), whole: false };
+  if (checked.missing || checked.damaged)
+    return {
+      text: t('Checked {when}: of its {pieces} pieces, {missing} are not on the server and {damaged} are not as made. Copy now sends again those this phone has.', { when, pieces: checked.pieces, missing: checked.missing, damaged: checked.damaged }),
+      whole: false,
+    };
+  return {
+    text: plural(checked.files, 'Checked {when}: the {pieces} pieces of its {n} file are all on the server, each of its size, and the {read} fetched open with their key.', 'Checked {when}: the {pieces} pieces of its {n} files are all on the server, each of its size, and the {read} fetched open with their key.', { when, pieces: checked.pieces, read: checked.read }),
+    whole: true,
+  };
 }
 
 // The place's server: on or off, its address, user name and password, how the copying goes, and
@@ -267,6 +325,10 @@ function ServerCard({ place, tor, torReady, onTor }: { place: CollectionPlace; t
   const [user, setUser] = useState('');
   const [secret, setSecret] = useState('');
   const [busy, setBusy] = useState(false);
+  // What the last check found, and how far bringing the files back is (null when it does not run).
+  const [checked, setChecked] = useState<ServerCheck | null>(null);
+  const [bringing, setBringing] = useState<{ done: number; all: number } | null>(null);
+  const [stopBringing, setStopBringing] = useState<AbortController | null>(null);
   const [note, setNoteText] = useState('');
   // Whether the note says the connection works: in the colour of what went well, not of a warning.
   const [works, setWorks] = useState(false);
@@ -281,12 +343,58 @@ function ServerCard({ place, tor, torReady, onTor }: { place: CollectionPlace; t
       .then((c) => active && setServer(c.server ?? null))
       .catch(() => active && setServer(null));
     setStatus(serverStatus(place));
+    setChecked(null);
     const stop = watchServerStatus(place, (next) => active && setStatus(next));
     return () => {
       active = false;
       stop();
     };
   }, [place]);
+
+  // Bringing the files back stops when the screen goes; what came stays.
+  useEffect(() => () => stopBringing?.abort(), [stopBringing]);
+
+  async function check() {
+    setBusy(true);
+    setNote('');
+    try {
+      setChecked(await checkCollectionServer(place));
+    } catch (error) {
+      setNote(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Every file not whole on this phone, fetched from the server now.
+  async function bringBack() {
+    const stop = new AbortController();
+    setStopBringing(stop);
+    setBusy(true);
+    setNote('');
+    setBringing({ done: 0, all: 0 });
+    try {
+      const brought = await bringBackAll(place, { signal: stop.signal, progress: (done, all) => setBringing({ done, all }) });
+      if (brought.wanted === 0) setNote(t('All of this Collection’s files are on this phone already.'));
+      else {
+        setNote(
+          [
+            plural(brought.came, '{n} file came back from the server.', '{n} files came back from the server.'),
+            brought.failed > 0 ? plural(brought.failed, '{n} did not: the server does not have it whole.', '{n} did not: the server does not have them whole.') : '',
+          ]
+            .filter(Boolean)
+            .join(' '),
+        );
+        setWorks(brought.failed === 0);
+      }
+    } catch (error) {
+      if (!(error instanceof FillStoppedError)) setNote(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBringing(null);
+      setStopBringing(null);
+      setBusy(false);
+    }
+  }
 
   // The form, filled with this place's server, or else the backups' own.
   async function openForm() {
@@ -356,9 +464,26 @@ function ServerCard({ place, tor, torReady, onTor }: { place: CollectionPlace; t
           <Text variant="caption" tone="muted">
             {cloudLabel(server)} · {statusText(server, status)}
           </Text>
+          {checked ? (
+            <Text variant="caption" color={checkText(checked).whole ? undefined : colors.warning} tone={checkText(checked).whole ? 'muted' : undefined}>
+              {checkText(checked).whole ? '✓ ' : '⚠ '}
+              {checkText(checked).text}
+            </Text>
+          ) : null}
+          {bringing ? (
+            <Text variant="caption" accessibilityLiveRegion="polite">
+              {t('Bringing the files back from the server: {done} of {all}…', { done: bringing.done, all: bringing.all })}
+            </Text>
+          ) : null}
           <Row wrap>
-            {server.on ? <Button title={t('Copy now')} kind="secondary" compact onPress={() => scheduleServerCopy(place, 0)} disabled={status?.running === true} /> : null}
-            <Button title={t('Change the server')} kind="secondary" compact onPress={() => void openForm()} />
+            {server.on ? <Button title={t('Copy now')} kind="secondary" compact onPress={() => scheduleServerCopy(place, 0)} disabled={status?.running === true || busy} /> : null}
+            <Button title={busy && !bringing ? t('One moment…') : t('Check')} kind="secondary" compact onPress={() => void check()} disabled={busy} />
+            {bringing ? (
+              <Button title={t('Cancel')} kind="secondary" compact onPress={() => stopBringing?.abort()} />
+            ) : (
+              <Button title={t('Bring back the files not on this phone')} kind="secondary" compact onPress={() => void bringBack()} disabled={busy} />
+            )}
+            <Button title={t('Change the server')} kind="secondary" compact onPress={() => void openForm()} disabled={busy} />
           </Row>
         </>
       ) : null}

@@ -5,7 +5,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { measureAppSpace, spaceRows, spaceText } from "../lib/app-space";
+import {
+  measureAppSpace,
+  partsBytes,
+  spaceRows,
+  spaceText,
+  wholeBackupAtMost,
+} from "../lib/app-space";
 
 test("what takes room: kinds in words, those of the same words together, the largest first", () => {
   const rows = spaceRows([
@@ -34,4 +40,20 @@ test("what takes room: kinds in words, those of the same words together, the lar
 
 test("what takes room is not measured where there is no phone module for it", async () => {
   assert.equal(await measureAppSpace(), null);
+});
+
+test("what a backup made whole holds at most: the photos, files and voice messages, and nothing else measured", async () => {
+  assert.equal(
+    partsBytes([
+      { kind: "erevos-file-", bytes: 5_000_000_000, files: 76_000 },
+      { kind: "erevos-voice-", bytes: 20_000_000, files: 40 },
+      { kind: "erevos-page-", bytes: 9_000_000, files: 300 },
+      { kind: "files/tor/", bytes: 30_000_000, files: 20 },
+      { kind: "cache/", bytes: 700_000_000, files: 9 },
+    ]),
+    5_020_000_000,
+  );
+  assert.equal(partsBytes([]), 0);
+  // Not said where it cannot be measured.
+  assert.equal(await wholeBackupAtMost(), null);
 });

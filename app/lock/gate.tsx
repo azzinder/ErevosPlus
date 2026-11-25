@@ -9,7 +9,7 @@ import { KeyboardAvoidingView } from '../components/keyboard';
 import { Button, Input, Text, TextButton } from '../components/ui';
 import { useColors, useTheme } from '../theme/context';
 
-import { BiometricError, biometricOn, unlockWithBiometric } from './biometric';
+import { BiometricError, biometricOffered, biometricOfferedBefore, unlockWithBiometric } from './biometric';
 import { PanicPasswordError, unlock, type LockConfig, type Unlocked } from './config';
 import { LockedOutError, lockedOutMessage } from './tries';
 import { editionName, named } from '../lib/edition';
@@ -22,23 +22,37 @@ import { openEmergencyDial, phoneStatus } from '../modules/erevos-phone';
 // typed, and the password decides which space opens. Wrong passwords are counted on the phone
 // (tries.ts): after a few, the next try must wait. It shows in the look last used (theme/look.ts).
 // Where unlocking with a fingerprint or face is on (biometric.ts), a button offers it too; it
-// opens only the first password's space, and the password field stays. The panic password, when
+// opens only the first password's space, and the password field stays. The button is there with
+// the screen: it shows as it last did, and what is read then puts it right, with nothing asked of
+// the phone's Keystore until it is pressed. The panic password, when
 // one is set (config.ts), wipes Erevos as the panic button does; until Erevos stops, the screen
 // looks as after a wrong password.
 export function PasswordGate({ config, onUnlock }: { config: LockConfig; onUnlock: (space: Unlocked) => Promise<void> }) {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [biometric, setBiometric] = useState(false);
+  const [biometric, setBiometric] = useState(biometricOfferedBefore);
+  // The fingerprint was asked for, and Android's prompt has not shown yet: the button says so.
+  const [asking, setAsking] = useState(false);
   const colors = useColors();
 
   useEffect(() => {
-    biometricOn(biometricSealer).then(setBiometric, () => setBiometric(false));
+    let live = true;
+    biometricOffered(biometricSealer, config).then(
+      (on) => live && setBiometric(on),
+      () => live && setBiometric(false),
+    );
+    return () => {
+      live = false;
+    };
+    // Once, as it shows: the lock it was given is the one it asks of.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fingerprint() {
     if (busy) return;
     setBusy(true);
+    setAsking(true);
     setError(null);
     try {
       const space = await unlockWithBiometric(biometricSealer, { title: named(t('Unlock Erevos')), cancel: t('Use password') });
@@ -53,6 +67,7 @@ export function PasswordGate({ config, onUnlock }: { config: LockConfig; onUnloc
       if (!(e instanceof BiometricError && e.reason === 'cancelled')) setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+      setAsking(false);
     }
   }
 
@@ -109,9 +124,9 @@ export function PasswordGate({ config, onUnlock }: { config: LockConfig; onUnloc
             {error}
           </Text>
         ) : null}
-        <Button title={t('Unlock')} onPress={submit} disabled={!password} loading={busy} style={styles.stretch} />
+        <Button title={t('Unlock')} onPress={submit} disabled={!password} loading={busy && !asking} style={styles.stretch} />
         {biometric ? (
-          <Button title={t('Fingerprint or face')} kind="secondary" onPress={fingerprint} disabled={busy} style={styles.stretch} />
+          <Button title={t('Fingerprint or face')} kind="secondary" onPress={fingerprint} disabled={busy} loading={asking} style={styles.stretch} />
         ) : null}
         {/* With Erevos the phone app, an emergency call is a tap away, with no password: Android's
             own emergency keypad, which calls only emergency numbers. */}

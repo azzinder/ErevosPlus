@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardAwareScrollView } from '../components/keyboard';
+import { KeyboardPaddedView } from '../components/keyboard';
 import { StarredHere, useKeep } from '../components/keep-actions';
 import { MatrixRoomInfo } from '../components/matrix-members';
 import { MatrixBubble, lineOf, type Answered } from '../components/matrix-message';
@@ -25,16 +25,18 @@ import { ChatTorSwitch } from '../components/account-tor';
 import { hiddenKeep, ipGate } from '../components/ip-warning';
 import { accountThroughTor } from '../lib/account-tor';
 import { hiddenOnScreen, NetworkChatNotify, useNetworkChatShown } from '../components/network-chat-notify';
-import { CarryButtons, useNetworkAmong, usePhotoQuality } from '../components/network-carry';
+import { useNetworkAmong, usePhotoQuality } from '../components/network-carry';
+import { laterWay, NetworkPanel, vanishWay } from '../components/network-panel';
 import { OwnName } from '../components/own-name';
-import { useNetworkThread } from '../components/network-thread';
+import { THREAD_FOOT, THREAD_GROWS, THREAD_PAGE, THREAD_SIDE, useNetworkThread } from '../components/network-thread';
+import { beforePanel } from '../components/panel-close';
 import { PlaceSheet } from '../components/place-sheet';
 import { PollSheet } from '../components/poll';
 import { useSayTyping } from '../components/say-typing';
 import { SelectBar, selectAction, useSelection } from '../components/select-bar';
 import { PhoneSign, ShortcutTile, VideoSign } from '../components/shortcut-tile';
 import { IconButton } from '../components/composer';
-import { MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
+import { CloseIcon, MoreIcon, OptionsIcon, PlusIcon } from '../components/icons';
 import { Button, Chip, Input, OptionList, Page, Row, Sheet, Text } from '../components/ui';
 import { WhoRead } from '../components/who-read';
 import { ask } from '../lib/alert';
@@ -102,7 +104,7 @@ import { isVerified } from '../lib/matrix-verify';
 import { cardFile } from '../lib/message-carry';
 import { useNetworkWhere, whereParams, type NetworkWhere } from '../lib/network-place';
 import { pickFile, TooLargeError } from '../lib/pick-file';
-import { pickPhoto } from '../lib/pick-photo';
+import { CAN_TAKE_PHOTOS, pickPhoto } from '../lib/pick-photo';
 import { pickVideo } from '../lib/pick-video';
 import { throughTor } from '../lib/relay';
 import { useSharedFiles, useSharedWords } from '../lib/shared-here';
@@ -231,8 +233,12 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const [lit, setLit] = useState<string | null>(null);
   // Whether the room's own look shows its choices (components/chat-look.tsx).
   const [styling, setStyling] = useState(false);
+  // What goes with a message: the panel "+" opens under the field, as in an Erevos chat
+  // (components/network-panel.tsx); and the chat's options, a sheet.
   const [attaching, setAttaching] = useState(false);
   const [more, setMore] = useState(false);
+  // Asks the field to choose when what is typed goes: false while nothing is typed (Field).
+  const askLater = useRef<(() => boolean) | null>(null);
   // Search in this chat, its media, Go to a day and Export chat (components/chat-history.tsx).
   const history = useHistoryTools();
   // The message a reminder is being set for (components/chat-writing.tsx).
@@ -321,7 +327,9 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   counted.current = count;
   // The thread opens at its last message, with the arrows to its start, to where it was left and to its
   // end (components/network-thread.tsx); older messages coming in above hold it.
-  const { scroll, scrollProps, threadProps, endProps, place, goTo, withArrows } = useNetworkThread({
+  const { scroll, scrollProps, threadProps, endProps, place, goTo, toEnd, withArrows } = useNetworkThread({
+    // The screen ends above the keyboard, as the Erevos chat's does (KeyboardPaddedView, below).
+    padded: true,
     list: shownMessages,
     idOf: (message) => message.id,
     mine: (message) => message.sender === state?.userId,
@@ -357,6 +365,16 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
     if (!roomId || !state || accountThroughTor(matrixWayOf(state), true)) return true;
     return ipGate({ network: 'Matrix', act: 'send', of: `matrix:${roomId}`, own: true, ...ipKeep() }, { label: t('Through Tor'), run: () => matrixSetRoomTor(roomId, true) });
   };
+  // "+" opens its panel under the field: the keyboard goes first, or the panel would open behind
+  // it, and the thread is read at its end, so the panel comes into view as it is laid out.
+  function openPanel(open: boolean) {
+    if (open) {
+      beforePanel();
+      setNote('');
+      toEnd();
+    }
+    setAttaching(open);
+  }
 
   async function sendPicked(pick: () => Promise<OutgoingFile | null>) {
     if (!roomId || sending) return;
@@ -409,6 +427,8 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   const answered = replying && !replying.deleted ? replying : undefined;
   const editing = editId ? byId.get(editId) : undefined;
   const changed = editing && !editing.deleted && !editing.state ? editing : undefined;
+  // The "+" panel shows only while the chat does, and never while a message is being changed.
+  const panelOpen = attaching && shown && !changed;
   const menuMessage = menuFor ? byId.get(menuFor) : undefined;
   const nameOf = (message: MatrixMessage) => (message.sender === me ? t('You') : room.members[message.sender]?.name || message.sender);
 
@@ -746,13 +766,14 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
 
   // The bar over the thread while messages are chosen; the thread stays as it was under it.
   const screen = withArrows(
-    <KeyboardAwareScrollView
+    <ScrollView
       ref={scroll}
       style={{ flex: 1, backgroundColor: colors.ground }}
-      // As Page (components/ui.tsx) has it, but with a hold on the scrolling.
-      contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingBottom: insets.bottom + space.xl, gap: space.md }}
+      // As Page (components/ui.tsx) has it, but with a hold on the scrolling, and as tall as the
+      // screen, so the field sits at the bottom of a chat with few messages. The open panel ends it.
+      // A plain scrolling view: the screen itself ends above the keyboard (KeyboardPaddedView, below).
+      contentContainerStyle={[THREAD_PAGE, { paddingBottom: panelOpen ? 0 : THREAD_FOOT }]}
       keyboardShouldPersistTaps="handled"
-      bottomOffset={space.xl}
       {...scrollProps}
       onScroll={(event) => {
         scrolled.current.y = event.nativeEvent.contentOffset.y;
@@ -806,7 +827,7 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           }}
         />
       ) : null}
-      <View style={{ gap: space.md }} {...threadProps}>
+      <View style={THREAD_GROWS} {...threadProps}>
         {room.before && !room.start ? (
           <Row style={{ justifyContent: 'center' }}>
             <Button title={earlier ? t('Fetching…') : t('Load earlier messages')} kind="secondary" compact disabled={earlier} onPress={() => void loadEarlier()} />
@@ -862,28 +883,60 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
           // Saved new words leave the draft as it was.
           if (!changed) kept.sent();
         }}
-        later={{ where, hold: holdLater }}
+        later={{ where, hold: holdLater, ask: askLater }}
+        // The keyboard comes: the panel under the field gives way to it.
+        onFocus={() => setAttaching(false)}
       />
-      <Row {...endProps}>
-        {voice.recording ? (
-          <RecordingLine />
-        ) : (
-          <>
-            {!changed ? (
-              <IconButton label={t('Attach and more')} onPress={() => setAttaching(true)} disabled={sending}>
-                <PlusIcon color={colors.text} size={22} />
-              </IconButton>
-            ) : null}
-            {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
-          </>
-        )}
-        {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
-        <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
-          <OptionsIcon color={colors.text} size={22} />
-        </IconButton>
-        <MicButton voice={voice} disabled={sending || !!changed} />
-      </Row>
-      {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
+      {/* Under the field: what goes with a message ("+"), the chat's options and the microphone;
+          under them the panel "+" opens, which ends the page while it is open. */}
+      <View style={{ gap: space.md }} {...endProps}>
+        <Row>
+          {voice.recording ? (
+            <RecordingLine />
+          ) : (
+            <>
+              {!changed ? (
+                <IconButton label={attaching ? t('Close') : t('Attach and more')} onPress={() => openPanel(!attaching)} disabled={sending} state={{ expanded: attaching }}>
+                  {attaching ? <CloseIcon color={colors.text} size={22} /> : <PlusIcon color={colors.text} size={22} />}
+                </IconButton>
+              ) : null}
+              {sending ? <Text tone="muted">{t('Sending…')}</Text> : <View style={{ flex: 1 }} />}
+            </>
+          )}
+          {/* The chat's options, beside the field, where a long chat keeps them in reach (#44). */}
+          <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+            <OptionsIcon color={colors.text} size={22} />
+          </IconButton>
+          <MicButton voice={voice} disabled={sending || !!changed} />
+        </Row>
+        {note || now.problem ? <Text tone="muted">{note || now.problem}</Text> : null}
+        <NetworkPanel
+          open={panelOpen}
+          onClose={() => setAttaching(false)}
+          shown={shown}
+          // Only in an encrypted room is what is sent encrypted to its members, files too.
+          encrypted={!!room.encrypted}
+          style={{ marginHorizontal: -THREAD_SIDE }}
+          tiles={[
+            { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto() },
+            CAN_TAKE_PHOTOS && { key: 'camera', title: t('Camera'), icon: 'camera', onPress: () => void sendPhoto('camera') },
+            { key: 'video', title: t('Video'), icon: 'photo', onPress: () => void sendVideo() },
+            { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendAnyFile() },
+            stickerPlace && { key: 'sticker', title: t('Sticker'), icon: 'sticker', onPress: () => setStickering(true) },
+            { key: 'place', title: t('Location'), icon: 'place', onPress: () => setPlacing(true) },
+            !thread && { key: 'poll', title: t('Poll'), icon: 'poll', onPress: () => setPolling(true) },
+          ]}
+          card={{ among, foot: room.encrypted ? undefined : t('Not encrypted: the Matrix server can read this chat.'), onSend: (card) => void sendCard(card) }}
+          photos={photos}
+          ways={[
+            vanishWay(vanish, () => setAttaching(false)),
+            laterWay(() => {
+              if (!askLater.current?.()) return setNote(t('Write the message first, then choose when it goes.'));
+              setAttaching(false);
+            }),
+          ]}
+        />
+      </View>
       {!room.direct && !room.invitedBy ? <MatrixRoomInfo visible={info} onClose={() => setInfo(false)} room={room} me={me} /> : null}
       <MatrixStickers
         visible={stickering}
@@ -897,27 +950,6 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         }}
       />
       <ChatLookSheet visible={styling} onClose={() => setStyling(false)} name={shownRoomName(room)} chat={lookChat} />
-      <Sheet visible={attaching} onClose={() => setAttaching(false)} title={t('Attach and more')}>
-        <View style={{ gap: space.sm }}>
-          <Row wrap>
-            <Button title={t('Photo')} kind="secondary" compact disabled={sending || !!changed} onPress={() => { setAttaching(false); void sendPhoto(); }} />
-            <Button title={t('File')} kind="secondary" compact disabled={sending || !!changed} onPress={() => { setAttaching(false); void sendAnyFile(); }} />
-            {!thread ? <Button title={t('Poll')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setPolling(true); }} /> : null}
-            <Button title={t('Location')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setPlacing(true); }} />
-            {stickerPlace ? <Button title={t('Sticker')} kind="secondary" compact disabled={sending} onPress={() => { setAttaching(false); setStickering(true); }} /> : null}
-            <CarryButtons
-              disabled={sending}
-              photos={photos}
-              among={among}
-              foot={room.encrypted ? undefined : t('Not encrypted: the Matrix server can read this chat.')}
-              onCamera={() => { setAttaching(false); void sendPhoto('camera'); }}
-              onVideo={() => { setAttaching(false); void sendVideo(); }}
-              onCard={(card) => { setAttaching(false); void sendCard(card); }}
-            />
-            {vanish.on ? null : <Button title={t('Disappear')} kind="secondary" compact onPress={() => { setAttaching(false); vanish.toggle(); }} />}
-          </Row>
-        </View>
-      </Sheet>
       <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
           {!room.direct && !room.invitedBy ? <InviteCard roomId={roomId} say={setNote} /> : null}
@@ -1018,11 +1050,11 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         onReact={menuMessage && !menuMessage.state ? (emoji) => void react(menuMessage.id, emoji) : undefined}
         actions={menuMessage ? actionsOf(menuMessage) : []}
       />
-    </KeyboardAwareScrollView>,
+    </ScrollView>,
     top,
   );
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardPaddedView bottom={insets.bottom} style={{ flex: 1 }}>
       {chosen.length ? (
         <SelectBar
           count={chosen.length}
@@ -1055,7 +1087,7 @@ function MatrixChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
         say={setNote}
       />
       {screen}
-    </View>
+    </KeyboardPaddedView>
   );
 }
 
@@ -1129,6 +1161,7 @@ function Field({
   onTyped,
   onSent,
   later,
+  onFocus,
 }: {
   initial: string;
   editing: boolean;
@@ -1137,11 +1170,28 @@ function Field({
   onSend: (text: string) => boolean | Promise<boolean>;
   onTyped: (text: string) => void;
   onSent: () => void;
-  later: { where: NetworkWhere; hold: (text: string, at: number) => Promise<boolean> };
+  /** `ask`: where the screen finds how to ask when what is typed goes (the "+" panel's Send later). */
+  later: { where: NetworkWhere; hold: (text: string, at: number) => Promise<boolean>; ask?: { current: (() => boolean) | null } };
+  onFocus?: () => void;
 }) {
   const [text, setText] = useState(initial);
   const [choosingLater, setChoosingLater] = useState(false);
   const typed = text.trim();
+  // The screen's way to ask when what is typed goes: not while a message is changed, nor with nothing typed.
+  const ask = later.ask;
+  const askable = !editing && !!typed;
+  useEffect(() => {
+    if (!ask) return;
+    const mine = () => {
+      if (!askable) return false;
+      setChoosingLater(true);
+      return true;
+    };
+    ask.current = mine;
+    return () => {
+      if (ask.current === mine) ask.current = null;
+    };
+  }, [ask, askable]);
   const go = async () => {
     if (!typed || saving) return;
     if (await onSend(typed)) {
@@ -1165,7 +1215,7 @@ function Field({
         </Row>
       ) : null}
       <Row>
-        <Input style={{ flex: 1 }} value={text} onChangeText={write} multiline placeholder={t('Message')} accessibilityLabel={editing ? t('Edit message') : t('Message')} />
+        <Input style={{ flex: 1 }} value={text} onChangeText={write} multiline placeholder={t('Message')} accessibilityLabel={editing ? t('Edit message') : t('Message')} onFocus={onFocus} />
         <Button title={editing ? t('Save') : t('Send')} compact disabled={!typed || saving} onPress={go} onLongPress={!editing && typed ? () => setChoosingLater(true) : undefined} />
       </Row>
       <LaterSheet

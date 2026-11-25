@@ -4,6 +4,8 @@
 
 import { useSyncExternalStore } from 'react';
 
+import type { Checked } from './backup-check';
+
 // A backup into a folder being made (Settings → Backups → Make a backup): how far it is, and what
 // came of it, kept outside the screen. So leaving the screen, or Erevos, while it is made and
 // coming back shows it still going, and then how it ended, as if the screen had stayed open.
@@ -22,6 +24,8 @@ export interface Making {
 export interface MadeNote {
   text: string;
   bad: boolean;
+  /** What the check right after it found (lib/backup-check.ts), and where: none where it cannot be checked. */
+  checked?: { where: string; checked: Checked };
 }
 
 export interface BackupMaking {

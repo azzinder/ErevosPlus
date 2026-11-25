@@ -12,6 +12,8 @@ import { test } from 'node:test';
 import { decryptText, encryptText, fromBase64, randomBytes, setHardCost, setPbkdf2, toBase64, toHex, webCryptoPbkdf2 } from '../lib/crypto';
 import {
   BiometricError,
+  biometricOffered,
+  biometricOfferedBefore,
   biometricOn,
   turnOffBiometric,
   turnOnBiometric,
@@ -51,8 +53,16 @@ class FakePhone implements BiometricSealer {
   broken = false;
   // Everything ever given to seal, to see what was sealed.
   sealed: string[] = [];
-  available = () => true;
-  keyState = (): KeyState => (this.key ? (this.dropped ? 'invalidated' : this.phoneLocked || this.broken ? 'unknown' : 'valid') : 'none');
+  // No strong fingerprint or face set up on the phone.
+  bare = false;
+  // How many times the Keystore was asked whether the key still works: each one is a use of the key started.
+  asked = 0;
+  available = () => !this.bare;
+  // Off the app's own thread on the phone, so it answers later.
+  keyState = async (): Promise<KeyState> => {
+    this.asked++;
+    return this.key ? (this.dropped ? 'invalidated' : this.phoneLocked || this.broken ? 'unknown' : 'valid') : 'none';
+  };
   async seal(data: string) {
     this.key = randomBytes(32);
     this.dropped = false;
@@ -284,4 +294,63 @@ test('turning the lock off turns it off too, and it is not offered where the pho
   await turnOffBiometric(phone);
   assert.equal(store.get(ENTRY), undefined);
   assert.equal(phone.key, null);
+});
+
+test("the password screen's button asks nothing of the Keystore, and is there with the screen", async () => {
+  await locked();
+  const phone = new FakePhone();
+  const config = await loadLockConfig();
+  // Off: no button, at first and after it was asked.
+  await turnOffBiometric(phone);
+  assert.equal(biometricOfferedBefore(), false);
+  assert.equal(await biometricOffered(phone, config), false);
+  assert.equal(biometricOfferedBefore(), false);
+
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  // Turned on: the next password screen has it from its first picture.
+  assert.equal(biometricOfferedBefore(), true);
+  phone.asked = 0;
+  assert.equal(await biometricOffered(phone, config), true);
+  assert.equal(await biometricOffered(phone), true);
+  assert.equal(phone.asked, 0);
+
+  // A key Android dropped still shows the button: pressing it finds out, turns it off, and the next screen has none.
+  phone.dropped = true;
+  assert.equal(await biometricOffered(phone, config), true);
+  assert.equal(phone.asked, 0);
+  assert.notEqual(store.get(ENTRY), undefined);
+  assert.equal(await unlockWithBiometric(phone, PROMPT), null);
+  assert.equal(biometricOfferedBefore(), false);
+  assert.equal(await biometricOffered(phone, config), false);
+
+  // A phone with no fingerprint or face set up any more: no button, and nothing is turned off by looking.
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  phone.bare = true;
+  assert.equal(await biometricOffered(phone, config), false);
+  assert.equal(biometricOfferedBefore(), false);
+  assert.notEqual(store.get(ENTRY), undefined);
+  phone.bare = false;
+  assert.equal(await biometricOffered(phone, config), true);
+
+  // The lock turned off: no button, whatever is still kept; the setting's own look turns it off.
+  await removePasswordLock(0, real);
+  assert.equal(await biometricOffered(phone), false);
+  assert.equal(await biometricOffered(phone, await loadLockConfig()), false);
+  assert.equal(phone.asked, 0);
+  assert.equal(await biometricOn(phone), false);
+  assert.equal(phone.asked, 1);
+  assert.equal(store.get(ENTRY), undefined);
+});
+
+test('where the setting shows, the Keystore is asked whether its key still works, and may answer later', async () => {
+  await locked();
+  const phone = new FakePhone();
+  await turnOnBiometric(phone, 0, 'real-1111', PROMPT);
+  phone.asked = 0;
+  assert.equal(await biometricOn(phone), true);
+  assert.equal(phone.asked, 1);
+  assert.equal(biometricOfferedBefore(), true);
+  phone.dropped = true;
+  assert.equal(await biometricOn(phone), false);
+  assert.equal(biometricOfferedBefore(), false);
 });

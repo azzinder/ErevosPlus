@@ -428,6 +428,30 @@ export async function addSealedToCollection(
   return catalogued(place, file, { folder, thumb, now });
 }
 
+/**
+ * Puts into the place's Collection what Erevos's camera took while Erevos was locked
+ * (lock/camera-drop.ts): a file already encrypted into chunks here, its small picture in a chunk
+ * of its own, and when it was taken, as its note said them. It lies at the top, under no folder;
+ * a name taken there gets a number. One whose file the Collection has already is not added again
+ * (Erevos stopped after this and before its note went). Nothing is deleted here: a file that is
+ * not as one of the Collection is throws CollectionFileDamagedError, and whoever opened the note
+ * decides what goes.
+ */
+export async function addTakenToCollection(place: CollectionPlace, taken: { file: unknown; thumb?: unknown; at: number }, now = Date.now()): Promise<CollectionItem> {
+  const file = kept(taken.file);
+  const small = taken.thumb === undefined || taken.thumb === null ? null : kept(taken.thumb);
+  if (!file || file.size > MAX_COLLECTION_FILE || (taken.thumb !== undefined && taken.thumb !== null && !small)) throw new CollectionFileDamagedError();
+  // When it was taken, by the phone's clock then: never later than now.
+  const added = isTime(taken.at) && taken.at > 0 && taken.at <= now ? taken.at : now;
+  return change(place, async (c) => {
+    const there = c.items.find((i) => i.file.id === file.id);
+    if (there) return { next: null, result: there };
+    const names = new Set(c.items.filter((i) => i.folder === '').map((i) => i.file.name));
+    const item: CollectionItem = { id: newId(), file: { ...file, name: freeName(file.name, names) }, ...(small ? { thumb: small } : {}), folder: '', added, at: now };
+    return { next: { ...c, items: [...c.items, item] }, result: item };
+  });
+}
+
 const metaOf = (item: NewItem) => ({ name: cleanFileName(item.name), mime: cleanMime(item.mime), kind: item.kind, ...(item.w && item.h ? { w: item.w, h: item.h } : {}) });
 
 // A file kept in chunks, with its small picture, written into the catalogue; if any of it cannot
@@ -893,6 +917,26 @@ export function placeIsOpen(place: CollectionPlace): boolean {
 /** What a backup made now leaves out: the chunks of the open space's Collection and of the open hidden places', those the owner keeps out of backups. */
 export async function openCollectionSkips(): Promise<Set<string>> {
   return backupSkips(openPlaces()).catch(() => new Set<string>());
+}
+
+/**
+ * Why a backup made now leaves out the files of an open place's Collection, as backupSkips does, so
+ * the backup screen can say so: `byChoice`, one whose owner keeps it out of backups; `onServer`,
+ * one whose copies on its WebDAV server are whole, which a restore fetches from there.
+ */
+export async function openCollectionsLeftOut(): Promise<{ byChoice: boolean; onServer: boolean }> {
+  const out = { byChoice: false, onServer: false };
+  for (const place of openPlaces()) {
+    try {
+      const collection = await loadCollection(place);
+      if (collection.items.length === 0) continue;
+      if (!collection.backup) out.byChoice = true;
+      else if (serverHoldsAll(place, collection)) out.onServer = true;
+    } catch {
+      // Nothing known of it: nothing said.
+    }
+  }
+  return out;
 }
 
 /** How far fetching a file's missing chunks has come: its chunks here of all it has, and about how many of its bytes. */

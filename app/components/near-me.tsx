@@ -24,6 +24,10 @@ import { useColors } from '../theme/context';
 // yeses make them contacts (lib/near-pair.ts). Under it, for when they do not: this phone's QR
 // code and a code of 8 digits to show (lib/pair-code.ts), the other's to scan or type, and giving
 // Erevos to a phone that has none (app/give-app.tsx).
+//
+// The looking is what the page is, in a card of its own; the rest is small under it: the QR code
+// a tile that shows large when tapped (components/connect-cards.tsx QrTile), with what it is said
+// in the sheet it opens, and the other's code two buttons side by side at the foot.
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error)).split('\n')[0];
 // A phone newly shown takes no yes for this long: a tap meant for the one before it says nothing of this one.
@@ -80,8 +84,9 @@ function useNearPair(on: boolean, own: () => NearEnd | null, onJoined: (end: Nea
   };
 }
 
-// Rings going out from a dot, while this phone looks: still when the phone asks for less motion.
-function Looking({ color }: { color: string }) {
+// Rings going out from this phone, while it looks: still when the phone asks for less motion.
+// `on`: what is drawn on the colour.
+function Looking({ color, on }: { color: string; on: string }) {
   const reduce = useReduceMotion();
   const turn = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -97,9 +102,14 @@ function Looking({ color }: { color: string }) {
   return (
     <View style={styles.looking} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <View style={[styles.ring, { borderColor: withAlpha(color, 0.25) }]} />
-      <View style={[styles.ring, styles.ringMid, { borderColor: withAlpha(color, 0.4) }]} />
-      <Animated.View style={[styles.ring, { borderColor: color }, ring(0.35, 1)]} />
-      <View style={[styles.dot, { backgroundColor: color }]} />
+      <View style={[styles.ring, styles.ringMid, { borderColor: withAlpha(color, 0.45) }]} />
+      <Animated.View style={[styles.ring, { borderColor: color }, ring(0.42, 1)]} />
+      {/* This phone, at the middle of what it looks into. */}
+      <View style={[styles.dot, { backgroundColor: color }]}>
+        <View style={[styles.phone, { borderColor: on }]}>
+          <View style={[styles.phoneBar, { backgroundColor: on }]} />
+        </View>
+      </View>
     </View>
   );
 }
@@ -275,8 +285,8 @@ export function NearMe({ shown, search, held, own, onJoined, qr, ownLink, canCod
             onCancel={() => near.no(first.id, false)}
           />
         ) : (
-          <View style={styles.status} accessibilityLiveRegion="polite">
-            <Looking color={colors.primary} />
+          <View style={[card, styles.status]} accessibilityLiveRegion="polite">
+            <Looking color={colors.primary} on={colors.onPrimary} />
             <Text variant="heading" style={styles.center}>
               {near.spent
                 ? t('Too many tries')
@@ -309,8 +319,18 @@ export function NearMe({ shown, search, held, own, onJoined, qr, ownLink, canCod
         </Text>
       )}
       <View style={card}>
-        <Text variant="label">{search ? t('If it is not found') : t('Your QR code')}</Text>
-        {qr}
+        {/* The QR code small, beside what it is for: tapped, it shows large (QrTile). */}
+        <View style={styles.beside}>
+          {qr}
+          <View style={styles.said}>
+            <Text variant="label">{search ? t('If it is not found') : t('Your QR code')}</Text>
+            {qr ? (
+              <Text variant="caption" tone="muted">
+                {t('Their phone’s camera scans it. Tap it to show it large.')}
+              </Text>
+            ) : null}
+          </View>
+        </View>
         {canCode && ownLink ? (
           code ? (
             <>
@@ -321,7 +341,7 @@ export function NearMe({ shown, search, held, own, onJoined, qr, ownLink, canCod
               {!busy ? <Button title={t('New code')} kind="secondary" compact onPress={() => void showMine()} /> : null}
             </>
           ) : (
-            <Button title={t('Show a code of 8 digits')} kind="secondary" onPress={() => void showMine()} />
+            <Button title={t('Show a code of 8 digits')} kind="secondary" compact style={styles.wide} onPress={() => void showMine()} />
           )
         ) : null}
       </View>
@@ -329,23 +349,24 @@ export function NearMe({ shown, search, held, own, onJoined, qr, ownLink, canCod
         <Pressable
           onPress={onGive}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.give, { borderRadius: radius.lg, borderColor: colors.border }, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.give, { borderRadius: radius.lg, borderColor: withAlpha(colors.primary, 0.5) }, pressed && styles.pressed]}
         >
           <Text variant="label">{t('No Erevos on their phone?')}</Text>
-          <Text variant="caption" color={colors.accentText}>
+          <Text variant="label" color={colors.accentText}>
             {t('Give it to them from here')}
           </Text>
         </Pressable>
       ) : null}
-      <Row wrap style={styles.buttons}>
-        <Button title={t('Scan theirs')} kind="secondary" onPress={onScan} />
-        <Button title={t('Type their code')} kind="secondary" onPress={onType} />
-      </Row>
+      {/* Theirs: two buttons of one width, side by side. */}
+      <View style={styles.theirs}>
+        <Button title={t('Scan theirs')} kind="secondary" compact style={styles.half} onPress={onScan} />
+        <Button title={t('Type their code')} kind="secondary" compact style={styles.half} onPress={onType} />
+      </View>
     </View>
   );
 }
 
-const RING = 132;
+const RING = 150;
 // A picture with its name under it, and three of them to a row: the six read as two rows.
 const PICTURE = 88;
 
@@ -354,9 +375,9 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   status: {
-    alignItems: 'center',
-    gap: space.sm,
-    paddingVertical: space.sm,
+    gap: space.md,
+    paddingVertical: space.xl - 2,
+    paddingHorizontal: space.lg,
   },
   looking: {
     width: RING,
@@ -372,13 +393,50 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   ringMid: {
-    width: RING * 0.62,
-    height: RING * 0.62,
+    width: RING * 0.68,
+    height: RING * 0.68,
+    borderRadius: (RING * 0.68) / 2,
   },
   dot: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  phone: {
     width: 18,
-    height: 18,
-    borderRadius: 9,
+    height: 30,
+    borderWidth: 2,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 3,
+  },
+  phoneBar: {
+    width: 6,
+    height: 2,
+    borderRadius: 1,
+  },
+  beside: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  said: {
+    flex: 1,
+    gap: 4,
+  },
+  wide: {
+    alignSelf: 'stretch',
+  },
+  theirs: {
+    flexDirection: 'row',
+    gap: space.sm,
+  },
+  half: {
+    flex: 1,
   },
   card: {
     alignItems: 'center',
@@ -408,9 +466,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   give: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 2,
-    padding: space.md,
+    justifyContent: 'center',
+    columnGap: space.sm,
+    rowGap: 2,
+    minHeight: 48,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.md,
     borderWidth: 1,
     borderStyle: 'dashed',
   },

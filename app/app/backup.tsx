@@ -59,6 +59,8 @@ import {
   PICKS_PART_FILES,
   checkBackupsNow,
   checkFolderFully,
+  checkMadeBackup,
+  checkSentBackup,
   runAutoBackup,
   startAutoBackup,
   stopAutoBackup,
@@ -113,19 +115,25 @@ import {
   WrongBackupPasswordError,
   type Backup,
   type MissingPartError,
+  type PartMade,
 } from "../lock/backup";
-import { openCollectionSkips } from "../lock/collection-data";
+import { openCollectionSkips, openCollectionsLeftOut } from "../lock/collection-data";
 import { useLock } from "../lock/context";
 import { phoneStatus } from "../modules/erevos-phone";
 import { lostAt, markLost, restoredFromOther } from "../lock/restored";
 import { importPhoneSms, smsStatus } from "../modules/erevos-sms";
 import { useTheme } from "../theme/context";
-import { measureAppSpace, spaceText, type SpaceRow } from "../lib/app-space";
+import {
+  measureAppSpace,
+  spaceText,
+  wholeBackupAtMost,
+  type SpaceRow,
+} from "../lib/app-space";
 import { canFindLeftovers } from "../lib/leftovers";
 import { LeftoversCard } from "../components/leftovers";
 import { device as phoneDevice } from "../modules/erevos-device";
-import { tellBackupMade } from "../lib/backup-notice";
-import { beginBackupMaking, clearBackupMadeNote, useBackupMaking, type BackupTold } from "../lib/backup-making";
+import { tellBackupMade, tellBackupSent } from "../lib/backup-notice";
+import { beginBackupMaking, clearBackupMadeNote, useBackupMaking, type BackupTold, type MadeNote } from "../lib/backup-making";
 
 // Backups of everything Erevos keeps on the phone or computer (lock/backup.ts): made by hand into a folder the
 // owner picks, made by themselves every 6 hours, day or week (lib/backup-folder.ts), and put back. Every
@@ -141,6 +149,13 @@ import { beginBackupMaking, clearBackupMadeNote, useBackupMaking, type BackupTol
 // owner chooses; all of them are there, and open, before anything is replaced. Should one be
 // missing or damaged, the screen says which, and the owner may restore all the rest without such
 // files: the photos, files and voice messages on the phone then stay as they are.
+//
+// A backup made by hand goes into a folder the owner picks, or to a server (Make a backup → To a
+// server), the same as automatic backups go to, which the owner gives there if there is none yet:
+// with automatic backups on, one goes there now with their password; otherwise with a password of
+// its own. Either is checked right after it is made (lib/backup-folder.ts checkMadeBackup,
+// checkSentBackup), and what is said of it names its size in all, the files beside it with it,
+// when it began, as its name says, and when it ended, what it holds besides, and what it does not.
 //
 // The phone a backup came from may be lost or stolen and still on: The old phone was lost marks
 // this phone so (lock/restored.ts markLost), and each space and hidden place a backup put back here
@@ -227,6 +242,25 @@ export default function Backups() {
   const busy = busyHere || making !== null;
   const [space, setSpace] = useState<SpaceRow[] | null>(null);
   const [measuring, setMeasuring] = useState(false);
+  // A backup sent to the server by hand has a password of its own, so a key of its own: it can
+  // name no part of an earlier one, and every part goes again. Its password sheet says so before
+  // it starts, with about how much that is where the phone can measure it.
+  const [whole, setWhole] = useState<number | null>(null);
+  const askingKind = asking?.kind;
+  useEffect(() => {
+    if (askingKind !== "cloud") return;
+    let live = true;
+    setWhole(null);
+    void wholeBackupAtMost().then(
+      (bytes) => {
+        if (live) setWhole(bytes);
+      },
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [askingKind]);
   // A folder or file picker is open: a second tap opens no second one.
   const picking = useRef(false);
   // Whether backups hold the phone's SMS and MMS, and its calls and blocked numbers.
@@ -238,7 +272,8 @@ export default function Backups() {
   const [checking, setChecking] = useState(false);
   const [fully, setFully] = useState("");
   const stopFull = useRef(false);
-  const [form, setForm] = useState<"add" | "restore" | null>(null);
+  // A server's fields shown: to add one, under To a server too (add) or Make a backup (make), or to restore from one.
+  const [form, setForm] = useState<"add" | "make" | "restore" | null>(null);
   const adding = form === "add";
   // The backups on a server to restore from, newest first, once listed.
   const [listed, setListed] = useState<{
@@ -285,10 +320,11 @@ export default function Backups() {
     );
   }
 
-  // `made`: said of a backup into a folder, in its own card, while its space stays open (lib/backup-making.ts).
-  function say(text: string, bad = false, made: BackupTold | null = null) {
+  // `made`: said of a backup made by hand, in its own card, while its space stays open
+  // (lib/backup-making.ts), with what the check right after it found (`checked`).
+  function say(text: string, bad = false, made: BackupTold | null = null, checked?: MadeNote["checked"]) {
     if (made) {
-      made.note(text ? { text, bad } : null);
+      made.note(text ? { text, bad, ...(checked ? { checked } : {}) } : null);
       setNote("");
       return;
     }
@@ -319,9 +355,10 @@ export default function Backups() {
     say("");
     if (every === (auto?.every ?? 0)) return;
     if (!every) {
+      // The server stays, for backups sent by hand (lib/backup-folder.ts).
       await stopAutoBackup();
       setAuto(null);
-      setCloud(null);
+      setChecks(await loadChecks());
       say(
         t(
           "Automatic backups are off. The ones already made stay in their folder.",
@@ -429,6 +466,8 @@ export default function Backups() {
   }
 
   async function addServer() {
+    // Added from Make a backup: a backup goes there now, and only there.
+    const fromMake = form === "make";
     say("");
     setBusy(true);
     try {
@@ -442,8 +481,35 @@ export default function Backups() {
     } finally {
       setBusy(false);
     }
-    if (CAN_AUTO_BACKUP) await backUpNow();
+    if (CAN_AUTO_BACKUP && auto) await (fromMake ? serverNow() : backUpNow());
     else setAsking({ kind: "cloud" });
+  }
+
+  // Make a backup → To a server: with no server yet, its fields first; with automatic backups on,
+  // one goes there now with their password; else one with a password of its own.
+  function toServer() {
+    say("");
+    if (!cloud) setForm("make");
+    else if (CAN_AUTO_BACKUP && auto) void serverNow();
+    else setAsking({ kind: "cloud" });
+  }
+
+  // One automatic backup to the server now, none into the folder; checked there as each is.
+  async function serverNow() {
+    setBusy(true);
+    try {
+      const { auto: next, cloud: sent } = await runAutoBackup(true, Date.now(), { serverOnly: true });
+      setAuto(next);
+      setCloud(sent);
+      setChecks(await loadChecks());
+      if (!sent) return;
+      if (sent.error) say(t("Not sent. {error}", { error: sent.error }), true);
+      else say(t("Sent a backup to {server}.", { server: cloudLabel(sent) }));
+    } catch (error) {
+      say(errorText(error), true);
+    } finally {
+      setBusy(false);
+    }
   }
 
   // The server's own Tor switch: kept with the server when there is one, and shown in its form.
@@ -479,7 +545,7 @@ export default function Backups() {
   }
 
   async function stopServer() {
-    const told = CAN_AUTO_BACKUP
+    const told = CAN_AUTO_BACKUP && auto
       ? t(
           "Automatic backups will go only to the folder from now on. Those already on the server stay there until you delete them.",
         )
@@ -757,6 +823,29 @@ export default function Backups() {
     return picked ? found(picked, picked.missing(names)) : found(null, names);
   }
 
+  // When a backup made by hand began and ended, this phone's time; `named`: its name says when it began.
+  function timesText(start: number, end: number, named = true): string {
+    const said = t("Began {start}, ended {end}.", {
+      start: clockText(start),
+      end: clockText(end, start),
+    });
+    return named ? `${said} ${t("The time in its name is when it began.")}` : said;
+  }
+
+  // What a backup made now does not hold: Erevos itself and what it keeps for a while only, and
+  // the Collections of the open places that it leaves out (lock/collection-data.ts).
+  function notInText(out: { byChoice: boolean; onServer: boolean }): string {
+    return [
+      t("Not in it: Erevos itself, and what it keeps only for a while, such as its cache and Tor’s files."),
+      out.onServer
+        ? t("Nor the Collection’s files that are whole on its WebDAV server: a restore fetches them from there.")
+        : "",
+      out.byChoice ? t("Nor the Collection you keep out of backups.") : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
   // What a backup holds of the phone's SMS, said after it is made.
   // Erevos+: what the backup holds of the other networks (#67), and of Session's account as it went in.
   function networksText(kept: NetworksKept): string {
@@ -800,6 +889,8 @@ export default function Backups() {
       // What it says is kept while this space stays open, and dropped once it closed.
       const made = beginBackupMaking();
       say("", false, made);
+      // When it begins, which its name says too.
+      const start = Date.now();
       try {
         made.making({
           step: t("Gathering chats, contacts, SMS, calls and settings…"),
@@ -811,8 +902,9 @@ export default function Backups() {
         // Erevos+: Session's account, kept sealed for it now where the first space is open.
         const networks = await keepNetworksForBackup();
         const skip = await openCollectionSkips();
+        const out = await openCollectionsLeftOut();
         made.making({ step: t("Encrypting and saving…"), percent: null });
-        const { name, size, parts, where } = await writeBackup(
+        const { name, size, parts, partsSize, where } = await writeBackup(
           asking.folder,
           (part) =>
             makeBackup(key, {
@@ -823,26 +915,41 @@ export default function Backups() {
               progress: progress(true, made),
               skip,
             }),
+          start,
         );
+        const end = Date.now();
         const folder = where ?? folderLabel(asking.folder);
+        // Read back from the folder as it lies there, where its files can be listed.
+        made.making({ step: t("Checking the backup…"), percent: null });
+        const checked = await checkMadeBackup(asking.folder, name, key);
         say(
-          t(
-            "Saved {name} ({size}) in {folder}. Keep its password: nothing opens the backup without it.",
-            {
-              name,
-              size: sizeText(size),
-              folder,
-            },
-          ) +
-            partsText(parts) +
-            smsText(phoneSms) +
-            callsText(phoneCalls) +
-            networksText(networks),
+          [
+            parts > 0
+              ? plural(
+                  parts,
+                  "Saved {name} in {folder}, with {n} file beside it: {total} in all.",
+                  "Saved {name} in {folder}, with {n} files beside it: {total} in all.",
+                  { name, folder, total: spaceText(size + partsSize) },
+                )
+              : t("Saved {name} in {folder}: {total}.", {
+                  name,
+                  folder,
+                  total: spaceText(size),
+                }),
+            timesText(start, end),
+            (partsText(parts) + smsText(phoneSms) + callsText(phoneCalls)).trim(),
+            networksText(networks).trim(),
+            notInText(out),
+            t("Keep its password: nothing opens the backup without it."),
+          ]
+            .filter(Boolean)
+            .join("\n"),
           false,
           made,
+          checked ? { where: folder, checked } : undefined,
         );
         // The phone's notice names the backup too: not once the space that made it has closed.
-        if (made.kept()) tellBackupMade(name, sizeText(size), folder);
+        if (made.kept()) tellBackupMade(name, spaceText(size + partsSize), folder, parts);
       } catch (error) {
         say(errorText(error), true, made);
       } finally {
@@ -850,37 +957,85 @@ export default function Backups() {
         setBusy(false);
       }
     } else if (asking.kind === "cloud") {
-      // The web app's backup sent now, with a password of its own: it keeps none for backups.
+      // A backup sent to the server now, with a password of its own: from the web app, which
+      // keeps none for backups, and from Make a backup with no automatic backups on.
       const key = await backupKey(password);
       setAsking(null);
       if (!cloud) return;
       setBusy(true);
+      const made = beginBackupMaking();
+      say("", false, made);
+      const start = Date.now();
       try {
+        made.making({
+          step: t("Gathering chats, contacts, SMS, calls and settings…"),
+          percent: null,
+        });
+        const phoneSms = await phoneSmsForBackup();
+        const phoneCalls = await phoneCallsForBackup();
+        const native = await phoneSettingsForBackup();
         const skip = await openCollectionSkips();
+        const out = await openCollectionsLeftOut();
+        made.making({ step: t("Encrypting and sending…"), percent: null });
+        // The backup's own size, and its parts', to say and to check there.
+        let size = 0;
+        let named: PartMade[] = [];
         const sent = await sendToCloud(
           cloud,
-          (parts) =>
-            makeBackup(key, {
+          async (parts) => {
+            const bytes = await makeBackup(key, {
               parts,
+              phoneSms,
+              phoneCalls,
+              native,
               bare: true,
-              progress: progress(true),
+              progress: progress(true, made),
               skip,
-            }),
+              made: (list) => (named = list),
+            });
+            size = bytes.length;
+            return bytes;
+          },
           KEEP,
         );
         setCloud(sent);
-        if (sent.error)
-          say(t("Not sent. {error}", { error: sent.error }), true);
-        else
-          say(
-            t(
-              "Sent a backup to {server}. Keep its password: nothing opens the backup without it.",
-              { server: cloudLabel(sent) },
-            ),
-          );
+        if (sent.error) {
+          say(t("Not sent. {error}", { error: sent.error }), true, made);
+          return;
+        }
+        const end = Date.now();
+        const total = spaceText(size + named.reduce((sum, part) => sum + part.size, 0));
+        made.making({ step: t("Checking the backup…"), percent: null });
+        const checked = await checkSentBackup(sent, named, size);
+        say(
+          [
+            named.length > 0
+              ? plural(
+                  named.length,
+                  "Sent a backup to {server}, with {n} file beside it: {total} in all.",
+                  "Sent a backup to {server}, with {n} files beside it: {total} in all.",
+                  { server: cloudLabel(sent), total },
+                )
+              : t("Sent a backup to {server}: {total}.", {
+                  server: cloudLabel(sent),
+                  total,
+                }),
+            timesText(start, end, false),
+            (smsText(phoneSms) + callsText(phoneCalls)).trim(),
+            notInText(out),
+            t("Keep its password: nothing opens the backup without it."),
+          ]
+            .filter(Boolean)
+            .join("\n"),
+          false,
+          made,
+          checked ? { where: cloudLabel(sent), checked } : undefined,
+        );
+        if (made.kept()) tellBackupSent(cloudLabel(sent), total);
       } catch (error) {
-        say(errorText(error), true);
+        say(errorText(error), true, made);
       } finally {
+        made.making(null);
         setBusy(false);
       }
     } else if (asking.kind === "auto") {
@@ -1057,6 +1212,30 @@ export default function Backups() {
   }
 
   const every = auto?.every ?? 0;
+  // Whether automatic backups go to the server; otherwise only those sent by hand do.
+  const autoOn = CAN_AUTO_BACKUP && !!auto;
+  // A server's fields, with Connect and Cancel, where a server is added.
+  const addForm = (
+    <>
+      {serverFields}
+      <Row wrap>
+        <Button
+          title={busy ? t("One moment…") : t("Connect")}
+          compact
+          loading={busy}
+          onPress={() => void addServer()}
+          disabled={busy || !serverReady}
+        />
+        <Button
+          title={t("Cancel")}
+          kind="secondary"
+          compact
+          onPress={() => setForm(null)}
+          disabled={busy}
+        />
+      </Row>
+    </>
+  );
   return (
     <Page>
       <Text variant="title">{t("Backups")}</Text>
@@ -1077,14 +1256,41 @@ export default function Backups() {
         <Text variant="caption" tone="muted" style={hint}>
           {t(PLACES)}
         </Text>
+        {CAN_CLOUD_BACKUP ? (
+          <Text variant="caption" tone="muted" style={hint}>
+            {cloud
+              ? t("Or to {server}, your server: it gets the backup encrypted, under a random name.", { server: cloudLabel(cloud) })
+              : t("Or to a folder on a server of yours over WebDAV, such as Nextcloud: it gets the backup encrypted, under a random name.")}
+          </Text>
+        ) : null}
         <Row wrap>
           <Button
-            title={making ? t("Making the backup…") : t("Make a backup")}
+            title={
+              making
+                ? t("Making the backup…")
+                : DEVICE === "device"
+                  ? t("Make a backup")
+                  : t("Into a folder")
+            }
             compact
             onPress={make}
             disabled={busy}
           />
+          {CAN_CLOUD_BACKUP ? (
+            <Button
+              title={
+                cloud
+                  ? t("To {server}", { server: cloudLabel(cloud) })
+                  : t("To a server (WebDAV)")
+              }
+              kind="secondary"
+              compact
+              onPress={toServer}
+              disabled={busy || form === "make"}
+            />
+          ) : null}
         </Row>
+        {form === "make" ? addForm : null}
         {making ? (
           <View accessibilityLiveRegion="polite" style={{ gap: 6 }}>
             <Text variant="caption" tone="muted">
@@ -1120,6 +1326,12 @@ export default function Backups() {
           >
             {madeNote.text}
           </Text>
+        ) : null}
+        {madeNote?.checked && !making ? (
+          <CheckLine
+            where={madeNote.checked.where}
+            checked={madeNote.checked.checked}
+          />
         ) : null}
       </Card>
 
@@ -1295,7 +1507,7 @@ export default function Backups() {
         </>
       ) : null}
 
-      {CAN_CLOUD_BACKUP && (auto || !CAN_AUTO_BACKUP) ? (
+      {CAN_CLOUD_BACKUP ? (
         <>
           <SectionTitle title={t("To a server too")} />
           <Card>
@@ -1308,15 +1520,18 @@ export default function Backups() {
                   {cloud.last
                     ? t("Last one sent {when}.", { when: whenText(cloud.last) })
                     : t("None sent yet.")}{" "}
-                  {CAN_AUTO_BACKUP
+                  {autoOn
                     ? t(
                         "Each automatic backup goes there too, and the server keeps the {n} newest.",
                         { n: KEEP },
                       )
-                    : t(
-                        "Send a backup there now and then; the server keeps the {n} newest.",
-                        { n: KEEP },
-                      )}
+                    : [
+                        t(
+                          "Send a backup there now and then; the server keeps the {n} newest.",
+                          { n: KEEP },
+                        ),
+                        byHandText(null),
+                      ].join(" ")}
                 </Text>
                 <TorSwitch
                   on={cloud.tor === true}
@@ -1326,7 +1541,7 @@ export default function Backups() {
                 />
                 {cloud.error ? (
                   <Text variant="caption" color={colors.danger} style={hint}>
-                    {CAN_AUTO_BACKUP
+                    {autoOn
                       ? t(
                           "The last one did not go: {error} Erevos tries again next time it opens.",
                           { error: cloud.error },
@@ -1337,7 +1552,7 @@ export default function Backups() {
                   </Text>
                 ) : null}
                 <Row wrap>
-                  {CAN_AUTO_BACKUP ? null : (
+                  {autoOn ? null : (
                     <Button
                       title={busy ? t("One moment…") : t("Send a backup now")}
                       kind="secondary"
@@ -1356,29 +1571,11 @@ export default function Backups() {
                 </Row>
               </>
             ) : adding ? (
-              <>
-                {serverFields}
-                <Row wrap>
-                  <Button
-                    title={busy ? t("One moment…") : t("Connect")}
-                    compact
-                    loading={busy}
-                    onPress={() => void addServer()}
-                    disabled={busy || !serverReady}
-                  />
-                  <Button
-                    title={t("Cancel")}
-                    kind="secondary"
-                    compact
-                    onPress={() => setForm(null)}
-                    disabled={busy}
-                  />
-                </Row>
-              </>
+              addForm
             ) : (
               <>
                 <Text variant="caption" tone="muted" style={hint}>
-                  {!CAN_AUTO_BACKUP
+                  {!autoOn
                     ? t(
                         "A backup can also go to a folder on a server you choose, such as your Nextcloud, over WebDAV, each time you send one. The server gets random bytes under a random name: it cannot open them or tell they are Erevos's. It still sees your account, your address, when one comes and roughly how big it is. Nothing goes until you add one.",
                       )
@@ -1403,7 +1600,7 @@ export default function Backups() {
                     kind="secondary"
                     compact
                     onPress={() => setForm("add")}
-                    disabled={busy}
+                    disabled={busy || form === "make"}
                   />
                 </Row>
               </>
@@ -1671,10 +1868,20 @@ export default function Backups() {
         }
         repeat={sheet?.kind !== "open"}
         least={MIN_BACKUP_PASSWORD}
-        hint={t(
-          "A backup holds every space and all its chats, and once the file is elsewhere its password is all that guards it: use at least {n} characters, or four words.",
-          { n: MIN_BACKUP_PASSWORD },
-        )}
+        hint={[
+          t(
+            "A backup holds every space and all its chats, and once the file is elsewhere its password is all that guards it: use at least {n} characters, or four words.",
+            { n: MIN_BACKUP_PASSWORD },
+          ),
+          sheet?.kind === "cloud"
+            ? [
+                byHandText(whole),
+                t("The server keeps the {n} newest whole.", { n: KEEP }),
+              ].join(" ")
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n")}
         submitLabel={sheet?.kind === "open" ? t("Open") : t("Save")}
         onClose={() => setAsking(null)}
         onSubmit={submit}
@@ -1684,6 +1891,24 @@ export default function Backups() {
 }
 
 const hint = { fontSize: 14, lineHeight: 20 };
+
+// What a backup sent to the server by hand costs, said before it starts: all of it goes each
+// time (`bytes`: about how much, when measured), where automatic backups send only what is new.
+function byHandText(bytes: number | null): string {
+  return [
+    bytes
+      ? t(
+          "A backup sent by hand goes whole each time, with every photo and file: up to about {size} now.",
+          { size: spaceText(bytes) },
+        )
+      : t("A backup sent by hand goes whole each time, with every photo and file."),
+    CAN_AUTO_BACKUP
+      ? t("With automatic backups on, only what is new goes each time.")
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
 
 // What the last check of a place found (lib/backup-check.ts).
 function CheckLine({
@@ -1762,6 +1987,14 @@ function fileText(file: CloudFile): string {
       })
     : t("No date");
   return `${when} · ${sizeText(file.size)}`;
+}
+
+// The time of `ms`, this phone's, with its day when that is not the day of `since` (else today).
+function clockText(ms: number, since = Date.now()): string {
+  const day = (at: number) => new Date(at).toDateString();
+  return day(ms) === day(since)
+    ? new Date(ms).toLocaleTimeString(locale(), { hour: "2-digit", minute: "2-digit" })
+    : whenText(ms);
 }
 
 function whenText(ms: number): string {

@@ -291,9 +291,9 @@ function ModuleStep({ module, modules, checks, maker, onChanged }: { module: Mod
             </Row>
           </Card>
           <Card>
-            <Text variant="bodyStrong">{t('Other ways in')}</Text>
+            <Text variant="bodyStrong">{t('I have no invite')}</Text>
             <Text variant="caption" tone="muted" style={hint}>
-              {t('Sign in with LPHL, start without a relay, or use a relay of your own: under For advanced users.')}
+              {t('With an account at a server such as LPHL, with a server of your own, or with no server at all. The next screen says what each one means.')}
             </Text>
             <Row wrap>
               <Button title={t('Open')} kind="secondary" compact onPress={() => router.push('/chat?setup=relay')} />

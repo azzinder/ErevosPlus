@@ -10,7 +10,7 @@ import { secureGet, secureSet } from './secure';
 import { channelOf, channelsOf, loadChannel, wireOf, type Channel, type ChannelName } from './update-channel';
 import { RELEASE_KEY, readChannelStatement } from './update-signature';
 import { VERSION_NAME } from './version-name';
-import { START_RELAY } from './welcome';
+import { LPHL_RELAY, LPHL_WEB } from './servers';
 
 // A new Erevos told as a message from Erevos itself: at the top of the chats, and in a notice, so
 // no one has to look for it. Once a day the phone asks the server the release computer publishes
@@ -30,7 +30,7 @@ import { START_RELAY } from './welcome';
 // address nor more than that someone asked.
 
 /** Where the release computer publishes, as STATEMENT_URL. */
-export const NOTICE_SERVER = 'https://erevos-web.lphl.nekten.eu/';
+export const NOTICE_SERVER = `${LPHL_WEB}/`;
 /** How often the server is asked, at most. */
 export const NOTICE_EVERY = 24 * 3600_000;
 
@@ -99,10 +99,10 @@ export async function noticeSeen(): Promise<void> {
   if (!kept.seen) await save({ ...kept, seen: true });
 }
 
-/** Whether a space with this relay and Tor way may ask the server: its relay is LPHL's, and not everything goes through Tor, unless Updates' own Tor switch is on (`ownTor`), when it is asked through Tor too. */
+/** Whether a space with this relay and Tor way may ask the server: its relay is LPHL's (in every build: these are Erevos's own releases), and not everything goes through Tor, unless Updates' own Tor switch is on (`ownTor`), when it is asked through Tor too. */
 export function mayAsk({ url, tor }: { url: string; tor: string }, ownTor = false): boolean {
   const host = hostOf(url.trim());
-  return !!host && host === hostOf(START_RELAY) && (tor !== 'all' || ownTor);
+  return !!host && host === hostOf(LPHL_RELAY) && (tor !== 'all' || ownTor);
 }
 
 /**

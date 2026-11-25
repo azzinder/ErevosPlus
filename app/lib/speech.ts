@@ -8,23 +8,22 @@ import { Platform } from 'react-native';
 import { device } from '../modules/erevos-device';
 import { speechCore } from './core';
 import { t } from './i18n';
+import { loadModelsServer } from './models-server';
 import { soundOf } from './voice';
 import { DOWNLOAD_TRIES, stalled } from './updates';
 
 // A voice message written out, on the phone (components/speech-sheet.tsx). The words are heard by
 // a speech model, Whisper small (OpenAI's, MIT), run by the core (crates/erevos-speech): it hears
 // about a hundred languages, and says which it heard. The model is not in the app, as it is 268
-// MB: it is downloaded once, when the owner asks for it, from MODEL_URL, and checked by the core
+// MB: it is downloaded once, when the owner asks for it, from the models' folder (lib/models-server.ts), and checked by the core
 // against its SHA-256 before it is opened. Downloading it is the only thing that leaves the
 // phone, and it says nothing of any message; the sound and its words never do. Android only, from
 // a recording Android reads (Voice.kt samples); about as long to write out as the message lasts.
 
-/** Where the model is downloaded from. */
-export const MODEL_URL = 'https://erevos-web.lphl.nekten.eu/models/erevos-whisper-small-q8.gguf';
+/** The model's file, in the folder the models are downloaded from (lib/models-server.ts): LPHL's, or one the owner named. */
+export const MODEL_FILE = 'erevos-whisper-small-q8.gguf';
 /** The model's size, bytes (crates/erevos-speech MODEL_SHA256 is its hash). */
 export const MODEL_BYTES = 268_638_368;
-/** Its host, as the owner is told before downloading it. */
-export const MODEL_HOST = new URL(MODEL_URL).host;
 
 const folder = () => new Directory(Paths.document, 'speech');
 const modelFile = () => new File(folder(), 'erevos-whisper-small-q8.gguf');
@@ -65,10 +64,11 @@ export async function downloadModel(onProgress: (received: number, total: number
   const dir = folder();
   if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
   const part = partFile();
+  const from = (await loadModelsServer()) + MODEL_FILE;
   for (let tries = 1; ; tries++) {
     try {
       if (part.exists) part.delete();
-      await File.downloadFileAsync(MODEL_URL, part, {
+      await File.downloadFileAsync(from, part, {
         idempotent: true,
         signal,
         onProgress: ({ bytesWritten }) => onProgress(bytesWritten, MODEL_BYTES),

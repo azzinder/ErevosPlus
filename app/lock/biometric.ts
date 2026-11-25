@@ -5,7 +5,7 @@
 import { fromBase64, randomBytes, toBase64 } from '../lib/crypto';
 import { secureDelete, secureGet, secureSet } from '../lib/secure';
 
-import { isPasswordLocked, loadLockConfig, ownSpaceKey, type Unlocked } from './config';
+import { isPasswordLocked, loadLockConfig, ownSpaceKey, type LockConfig, type Unlocked } from './config';
 import { opensSpace } from './space-data';
 
 // Unlocking with a fingerprint or face, on Android 11 and later (modules/erevos-biometric). Off
@@ -23,6 +23,14 @@ import { opensSpace } from './space-data';
 // not the first space's key, or Android has dropped its key, it turns itself off, the same way in
 // both cases, and the password opens Erevos.
 
+// The password screen's button (biometricOffered) asks nothing of the Keystore: it shows while a
+// sealed key is kept, the phone can check a fingerprint or face, and the lock is on. Whether
+// Android still has its key, and whether it still works, is found out as the button is pressed,
+// which turns it off and says so (unlockWithBiometric), and where the setting shows (biometricOn).
+// Asking the Keystore whether the key works starts a use of it, in the phone's security chip
+// where it has one, and that is slow, and only a few may be started at once: asked each time the
+// password screen showed, the button came seconds late, and the prompt after it.
+//
 // 'unknown': it cannot be told now (the phone itself is locked, as when an Erevos call shows over
 // its lock screen, or the Keystore did not answer). That never turns it off by itself.
 //
@@ -53,8 +61,8 @@ export interface BiometricPrompt {
 export interface BiometricSealer {
   /** Android 11 or later, with a strong fingerprint or face set up. */
   available(): boolean;
-  /** Whether the Keystore key is there, and still works, or 'unknown' when that cannot be told now. */
-  keyState(): KeyState;
+  /** Whether the Keystore key is there, and still works, or 'unknown' when that cannot be told now. The phone answers off the app's own thread. */
+  keyState(): KeyState | Promise<KeyState>;
   /** Makes a new Keystore key, asks for a fingerprint or face and seals `data` (base64). */
   seal(data: string, prompt: BiometricPrompt): Promise<Sealed>;
   /** Asks for a fingerprint or face and opens what `seal` gave, as base64. */
@@ -101,11 +109,42 @@ function parse(raw: string | null): Sealed | null {
   }
 }
 
-/** Whether a fingerprint or face can open Erevos: shown the same in every space. */
+// Whether the button showed the last time it was asked for, while Erevos runs: the password screen
+// shows it with that from its first picture, and what it reads then puts it right.
+let offeredLast = false;
+
+/** Whether the password screen's button showed when last asked: what the screen starts with. */
+export function biometricOfferedBefore(): boolean {
+  return offeredLast;
+}
+
+/**
+ * Whether the password screen, or the Collection's, offers a fingerprint or face: a sealed key is
+ * kept, the phone can check one, and the lock is on (`config`, when the screen has it already).
+ * It asks nothing of the Keystore, and turns nothing off: a key Android dropped is found out as
+ * the button is pressed.
+ */
+export async function biometricOffered(sealer: BiometricSealer, config?: LockConfig): Promise<boolean> {
+  let on = false;
+  try {
+    on = sealer.available() && !!parse(await secureGet(ENTRY)) && isPasswordLocked(config ?? (await loadLockConfig()));
+  } finally {
+    offeredLast = on;
+  }
+  return on;
+}
+
+/** Whether a fingerprint or face can open Erevos: shown the same in every space. Asks the Keystore whether its key still works, so only where the setting shows. */
 export async function biometricOn(sealer: BiometricSealer): Promise<boolean> {
-  if (!sealer.available() || !parse(await secureGet(ENTRY))) return false;
-  const state = sealer.keyState();
-  if ((state === 'valid' || state === 'unknown') && isPasswordLocked(await loadLockConfig())) return true;
+  if (!sealer.available() || !parse(await secureGet(ENTRY))) {
+    offeredLast = false;
+    return false;
+  }
+  const state = await sealer.keyState();
+  if ((state === 'valid' || state === 'unknown') && isPasswordLocked(await loadLockConfig())) {
+    offeredLast = true;
+    return true;
+  }
   // Android dropped the key, or the lock is off: it is off too.
   await turnOffBiometric(sealer);
   return false;
@@ -125,8 +164,10 @@ export async function turnOnBiometric(
   if (!key) return false;
   await secureDelete(ENTRY);
   await secureDelete(UNUSABLE);
+  offeredLast = false;
   const sealed = await sealer.seal(toBase64(space === 0 ? key : randomBytes(32)), prompt);
   await secureSet(ENTRY, JSON.stringify(sealed));
+  offeredLast = true;
   return true;
 }
 
@@ -161,6 +202,7 @@ export async function unlockWithBiometric(sealer: BiometricSealer, prompt: Biome
 
 /** Turns it off: the sealed key and the Keystore key are removed. */
 export async function turnOffBiometric(sealer: BiometricSealer): Promise<void> {
+  offeredLast = false;
   await secureDelete(ENTRY);
   await secureDelete(UNUSABLE);
   sealer.forget();

@@ -81,7 +81,6 @@ export const settings: Record<string, string> = {
   'A newer Erevos made this backup, so this one cannot restore it. Update Erevos to the latest version, then restore it.':
     'Ein neueres Erevos hat dieses Backup gemacht, darum kann dieses es nicht wiederherstellen. Aktualisiere Erevos auf die neueste Version und stelle es dann wieder her.',
   'Could not read that file. {error}': 'Diese Datei ließ sich nicht lesen. {error}',
-  'Saved {name} ({size}) in {folder}. Keep its password: nothing opens the backup without it.': '{name} ({size}) gespeichert in {folder}. Bewahre sein Passwort auf: Ohne es öffnet nichts das Backup.',
   'Replace everything': 'Alles ersetzen',
   'Every space on {device}, with its contacts, messages and hidden chats, will be replaced by what the backup holds. What is here now and not in the backup is gone for good. Then Erevos opens as it was when the backup was made, with the passwords used then.': 'Jeder Bereich auf {device}, mit seinen Kontakten, Nachrichten und versteckten Chats, wird durch den Inhalt des Backups ersetzt. Was jetzt hier ist und nicht im Backup, ist endgültig weg. Danach öffnet sich Erevos so, wie es beim Erstellen des Backups war, mit den damaligen Passwörtern.',
   "A backup holds everything Erevos keeps on {device}: every space, with its contacts, messages, photos, files, voice messages, imported chats and hidden chats, each still sealed with its own password, and the settings that go with you to another device. The backup has a password of its own too. Its photos, files and voice messages go in files of their own beside it. An automatic backup also needs files of the ones before it: keep the whole folder.":
@@ -439,4 +438,15 @@ export const settings: Record<string, string> = {
   "Fetched at once, but while roaming only on a tap.": "Sofort abgerufen, beim Roaming aber nur auf Tippen.",
   "Fetched only on a tap.": "Nur auf Tippen abgerufen.",
   "MMS from {from} · {size} KB": "MMS von {from} · {size} KB",
+  'Began {start}, ended {end}.': 'Beginn: {start}, Ende: {end}.',
+  'The time in its name is when it began.': 'Die Uhrzeit in seinem Namen ist die des Beginns.',
+  'Not in it: Erevos itself, and what it keeps only for a while, such as its cache and Tor’s files.': 'Nicht darin: Erevos selbst und was es nur eine Weile aufbewahrt, etwa seinen Cache und die Dateien von Tor.',
+  'Nor the Collection’s files that are whole on its WebDAV server: a restore fetches them from there.': 'Auch nicht die Dateien der Sammlung, die vollständig auf ihrem WebDAV-Server liegen: Eine Wiederherstellung holt sie von dort.',
+  'Nor the Collection you keep out of backups.': 'Auch nicht die Sammlung, die du aus Backups heraushältst.',
+  'Checking the backup…': 'Das Backup wird geprüft…',
+  'Saved {name} in {folder}: {total}.': '{name} gespeichert in {folder}: {total}.',
+  'Keep its password: nothing opens the backup without it.': 'Bewahre sein Passwort auf: Ohne es öffnet nichts das Backup.',
+  'Into a folder': 'In einen Ordner',
+  'Saved {name} in {folder}, with {n} file beside it: {total} in all.': '{name} gespeichert in {folder}, mit {n} Datei daneben: {total} insgesamt.',
+  'Saved {name} in {folder}, with {n} files beside it: {total} in all.': '{name} gespeichert in {folder}, mit {n} Dateien daneben: {total} insgesamt.',
 };

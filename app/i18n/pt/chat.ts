@@ -419,4 +419,5 @@ export const chat: Record<string, string> = {
   "Erevos phones near this one find each other and talk with no internet, over Bluetooth and the ways below.": "Os celulares Erevos perto deste se encontram e conversam sem internet, por Bluetooth e pelos meios abaixo.",
   "Off: Erevos looks for no phone nearby, and everything goes through the relay. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.": "Desligado: o Erevos não procura nenhum celular por perto, e tudo vai pelo relay. Ligue para conversar e ligar sem internet, lado a lado ou na mesma Wi-Fi.",
   "Off on this phone. Tap to turn on Look for phones nearby.": "Desligado neste celular. Toque para ligar Procurar celulares por perto.",
+  'Write the message first, then choose when it goes.': 'Digite primeiro a mensagem e depois escolha quando ela sai.',
 };

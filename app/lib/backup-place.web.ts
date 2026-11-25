@@ -62,8 +62,8 @@ export function folderLabel(path: string): string {
   return path.replace(/^\/(home|Users)\/[^/]+/, '~');
 }
 
-/** A backup written: its file's name, its size, how many parts went beside it, and where, when the folder does not say. */
-export type Written = { name: string; size: number; parts: number; where?: string };
+/** A backup written: its file's name, its size, how many parts went beside it and their size together, and where, when the folder does not say. */
+export type Written = { name: string; size: number; parts: number; partsSize: number; where?: string };
 
 const query = (folder: string, name?: string, keep?: number) =>
   `/__backup?folder=${encodeURIComponent(folder)}${name === undefined ? '' : `&name=${encodeURIComponent(name)}`}${keep === undefined ? '' : `&keep=${keep}`}`;
@@ -98,16 +98,18 @@ export async function writeBackup(folder: string, make: (part: PartSink) => Prom
     const name = backupFileName(stem);
     const how = await handOverAll([new File([bytes as BlobPart], name, { type: 'application/octet-stream' }), ...parts]);
     if (!how) throw new Error(t('Not saved: the share sheet was closed.'));
-    return { name, size: bytes.length, parts: parts.length, where: how === 'shared' ? t('the place you chose') : t('the downloads folder') };
+    return { name, size: bytes.length, parts: parts.length, partsSize: parts.reduce((sum, part) => sum + part.size, 0), where: how === 'shared' ? t('the place you chose') : t('the downloads folder') };
   }
   const stem = SHELL === 'electron' ? freeStem(backupStem(now), await namesIn(folder)) : uniqueStem(now);
   const written: string[] = [];
+  let partsSize = 0;
   let bytes: Uint8Array;
   try {
     bytes = await make(async (part) => {
       const name = partFileName(stem, written.length + 1);
       await put(folder, name, part, 0);
       written.push(name);
+      partsSize += part.length;
       return name;
     });
     await put(folder, backupFileName(stem), bytes, keep);
@@ -116,7 +118,7 @@ export async function writeBackup(folder: string, make: (part: PartSink) => Prom
     if (SHELL === 'electron') for (const name of written) await shellFetch(query(folder, name), { method: 'DELETE' }).catch(() => undefined);
     throw error;
   }
-  return { name: backupFileName(stem), size: bytes.length, parts: written.length };
+  return { name: backupFileName(stem), size: bytes.length, parts: written.length, partsSize };
 }
 
 /** The backups' files in a folder, their own and their parts', each with its size (-1 where the

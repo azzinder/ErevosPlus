@@ -15,7 +15,7 @@
 //   body: version (1), flags (1: bit 0 = the relay's key follows, bit 1 = a relay address does),
 //         expires (4, Unix seconds), sender id (24), answer key (32), invite to the relay (32),
 //         [the relay's key (32)], name's length (1), name (UTF-8), [relay address (UTF-8, the rest)]
-// With no relay address, the relay is LPHL's (START_RELAY). What follows # never goes to the web
+// With no relay address, the relay is LPHL's (LPHL_RELAY, in every build). What follows # never goes to the web
 // server. The phone company sees the SMS, though, so whoever opens the link first can take it: it
 // lasts TEXT_INVITE_DAYS, and the inviting phone takes back the relay's invite once that is over
 // while no phone used it (lib/sms-relay.ts, expireTextInvites).
@@ -24,10 +24,10 @@
 import { fromHex, sha256Bytes, toHex, utf8Decode, utf8Encode } from './crypto';
 import { fromBase64Url, toBase64Url } from './e2e';
 import { checkInvite } from './relay-invite';
-import { START_RELAY } from './welcome';
+import { LPHL_RELAY, WEB_ORIGIN, pageLink } from './servers';
 
 /** Where the link of an invite by SMS goes: the page that offers Erevos, then opens the invite. */
-export const TEXT_INVITE_PAGE = 'https://erevos-web.lphl.nekten.eu/i';
+export const TEXT_INVITE_PAGE = `${WEB_ORIGIN}/i`;
 /** How long an invite by SMS lasts, days. */
 export const TEXT_INVITE_DAYS = 2;
 
@@ -56,7 +56,7 @@ const APP = 'erevos://text-invite?d=';
 const MOST_NAME = 120;
 
 function body(invite: TextInvite): Uint8Array {
-  const relay = invite.relay === START_RELAY ? new Uint8Array(0) : utf8Encode(invite.relay);
+  const relay = invite.relay === LPHL_RELAY ? new Uint8Array(0) : utf8Encode(invite.relay);
   const relayKey = invite.relayKey ? fromBase64Url(invite.relayKey) : new Uint8Array(0);
   let letters = Array.from(invite.name.trim());
   while (utf8Encode(letters.join('')).length > MOST_NAME) letters = letters.slice(0, -1);
@@ -105,7 +105,7 @@ export function textInviteOf(data: unknown): TextInvite | null {
   const length = bytes[at];
   if (length > MOST_NAME || at + 1 + length > bytes.length) return null;
   const name = utf8Decode(bytes.subarray(at + 1, at + 1 + length));
-  const relay = (bytes[1] & 2) === 2 ? utf8Decode(bytes.subarray(at + 1 + length)) : START_RELAY;
+  const relay = (bytes[1] & 2) === 2 ? utf8Decode(bytes.subarray(at + 1 + length)) : LPHL_RELAY;
   if ((bytes[1] & 2) === 0 && at + 1 + length !== bytes.length) return null;
   const code = card ? '' : toHex(bytes.subarray(62, 94));
   // A card has no invite to the relay: its address is checked as an invite's would be.
@@ -127,10 +127,9 @@ export function textInviteOf(data: unknown): TextInvite | null {
 export function parseTextInvite(text: string): TextInvite | null {
   const clean = text.trim();
   const lower = clean.toLowerCase();
-  // The server answers /i with /i/, so a link copied from the address bar may read /i/#.
-  for (const page of [`${TEXT_INVITE_PAGE}#`, `${TEXT_INVITE_PAGE}/#`]) {
-    if (lower.startsWith(page)) return textInviteOf(clean.slice(page.length));
-  }
+  // On this build's web server, LPHL's, or any other that serves Erevos's pages (lib/servers.ts).
+  const page = pageLink(clean, 'i');
+  if (page !== null) return textInviteOf(page);
   if (lower.startsWith(APP)) return textInviteOf(clean.slice(APP.length).split('&')[0]);
   return null;
 }

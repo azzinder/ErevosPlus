@@ -21,9 +21,6 @@ export const setupText: Record<string, string> = {
   'How you join': 'Como você entra',
   'Scan its QR code, or open or paste the link they sent you.':
     'Escaneie o código QR dele, ou abra ou cole o link que lhe enviaram.',
-  'Other ways in': 'Outras formas de entrar',
-  'Sign in with LPHL, start without a relay, or use a relay of your own: under For advanced users.':
-    'Entrar com LPHL, começar sem relay ou usar um relay seu: em “Para usuários avançados”.',
   'Your account there: set it up now, or later from {module}.':
     'Sua conta lá: configure agora, ou depois por {module}.',
   'Set up {module}': 'Configurar {module}',

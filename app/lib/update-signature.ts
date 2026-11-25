@@ -5,6 +5,7 @@
 import { t } from './i18n';
 import { canVerify, verifySignature } from './core';
 import { fromBase64, utf8Encode } from './crypto';
+import { LPHL_WEB } from './servers';
 import { wireOf, type ChannelName } from './update-channel';
 import type { ChannelRelease, Release } from './updates';
 
@@ -21,7 +22,7 @@ import type { ChannelRelease, Release } from './updates';
 export const RELEASE_KEY = 'pjWWvp05rToqI0/s1RBLqST1pOf8OnLzMW2m3L8NhGA=';
 
 /** Where the release computer serves the statement: beside the web app. */
-export const STATEMENT_URL = 'https://erevos-web.lphl.nekten.eu/android-update.json';
+export const STATEMENT_URL = `${LPHL_WEB}/android-update.json`;
 
 /** What the release key signs for an APK, as pwa/release.mjs androidStatement makes it. */
 export function statementOf(build: number, sha256: string): string {

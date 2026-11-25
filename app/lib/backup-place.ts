@@ -57,8 +57,8 @@ export function folderLabel(uri: string): string {
   return path.replace(/^primary:/, '') || path;
 }
 
-/** A backup written: its file's name, its size, how many parts went beside it, and where, when the folder does not say. */
-export type Written = { name: string; size: number; parts: number; where?: string };
+/** A backup written: its file's name, its size, how many parts went beside it and their size together, and where, when the folder does not say. */
+export type Written = { name: string; size: number; parts: number; partsSize: number; where?: string };
 
 const filesIn = (folder: Directory): File[] => folder.list().filter((entry): entry is File => entry instanceof File);
 
@@ -133,7 +133,7 @@ export async function writeBackup(folder: string, make: (part: PartSink) => Prom
     throw error;
   }
   if (keep) await prune(folder, keep);
-  return { name: file.name, size: bytes.length, parts: written.length };
+  return { name: file.name, size: bytes.length, parts: written.length, partsSize: written.reduce((sum, part) => sum + part.size, 0) };
 }
 
 /** The backups' files in a folder, their own and their parts', each with its size (-1 where the

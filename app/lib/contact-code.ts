@@ -25,12 +25,12 @@
 // so whoever adds it with no relay between the two writes to it there, through Tor
 // (lib/nostr-chats.ts nostrOnlyWay), with or without an id and a relay.
 // For a web page, as a contact page anyone may open, the same fields go after # on LPHL's web
-// server, with the name the phone gives itself for them:
+// server (or the one the build names, lib/servers.ts), with the name the phone gives itself for them:
 //   https://erevos-web.lphl.nekten.eu/c#id=...&relay=...&key=...[&n=<name>]
 // whose page (pwa/c/) offers Erevos and then opens the link in it. What follows # never goes to the
 // web server. It has no place on a relay in it (no `lend`): anyone who sees the page has the link,
 // and whoever adds it writes a message request first, as with any contact link.
-// Self-contained on purpose, so it can run under plain Node for checks.
+// Self-contained on purpose (but for lib/servers.ts), so it can run under plain Node for checks.
 
 export type SpareCode = { senderHex: string; relayUrl: string; relayKey?: string; more?: SpareCode[] };
 /** The most home relays a link names besides the first (lock/e2e-data.ts MORE_SPARE, as there). */
@@ -43,9 +43,11 @@ export type NostrCode = { k: string; r: string[] };
 /** `d`: the link's Erevos takes a new contact's first conversation from one of their linked devices, with their account's word for it (docs/multi-device.md, S5): an Erevos before does not say it. */
 export type ContactCode = { senderHex: string; relayUrl: string; key: string; relayKey?: string; spare?: SpareCode; lend?: string; nostr?: NostrCode; d?: true };
 
+import { WEB_ORIGIN, pageLink } from './servers';
+
 const LINK = 'erevos://contact?';
 /** Where a contact link for a web page goes: the page that offers Erevos, then opens the link (pwa/c/). */
-export const CONTACT_PAGE = 'https://erevos-web.lphl.nekten.eu/c';
+export const CONTACT_PAGE = `${WEB_ORIGIN}/c`;
 /** The longest name a link for a web page gives its phone (lib/welcome.ts MAX_NAME, as there). */
 const PAGE_NAME = 40;
 // A bundle is about 1800 characters. Anything far longer is not one.
@@ -143,13 +145,10 @@ export function parseContact(text: string): ContactCode | null {
   return code ? { ...code, ...(spare ? { spare } : {}), ...(lend ? { lend } : {}), ...(nostr ? { nostr } : {}), ...(code.key && fields.d === '1' ? { d: true as const } : {}) } : code;
 }
 
-/** The fields of a link for a web page, after #, or null when the text is not one. The server answers /c with /c/, so a link copied from the address bar may read /c/#. */
+/** The fields of a link for a web page, after #, or null when the text is not one. */
 function pageFields(text: string): string | null {
-  const lower = text.toLowerCase();
-  for (const page of [`${CONTACT_PAGE}#`, `${CONTACT_PAGE}/#`]) {
-    if (lower.startsWith(page)) return text.slice(page.length);
-  }
-  return null;
+  // On this build's web server, LPHL's, or any other that serves Erevos's pages (lib/servers.ts).
+  return pageLink(text, 'c');
 }
 
 /** A name as a link gives it: one line, no marks that could turn it around, at most PAGE_NAME letters. */

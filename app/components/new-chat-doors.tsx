@@ -5,9 +5,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { WayCard } from './connect-cards';
 import { CheckIcon, ChevronIcon, GlobeIcon } from './icons';
-import { Button, Field, Input, Row, Text } from './ui';
+import { Button, buttonColors, Field, Input, Row, Text } from './ui';
 import { t } from '../lib/i18n';
 import { MAX_NAME } from '../lock/e2e-data';
 import { radius, space, withAlpha } from '../theme/colors';
@@ -17,7 +16,10 @@ import { useColors } from '../theme/context';
 // answer is a page of its own: Near me (components/near-me.tsx), Far away (an invite to send,
 // components/welcome-invite.tsx) and I have their code (components/their-code.tsx). All three end
 // on the same page, You are connected. The rest of New chat, this phone's own link, who is blocked
-// and what is for advanced users, waits behind three small rows under them.
+// and what is for advanced users, waits behind three small buttons under them.
+//
+// The question is a quiet line and the answers are what the page is: three large doors, the first
+// lit in the look's own colour, as the way for the one beside you is the one most take.
 
 /** The pages of New chat: its first one, the three doors, where they end, and the rest. */
 export type Door = 'root' | 'near' | 'far' | 'code' | 'done' | 'link' | 'blocked' | 'advanced';
@@ -25,10 +27,10 @@ export type Door = 'root' | 'near' | 'far' | 'code' | 'done' | 'link' | 'blocked
 const WHITE = '#ffffff';
 
 // Two phones side by side, for Near me.
-function NearSign({ size = 22 }: { size?: number }) {
+function NearSign({ size = 26, color = WHITE }: { size?: number; color?: string }) {
   const k = size / 22;
   const phone = (x: number, y: number) => (
-    <View style={{ position: 'absolute', left: x * k, top: y * k, width: 8.5 * k, height: 15 * k, borderWidth: 1.9 * k, borderColor: WHITE, borderRadius: 2.4 * k }} />
+    <View style={{ position: 'absolute', left: x * k, top: y * k, width: 8.5 * k, height: 15 * k, borderWidth: 1.9 * k, borderColor: color, borderRadius: 2.4 * k }} />
   );
   return (
     <View style={{ width: size, height: size }}>
@@ -39,16 +41,57 @@ function NearSign({ size = 22 }: { size?: number }) {
 }
 
 // The keys of a keypad, for a code typed.
-function CodeSign({ size = 22 }: { size?: number }) {
+function CodeSign({ size = 26, color = WHITE }: { size?: number; color?: string }) {
   const k = size / 22;
   return (
     <View style={{ width: size, height: size }}>
       {[0, 1, 2].flatMap((row) =>
         [0, 1, 2].map((column) => (
-          <View key={`${row}-${column}`} style={{ position: 'absolute', left: (2.5 + column * 6.6) * k, top: (2.5 + row * 6.6) * k, width: 3.8 * k, height: 3.8 * k, borderRadius: 1.2 * k, backgroundColor: WHITE }} />
+          <View key={`${row}-${column}`} style={{ position: 'absolute', left: (2.5 + column * 6.6) * k, top: (2.5 + row * 6.6) * k, width: 3.8 * k, height: 3.8 * k, borderRadius: 1.2 * k, backgroundColor: color }} />
         )),
       )}
     </View>
+  );
+}
+
+// A door: its sign in a tile, what it is, and one line of what it does. `lit`: the first of them,
+// drawn as the look draws its main button (filled, or in Nocturne outlined), the others as cards.
+function DoorCard({ lit = false, sign, title, line, onPress }: {
+  lit?: boolean;
+  sign: (color: string) => ReactNode;
+  title: string;
+  line: string;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+  const main = buttonColors('primary', colors);
+  const ink = lit ? main.fg : colors.text;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${line}`}
+      style={({ pressed }) => [
+        styles.door,
+        {
+          borderRadius: radius.lg,
+          backgroundColor: lit ? (pressed ? main.pressed : main.bg) : colors.surface,
+          borderColor: lit ? (main.line ?? 'transparent') : withAlpha(colors.border, 0.6),
+        },
+        pressed && !lit && styles.pressed,
+      ]}
+    >
+      <View style={[styles.doorSign, { borderRadius: radius.md, backgroundColor: lit ? withAlpha(ink, 0.16) : colors.surfaceAlt }]}>{sign(lit ? ink : colors.accentText)}</View>
+      <View style={styles.grow}>
+        <Text variant="heading" color={ink}>
+          {title}
+        </Text>
+        <Text variant="caption" color={lit ? withAlpha(ink, 0.82) : colors.textMuted}>
+          {line}
+        </Text>
+      </View>
+      <ChevronIcon color={lit ? withAlpha(ink, 0.7) : colors.textFaint} />
+    </Pressable>
   );
 }
 
@@ -56,51 +99,47 @@ function CodeSign({ size = 22 }: { size?: number }) {
 export function Doors({ invites, onOpen }: { invites: boolean; onOpen: (door: 'near' | 'far' | 'code') => void }) {
   return (
     <View style={styles.doors}>
-      <Text variant="title">{t('Where is the other person?')}</Text>
-      <WayCard
-        tint="green"
-        sign={<NearSign />}
+      <Text variant="bodyStrong" tone="muted" accessibilityRole="header" style={styles.question}>
+        {t('Where is the other person?')}
+      </Text>
+      <DoorCard
+        lit
+        sign={(color) => <NearSign color={color} />}
         title={t('Near me')}
         line={t('The two phones find each other by themselves, or with a code on the screen.')}
-        open={false}
         onPress={() => onOpen('near')}
       />
-      <WayCard
-        tint="blue"
-        sign={<GlobeIcon color={WHITE} size={22} />}
+      <DoorCard
+        sign={(color) => <GlobeIcon color={color} size={26} />}
         title={t('Far away')}
         line={invites ? t('Send an invite with any app: they tap the link, and they are in.') : t('Send your contact link with any app: they add you with it.')}
-        open={false}
         onPress={() => onOpen('far')}
       />
-      <WayCard
-        tint="violet"
-        sign={<CodeSign />}
+      <DoorCard
+        sign={(color) => <CodeSign color={color} />}
         title={t('I have their code')}
         line={t('8 digits, a link or a QR code they gave you.')}
-        open={false}
         onPress={() => onOpen('code')}
       />
     </View>
   );
 }
 
-/** The rest of New chat, under the doors: small rows, each opening its page. */
+/** The rest of New chat, under the doors: small buttons side by side, each opening its page. */
 export function Rest({ rows }: { rows: { title: string; onPress: () => void }[] }) {
   const colors = useColors();
   return (
-    <View style={[styles.rest, { borderRadius: radius.lg, backgroundColor: colors.surface, borderColor: withAlpha(colors.border, 0.6) }]}>
-      {rows.map((row, n) => (
+    <View style={styles.rest}>
+      {rows.map((row) => (
         <Pressable
           key={row.title}
           onPress={row.onPress}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.restRow, n > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.restChip, { borderRadius: radius.chip, backgroundColor: pressed ? colors.surfacePressed : colors.surfaceAlt }]}
         >
-          <Text numberOfLines={1} style={styles.grow}>
+          <Text variant="label" numberOfLines={1}>
             {row.title}
           </Text>
-          <ChevronIcon color={colors.textFaint} />
         </Pressable>
       ))}
     </View>
@@ -172,21 +211,42 @@ export function Joined({ face, name, onName, onWrite, onAnother, children }: {
 
 const styles = StyleSheet.create({
   doors: {
-    gap: space.sm,
+    gap: space.md,
   },
-  rest: {
-    borderWidth: 1,
-    overflow: 'hidden',
+  question: {
+    paddingHorizontal: space.xs,
   },
-  restRow: {
+  door: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 14,
+    minHeight: 92,
+    padding: space.lg,
+    borderWidth: 1,
+  },
+  doorSign: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rest: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: space.sm,
-    minHeight: 48,
-    paddingHorizontal: space.md,
+    paddingTop: space.xs,
+  },
+  restChip: {
+    minHeight: 44,
+    paddingHorizontal: space.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: '100%',
   },
   grow: {
     flex: 1,
+    gap: 2,
   },
   pressed: {
     opacity: 0.7,

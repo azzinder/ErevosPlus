@@ -3,6 +3,7 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { device } from "../modules/erevos-device";
+import { waitingDrops } from "../lock/camera-drop";
 import { PAGE_PREFIX, sealedFile, type Holder } from "../lock/sealed-file";
 import { decryptBytes, utf8Decode } from "./crypto";
 import { readBytes, readFile } from "./files";
@@ -23,6 +24,12 @@ import { t } from "./i18n";
 // keeps it; and a file of sealed values that cannot be read stops the search. A file written in the last day is never
 // one, as one an import, a download or a share is writing now. What is found is shown first, and
 // deleted only when the owner says so. Nothing leaves the phone.
+//
+// One kind of file no place names yet, and it is never a leftover: what Erevos's camera took while
+// Erevos was locked (lock/camera-drop.ts). Until its own space opens and takes it into its
+// Collection, only its note names its chunks, and a note opens with that space's key alone. Its
+// chunks' ids are in it in the clear, so they are read whichever places were opened here
+// (idsOfDrops): the owner may be looking from another space, a day and more after taking it.
 
 /** A place whose sealed values are read: the space's or its hidden chats', with its key. */
 export type Place = { holder: Holder; space: number; key: Uint8Array };
@@ -135,16 +142,51 @@ export async function storeFiles(): Promise<string[]> {
   return stores;
 }
 
-/** The files none of `places` names, written more than a day before `now`. */
+/**
+ * Every id a note of the locked camera names (lock/camera-drop.ts): each note as it lies, read as
+ * a place's values are, so more is named than it holds, never fewer. One that cannot be read may
+ * name any file, and stops the search.
+ */
+export async function idsOfDrops(
+  into = new Set<string>(),
+): Promise<Set<string>> {
+  try {
+    for (const name of await waitingDrops()) {
+      const text = await readFile(name);
+      if (text) idsIn(text, into);
+    }
+  } catch {
+    throw new Error(
+      t(
+        "Some of what a place keeps could not be read, so nothing is taken for a leftover. Try again later.",
+      ),
+    );
+  }
+  return into;
+}
+
+/**
+ * Every id something on the phone names: the notes of the locked camera, then each of `places` in
+ * the files of sealed values `stores`. The notes first: one whose space takes it into its
+ * Collection meanwhile is named by the one or by the other.
+ */
+export async function namedBy(
+  places: Place[],
+  stores: string[],
+): Promise<Set<string>> {
+  const named = await idsOfDrops();
+  for (const place of places) await idsOfPlace(place, stores, named);
+  return named;
+}
+
+/** The files neither `places` nor a note of the locked camera names, written more than a day before `now`. */
 export async function findLeftovers(
   places: Place[],
   now = Date.now(),
 ): Promise<Leftovers> {
   if (!canFindLeftovers() || places.length === 0)
     return { ids: [], bytes: 0, files: 0 };
-  const stores = await storeFiles();
-  const named = new Set<string>();
-  for (const place of places) await idsOfPlace(place, stores, named);
+  const named = await namedBy(places, await storeFiles());
   return leftoversOf((await device!.chunkFiles!()) ?? [], named, now);
 }
 

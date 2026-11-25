@@ -51,8 +51,6 @@ export const cloudBackup: Record<string, string> = {
     "En un navegador el servidor tiene que dejar entrar a la web app (CORS), y este no la dejó o no se pudo alcanzar.",
   "Erevos forgets the server and its password here. The backups already on it stay there until you delete them.":
     "Erevos olvida aquí el servidor y su contraseña. Las copias que ya están en él se quedan allí hasta que las borres.",
-  "Sent a backup to {server}. Keep its password: nothing opens the backup without it.":
-    "Se envió una copia a {server}. Guarda su contraseña: nada abre la copia sin ella.",
   "Send a backup there now and then; the server keeps the {n} newest.":
     "Envía allí una copia de vez en cuando; el servidor guarda las {n} más recientes.",
   "The last one did not go: {error}":
@@ -221,4 +219,23 @@ export const cloudBackup: Record<string, string> = {
   "Keep Erevos open until it is done: a notice says when.": "Mantén Erevos abierto hasta que termine: un aviso te dirá cuándo.",
   "Backup made": "Copia hecha",
   "{name} ({size}) is saved in {folder}.": "{name} ({size}) está guardado en {folder}.",
+  "Encrypting and sending…": "Cifrando y enviando…",
+  "Sent a backup to {server}: {total}.": "Copia enviada a {server}: {total}.",
+  "Or to {server}, your server: it gets the backup encrypted, under a random name.": "O a {server}, tu servidor: recibe la copia cifrada, con un nombre al azar.",
+  "Or to a folder on a server of yours over WebDAV, such as Nextcloud: it gets the backup encrypted, under a random name.": "O a una carpeta de un servidor tuyo por WebDAV, como Nextcloud: recibe la copia cifrada, con un nombre al azar.",
+  "To a server (WebDAV)": "A un servidor (WebDAV)",
+  "Sent a backup to {server}, with {n} file beside it: {total} in all.": "Copia enviada a {server}, con {n} archivo al lado: {total} en total.",
+  "Sent a backup to {server}, with {n} files beside it: {total} in all.": "Copia enviada a {server}, con {n} archivos al lado: {total} en total.",
+  "The backup itself is there, but not of the size it was sent with.": "La copia en sí está, pero no del tamaño con que se envió.",
+  "A backup of {total} in all went to {server}.": "Una copia de {total} en total se envió a {server}.",
+  "{name} and {n} file beside it, {total} in all, are saved in {folder}.": "{name} y {n} archivo al lado, {total} en total, están guardados en {folder}.",
+  "{name} and {n} files beside it, {total} in all, are saved in {folder}.": "{name} y {n} archivos al lado, {total} en total, están guardados en {folder}.",
+  "A backup sent by hand goes whole each time, with every photo and file: up to about {size} now.":
+    "Una copia enviada a mano va entera cada vez, con cada foto y archivo: hasta unos {size} ahora.",
+  "A backup sent by hand goes whole each time, with every photo and file.":
+    "Una copia enviada a mano va entera cada vez, con cada foto y archivo.",
+  "With automatic backups on, only what is new goes each time.":
+    "Con las copias automáticas activadas, cada vez solo va lo nuevo.",
+  "The server keeps the {n} newest whole.":
+    "El servidor guarda enteras las {n} más recientes.",
 };

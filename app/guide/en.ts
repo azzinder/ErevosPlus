@@ -503,9 +503,10 @@ email to reach you: whoever has your contact link can write to your queue, and o
    words how your contacts reach you: through your relay, through Nostr with no relay, or only nearby; when everything
    works it is not shown. With a relay, a field at the top finds a contact by name or adds a link pasted into it. Then
    comes one question, **Where is the other person?**, and each answer opens a page of its own: **Near me**, **Far
-   away** and **I have their code**, as in 4 to 6 below. Three rows under them open the rest: **My link**, **Blocked
-   contacts** and **For advanced users**, where the relay's own settings are; **Settings** → **Relay and
-   networks** → **Relay** opens New chat with them open.
+   away** and **I have their code**, as in 4 to 6 below. Three small buttons under them open the rest: **My link**,
+   **Blocked contacts** and **For advanced users**, where the relay's own settings are, and a phone with no relay yet
+   has one more, **I have no invite**, which opens the same page; **Settings** → **Relay and networks** → **Relay**
+   opens New chat with them open.
 2. Under **For advanced users**, type the **Relay address**: \`ws://<computer address>:7879\` for a relay on your own network, or
    \`wss://relay.example.org\` for one on the internet. Add the **Token** if the relay needs one.
 3. Erevos makes your queue on it by itself, a few seconds later, and says **Relay queue created**: everything works, texts,
@@ -521,7 +522,8 @@ email to reach you: whoever has your contact link can write to your queue, and o
    stays off; in hidden chats and in the web app nothing looks. Under **If it is not found** the page has the other
    ways for someone beside you: a QR code for their camera, which is an invite where your relay lets this phone invite
    and your contact link otherwise; **Show a code of 8 digits**, which they type as in 6; **Scan theirs** and **Type
-   their code**, for theirs; and, on Android, **No Erevos on their phone?**, which hands them the app itself.
+   their code**, for theirs; and, on Android, **No Erevos on their phone?**, which hands them the app itself. The QR
+   code there shows small; a tap shows it large.
 5. **Far away**, for someone who is not with you: the page makes an invite, one link for one person, inside a message
    ready to send. Tap **Send with…** and choose the app it goes with (in a browser and on a computer, **Copy the
    invite**), or **Its QR code** to show it as a code. They tap the link: with Erevos on their phone it opens there,
@@ -530,7 +532,8 @@ email to reach you: whoever has your contact link can write to your queue, and o
    **Waiting for them to open it**, **You are connected**, and you may leave it meanwhile: once their phone has
    joined, they show in your chats. More about invites is in Inviting someone new, below. Where this phone can make no
    invite, with no relay yet, in hidden chats or on a linked computer, the page gives your contact link to send
-   instead: they open it in Erevos, or paste it under **I have their code**.
+   instead: they open it in Erevos, or paste it under **I have their code**. On the page the link in the message shows
+   short, its middle left out; what is sent, copied or shown as a QR code is always the whole link.
 6. **I have their code**, for what they gave you. Type the 8 digits their phone shows under **Near me** → **Show a
    code of 8 digits**, beside you or said on a call: each phone then has the other as a contact. The code itself never
    leaves the phones: they prove to each other that they know it, and their contact links go encrypted with a key only
@@ -540,20 +543,20 @@ email to reach you: whoever has your contact link can write to your queue, and o
    screen, or **From a photo of their QR code** for a screenshot or a photo of it they sent you. Erevos reads it and
    adds them at once. On a computer, on Sailfish OS and in the web app, **Scan their QR code** asks for a photo of it;
    on an iPhone it offers the camera too. Hidden chats have this page too.
-7. **My link**, in the rows under the three, is this phone's own QR code and contact link. Let the other phone scan
-   the code with its camera, then open the link in Erevos. The **Add a contact** screen shows what it holds: tap **Add
-   to chat** only if you scanned it yourself. **Add and connect to one of my contacts** adds them too, linked to the
-   contact you choose, whose name the chat takes. The code is short, so any camera reads it. Whoever scans it answers
-   with their own contact link, and then this phone writes to them first. The code is new each time the page opens,
-   and good once: the first to scan it is a contact at once; anyone who scans it after, or takes the link you share,
-   writes a message request first. **Large QR code, for no internet** shows the whole code instead, which works nearby
-   with no internet, and **Small QR code** goes back. **Share**, under it, sends a short link that any app lets you
-   tap; on Android it opens Erevos, which asks before it takes it. To add someone with their contact QR code, your
-   phone needs a relay first. This QR code works only when both phones have a relay, as the page says: otherwise use
-   **Near me**, or an invite from **Far away**. **Scan theirs** and **From a photo of their QR code**, under it, read
-   the other phone's code from here. Touch works too: while the small contact QR code shows and NFC is on, on Android,
-   the other phone takes it when you hold the back of their phone to the back of yours. It works only while Erevos is
-   open in front, not in the background, and never with the large QR code.
+7. **My link**, under the three, is this phone's own QR code and contact link. Let the other phone scan the code with
+   its camera, then open the link in Erevos. The **Add a contact** screen shows what it holds: tap **Add to chat**
+   only if you scanned it yourself. **Add and connect to one of my contacts** adds them too, linked to the contact you
+   choose, whose name the chat takes. The code is short, so any camera reads it. Whoever scans it answers with their
+   own contact link, and then this phone writes to them first. The code is new each time the page opens, and good
+   once: the first to scan it is a contact at once; anyone who scans it after, or takes the link you share, writes a
+   message request first. **Large QR code, for no internet** shows the whole code instead, which works nearby with no
+   internet, and **Small QR code** goes back. **Share**, under it, sends a short link that any app lets you tap; on
+   Android it opens Erevos, which asks before it takes it. To add someone with their contact QR code, your phone needs
+   a relay first. This QR code works only when both phones have a relay, as the page says: otherwise use **Near me**,
+   or an invite from **Far away**. **Scan theirs** and **From a photo of their QR code**, under it, read the other
+   phone's code from here. Touch works too: while the small contact QR code shows and NFC is on, on Android, the other
+   phone takes it when you hold the back of their phone to the back of yours. It works only while Erevos is open in
+   front, not in the background, and never with the large QR code.
 
 Whichever way you take, it ends on **You are connected**: their picture, **Their name in your chats**, which their
 phone may have given and you may change, and **Write a message** or **Add someone else**. The new chat appears on the
@@ -610,15 +613,15 @@ nothing, and you are each other's contacts at once, with no message request.
 
 - **To invite:** on the home screen, tap **Invite** beside the relay's line, or, on **New chat**, tap **Far away**.
   The invite is made at once and shows inside a message ready to send: tap **Send with…** and choose the app, or tap
-  **Its QR code** and let them scan it with their phone's camera. Below it you may type who it is for (their name in
-  your chats) and **Your name, for them**, or leave both empty. Opened again while no one took it and it has a day
-  left, it shows the same invite, so it spends none of the 5 waiting and 10 a day; **Invite someone else** makes a new
-  one, and **Take this invite back** closes its link while no phone has taken it. It is for one person, for 7 days, or
-  less when the relay's invite ends sooner. Whoever takes it first has it, so give it to them only. For someone beside
-  you, **Near me** shows such an invite as a QR code too. On an Android phone with NFC on, you can also hand it over
-  by touch: hold the back of their phone to the back of yours while the code shows, and their phone opens the link by
-  itself, in Erevos if it is installed, otherwise on Erevos's web page, which offers {=Erevos}. If NFC is off, the page
-  says to turn it on in Android's settings.
+  **Its QR code** and let them scan it with their phone's camera. **Who is it for?**, below it, opens two fields,
+  their name in your chats and **Your name, for them**: fill them in, or leave both empty. Opened again while no one
+  took it and it has a day left, it shows the same invite, so it spends none of the 5 waiting and 10 a day; **Invite
+  someone else** makes a new one, and **Take this invite back** closes its link while no phone has taken it. It is for
+  one person, for 7 days, or less when the relay's invite ends sooner. Whoever takes it first has it, so give it to
+  them only. For someone beside you, **Near me** shows such an invite as a QR code too. On an Android phone with NFC
+  on, you can also hand it over by touch: hold the back of their phone to the back of yours while the code shows, and
+  their phone opens the link by itself, in Erevos if it is installed, otherwise on Erevos's web page, which offers
+  {=Erevos}. If NFC is off, the page says to turn it on in Android's settings.
 - **To join:** tap the link they sent, or scan the invite with the camera and open the link in Erevos: it opens **…
   invites you to {=Erevos}**, and you tap **Join** only if it came from them. Inside Erevos, **I have their code** on
   **New chat** takes an invite too: tap **Scan their QR code** and take a photo of the invite on their screen, or
@@ -627,10 +630,15 @@ nothing, and you are each other's contacts at once, with no message request.
   phone, which adds this one as a contact at once, named as they typed.
 - **The other ways in:** on **New chat**, **For advanced users** opens the rest, for whoever looks for them: **Sign in
   with LPHL** signs this phone in to LPHL's relay with an LPHL account, in the browser (see Signing in to the relay
-  below), and then you add your contacts by their invites or links; **Start without a relay**, as in With no relay at
+  below), and then you add your contacts by their invites or links; **Start without a server**, as in With no relay at
   all, under Through Nostr; and the relay settings, as in 1 to 3 above. An invite is the simplest way in, and on the
   relay an invited phone has only a name of random letters and digits.
-- **Another relay:** under **Sign in with LPHL**, **Sign in at another relay…** takes the address of another relay,
+- **A server of your own:** on the same screen, under **Where your messages wait**, **I have a server of my own**
+  takes the address of a relay that is yours, or your family's, group's or workplace's, and the code you were given
+  for it (the relay's token; leave it empty if the relay has none). **Connect** tries it at once, and nothing is kept
+  if the server does not answer. While this phone has no relay yet, **I have no invite** on **New chat** opens this
+  screen too.
+- **Another relay:** under **Sign in with LPHL**, **My account is at another server…** takes the address of another relay,
   as its operator gave it, such as relay.example.org: the card then signs in there, named after the accounts that relay
   takes, or says it offers no sign-in, and then its operator can give you an invite. **Back to** brings LPHL's back.
 - **What your relay must allow:** the access of its own is an invite to your relay (see Invites to the relay below),
@@ -1381,14 +1389,17 @@ call goes over the phone company's network and is not encrypted{~, as a plain SM
   space. It works where the notice does: on Android, while the space that is open has **Receive and ring** and **Say a
   message came** on. For it the phone keeps, beside the addresses above, only whether a message came. Whoever sees the
   open space's chats sees the dot too, and may guess there is another space.
-- **When the phone turns on:** after the phone starts, Erevos does not run until you open it. With **Start when the
-  phone turns on** under **Settings** → **Notifications** → **In the background** (the default is **Wait until I open
-  it**), it starts by itself after the phone turns on, or after Erevos is updated, with no space open: no space can open
-  without its password, as Erevos keeps no key on the phone. Then the spaces set to **Also while another space is open**
-  already say "New message", or how many came, never which space, nor who or what, and a quiet notice says "Locked".
-  Calls do not ring, and nothing else comes, until you open a space; spaces that go through Tor say nothing until then.
-  With no such space, or with **No notice**, only a quiet notice says it is locked, and a tap
-  on it opens Erevos. Android only.
+- **When the phone turns on:** where Erevos receives in the background, it starts by itself after the phone turns on,
+  or after Erevos is updated: **Start when the phone turns on**, under **Settings** → **Notifications** → **In the
+  background**, is the default, and **Wait until I open it** there leaves it closed until you open it. It starts with
+  no space open, as a space with a password opens only with it and Erevos keeps no key on the phone. So until you open
+  a space it reads no message, shows nothing of what came, and rings for no call. Only the spaces set to **Also while
+  another space is open** ask their relay whether something came, without taking it: a quiet notice says "Locked: says
+  only that messages came", and "New message", or how many came, shows when something does, never which space, nor who
+  or what; a call counts as something that came, and does not ring. Spaces that go through Tor say nothing until a
+  space is open. With no such space, or with **No notice**, only a quiet notice says "Locked. Open it to receive calls
+  and messages again.", and a tap on it opens Erevos. An Erevos with no password does not open by itself either: it
+  too says it is locked until you open it. Once a space is open, it receives and rings as ever. Android only.
 
   **Why:** after a restart Erevos could not tell you that messages wait until you happened to open it. Without your
   password it still cannot read them, so it says no more than a closed space does.
@@ -1608,6 +1619,32 @@ Every path is end-to-end encrypted: no relay and no phone in between can read wh
 | **Not sent. The relay does not have this contact's queue any more.** | Ask them to write to you, or for their new contact link. |
 | **This build cannot encrypt, so chats through the relay are off.** | Build the app again: this build is older than its encryption. |
 
+## Erevos on your own servers {#own-servers}
+
+Erevos does not need its maker's servers. LPHL's are only what it offers first: you can use your own for each thing
+below, from inside the app, with nothing else to install on the phone.
+
+- **Messages, photos and files:** they wait, end-to-end encrypted, on a small server called a relay. To use yours, or
+  your group's: on **New chat**, **I have no invite**, then **I have a server of my own**, and type its address and
+  the code you were given. Later, the same two are the relay address and the token under **For advanced users**.
+- **Calls:** nothing more to set. The call relay comes with your relay, so with your own relay your calls go through
+  your own server too.
+- **Backups:** on **Backups**, **To a server too** sends each backup, encrypted, to a folder on a server you choose,
+  such as your own Nextcloud. See [Backups](#backup).
+- [~] **The Collection:** in its settings, **Also on a WebDAV server** keeps its encrypted files on a server you
+  choose. See [Collection](#collection).
+- **Speech and translation models:** where Erevos asks to download them, **Download from another server…** takes a
+  web folder of yours that holds the same files. Erevos checks every file and refuses one that was changed.
+- **No server at all:** **Start without a server** on the same screen. Texts then go through public Nostr relays, or
+  straight between phones that are near. See [With no relay at all](#nostr).
+
+**What still reaches LPHL:** only a phone whose relay is LPHL's asks LPHL's web server, once a day, whether a new
+version is out (see [Told when a new version is out](#updates)); **Check for updates** asks GitHub. {~A contact
+link made for a website and an invite by SMS open|A contact link made for a website opens} a page on LPHL's web server, which gets nothing of what the link
+says: that part never leaves the phone. The same pages on another server are read too, when you paste or scan them.
+
+**To set up a relay yourself:** see [Running your own relay](#own-relay), next.
+
 ## Running your own relay {#own-relay}
 
 A relay you run yourself is the safest one, since whoever runs a relay sees who connects to it. The source code
@@ -1811,7 +1848,7 @@ you, pictures, files and voice messages go there too (see With no relay at all).
 A phone with no relay, no invite and no LPHL account can still begin: its contact link and QR code say where it reads
 on Nostr, and that is enough to talk.
 
-- **To begin:** on **New chat**, under **For advanced users**, tap **Start without a relay**, then **Show my QR code**
+- **To begin:** on **New chat**, under **For advanced users**, tap **Start without a server**, then **Show my QR code**
   or **Share my contact link**, and give it to someone who uses {=Erevos}. Who adds it writes to you through Nostr, and
   shows as a message request, which you accept. You can add their link or QR code too, the same way.
 - **What goes:** texts, stickers, reactions, edits, and the marks that a message came or was read, all through Nostr; and photos, files and voice messages too. A voice message goes in wraps like a text. A photo up to 3 MB goes in pieces of 32 KB, a wrap each, sent before the message that offers it; the other phone keeps them, encrypted with the rest of the space or the hidden chats they came for, until all have come, four days at most. A larger photo, a video or any other file, up to 20 MB, goes as one blob, encrypted on the phone, to a Blossom file server (blossom.primal.net, blossom.band or nostr.download), through Tor as the space's Tor choice says (straight with **Nothing**): the server keeps only what it cannot read. Calls and groups need a relay, or the other phone nearby. Hidden chats work so too, through Nostr only (see [Hidden chats](#hidden)).
@@ -2034,9 +2071,9 @@ between.
 - **Threads:** hold a message and choose **Reply in thread** to answer it in a thread. A thread opens on a screen of
   its own, and a message with answers says how many; tap it to open the thread. Apps without threads show the answers
   as plain answers.
-- **Polls:** **Poll**, under the message box, asks a question with several options. Tap an option in the bubble to
-  choose it, and tap again to take it back; everyone sees who chose what. Whoever made a poll can hold it and choose
-  **End poll**: no vote counts after that.
+- **Polls:** **Poll**, under **+**, asks a question with several options. Tap an option in the bubble to choose it,
+  and tap again to take it back; everyone sees who chose what. Whoever made a poll can hold it and choose **End
+  poll**: no vote counts after that.
 - **Places:** **Location** sends where you are, once, as Element does; it goes encrypted as the chat is, and shows
   with **Open in maps** on Android.
 - **Link previews:** with **Link previews** on, as for your contacts' chats, the first link in a message goes with a
@@ -2081,20 +2118,21 @@ marked, for the people you would otherwise reach only on Matrix.
 - **Drafts:** what you type and do not send stays as the chat's draft, encrypted on this phone only. It comes back
   when you open the chat again, also after Erevos closed, and the home list shows it on the chat's row as **Draft**. A
   Matrix thread keeps no draft of its own.
-- **Send later:** hold **Send** down, choose a time (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day
-  and time) and tap **Send later**. The message waits on this phone, encrypted, shown dashed after the chat's messages
-  with its time, and goes from this phone at that time while Erevos is unlocked, on Android in the background too;
-  otherwise as soon as it is unlocked again. Text only. Tap it to send it now or delete it. In hidden chats one goes
-  only while they are open, unless they receive while closed. One that a restored backup brought back, whose time came
-  before the restore, does not go by itself: the phone the backup came from may have sent it already.
+- **Send later:** hold **Send** down, or, with the message typed, tap **+** and then **Send later**, and choose a time
+  (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day and time) and tap **Send later**. The message
+  waits on this phone, encrypted, shown dashed after the chat's messages with its time, and goes from this phone at
+  that time while Erevos is unlocked, on Android in the background too; otherwise as soon as it is unlocked again.
+  Text only. Tap it to send it now or delete it. In hidden chats one goes only while they are open, unless they
+  receive while closed. One that a restored backup brought back, whose time came before the restore, does not go by
+  itself: the phone the backup came from may have sent it already.
 - **Send again:** a message of yours that shows **Not sent** has **Send again** and **Delete** in its menu.
 - **Remind me:** a message's menu has **Remind me**. Pick a time: the message, with the name of its chat, goes into
   **Chat with myself** and reminds you then. It needs **Erevos** on in [Modules](#modules).
-- **Disappearing messages:** **Disappearing messages**, under the message field, sets a time for new messages, sent or
+- **Disappearing messages:** **Disappearing messages**, in **Chat options**, sets a time for new messages, sent or
   received: 5 minutes, 1 hour, 1 day or 1 week after each was sent. Then they go from this phone, and yours are taken
   back for everyone in the chat too (their apps show them as deleted), or as soon as Erevos runs again. What the
-  others sent stays with them. **Disappear**, beside **Poll** and **Location**, does it for the next message only.
-  Messages already in the chat stay.
+  others sent stays with them. **Disappearing message**, under **+**, does it for the next message only. Messages
+  already in the chat stay.
 - **Blocking:** **Block**, in a chat with one person, adds them to your account's ignore list: nothing of theirs
   reaches your Matrix account, in any of its apps, and they are not told. **Blocked contacts**, on the Matrix screen,
   lists them, with **Unblock**.
@@ -2153,14 +2191,14 @@ bridge sits in between.
   through again. Someone blocked in another app of the account is blocked here too.
 - **Messages from before:** what came while Erevos was closed is fetched from the server's archive when it connects, if
   the server keeps one. A message sent before this device signed in, or not meant for it, shows as locked.
-- **Photos and files:** **Photo** and **File**, under a chat's message box, send one of up to 50 MB, or less if your
-  XMPP server takes less, through the server's file upload. In an encrypted chat it is encrypted on this phone first,
-  with a key made for it alone, and the key goes in the message, encrypted with OMEMO, so the server keeps only what it
-  cannot read; Conversations, Monal, Gajim and Dino open it. In a chat written without encryption the file goes as it
-  is. A photo, sound or file that comes is fetched only when you tap **Show photo**, **Play** or **Save**. On Android,
-  files go through Tor as the chat does.
-  Tap a photo that shows to see it on the whole screen, as in a contact's chat: two fingers or a double tap zoom in,
-  it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat through a relay](#relay)).
+- **Photos and files:** **Photo** and **File**, under **+**, send one of up to 50 MB, or less if your XMPP server
+  takes less, through the server's file upload. In an encrypted chat it is encrypted on this phone first, with a key
+  made for it alone, and the key goes in the message, encrypted with OMEMO, so the server keeps only what it cannot
+  read; Conversations, Monal, Gajim and Dino open it. In a chat written without encryption the file goes as it is. A
+  photo, sound or file that comes is fetched only when you tap **Show photo**, **Play** or **Save**. On Android, files
+  go through Tor as the chat does. Tap a photo that shows to see it on the whole screen, as in a contact's chat: two
+  fingers or a double tap zoom in, it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat
+  through a relay](#relay)).
 - **Stickers:** **Sticker** sends your own stickers made from photos (**Mine**) as photos, encrypted as the chat is;
   other XMPP apps show them as photos. The built-in sets are there too: each sticker goes as its picture, made on your
   device. A sticker pack that another app sends (XEP-0449) is not fetched: it shows its words.
@@ -2261,18 +2299,19 @@ the people you would otherwise reach only on XMPP.
   their address again.
 - **Drafts:** what you type and do not send stays as the chat's draft, encrypted on this phone only. It comes back
   when you open the chat again, also after Erevos closed, and the home list shows it on the chat's row as **Draft**.
-- **Send later:** hold **Send** down, choose a time (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day
-  and time) and tap **Send later**. The message waits on this phone, encrypted, shown dashed after the chat's messages
-  with its time, and goes from this phone at that time while Erevos is unlocked, on Android in the background too;
-  otherwise as soon as it is unlocked again. Text only. Tap it to send it now or delete it. In hidden chats one goes
-  only while they are open, unless they receive while closed. One that a restored backup brought back, whose time came
-  before the restore, does not go by itself: the phone the backup came from may have sent it already.
+- **Send later:** hold **Send** down, or, with the message typed, tap **+** and then **Send later**, and choose a time
+  (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day and time) and tap **Send later**. The message
+  waits on this phone, encrypted, shown dashed after the chat's messages with its time, and goes from this phone at
+  that time while Erevos is unlocked, on Android in the background too; otherwise as soon as it is unlocked again.
+  Text only. Tap it to send it now or delete it. In hidden chats one goes only while they are open, unless they
+  receive while closed. One that a restored backup brought back, whose time came before the restore, does not go by
+  itself: the phone the backup came from may have sent it already.
 - **Send again:** a message of yours that shows **Not sent** has **Send again** and **Delete** in its menu.
 - **Remind me:** a message's menu has **Remind me**. Pick a time: the message, with the name of its chat, goes into
   **Chat with myself** and reminds you then. It needs **Erevos** on in [Modules](#modules).
-- **Disappearing messages:** **Disappearing messages**, under the message field, deletes new messages from this phone
-  that long after they were sent, and **Disappear** does it for the next message only. The other side keeps them: XMPP
-  has no way to delete them there. Messages already here stay.
+- **Disappearing messages:** **Disappearing messages**, in **Chat options**, deletes new messages from this phone that
+  long after they were sent, and **Disappearing message**, under **+**, does it for the next message only. The other
+  side keeps them: XMPP has no way to delete them there. Messages already here stay.
 - **Appear offline:** at the bottom of a chat with one person, **Appear offline** shows you offline to them, whatever
   your account shows everyone else, and tells them nothing of what you read or type, nor that their messages came. A
   group you share still shows you. It holds for this phone's connection only.
@@ -2307,10 +2346,10 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
   encrypted for each, and nobody can be added or taken out later; a group with other people is a new group. **Name this
   group** renames it for everyone, with your next message. A message another app sends to you and others shows as a
   group too, each message with who wrote it.
-- **Photos and files:** **Photo** and **File**, under a chat's message box, send one of up to 20 MB. It is encrypted on
-  this phone with a key made for it alone (AES-GCM, as NIP-17 asks) and put on a Blossom file server, which keeps only
-  what it cannot read; its key goes in the message, encrypted as messages are, and the upload is signed by a key made
-  for it alone, so the server does not learn whose it is. On Android, files go through Tor as these chats do. **File
+- **Photos and files:** **Photo** and **File**, under **+**, send one of up to 20 MB. It is encrypted on this phone
+  with a key made for it alone (AES-GCM, as NIP-17 asks) and put on a Blossom file server, which keeps only what it
+  cannot read; its key goes in the message, encrypted as messages are, and the upload is signed by a key made for it
+  alone, so the server does not learn whose it is. On Android, files go through Tor as these chats do. **File
   servers** says where they go, the first that takes one: blossom.primal.net, blossom.band and nostr.download unless you
   change them. A photo or file that comes is fetched only when you tap **Show photo** or **Save**, and opens only if it
   is the one that was sent.
@@ -2421,18 +2460,19 @@ because a Nostr key is the same to everyone you write to, while Erevos's own cha
   **Forwarded** on your phone only.
 - **Drafts:** what you type and do not send stays as the chat's draft, encrypted on this phone only. It comes back
   when you open the chat again, also after Erevos closed, and the home list shows it on the chat's row as **Draft**.
-- **Send later:** hold **Send** down, choose a time (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day
-  and time) and tap **Send later**. The message waits on this phone, encrypted, shown dashed after the chat's messages
-  with its time, and goes from this phone at that time while Erevos is unlocked, on Android in the background too;
-  otherwise as soon as it is unlocked again. Text only. Tap it to send it now or delete it. In hidden chats one goes
-  only while they are open, unless they receive while closed. One that a restored backup brought back, whose time came
-  before the restore, does not go by itself: the phone the backup came from may have sent it already.
+- **Send later:** hold **Send** down, or, with the message typed, tap **+** and then **Send later**, and choose a time
+  (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**, or any day and time) and tap **Send later**. The message
+  waits on this phone, encrypted, shown dashed after the chat's messages with its time, and goes from this phone at
+  that time while Erevos is unlocked, on Android in the background too; otherwise as soon as it is unlocked again.
+  Text only. Tap it to send it now or delete it. In hidden chats one goes only while they are open, unless they
+  receive while closed. One that a restored backup brought back, whose time came before the restore, does not go by
+  itself: the phone the backup came from may have sent it already.
 - **Remind me:** a message's menu has **Remind me**. Pick a time: the message, with the name of its chat, goes into
   **Chat with myself** and reminds you then. It needs **Erevos** on in [Modules](#modules).
-- **Disappearing messages:** **Disappearing messages**, under the message field, deletes new messages, sent or
-  received, from this phone that long after they were sent. Yours carry that time (NIP-40), so their app and the
-  relays that honour it delete them then; those that do not keep them. **Disappear** does it for the next message
-  only. A message that comes with its own time goes at that time.
+- **Disappearing messages:** **Disappearing messages**, in **Chat options**, deletes new messages, sent or received,
+  from this phone that long after they were sent. Yours carry that time (NIP-40), so their app and the relays that
+  honour it delete them then; those that do not keep them. **Disappearing message**, under **+**, does it for the next
+  message only. A message that comes with its own time goes at that time.
 - **Blocking:** **Block**, at the bottom of a chat, drops what that key sends on this phone, unread; it does not come
   back if you unblock them. They are not told: Nostr cannot stop anyone from writing to you. **Blocked contacts**, on
   the Nostr chats screen, lists them, with **Unblock**.
@@ -2618,12 +2658,13 @@ invite is a data SMS, which messaging apps do not show, so a phone without {=Ere
 - **Two SIMs:** the SIM to send on shows above the message field; tap **Choose the SIM** once to let Erevos see
   them. Your choice is kept for that number; until then, Erevos answers on the SIM the last message came on. Each
   message shows its SIM.
-- **SMS later:** hold the round **Send** after the field down and choose a time, as in a chat. The SMS shows at the end of the conversation
-  marked **Scheduled**; tap it to cancel it. It goes at that time, with Erevos closed and locked too; if the phone is
-  off then, as soon as it is on and unlocked again. Until then it is not in the phone's SMS, where other apps would
-  see it, and the phone company does not have it. It waits locked with a key of the phone itself (Android
-  Keystore), not with your space's password, as Android has to send it while Erevos is locked: the protection every
-  SMS has once sent, as sent SMS stay in the phone's SMS. Text only, to one number.
+- **SMS later:** hold the round **Send** after the field down, or, with the SMS typed, tap **+** and then **Send
+  later**, and choose a time, as in a chat. The SMS shows at the end of the conversation marked **Scheduled**; tap it
+  to cancel it. It goes at that time, with Erevos closed and locked too; if the phone is off then, as soon as it is on
+  and unlocked again. Until then it is not in the phone's SMS, where other apps would see it, and the phone company
+  does not have it. It waits locked with a key of the phone itself (Android Keystore), not with your space's password,
+  as Android has to send it while Erevos is locked: the protection every SMS has once sent, as sent SMS stay in the
+  phone's SMS. Text only, to one number.
 - **Links:** a web address in an SMS is underlined, and opens as in a chat, once you have seen it whole.
 - **Names from your contacts:** off at first, so SMS numbers show as numbers. **Names**, above the list on the **SMS** part, unlocks them
   (as does **Show names from my contacts** under **Settings** → **Phone and SMS** → **SMS** → **Names from your
@@ -2634,8 +2675,8 @@ invite is a data SMS, which messaging apps do not show, so a phone without {=Ere
   answered.
 - **Remind me:** hold a message down for **Remind me**: it goes into **Chat with myself** with the conversation's
   name, and reminds you at the time you pick.
-- **Disappearing messages:** with Erevos as the SMS app, **Disappearing messages**, under a conversation's **Plain
-  SMS** line, deletes its new SMS from this phone that long after they were sent, or as soon as Erevos runs again. The
+- **Disappearing messages:** with Erevos as the SMS app, **Disappearing messages**, in a conversation's **Chat
+  options**, deletes its new SMS from this phone that long after they were sent, or as soon as Erevos runs again. The
   other phone keeps them: an SMS cannot be deleted there. Messages already here stay.
 
 ### Encrypted SMS when nothing else works
@@ -2677,9 +2718,9 @@ the phone company who talks to whom, which Erevos otherwise hides, so SMS is the
   the list by itself when a new SMS comes from them, or with **Unarchive**.
 - **Group MMS names:** hold a group MMS down and choose **Name it here** to give it a name of your own, only on this
   phone.
-- **A conversation's own:** under its **Plain SMS** line, a conversation has **Chat look**, as a chat does, and, with
-  one number, **Notifications**: mute it for a while or always, or give it a sound of its own, or none. These hold
-  while the space is open; with it closed, every SMS notifies as the settings say.
+- **A conversation's own:** in its **Chat options**, a conversation has **Chat look**, as a chat does, and, with one
+  number, **Notifications**: mute it for a while or always, or give it a sound of its own, or none. These hold while
+  the space is open; with it closed, every SMS notifies as the settings say.
 - **Chat options:** the sliders button beside where you write, or **⋯** at the top, opens them all in one tidy list,
   in reach however long the chat: **Notifications**, **Chat look**, the PIN, screenshots and disappearing messages
   under **This chat**, then search, media, a day and export under **Find**.
@@ -2992,8 +3033,8 @@ Under **Settings** → **Privacy and security** → **Lock and second password**
 choices: **No lock** and **Password**.
 
 1. Tap **Password**, type it twice (at least 4 characters) and tap **Save**.
-2. From then on Erevos asks for it every time it opens, and again after 30 seconds in the background.
-3. **Change password** changes it, and **Lock now** locks Erevos straight away.
+2. From then on Erevos asks for it every time it opens, and again after 30 seconds in the background. On Android, as Erevos goes to the background, the phone covers its screens with a plain cover in their background colour: back within the 30 seconds, the cover is gone before anything shows; back later, it stays until the password screen shows, so nothing of the space shows before the password. The 30 seconds are counted on a clock that changing the phone's time does not move.
+3. **Change password** changes it, and **Lock now** locks Erevos straight away: on Android its screen is covered at once.
 
 - **A phrase, not a short PIN:** what checks the password is kept in the phone's keystore, so a copy of the phone's
   storage cannot be used to try passwords. But someone who breaks into the phone's own security, as forensic tools do
@@ -3062,7 +3103,7 @@ is off unless you turn it on.
 1. With the password lock on, under **Fingerprint or face**, tap **Turn on**.
 2. Type the password of the space you are in, tap **Turn on**, and touch the sensor (or look at the phone).
 3. From then on the password screen has a **Fingerprint or face** button. The password always works too, and
-   **Turn off** turns it off.
+   **Turn off** turns it off. The button is there as soon as the password screen shows.
 
 - **Only the first password's space:** a fingerprint never opens the space of a second password, nor hidden chats.
   Turned on in the space a second password opens, it opens nothing: the first time it is tried it turns itself off,
@@ -3108,7 +3149,9 @@ exist.
   gives that space this relay to keep, and the relay can then tell that both spaces are on one phone.
 - **Discretion:** for privacy, the app never shows whether a second password is set. In the web app with
   notifications while closed on, the number on Erevos's icon stays while Erevos is closed: one that does not match
-  the space you open may hint at another (**Number on the icon** turns it off).
+  the space you open may hint at another (**Number on the icon** turns it off).{~ On Android, what the camera took
+  with Erevos locked can hint at another space too while it waits for its own: see **Camera before the password** in
+  [Collection](#collection).}
 
 ## Hidden chats {#hidden}
 
@@ -3292,12 +3335,13 @@ The Collection is an encrypted place for your photos, files and folders, in ever
 - **Out of the Collection:** a photo opens on the whole screen, to swipe and zoom, with **Send to a chat**, **Save to phone**, **Information** and **Delete**. Saving to the phone, or opening a file with another app, takes it out unencrypted, and Erevos says so first. Sending to a chat leaves the Collection's copy where it is. From a hidden place's Collection, files go only to the chats and groups of that hidden place, never to the space's, and the space's Collection never to a hidden place's. Swipe, or use the arrows, for the next photo or the one before; **Slideshow** at the top shows them one after the other, every 4 seconds, till a tap.
 - **From a chat:** **+** under the message field, then **Collection**, opens the Collection of that chat's place: tap the photos or files to send, then **Send**, and they go in that chat.
 - **Backups:** a backup holds the Collection with the rest of the phone. **Settings** → **Data and devices** → **Collection**, or the three dots in the Collection, can leave that Collection out of the backups made while it is open: each Collection has its own choice.
-- **On a WebDAV server:** in the Collection's settings, **Also on a WebDAV server** copies that Collection's files as they are, still encrypted, to a folder on a server you choose, Nextcloud, ownCloud or any that speaks WebDAV: give the folder's address, a user name and, best, an app password, then tap **Connect**; **Test the connection** checks them first. Each space and hidden place has its own choice and server; the backups' server is offered first. Only what is not there yet goes, a piece at a time, while the place is open, going on where it stopped after the network drops, and a file deleted here is deleted there too; nothing else in the folder is touched. The server sees only pieces with random names, in a subfolder with a random name, and cannot open them. A phone that lacks a file, as after a backup restored on a new phone, fetches it from there as it opens, and keeps only pieces that open with the file's key. Erevos shows how much of it has come, with **Cancel**: what came stays, and the next time only the rest comes; music, videos, PDFs and **Open with another app** fetch it first too. While everything is copied, backups made while the place is open may leave its pieces out, after Erevos starts again too, until a file is added or deleted. It has a **Through Tor** switch of its own, off unless you turn it on: with it on, the copy goes only through Tor, whatever the space's Tor setting, so the server does not see your IP address; it is slower, and waits while Tor starts. Where there is no Tor, in the desktop app and the web app, a server with it on gets nothing.
+- **On a WebDAV server:** in the Collection's settings, **Also on a WebDAV server** copies that Collection's files as they are, still encrypted, to a folder on a server you choose, Nextcloud, ownCloud or any that speaks WebDAV: give the folder's address, a user name and, best, an app password, then tap **Connect**; **Test the connection** checks them first. Each space and hidden place has its own choice and server; the backups' server is offered first. Only what is not there yet goes, a piece at a time, while the place is open, going on where it stopped after the network drops, and a file deleted here is deleted there too; nothing else in the folder is touched. The server sees only pieces with random names, in a subfolder with a random name, and cannot open them. A phone that lacks a file, as after a backup restored on a new phone, fetches it from there as it opens, and keeps only pieces that open with the file's key. Erevos shows how much of it has come, with **Cancel**: what came stays, and the next time only the rest comes; music, videos, PDFs and **Open with another app** fetch it first too. While everything is copied, backups made while the place is open may leave its pieces out, after Erevos starts again too, until a file is added or deleted. It has a **Through Tor** switch of its own, off unless you turn it on: with it on, the copy goes only through Tor, whatever the space's Tor setting, so the server does not see your IP address; it is slower, and waits while Tor starts. Where there is no Tor, in the desktop app and the web app, a server with it on gets nothing. Under the server, a line says how much of this Collection's own files, encrypted, is on it, and when the last copy began and ended; the chats' photos and backups are not among them. After each copy Erevos lists the folder again, and a piece that is not there whole goes again with the next copy. **Check** looks without changing anything: every piece is there, of its size, and 4 of them, picked at random, are fetched and open with their key, so one the server changed or swapped shows. **Bring back the files not on this phone** fetches at once every file not whole here, as after a backup restored on a new phone, with **Cancel**: what came stays, and Erevos says how many came back and how many the server does not have whole either.
 - **With Nextcloud, as LPHL’s:** in that form, and in the backups’ **Add a server**, type your Nextcloud’s address under **Your Nextcloud** and tap **Sign in with Nextcloud**: sign in in the browser, as Fasouli does, through Authentik or however it signs in, and choose **Grant access**. Erevos gets an app password of its own and fills the form with its own folder in your files, **Erevos/Collection** or **Erevos/Backups**, made if it is not there, beside Fasouli’s, which it never reads; then tap **Connect**. Take that app password back in Nextcloud → Settings → Security. The sign-in follows the **Through Tor** switch of the server it signs in for: with it on, Erevos asks your Nextcloud only through Tor, but the browser page itself goes as the browser always does.
 - **On your linked devices:** in the Collection's settings, **On my linked devices too** sends that Collection to the [linked devices](#devices) of its space or hidden place, and the switch goes to all of them. A file added, renamed, moved or deleted on one is so on all. Small pictures come at once; a file itself comes at once on the same Wi-Fi, else when you open it, from the WebDAV server if the Collection has one, or through the relay up to 100 MB. Each piece is kept only once it opens with the file's key, and a transfer cut off goes on from the piece that was missing. A file is deleted elsewhere only when it is deleted on one of your devices, never because it is missing there. A hidden place's Collection goes only to that place's own linked devices.
 - **Music, videos and PDFs:** a PDF reads page by page inside Erevos (Android 11 and later), decrypted in memory only. Music and videos play straight from their encrypted pieces, never from a copy: a video on the whole screen, music with the next ones in the folder, going on with the screen off, with play, pause, next and previous in the notification and on the phone's lock screen, and only those there. The list goes on after the space locks, unless **Stop playing when the space locks** is on in the Collection's settings; **Stop** and the panic button end it. The notification says only **Playing** unless **Show the title in the notification** is on. **Open with another app** hands the file over as it is decrypted, with no copy on the phone, until you leave the Collection; the other app may keep one of its own.
 - **Gallery originals:** with **Delete the original from the gallery after importing** on, a photo or video picked from the phone's files is deleted from the gallery once it is in the Collection, after Android asks you to confirm. It needs Android 11 or later. A photo from the camera never goes to the gallery. If Android does not say which photo of the gallery it is (as from **Recent** in the file picker), the original stays and Erevos says so: pick it from **Images** or the phone's storage.
 - **Photos and videos:** in **+**, **Camera** is Erevos's own: photos and videos one after the other, with the flash and the front camera, straight into the Collection, never to the gallery, and no other app sees them; a photo is never written anywhere, not even for a moment, and holds nothing but its picture. Where the phone's maker offers them, as on a Pixel, **Night** and **Portrait** stand beside **Photo**, and **HDR on** at the top: they are the phone's own, made on the phone, and nothing goes out. A tap focuses and sets the light there; two fingers zoom, and the buttons above the shutter go to the wide lens (**0.5×**), **1×**, **2×** and **5×** where the phone has them. **More** has a timer of 3 or 10 seconds, a grid, a silent shutter where the law allows it, **Darker** and **Brighter** and, for videos, HD, Full HD or 4K, and **HDR video on** where the phone films it; in video the light can stay on. **From the gallery** brings in many photos and videos at once; with **Delete the original from the gallery after importing** on, Android then asks once for all of them. HEIC and AVIF photos show among the **Photos** (Android draws HEIC from 9 and AVIF from 12); one the device cannot draw offers **Open with another app**. Under a photo, **Edit** turns it a quarter at a time and cuts it with a frame dragged by its corners: it is kept as a new photo, and the one it came from stays as it was. **Information** says whether a photo or video says where it was taken. A JPEG, PNG, WebP or GIF photo saved out or opened with another app goes without where and when it was taken and the phone, unless **Photos leave with their place and time** is on in the Collection's settings; a video or a HEIC photo goes as it is, and Erevos says first when it names a place. The camera, the gallery and **Edit** are on Android; in the desktop app and a browser AVIF photos show too.
+- **Camera before the password:** with Erevos locked, the camera's icon and **Camera** on Erevos's icon open the camera at once, with no password. What it takes, photos and videos, is encrypted as it is taken, for the space opened last, and shows only after that space's password, in its Collection; the camera says how many it took. Nothing else opens from there, not even what it just took: the locked camera holds no key that opens anything, so whoever holds the phone can add to what waits, and see none of it. What was taken for one space never shows in another, and what waits is in no backup: a backup restored deletes it. **Open the camera without the password**, in the Collection's settings, is on unless you turn it off, and is this phone's, the same in every space; off, the camera's icon waits for the password. Left on, it can show that a space exists: while something waits for a space, it lies on the phone as files that another space, once opened, leaves there, and someone shown that other space who reads the phone with a forensic tool finds them. Where a second password must stay unseen, turn it off. What still waits for the other spaces is deleted when the first password's space removes its second password or turns its lock off. It works once a space with a password has been opened on the phone. Android only.
 - **In the desktop app:** on Linux, macOS and Windows the Collection works too, its files kept encrypted in Erevos's own folder on the computer. **+** brings in a file from the computer, encrypted a piece at a time; there is no camera. Photos, text, PDFs (in the built-in PDF viewer), music and videos open in Erevos's memory only, never as a plain copy on the disk, up to 1 GB each, and music and videos of any size, read a piece at a time from their encrypted pieces as they play; the file closes, and music or a video stops, when the space locks or with the panic button. **Save to the computer** asks first, as on the phone; **Open with another app** is not there.
 - **In a browser and on Sailfish OS:** the web app, on an iPhone's home screen too, and {=Erevos} on Sailfish OS have the Collection as well. **+** brings in a file with the browser's own picker, read and encrypted a piece at a time, so a large one is never held whole; its pieces are kept in the browser's storage, or on Sailfish OS in Erevos's own folder. A browser gives a site only so much room: when it runs out, nothing of the file is kept, and Erevos says so. Photos, text, music and videos open in memory only, up to 256 MB each, and close when the space locks; a PDF is not shown there: save it to read it with another app. **Save to this device** (on Sailfish OS **Save to phone**) asks first; in a browser it takes up to 256 MB, while Sailfish OS writes a file of any size to Downloads a piece at a time. In a browser the WebDAV server has to let the web app in, as for backups; Sailfish OS has no copy on WebDAV.
 - **Formats:** on Android MP3, AAC and M4A, FLAC, Ogg and Opus, WAV, AMR, MP4, MKV, WebM and 3GP play, a file that came with no type too, known by its name's ending, as files from other apps often come. In the desktop app and a browser, what the browser plays of them: not 3GP nor AMR.
@@ -3329,10 +3373,16 @@ automatic backup uses the files of the ones before it too: keep the whole folder
 
 [+] Session's account and chats go into a backup, sealed with its password and the first space's (a backup made from another space holds them as the first space last kept them), and a restore brings them back, sealed again on the new phone, once the first space opens; a phone with another Session account keeps its own, and Erevos says so; its photos and files do not, and come again from Session while it keeps them. Signal's history goes in too, sealed the same way: its chats and messages, without their photos and files, and not its link to the account, its keys or its safety numbers. After a restore, register or link Signal again; once the first space opens, the old messages show in their chats beside the new ones, to read only. Telegram and Messenger are not in a backup: their sign-ins are each phone's own. After a restore, sign in to them again; their messages come back only as far as each network keeps them. What Erevos keeps of them goes in: each chat's notifications, the Tor choices, and the keys of the ErevosGram encryption.
 
-1. **Make a backup:** tap **Make a backup**, choose a folder (on the phone, a memory card, or a cloud app that shows
-   its folders there; on a computer, any folder), type a password for the backup twice (at least 12 characters, or
-   four words) and tap **Save**. In a browser the backup and its files go to the share sheet, or to the downloads: the first at once, each next one after a tap on **Save**.
-   While it is made, its card says what it does and how far it is; when it is done, a notice says so.
+1. **Make a backup:** under **Make a backup**, tap **Into a folder**, choose a folder (on the phone, a memory card, or
+   a cloud app that shows its folders there; on a computer, any folder), type a password for the backup twice (at
+   least 12 characters, or four words) and tap **Save**. In a browser the button is **Make a backup**, and the backup
+   and its files go to the share sheet, or to the downloads: the first at once, each next one after a tap on **Save**.
+   While it is made, its card says what it does and how far it is. Then it says how big it is in all, with the files
+   beside it, when it began and when it ended (the time in its name is when it began), and what is not in it: Erevos
+   itself and what it keeps only for a while{~, or the Collection's files that are whole on its WebDAV server, which a
+   restore fetches from there, or a Collection you keep out of backups}. On Android and in the desktop app Erevos then
+   reads it back from the folder, as after each automatic backup (see **Check the backups** below), and says what it
+   found. When it is done, a notice says so.
 2. **Automatic backups:** choose **Every 6 hours**, **Every day** or **Every week**, then a folder and a password.
    Erevos makes one while it is open, once the last one is older than that: when a space opens, every 15 minutes, and
    as it goes to the background, before it locks; never with no space open. Each one writes only the photos, files and
@@ -3340,14 +3390,20 @@ automatic backup uses the files of the ones before it too: keep the whole folder
    one every 6 hours costs little. The folder keeps the 3 newest, with every file they need, and deletes the files none
    of them needs. One that failed is tried again when a space opens, or an hour later. Under them are **Back up now**,
    **Change folder** and **Change password**; **Off** stops them, and the ones made stay in the folder.
-3. **To a server too:** on Android and in the desktop app, with automatic backups on, **Add a server** under **To a
-   server too** sends each one also to a folder on a server you choose that speaks WebDAV, such as your own Nextcloud:
-   give the folder's address, a user name and, best, an app password made for Erevos alone, then tap **Connect**. The
-   server keeps the 3 newest, with every file they need, and each one sends only what is new; **Stop sending** stops
-   it, and those there stay. In the web app, which makes no backups
-   by itself, **Send a backup now** sends one there, with a password you type each time.
-   Each server has a **Through Tor** switch, in its card and in the form that adds one, off unless you turn it on (see
-   **On a server** below).
+3. **To a server too:** a backup can also go to a folder on a server you choose that speaks WebDAV, such as your own
+   Nextcloud. **Add a server** under **To a server too**, or **To a server (WebDAV)** under **Make a backup**, asks
+   for the folder's address, a user name and, best, an app password made for Erevos alone: tap **Connect**, and the
+   first backup goes there. With automatic backups on, on Android and in the desktop app, each one goes there too: the
+   server keeps the 3 newest, with every file they need, and each one sends only what is new. Without them, and in the
+   web app, which makes no backups by itself, one goes there when you send it, with a password you type each time:
+   **Send a backup now**, under **To a server too**. Under **Make a backup**, the button then reads **To** and the
+   server's name and sends one now; with automatic backups on, it sends one of them, with their password, and none
+   into the folder. Erevos then checks it on the server (see **Check the backups** below) and says how big it is in
+   all and when it began and ended. One sent with a password of its own goes whole each time, with every photo and
+   file, and the server keeps the 3 newest whole: Erevos says so as it asks for the password, with about how much that
+   is on Android. Turning automatic backups off keeps the server, for the backups you send; **Stop sending** forgets
+   it, and those there stay. Each server has a **Through Tor** switch, in its card and in the form that adds one, off
+   unless you turn it on (see **On a server** below).
 4. **Restore:** tap **Restore a backup**, choose the file and type its password. Erevos asks once more, finds the
    backup's files beside it, or asks you to choose them or their folder (for an automatic backup, choose every file of
    the folder, as some of its files may start as an earlier backup's name), then puts the backup in place of everything on
@@ -3361,8 +3417,8 @@ automatic backup uses the files of the ones before it too: keep the whole folder
 - **Automatic backups keep their password on the phone,** so they need no password each time. Whoever opens their
   folder still needs the spaces' passwords to read the chats.
 - **What takes room:** on Android, **Measure** under **What takes room** shows how much room Erevos takes on the phone, by kind: {~the Collection with |}the chats' photos and files, voice messages, chat history, Tor, and what writes that did not end left over. Each automatic backup holds it all, so this tells why one is large. Only the files' names and sizes are looked at, on the phone, and nothing is sent.
-- **Leftovers:** photos and files no chat{~, Collection|} or import names any more, as those of an import that stopped in its middle, stay on the phone and in every backup. Under **Leftovers**, type one at a time, or several at once separated by commas or spaces, the PIN of each of your hidden chats and the password of any other space, then tap **Find leftovers**: Erevos reads which files each of them and this space name, and shows how much none of them names. **Delete them** deletes those, after you say so once more. A place you did not open there loses its photos and files: open every one first. A file written in the last day is never taken, and backups already made keep everything.
-- **Check the backups:** after each automatic backup Erevos reads it back from the folder: it opens with its password, every part it names is there, of its size, and two parts picked at random are read through. Of a server it then only looks at the listing, so nothing is downloaded. **Check now** also downloads the server’s newest backup and ten of its parts. A part missing or damaged shows in red: back up now, then check again. **Full check of the folder** reads every part there through and compares it with the SHA-256 the backup wrote down for it: a few minutes for many GB, and nothing leaves the phone.
+- **Leftovers:** photos and files no chat{~, Collection|} or import names any more, as those of an import that stopped in its middle, stay on the phone and in every backup. Under **Leftovers**, type one at a time, or several at once separated by commas or spaces, the PIN of each of your hidden chats and the password of any other space, then tap **Find leftovers**: Erevos reads which files each of them and this space name, and shows how much none of them names. **Delete them** deletes those, after you say so once more. A place you did not open there loses its photos and files: open every one first. A file written in the last day is never taken{~, nor what the camera took with Erevos locked while it waits for its space}, and backups already made keep everything.
+- **Check the backups:** after each backup into a folder, automatic or made by hand, on Android and in the desktop app, Erevos reads it back from the folder: it opens with its password, every part it names is there, of its size, and two parts picked at random are read through. Of a server it then only looks at the listing: the backup and every part it names are there, each of the size it was sent with, so nothing is downloaded. **Check now** also downloads the server’s newest backup and ten of its parts. A part missing or damaged shows in red: back up now, then check again. **Full check of the folder** reads every part there through and compares it with the SHA-256 the backup wrote down for it: a few minutes for many GB, and nothing leaves the phone.
 - **On a server:** the backup sent there is sealed with its password like the others, and that password never leaves
   the phone, so the server cannot open it. Its name is random and the file looks like random bytes, of one of a few
   sizes, so neither says it is Erevos's nor tells exactly how much it holds. Its photos, files and voice messages go
@@ -3796,9 +3852,10 @@ always reads well, on glass too.
   list of apps.
 - [~] **Camera** (Android, under **Launcher icons**): Erevos's camera at a tap. **Put the Camera among the phone's apps**
   adds an icon of its own (orange at first, in any colour), and holding Erevos's icon down offers **Camera** too, which
-  can also be dragged to the home screen. Either opens the Collection's camera, behind Erevos's password and the
-  Collection's, and what it takes goes straight into the Collection. Neither shows while the Collection is off in
-  **Modules** or the calculator stands in place of Erevos.
+  can also be dragged to the home screen. Either opens the Collection's camera, and what it takes goes straight into
+  the Collection: with Erevos locked, at once, and what it took shows only after the password (**Open the camera
+  without the password**, in the Collection's settings); with that off, behind Erevos's password and the Collection's.
+  Neither shows while the Collection is off in **Modules** or the calculator stands in place of Erevos.
 - **Dots and numbers on the icons** (Android): Android gives a notice's dot or number to the app, not to one of its
   icons, so on most launchers, such as those of Pixel and GrapheneOS, Samsung's, Xiaomi's and Kvaesitso, each notice
   of Erevos (a message, {~an SMS, |}a call, a birthday) shows on the Erevos{~, Phone, SMS and| and} Contacts icons alike; Erevos

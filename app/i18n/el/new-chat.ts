@@ -54,7 +54,6 @@ export const newChatText: Record<string, string> = {
   "A phone has taken this invite already: it is not taken back.": "Ένα τηλέφωνο έχει ήδη πάρει αυτή την πρόσκληση: δεν παίρνεται πίσω.",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.": "Ένας σύνδεσμος, για ένα άτομο: το τηλέφωνό του μπαίνει στο Erevos με αυτόν, χωρίς να πληκτρολογήσει τίποτα, και γίνεστε αμέσως επαφές. Αν δεν έχει ακόμη Erevos, του δείχνει από πού να το πάρει.",
   "Send with…": "Αποστολή με…",
-  "Hide the QR code": "Κρύψε τον κωδικό QR",
   "Its QR code": "Ο κωδικός QR της",
   "For one person, until {when}. Whoever opens it first has it, so send it to them only.": "Για ένα άτομο, έως {when}. Όποιος την ανοίξει πρώτος την έχει, γι’ αυτό στείλ’ την μόνο σε εκείνον.",
   "The invite is ready": "Η πρόσκληση είναι έτοιμη",
@@ -66,4 +65,5 @@ export const newChatText: Record<string, string> = {
   "New invite": "Νέα πρόσκληση",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.": "Ένας σύνδεσμος, για ένα άτομο: το τηλέφωνό του μπαίνει στο Erevos με αυτόν, χωρίς να πληκτρολογήσει τίποτα, και γίνεστε αμέσως επαφές. Ανοίγει μόνο σε τηλέφωνο που έχει ήδη Erevos.",
   "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.": "Το σκανάρει με την κάμερα του κινητού του, που έχει ήδη Erevos: ετοιμάζεται μόνο του, χωρίς relay ή κωδικούς, και γίνεστε επαφές.",
+  "Their phone’s camera scans it. Tap it to show it large.": "Τον σκανάρει η κάμερα του άλλου τηλεφώνου. Πάτα τον για να φανεί μεγάλος.",
 };

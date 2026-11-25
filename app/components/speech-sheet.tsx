@@ -3,13 +3,14 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { useEffect, useRef, useState } from 'react';
+import { ModelsServer, useModelsHost } from './models-server';
 import { View } from 'react-native';
 
 import { confirm } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { errorText } from '../lib/chat-screen';
 import { t } from '../lib/i18n';
-import { deleteModel, downloadModel, letGoOfModel, MODEL_BYTES, MODEL_HOST, modelHere, writeOut } from '../lib/speech';
+import { deleteModel, downloadModel, letGoOfModel, MODEL_BYTES, modelHere, writeOut } from '../lib/speech';
 import { Button, Row, Sheet, Text, TextButton } from './ui';
 
 // A voice message written out (lib/speech.ts), from its menu in a chat or a group. The first
@@ -30,6 +31,8 @@ export function SpeechSheet({ sound, onClose }: {
   sound: (() => Promise<Uint8Array | null>) | null;
   onClose: () => void;
 }) {
+  // Where the model comes from: LPHL's server, or a web folder the owner named (lib/models-server.ts).
+  const host = useModelsHost();
   const [step, setStep] = useState<Step>({ at: 'writing' });
   const [copied, setCopied] = useState(false);
   const stopping = useRef<AbortController | null>(null);
@@ -94,12 +97,13 @@ export function SpeechSheet({ sound, onClose }: {
       {step.at === 'need' ? (
         <>
           <Text>
-            {t('To write out voice messages, Erevos needs a speech model ({size} MB), once. It is downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: the sound and its words never leave it.', { size: MB(MODEL_BYTES), host: MODEL_HOST })}
+            {t('To write out voice messages, Erevos needs a speech model ({size} MB), once. It is downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: the sound and its words never leave it.', { size: MB(MODEL_BYTES), host })}
           </Text>
           <Text variant="caption" tone="muted">
             {t('It hears about a hundred languages, Greek among them, and finds the one spoken. Best over Wi-Fi.')}
           </Text>
           <Button title={t('Download ({size} MB)', { size: MB(MODEL_BYTES) })} onPress={() => void download()} />
+          <ModelsServer />
         </>
       ) : step.at === 'downloading' ? (
         <>

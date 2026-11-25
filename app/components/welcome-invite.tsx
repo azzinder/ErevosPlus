@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { useEffect, useRef, useState } from 'react';
-import { Platform, Share, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { ActivityIndicator, Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 
+import { QR_TILE, QrSign, QrTile } from './connect-cards';
+import { CopyIcon } from './icons';
 import { QrCode } from './QrCode';
-import { Button, Field, Input, Row, Text, TextButton } from './ui';
+import { Button, Field, Input, Sheet, Text, TextButton } from './ui';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { WELCOME_DAYS, type E2E } from '../lib/e2e';
 import { t } from '../lib/i18n';
@@ -14,6 +16,7 @@ import { laterLabel } from '../lib/later';
 import { makeInvite, type Relay } from '../lib/relay';
 import { oldToken } from '../lib/relay-signin';
 import { useNfcShare } from '../lib/nfc-share';
+import { shownLink } from '../lib/shown-link';
 import { makeShortInvite, nameShortInvite, shortInviteWaits, takeBackShortInvite, waitingShortInvite, type ShortInvite } from '../lib/sms-relay';
 import { textInviteLink } from '../lib/text-invite';
 import { welcomeLink } from '../lib/welcome';
@@ -27,12 +30,14 @@ import { useColors } from '../theme/context';
 // opens it in Erevos and joins: it takes access of its own to this phone's relay (an invite to it,
 // when the relay lets this phone invite), and the two are each other's contacts at once. The name
 // typed for them stays here: their access on the relay has a name of random letters (E2E.lineFor).
-// On New chat (app/chat.tsx) it shows two ways. Far away is a page: the message that goes, to send
-// with any app, how far it has come, and who it is for and the name this phone gives itself, typed
-// below or never (E2E.nameInvite). Near me (components/near-me.tsx) has only its QR code, `inline`,
-// for the phone beside this one to scan. The invite is made as either opens. The relay lets a phone
-// make only a few invites a day, so one opened again soon after, for the same one still waiting,
-// shows that one again; Invite someone else makes another.
+// On New chat (app/chat.tsx) it shows two ways. Far away is a page: the message that goes, as a
+// message, to send with any app; its link reads short there (lib/shown-link.ts), and what is sent,
+// copied or drawn as a QR code is all of it. Under it, how far the invite has come, and, behind
+// Who is it for?, who it is for and the name this phone gives itself, typed there or never
+// (E2E.nameInvite). Near me (components/near-me.tsx) has only its QR code, `inline`, a small tile
+// that shows large when tapped, for the phone beside this one to scan. The invite is made as
+// either opens. The relay lets a phone make only a few invites a day, so one opened again soon
+// after, for the same one still waiting, shows that one again; Invite someone else makes another.
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error)).split('\n')[0];
 
@@ -68,10 +73,12 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState('');
   const [made, setMade] = useState<Made | null>(null);
-  // The page: whether its QR code shows, whether the invite still waits for its phone, and one taken back.
+  // The page: whether its QR code shows, whether the invite still waits for its phone, one taken
+  // back, and whether the names are being typed.
   const [qrShown, setQrShown] = useState(false);
   const [waits, setWaits] = useState(true);
   const [back, setBack] = useState(false);
+  const [naming, setNaming] = useState(false);
   const colors = useColors();
   const making = useRef(false);
   // The short invite goes by touching phones too, while it shows (lib/nfc-share.ts).
@@ -107,6 +114,7 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
     setFailed('');
     setBack(false);
     setQrShown(false);
+    setNaming(false);
     const as = e2e?.invitedAs() ?? '';
     setAs(as);
     const again = lastMade;
@@ -250,9 +258,9 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
   }
 
   if (inline) {
+    // A small tile beside what it is for (Near me): tapped, it shows large, with what it is under it.
     return made ? (
-      <View style={styles.inline}>
-        <QrCode text={made.link} size={200} />
+      <QrTile text={made.link} shown={visible}>
         {/* The short invite's link is a web page that offers Erevos first; the long one opens only in Erevos. */}
         <Text variant="caption" tone="muted" style={styles.center}>
           {made.short
@@ -270,13 +278,18 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
           </Text>
         ) : null}
         <TextButton title={t('New QR code')} onPress={another} />
+      </QrTile>
+    ) : failed ? (
+      <View style={styles.tileFailed}>
+        <Text variant="caption" tone="muted" style={styles.center}>
+          {failed}
+        </Text>
+        {!busy ? <Button title={t('Try again')} compact onPress={() => void make(as)} /> : null}
       </View>
     ) : (
-      <View style={styles.inline}>
-        <Text variant="caption" tone="muted" style={styles.center}>
-          {failed || t('Making the invite…')}
-        </Text>
-        {failed && !busy ? <Button title={t('Try again')} compact onPress={() => void make(as)} /> : null}
+      // The tile's place, while the invite is made.
+      <View style={[styles.tileWaits, { borderRadius: radius.md, borderColor: colors.border }]} accessible accessibilityLabel={t('Making the invite…')}>
+        <ActivityIndicator color={colors.textMuted} />
       </View>
     );
   }
@@ -291,44 +304,69 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
     </View>
   );
 
+  // The message as it goes, its link read short and in the look's colour: the words are one
+  // sentence with the link's place in it, so the link is found by a mark no language writes.
+  const [before, after = ''] = message('\u0000').split('\u0000');
+  // What goes with the message beside sending it: a square with its sign over its name.
+  const tile = (title: string, sign: ReactNode, onPress: () => void) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.tile, { borderRadius: radius.lg, backgroundColor: pressed ? colors.surfacePressed : colors.surface, borderColor: colors.border }]}
+    >
+      {sign}
+      <Text variant="caption" numberOfLines={2} style={styles.center}>
+        {title}
+      </Text>
+    </Pressable>
+  );
+
   return made ? (
     <View style={styles.page}>
-      <Text tone="muted">
-        {made.short
-          ? t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. With no Erevos yet, it shows them where to get it.')
-          : t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.')}
-      </Text>
-      <View style={[styles.bubble, { borderRadius: radius.lg, backgroundColor: colors.primarySoft }]}>
-        <Text selectable>{message(made.link)}</Text>
+      <View
+        style={[styles.bubble, { borderRadius: radius.lg, borderBottomLeftRadius: radius.sm, backgroundColor: colors.surface, borderColor: colors.border }]}
+        accessible
+        accessibilityLabel={`${before}${shownLink(made.link)}${after}`}
+      >
+        <Text>
+          {before}
+          <Text color={colors.accentText}>{shownLink(made.link)}</Text>
+          {after}
+        </Text>
       </View>
-      <Row wrap>
-        <Button title={Platform.OS === 'web' ? t('Copy the invite') : t('Send with…')} onPress={() => void share(made.link)} />
-        {Platform.OS !== 'web' && CAN_COPY ? <Button title={t('Copy')} kind="secondary" onPress={() => void share(made.link, true)} /> : null}
-        <Button title={qrShown ? t('Hide the QR code') : t('Its QR code')} kind="secondary" onPress={() => setQrShown(!qrShown)} />
-      </Row>
-      {qrShown ? (
-        <View style={styles.inline}>
-          <QrCode text={made.link} size={220} />
-        </View>
-      ) : null}
-      <Text variant="caption" tone="muted">
+      <Text variant="caption" tone="muted" style={styles.under}>
         {t('For one person, until {when}. Whoever opens it first has it, so send it to them only.', { when: laterLabel(made.until) })}
       </Text>
-      {qrShown && nfc === 'on' ? (
-        <Text variant="caption" tone="muted">
-          {t('Or hold the back of their phone to the back of yours: their phone opens the invite.')}
+      {/* The long invite's link is no web page: it opens only where Erevos is already. */}
+      {made.short ? null : (
+        <Text variant="caption" tone="muted" style={styles.under}>
+          {t('One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.')}
         </Text>
-      ) : qrShown && nfc === 'off' ? (
-        <Text variant="caption" tone="muted">
-          {t('Turn on NFC in Android\'s settings to give it by touching phones too.')}
-        </Text>
-      ) : null}
+      )}
       {made.access ? null : (
-        <Text variant="caption" tone="muted">
+        <Text variant="caption" tone="muted" style={styles.under}>
           {t('Your relay lets this phone invite no one, so their phone uses it only as your contact link lets it: if it needs a token, they need one of their own.')}
         </Text>
       )}
-      <View style={[styles.steps, { borderRadius: radius.lg, borderColor: colors.border }]}>
+      <View style={styles.tiles}>
+        {Platform.OS !== 'web' && CAN_COPY ? tile(t('Copy'), <CopyIcon color={colors.accentText} size={22} />, () => void share(made.link, true)) : null}
+        {tile(t('Its QR code'), <QrSign color={colors.accentText} size={22} />, () => setQrShown(true))}
+      </View>
+      <Button title={Platform.OS === 'web' ? t('Copy the invite') : t('Send with…')} style={styles.wide} onPress={() => void share(made.link)} />
+      {/* Its QR code, large, for a camera: in a sheet, so the page stays as it was. */}
+      <Sheet visible={qrShown && visible} onClose={() => setQrShown(false)} title={t('QR code')}>
+        <QrCode text={made.link} size={260} />
+        {nfc === 'on' ? (
+          <Text variant="caption" tone="muted" style={styles.center}>
+            {t('Or hold the back of their phone to the back of yours: their phone opens the invite.')}
+          </Text>
+        ) : nfc === 'off' ? (
+          <Text variant="caption" tone="muted" style={styles.center}>
+            {t('Turn on NFC in Android\'s settings to give it by touching phones too.')}
+          </Text>
+        ) : null}
+      </Sheet>
+      <View style={[styles.steps, { borderRadius: radius.lg, backgroundColor: colors.surface, borderColor: colors.border }]}>
         {step(t('The invite is ready'), 'done')}
         {step(t('Waiting for them to open it'), waits ? 'now' : 'done')}
         {step(t('You are connected'), waits ? 'later' : 'now')}
@@ -338,16 +376,23 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
             : t('They opened the invite: they show in your chats as soon as their phone has joined.')}
         </Text>
       </View>
-      <Field label={t('Who is it for?')} hint={t('Their name in your chats. Optional: you can name them once they join, too.')}>
-        <Input value={name} onChangeText={setName} onEndEditing={keepName} onSubmitEditing={keepName} placeholder={t('Maria')} maxLength={MAX_NAME} autoCorrect={false} />
-      </Field>
-      <Field label={t('Your name, for them')} hint={t('Goes in the invite, so their phone names you. Optional.')}>
-        <Input value={as} onChangeText={setAs} onEndEditing={keepAs} onSubmitEditing={keepAs} placeholder={t('Your name')} maxLength={MAX_NAME} autoCorrect={false} />
-      </Field>
-      <Row wrap>
-        <TextButton title={t('Invite someone else')} onPress={another} />
-        {made.short && waits ? <TextButton title={t('Take this invite back')} onPress={() => void takeBack()} /> : null}
-      </Row>
+      {/* The names are for whoever wants them: behind their question until it is tapped. */}
+      {naming ? (
+        <>
+          <Field label={t('Who is it for?')} hint={t('Their name in your chats. Optional: you can name them once they join, too.')}>
+            <Input value={name} onChangeText={setName} onEndEditing={keepName} onSubmitEditing={keepName} placeholder={t('Maria')} maxLength={MAX_NAME} autoCorrect={false} />
+          </Field>
+          <Field label={t('Your name, for them')} hint={t('Goes in the invite, so their phone names you. Optional.')}>
+            <Input value={as} onChangeText={setAs} onEndEditing={keepAs} onSubmitEditing={keepAs} placeholder={t('Your name')} maxLength={MAX_NAME} autoCorrect={false} />
+          </Field>
+        </>
+      ) : (
+        <TextButton title={name.trim() ? `${t('Who is it for?')} ${name.trim()}` : t('Who is it for?')} onPress={() => setNaming(true)} />
+      )}
+      <View style={styles.pair}>
+        <Button title={t('Invite someone else')} kind="secondary" compact style={styles.half} onPress={another} />
+        {made.short && waits ? <Button title={t('Take this invite back')} kind="secondary" compact style={styles.half} onPress={() => void takeBack()} /> : null}
+      </View>
     </View>
   ) : (
     <View style={styles.page}>
@@ -358,17 +403,24 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
       </Text>
       {busy ? <Text variant="caption" tone="muted">{t('Making the invite…')}</Text> : null}
       {failed ? <Text variant="caption" tone="muted">{failed}</Text> : null}
-      <Row wrap>
+      <View style={styles.pair}>
         {back && !busy ? <Button title={t('New invite')} compact onPress={another} /> : null}
         {failed && !busy ? <Button title={t('Try again')} compact onPress={() => void make(as)} /> : null}
-      </Row>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  inline: {
-    alignSelf: 'stretch',
+  tileWaits: {
+    width: QR_TILE,
+    height: QR_TILE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  tileFailed: {
+    flex: 1,
     alignItems: 'center',
     gap: space.sm,
   },
@@ -379,7 +431,37 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   bubble: {
-    padding: space.md,
+    padding: space.lg,
+    borderWidth: 1,
+  },
+  under: {
+    paddingHorizontal: space.xs,
+  },
+  tiles: {
+    flexDirection: 'row',
+    gap: space.sm,
+  },
+  tile: {
+    flex: 1,
+    minHeight: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.sm,
+    borderWidth: 1,
+  },
+  wide: {
+    alignSelf: 'stretch',
+  },
+  pair: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: space.sm,
+  },
+  half: {
+    flex: 1,
+    minWidth: 140,
   },
   steps: {
     gap: space.xs,

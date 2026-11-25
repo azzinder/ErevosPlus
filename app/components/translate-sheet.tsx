@@ -3,13 +3,14 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { useEffect, useRef, useState } from 'react';
+import { ModelsServer, useModelsHost } from './models-server';
 import { View } from 'react-native';
 
 import { confirm } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { errorText } from '../lib/chat-screen';
 import { lang, t } from '../lib/i18n';
-import { anyModelHere, deleteModels, downloadModels, languageName, letGoOfModels, missing, MODELS_HOST, translate } from '../lib/translate';
+import { anyModelHere, deleteModels, downloadModels, languageName, letGoOfModels, missing, translate } from '../lib/translate';
 import { intoFor, LANGUAGES, languageOf, type Language } from '../lib/translate-ways';
 import { Button, Chip, Row, Sheet, Text, TextButton } from './ui';
 
@@ -32,6 +33,8 @@ export function TranslateSheet({ text, onClose }: {
   text: string | null;
   onClose: () => void;
 }) {
+  // Where the model comes from: LPHL's server, or a web folder the owner named (lib/models-server.ts).
+  const host = useModelsHost();
   const [from, setFrom] = useState<Language>('en');
   const [into, setInto] = useState<Language>('en');
   const [step, setStep] = useState<Step>({ at: 'working' });
@@ -131,9 +134,10 @@ export function TranslateSheet({ text, onClose }: {
       {step.at === 'need' ? (
         <>
           <Text>
-            {t('To translate this way, Erevos needs translation models ({size} MB), once. They are downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: the message and its translation never leave it.', { size, host: MODELS_HOST })}
+            {t('To translate this way, Erevos needs translation models ({size} MB), once. They are downloaded from {host}, which sees your IP address, as for any download. Then everything is done on this phone: the message and its translation never leave it.', { size, host })}
           </Text>
           <Button title={t('Download ({size} MB)', { size })} onPress={() => void download()} />
+          <ModelsServer />
         </>
       ) : step.at === 'downloading' ? (
         <>

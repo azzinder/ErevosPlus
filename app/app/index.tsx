@@ -78,6 +78,7 @@ import { editionNote } from '../lib/edition-notice';
 import { EDITION, editionName, named, type Edition } from '../lib/edition';
 import { answerAsked, invitesToAsk, onInvitesToAsk } from '../lib/sms-relay';
 import { loadCurrentSpaceData } from '../lock/space-data';
+import { keepRelayLine, knownRelayLine, relayLineOf, type RelayLine } from '../lib/relay-line';
 import { waysNow } from '../lib/ways';
 import { HUES, NO_INPUT, useWays } from '../lib/ways-read';
 import { radius, shape, space, withAlpha, type Colors } from '../theme/colors';
@@ -92,7 +93,8 @@ import Contacts from './contacts';
 // chats never show here: their PIN, typed in the search or after holding New chat down, opens
 // them, in every space alike.
 
-type Relay = 'ready' | 'no-queue' | 'none';
+// What the line under the top bar says of the relay: nothing until the space's data was read (lib/relay-line.ts).
+type Relay = RelayLine;
 
 // The places of Erevos; its settings are in Settings (lib/settings.ts), the Phone and Contacts in
 // the tiles at the top. `links`: where there are links to phones nearby.
@@ -172,7 +174,15 @@ function Home() {
   // Whether any module that brings messages is on: with none (the Phone alone), there is no list.
   const messagesOn = erevosOn || modules.has('sms') || modules.has('nostr') || modules.has('matrix') || modules.has('xmpp') || modules.has('telegram') || MSG_SERVICES.some((m) => modules.has(m));
   const [rows, setRows] = useState<InboxRow[] | null>(null);
-  const [relay, setRelay] = useState<Relay>('none');
+  // As last read while this space is open, so that back from the password screen the line shows
+  // what holds from its first drawing, never "No relay yet" while the chats are still read.
+  const [relay, setRelay] = useState<Relay>(() => {
+    try {
+      return knownRelayLine(currentSpace().space);
+    } catch {
+      return 'unknown';
+    }
+  });
   const [query, setQuery] = useState('');
   const params = useLocalSearchParams<{ show?: string; opened?: string; from?: string }>();
   // Erevos's launcher icon (from=launcher) and a start with no link open on the part the owner
@@ -404,6 +414,14 @@ function Home() {
       // The chats show as soon as they are read; the phone's SMS, slower to read (a hundred
       // conversations), join them when they are.
       const load = () => {
+        // The relay's line needs only the space's own data: read at once and alone, it never waits
+        // for the chats. Data that could not be read says nothing, and what was known stays.
+        void quiet(loadCurrentSpaceData(), null).then((data) => {
+          const line = relayLineOf(data);
+          if (!active || !line) return;
+          keepRelayLine(current, line);
+          setRelay(line);
+        });
         let chatsRead: ((sms: SmsList) => void) | null = null;
         // The phone's SMS show only once Erevos is its SMS app.
         let smsFirst = false;
@@ -434,10 +452,9 @@ function Home() {
         void Promise.all([
           erevos ? quiet(chats(), [[], []]) : Promise.resolve<Awaited<ReturnType<typeof chats>>>([[], []]),
           erevos ? quiet(Archive.open('space', current, key).then((a) => a.chats()), []) : Promise.resolve([]),
-          quiet(loadCurrentSpaceData(), null),
           groupsOn ? quiet(spaceGroups().then((g) => g.list() as InboxGroup[]), []) : Promise.resolve([] as InboxGroup[]),
           groupsOn ? quiet(spaceGroups().then((g) => g.list().flatMap((group) => groupFindables(group.id, g.messages(group.id)))), []) : Promise.resolve([]),
-        ]).then(([[contacts, messages], imported, data, groups, said]) => {
+        ]).then(([[contacts, messages], imported, groups, said]) => {
           if (!active) return;
           const name = (identity: string) => publicMemberName(identity) ?? memberName(identity, contacts, groupMemberSaid);
           const phones = contacts.flatMap((c) => (c.phone ? [c.phone] : []));
@@ -469,7 +486,6 @@ function Home() {
             void saveInboxCache(current, key, list).catch(() => undefined);
           };
           chatsRead(smsShown.current);
-          setRelay(!data?.url ? 'none' : data.ownQueue ? 'ready' : 'no-queue');
         });
       };
       reload.current = load;
@@ -784,8 +800,9 @@ function Home() {
   const waysRead = useWays(WAYS_EVERY);
   const waysWaiting = waysRead?.waiting ?? 0;
   const waysShown = waysNow(waysRead?.input ?? NO_INPUT, waysWaiting);
-  const shownWays = waysShown.ways.filter((way) => way.id !== 'tor');
-  const waysLabel = `${t('Ways')}. ${waysShown.lead} ${waysShown.waiting}`;
+  // Until the ways were read once, no dot: one drawn from nothing would say the relay is off.
+  const shownWays = waysRead ? waysShown.ways.filter((way) => way.id !== 'tor') : [];
+  const waysLabel = waysRead ? `${t('Ways')}. ${waysShown.lead} ${waysShown.waiting}` : t('Ways');
 
   // The bar at the top, with the name and its buttons, stays where it is while the list scrolls (#12).
   const topBar = (
@@ -916,6 +933,13 @@ function Home() {
               ) : null}
               <ChevronIcon color={colors.textFaint} size={12} />
             </Pressable>
+          ) : relay === 'unknown' ? (
+            // Not read yet: the line's place is kept, and it says nothing it does not know.
+            <View style={[styles.status, styles.statusUnknown]} accessible={false} importantForAccessibility="no-hide-descendants">
+              <Text variant="caption" style={styles.statusText}>
+                {' '}
+              </Text>
+            </View>
           ) : (
             <Pressable
               onPress={() => router.push('/chat?setup=1')}
@@ -1457,6 +1481,11 @@ const makeStyles = (colors: Colors) =>
     },
     statusText: {
       fontSize: 12,
+    },
+    // The line before the relay's state is read: its height only, nothing drawn.
+    statusUnknown: {
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
     },
     statusRow: {
       flexDirection: 'row',

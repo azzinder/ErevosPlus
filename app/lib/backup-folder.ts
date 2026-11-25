@@ -4,7 +4,7 @@
 
 import { earlierParts, hardBackupKey, isBackupPassword, makeBackup, newBackupHard, unneededFiles, type BackupKey, type MakeOptions, type PartMade } from '../lock/backup';
 
-import { cloudFiles, loadCloudBackup, saveCloudBackup, sendToCloud, stopCloudBackup, type CloudBackup } from './backup-cloud';
+import { cloudFiles, loadCloudBackup, saveCloudBackup, sendToCloud, type CloudBackup } from './backup-cloud';
 import { phoneCallsForBackup } from './backup-calls';
 import { folderPlace, loadLedger, saveLedger, serverPlace, type Book, type Ledger } from './backup-ledger';
 import { phoneSettingsForBackup } from './backup-native';
@@ -43,6 +43,12 @@ export { backupFilesIn, CAN_AUTO_BACKUP, CAN_BACK_UP, CAN_CLOUD_BACKUP, CAN_CLOU
 // Backups hold AUTO, with its key, but not its folder, which only this phone may write in: a
 // backup restored on another phone leaves automatic backups on with no folder ('') until the
 // owner chooses one there, and meanwhile only the server gets them, when there is one.
+//
+// A server is the owner's apart from automatic backups: a backup made by hand can go there too,
+// with a password of its own (app/backup.tsx), and turning automatic backups off leaves it set,
+// with what is there. Each backup made by hand is checked as it is made, as automatic ones are
+// (checkMadeBackup): read back from the folder, opened with its password, every file beside it
+// there, and two of them read through.
 
 /** How automatic backups are made. `every` is days, a quarter of one for every 6 hours, 0 when
  *  off; `last` milliseconds, 0 if never. `hard` is Argon2id's salt and cost, null in settings from
@@ -124,10 +130,9 @@ export async function changeAutoBackup(patch: Partial<Pick<AutoBackup, 'every' |
   return next;
 }
 
-/** Stops automatic backups, and their copies to a server with them. */
+/** Stops automatic backups. The server stays, for backups sent by hand, with those already there. */
 export async function stopAutoBackup(): Promise<void> {
   await secureDelete(AUTO);
-  await stopCloudBackup();
   await saveCheck('folder', null);
   await saveCheck('server', null);
   panicFolderChanged('');
@@ -179,18 +184,19 @@ function bookOf(ledger: Ledger, place: string): Book {
  * Makes an automatic backup if one is due (or `now` anyway, with `force`), and sends one to the
  * server if it has not the newest. Returns the settings as they are after it; a backup that failed
  * says why in `error`, and is tried again next time. With `checking`, as when Erevos looks now and
- * then whether one is due, one that failed is tried again only after RETRY_MS.
+ * then whether one is due, one that failed is tried again only after RETRY_MS. With `serverOnly`,
+ * one goes to the server now, and none into the folder (Make a backup → To a server).
  */
-export function runAutoBackup(force = false, now = Date.now(), { checking = false }: { checking?: boolean } = {}): Promise<AutoRun> {
+export function runAutoBackup(force = false, now = Date.now(), { checking = false, serverOnly = false }: { checking?: boolean; serverOnly?: boolean } = {}): Promise<AutoRun> {
   running ??= (async () => {
     let auto = await loadAutoBackup();
     let cloud = await loadCloudBackup();
     if (!auto || !auto.every) return { auto, cloud };
     if (checking && failedAt && now - failedAt < RETRY_MS) return { auto, cloud };
     const every = auto.every * DAY;
-    const due = !!auto.folder && (force || now - auto.last >= every);
+    const due = !serverOnly && !!auto.folder && (force || now - auto.last >= every);
     // Without a folder, the server's go by themselves, as often.
-    const cloudDue = !!cloud && (due || cloud.last < auto.last || (!auto.folder && (force || now - cloud.last >= every)));
+    const cloudDue = !!cloud && (serverOnly || due || cloud.last < auto.last || (!auto.folder && (force || now - cloud.last >= every)));
     if (!due && !cloudDue) return { auto, cloud };
     try {
       let hard = auto.hard;
@@ -232,13 +238,25 @@ export function runAutoBackup(force = false, now = Date.now(), { checking = fals
       if (cloud && cloudDue) {
         const book = bookOf(ledger, serverPlace(cloud.url));
         const before = cloud.last;
-        cloud = await sendToCloud(cloud, (parts, reuse) => makeBackup(key, { parts, phoneSms, phoneCalls, native, bare: true, skip, ...reuse }), KEEP, now, book);
+        // The backup's own size, which the server is to list too.
+        let size: number | undefined;
+        cloud = await sendToCloud(
+          cloud,
+          async (parts, reuse) => {
+            const bytes = await makeBackup(key, { parts, phoneSms, phoneCalls, native, bare: true, skip, ...reuse });
+            size = bytes.length;
+            return bytes;
+          },
+          KEEP,
+          now,
+          book,
+        );
         const sent = cloud.names[cloud.names.length - 1];
         if (!cloud.error && sent) {
           // What the server lists of it: nothing is downloaded after each one.
           let checked: Checked;
           try {
-            checked = checkListed((await cloudFiles(cloud)).sizes, sent, book.get(sent) ?? [], now);
+            checked = checkListed((await cloudFiles(cloud)).sizes, sent, book.get(sent) ?? [], now, size);
           } catch (error) {
             checked = { at: now, parts: 0, read: 0, missing: 0, damaged: 0, opened: false, error: errorText(error) };
           }
@@ -317,6 +335,37 @@ export async function checkFolderFully(how: CheckProgress = {}, now = Date.now()
     await checkFolder(auto.folder, key, ledger.get(folderPlace(auto.folder)), 'all', now, how);
   }
   return loadChecks();
+}
+
+/**
+ * Checks a backup just made by hand into `folder`, named `name`, as an automatic one is after it
+ * (lib/backup-check.ts): read back and opened with `key`, every file beside it there, of its size,
+ * and AUTO_SAMPLE of them read through and opened. Null where the folder's files cannot be listed
+ * (Sailfish OS, a browser). What it finds is the caller's to say: it is kept nowhere.
+ */
+export async function checkMadeBackup(folder: string, name: string, key: Pick<BackupKey, 'key' | 'salt'>, now = Date.now()): Promise<Checked | null> {
+  try {
+    const files = await backupFilesIn(folder);
+    if (!files) return null;
+    return await checkBackup(files, name, key, AUTO_SAMPLE, now);
+  } catch (error) {
+    return { at: now, parts: 0, read: 0, missing: 0, damaged: 0, opened: false, error: errorText(error) };
+  }
+}
+
+/**
+ * Checks a backup just sent to the server by hand, as an automatic one is after it: the server
+ * lists it, of `size`, and every part it named (`made`), of their sizes. Nothing is downloaded.
+ * Null when it did not go.
+ */
+export async function checkSentBackup(cloud: CloudBackup, made: readonly PartMade[], size: number, now = Date.now()): Promise<Checked | null> {
+  const sent = cloud.names[cloud.names.length - 1];
+  if (cloud.error || !sent) return null;
+  try {
+    return checkListed((await cloudFiles(cloud)).sizes, sent, made, now, size);
+  } catch (error) {
+    return { at: now, parts: made.length, read: 0, missing: 0, damaged: 0, opened: false, error: errorText(error) };
+  }
 }
 
 /** Makes an automatic backup if one is due, as Erevos looks now and then while a space is open. */

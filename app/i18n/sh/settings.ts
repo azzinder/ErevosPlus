@@ -81,7 +81,6 @@ export const settings: Record<string, string> = {
   'A newer Erevos made this backup, so this one cannot restore it. Update Erevos to the latest version, then restore it.':
     'Ovu rezervnu kopiju napravio je noviji Erevos, pa je ovaj ne može vratiti. Ažurirajte Erevos na najnoviju verziju, pa je onda vratite.',
   'Could not read that file. {error}': 'Ta datoteka se nije mogla pročitati. {error}',
-  'Saved {name} ({size}) in {folder}. Keep its password: nothing opens the backup without it.': 'Datoteka {name} ({size}) sačuvana je u {folder}. Čuvajte njenu lozinku: bez nje ništa ne otvara rezervnu kopiju.',
   'Replace everything': 'Zamijeni sve',
   'Every space on {device}, with its contacts, messages and hidden chats, will be replaced by what the backup holds. What is here now and not in the backup is gone for good. Then Erevos opens as it was when the backup was made, with the passwords used then.': 'Svaki prostor na {device}, s kontaktima, porukama i skrivenim razgovorima, zamjenjuje se sadržajem rezervne kopije. Ono što je sada ovdje, a nije u rezervnoj kopiji, nestaje zauvijek. Zatim se Erevos otvara kakav je bio kad je rezervna kopija napravljena, s tadašnjim lozinkama.',
   "A backup holds everything Erevos keeps on {device}: every space, with its contacts, messages, photos, files, voice messages, imported chats and hidden chats, each still sealed with its own password, and the settings that go with you to another device. The backup has a password of its own too. Its photos, files and voice messages go in files of their own beside it. An automatic backup also needs files of the ones before it: keep the whole folder.":
@@ -439,4 +438,15 @@ export const settings: Record<string, string> = {
   "Fetched at once, but while roaming only on a tap.": "Preuzimaju se odmah, ali u romingu samo na dodir.",
   "Fetched only on a tap.": "Preuzimaju se samo na dodir.",
   "MMS from {from} · {size} KB": "MMS od {from} · {size} KB",
+  'Began {start}, ended {end}.': 'Početak: {start}, kraj: {end}.',
+  'The time in its name is when it began.': 'Vrijeme u njenom imenu je vrijeme početka.',
+  'Not in it: Erevos itself, and what it keeps only for a while, such as its cache and Tor’s files.': 'U njoj nije: sam Erevos, ni ono što čuva samo neko vrijeme, kao njegov keš i Torove datoteke.',
+  'Nor the Collection’s files that are whole on its WebDAV server: a restore fetches them from there.': 'Ni datoteke Zbirke koje su cijele na njenom WebDAV serveru: vraćanje ih preuzima odande.',
+  'Nor the Collection you keep out of backups.': 'Ni Zbirka koju držite izvan rezervnih kopija.',
+  'Checking the backup…': 'Provjera rezervne kopije…',
+  'Saved {name} in {folder}: {total}.': 'Datoteka {name} sačuvana je u {folder}: {total}.',
+  'Keep its password: nothing opens the backup without it.': 'Čuvajte njenu lozinku: bez nje ništa ne otvara rezervnu kopiju.',
+  'Into a folder': 'U folder',
+  'Saved {name} in {folder}, with {n} file beside it: {total} in all.': 'Datoteka {name} sačuvana je u {folder}, s {n} datotekom pored nje: ukupno {total}.',
+  'Saved {name} in {folder}, with {n} files beside it: {total} in all.': 'Datoteka {name} sačuvana je u {folder}, s {n} datotekom pored nje: ukupno {total}. | Datoteka {name} sačuvana je u {folder}, s {n} datoteke pored nje: ukupno {total}. | Datoteka {name} sačuvana je u {folder}, s {n} datoteka pored nje: ukupno {total}.',
 };

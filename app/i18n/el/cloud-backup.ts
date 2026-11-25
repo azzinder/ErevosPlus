@@ -52,8 +52,6 @@ export const cloudBackup: Record<string, string> = {
     "Σε έναν browser ο server πρέπει να αφήνει το web app να μπει (CORS), και αυτός δεν το άφησε ή δεν βρέθηκε.",
   "Erevos forgets the server and its password here. The backups already on it stay there until you delete them.":
     "Το Erevos ξεχνά εδώ τον server και τον κωδικό του. Τα αντίγραφα που είναι ήδη εκεί μένουν μέχρι να τα σβήσεις.",
-  "Sent a backup to {server}. Keep its password: nothing opens the backup without it.":
-    "Στάλθηκε αντίγραφο στο {server}. Κράτα τον κωδικό του: τίποτα δεν ανοίγει το αντίγραφο χωρίς αυτόν.",
   "Send a backup there now and then; the server keeps the {n} newest.":
     "Στέλνε εκεί ένα αντίγραφο πού και πού· ο server κρατά τα {n} πιο πρόσφατα.",
   "The last one did not go: {error}":
@@ -222,4 +220,23 @@ export const cloudBackup: Record<string, string> = {
   "Keep Erevos open until it is done: a notice says when.": "Κράτα το Erevos ανοιχτό μέχρι να τελειώσει: μια ειδοποίηση θα σου το πει.",
   "Backup made": "Το αντίγραφο έγινε",
   "{name} ({size}) is saved in {folder}.": "Το {name} ({size}) αποθηκεύτηκε στο {folder}.",
+  "Encrypting and sending…": "Κρυπτογράφηση και αποστολή…",
+  "Sent a backup to {server}: {total}.": "Στάλθηκε αντίγραφο στο {server}: {total}.",
+  "Or to {server}, your server: it gets the backup encrypted, under a random name.": "Ή στο {server}, τον server σου: παίρνει το αντίγραφο κρυπτογραφημένο, με τυχαίο όνομα.",
+  "Or to a folder on a server of yours over WebDAV, such as Nextcloud: it gets the backup encrypted, under a random name.": "Ή σε φάκελο σε δικό σου server μέσω WebDAV, όπως το Nextcloud: παίρνει το αντίγραφο κρυπτογραφημένο, με τυχαίο όνομα.",
+  "To a server (WebDAV)": "Σε server (WebDAV)",
+  "Sent a backup to {server}, with {n} file beside it: {total} in all.": "Στάλθηκε αντίγραφο στο {server}, με {n} αρχείο δίπλα του: {total} συνολικά.",
+  "Sent a backup to {server}, with {n} files beside it: {total} in all.": "Στάλθηκε αντίγραφο στο {server}, με {n} αρχεία δίπλα του: {total} συνολικά.",
+  "The backup itself is there, but not of the size it was sent with.": "Το ίδιο το αντίγραφο είναι εκεί, αλλά όχι με το μέγεθος που στάλθηκε.",
+  "A backup of {total} in all went to {server}.": "Ένα αντίγραφο {total} συνολικά πήγε στο {server}.",
+  "{name} and {n} file beside it, {total} in all, are saved in {folder}.": "Το {name} και {n} αρχείο δίπλα του, {total} συνολικά, αποθηκεύτηκαν στο {folder}.",
+  "{name} and {n} files beside it, {total} in all, are saved in {folder}.": "Το {name} και {n} αρχεία δίπλα του, {total} συνολικά, αποθηκεύτηκαν στο {folder}.",
+  "A backup sent by hand goes whole each time, with every photo and file: up to about {size} now.":
+    "Ένα αντίγραφο που στέλνεται με το χέρι πηγαίνει ολόκληρο κάθε φορά, με κάθε φωτογραφία και αρχείο: έως περίπου {size} τώρα.",
+  "A backup sent by hand goes whole each time, with every photo and file.":
+    "Ένα αντίγραφο που στέλνεται με το χέρι πηγαίνει ολόκληρο κάθε φορά, με κάθε φωτογραφία και αρχείο.",
+  "With automatic backups on, only what is new goes each time.":
+    "Με τα αυτόματα αντίγραφα ανοιχτά, πηγαίνει κάθε φορά μόνο ό,τι είναι νέο.",
+  "The server keeps the {n} newest whole.":
+    "Ο server κρατά τα {n} πιο πρόσφατα ολόκληρα.",
 };

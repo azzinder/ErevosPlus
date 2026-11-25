@@ -19,8 +19,10 @@
   const LONGEST = 6000;
   const MAX_KEY = 4096;
   const NAME_MAX = 40;
-  // The link the app takes when pasted: CONTACT_PAGE in lib/contact-code.ts.
-  const PAGE = 'https://erevos-web.lphl.nekten.eu/c';
+  // The link the app takes when pasted: CONTACT_PAGE in lib/contact-code.ts, on any server.
+  // This page's own server: LPHL's, or a community's that serves Erevos's pages (lib/servers.ts).
+  const ORIGIN = typeof location === 'object' && /^https:\/\//.test(location.origin) ? location.origin : 'https://erevos-web.lphl.nekten.eu';
+  const PAGE = `${ORIGIN}/c`;
   const APK = 'https://github.com/azzinder/erevos-releases/releases/latest/download/erevos-android.apk';
   const DOWNLOADS = 'https://github.com/azzinder/erevos-releases/releases/latest';
 

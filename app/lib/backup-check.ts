@@ -261,13 +261,15 @@ export async function checkBackup(
 
 /**
  * Checks, by what the server lists, that the backup `name` sent there and every part it named (as
- * the ledger says, `made`) are there, of their sizes: nothing is downloaded.
+ * the ledger says, `made`) are there, of their sizes: nothing is downloaded. With `size`, the
+ * backup's own, which it is to be there too.
  */
 export function checkListed(
   sizes: Map<string, number>,
   name: string,
   made: readonly PartMade[],
   now = Date.now(),
+  size?: number,
 ): Checked {
   const checked: Checked = {
     at: now,
@@ -280,6 +282,9 @@ export function checkListed(
   };
   if (!sizes.has(name))
     return { ...checked, error: t("The backup itself is not there.") };
+  const listed = sizes.get(name) ?? -1;
+  if (size !== undefined && listed >= 0 && listed !== size)
+    return { ...checked, error: t("The backup itself is there, but not of the size it was sent with.") };
   for (const part of made) {
     const size = sizes.get(part.name);
     if (size === undefined) checked.missing++;

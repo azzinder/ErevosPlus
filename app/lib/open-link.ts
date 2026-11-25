@@ -9,7 +9,9 @@
 // is held here (app/+native-intent.ts) and opened once a space is open, if it came in the last few
 // minutes. One opened just before Erevos locked, as it does when it comes back from the background
 // with the link, is held again for after the password.
-// Self-contained on purpose, so it can run under plain Node for checks.
+// Self-contained on purpose (but for lib/servers.ts), so it can run under plain Node for checks.
+
+import { LPHL_WEB, WEB_ORIGIN } from './servers';
 
 /** How long a link waits for the password. */
 export const KEEP_MS = 5 * 60_000;
@@ -34,11 +36,15 @@ export function linkHref(url: string): string {
   return `/${path}${query}`;
 }
 
-// Erevos's own pages on LPHL's web server that Android opens in Erevos (app.json intentFilters,
-// with the server's .well-known/assetlinks.json): an invite (/i#..., lib/text-invite.ts) and a
-// contact page (/c#..., lib/contact-code.ts), whose data follows #. The same screens as the links
-// those pages open in the app. Expo Router may hand over the whole address or only its path.
-const WEB_PAGE = /^(?:https:\/\/erevos-web\.lphl\.nekten\.eu)?\/([ic])\/?#(.+)$/i;
+// Erevos's own pages on the web server that Android opens in Erevos (app.json intentFilters, with
+// the server's .well-known/assetlinks.json: LPHL's, or the one the build names, lib/servers.ts): an
+// invite (/i#..., lib/text-invite.ts) and a contact page (/c#..., lib/contact-code.ts), whose data
+// follows #. Only those two servers open a screen by themselves; the same pages on any other
+// server are taken when pasted or scanned (pastedLink, parseContact, parseTextInvite). The same
+// screens as the links those pages open in the app. Expo Router may hand over the whole address
+// or only its path.
+const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const WEB_PAGE = new RegExp(`^(?:${[...new Set([WEB_ORIGIN, LPHL_WEB])].map(escaped).join('|')})?\\/([ic])\\/?#(.+)$`, 'i');
 
 /** The screen of a link to Erevos's invite or contact page, or '' for any other. */
 export function webLinkHref(url: string): string {
@@ -50,8 +56,13 @@ export function webLinkHref(url: string): string {
   return /^[A-Za-z0-9_%.~+=&-]+$/.test(data) ? `/contact?${data}` : '';
 }
 
-// An Erevos link wherever it stands in a text: its own kind (erevos://...), or one of its two pages.
-const LINK_IN = /(?:erevos:\/\/[a-z-]+\?|https:\/\/erevos-web\.lphl\.nekten\.eu\/[ci]\/?#)[^\s<>"'«»]+/i;
+// An Erevos link wherever it stands in a text: its own kind (erevos://...), or one of its two pages
+// on this build's web server or LPHL's. Only a text with neither is read for the same pages on any
+// other web server, so an address of that shape which is not Erevos's, earlier in the text, does
+// not stand in the link's way.
+const REST = `[^\\s<>"'«»]+`;
+const LINK_IN = new RegExp(`(?:erevos:\\/\\/[a-z-]+\\?|(?:${[...new Set([WEB_ORIGIN, LPHL_WEB])].map(escaped).join('|')})\\/[ci]\\/?#)${REST}`, 'i');
+const LINK_ELSEWHERE = new RegExp(`https:\\/\\/[a-z0-9.-]+(?::[0-9]{1,5})?\\/[ci]\\/?#${REST}`, 'i');
 
 /**
  * What was pasted where a link is asked for, as the link in it: a whole message someone sent, with
@@ -59,7 +70,7 @@ const LINK_IN = /(?:erevos:\/\/[a-z-]+\?|https:\/\/erevos-web\.lphl\.nekten\.eu\
  * sentence. Text with no Erevos link in it comes back as it is, trimmed.
  */
 export function pastedLink(text: string): string {
-  const found = LINK_IN.exec(text);
+  const found = LINK_IN.exec(text) ?? LINK_ELSEWHERE.exec(text);
   if (!found) return text.trim();
   let end = found[0].length;
   while (end > 0 && '.,;:!?)]'.includes(found[0][end - 1])) end -= 1;

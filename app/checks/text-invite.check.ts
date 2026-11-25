@@ -107,7 +107,11 @@ test('what is not an invite by SMS is not taken for one', () => {
   // A name longer than the rest of the link says.
   assert.equal(parseTextInvite(changed(126, 120)), null);
   assert.equal(parseTextInvite(link.replace('#', '#!')), null);
-  assert.equal(parseTextInvite(`https://example.org/i#${data(link)}`), null);
+  // On another server it is read as on LPHL's (lib/servers.ts, checks/servers.check.ts), but only
+  // over https and at /i.
+  assert.deepEqual(parseTextInvite(`https://example.org/i#${data(link)}`), parseTextInvite(link));
+  assert.equal(parseTextInvite(`http://example.org/i#${data(link)}`), null);
+  assert.equal(parseTextInvite(`https://example.org/x/i#${data(link)}`), null);
   assert.equal(parseTextInvite('erevos://text-invite?d='), null);
   assert.equal(textInviteOf(undefined), null);
   // A relay without TLS is taken only on a private network, as an invite to a relay is.

@@ -44,6 +44,11 @@ test('a link pasted with the words around it is taken alone', () => {
   assert.equal(pastedLink(`${invite} erevos://welcome?x=1`), invite);
   assert.equal(pastedLink('  1234 5678 '), '1234 5678');
   assert.equal(pastedLink('https://example.org/i#abc'), 'https://example.org/i#abc');
+  // The same pages on another web server are read too, where the text has no link on Erevos's own:
+  // an address of that shape earlier in the text does not stand in the link's way.
+  assert.equal(pastedLink('Add me: https://erevos.community.example/c#id=ab&key=cd.'), 'https://erevos.community.example/c#id=ab&key=cd');
+  assert.equal(pastedLink(`see https://blog.example/c#about, then ${invite}`), invite);
+  assert.equal(pastedLink('see https://blog.example/i#top, then erevos://contact?id=ab&key=cd'), 'erevos://contact?id=ab&key=cd');
   const started = performance.now();
   assert.equal(pastedLink(`${invite}${')'.repeat(200000)}`), invite);
   assert.ok(performance.now() - started < 2000);

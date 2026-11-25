@@ -214,7 +214,6 @@ export const smsTools: Record<string, string> = {
   "At most {n} quick texts.": "Najviše {n} brzih tekstova.",
   "Tap one to put it in the field. Hold one down to remove it.": "Dodirnite jedan da ga stavite u polje. Držite jedan da ga uklonite.",
   "A new quick text": "Novi brzi tekst",
-  "Or hold + down.": "Ili držite +.",
   "Fetch (may cost)": "Preuzmi (može koštati)",
   "MMS · {size} KB": "MMS · {size} KB",
   "MMS waiting · {n}": "MMS na čekanju · {n}",
