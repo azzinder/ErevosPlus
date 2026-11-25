@@ -32,6 +32,14 @@ test('what is not one is left out', () => {
   assert.equal(checkedNetworks({ session: JSON.stringify({ seed: 'zz' + seed.slice(2) }) }), null);
 });
 
-test('only Session goes in: what another network might say is not read', () => {
+test("only Session goes in: what another network might say is not read", () => {
   assert.deepEqual(checkedNetworks({ session: state, signal: 'x', telegram: 'y' }), { session: state });
+});
+
+test("what the first space keeps for backups: Session's account as it was, or none", async () => {
+  const { checkedNetworksBackup } = await import('../lock/networks-backup-data');
+  assert.deepEqual(checkedNetworksBackup({ session: state, at: 5 }), { session: state, at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: 'not json', at: 5 }), { session: '', at: 5 });
+  assert.deepEqual(checkedNetworksBackup({ session: state, at: -1 }), { session: state, at: 0 });
+  assert.deepEqual(checkedNetworksBackup(null), { session: '', at: 0 });
 });

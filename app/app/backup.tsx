@@ -95,7 +95,11 @@ import { takeHandedServer } from "../lib/backup-pieces";
 import { pickFile, TooLargeError } from "../lib/pick-file";
 import { SHELL } from "../lib/shell";
 import { EDITION } from "../lib/edition";
-import { sessionRestoreError } from "../lib/backup-networks";
+import {
+  keepNetworksForBackup,
+  networksRestored,
+  type NetworksKept,
+} from "../lib/backup-networks";
 import { holdReceiver } from "../lib/receiver";
 import {
   backupKey,
@@ -157,7 +161,7 @@ type Asking =
 // from a server comes up to 100 MB only (CLOUD_RESTORE_MOST), as any download (lib/net-http.ts).
 // What Erevos+ says of the networks a backup leaves out (#67): each keeps its own, and how they come back.
 const NETWORKS_LEFT = mark(
-  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.",
 );
 const MAX_BYTES = 200 * 1024 * 1024;
 
@@ -754,9 +758,16 @@ export default function Backups() {
   }
 
   // What a backup holds of the phone's SMS, said after it is made.
-  // Erevos+: the other networks' accounts and chats stay with them, never in a backup (#67).
-  function networksText(): string {
-    return EDITION === "plus" ? ` ${t(NETWORKS_LEFT)}` : "";
+  // Erevos+: what the backup holds of the other networks (#67), and of Session's account as it went in.
+  function networksText(kept: NetworksKept): string {
+    if (EDITION !== "plus") return "";
+    const session =
+      kept.kind === "failed"
+        ? ` ${t("Session's account is not in this backup: {error}", { error: kept.error })}`
+        : kept.kind === "earlier"
+          ? ` ${t("Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.")}`
+          : "";
+    return ` ${t(NETWORKS_LEFT)}${session}`;
   }
 
   function smsText(sms: Uint8Array | null): string {
@@ -795,6 +806,8 @@ export default function Backups() {
         const phoneSms = await phoneSmsForBackup();
         const phoneCalls = await phoneCallsForBackup();
         const native = await phoneSettingsForBackup();
+        // Erevos+: Session's account, kept sealed for it now where the first space is open.
+        const networks = await keepNetworksForBackup();
         const skip = await openCollectionSkips();
         made.making({ step: t("Encrypting and saving…"), percent: null });
         const { name, size, parts, where } = await writeBackup(
@@ -822,7 +835,7 @@ export default function Backups() {
             partsText(parts) +
             smsText(phoneSms) +
             callsText(phoneCalls) +
-            networksText(),
+            networksText(networks),
           false,
           made,
         );
@@ -965,6 +978,8 @@ export default function Backups() {
             say(errorText(error), true);
             return;
           }
+          // Erevos+: Session's account it held goes back as the first space next opens.
+          await networksRestored().catch(() => undefined);
           // The settings it held, followed at once, and the phone module's put back.
           await afterRestore(backupNative(backup), before);
           if (sms && putSms) {
@@ -1024,21 +1039,10 @@ export default function Backups() {
               { name: left[0] },
             )
           : "";
-        // Erevos+: Session's account, where the backup held one that did not go back (lib/backup-networks.ts).
-        const sessionError = sessionRestoreError();
-        const sessionText = sessionError
-          ? t("Session's account could not go back: {error}", {
-              error: sessionError,
-            })
-          : "";
-        if (leftText || told || toldCalls || sessionText)
+        if (leftText || told || toldCalls)
           ask(
-            leftText || toldCalls || sessionText
-              ? t("Restore a backup")
-              : t("SMS"),
-            [leftText, told, toldCalls, sessionText]
-              .filter(Boolean)
-              .join("\n\n"),
+            leftText || toldCalls ? t("Restore a backup") : t("SMS"),
+            [leftText, told, toldCalls].filter(Boolean).join("\n\n"),
             [{ text: t("OK") }],
           );
       }

@@ -4,10 +4,16 @@
 
 // Serbo-Croatian for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Session's account is not in this backup: {error}":
+    "Session nalog nije u ovoj kopiji: {error}",
+  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
+    "Session nalog je unutra onakav kakvim ga je prvi prostor zadnji put sačuvao: napravi kopiju s otvorenim prvim prostorom da uđe kakav je sada.",
+  "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
+    "Ovaj telefon ima drugi Session nalog, pa nalog iz kopije nije stavljen na njegovo mjesto. Da vratiš onaj iz kopije, odjavi se iz Sessiona ovdje i ponovo vrati kopiju.",
   "Session's account could not go back: {error}":
     "Session nalog nije mogao da se vrati: {error}",
-  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
-    "Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom; njegove fotografije i datoteke ne, vraćaju se iz Sessiona dok ih čuva. Telegram, Signal i Messenger nisu u kopiji: nakon vraćanja ponovo se prijavi na Telegram i Messenger, i ponovo registruj ili poveži Signal. Njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
+    "Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom i lozinkom prvog prostora; vraćanje ih donosi nazad čim se otvori prvi prostor, ako telefon nema drugi Session nalog. Njegove fotografije i datoteke ne ulaze: Session ih ponovo daje dok ih čuva. Telegram, Signal i Messenger nisu u kopiji: nakon vraćanja ponovo se prijavi na Telegram i Messenger, i ponovo registruj ili poveži Signal. Njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva.",
   'Turn off the lock': 'Isključi zaključavanje',
   'Erevos will open without a password. The second password stops working too.': 'Erevos će se otvarati bez lozinke. Prestaje raditi i druga lozinka.',
   'The lock is off.': 'Zaključavanje je isključeno.',

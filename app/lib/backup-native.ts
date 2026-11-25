@@ -4,7 +4,6 @@
 
 import { blockingRules, phoneGroups, phoneReady, quickReplies, setBlockingRules, setQuickReplies, type ContactGroup } from '../modules/erevos-phone';
 
-import { checkedNetworks, networksForBackup, putNetworks } from './backup-networks';
 import { utf8Decode, utf8Encode } from './crypto';
 import { cleanReplies } from './phone';
 import { checkedRules, rulesFrom, rulesJson, type GroupBlock } from './phone-rules';
@@ -25,11 +24,9 @@ type Named = { id: string; title: string; account: string };
 
 const noGroups = { allowed: false, groups: [] as ContactGroup[] };
 
-/** The phone module's settings, for a backup being made, with Erevos+'s other networks
- *  (lib/backup-networks.ts); null where there is neither. */
+/** The phone module's settings, for a backup being made; null where there is no phone module. */
 export async function phoneSettingsForBackup(): Promise<Uint8Array | null> {
-  const networks = await networksForBackup();
-  if (!phoneReady()) return networks ? utf8Encode(JSON.stringify({ v: VERSION, replies: [], rules: null, groups: [], networks, noPhone: true })) : null;
+  if (!phoneReady()) return null;
   const { replies, own } = quickReplies();
   const rules = rulesFrom(blockingRules());
   const named: Named[] = [];
@@ -40,14 +37,14 @@ export async function phoneSettingsForBackup(): Promise<Uint8Array | null> {
       if (group) named.push({ id: group.id, title: group.title, account: group.account });
     }
   }
-  return utf8Encode(JSON.stringify({ v: VERSION, replies: own ? replies : [], rules, groups: named, ...(networks ? { networks } : {}) }));
+  return utf8Encode(JSON.stringify({ v: VERSION, replies: own ? replies : [], rules, groups: named }));
 }
 
 /** Puts back the phone module's settings a backup holds, in place of the phone's. Nothing
  *  changes where there is no phone module, or nothing to put back. */
 export async function putPhoneSettings(bytes: Uint8Array | null): Promise<void> {
-  if (!bytes) return;
-  let value: { v?: unknown; replies?: unknown; rules?: unknown; groups?: unknown; networks?: unknown; noPhone?: unknown };
+  if (!bytes || !phoneReady()) return;
+  let value: { v?: unknown; replies?: unknown; rules?: unknown; groups?: unknown };
   try {
     value = JSON.parse(utf8Decode(bytes)) as typeof value;
   } catch {
@@ -55,10 +52,6 @@ export async function putPhoneSettings(bytes: Uint8Array | null): Promise<void> 
   }
   // One of a later kind, from a newer Erevos, as far as it is understood.
   if (!value || typeof value !== 'object' || typeof value.v !== 'number' || value.v < VERSION) return;
-  // Erevos+'s other networks first, phone module or not (lib/backup-networks.ts).
-  await putNetworks(checkedNetworks(value.networks));
-  // A backup from where there was no phone module holds none of its settings: the phone's stay.
-  if (!phoneReady() || value.noPhone === true) return;
   const replies = Array.isArray(value.replies) ? value.replies.filter((reply): reply is string => typeof reply === 'string') : [];
   setQuickReplies(cleanReplies(replies));
   const rules = checkedRules(value.rules);

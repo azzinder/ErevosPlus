@@ -4,10 +4,16 @@
 
 // Greek for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Session's account is not in this backup: {error}":
+    "Ο λογαριασμός Session δεν είναι σε αυτό το αντίγραφο: {error}",
+  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
+    "Ο λογαριασμός Session είναι μέσα όπως τον κράτησε τελευταία φορά ο πρώτος χώρος: κάνε το αντίγραφο με ανοιχτό τον πρώτο χώρο για να μπει όπως είναι τώρα.",
+  "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
+    "Αυτό το κινητό έχει άλλον λογαριασμό Session, γι' αυτό ο λογαριασμός του αντιγράφου δεν μπήκε στη θέση του. Για να επιστρέψει του αντιγράφου, αποσυνδέσου από το Session εδώ και κάνε ξανά την επαναφορά.",
   "Session's account could not go back: {error}":
     "Ο λογαριασμός Session δεν μπόρεσε να επιστρέψει: {error}",
-  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
-    "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του· οι φωτογραφίες και τα αρχεία του όχι, ξανάρχονται από το Session όσο τα κρατά. Τα Telegram, Signal και Messenger δεν μπαίνουν: μετά την επαναφορά, συνδέσου ξανά στο Telegram και στο Messenger, και κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
+    "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του και του πρώτου χώρου· η επαναφορά τα φέρνει πίσω μόλις ανοίξει ο πρώτος χώρος, αν το κινητό δεν έχει άλλον λογαριασμό Session. Οι φωτογραφίες και τα αρχεία του δεν μπαίνουν: ξανάρχονται από το Session όσο τα κρατά. Τα Telegram, Signal και Messenger δεν μπαίνουν: μετά την επαναφορά, συνδέσου ξανά στο Telegram και στο Messenger, και κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
   'Turn off the lock': 'Απενεργοποίηση κλειδώματος',
   'Erevos will open without a password. The second password stops working too.': 'Το Erevos θα ανοίγει χωρίς κωδικό. Θα σταματήσει να λειτουργεί και ο δεύτερος κωδικός.',
   'The lock is off.': 'Το κλείδωμα απενεργοποιήθηκε.',

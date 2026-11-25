@@ -4,10 +4,16 @@
 
 // Portuguese for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Session's account is not in this backup: {error}":
+    "A conta do Session não está nesta cópia: {error}",
+  "Session's account is in it as the first space last kept it: make the backup with the first space open to keep it as it is now.":
+    "A conta do Session está lá como o primeiro espaço a guardou da última vez: faz a cópia com o primeiro espaço aberto para que entre como está agora.",
+  "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
+    "Este telemóvel tem outra conta do Session, por isso a da cópia não foi posta no seu lugar. Para recuperar a da cópia, termina a sessão do Session aqui e restaura a cópia de novo.",
   "Session's account could not go back: {error}":
     "A conta do Session não pôde voltar: {error}",
-  "Session's account and chats go into a backup, sealed with its password; its photos and files do not, and come again from Session while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
-    "A conta e as conversas do Session entram numa cópia de segurança, cifradas com a sua palavra-passe; as fotos e os ficheiros não, voltam do Session enquanto ele os guardar. Telegram, Signal e Messenger não estão numa cópia: depois de restaurar, inicia sessão de novo no Telegram e no Messenger, e regista ou liga o Signal de novo. As mensagens voltam só até onde cada rede as guarda.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Telegram, Signal and Messenger are not in a backup: after a restore, sign in to Telegram and Messenger again, and register or link Signal again. Their messages come back only as far as each network keeps them.":
+    "A conta e as conversas do Session entram numa cópia de segurança, cifradas com a sua palavra-passe e a do primeiro espaço; restaurar trá-las de volta assim que o primeiro espaço abre, se o telemóvel não tiver outra conta do Session. As fotos e os ficheiros não entram: o Session dá-os de novo enquanto os guardar. Telegram, Signal e Messenger não estão numa cópia: depois de restaurar, inicia sessão de novo no Telegram e no Messenger, e regista ou liga o Signal de novo. As mensagens voltam só até onde cada rede as guarda.",
   'Turn off the lock': 'Desativar o bloqueio',
   'Erevos will open without a password. The second password stops working too.': 'O Erevos vai abrir sem senha. A segunda senha também deixa de funcionar.',
   'The lock is off.': 'O bloqueio está desativado.',

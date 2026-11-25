@@ -15,6 +15,9 @@ import { accountNeverStraight, accountThroughTor, accountTorDoor, effectiveTor, 
 import { onTorReady, onTorWay } from './relay';
 import { t } from './i18n';
 import { currentSpace } from '../lock/keys';
+import { loadNetworksBackup } from '../lock/networks-backup-data';
+import { lastRestore } from '../lock/restored';
+import { secureDelete, secureGet } from './secure';
 import type { ChatNotify } from '../lock/chat-notify';
 import { addNetwork, hearing } from './network-notices';
 import { sessionCallTexts } from './session-calls';
@@ -79,6 +82,7 @@ async function readOwn(): Promise<void> {
     ownKey = key;
     tellSessionMuted();
     changed();
+    void restoredSession(key);
   } catch {
     // No space open, or none that opens it: no chat has notifications of its own.
   }
@@ -486,20 +490,57 @@ export function msgEnginesHere(): boolean {
   return native !== null;
 }
 
+// Where lib/backup-networks.ts marks a restore whose Session account waits for the first space.
+const RESTORE_PENDING = 'erevos.networks-restore';
+let restoring = false;
+
 /**
- * Session's account from a backup (lib/backup-networks.ts) in place of this phone's: the engine
- * keeps it sealed anew, the chats shown so far go, and it starts again with the account restored.
+ * After a restore from Backups, once the first space opens: Session's account the backup held
+ * (lock/networks-backup-data.ts) goes back to the engine, sealed anew with this phone's Keystore,
+ * and Session starts again with it. Only where there is no Session account, or the same one:
+ * another account here is never replaced, and that is said. Once, for that restore.
  */
-export async function sessionRestore(state: string): Promise<void> {
-  await msgCall('session', 'restoreState', { state });
-  set('session', emptyMsgState());
-  cameSince.session.clear();
-  readTo.session.clear();
-  countedTo.session.clear();
-  started.delete('session');
-  startedAt.delete('session');
-  hearNow('session');
-  await msgSignedIn('session');
+async function restoredSession(key: Uint8Array): Promise<void> {
+  if (restoring || !native) return;
+  restoring = true;
+  try {
+    const pending = await secureGet(RESTORE_PENDING);
+    if (!pending) return;
+    if (pending !== (await lastRestore())) {
+      await secureDelete(RESTORE_PENDING);
+      return;
+    }
+    const { session } = await loadNetworksBackup(key);
+    await secureDelete(RESTORE_PENDING);
+    if (!session) return;
+    try {
+      await msgCall('session', 'restoreState', { state: session });
+    } catch (error) {
+      const said = error instanceof Error ? error.message : String(error);
+      // Loaded here, not with this file: it needs the app around it.
+      const { ask } = await import('./alert');
+      ask(
+        SERVICE_NAMES.session,
+        said === 'other-account'
+          ? t("This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.")
+          : t("Session's account could not go back: {error}", { error: said }),
+        [{ text: t('OK') }],
+      );
+      return;
+    }
+    set('session', emptyMsgState());
+    cameSince.session.clear();
+    readTo.session.clear();
+    countedTo.session.clear();
+    started.delete('session');
+    startedAt.delete('session');
+    hearNow('session');
+    await msgSignedIn('session');
+  } catch {
+    // Tried again as the first space next opens, while the mark stays.
+  } finally {
+    restoring = false;
+  }
 }
 
 /** Signs a service out on this phone: the engine forgets its account. */

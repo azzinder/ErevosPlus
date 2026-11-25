@@ -38,6 +38,7 @@ import { FILE as SYNC } from './sync-data';
 import { PREFIX as AVATAR } from './avatar-photos';
 import { PREFIX as VOICE } from './voice-clips';
 import { FILE as MSG_OWN } from './msg-own-data';
+import { FILE as NETWORKS } from './networks-backup-data';
 import { FILE as TELEGRAM } from './telegram-data';
 import { FILE as XMPP } from './xmpp-data';
 
@@ -239,7 +240,8 @@ const NEVER_KEPT = ['erevos.phone-speed'];
 // each place's Telegram of the ErevosGram build (lock/telegram-data.ts): whether it signed in, and the
 // ErevosGram encryption's keys; TDLib's own folder is never in a backup, so a restored one signs in
 // to Telegram again, with its encrypted chats as they were.
-const TEXT_FILES = [E2E, HISTORY, ARCHIVE, GROUPS, PUBLIC_GROUPS, SMS_ORDER, CHAT_LIST, CONTACTS, STICKERS, MYSELF, MATRIX, XMPP, NOSTR_DM, NOSTR_PIECES, COLLECTION, STARS, TELEGRAM, MSG_OWN];
+// And Erevos+'s Session account, sealed with the first space's key (lock/networks-backup-data.ts).
+const TEXT_FILES = [E2E, HISTORY, ARCHIVE, GROUPS, PUBLIC_GROUPS, SMS_ORDER, CHAT_LIST, CONTACTS, STICKERS, MYSELF, MATRIX, XMPP, NOSTR_DM, NOSTR_PIECES, COLLECTION, STARS, TELEGRAM, MSG_OWN, NETWORKS];
 // The sealed files no backup holds, whose values may lie in pages too: the linked devices and the
 // account's log (lock/devices-data.ts, lock/sync-data.ts). Restoring deletes every page the backup
 // does not hold, theirs among them, so they go with their pages: a restored space links anew, its

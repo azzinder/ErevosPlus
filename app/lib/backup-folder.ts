@@ -205,6 +205,9 @@ export function runAutoBackup(force = false, now = Date.now(), { checking = fals
       const phoneSms = await phoneSmsForBackup();
       const phoneCalls = await phoneCallsForBackup();
       const native = await phoneSettingsForBackup();
+      // Erevos+: Session's account, kept sealed for it now where the first space is open (lib/backup-networks.ts).
+      // Loaded here, not with this file: what it brings needs the app around it.
+      await (await import('./backup-networks')).keepNetworksForBackup(now);
       // Without the open space's Collection when its owner keeps it out of backups.
       const skip = await openCollectionSkips();
       const key = { key: fromBase64(auto.key), salt: fromBase64(auto.salt), iter: auto.iter, hard: { ...hard, salt: fromBase64(hard.salt) } };

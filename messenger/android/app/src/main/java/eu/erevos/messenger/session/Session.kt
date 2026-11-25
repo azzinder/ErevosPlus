@@ -72,6 +72,8 @@ object Session {
     private val groups = LinkedHashMap<String, Group>()
     private var polling: Thread? = null
     @Volatile private var running = false
+    /** Which polling is wanted: one started before a stop sees another number and ends (stopPolling). */
+    @Volatile private var generation = 0
 
     /** While a call is being set up or is on, new messages are read every second. */
     @Volatile var urgent = false
@@ -320,9 +322,22 @@ object Session {
         return JSONObject().put("id", acc.id)
     }
 
-    private fun logout() {
+    /**
+     * Stops polling and waits for it a while, so a start after it never has two at once; one still
+     * in a request then ends as it comes back, as its number is no longer the one wanted.
+     */
+    private fun stopPolling() {
         running = false
-        polling?.interrupt()
+        generation++
+        val was = polling
+        polling = null
+        was?.interrupt()
+        synchronized(wake) { wake.notifyAll() }
+        if (was != null && was !== Thread.currentThread()) runCatching { was.join(10_000L) }
+    }
+
+    private fun logout() {
+        stopPolling()
         synchronized(lock) {
             account = null
             chats.clear(); groups.clear(); names.clear(); seen.clear(); lastHash = ""; myName = ""
@@ -395,24 +410,44 @@ object Session {
      */
     private fun backupState(): String? {
         open()
+        // What waits to be saved is saved now, so the backup and the phone keep the same.
         synchronized(lock) { saveTask?.cancel(false) }
+        saveNow()
         return stateText()
     }
 
     /**
-     * Puts an account from a backup in place of this phone's, sealed with a new key of this phone's
-     * Keystore. It is read as open() reads it (a seed that does not make an account is refused
-     * before anything here is touched); the next open() starts it.
+     * Puts an account from a backup back on this phone, sealed with this phone's Keystore. Only
+     * where there is no account, or the same one (same seed): another account here is never
+     * replaced ("other-account"), as its seed would be lost. It is written beside the kept state
+     * first and put in its place in one rename, so a failure leaves this phone's as it was; the
+     * media folder stays, the same account's. The next open() starts it.
      */
     @Synchronized
     private fun restoreState(text: String) {
         val o = JSONObject(text)
-        SessionAccount(SessionNet.hex(o.getString("seed")))
-        logout()
+        val seed = o.getString("seed")
+        SessionAccount(SessionNet.hex(seed))
+        val here = synchronized(lock) { account?.seed }?.let { SessionNet.hexOf(it) }
+            ?: if (stateFile.exists()) {
+                runCatching { JSONObject(String(unseal(stateFile.readBytes()))).getString("seed") }
+                    .getOrElse { throw IllegalStateException("the Session account here does not open") }
+            } else null
+        if (here != null && !here.equals(seed, ignoreCase = true)) throw IllegalStateException("other-account")
         dir.mkdirs()
-        val tmp = File(dir, "state.tmp")
+        val tmp = File(dir, "restore.tmp")
         tmp.writeBytes(seal(text.toByteArray()))
-        if (!tmp.renameTo(stateFile)) throw IllegalStateException("could not keep the Session account")
+        stopPolling()
+        synchronized(lock) {
+            saveTask?.cancel(false)
+            account = null
+            chats.clear(); groups.clear(); names.clear(); seen.clear(); gone.clear(); lastHash = ""; myName = ""
+        }
+        ready = false
+        if (!tmp.renameTo(stateFile)) {
+            tmp.delete()
+            throw IllegalStateException("could not keep the Session account")
+        }
     }
 
     /** The state as saveNow() keeps it, in the clear; null with no account. */
@@ -464,15 +499,16 @@ object Session {
         all.forEach { emitChat(it) }
         if (!running) {
             running = true
-            polling = Thread({ pollForever() }, "erevos-session").apply { isDaemon = true; start() }
+            val gen = generation
+            polling = Thread({ pollForever(gen) }, "erevos-session").apply { isDaemon = true; start() }
         }
         return JSONObject().put("self", selfId).put("id", acc.id)
     }
 
-    private fun pollForever() {
+    private fun pollForever(gen: Int) {
         var wait = 3_000L
         var wasOk = false
-        while (running) {
+        while (running && gen == generation) {
             try {
                 pollOnce()
                 if (!wasOk) emit(JSONObject().put("type", "status").put("network", "session").put("status", "συνδέθηκε"))
