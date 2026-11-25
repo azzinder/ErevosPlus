@@ -9,15 +9,19 @@
 //! ratchet or session, no profile or group key. An account that came back from old keys would break
 //! the new messages, and two phones with one account are cut off by Signal. So after a restore one
 //! signs in to Signal anew, and the old history is kept apart from presage's store (which takes no
-//! messages it did not receive), read-only, in `kept/` of the engine's folder: `kept.json` and the
-//! files in `kept/media`. Each chat shows its kept messages before its own, with the same ids, so
+//! messages it did not receive), read-only, in `kept/` of the engine's folder: `kept.sealed`,
+//! encrypted with a key made from the store's own (`kept_key`), never in the clear on the phone,
+//! and the files in `kept/media`. Each chat shows its kept messages before its own, with the same ids, so
 //! nothing shows twice; a chat that is not there any more (a group one is not in again) shows as one
 //! to read only.
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
+use chacha20poly1305::aead::{Aead, KeyInit};
+use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use serde_json::{json, Value};
 
 /// The kind of history this engine writes and reads; a newer one is read as far as it is understood.
@@ -42,6 +46,8 @@ pub struct KeptChat {
 #[serde(default)]
 pub struct History {
     pub v: u32,
+    /// The ACI of the account the history was read from: a restore says so when Signal here is another.
+    pub owner: String,
     pub chats: Vec<KeptChat>,
     /// Messages as the screens take them (events.rs), their files named `kept:<file>`.
     pub messages: Vec<Value>,
@@ -93,6 +99,10 @@ pub fn to_shown(mut msg: Value, media: &Path) -> Value {
                 .filter(|p| p.exists())
                 .map(|p| format!("file://{}", p.display()))
                 .unwrap_or_default();
+            // A file the history names that is not here (not in the backup): said, not an empty tile.
+            if url.starts_with("kept:") && shown.is_empty() {
+                a["missing"] = json!(true);
+            }
             a["url"] = json!(shown.clone());
             a["playUrl"] = json!(shown);
         }
@@ -172,7 +182,12 @@ pub fn checked(h: History) -> History {
             true
         }
     });
-    History { v: VERSION, chats, messages }
+    let owner = if uuid_like(&h.owner) { h.owner } else { String::new() };
+    History { v: VERSION, owner, chats, messages }
+}
+
+fn uuid_like(s: &str) -> bool {
+    s.len() == 36 && s.chars().all(|c| c.is_ascii_hexdigit() || c == '-')
 }
 
 /// Two histories as one (a restore onto what an earlier one left, or what a chat shows now onto what
@@ -196,7 +211,8 @@ pub fn merge(earlier: History, later: History) -> History {
     let later_ids: HashSet<String> = later.messages.iter().filter_map(|m| m["id"].as_str().map(str::to_string)).collect();
     let mut messages: Vec<Value> = earlier.messages.into_iter().filter(|m| m["id"].as_str().is_none_or(|id| !later_ids.contains(id))).collect();
     messages.extend(later.messages);
-    checked(History { v: VERSION, chats, messages })
+    let owner = if later.owner.is_empty() { earlier.owner } else { later.owner };
+    checked(History { v: VERSION, owner, chats, messages })
 }
 
 /// The files a history's messages name.
@@ -222,25 +238,56 @@ pub fn kept_media(engine_dir: &Path) -> PathBuf {
 }
 
 /// The history the engine keeps, or an empty one.
-pub fn load(engine_dir: &Path) -> History {
-    std::fs::read(kept_dir(engine_dir).join("kept.json"))
+/// The key `kept.sealed` is encrypted with: made from the store's (SQLCipher's) key, which the app
+/// keeps in the Android Keystore, so the history opens as the store does and no other way.
+pub fn kept_key(store_key: &str) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(b"erevos-signal-kept-history-v1");
+    h.update(store_key.as_bytes());
+    h.finalize().into()
+}
+
+const SEALED: &str = "kept.sealed";
+const MAGIC: &[u8] = b"EKH1";
+
+fn seal(key: &[u8; 32], plain: &[u8]) -> Result<Vec<u8>, String> {
+    let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|e| e.to_string())?;
+    let nonce: [u8; 24] = rand::random();
+    let sealed = cipher.encrypt(&XNonce::from(nonce), plain).map_err(|e| e.to_string())?;
+    Ok([MAGIC, &nonce[..], &sealed].concat())
+}
+
+fn unseal(key: &[u8; 32], bytes: &[u8]) -> Option<Vec<u8>> {
+    let rest = bytes.strip_prefix(MAGIC)?;
+    if rest.len() < 24 {
+        return None;
+    }
+    let (nonce, sealed) = rest.split_at(24);
+    let cipher = XChaCha20Poly1305::new_from_slice(key).ok()?;
+    let nonce: [u8; 24] = nonce.try_into().ok()?;
+    cipher.decrypt(&XNonce::from(nonce), sealed).ok()
+}
+
+/// The history kept here, opened with `key` (kept_key); none when there is none or it does not open.
+pub fn load(engine_dir: &Path, key: &[u8; 32]) -> History {
+    std::fs::read(kept_dir(engine_dir).join(SEALED))
         .ok()
+        .and_then(|b| unseal(key, &b))
         .and_then(|b| serde_json::from_slice::<History>(&b).ok())
         .map(checked)
         .unwrap_or_default()
 }
 
-/// Keeps a history, written whole then put in place, so a broken write leaves the one before.
-pub fn save(engine_dir: &Path, h: &History) -> Result<(), String> {
+/// Keeps the history encrypted with `key`: written beside, then put in place in one rename.
+pub fn save(engine_dir: &Path, key: &[u8; 32], h: &History) -> Result<(), String> {
     let dir = kept_dir(engine_dir);
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    let bytes = serde_json::to_vec(h).map_err(|e| e.to_string())?;
-    let tmp = dir.join("kept.json.new");
+    let bytes = seal(key, &serde_json::to_vec(h).map_err(|e| e.to_string())?)?;
+    let tmp = dir.join(format!("{SEALED}.new"));
     std::fs::write(&tmp, bytes).map_err(|e| e.to_string())?;
-    std::fs::rename(&tmp, dir.join("kept.json")).map_err(|e| e.to_string())
+    std::fs::rename(&tmp, dir.join(SEALED)).map_err(|e| e.to_string())
 }
 
-/// The kept files no message names any more go.
 pub fn drop_unnamed(engine_dir: &Path, h: &History) {
     let named = files_of(h);
     if let Ok(entries) = std::fs::read_dir(kept_media(engine_dir)) {
@@ -304,38 +351,47 @@ mod tests {
                 msg("x:3", -5, 3, "not Signal's", ""),
                 msg("sg:4:a", -5, 4, "a path", "kept:../../signal.db"),
             ],
+            owner: "not an ACI".into(),
         };
         let c = checked(h);
         assert_eq!(c.chats.len(), 1);
         assert_eq!(c.messages.len(), 1);
         assert_eq!(c.messages[0]["text"], "ok");
         assert_eq!(files_of(&c), HashSet::from(["a.jpg".to_string()]));
+        assert_eq!(c.owner, "");
     }
 
     #[test]
     fn a_second_restore_adds_without_doubling() {
-        let a = History { v: 1, chats: vec![KeptChat { key: -5, name: "Ada".into(), ..Default::default() }], messages: vec![msg("sg:1:a", -5, 1, "one", "")] };
+        let a = History { v: 1, chats: vec![KeptChat { key: -5, name: "Ada".into(), ..Default::default() }], messages: vec![msg("sg:1:a", -5, 1, "one", "")], ..Default::default() };
         let b = History {
             v: 1,
             chats: vec![KeptChat { key: -5, name: "Ada L".into(), ..Default::default() }, KeptChat { key: -7, name: "Group".into(), group: true, ..Default::default() }],
             messages: vec![msg("sg:1:a", -5, 1, "one", ""), msg("sg:2:b", -7, 2, "two", "")],
+            owner: "0b5e4c8e-2a77-4f4e-9d6b-3f7c1c0e9a11".into(),
         };
         let m = merge(a, b);
         assert_eq!(m.chats.len(), 2);
         assert_eq!(m.chats[0].name, "Ada L");
         assert_eq!(m.messages.len(), 2);
+        assert_eq!(m.owner, "0b5e4c8e-2a77-4f4e-9d6b-3f7c1c0e9a11");
     }
 
     #[test]
     fn it_is_kept_and_read_back_whole() {
         let dir = std::env::temp_dir().join(format!("erevos-signal-history-{}", std::process::id()));
-        let h = checked(History { v: 1, chats: vec![KeptChat { key: -5, name: "Ada".into(), ..Default::default() }], messages: vec![msg("sg:1:a", -5, 1, "one", "kept:a.jpg")] });
-        save(&dir, &h).unwrap();
+        let h = checked(History { v: 1, chats: vec![KeptChat { key: -5, name: "Ada".into(), ..Default::default() }], messages: vec![msg("sg:1:a", -5, 1, "one", "kept:a.jpg")], ..Default::default() });
+        let key = kept_key("0123456789abcdef0123456789abcdef");
+        save(&dir, &key, &h).unwrap();
+        // Never in the clear on the phone, and not opened by another key.
+        let on_disk = std::fs::read(kept_dir(&dir).join(SEALED)).unwrap();
+        assert!(!on_disk.windows(3).any(|w| w == b"one"));
+        assert!(load(&dir, &kept_key("another key, another key, another")).messages.is_empty());
         std::fs::create_dir_all(kept_media(&dir)).unwrap();
         std::fs::write(kept_media(&dir).join("a.jpg"), b"x").unwrap();
         std::fs::write(kept_media(&dir).join("stray.bin"), b"x").unwrap();
         drop_unnamed(&dir, &h);
-        let back = load(&dir);
+        let back = load(&dir, &key);
         assert_eq!(back.messages.len(), 1);
         assert!(kept_media(&dir).join("a.jpg").exists());
         assert!(!kept_media(&dir).join("stray.bin").exists());

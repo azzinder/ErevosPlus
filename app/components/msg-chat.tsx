@@ -356,56 +356,65 @@ function MsgChat({ service }: { service: MsgService }) {
             {note}
           </Text>
         ) : null}
-        <Row>
-          {voice.recording ? (
-            <View style={{ flex: 1 }}>
-              <RecordingLine />
-            </View>
-          ) : (
-            <>
-              <IconButton label={adding ? t('Close') : t('Attach and more')} onPress={() => openAdding(!adding)} state={{ expanded: adding }} disabled={busy}>
-                {adding ? <CloseIcon color={colors.text} size={20} /> : <PlusIcon color={colors.text} size={20} />}
-              </IconButton>
-              <Input style={{ flex: 1 }} value={draft} onChangeText={setDraft} onFocus={() => setAdding(false)} placeholder={t('Message')} multiline />
-            </>
-          )}
-          {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
-          {key ? (
-            <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
-              <OptionsIcon color={colors.text} size={22} />
-            </IconButton>
-          ) : null}
-          {draft.trim() && !voice.recording ? (
-            <Button title={t('Send')} compact disabled={busy} loading={busy} onPress={() => void send()} />
-          ) : (
-            <MicButton voice={voice} disabled={busy} />
-          )}
-        </Row>
-        {/* What "+" opens under the field, as in Erevos's own chats (#59). */}
-        {adding && !voice.recording ? (
-          <ComposerPanel
-            encrypted={chat?.encrypted ?? service !== 'messenger'}
-            quality={{ value: photos.quality, onChange: photos.choose }}
-            tiles={[
-              { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto('photos') },
-              ...(CAN_TAKE_PHOTOS ? [{ key: 'camera', title: t('Camera'), icon: 'camera' as const, onPress: () => void sendPhoto('camera') }] : []),
-              { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendFile() },
-              ...(stickerPlace
-                ? [
-                    {
-                      key: 'sticker',
-                      title: t('Sticker'),
-                      icon: 'sticker' as const,
-                      onPress: () => {
-                        setAdding(false);
-                        setStickering(true);
-                      },
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        ) : null}
+        {/* Signal: a chat a backup brought back that Signal no longer has is only to read (#68). */}
+        {chat?.readOnly ? (
+          <Text variant="caption" tone="muted">
+            {t('This chat came back from a backup, and Signal no longer has it: it is only to read.')}
+          </Text>
+        ) : (
+          <>
+            <Row>
+              {voice.recording ? (
+                <View style={{ flex: 1 }}>
+                  <RecordingLine />
+                </View>
+              ) : (
+                <>
+                  <IconButton label={adding ? t('Close') : t('Attach and more')} onPress={() => openAdding(!adding)} state={{ expanded: adding }} disabled={busy}>
+                    {adding ? <CloseIcon color={colors.text} size={20} /> : <PlusIcon color={colors.text} size={20} />}
+                  </IconButton>
+                  <Input style={{ flex: 1 }} value={draft} onChangeText={setDraft} onFocus={() => setAdding(false)} placeholder={t('Message')} multiline />
+                </>
+              )}
+              {/* The chat's options, beside the field, where a long chat keeps them in reach (#54, as #44). */}
+              {key ? (
+                <IconButton label={t('Chat options')} onPress={() => setMore(true)}>
+                  <OptionsIcon color={colors.text} size={22} />
+                </IconButton>
+              ) : null}
+              {draft.trim() && !voice.recording ? (
+                <Button title={t('Send')} compact disabled={busy} loading={busy} onPress={() => void send()} />
+              ) : (
+                <MicButton voice={voice} disabled={busy} />
+              )}
+            </Row>
+            {/* What "+" opens under the field, as in Erevos's own chats (#59). */}
+            {adding && !voice.recording ? (
+              <ComposerPanel
+                encrypted={chat?.encrypted ?? service !== 'messenger'}
+                quality={{ value: photos.quality, onChange: photos.choose }}
+                tiles={[
+                  { key: 'photo', title: t('Photo'), icon: 'photo', onPress: () => void sendPhoto('photos') },
+                  ...(CAN_TAKE_PHOTOS ? [{ key: 'camera', title: t('Camera'), icon: 'camera' as const, onPress: () => void sendPhoto('camera') }] : []),
+                  { key: 'file', title: t('File'), icon: 'file', onPress: () => void sendFile() },
+                  ...(stickerPlace
+                    ? [
+                        {
+                          key: 'sticker',
+                          title: t('Sticker'),
+                          icon: 'sticker' as const,
+                          onPress: () => {
+                            setAdding(false);
+                            setStickering(true);
+                          },
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ) : null}
+          </>
+        )}
       </KeyboardAwareScrollView>
       <Sheet visible={more} onClose={() => setMore(false)} title={t('Chat options')}>
         <View style={{ gap: space.md }}>
@@ -533,7 +542,12 @@ function Bubble({ service, message, group, quoted, onMenu, onSign }: { service: 
           </Text>
         ) : null}
         {message.attachments.map((a, i) =>
-          (a.kind === 'image' || a.kind === 'sticker') && a.url ? (
+          a.missing ? (
+            // A file the backup did not hold (#68): said, not an empty tile.
+            <Text key={i} variant="caption" tone="faint">
+              {t('{what}: not in the backup', { what: lineOf({ text: '', attachments: [a] }) })}
+            </Text>
+          ) : (a.kind === 'image' || a.kind === 'sticker') && a.url ? (
             <MsgImage key={i} service={service} url={a.url} label={a.kind === 'sticker' ? t('Sticker') : t('Photo')} height={a.w && a.h ? Math.min(320, (220 * a.h) / a.w) : 220} />
           ) : (
             <Pressable key={i} onPress={() => void openAttachment(service, a).catch((error: unknown) => ask(t('Open'), error instanceof Error ? error.message : String(error), [{ text: t('OK') }]))} accessibilityRole="link">

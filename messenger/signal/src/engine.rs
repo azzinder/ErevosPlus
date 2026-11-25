@@ -167,6 +167,8 @@ struct Inner {
     pni_signed: RefCell<Option<HashSet<Uuid>>>,
     /// The history a backup brought back (history.rs), read once from `kept/`.
     kept: RefCell<Option<History>>,
+    /// What the history is encrypted with on the phone, made from the store's key once it opens.
+    kept_key: RefCell<Option<[u8; 32]>>,
 }
 
 #[derive(Deserialize, Default)]
@@ -242,6 +244,7 @@ impl Inner {
             read_receipts: RefCell::new(None),
             pni_signed: RefCell::new(None),
             kept: RefCell::new(None),
+            kept_key: RefCell::new(None),
         }
     }
 
@@ -332,6 +335,9 @@ impl Inner {
 
     /// Opens the encrypted database with the key the app keeps in the Android Keystore.
     async fn open(self: &Rc<Self>, key: &str) -> Result<Value, String> {
+        if key.len() >= 32 && self.kept_key.borrow().is_none() {
+            *self.kept_key.borrow_mut() = Some(history::kept_key(key));
+        }
         if self.store.borrow().is_some() {
             return Ok(json!({"registered": matches!(&*self.account.borrow(), Account::Ready(_))}));
         }
@@ -448,6 +454,8 @@ impl Inner {
         self.names.borrow_mut().clear();
         *self.identities.borrow_mut() = None;
         *self.kept.borrow_mut() = None;
+        // The store's key goes with its files: the next one makes the history's key anew.
+        *self.kept_key.borrow_mut() = None;
         let store = self.store.borrow_mut().take();
         if let Some(mut store) = store {
             // If this fails, the files below still go, and with them the registration.
@@ -1014,8 +1022,16 @@ impl Inner {
     // ---- the history a backup brought back (history.rs) ----
 
     fn with_kept<T>(&self, job: impl FnOnce(&History) -> T) -> T {
+        // Before the store opens there is no key to read it with: none, and read once it opens.
+        let Some(key) = *self.kept_key.borrow() else {
+            return job(&History::default());
+        };
         let mut kept = self.kept.borrow_mut();
-        job(kept.get_or_insert_with(|| history::load(&self.dir)))
+        job(kept.get_or_insert_with(|| history::load(&self.dir, &key)))
+    }
+
+    fn kept_key(&self) -> Result<[u8; 32], String> {
+        self.kept_key.borrow().ok_or_else(|| "Signal's store is not open".to_string())
     }
 
     /// A chat's kept messages, as the screens take them, oldest first.
@@ -1030,7 +1046,12 @@ impl Inner {
     /// The kept chats in the list: one-to-one ones as the chats they are again (sending to them
     /// works), the others to read only; each with its last kept message when it has none newer.
     async fn show_kept_chats(self: &Rc<Self>, m: Option<&Ready>) {
-        let chats = self.with_kept(|h| h.chats.clone());
+        let (chats, owner) = self.with_kept(|h| (h.chats.clone(), h.owner.clone()));
+        // Read from another Signal account than the one here: said, so its chats are not taken for this one's.
+        let me = *self.self_uuid.borrow();
+        if m.is_some() && !owner.is_empty() && !me.is_nil() && owner != me.to_string() {
+            self.emit(json!({"type": "keptOther"}));
+        }
         for c in chats {
             let person = Uuid::parse_str(&c.person).ok().filter(|u| !u.is_nil());
             if let Some(u) = person {
@@ -1069,7 +1090,7 @@ impl Inner {
                     self.emit(json!({"type": "thread", "thread": {
                         "key": c.key, "name": if c.name.is_empty() { "Signal".to_string() } else { c.name.clone() },
                         "snippet": snippet, "lastMs": ms, "encrypted": true, "group": c.group,
-                        "unread": false, "pinned": "", "network": "signal",
+                        "unread": false, "pinned": "", "network": "signal", "readOnly": true,
                     }}));
                 }
             }
@@ -1079,12 +1100,14 @@ impl Inner {
     /// What a backup takes of Signal: the history (history.rs) as JSON, and the files it names
     /// (name and where they are now). Never a key, a session or anything of the account.
     async fn history_export(self: &Rc<Self>) -> Result<Value, String> {
+        self.kept_key()?;
         let mut h = self.with_kept(|h| h.clone());
         let media = self.media_dir();
         if let Ok(m) = self.manager() {
             let me = *self.self_uuid.borrow();
             let chats: Vec<(i64, Chat)> = self.chats.borrow().iter().map(|(k, c)| (*k, c.clone())).collect();
-            let mut now = History { v: history::VERSION, ..Default::default() };
+            let owner = if me.is_nil() { String::new() } else { me.to_string() };
+            let mut now = History { v: history::VERSION, owner, ..Default::default() };
             let mut files = HashSet::new();
             for (key, c) in chats {
                 let Ok(msgs) = m.store().messages(&c.thread, ..).await else { continue };
@@ -1142,13 +1165,17 @@ impl Inner {
     async fn history_import(self: &Rc<Self>, text: &str) -> Result<Value, String> {
         let incoming: History = serde_json::from_str(text).map_err(err)?;
         let incoming = history::checked(incoming);
-        let merged = history::merge(history::load(&self.dir), incoming);
-        history::save(&self.dir, &merged)?;
+        let key = self.kept_key()?;
+        let merged = history::merge(history::load(&self.dir, &key), incoming);
+        history::save(&self.dir, &key, &merged)?;
         history::drop_unnamed(&self.dir, &merged);
         let n = merged.messages.len();
         *self.kept.borrow_mut() = Some(merged);
-        let m = self.manager().ok();
-        self.show_kept_chats(m.as_ref()).await;
+        // Shown only with an account here: before Signal is registered again it is only kept, and
+        // the chat list shows it once it is (load_chats); a chat shown now would pass for one.
+        if let Ok(m) = self.manager() {
+            self.show_kept_chats(Some(&m)).await;
+        }
         Ok(json!(n))
     }
 

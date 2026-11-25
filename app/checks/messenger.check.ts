@@ -213,3 +213,20 @@ test('the case takes the rest of the look: text size, bubbles, letters, what lie
   assert.match(photo?.layers[0].image ?? '', /^linear-gradient\(160deg/);
   assert.equal(caseBackdrop(null), null);
 });
+
+// Signal's history from a backup (#68): a chat Signal no longer has is only to read, a file the
+// backup did not hold says so, and chats of another account are told.
+test("a Signal chat from a backup is only to read until Signal has it again", () => {
+  let s = applyEvent(emptyMsgState(), { type: 'thread', thread: { key: '7', name: 'Old group', readOnly: true } });
+  assert.equal(s.threads['7'].readOnly, true);
+  s = applyEvent(s, { type: 'thread', thread: { key: '7', name: 'Old group' } });
+  assert.equal(s.threads['7'].readOnly, undefined);
+});
+
+test("a file a backup did not hold is marked missing, and another account's chats are told", () => {
+  const s = applyEvent(emptyMsgState(), { type: 'message', message: { id: 'sg:1:a', thread: '7', ms: 1, attachments: [{ kind: 'image', url: '', missing: true }, { kind: 'image', url: 'file:///x.jpg' }] } });
+  const [gone, here] = s.messages['7'][0].attachments;
+  assert.equal(gone.missing, true);
+  assert.equal(here.missing, undefined);
+  assert.equal(applyEvent(emptyMsgState(), { type: 'keptOther' }).keptOther, true);
+});

@@ -83,6 +83,12 @@ export function MsgAccountScreen({ service }: { service: MsgService }) {
               <Text variant="caption" tone="muted">
                 {plural(chats.length, '{n} chat', '{n} chats')}
               </Text>
+              {/* Signal: chats a backup brought back from another account than this one (#68). */}
+              {state.keptOther ? (
+                <Text variant="caption" color={colors.danger}>
+                  {t('Some chats here came back from a backup of another Signal account than this one: their old messages are that account’s.')}
+                </Text>
+              ) : null}
               <View style={{ gap: space.sm }}>
                 {chats.slice(0, 50).map((chat) => (
                   <Button key={chat.key} title={chat.name || chat.key} kind="ghost" onPress={() => router.push({ pathname: `/${service}-chat`, params: { key: chat.key } })} />

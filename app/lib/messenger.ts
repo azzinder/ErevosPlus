@@ -28,9 +28,23 @@ export type MsgThread = {
   group: boolean;
   unread: boolean;
   pinned: string;
+  /** Signal: a chat a backup brought back that Signal no longer has (#68), to read only. */
+  readOnly?: boolean;
 };
 
-export type MsgAttachment = { kind: string; url: string; playUrl: string; mime: string; w: number; h: number; name: string; title: string; link: string };
+export type MsgAttachment = {
+  kind: string;
+  url: string;
+  playUrl: string;
+  mime: string;
+  w: number;
+  h: number;
+  name: string;
+  title: string;
+  link: string;
+  /** Signal: a file of a message a backup brought back, that the backup did not hold (#68). */
+  missing?: boolean;
+};
 
 export type MsgQuote = { id: string; text: string; sender: string; name: string };
 
@@ -66,6 +80,8 @@ export type MsgState = {
   threads: Record<string, MsgThread>;
   /** Each chat's messages, oldest first. */
   messages: Record<string, MsgMessage[]>;
+  /** Signal: the chats a backup brought back are of another account than the one here (#68). */
+  keptOther?: boolean;
 };
 
 export const emptyMsgState = (): MsgState => ({ signedIn: false, connected: false, status: '', signInAgain: false, linkUrl: '', linkError: '', threads: {}, messages: {} });
@@ -157,6 +173,7 @@ function thread(raw: Record<string, unknown>, before?: MsgThread): MsgThread {
     group: bool(raw.group),
     unread: bool(raw.unread),
     pinned: raw.pinned === undefined ? (before?.pinned ?? '') : str(raw.pinned),
+    ...(bool(raw.readOnly) ? { readOnly: true } : {}),
   };
 }
 
@@ -164,7 +181,7 @@ function attachments(v: unknown): MsgAttachment[] {
   if (!Array.isArray(v)) return [];
   return v.map((a) => {
     const o = obj(a);
-    return { kind: str(o.kind), url: str(o.url), playUrl: str(o.playUrl), mime: str(o.mime), w: num(o.w), h: num(o.h), name: str(o.name), title: str(o.title), link: str(o.link) };
+    return { kind: str(o.kind), url: str(o.url), playUrl: str(o.playUrl), mime: str(o.mime), w: num(o.w), h: num(o.h), name: str(o.name), title: str(o.title), link: str(o.link), ...(bool(o.missing) ? { missing: true } : {}) };
   });
 }
 
@@ -221,6 +238,8 @@ export function applyEvent(state: MsgState, event: unknown, fresh: (key: string,
       return { ...state, linkUrl: str(e.url), linkError: '' };
     case 'signalLinked':
       return { ...state, signedIn: true, signInAgain: false, linkUrl: '', linkError: '' };
+    case 'keptOther':
+      return state.keptOther ? state : { ...state, keptOther: true };
     case 'signalLinkFailed':
       return { ...state, linkUrl: '', linkError: str(e.error) };
     case 'fatal':

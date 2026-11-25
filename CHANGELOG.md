@@ -38,8 +38,12 @@ and 0.1.15 never came out.
   in: no identity key, no sessions, no safety numbers, and for now no photos or files. Reading it never stops a
   backup: the backup then says Signal's history is not in it, and why. After a restore from Backups, once the first
   space opens, it is added to what the engine keeps (`historyImport`), checked: only chats and messages of the shape
-  the engine makes. Once Signal is registered or linked again, the old messages show in their chats beside the new
-  ones, to read only. Signing out of Signal deletes it with the rest. Requested by the maintainer.
+  the engine makes, and only once Signal is registered or linked again do its chats show. Then the old messages show
+  in their chats beside the new ones; a chat Signal no longer has (an old group) is only to read, with no field to
+  write in, and a file the backup did not hold says so. On the phone the history is kept encrypted with a key made
+  from the store's own (`kept/kept.sealed`, XChaCha20-Poly1305), never in the clear. It names the account it came
+  from, and a Signal account here that is another says so. Signing out of Signal deletes it with the rest.
+  Requested by the maintainer.
 - Erevos+: a Signal search that could not ask Signal says why (#69), as «Signal was not searched: …», and no longer
   that the number is not on Signal. Looking a number or a username up on Signal's servers failed in silence and gave
   no one found (`search_people` in `messenger/signal/src/engine.rs`, `components/msg-account.tsx`). The list as you

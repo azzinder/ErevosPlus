@@ -558,6 +558,8 @@ async function putSession(session: string): Promise<void> {
 // engine reads them (messenger/signal/src/engine.rs historyImport, and its chat list as it starts).
 async function putSignalHistory(history: string): Promise<void> {
   try {
+    // Opened first: the history is kept encrypted with a key made from the store's.
+    await msgCall('signal', 'open');
     await msgCall('signal', 'historyImport', { history });
   } catch (error) {
     const said = error instanceof Error ? error.message : String(error);

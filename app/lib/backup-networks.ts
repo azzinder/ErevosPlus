@@ -39,6 +39,8 @@ const errorOf = (error: unknown) => (error instanceof Error ? error.message : St
 // Signal's history as its engine gives it (historyExport), without its files: '' where there is none.
 async function signalHistory(): Promise<string> {
   try {
+    // Opened first: the history is kept encrypted with a key made from the store's.
+    await msgCall('signal', 'open');
     const kept = await msgCall<{ history?: unknown } | null>('signal', 'historyExport');
     return checkedSignalHistory(kept?.history) ?? '';
   } catch (error) {
