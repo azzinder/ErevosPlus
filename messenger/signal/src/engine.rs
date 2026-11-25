@@ -1674,7 +1674,11 @@ impl Inner {
                         }
                     }
                 }
-                Err(e) => self.note(format!("phone lookup: {e}")),
+                // Said, not taken for «not on Signal» (#69): the screen shows why it could not ask.
+                Err(e) => {
+                    self.note(format!("phone lookup: {e}"));
+                    return Err(format!("phone lookup: {e}"));
+                }
             }
         } else if q.contains('.') {
             let mut m = self.manager()?;
@@ -1686,7 +1690,10 @@ impl Inner {
                     out.push(json!({"id": keys::person(&u), "name": format!("@{q}"), "network": "signal"}));
                 }
                 Ok(None) => {}
-                Err(e) => self.note(format!("username: {e}")),
+                Err(e) => {
+                    self.note(format!("username: {e}"));
+                    return Err(format!("username lookup: {e}"));
+                }
             }
         }
         Ok(Value::Array(out))

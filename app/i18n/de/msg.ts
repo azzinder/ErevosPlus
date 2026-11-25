@@ -29,6 +29,7 @@ export const msgText: Record<string, string> = {
   "New number: {number}": "Neue Nummer: {number}",
   "From the phone’s contacts: Signal is asked only about the one you tap.": "Aus den Kontakten des Telefons: Signal wird nur nach dem gefragt, den du antippst.",
   "{number} is not on Signal, or does not let itself be found by its number.": "{number} ist nicht bei Signal oder lässt sich nicht über die Nummer finden.",
+  "Signal was not searched: {error}": "Signal wurde nicht durchsucht: {error}",
   "That chat could not start.": "Dieser Chat konnte nicht beginnen.",
   "Your Session ID: others start a chat with you by it.": "Deine Session-ID: damit beginnen andere einen Chat mit dir.",
   "New Signal account with my phone number": "Neues Signal-Konto mit meiner Telefonnummer",

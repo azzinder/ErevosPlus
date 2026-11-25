@@ -29,6 +29,7 @@ export const msgText: Record<string, string> = {
   "New number: {number}": "Novi broj: {number}",
   "From the phone’s contacts: Signal is asked only about the one you tap.": "Iz kontakata telefona: Signal se pita samo za onaj koji dodirneš.",
   "{number} is not on Signal, or does not let itself be found by its number.": "{number} nije na Signalu ili ne dopušta da ga se pronađe po broju.",
+  "Signal was not searched: {error}": "Signal nije pretražen: {error}",
   "That chat could not start.": "Taj razgovor nije mogao da počne.",
   "Your Session ID: others start a chat with you by it.": "Tvoj Session ID: po njemu drugi započinju razgovor s tobom.",
   "New Signal account with my phone number": "Novi Signal nalog s mojim brojem",

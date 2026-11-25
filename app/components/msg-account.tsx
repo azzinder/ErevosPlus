@@ -233,13 +233,25 @@ function NewChat({ service, onOpen }: { service: MsgService; onOpen: (key: strin
   const number = service === 'signal' ? typedNumber(query) : null;
   const matches = service === 'signal' ? contactMatches(book, query) : [];
 
+  // Why a search did not happen (#69): said as it is, never as «not on Signal».
+  function searchFailed(e: unknown): string {
+    const error = e instanceof Error ? e.message : String(e);
+    return service === 'signal' ? t('Signal was not searched: {error}', { error }) : error;
+  }
+
   // A number (typed, or a contact's): asked of Signal, and its chat opened when it has Signal.
   function byNumber(row: ContactNumber) {
     const id = `${row.name}|${row.number}`;
     setOpening(id);
     setNote('');
     void (async () => {
-      const people = await msgSearch(service, row.number);
+      let people: Awaited<ReturnType<typeof msgSearch>>;
+      try {
+        people = await msgSearch(service, row.number);
+      } catch (e) {
+        setNote(searchFailed(e));
+        return;
+      }
       const person = people[0];
       if (!person) {
         setNote(t('{number} is not on Signal, or does not let itself be found by its number.', { number: row.number }));
@@ -263,7 +275,7 @@ function NewChat({ service, onOpen }: { service: MsgService; onOpen: (key: strin
       setFound(people);
       if (!people.length) setNote(t('No one found.'));
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(service === 'session' ? (e instanceof Error ? e.message : String(e)) : searchFailed(e));
     } finally {
       setBusy(false);
     }

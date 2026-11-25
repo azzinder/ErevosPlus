@@ -29,6 +29,7 @@ export const msgText: Record<string, string> = {
   "New number: {number}": "Νέος αριθμός: {number}",
   "From the phone’s contacts: Signal is asked only about the one you tap.": "Από τις επαφές του τηλεφώνου: το Signal ρωτιέται μόνο για όποια πατήσεις.",
   "{number} is not on Signal, or does not let itself be found by its number.": "Το {number} δεν έχει Signal ή δεν αφήνει να βρεθεί από τον αριθμό του.",
+  "Signal was not searched: {error}": "Δεν έγινε αναζήτηση στο Signal: {error}",
   "That chat could not start.": "Αυτή η συνομιλία δεν μπόρεσε να ξεκινήσει.",
   "Your Session ID: others start a chat with you by it.": "Το Session ID σου: με αυτό σε βρίσκουν οι άλλοι για να ξεκινήσουν συνομιλία.",
   "New Signal account with my phone number": "Νέος λογαριασμός Signal με τον αριθμό μου",
