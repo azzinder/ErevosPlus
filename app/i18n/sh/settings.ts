@@ -12,8 +12,8 @@ export const settings: Record<string, string> = {
     "Session nalog nije mogao da se vrati: {error}",
   "Signal's history could not go back: {error}":
     "Istorija Signala nije mogla da se vrati: {error}",
-  "Signal's history is NOT in this backup: {error}":
-    "Istorija Signala NIJE u ovoj kopiji: {error}",
+  "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Istorija Signala sada nije mogla da se pročita, pa je ova kopija ima kakva je zadnji put sačuvana, ako je ima: {error}",
   "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
     "Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom i lozinkom prvog prostora; vraćanje ih donosi nazad čim se otvori prvi prostor, ako telefon nema drugi Session nalog. Njegove fotografije i datoteke ne ulaze: Session ih ponovo daje dok ih čuva. Ulazi i istorija Signala, razgovori i poruke bez svojih fotografija i datoteka, ali ne i njegova veza s nalogom: nakon vraćanja ponovo registruj ili poveži Signal, i stare poruke se vide pored novih, samo za čitanje. Telegram i Messenger nisu u kopiji: nakon vraćanja ponovo se prijavi na njih. Njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva.",
   'Turn off the lock': 'Isključi zaključavanje',

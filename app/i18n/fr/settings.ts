@@ -12,8 +12,8 @@ export const settings: Record<string, string> = {
     "Le compte Session n’a pas pu revenir : {error}",
   "Signal's history could not go back: {error}":
     "L’historique de Signal n’a pas pu revenir : {error}",
-  "Signal's history is NOT in this backup: {error}":
-    "L’historique de Signal N’est PAS dans cette sauvegarde : {error}",
+  "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "L’historique de Signal n’a pas pu être lu maintenant : cette sauvegarde le tient tel qu’il a été gardé la dernière fois, s’il y en a un : {error}",
   "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
     "Le compte et les conversations de Session entrent dans une sauvegarde, chiffrés avec son mot de passe et celui du premier espace ; une restauration les ramène dès que le premier espace s’ouvre, si le téléphone n’a pas d’autre compte Session. Ses photos et fichiers n’y entrent pas : Session les redonne tant qu’il les garde. L’historique de Signal y entre aussi, ses conversations et messages sans leurs photos et fichiers, mais pas son lien avec le compte : après une restauration, réinscrivez ou reliez de nouveau Signal, et les anciens messages s’affichent à côté des nouveaux, en lecture seule. Telegram et Messenger ne sont pas dans une sauvegarde : après une restauration, reconnectez-vous à eux. Leurs messages ne reviennent que dans la mesure où chaque réseau les garde.",
   'Turn off the lock': 'Désactiver le verrou',

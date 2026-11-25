@@ -12,8 +12,8 @@ export const settings: Record<string, string> = {
     "Das Session-Konto konnte nicht zurück: {error}",
   "Signal's history could not go back: {error}":
     "Der Verlauf von Signal konnte nicht zurück: {error}",
-  "Signal's history is NOT in this backup: {error}":
-    "Der Verlauf von Signal ist NICHT in dieser Sicherung: {error}",
+  "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Der Verlauf von Signal ließ sich jetzt nicht lesen, daher hält diese Sicherung ihn so, wie er zuletzt behalten wurde, falls überhaupt: {error}",
   "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
     "Das Konto und die Chats von Session kommen in eine Sicherung, verschlüsselt mit ihrem Passwort und dem des ersten Bereichs; eine Wiederherstellung bringt sie zurück, sobald der erste Bereich öffnet, wo das Telefon kein anderes Session-Konto hat. Seine Fotos und Dateien kommen nicht hinein: Session gibt sie wieder, solange es sie aufbewahrt. Auch der Verlauf von Signal kommt hinein, seine Chats und Nachrichten ohne ihre Fotos und Dateien, aber nicht seine Verbindung zum Konto: Nach dem Wiederherstellen registrierst oder verknüpfst du Signal neu, und die alten Nachrichten stehen neben den neuen, nur zum Lesen. Telegram und Messenger sind nicht in einer Sicherung: Nach dem Wiederherstellen meldest du dich wieder bei ihnen an. Ihre Nachrichten kommen nur so weit zurück, wie jedes Netz sie aufbewahrt.",
   'Turn off the lock': 'Sperre ausschalten',

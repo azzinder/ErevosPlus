@@ -36,7 +36,7 @@ and 0.1.15 never came out.
   `messenger/signal/src/history.rs`), kept before each backup beside Session's account in the first space's sealed
   file (`lock/networks-backup-data.ts`), so the backup's integrity check covers it. Nothing of the registration goes
   in: no identity key, no sessions, no safety numbers, and for now no photos or files. Reading it never stops a
-  backup: the backup then says Signal's history is not in it, and why. After a restore from Backups, once the first
+  backup: one that cannot be read now goes in as it was last kept, and the backup says so, and why. After a restore from Backups, once the first
   space opens, it is added to what the engine keeps (`historyImport`), checked: only chats and messages of the shape
   the engine makes, and only once Signal is registered or linked again do its chats show. Then the old messages show
   in their chats beside the new ones; a chat Signal no longer has (an old group) is only to read, with no field to

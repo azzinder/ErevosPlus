@@ -12,8 +12,8 @@ export const settings: Record<string, string> = {
     "Ο λογαριασμός Session δεν μπόρεσε να επιστρέψει: {error}",
   "Signal's history could not go back: {error}":
     "Το ιστορικό του Signal δεν μπόρεσε να επιστρέψει: {error}",
-  "Signal's history is NOT in this backup: {error}":
-    "Το ιστορικό του Signal ΔΕΝ είναι σε αυτό το αντίγραφο: {error}",
+  "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Το ιστορικό του Signal δεν διαβάστηκε τώρα, οπότε το αντίγραφο το έχει όπως κρατήθηκε τελευταία φορά, αν υπάρχει: {error}",
   "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
     "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του και του πρώτου χώρου· η επαναφορά τα φέρνει πίσω μόλις ανοίξει ο πρώτος χώρος, αν το κινητό δεν έχει άλλον λογαριασμό Session. Οι φωτογραφίες και τα αρχεία του δεν μπαίνουν: ξανάρχονται από το Session όσο τα κρατά. Μπαίνει και το ιστορικό του Signal, οι συνομιλίες και τα μηνύματα χωρίς τις φωτογραφίες και τα αρχεία τους, όχι όμως η σύνδεση με τον λογαριασμό: μετά την επαναφορά, κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal, και τα παλιά μηνύματα φαίνονται δίπλα στα νέα, μόνο για ανάγνωση. Τα Telegram και Messenger δεν μπαίνουν: μετά την επαναφορά, συνδέσου ξανά σε αυτά. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
   'Turn off the lock': 'Απενεργοποίηση κλειδώματος',

@@ -12,8 +12,8 @@ export const settings: Record<string, string> = {
     "La cuenta de Session no pudo volver: {error}",
   "Signal's history could not go back: {error}":
     "El historial de Signal no pudo volver: {error}",
-  "Signal's history is NOT in this backup: {error}":
-    "El historial de Signal NO está en esta copia: {error}",
+  "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "El historial de Signal no se pudo leer ahora, así que esta copia lo tiene como se guardó la última vez, si lo hay: {error}",
   "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
     "La cuenta y los chats de Session entran en una copia de seguridad, cifrados con su contraseña y la del primer espacio; restaurar los devuelve en cuanto se abre el primer espacio, si el teléfono no tiene otra cuenta de Session. Sus fotos y archivos no entran: Session los da de nuevo mientras los guarde. También entra el historial de Signal, sus chats y mensajes sin sus fotos y archivos, pero no su enlace con la cuenta: tras restaurar, registra o vincula Signal de nuevo, y los mensajes antiguos se ven junto a los nuevos, solo para leer. Telegram y Messenger no están en una copia: tras restaurar, vuelve a iniciar sesión en ellos. Sus mensajes vuelven solo hasta donde cada red los guarda.",
   'Turn off the lock': 'Desactivar el bloqueo',

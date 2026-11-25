@@ -75,8 +75,8 @@ export async function keepNetworksForBackup(now = Date.now()): Promise<NetworksK
     if (NOT_HERE.test(said)) session = '';
     else kept = { kind: 'failed', error: said };
   }
-  // Signal's history; one that cannot be read is not in the backup, and that is said.
-  let signal = '';
+  // Signal's history; one that cannot be read now goes in as it was last kept, and that is said.
+  let signal: string | null = null;
   let signalFailed: string | undefined;
   try {
     signal = await signalHistory();
@@ -84,10 +84,12 @@ export async function keepNetworksForBackup(now = Date.now()): Promise<NetworksK
     signalFailed = errorOf(error);
   }
   try {
-    // Session's account that could not be read now stays as it was last kept.
-    const held = session ?? (await loadNetworksBackup(open.key)).session;
+    // Session's account or Signal's history that could not be read now stays as it was last kept.
+    const before = session === null || signal === null ? await loadNetworksBackup(open.key) : null;
+    const held = session ?? before?.session ?? '';
+    const history = signal ?? before?.signal ?? '';
     // None here: none kept either, so an account signed out does not stay in backups.
-    await saveNetworksBackup(open.key, { session: held, signal, at: held || signal ? now : 0 });
+    await saveNetworksBackup(open.key, { session: held, signal: history, at: held || history ? now : 0 });
   } catch (error) {
     const said = errorOf(error);
     return { kind: 'failed', error: said, ...(signal || signalFailed ? { signalFailed: signalFailed ?? said } : {}) };

@@ -765,9 +765,9 @@ export default function Backups() {
       kept.kind === "failed"
         ? ` ${t("Session's account is not in this backup: {error}", { error: kept.error })}`
         : "";
-    // Signal's history, where it could not be read: the backup is made without it, and says so (#68).
+    // Signal's history, where it could not be read now: the backup holds it as last kept, and says so (#68).
     const signal = kept.signalFailed
-      ? ` ${t("Signal's history is NOT in this backup: {error}", { error: kept.signalFailed })}`
+      ? ` ${t("Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}", { error: kept.signalFailed })}`
       : "";
     return ` ${t(NETWORKS_LEFT)}${session}${signal}`;
   }
