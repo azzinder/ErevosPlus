@@ -5,11 +5,14 @@
 package expo.modules.erevosmessenger
 
 import android.app.Activity
+import android.app.Application
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -240,9 +243,47 @@ internal object WebPages {
     return name
   }
 
+  /** How many pages are in front now (resumed), and when one last stopped being (elapsedRealtime, ms; -1 never). Main thread. */
+  @Volatile private var front = 0
+  @Volatile private var leftAt = -1L
+  @Volatile private var following = false
+
+  /**
+   * A page in front is Erevos in front: while one shows, Erevos's own screen is out of sight, but
+   * the owner is still in Erevos, and the lock's time away does not run (app/_layout.tsx,
+   * lib/web-pages.ts). It counts from when the last page left.
+   */
+  private val follow = object : Application.ActivityLifecycleCallbacks {
+    override fun onActivityResumed(activity: Activity) {
+      if (synchronized(open) { activity in open }) front++
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+      if (!synchronized(open) { activity in open }) return
+      front = maxOf(0, front - 1)
+      leftAt = SystemClock.elapsedRealtime()
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivityDestroyed(activity: Activity) {}
+  }
+
+  /** Whether a page is in front now. */
+  fun inFront(): Boolean = front > 0
+
+  /** When a page last stopped being in front, on the clock nobody can set (ms); -1 when none has. */
+  fun leftAt(): Long = leftAt
+
   /** From a page's onCreate, before it shows anything. */
   fun shown(page: Activity) {
     synchronized(open) { open.add(page) }
+    if (!following) {
+      following = true
+      page.application.registerActivityLifecycleCallbacks(follow)
+    }
     keep(page)
   }
 

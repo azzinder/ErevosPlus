@@ -8,6 +8,16 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
+## Unreleased
+
+### For you
+
+- Erevos+: Messenger's case no longer locks you out (#77). Messenger **In its case**, Facebook and a sign-in page are
+  screens of their own: with one in front, Erevos's own screen was out of sight, and after the lock's 30 seconds
+  Erevos+ locked as if left and closed the page. Now a page of its own in front counts as Erevos+ in front: the time
+  away counts from when the last page left (`WebPages.kt` follows them, `lib/web-pages.ts`, `app/_layout.tsx`).
+  Requested by the maintainer.
+
 ## 3.1.0-rc.3 (2026-11-25)
 
 The third release candidate of Erevos+: Erevos 3.0.0-rc.3 with every network, with what is below.

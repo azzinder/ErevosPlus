@@ -144,6 +144,8 @@ class ErevosMessengerModule : Module() {
     Function("setWebPagesLook") { look: String -> WebPages.setLook(look) }
     // Whether Messenger's case is on the screen now (lib/messenger-store.ts counts nothing then).
     Function("caseInFront") { MessengerCaseActivity.inFront }
+    Function("webPageInFront") { WebPages.inFront() }
+    Function("webPagesLeftAt") { WebPages.leftAt().toDouble() }
 
     // The words of Session's call screen and notifications, in the app's language (lib/messenger-store.ts).
     Function("setCallTexts") { words: String -> SessionCalls.setTexts(JSONObject(words)) }

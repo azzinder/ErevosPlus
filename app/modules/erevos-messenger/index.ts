@@ -58,6 +58,10 @@ export type MessengerNative = {
   closeWebPages?(): void;
   /** Whether Messenger's case is on the screen now (not left behind Home, the screen off or the lock). */
   caseInFront?(): boolean;
+  /** Whether one of those pages (the case, Facebook, a sign-in page) is on the screen now. Missing in a build from before it. */
+  webPageInFront?(): boolean;
+  /** When one of them last left the screen, on the phone's clock nobody can set (ms, as the device module's clock().up); -1 when none has. */
+  webPagesLeftAt?(): number;
   /** Keeps those pages out of screenshots and the recent apps preview, as Erevos's own screen. */
   setWebPagesSecure?(on: boolean): void;
   /** The colours of those pages' bar (JSON: bar, text, accent, dark), as Erevos's own screen. */

@@ -26,3 +26,25 @@ export function webPagesSecure(on: boolean): void {
 export function webPagesLook(look: { bar: string; text: string; accent: string; dark: boolean; page?: CaseLook }): void {
   messengerNative?.setWebPagesLook?.(JSON.stringify(look));
 }
+
+/**
+ * Whether one of them is on the screen now. Erevos's own screen is then out of sight, but the
+ * owner is still in Erevos: the lock's time away does not run (app/_layout.tsx).
+ */
+export function webPageInFront(): boolean {
+  try {
+    return messengerNative?.webPageInFront?.() === true;
+  } catch {
+    return false;
+  }
+}
+
+/** When one of them last left the screen, on the clock lib/curtain.ts awayClock reads; null when none has, or elsewhere. */
+export function webPagesLeftAt(): number | null {
+  try {
+    const at = messengerNative?.webPagesLeftAt?.();
+    return typeof at === 'number' && Number.isFinite(at) && at >= 0 ? at : null;
+  } catch {
+    return null;
+  }
+}

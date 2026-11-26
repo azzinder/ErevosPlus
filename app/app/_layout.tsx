@@ -110,7 +110,7 @@ import { ensureStyleFonts } from '../theme/fonts';
 import { loadSettingsShared, lookFrom, lookToShare, onSettingCame, onSettingNow, settingChanged, shareLanguage } from '../lib/sync/settings';
 import { DEFAULT_LOOK, loadLockScreenLook, saveLockScreenLook, TEXT_SCALE, type Look } from '../theme/look';
 import { keepPrivate, loadScreenPrivacy } from '../lib/screen-privacy';
-import { closeWebPages, webPagesLook } from '../lib/web-pages';
+import { closeWebPages, webPageInFront, webPagesLeftAt, webPagesLook } from '../lib/web-pages';
 import { useCaseFonts } from '../lib/messenger-case-fonts';
 import { messengerCaseLook } from '../lib/messenger-case-look';
 import { collectionLockAfter, collectionLocked } from '../lib/collection-play';
@@ -125,6 +125,8 @@ callAudio?.noCookies?.();
 
 // Lock again after the app has been in the background this long.
 const RELOCK_AFTER_MS = 30_000;
+// How often Erevos+ looks whether one of its own web pages is still in front, while it is out of sight.
+const PAGE_LOOK_MS = 1_000;
 // A password screen asked for (gate) that has not come after this long: Erevos starts again from
 // the password, with the space closed, sooner than stay under the phone's cover (lib/curtain.ts).
 const GATE_STUCK_MS = 8_000;
@@ -526,6 +528,46 @@ export default function RootLayout() {
   useEffect(() => {
     let lockTimer: ReturnType<typeof setTimeout> | null = null;
     let coverTimer: ReturnType<typeof setTimeout> | null = null;
+    // Erevos+: one of its own web pages in front (Messenger in its case, Facebook, a sign-in page:
+    // lib/web-pages.ts) puts Erevos's own screen out of sight, but the owner is still in Erevos.
+    // The lock's time away does not run then; it counts from when the last page left.
+    let inPage = false;
+    let pageSeen = false;
+    let pageTimer: ReturnType<typeof setInterval> | null = null;
+    const stopPage = () => {
+      if (pageTimer) clearInterval(pageTimer);
+      pageTimer = null;
+    };
+    const followPage = () => {
+      const current = phaseRef.current;
+      if (AppState.currentState === 'active' || gating.current || current.kind !== 'open' || !current.passwordLock) {
+        stopPage();
+        return;
+      }
+      if (webPageInFront()) {
+        if (!inPage) {
+          inPage = true;
+          pageSeen = true;
+          if (lockTimer) clearTimeout(lockTimer);
+          lockTimer = null;
+          forgetKnownNamesAfter(-1);
+          collectionLockAfter(-1);
+        }
+        pageTimer ??= setInterval(followPage, PAGE_LOOK_MS);
+        return;
+      }
+      if (!inPage) return;
+      // The last page left, and Erevos is still out of sight: from then, as if it had just gone.
+      inPage = false;
+      stopPage();
+      const now = awayClock();
+      const left = Math.min(webPagesLeftAt() ?? now, now);
+      backgroundAt.current = left;
+      const rest = Math.max(0, RELOCK_AFTER_MS - (now - left));
+      forgetKnownNamesAfter(rest);
+      collectionLockAfter(rest);
+      lockTimer = setTimeout(lockAway, rest);
+    };
     // The lock's time has passed with Erevos still out of sight, where the app goes on running
     // there (it takes messages in the background): it locks now, behind the phone's cover, so the
     // password screen is ready as Erevos comes back. Back already: decided as it is told so, below.
@@ -533,6 +575,10 @@ export default function RootLayout() {
       lockTimer = null;
       const current = phaseRef.current;
       if (backgroundAt.current === null || gating.current || current.kind !== 'open' || !current.passwordLock) return;
+      if (webPageInFront()) {
+        followPage();
+        return;
+      }
       backTaken.current ??= curtainBack();
       if (backTaken.current) return;
       if (currentCall() || hiddenRingHoldsLock()) relockAfterCall.current = true;
@@ -554,16 +600,30 @@ export default function RootLayout() {
           collectionLockAfter(RELOCK_AFTER_MS);
           if (lockTimer) clearTimeout(lockTimer);
           lockTimer = setTimeout(lockAway, RELOCK_AFTER_MS);
+          // A page of Erevos+'s own may be coming to the front as Erevos's screen goes: looked at
+          // now and in a moment, as Android puts it there just after.
+          inPage = false;
+          pageSeen = false;
+          followPage();
+          setTimeout(followPage, PAGE_LOOK_MS);
         }
       }
       if (state !== 'active') return;
       if (lockTimer) clearTimeout(lockTimer);
       lockTimer = null;
+      stopPage();
+      // Back from a page of its own: the time away is from when it left, not from when Erevos's
+      // screen went (the phone's own count is of that screen alone).
+      const fromPage = pageSeen;
+      const pageLeft = inPage ? webPagesLeftAt() : null;
+      inPage = false;
+      pageSeen = false;
       // How long Erevos was away: by the phone's count where it keeps one, on the clock nobody can
       // set, which is what it kept its cover by (lib/curtain.ts); else by the app's own.
-      const back = backTaken.current ?? curtainBack();
+      const counted = backTaken.current ?? curtainBack();
       backTaken.current = null;
-      const since = backgroundAt.current;
+      const back = fromPage ? null : counted;
+      const since = fromPage && pageLeft !== null ? Math.min(pageLeft, awayClock()) : backgroundAt.current;
       backgroundAt.current = null;
       if (back === null && since === null) return;
       // Locked already, or locking: the cover goes with the password screen.
@@ -614,6 +674,7 @@ export default function RootLayout() {
       if (answerTimer) clearTimeout(answerTimer);
       if (lockTimer) clearTimeout(lockTimer);
       if (coverTimer) clearTimeout(coverTimer);
+      stopPage();
     };
   }, [gate, relock, fail]);
 

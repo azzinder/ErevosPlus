@@ -4,6 +4,8 @@
 
 // The Spanish of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/es/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Messenger's case no longer locks you out**: in Erevos+, after half a minute in Messenger **In its case**, or on Facebook, Erevos+ no longer locks as if you had left it, nor closes the page. The lock's time now counts only from when you leave Erevos+ itself.":
+    "**La funda de Messenger ya no te deja fuera**: en Erevos+, tras medio minuto en Messenger **En su funda**, o en Facebook, Erevos+ ya no se bloquea como si lo hubieras dejado ni cierra la página. El tiempo del bloqueo cuenta ahora solo desde que dejas Erevos+.",
   "**Release candidate 3**: Erevos+ with everything Erevos 3.0.0-rc.3 brought, and what is below.":
     "**Versión candidata 3**: Erevos+ con todo lo que trajo Erevos 3.0.0-rc.3, y lo que sigue.",
   "**Session and Signal in backups**: in Erevos+, a backup now holds Session's account and chats, sealed with its password, and a restore brings them back. It holds Signal's history too, but not its link to the account: register or link Signal again, and the old messages show beside the new ones, to read only. **Backups** and the message after a backup say that Telegram and Messenger are not in it, and what each needs after a restore. See [Backups](#backup).":
