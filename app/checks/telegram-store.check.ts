@@ -18,6 +18,7 @@ import { randomBytes } from '../lib/crypto';
 import { chatList } from '../lib/telegram';
 import { isWire, SEALED } from '../lib/telegram-seal';
 import {
+  restoredSignInNote,
   runTelegram,
   setTelegramNative,
   stopTelegram,
@@ -456,4 +457,9 @@ test('mark all as read, admins, adding members, quizzes: as TDLib takes them', a
     setCurrentSpace(null);
     setTelegramNative(null);
   }
+});
+
+test("a restored Telegram sign-in is said once only where it went back, not where this phone's own was kept", () => {
+  assert.match(restoredSignInNote(true) ?? '', /^Telegram is signed in from the backup\. On the old phone delete Erevos\+ without signing out/);
+  assert.equal(restoredSignInNote(false), null);
 });

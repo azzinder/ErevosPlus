@@ -353,6 +353,15 @@ export async function telegramRestored(id: string): Promise<void> {
   await secureSet(RESTORE_PENDING, JSON.stringify({ id, done: [] }));
 }
 
+/**
+ * What a restore says of a space's Telegram sign-in, once: only where it really went back (TDLib's
+ * putSignIn true), as the same sign-in on two phones signs both out from either. Where this phone's
+ * own sign-in was kept (false), nothing changed, and nothing is said.
+ */
+export function restoredSignInNote(put: boolean): string | null {
+  return put === true ? t("Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.") : null;
+}
+
 // The backup's sign-in of `it`, put in place before its Telegram first opens after a restore,
 // once; where this phone has a sign-in for it already, that stays.
 async function restoredSignIn(it: Live): Promise<void> {
@@ -367,10 +376,10 @@ async function restoredSignIn(it: Live): Promise<void> {
     }
     if (pending.done.includes(it.slot)) return;
     const { signIn } = await loadTelegramSignIn(it.space, it.key, it.holder);
-    if (signIn) await n.putSignIn(it.slot, signIn);
+    const put = signIn ? await n.putSignIn(it.slot, signIn) : false;
     await secureSet(RESTORE_PENDING, JSON.stringify({ id: pending.id, done: [...pending.done, it.slot] }));
-    // Said once, as it went back: the same sign-in on two phones signs both out from either.
-    if (signIn) void import('./alert').then(({ ask }) => ask('Telegram', t("Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too."), [{ text: t('OK') }])).catch(() => undefined);
+    const note = restoredSignInNote(put);
+    if (note) void import('./alert').then(({ ask }) => ask('Telegram', note, [{ text: t('OK') }])).catch(() => undefined);
   } catch (error) {
     // TDLib opens without it: Telegram asks to sign in, as before backups held it.
     it.problem = t("Telegram's sign-in from the backup could not go back: {error}", { error: reason(error) });
