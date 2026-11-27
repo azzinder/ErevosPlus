@@ -88,7 +88,7 @@ export default function PublicGroupsScreen() {
     <Page>
       <Text variant="title">{t('Public groups')}</Text>
       <Text tone="muted">
-        {t('A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no relay learns who is in it.')}
+        {t('A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no server learns who is in it.')}
       </Text>
 
       <SectionTitle title={t('Make a public group')} />

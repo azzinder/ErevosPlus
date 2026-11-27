@@ -64,13 +64,15 @@ test('the build settings name the pages, the relay and the server Android opens 
     const plain = appConfig({ config: APP_JSON });
     assert.equal(plain.extra.webOrigin, undefined);
     assert.equal(plain.extra.startRelay, undefined);
-    assert.deepEqual(plain.android.intentFilters, APP_JSON.android.intentFilters);
+    // app.json's, and last the one Google's sign-in comes back by, the app's package as a scheme.
+    assert.deepEqual(plain.android.intentFilters.slice(0, -1), APP_JSON.android.intentFilters);
+    assert.deepEqual(plain.android.intentFilters.at(-1), { action: 'VIEW', category: ['BROWSABLE', 'DEFAULT'], data: [{ scheme: 'app.erevos.plus' }] });
     process.env.EREVOS_WEB_ORIGIN = COMMUNITY;
     process.env.EREVOS_START_RELAY = 'wss://relay.community.example';
     const own = appConfig({ config: APP_JSON });
     assert.equal(own.extra.webOrigin, COMMUNITY);
     assert.equal(own.extra.startRelay, 'wss://relay.community.example');
-    const hosts = own.android.intentFilters.flatMap((filter) => filter.data.map((data) => data.host));
+    const hosts = own.android.intentFilters.flatMap((filter) => filter.data.flatMap((data) => (data.host ? [data.host] : [])));
     assert.ok(hosts.length >= 4);
     assert.ok(hosts.every((host) => host === 'erevos.community.example'), hosts.join());
     process.env.EREVOS_WEB_ORIGIN = 'https://erevos.community.example/c';
@@ -192,9 +194,10 @@ test('a phone with no relay yet is offered every way to begin on one page, in pl
   const tried = joining.indexOf('await createQueue({ url, token: token || undefined })');
   assert.ok(tried > 0);
   for (const kept of ['setRelayUrl(url)', 'setRelayToken(token)', 'setOwnQueue(']) assert.ok(joining.indexOf(kept) > tried, kept);
-  // The first start names both ways in, and the one with no invite opens that page (setup=relay).
+  // The first start's mode step leaves the other ways, an account at a server or one's own, to the link
+  // Another server (for advanced users), which opens that page (setup=relay).
   const first = read('../app/first-steps.tsx');
-  assert.ok(first.includes("{t('I have an invite')}") && first.includes("{t('I have no invite')}"));
+  assert.ok(first.includes("t('Another server (for advanced users)')"));
   assert.ok(first.includes("router.push('/chat?setup=relay')"));
   assert.ok(chat.includes("relaySettings={setup === 'relay'}") && chat.includes("useState<Door>(relaySettings || nearbyOpen ? 'advanced'"));
   // Whoever has neither an account nor a server is told which way is theirs, where that way is offered.

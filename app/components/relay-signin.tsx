@@ -210,7 +210,7 @@ export function RelaySignIn({
       )}
       <Text variant="caption" tone="muted">
         {t(
-          "Signs this phone in to the relay with your {name} account, in the browser: you type the password there only, and this phone gets a token of its own, kept in this space. The relay's operator sees your {name} user name, and every hour the relay asks {name} whether the account may still use it, signing this phone out when it may not, or when {name} cannot be asked for 3 days. Signing in from another space with the same account shows the relay that both are yours.",
+          "Signs this phone in to the server with your {name} account, in the browser: you type the password there only, and this phone gets a token of its own, kept in this space. The server's operator sees your {name} user name, and every hour the server asks {name} whether the account may still use it, signing this phone out when it may not, or when {name} cannot be asked for 3 days. Signing in from another space with the same account shows the server that both are yours.",
           { name: offer.name },
         )}
       </Text>

@@ -53,7 +53,7 @@ export default function NostrPostsScreen() {
       const shown = new Set(more ? posts.map((post) => post.id) : []);
       setPosts([...(more ? posts : []), ...found.posts.filter((post) => !shown.has(post.id))]);
       setOlder(found.older);
-      if (!found.answered) setSaid(t('No relay answered. Try again in a while.'));
+      if (!found.answered) setSaid(t('No server answered. Try again in a while.'));
     } catch (error) {
       setSaid(error instanceof Error ? error.message : String(error));
     } finally {
@@ -89,13 +89,13 @@ export default function NostrPostsScreen() {
         {t('Public posts · read only')}
       </Text>
       <Text variant="caption" tone="faint">
-        {t('What they post for everyone, newest first, as their relays keep it. It is looked up now and not kept, and no pictures or links are opened: they show as their addresses.')}
+        {t('What they post for everyone, newest first, as their servers keep it. It is looked up now and not kept, and no pictures or links are opened: they show as their addresses.')}
       </Text>
       {canTor() ? (
         <Text variant="caption" tone="faint">
           {nostrChatsThroughTor(nostrDmTor(where))
-            ? t('Through Tor: the Nostr relays do not see your address.')
-            : t('Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.')}
+            ? t('Through Tor: the Nostr servers do not see your address.')
+            : t('Not through Tor now: the Nostr servers see your address. Tor for this account is under Settings → Server and networks → Nostr chats.')}
         </Text>
       ) : null}
 

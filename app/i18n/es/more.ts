@@ -9,7 +9,7 @@ export const more: Record<string, string> = {
   'Automatic': 'Automático',
   'straight': 'directo',
   'your own bridges': 'tus propios puentes',
-  'Tor is off for this space: messages go straight to the relay.': 'Tor está desactivado en este espacio: los mensajes van directos al relay.',
+  'Tor is off for this space: messages go straight to the server.': 'Tor está desactivado en este espacio: los mensajes van directos al servidor.',
   'Tor is connected, {how}.': 'Tor está conectado, {how}.',
   'Tor is connected.': 'Tor está conectado.',
   'Tor cannot connect from this network. Try Automatic, or bridges of your own.': 'Tor no puede conectarse desde esta red. Prueba Automático, o puentes propios.',
@@ -42,8 +42,8 @@ export const more: Record<string, string> = {
   'Not in use until you tap Use these bridges.': 'No se usan hasta que toques «Usar estos puentes».',
   'With bridges, Tor never goes straight to its relays: when no bridge answers, messages wait. Bridges count only while Tor is on.':
     'Con puentes, Tor nunca va directamente a sus repetidores: si ningún puente responde, los mensajes esperan. Los puentes solo cuentan mientras Tor está activado.',
-  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the relay without Tor until one does.':
-    'Con puentes, Tor nunca va directamente a sus repetidores: si ningún puente responde, los mensajes van al relay sin Tor hasta que uno responda.',
+  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the server without Tor until one does.':
+    'Con puentes, Tor nunca va directamente a sus repetidores: si ningún puente responde, los mensajes van al servidor sin Tor hasta que uno responda.',
 
   // Updates on Windows, and on every computer: the file to take.
   'The download page opens: take {file}, see User guide → Updates.': 'Se abre la página de descargas: elige {file}, consulta «Guía de uso → Actualizaciones».',

@@ -27,8 +27,9 @@ import java.io.FileNotFoundException
  *
  * The provider answers only an app signed with this one's key (PackageManager.checkSignatures
  * against the caller's uid): another app on the phone gets nothing, not even whether a move waits.
- * No permission of our own is declared, so a build signed with another key (F-Droid's) installs
- * beside ours without clashing; it just cannot take a move, and a backup does it instead.
+ * No permission of our own is declared, so a build signed with another key (one built on a
+ * computer for testing) installs beside ours without clashing; it just cannot take a move, and a
+ * backup does it instead. The F-Droid build is signed with the same key as the others.
  * The files are served read-only, by name; the one moved to deletes them when done.
  */
 class MoveProvider : ContentProvider() {

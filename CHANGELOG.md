@@ -8,10 +8,23 @@ Until then releases were numbered `0.1.<run of the release workflow>`, so some n
 and 0.1.15 never came out.
 4.0.0-rc.6 is the first release with a macOS build. After 4.0.0-rc.10 comes 6.0.0-rc.1, and after 7.0.2 comes 7.2.0-beta.1 (7.1 and 7.3 are Erevos+). After 7.2.0-rc.2 comes 3.0.0-beta.1: since then the second number says the edition (3.0.x Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite), and What's new in the app starts again there. **Not audited.**
 
-## Unreleased
+## 3.1.0-rc.4 (2026-11-27)
+
+The fourth release candidate of Erevos+: Erevos 3.0.0-rc.4 with every network, with what is below.
 
 ### For you
 
+- Everything Erevos 3.0.0-rc.4 brought (below), in Erevos+: how visible you are (SPEED, ANONYMOUS, INVISIBLE), calls
+  straight from phone to phone, the new first start in each edition's colours (Erevos+'s «Other networks» group off
+  at the start), LPHL's server by itself, the fingerprint or face at once, backups to a cloud app's folder, to a
+  server only or to Google Drive, and «server» in plain words on every screen.
+- Erevos+: INVISIBLE for every network. In a space on INVISIBLE every account of Telegram, Signal, Messenger,
+  Session, Matrix, XMPP and Nostr goes only through Tor, whatever its own Tor choice (`lib/account-tor.ts`
+  accountThroughTor, accountNeverStraight), and XMPP and Nostr accounts connect again when the Tor way changes.
+  No call of theirs goes or rings: Telegram's (`lib/telegram-calls.ts`), Signal's and Session's
+  (`setCallsOff` in the messenger module, `SignalCalls.kt`, `SessionCalls.kt`), Matrix's and the chat screens say
+  why, as Erevos does (`callsOffNote`), and a call going on ends when the space turns INVISIBLE. **Account Tor**
+  says so on each network's screen. Requested by the maintainer.
 - Erevos+: Messenger's chats read elsewhere are read here too (#78). A message counted here, in a chat its engine
   never had unread, stayed unread when read in Messenger's case, on Facebook or in Messenger's app: only a change of
   the chat's own word cleared it. The engine now tells how far a chat was read, from Meta's read marks and our own
@@ -28,6 +41,303 @@ and 0.1.15 never came out.
   sign-in (its cookies, never a password) goes in the first space's networks file and signs in again after a restore,
   never over another account. Chats and files stay out: each network sends them again. Backups, the guide and What's
   new say to use a restored sign-in on one phone only. Requested by the maintainer.
+
+### Under the hood
+
+- Erevos+ 3.1.0-rc.4 merges Erevos main at 3.0.0-rc.4 / Lite 3.2.0-rc.4 (`7a62c62f`). Relay → server in Erevos+'s own
+  texts and guide too (code names, guide ids and Tor relays stay); Erevos+'s Matrix, XMPP and Nostr keep their own
+  per-account Tor choice. The Erevos+ release workflow (`erevosgram.yml`) fetches Gradle and its plugins through
+  the Maven Central mirror, trying four times, as Erevos's do (`checks/gradle-fetch.check.ts`).
+
+## 3.2.0-rc.4 (2026-11-27)
+
+The fourth release candidate of Erevos Lite: Erevos 3.0.0-rc.4 for Erevos's own chats and calls, with what is below.
+
+### For you
+
+- What Erevos 3.0.0-rc.4 brought to chats and calls: **How visible are you?**, with SPEED, ANONYMOUS and INVISIBLE, and
+  with SPEED calls straight from phone to phone; New chat that says what works with no server, and who came in with
+  your invite; server in plain words; the fingerprint or face at once; backups that say why a folder did not take
+  them, and are checked once a cloud app has them; a new first start, in four steps, that takes a place on LPHL's
+  server by itself; and automatic backups only to a server, or to Google Drive too. Nostr on a computer, in the web
+  app and on Sailfish OS is not Erevos Lite's, which is on Android only.
+- **The F-Droid build, the same file F-Droid hands out**: as Erevos's, `erevos-lite-android-fdroid.apk` is now built as
+  F-Droid builds it and signed with the same key, so that Erevos Lite from F-Droid, once it is there, and from the
+  releases page install over each other, keeping everything. As in Erevos, the F-Droid one has no Check for updates,
+  no From a phone nearby and no Google Drive: Backups says so, and an Erevos Lite from the releases page asks before it
+  takes F-Droid's from a phone nearby.
+
+### Under the hood
+
+- As in Erevos 3.0.0-rc.4: the key a fingerprint or face opens is made in the phone's TEE; a call with no server
+  between the phones is set up through Nostr; and a free place on LPHL's server keeps to a share of its own there,
+  and one the server let go is asked for again with the same token.
+- As in Erevos 3.0.0-rc.4: the F-Droid APK is built from `deploy/fdroid/app.erevos.lite.yml` as F-Droid builds it, with
+  no key at hand, then signed apart with the release key and checked as the APK Updates installs is, without the
+  permission to install packages. On 2026-11-27 it came out the same, byte for byte, in two builds on two machines, one
+  of them with two processors, and the signature of one, copied onto the other, verified. Gradle and the plugins it
+  needs are fetched first, tried four times, before the release key is there, and on GitHub's machines Maven Central's
+  files come from Google's copy of it.
+
+## 3.0.0-rc.4 (2026-11-27)
+
+### For you
+
+- **How visible are you?** (#73): three choices at the top of **Settings**, one for each space, for who sees the
+  phone's internet address (IP address), in the words of the first start's design. **SPEED**: the servers and your
+  contacts see it; Erevos no longer asks before what it sends through a server, a call, a file on a server a contact
+  chose, a contact's invite to their server, a pairing by a code of 8 digits, a radio station or TV channel, or the
+  spam list: it does them at once, and the chats show no quiet line about the address. **ANONYMOUS**: only the server
+  sees it, never your contacts; Erevos asks before each of those, as before, and calls go through a call server or on
+  the same Wi-Fi. **INVISIBLE**: no one sees it; everything of the space goes through Tor, files and Nostr too, and
+  there are no voice or video calls: trying one says why, no call rings, not even in hidden chats (the chat shows it
+  as missed, in INVISIBLE), and a call going on or ringing ends when INVISIBLE is chosen. A space is on SPEED until
+  another is chosen, unless Tor is on in it. The Tor and Nostr screens move it too, and say so: everything through Tor
+  is INVISIBLE, Tor for messages only or Nostr through Tor is ANONYMOUS. Hidden chats and chats set to **Through Tor**
+  still ask, and so do a web link, a link's preview, and bringing the messages of a phone beside this one from a
+  server it does not use. **What it changes**, under them, says who sees the address with each.
+- **Calls with no server between you** (#73): with SPEED, a call or video call with a contact who shares no server
+  with you is set up through Nostr and goes straight from phone to phone. Each phone then sees the other's address,
+  and a helper server (STUN) tells each phone its own: the one beside your server and LPHL's first, Cloudflare's and
+  Nextcloud's only when those do not answer; on the screen of the three, servers of your own or none, and **Check
+  now**. Where a network lets nothing in from outside, the call says **The call could not connect directly**, and what
+  helps. With ANONYMOUS such a call does not ring: the chat shows it as missed, and why.
+- **SPEED calls with a call server** (#73): a call or video call with a contact goes straight from phone to phone where
+  it can, the fastest way, and through the call server where it cannot, with no wait between: both ways are tried at
+  once. The contact's phone sees your address either way. Group calls, hidden chats and chats set to **Through Tor**
+  still never go straight over the internet.
+- **New chat says what works with no server** (#72): **Messages only, for now** (texts, photos, files and voice
+  messages) or, with SPEED, **Messages and calls, for now**, in place of **Texts only, for now**.
+- **Who came in with your invite** (#72): when a contact takes the invite to your server that your phone sent them by
+  itself, their chat says so, on your phone only, with **Take back** under that line while they are there.
+- **Server, in plain words**: Erevos now says server, on every screen, in every notice and in the guide, in all its
+  languages, for what keeps your messages, encrypted, until the other phone takes them. Nothing changes in how it works.
+- **Fingerprint or face, at once** (#76): Android asks for the finger or face without the moment's wait it took, as
+  the key it opens is now made in the phone's secure area, not in its separate security chip. Where it is on already,
+  turn it off and on once under **Settings** → **Privacy and security** → **Lock and second password**, for the new
+  key.
+- **Nostr on a computer, in the web app and on Sailfish OS**: texts there now go through the public Nostr servers too
+  when your servers do not take them, as on Android, and with no server at all. There is no Tor there, so they go
+  straight, while Erevos is open: the Nostr servers see that device's internet address, as your server does, never who
+  wrote to whom. With everything through Tor, or **Nostr through Tor** on, as a phone's backup may bring them, Erevos
+  reaches no Nostr server there, and the **Nostr** screen says so.
+- **A backup that a folder does not take says why** (#75): **Make a backup** and the automatic backups now say in
+  plain words why Android did not let the backup into the folder, and what to do (choose it again, make room, or
+  choose a folder on the phone), in place of Android's own error, which named a function of the app.
+- **A backup in a cloud app's folder is checked once it is there** (#75): such a folder, as DAVx5's for a WebDAV
+  server, takes the backup at once and sends it to its server after, and the check right after it found it empty or
+  short. The check now looks again a few times over about four minutes, and says so as it waits, before it says what
+  it found; under it, **Check again** looks once more, while the space stays open. Automatic backups into such a folder
+  wait the same way, and a check that finds the backup empty says that.
+- **A new first start**: Erevos now sets itself up in five short steps, with a dot for each, in the edition's own
+  colours over a dark or a light ground, as the phone is. **Welcome**: what you do not give, and your name if you like.
+  **What will you use?**: Erevos's chats, the Phone, the SMS and the Collection, each one left off not running at all
+  (not in Erevos Lite, nor where only one is there). **How visible are you?**: the three choices of Settings, SPEED
+  chosen already. **Miss nothing**: every permission Erevos asks for, in five groups by what they are for (Notices,
+  Calls, Messages, In the background, Reminders), with how many are allowed; **Allow all** asks Android's own questions
+  first, then for Erevos as the phone app and as the SMS app, then opens each screen of Android's settings in turn, as
+  you come back from the one before. **Keep it safe**: a password for Erevos, typed twice, with a meter and four tips
+  for a stronger one, the fingerprint or face, and where automatic backups go: **On this device**, in a folder you
+  choose, or **WebDAV** (Nextcloud, ownCloud and others), each set up on the Backups screen that **Done** opens. Moving
+  from another phone leaves out the choice of mode, as the backup brings it, and the computer app and Sailfish OS have
+  no permissions step. Then the home screen says **Ready**, with your name, and offers **They are beside me** and
+  **They are far away**, with a line for a permission still missing. The first start no longer asks whether you have
+  an invite: one that Erevos was opened with still opens once the steps are done, and the ways in with an account at a
+  server, or a server of your own, are under **Another server (for advanced users)** on the mode's step.
+- **LPHL's server, by itself** (#74): a new phone needs no invite and no account any more. At the first start, once you
+  choose how visible you are, Erevos takes a place for your messages on LPHL's server by itself and makes your queue
+  there, with nothing to type; the phone makes its token itself, and the server gets only its SHA-256. Until then the
+  step says LPHL's server is waiting for you, and once it is taken that it is ready. Such a place is for your own chats:
+  it cannot invite or lend places; each day it may make 20 queues, move 50 MB of files through the server, take what a
+  call through the server needs 30 times and send 5000 messages on to other servers, and past one of those Erevos says
+  in plain words that it goes on tomorrow, and sends what waits then; at once it may have 8 MB of messages waiting and
+  20 held for later, and open places together keep at most half of what the server keeps of messages, of files and of
+  what is held for later, so they never fill it for everyone. The home screen says what a free place on LPHL's server
+  may do each day. LPHL's server gives 3000 at most, 300 a day and 5 a day to one internet address (an IPv6 one by its
+  first 48 bits, its whole network), and takes out a place whose phone has not connected for 100 days, or for 30 when it
+  never connected again after its first day; another server gives 1000, 100 and 3 and takes one out after 60 days, or 7,
+  unless set otherwise. Each counts the addresses only for the day, in memory. Should it take yours out,
+  Erevos asks for it again by itself, with the same token, the next time it reaches the server, and your queue, links
+  and contacts stay as they were, as the server keeps queues for months. When it gives none, the home screen's dot
+  warns, and above the two ways to add someone, or above the chats of a space that has some, it says why, with **Try
+  again** and **Another server**, and Erevos tries again each time it opens; a space with no server and no chats yet
+  offers **Use LPHL’s server** there. An invite Erevos was first opened with that brings a server of its own, a server
+  at someone's home say, is used instead.
+- **Automatic backups only to a server**: automatic backups can now go to a WebDAV server with no folder on the device.
+  The first start's **WebDAV** sets them up so, and **Backups** shows them as **Only to** that server, with a folder on
+  the device optional, for one more copy close at hand. Stopping that server stops them too.
+- **Automatic backups to Google Drive**: on Android, automatic backups can now go to your Google Drive too, encrypted as
+  to a server, into a folder named Erevos that Erevos makes there, and with no folder on the phone and no server, only
+  there. **Backups** offers it beside WebDAV, under **To Google Drive too**, and the first start's **Google Drive** sets
+  it up. Each time, before signing in with Google, Erevos says that Google cannot read the backups but knows who you
+  are, sees when one comes and how big it is, and may hand that over if asked; in INVISIBLE also that signing in happens
+  in the browser, outside Erevos, not through Tor. **Restore from Google Drive** lists the backups there and puts one
+  back, with its photos, files and voice messages. **Stop sending** takes Erevos's access back at Google; the backups
+  there stay. It is not in the F-Droid build, which keeps to services anyone may run.
+- **The F-Droid build, the same file F-Droid hands out**: `erevos-android-fdroid.apk`, beside each release, is now built
+  as F-Droid builds it and signed with the same key as the other Erevos, so that F-Droid, once Erevos is there, hands
+  out that very file. Erevos from F-Droid and from the releases page then install over each other, keeping everything,
+  with no uninstalling (User guide → Updates). It has no Check for updates, no From a phone nearby and no Google Drive,
+  so going to it those stop: Backups then says so of backups that went to Google Drive, whose Stop sending still
+  takes Erevos's access back at Google, and where automatic backups still go. Given to a phone nearby, F-Droid's
+  Erevos says it is F-Droid's, on its screen and on the page, and an Erevos from the releases page asks before it
+  installs it.
+
+### Under the hood
+
+- A space's data keeps `direct`, on unless turned off, and `stun`, the helper servers typed; with no space open nothing
+  is direct (`lib/direct.ts`, `lock/space-data.ts`). Turning Tor or Nostr through Tor on writes `direct` off in that
+  space (`app/tor.tsx`, `app/nostr.tsx`).
+- The mode is not kept by itself: it is read from `direct`, the Tor way and Nostr's own Tor switch (INVISIBLE is the
+  Tor way `all`, SPEED is `direct` with nothing through Tor), and choosing one writes them (`lib/modes.ts`,
+  `components/mode-picker.tsx`). With the Tor way `all`, a call is refused where it starts or rings, Erevos's own,
+  group, XMPP and Matrix alike, asked again after the call relay is, and the Tor way turning to `all` ends a call
+  going on or ringing (`lib/calls.ts`, `lib/group-calls.ts`, `lib/matrix-calls.ts`); a closed hidden place keeps such
+  a call as missed at once, with no ring, and one that rings with no name as the way turns stops, kept so too
+  (`lib/place-receiver.ts`, `lib/xmpp-calls.ts`, `lib/matrix-calls.ts`, `lib/hidden-ring-notices.ts`).
+- Calls have a third way beside the call server and the same network: straight over the internet, with the helper
+  servers asked in groups, the reserve only when the first group is silent for 1.2 seconds (`lib/call.ts`). Their
+  signals go encrypted through Nostr when no server is between the two phones (`lib/space-calls.ts`, `lib/calls.ts`).
+- With SPEED and a call relay, a call says the relay's addresses beside its own and those the helper servers tell
+  (`iceTransportPolicy` `all`, the helper servers listed before the relay), so WebRTC keeps the straight way where it
+  works and the relay where it does not; its description goes soon after the first address the relay gives, as through
+  a relay only, and a call that never connects keeps the plain "could not connect" line (`lib/call.ts`
+  `connectionConfig`, `describedSdp`; `lib/calls.ts`; `app/chat.tsx`). With SPEED off, the call relay stays the only
+  way.
+- LPHL's helper server is its call server, on the port that server listens on there, 3480 (`lib/servers.ts`).
+- A contact keeps the id of the invite sent them by itself, when their phone came in with it and when that place was
+  taken back; the server is asked about it once, only while they read on it (`lib/invite-place.ts`, `app/chat.tsx`).
+- The guide: a link to a part inside a section, such as **Erevos, Erevos+ or Erevos Lite, and betas** from its first
+  page, opens that section instead of saying it was not found, and the titles of those parts no longer show their
+  `{#…}` (`lib/guide.ts`, `app/guide/[id].tsx`).
+- The words people read say server where they said relay, in the app's texts of every language, in the guide, and on
+  the server's own sign-in page once a server runs this version (`crates/erevos-relay/src/pages.rs`); the names in the
+  code, in the links to the guide's sections and in the server's own program and settings stay as they were
+  (`lib/relay.ts`, `#relay`, `erevos-relay`, `EREVOS_RELAY_…`). The computer app's start check looks for "server" on
+  the first screen (`desktop/main.js`).
+- The key that a fingerprint or face opens is made in the phone's TEE, no longer in StrongBox where the phone has it
+  (`modules/erevos-biometric`, `newKey`): each use of a StrongBox key began in the chip before Android's prompt could
+  show, a moment or more on a Pixel. It still needs a strong check for each single use, only on an unlocked phone, and
+  is dropped when fingerprints or faces change. The token that lets a use happen comes from the TEE in both cases, and
+  StrongBox takes it on a key the two share, so for a key that one use opens StrongBox added no safety. A key made in
+  StrongBox before keeps working there until unlocking is turned off and on again.
+- Where the core has no Tor (the web app, the computer app and Sailfish OS's: `lib/crypto-setup.ts`
+  `setNostrStraight`), the Nostr relays are reached straight over WebSocket with the core's wraps (`lib/nostr.ts`
+  `nostrStraight`, `lib/nostr-dm-net.ts` `openNostrStraight`, `lib/core.ts` `nostrSeal`), with the space's Tor way
+  Nothing or Messages, as its requests to the servers go then; with Everything, with Nostr's own Tor switch on, and for
+  a chat that goes only through Tor, on none, never straight. The WebAssembly core gives and takes an event as its
+  bytes, Android's as text: the guarded core says so (`Core.eventsAsBytes`, `lib/core-guard.ts`), and `nostrSeal` turns
+  them into text. `canNostr` says Nostr works there, `canNostrTor` whether Tor reaches it (Android). The Nostr setting
+  shows everywhere (`lib/settings.ts`), its Tor switch only where there is Tor, or while it is on (`app/nostr.tsx`). A
+  linked device still reads nothing there. The check runs it on the WebAssembly core as the web app sets it up.
+- What Android says when a file cannot be made or written in a backup's folder is put in plain words by
+  `folderTrouble` (`lib/backup-place.ts`), from the error under Expo's own line; the checks fail a write the ways
+  Android does.
+- The check right after a backup into a folder kept by another app than Android's own storage (`folderOfAnotherApp`:
+  the tree's authority is neither the phone's storage nor Downloads) looks again after 15, 30, 45, 60 and 90 seconds
+  while it does not find the backup whole (`lib/backup-folder.ts` `settled`), for automatic backups and those made by
+  hand; **Check again** looks once (`checkMadeBackup` `once`, `app/backup.tsx`), with the key the backup was made with,
+  kept only in the screen's note while the space is open (`lib/backup-making.ts`). DAVx5 makes each file empty on its
+  server first and uploads it once written, and reads it back empty until then: an empty backup says so
+  (`lib/backup-check.ts`). The checks run it in a DAVx5 folder whose backup comes whole only after a wait.
+- The first start's steps, their dots and the editions' colours come from `lib/first-start.ts` (`startSteps`, `stepAt`,
+  `startLook`), the permissions' groups and the order of **Allow all** from `lib/permission-groups.ts`
+  (`permissionGroups`, `askedInApp`, `nextSettingsScreen`), both checked under Node. The screens are drawn with parts of
+  their own (`components/first-start-look.tsx`): the welcome and the modules in `components/setup.tsx`, the rest in
+  `app/first-steps.tsx`, the first home in `components/first-home.tsx`. **Done** turns the password lock on with the
+  calls Settings makes (`lockWithPassword`, `prepareSpaces`), then the fingerprint (`turnOnBiometric`), and opens
+  Backups with the choice (`/backup?start=device` or `webdav`); the meter is `strengthOf` (`lib/password-strength.ts`).
+  The steps left are kept as before (`lib/setup-after.ts`), so they show again when Erevos closes before **Done**. The
+  Photos permission is not asked: the Collection takes photos and files through Android's own picker, which needs none.
+- Open places (`crates/erevos-relay/src/open.rs`): with `EREVOS_RELAY_OPEN=on` and a file of phones' tokens, the request
+  `OPEN` (39) on `/join`, with the SHA-256 of a token the phone made, adds a line for it named `open-` and 8 random hex
+  digits, with the day it was made, and answers its name; or `NOT_FOUND` (none given), `FULL`, `DAY_FULL` (7),
+  `ADDRESS_FULL` (8) or `FAILED`. `EREVOS_RELAY_OPEN_PLACES` (1000), `_DAY` (100), `_PER_ADDRESS` (3), `_UNUSED_DAYS`
+  (60), `_FIRST_DAYS` (7), `_FILES_MB` (50), `_CALLS` (30), `_QUEUES` (20), `_FORWARDS` (5000), `_QUEUED_MB` (8) and
+  `_LATER` (20) set the limits, each checked at start. An address counts as an HMAC under a secret drawn at start, an
+  IPv6 one by its /48 and one mapped into IPv6 as the IPv4 address, in memory and for the day only; a connection to
+  `/join` from a proxy on the relay's machine that sends no `X-Forwarded-For` is said in the log, once an hour at most.
+  What each place used that day, and the places given, are counted in `<file of tokens>.open`, written whole. An open
+  place's token uses its own queues and files, sends for later, pushes and the call relay within its day: its new
+  queues, bytes of files put or fetched, credentials for calls and forwards (`FORWARD`, `FILE_VIA` taking or deleting,
+  and `LATER` holding a `FORWARD`, each counted when asked and never given back), answered `DAY_FULL` past them. What it
+  keeps counts apart, in memory only: at most `_QUEUED_MB` megabytes of messages waiting in its queues and `_LATER`
+  requests held for later at once, and all open places' together at most half of the messages waiting, of the room for
+  files and of the requests held for later, `FULL` past that. `INVITE`, `INVITES`, `UNINVITE`, `LEND`, `COUPON_KEY`,
+  `COUPON_SIGN` and `PAIR` answer it `NOT_FOUND`, and `OWN`, `BORROW` and the requests of `/join` close its connection.
+  The hourly look takes out a line whose token connected on none of the set days, one with no record counted from the
+  first look that sees it, and `_FIRST_DAYS` days after the day a line was made, one whose token never connected after
+  that day; `erevos-relay open-places` counts them from the two files. A name typed for an invite or given by a provider
+  never starts with `open-`.
+- The app takes such a place with `takeOpenPlace`, and tells its refusals with `openPlaceRefusal` (`lib/relay.ts`). The
+  first space wants one from the first start's setup on and takes it once the mode is chosen, or as a space opens once
+  the steps are done (`lib/open-place.ts`); an invite that brings a server of its own is told by `bringsServer`
+  (`lib/invite-server.ts`). The token is kept as the space's own with `open` (`OwnToken`, `lib/relay-signin.ts`;
+  `checkedOwnToken`, `lock/space-data.ts`), so `isOpenPlace` knows a free place by its token, and the first home says
+  its limits (`components/first-home.tsx`). A day used (`DAY_FULL`) is said in plain words by `check` and `checkFile`,
+  `isDayFull` tells it, and `canTryLater` takes it as something to send again later. The computer app's start check
+  knows the first start's welcome by **Get started** (`desktop/main.js`).
+- A channel the relay ends at its token (a WebSocket closed for policy, `unauthorized`) is now a `RelayTokenError`,
+  still a `RelayUnreachableError` everywhere else, and `onTokenRefused` tells of it: `lib/open-place.ts` then asks for
+  the free place of the open space again with the same token (`takeOpenPlace(url, again)`, `reopenPlace`), so its
+  queues, links and contacts stay as they were; through Tor, which tells only that the connection closed, only once the
+  token alone, tried again at most once a minute, is not taken either (`tokenTaken`). One the relay cannot give again
+  now says why on the first home and above the chats (`NoPlaceCard`), and is asked for again as the space opens and with
+  **Try again** (`checks/open-place-again.check.ts`, against a real relay in a channel).
+- Automatic backups with no folder and a WebDAV server go only to that server: `runAutoBackup` already sent them so, and
+  `app/backup.tsx` now sets them up that way, says so, and stops them with the server.
+- Google Drive (`lib/google-drive.ts`) signs in with OAuth 2.0 for an app on the phone, with PKCE (S256), no client
+  secret and only the `drive.file` scope, so Erevos reaches only the files it made there. Google's page opens in the
+  phone's browser (`Linking.openURL`) and comes back to `<package>:/oauth2redirect`: an intent filter of each edition's
+  package as a scheme (`app.config.js`), mapped to `app/oauth2redirect.tsx` (`lib/open-link.ts`). The state and the PKCE
+  verifier wait in the keystore (`erevos.drive-sign-in`), sealed with a key the open space's own gives, 10 minutes at
+  most, and are taken at the first answer, so a code goes once. The refresh token is kept as the WebDAV password is
+  (`erevos.backup-drive`, outside the spaces and in backups, sealed with their password), access tokens only in memory,
+  asked for again when one runs out or Google refuses it (401), and **Stop sending** revokes it at
+  `oauth2.googleapis.com/revoke`. Each edition's Android OAuth client ID is in `lib/google-drive-ids.ts`, the three
+  from one Google Cloud project; without one `CAN_DRIVE` is false and nothing of Google Drive shows, as in the F-Droid
+  build, which has no intent filter for it either. Files go as multipart uploads, those above 5 MB as
+  resumable ones, through the same HTTP layer as backups to a server, so the space's Tor way applies; through Tor, whose
+  answers carry no headers, a large one goes as a multipart upload too. Backups there are sent, checked after each, kept
+  and deleted as on a server: `sendBare` sends to either place, a `BarePlace` (`lib/backup-cloud.ts`,
+  `lib/backup-folder.ts`, `lib/backup-check.ts`, `lib/backup-ledger.ts`).
+- F-Droid's recipes for Erevos and Erevos Lite are in `deploy/fdroid/` (`app.erevos.yml`, `app.erevos.lite.yml`), as
+  F-Droid's list of apps would carry them: Debian's compilers, Go, rustup and Java 17 beside Java 21, Node by its exact
+  version and SHA-256, the NDK React Native names, Expo's modules built from their source and Expo's template by its
+  exact version (`deploy/fdroid/build.sh`). `scripts/fdroid-build.sh` builds one in F-Droid's own build server image,
+  with F-Droid's `fdroid build`, in F-Droid's folder, so the APK comes out as F-Droid's own build of the same commit
+  would; the workflow `fdroid-build`, by hand, builds it twice on two machines and compares the two
+  (`scripts/apk-compare.py`), then signs the first as a release would, with a key made for the test
+  (`scripts/fdroid-sign.sh`: the signature alone, nothing else changed), and checks, as F-Droid does, that its signature
+  copied onto the second verifies. `checks/fdroid.check.ts` holds the recipes to the release key, the downloads and the
+  NDK, and the signing to Gradle's. On 2026-11-27 Erevos's came out the same, byte for byte, in three builds on three
+  machines, two of them with two processors, and the signature of one, copied onto another, verified; Erevos Lite's
+  too, in two builds on two machines, one of them with two processors. Nothing is sent to F-Droid.
+- The release builds its F-Droid APK with `scripts/fdroid-build.sh`, in a job that holds no key (`fdroid`), and signs it
+  in the next (`fdroid-sign`) with `scripts/fdroid-sign.sh`: the release key is written to a file for the SDK's
+  `apksigner` alone, in that one step, and removed after. Only then is apksigcopier installed, pinned by its SHA-256
+  with click (`scripts/apksigcopier-requirements.txt`, which `fdroid-build` uses too), to check that the signature alone
+  was added; the job then checks the APK as the apk job does, and that it is `app.erevos` of this build, without the
+  permission to install packages. The APK Updates installs is built as before, now alone in its job; Erevos Lite's
+  release does the same. A build that hangs holds the release two hours at most.
+- Taken from a phone nearby, F-Droid's build is told by its manifest (no permission to install packages,
+  `NearbyApk.kt`), and asked about before Android's installer opens (`lib/give-app.ts`). The F-Droid build reads
+  Google Drive's settings left by an Erevos installed before it (`lib/google-drive.ts` driveLeftBehind) only to show
+  them in Backups and stop them; it sends nothing there.
+- Gradle's own download, and the plugins it fetches before it builds anything, as React Native's from the Gradle Plugin
+  Portal, fail now and then: on 2026-11-27 a plugin was not found twice on GitHub's machines. Every build of the Android
+  app, the release's, the F-Droid build's (`deploy/fdroid/build.sh`), the one that adds an APK a release went out
+  without (`release-android`) and the check build, now fetches them first with `help`, which builds nothing, tried four
+  times, a plugin not found asked for again after the first try; the releases do it before the release key is there
+  (`checks/gradle-fetch.check.ts`).
+- On GitHub's machines Maven Central's files now come from Google's copy of it, the same files at the same paths, in
+  every build Gradle runs there (`scripts/maven-central-mirror.gradle`): Maven Central at times answers those machines
+  "too many requests", and Gradle then looks no further down its list, not even on the Gradle Plugin Portal, so a
+  plugin only the Portal has was "not found" for minutes, every try. The Portal, for its part, sends what it does not
+  hold on to Maven Central, so where Gradle would ask the Portal alone, as for the plugins of the app's own build and
+  of Expo's for modules, Maven Central from Google's copy now comes before it. A release's F-Droid build takes them
+  from there too; F-Droid's own build takes them from Maven Central, and the workflow `fdroid-build` now builds its
+  second APK so, to show that both come out the same.
 
 ## 3.1.0-rc.3 (2026-11-25)
 

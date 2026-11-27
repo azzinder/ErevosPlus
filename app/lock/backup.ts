@@ -106,10 +106,11 @@ import { FILE as XMPP } from './xmpp-data';
 // - the panic password's entry (lock/config.ts), random when none is set, so it says nothing;
 // - the phone's own settings that go with its owner to another phone (SETTINGS), applied once
 //   restored (lib/backup-settings.ts);
-// - how automatic backups are made and the server they go to (lib/backup-folder.ts,
-//   lib/backup-cloud.ts), with the key their password gives, but not their folder, which Android
-//   let only this phone write in: restored, they keep the folder this phone had for them, and a
-//   phone with none asks for one (keptHere);
+// - how automatic backups are made and the server and Google Drive they go to
+//   (lib/backup-folder.ts, lib/backup-cloud.ts, lib/google-drive.ts), with the key their password
+//   gives and Google's sign-in, but not their folder, which Android let only this phone write in:
+//   restored, they keep the folder this phone had for them, and a phone with none asks for one
+//   (keptHere);
 // - each space's SMS data in full (lock/sms-data.ts): an SMS for later whose time came before the
 //   restore waits for the owner to send it or delete it (lib/sms-later.ts), so none goes twice,
 //   from this phone and from the one the backup came from; and the SIM chosen for each number
@@ -221,9 +222,10 @@ const SETTINGS = [
 ];
 const AUTO = 'erevos.backup-auto';
 const CLOUD = 'erevos.backup-cloud';
+const DRIVE = 'erevos.backup-drive';
 const LORA = 'erevos.lora';
 // The keystore entries a backup holds from PARTS on: restoring one deletes those it does not hold.
-const LATER_KEYS = [PANIC_KEY, ...SETTINGS, AUTO, CLOUD];
+const LATER_KEYS = [PANIC_KEY, ...SETTINGS, AUTO, CLOUD, DRIVE];
 // The keystore entries no backup holds and every restore deletes: the copy of one space's speed
 // dial numbers that the Phone calls with Erevos locked (lib/phone-open.ts). The spaces are the
 // backup's from then on, and the one that kept the copy may not be among them: nothing could take
@@ -421,9 +423,9 @@ function partKey(key: Uint8Array): Uint8Array {
 }
 
 // Automatic backups' settings go in a backup without their folder, which is this phone's, and
-// without the last error, said in this phone's language; so does the server's last error.
+// without the last error, said in this phone's language; so do the server's and Google Drive's.
 function portable(name: string, value: string): string {
-  if (name !== AUTO && name !== CLOUD) return value;
+  if (name !== AUTO && name !== CLOUD && name !== DRIVE) return value;
   try {
     const kept = JSON.parse(value) as Record<string, unknown>;
     return JSON.stringify(name === AUTO ? { ...kept, folder: '', error: '' } : { ...kept, error: '' });
@@ -445,10 +447,12 @@ function jsonOf(value: string | null): Record<string, unknown> | null {
 // What of a keystore entry restored stays this phone's (`here`, its entry before the restore):
 // automatic backups go on into the folder this phone had for them, or into none, until one is
 // chosen, and when it was last written to. Sending to the same server, the phone's list of what it
-// sent there stays, so all of it is deleted in its turn. With the same LoRa radio, what this phone
-// kept of the radio's own settings from before Erevos changed them stays, to put back (lib/radio.ts).
+// sent there stays, so all of it is deleted in its turn; so it does sending to the same folder in
+// Google Drive, which is then the same account, with the phone's own sign-in, the newest. With the
+// same LoRa radio, what this phone kept of the radio's own settings from before Erevos changed
+// them stays, to put back (lib/radio.ts).
 function keptHere(name: string, value: string, here: string | null): string {
-  if (name !== AUTO && name !== CLOUD && name !== LORA) return value;
+  if (name !== AUTO && name !== CLOUD && name !== DRIVE && name !== LORA) return value;
   const restored = jsonOf(value);
   if (!restored) return value;
   const was = jsonOf(here);
@@ -458,8 +462,10 @@ function keptHere(name: string, value: string, here: string | null): string {
     const last = folder && typeof was?.last === 'number' ? was.last : restored.last;
     return JSON.stringify({ ...restored, folder, last, error: '' });
   }
-  if (!was || was.url !== restored.url) return JSON.stringify({ ...restored, error: '' });
-  return JSON.stringify({ ...restored, names: was.names, parts: was.parts, held: was.held, unfinished: was.unfinished, last: was.last, error: '' });
+  const same = name === DRIVE ? !!restored.folder && was?.folder === restored.folder && typeof was.refresh === 'string' && !!was.refresh : was?.url === restored.url;
+  if (!was || !same) return JSON.stringify({ ...restored, error: '' });
+  const own = name === DRIVE ? { refresh: was.refresh } : {};
+  return JSON.stringify({ ...restored, ...own, names: was.names, parts: was.parts, held: was.held, unfinished: was.unfinished, last: was.last, error: '' });
 }
 
 // What the backup itself holds: everything but the photos, files and voice messages. The copies
@@ -978,6 +984,7 @@ export async function restoreBackup(
   const here = new Map([
     [AUTO, await secureGet(AUTO)],
     [CLOUD, await secureGet(CLOUD)],
+    [DRIVE, await secureGet(DRIVE)],
     [LORA, await secureGet(LORA)],
   ]);
   // What the backup puts in place, all of it before anything is taken away, and what each of those

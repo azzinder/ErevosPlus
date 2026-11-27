@@ -14,6 +14,7 @@ import { loadMsgOwn, saveMsgOwn, type MessengerWay, type MsgOwn } from '../lock/
 import { accountNeverStraight, accountThroughTor, accountTorDoor, effectiveTor, type AccountTor } from './account-tor';
 import { onTorReady, onTorWay } from './relay';
 import { t } from './i18n';
+import { callsOff, callsOffNote } from './modes';
 import { currentSpace } from '../lock/keys';
 import { loadNetworksBackup } from '../lock/networks-backup-data';
 import { messengerAccountOf } from './backup-networks-data';
@@ -246,7 +247,10 @@ function open(): Promise<void> {
     });
     opened = engines
       .open()
-      .then(() => engines.setCallTexts(JSON.stringify(sessionCallTexts())))
+      .then(() => {
+        engines.setCallTexts(JSON.stringify(sessionCallTexts()));
+        engines.setCallsOff?.(callsOff());
+      })
       .catch((e: unknown) => {
         opened = null;
         subscription?.remove();
@@ -304,6 +308,7 @@ export async function startMessenger(on: readonly MsgService[]): Promise<void> {
  */
 export async function sessionCall(key: string, name: string, video: boolean): Promise<boolean> {
   if (!native) throw new Error('not here');
+  if (callsOff()) throw new Error(callsOffNote());
   await open();
   native.setCallTexts(JSON.stringify(sessionCallTexts()));
   return native.sessionCall(key, name, video);
@@ -705,6 +710,12 @@ function takeSignalCall(event: unknown): boolean {
   if (type === 'signalCallMissed') return true;
   if (type !== 'signalCallState') return false;
   const next = readSignalCall(event, signalCall, Date.now());
+  // Calls off (INVISIBLE, lib/modes.ts): one that rings all the same (a build from before
+  // setCallsOff, or an offer read just before INVISIBLE) is declined at once and never shows.
+  if (next && next.stage === 'ringing' && !next.outgoing && callsOff()) {
+    void native?.signalHangUp().catch(() => undefined);
+    return true;
+  }
   if (next) {
     signalCall = next;
     changed();
@@ -728,6 +739,7 @@ export function signalForgetCall(id: string): void {
 /** Calls a Signal person (their chat key), with this phone's camera on when `video`. */
 export async function signalCallStart(person: string, video: boolean): Promise<void> {
   if (!native) throw new Error('not here');
+  if (callsOff()) throw new Error(callsOffNote());
   if (signalCall && signalCall.stage !== 'ended') throw new Error('busy');
   await open();
   await native.signalCall(person, video);
@@ -910,3 +922,12 @@ export async function messengerMedia(url: string, path: string): Promise<string>
   await msgCall('messenger', 'fetch', { url, path });
   return path;
 }
+
+// INVISIBLE chosen or left (lib/modes.ts): the engines are told whether calls are off, so a Signal or
+// Session call that comes does not ring then; and a Signal call going on ends, as none goes through
+// Tor (a Session one ends in the module itself).
+onTorWay(() => {
+  const off = callsOff();
+  native?.setCallsOff?.(off);
+  if (off && signalCall && signalCall.stage !== 'ended') void native?.signalHangUp().catch(() => undefined);
+});

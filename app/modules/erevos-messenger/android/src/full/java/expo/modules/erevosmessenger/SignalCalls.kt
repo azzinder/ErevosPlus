@@ -143,10 +143,17 @@ internal object SignalCalls {
 
   // ---- from the Signal engine ----
 
+  /** Calls off (INVISIBLE): an offer that comes never reaches RingRTC, so it does not ring, and no candidate with this phone's address goes back. */
+  @Volatile var callsOff = false
+
   /** A signalCall event of the Signal engine: a call message for RingRTC. Any thread. */
   fun take(context: Context, event: JSONObject) {
     val uuid = event.optString("uuid")
     if (uuid.isEmpty()) return
+    if (callsOff && event.optString("kind") == "offer") {
+      Log.i(TAG, "offer left unanswered: calls are off")
+      return
+    }
     synchronized(people) { people[uuid] = event.optString("person") to event.optString("name") }
     network.execute {
       runCatching {

@@ -6,8 +6,9 @@ import { currentCall, offerMissed, otherCallOn, type Rtc } from './call';
 import { callClock, CALL_LINE } from './calls';
 import { GroupCall, currentGroupCall, HERE_EVERY } from './group-call';
 import type { GroupCallSignal } from './group-call-signal';
-import type { CallRelay } from './relay';
+import { onTorWay, type CallRelay } from './relay';
 import { t } from './i18n';
+import { callsOff, callsOffNote, CALLS_OFF_LINE } from './modes';
 
 // The group call on this phone, whatever screen shows (as lib/calls.ts is for a contact's call),
 // and the calls going on in this phone's groups, as their members say, so a group's screen can
@@ -43,6 +44,10 @@ const GONE_AFTER = HERE_EVERY * 2.5;
 let shown: { call: GroupCall; place: GroupCallPlace } | null = null;
 const goingOn = new Map<string, GoingOn>();
 const listeners = new Set<() => void>();
+// The calls that did not ring here as calls were off (lib/modes.ts), by group and call id, the last
+// QUIET_KEPT: their `start` again, through another way, keeps no second line.
+const quietBefore = new Set<string>();
+const QUIET_KEPT = 50;
 
 function changed() {
   listeners.forEach((listener) => {
@@ -111,16 +116,18 @@ function events(place: GroupCallPlace, group: string) {
   };
 }
 
-/** Starts a call in a group. Throws if a call is already in progress, or it could not start. */
+/** Starts a call in a group. Throws if a call is already in progress, calls are off (INVISIBLE), or it could not start. */
 export async function startGroupCall(place: GroupCallPlace, group: string, video: boolean, relay: CallRelay | null, rtc: Rtc): Promise<GroupCall> {
+  if (callsOff()) throw new Error(callsOffNote());
   const me = await place.me(group);
   const call = await GroupCall.start({ group, video, me, relay, rtc, relayAlways: place.relayAlways, bothWays: place.bothWays, events: events(place, group) });
   show(call, place);
   return call;
 }
 
-/** Joins the call going on in a group. */
+/** Joins the call going on in a group. Throws if it ended, or calls are off (INVISIBLE). */
 export async function joinGroupCall(place: GroupCallPlace, group: string, relay: CallRelay | null, rtc: Rtc): Promise<GroupCall> {
+  if (callsOff()) throw new Error(callsOffNote());
   const going = groupCallGoingOn(group);
   if (!going) throw new Error(t('The call has ended.'));
   const me = await place.me(group);
@@ -165,6 +172,17 @@ export async function groupCallSignal(place: GroupCallPlace, group: string, from
     place.line(group, `${CALL_LINE}Missed ${kind}`);
     return;
   }
+  // INVISIBLE (lib/modes.ts): no call rings, as a call would show this phone's internet address. The
+  // group's screen still shows the call going on, and joining it says why it cannot be. Asked again
+  // after the call relay is asked, as INVISIBLE may be chosen meanwhile.
+  const invisible = () => {
+    const key = `${group} ${signal.id}`;
+    if (quietBefore.has(key)) return;
+    quietBefore.add(key);
+    if (quietBefore.size > QUIET_KEPT) quietBefore.delete(quietBefore.values().next().value as string);
+    place.line(group, `${CALL_LINE}Missed ${kind}${CALLS_OFF_LINE}`);
+  };
+  if (callsOff()) return invisible();
   // Two started a call in the group at once: the one with the lower id goes on, and the other's
   // phone joins it, if no one is in its own yet.
   if (ours && ours.group === group && ours.state === 'in' && ours.peers().length === 0 && signal.id < ours.id) {
@@ -173,6 +191,8 @@ export async function groupCallSignal(place: GroupCallPlace, group: string, from
     ours.hangUp();
     const relay = await place.callRelay().catch(() => null);
     const me = await place.me(group);
+    // INVISIBLE chosen meanwhile.
+    if (callsOff()) return invisible();
     show(await GroupCall.join(signal.id, from, { group, video: signal.video, me, relay, rtc, relayAlways: place.relayAlways, bothWays: place.bothWays, events: events(place, group) }), place);
     return;
   }
@@ -187,9 +207,17 @@ export async function groupCallSignal(place: GroupCallPlace, group: string, from
     place.line(group, `${CALL_LINE}Missed ${kind}`);
     return;
   }
+  // INVISIBLE chosen while the call relay was asked.
+  if (callsOff()) return invisible();
   const ringing = GroupCall.incoming(signal.id, from, { group, video: signal.video, me, relay, rtc, relayAlways: place.relayAlways, bothWays: place.bothWays, events: events(place, group) });
   if (ringing) show(ringing, place);
 }
+
+// INVISIBLE chosen, or everything of the space sent through Tor on its screen: a group call on ends,
+// as no call goes through Tor (lib/modes.ts).
+onTorWay(() => {
+  if (callsOff()) shown?.call.hangUp();
+});
 
 /** Ends the group call, as when the space closes, and forgets the calls going on. */
 export function endGroupCall(): void {

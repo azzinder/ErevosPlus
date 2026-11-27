@@ -133,12 +133,12 @@ export const xmpp: Record<string, string> = {
   "This group server does not let a group be renamed.": "Ovaj grupni server ne dopušta preimenovanje grupe.",
   "To leave the group, use Leave the group.": "Za izlazak iz grupe koristite „Napusti grupu“.",
   "This person is not a member of the group.": "Ta osoba nije član grupe.",
-  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's relay of each message while no app of the account is on: the XMPP server learns the relay's name, and the relay when messages come.":
-    "Dok je otvoren drugi prostor, ovaj kaže „Nova poruka“ kad nešto stigne na XMPP-u, nikad šta, od koga ni u kojem razgovoru, a poziv ne zvoni. Za to XMPP server javlja relayu ovog prostora svaku poruku dok nijedna aplikacija računa nije uključena: XMPP server saznaje ime relaya, a relay kad stižu poruke.",
+  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's own server of each message while no app of the account is on: the XMPP server learns that server's name, and that server when messages come.":
+    "Dok je otvoren drugi prostor, ovaj kaže „Nova poruka“ kad nešto stigne na XMPP-u, nikad šta, od koga ni u kojem razgovoru, a poziv ne zvoni. Za to XMPP server javlja vlastitom serveru ovog prostora svaku poruku dok nijedna aplikacija računa nije uključena: XMPP server saznaje ime tog servera, a taj server kad stižu poruke.",
   "Closed, this space hears nothing from XMPP: what came shows when it opens.":
     "Zatvoren, ovaj prostor ne čuje ništa s XMPP-a: ono što je stiglo vidi se kad se otvori.",
-  "Your relay does not take XMPP notices yet: it needs updating.":
-    "Vaš relay još ne prima XMPP obavijesti: treba ga ažurirati.",
+  "Your server does not take XMPP notices yet: it needs updating.":
+    "Vaš server još ne prima XMPP obavijesti: treba ga ažurirati.",
   "Your XMPP server does not send notices to apps that are away.":
     "Vaš XMPP server ne šalje obavijesti aplikacijama koje nisu uključene.",
   "Always through Tor":

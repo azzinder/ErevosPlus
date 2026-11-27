@@ -110,6 +110,10 @@ async function serverPushes(server: Server, jid: string, port: number): Promise<
     const seen = await reading;
     answers.push(/<item-not-found/.test(seen) ? 'gone' : 'ok');
   }
+  // The relay may reset the stream as it closes, once the check has gone on: that tells nothing,
+  // and must not end the check's file with an error of no one's.
+  tls.on('error', () => undefined);
+  plain.on('error', () => undefined);
   tls.end('</stream:stream>');
   return answers;
 }

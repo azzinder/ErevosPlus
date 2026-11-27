@@ -155,7 +155,7 @@ function reach(hop: Relay, where: { relay: string; relayKey: string }, home: str
   if (sameRelay(relay, hop.url)) return { url: hop.url, token: hop.token, via: hop.via, ...tor };
   // Our own relay, through the backup: its key is the one it gave this run.
   if (sameRelay(relay, home) && !where.relayKey) return { url: relay, via: hop.via ?? { url: hop.url, token: hop.token, ...tor } };
-  if (!where.relayKey) throw new Error(t('That contact uses the relay at {relay}, and its link has no key for it. Ask them for a new link.', { relay }));
+  if (!where.relayKey) throw new Error(t('That contact uses the server at {relay}, and its link has no key for it. Ask them for a new link.', { relay }));
   return { url: relay, key: fromBase64Url(where.relayKey), via: hop.via ?? { url: hop.url, token: hop.token, ...tor } };
 }
 

@@ -15,6 +15,7 @@ import { telegramCallGate } from '../components/telegram-ip';
 import { ask } from '../lib/alert';
 import { callPermissions } from '../lib/call-permissions';
 import { t } from '../lib/i18n';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { TelegramVideoView } from '../modules/erevos-telegram';
 import { useNetworkWhere, whereParams } from '../lib/network-place';
 import { nameOf } from '../lib/telegram';
@@ -173,6 +174,8 @@ export default function TelegramInfoScreen() {
 
   // A video call asks for the camera too, and starts with it on.
   async function startCall(userId: number, video = false) {
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) throw new Error(callsOffNote());
     if (!(await telegramCallGate(userId, where))) return;
     if (!(await callPermissions(video))) throw new Error(video ? t('Allow the microphone and the camera for a video call.') : t('Allow the microphone to call.'));
     await telegramCall(userId, where, video);

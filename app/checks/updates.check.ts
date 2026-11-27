@@ -112,12 +112,14 @@ test('the F-Droid build may not install packages, and knows F-Droid updates it; 
     process.env = env;
   }
   const workflow = readFileSync(join(import.meta.dirname, '../../.github/workflows/release.yml'), 'utf8');
-  // The release builds both: the APK Updates installs as the release build, and the F-Droid one,
-  // signed with the same key, for F-Droid to compare with its own build of the tag.
-  assert.match(workflow, /- distribution: ""\n\s+file: erevos-android\.apk\n/);
-  assert.match(workflow, /- distribution: fdroid\n\s+file: erevos-android-fdroid\.apk\n/);
-  assert.equal(workflow.match(/EREVOS_DISTRIBUTION:/g)?.length, 1);
-  assert.match(workflow, /EREVOS_DISTRIBUTION: \$\{\{ matrix\.distribution \}\}/);
+  // The release builds both: the APK Updates installs, as the release build (no
+  // EREVOS_DISTRIBUTION), and the F-Droid one as F-Droid builds it (deploy/fdroid/build.sh sets
+  // EREVOS_DISTRIBUTION=fdroid), signed with the same key, for F-Droid to compare with its own build.
+  assert.match(workflow, /\n {6}APK: erevos-android\.apk\n/);
+  assert.doesNotMatch(workflow, /EREVOS_DISTRIBUTION/);
+  assert.match(workflow, /\n\s+run: scripts\/fdroid-build\.sh erevos /);
+  const build = readFileSync(join(import.meta.dirname, '../../deploy/fdroid/build.sh'), 'utf8');
+  assert.match(build, /^export EREVOS_EDITION=\$edition EREVOS_DISTRIBUTION=fdroid /m);
 });
 
 test("no build's manifest names Google Play services: expo-image-picker's service is taken out", async () => {

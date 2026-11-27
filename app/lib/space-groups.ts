@@ -93,7 +93,7 @@ let ownKey: { url: string; key: string } | null = null;
 /** What groups go by, for chats whose settings are `data` and whose queues `queues` keeps. Throws with no relay queue. */
 export async function groupSettings(data: SpaceData, queues: QueuesStore): Promise<GroupSettings> {
   const url = data.url.trim();
-  if (!url || !data.ownQueue) throw new Error(t('Groups go through the relay. Type its address in Relay first.'));
+  if (!url || !data.ownQueue) throw new Error(t('Groups go through the server. Type its address in Server first.'));
   const own = { url, token: data.token.trim() || undefined };
   if (ownKey?.url !== url && canRelaySeal()) {
     const key = await soon(relayKey(own).catch(() => null), 4000, null);
@@ -211,7 +211,7 @@ export function groupTransport(settings: () => Promise<GroupSettings>, chats: ()
   const deliver = async (identity: string, packets: Uint8Array[], relay: (() => Promise<void>) | null): Promise<void> => {
     if (!relayOnly) await nearby.deliver(identity, packets, relay);
     else if (relay) await relay();
-    else throw new Error(t('Groups go through the relay. Type its address in Relay first.'));
+    else throw new Error(t('Groups go through the server. Type its address in Server first.'));
   };
   return {
     async post(to, packet, mark) {

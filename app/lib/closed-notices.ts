@@ -164,7 +164,7 @@ export async function setDoorOpen(on: boolean): Promise<void> {
   if (!on) return saveDoor(space, null);
   if (relayStopped()) throw new SpaceStoppedError();
   const door = await doorOf(space, key);
-  if (!door) throw new Error(t('This space has no queue at a relay yet: it can say nothing while closed.'));
+  if (!door) throw new Error(t('This space has no queue at a server yet: it can say nothing while closed.'));
   await saveDoor(space, door, true);
 }
 

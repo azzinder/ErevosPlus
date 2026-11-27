@@ -202,8 +202,8 @@ export function LinkedDevices({ hidden }: { hidden: boolean }) {
       if (!links) return;
       const url = relayUrl.trim();
       // Hidden chats keep their relay and queue themselves, which the phone answers on.
-      if (place && !hasQueue) throw new Error(t('These hidden chats have no relay queue yet: in them, type the relay address under For advanced users, then create their queue.'));
-      if (!/^wss?:\/\/[^\s/?#]+(\/[^\s]*)?$/i.test(url)) throw new Error(t('A relay address starts with ws:// or wss://.'));
+      if (place && !hasQueue) throw new Error(t('These hidden chats have no server queue yet: in them, type the server address under For advanced users, then create their queue.'));
+      if (!/^wss?:\/\/[^\s/?#]+(\/[^\s]*)?$/i.test(url)) throw new Error(t('A server address starts with ws:// or wss://.'));
       // The phone answers on this space's queue, so there has to be one.
       if (!hasQueue) {
         const ids = await createQueue({ url, token: relayToken.trim() || undefined });
@@ -263,7 +263,7 @@ export function LinkedDevices({ hidden }: { hidden: boolean }) {
   const quickFallback = (why: string, relay?: string) => {
     setAnother(true);
     if (relay) setRelayUrl(relay);
-    setNote(t('{why} Link this way instead: sign in to the relay below, then tap Link to my phone.', { why }));
+    setNote(t('{why} Link this way instead: sign in to the server below, then tap Link to my phone.', { why }));
   };
 
   const differ = () =>
@@ -485,18 +485,18 @@ export function LinkedDevices({ hidden }: { hidden: boolean }) {
               : t('Use this when this device is the computer: its chats become those of the phone that holds the account.')}
           </Text>
           {copied ? <Text>{t('These chats came from a linked device’s backup: you can read them here, but not write in them. To write, link this device to the phone again, in Linked devices.')}</Text> : null}
-          {place && !hasQueue ? <Text>{t('These hidden chats have no relay queue yet: in them, type the relay address under For advanced users, then create their queue.')}</Text> : null}
+          {place && !hasQueue ? <Text>{t('These hidden chats have no server queue yet: in them, type the server address under For advanced users, then create their queue.')}</Text> : null}
           {!hasQueue && !place ? (
             <>
-              <Field label={t('Relay address')}>
+              <Field label={t('Server address')}>
                 <Input value={relayUrl} onChangeText={setRelayUrl} placeholder="wss://relay.example" autoCapitalize="none" autoCorrect={false} keyboardType="url" />
               </Field>
               <Field label={t('Token (optional)')}>
-                <Input value={relayToken} onChangeText={setRelayToken} placeholder={t('Token, if the relay needs one')} autoCapitalize="none" autoCorrect={false} secureTextEntry />
+                <Input value={relayToken} onChangeText={setRelayToken} placeholder={t('Token, if the server needs one')} autoCapitalize="none" autoCorrect={false} secureTextEntry />
               </Field>
               <RelaySignIn url={relayUrl.trim()} token={relayToken} onToken={(token, who) => void signedIn(token, who)} onNote={setNote} />
               <Text variant="caption" tone="muted">
-                {t('The phone answers on a queue of this device on a relay: the one the phone uses, or any other. If the relay asks for a token, sign in when it offers that, or type one.')}
+                {t('The phone answers on a queue of this device on a server: the one the phone uses, or any other. If the server asks for a token, sign in when it offers that, or type one.')}
               </Text>
             </>
           ) : null}
@@ -544,7 +544,7 @@ export function LinkedDevices({ hidden }: { hidden: boolean }) {
         {holder.problem ? <Text>{holder.problem}</Text> : null}
         {linkedNow.some((d) => !holder.can.includes(d.id)) ? <Text variant="caption" tone="muted">{t('A device whose Erevos is older cannot hold them: update it there first.')}</Text> : null}
         <Text variant="caption" tone="muted">
-          {t('The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the relay. Public groups stay on the phone.')}
+          {t('The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the server. Public groups stay on the phone.')}
         </Text>
       </Card>
     ) : null;
@@ -617,10 +617,10 @@ export function LinkedDevices({ hidden }: { hidden: boolean }) {
           <Text tone="muted">
             {place
               ? t(
-                  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.',
+                  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.',
                 )
               : t(
-                  "This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay. Calls ring here too. New groups, public groups and group calls stay on the phone for now.",
+                  "This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server. Calls ring here too. New groups, public groups and group calls stay on the phone for now.",
                 )}
           </Text>
           {phone ? <Button title={t('Unlink this device')} kind="danger" disabled={busy} onPress={() => unlink(phone)} /> : null}

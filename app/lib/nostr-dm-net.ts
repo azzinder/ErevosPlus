@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { canNostr, canTorHttp, nostrCore, torHttp } from './core';
+import { canNostrTor as coreNostrTor, canTorHttp, nostrCore, torHttp } from './core';
 import { utf8Decode } from './crypto';
 import { t } from './i18n';
 import { fetchCapped } from './net-http';
@@ -103,7 +103,7 @@ function socketLink(url: string): Promise<NostrLink> {
       woken();
     };
     const timer = setTimeout(() => {
-      end(new Error(t('The Nostr relay did not answer.')));
+      end(new Error(t('The Nostr server did not answer.')));
       socket.close();
     }, OPEN_WAIT);
     const link: NostrLink = {
@@ -130,7 +130,7 @@ function socketLink(url: string): Promise<NostrLink> {
         return null;
       },
       close() {
-        end(new Error(t('The connection to the Nostr relay ended.')));
+        end(new Error(t('The connection to the Nostr server ended.')));
         try {
           socket.close();
         } catch {
@@ -153,8 +153,8 @@ function socketLink(url: string): Promise<NostrLink> {
       frames.push(said);
       woken();
     };
-    socket.onclose = () => end(new Error(t('The connection to the Nostr relay ended.')));
-    socket.onerror = () => end(new Error(t('Could not reach the Nostr relay.')));
+    socket.onclose = () => end(new Error(t('The connection to the Nostr server ended.')));
+    socket.onerror = () => end(new Error(t('Could not reach the Nostr server.')));
   });
 }
 
@@ -167,7 +167,7 @@ export function openNostrStraight(url: string): Promise<NostrLink> {
 /** Whether the relays are reached through Tor now, on Android, as the account's Tor choice says
  *  (lib/account-tor.ts): 'space' (the way of the space's own Nostr, lib/nostr.ts) as the space's Tor way says. */
 export function nostrChatsThroughTor(choice: AccountTor = 'space'): boolean {
-  return canNostr() && accountThroughTor(choice);
+  return coreNostrTor() && accountThroughTor(choice);
 }
 
 /** How a connection goes with the account's choice now: through Tor, or straight should Tor
@@ -185,7 +185,7 @@ export async function openNostrLink(url: string, chat?: string, choice: AccountT
   const way = nostrWay(choice);
   if (way === 'straight') return socketLink(url);
   try {
-    if (!canNostr()) throw new Error(t('Tor is not ready.'));
+    if (!coreNostrTor()) throw new Error(t('Tor is not ready.'));
     // Always: Tor started for it when the space's way did not.
     if (choice === 'always') await ensureTor();
     return await torLink(url);
@@ -197,7 +197,7 @@ export async function openNostrLink(url: string, chat?: string, choice: AccountT
 
 /** Whether this build reaches relays through Tor at all (Android): a chat sent through Tor by itself needs it. */
 export function canNostrTor(): boolean {
-  return canNostr();
+  return coreNostrTor();
 }
 
 /**
@@ -206,7 +206,7 @@ export function canNostrTor(): boolean {
  * another's. Tor is started for it when the way did not; never straight, so it fails without Tor.
  */
 async function chatTorLink(url: string, chat: string): Promise<NostrLink> {
-  if (!canNostr()) throw new Error(t('Tor is not ready.'));
+  if (!coreNostrTor()) throw new Error(t('Tor is not ready.'));
   await ensureTor();
   return torLink(url, chat);
 }
@@ -295,7 +295,7 @@ export class NostrRelay {
   }
 
   close(): void {
-    this.end(new Error(t('The connection to the Nostr relay ended.')));
+    this.end(new Error(t('The connection to the Nostr server ended.')));
   }
 
   private take(frame: unknown[]): void {
@@ -357,7 +357,7 @@ export class NostrRelay {
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
         this.oks.delete(id);
-        resolve({ ok: false, why: t('The Nostr relay did not answer.') });
+        resolve({ ok: false, why: t('The Nostr server did not answer.') });
       }, ANSWER_WAIT);
       this.oks.set(id, {
         done: (ok, why) => {

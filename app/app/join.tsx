@@ -78,14 +78,14 @@ export default function Join() {
         <Field label={t('Your name in the group')} hint={t('Everyone in the group sees it, beside the start of a key made for this group alone.')}>
           <Input value={name} onChangeText={setName} placeholder={t('A name for this group')} maxLength={MAX_NAME} autoFocus />
         </Field>
-        <Field label={t('Its owner’s relay')}>
+        <Field label={t('Its owner’s server')}>
           <Text selectable variant="mono" style={{ fontSize: 13 }}>
             {link.relay}
           </Text>
         </Field>
       </Card>
       <Text tone="muted">
-        {t('A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your relay and your queue on it), not who you are in your chats.')}
+        {t('A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your server and your queue on it), not who you are in your chats.')}
       </Text>
       {note ? <Text color={colors.danger}>{note}</Text> : null}
       <Button title={t('Ask to join')} onPress={() => void ask()} disabled={busy || !name.trim()} loading={busy} />

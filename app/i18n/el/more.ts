@@ -9,7 +9,7 @@ export const more: Record<string, string> = {
   'Automatic': 'Αυτόματα',
   'straight': 'απευθείας',
   'your own bridges': 'τις δικές σου γέφυρες',
-  'Tor is off for this space: messages go straight to the relay.': 'Το Tor είναι κλειστό σε αυτόν τον χώρο: τα μηνύματα πάνε κατευθείαν στο relay.',
+  'Tor is off for this space: messages go straight to the server.': 'Το Tor είναι κλειστό σε αυτόν τον χώρο: τα μηνύματα πάνε κατευθείαν στον server.',
   'Tor is connected, {how}.': 'Το Tor συνδέθηκε, {how}.',
   'Tor is connected.': 'Το Tor συνδέθηκε.',
   'Tor cannot connect from this network. Try Automatic, or bridges of your own.': 'Το Tor δεν μπορεί να συνδεθεί από αυτό το δίκτυο. Δοκίμασε το Αυτόματα, ή δικές σου γέφυρες.',
@@ -42,8 +42,8 @@ export const more: Record<string, string> = {
   'Not in use until you tap Use these bridges.': 'Δεν χρησιμοποιούνται μέχρι να πατήσεις «Χρήση αυτών των γεφυρών».',
   'With bridges, Tor never goes straight to its relays: when no bridge answers, messages wait. Bridges count only while Tor is on.':
     'Με γέφυρες, το Tor δεν πηγαίνει ποτέ κατευθείαν στους αναμεταδότες του: όταν καμία γέφυρα δεν απαντά, τα μηνύματα περιμένουν. Οι γέφυρες μετράνε μόνο όσο το Tor είναι ενεργό.',
-  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the relay without Tor until one does.':
-    'Με γέφυρες, το Tor δεν πηγαίνει ποτέ κατευθείαν στους αναμεταδότες του: όταν καμία γέφυρα δεν απαντά, τα μηνύματα πάνε στο relay χωρίς Tor μέχρι να απαντήσει κάποια.',
+  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the server without Tor until one does.':
+    'Με γέφυρες, το Tor δεν πηγαίνει ποτέ κατευθείαν στους αναμεταδότες του: όταν καμία γέφυρα δεν απαντά, τα μηνύματα πάνε στον server χωρίς Tor μέχρι να απαντήσει κάποια.',
 
   // Updates on Windows, and on every computer: the file to take.
   'The download page opens: take {file}, see User guide → Updates.': 'Ανοίγει η σελίδα λήψης: πάρε το {file}, δες «Οδηγός χρήσης → Ενημερώσεις».',

@@ -130,12 +130,17 @@ export class TelegramCalls {
   private sound: number | null = null;
   /** The camera asked for by the call we start, until its first update says its id. */
   private cameraOut = false;
+  /** Whether calls are off now (INVISIBLE, lib/modes.ts callsOff), and what a call tried then says. */
+  private readonly off: () => string | null;
+  /** Calls that came while calls were off: they never ring here, nor show, to their end. */
+  private unrung = new Set<number>();
 
-  constructor(request: (body: Raw) => Promise<Raw>, native: () => CallsNativeLike | null, changed: () => void, now: () => number = Date.now) {
+  constructor(request: (body: Raw) => Promise<Raw>, native: () => CallsNativeLike | null, changed: () => void, now: () => number = Date.now, off: () => string | null = () => null) {
     this.request = request;
     this.native = native;
     this.changed = changed;
     this.now = now;
+    this.off = off;
   }
 
   /** The call going on now, or ringing, or the one that just ended (until it is let go of). */
@@ -162,6 +167,16 @@ export class TelegramCalls {
       const before = this.calls.get(id);
       const call = readCall(raw, before);
       if (!call) return true;
+      // Calls off (INVISIBLE): one that comes does not ring, is not answered and shows nothing, so
+      // nothing of this phone's address goes to it; Telegram tells the caller it was missed.
+      if (this.unrung.has(id)) {
+        if (call.stage === 'ended') this.unrung.delete(id);
+        return true;
+      }
+      if (!before && !call.outgoing && call.stage === 'ringing' && this.off() !== null) {
+        this.unrung.add(id);
+        return true;
+      }
       // A second call while one goes on: busy.
       const other = [...this.calls.values()].find((c) => c.id !== id && c.stage !== 'ended');
       if (!before && other && !call.outgoing && call.stage === 'ringing') {
@@ -221,6 +236,8 @@ export class TelegramCalls {
 
   /** Calls someone, with this phone's camera on when `video` (the camera permission given). */
   async call(userId: number, video = false): Promise<void> {
+    const off = this.off();
+    if (off !== null) throw new Error(off);
     if ([...this.calls.values()].some((c) => c.stage !== 'ended')) throw new Error('busy');
     this.cameraOut = video;
     const answer = await this.request({ '@type': 'createCall', user_id: userId, protocol: await this.protocol(), is_video: video });
@@ -230,6 +247,8 @@ export class TelegramCalls {
 
   /** Answers a call that rings, with this phone's camera on when `camera` (the camera permission given). */
   async answer(id: number, camera = false): Promise<void> {
+    const off = this.off();
+    if (off !== null) throw new Error(off);
     const call = this.calls.get(id);
     if (call) call.camera = camera;
     await this.request({ '@type': 'acceptCall', call_id: id, protocol: await this.protocol() });
@@ -263,6 +282,11 @@ export class TelegramCalls {
     call.muted = on;
     await this.native()?.callMute(on);
     this.changed();
+  }
+
+  /** Calls turned off (INVISIBLE chosen): a call going on or ringing ends, as none goes through Tor. */
+  async endAll(): Promise<void> {
+    for (const c of this.calls.values()) if (c.stage !== 'ended') await this.hangUp(c.id);
   }
 
   /** The space closes: its call ends with it. */

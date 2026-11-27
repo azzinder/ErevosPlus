@@ -69,7 +69,7 @@ export default function ForgetMe() {
 
   const lines = report
     ? [
-        line(t('Relay queues'), report.queues),
+        line(t('Server queues'), report.queues),
         line(t('Messages held for later'), report.held),
         line(t('Files waiting'), report.files),
         line(t('Invites not used'), report.invites),
@@ -81,13 +81,13 @@ export default function ForgetMe() {
     <Page>
       <Text variant="title">{t('Delete me from everywhere')}</Text>
       <Text variant="caption" tone="muted" style={hint}>
-        {t('This deletes what the servers keep for this space: its queues on the relays, with the messages waiting in them, the messages and files they hold for you, and your invites not used yet. It also asks the Nostr relays to forget the keys your chats read on. Your phone keeps everything it has.')}
+        {t('This deletes what the servers keep for this space: its queues on the servers, with the messages waiting in them, the messages and files they hold for you, and your invites not used yet. It also asks the Nostr servers to forget the keys your chats read on. Your phone keeps everything it has.')}
       </Text>
       <Text variant="caption" tone="muted" style={hint}>
         {t('Then this space is stopped: it receives and sends nothing until you tap Start again. Hidden chats that receive while closed are cleared with it; the others when you open them while the space is stopped.')}
       </Text>
       <Text variant="caption" tone="muted" style={hint}>
-        {t('It cannot reach what others keep: your contacts, Nostr relays that do not do as asked, files you sent through a file server, and the Matrix and XMPP servers.')}
+        {t('It cannot reach what others keep: your contacts, Nostr servers that do not do as asked, files you sent through a file server, and the Matrix and XMPP servers.')}
       </Text>
 
       {since > 0 ? (
@@ -96,7 +96,7 @@ export default function ForgetMe() {
           <Card>
             <Text variant="bodyStrong">{t('Stopped since {when}: it receives and sends nothing.', { when: whenText(since) })}</Text>
             <Text variant="caption" tone="muted" style={hint}>
-              {t('Start again makes new queues, as after a relay lost them, and tells your contacts quietly. Give them a new contact link too.')}
+              {t('Start again makes new queues, as after a server lost them, and tells your contacts quietly. Give them a new contact link too.')}
             </Text>
             <Row wrap>
               <Button title={working ? t('One moment…') : t('Start again')} compact onPress={() => void again()} disabled={working} />

@@ -346,7 +346,7 @@ export class QueueMove {
     return this.run(async () => {
       const space = await this.at.data.load();
       const url = space.url.trim();
-      if (!url || !space.ownQueue) throw new Error(t('Create your relay queue first, on New chat.'));
+      if (!url || !space.ownQueue) throw new Error(t('Create your server queue first, on New chat.'));
       const here = { url, token: space.token.trim() };
       const { q } = await this.reconcile(space, here, own);
       const started = Date.now();
@@ -418,11 +418,11 @@ export class QueueMove {
         if (ids) {
           own = queue = await this.settle(queueOf(ids), here, 'junk', now, look.own);
           await this.at.queues.update((d) => ({ ...d, junk: { ...d.junk, own: now } }));
-          notes.push(t('Junk filled your relay queue, so Erevos gave you a new one and told your contacts. Whoever sent it does not know the new one.'));
+          notes.push(t('Junk filled your server queue, so Erevos gave you a new one and told your contacts. Whoever sent it does not know the new one.'));
         }
       } else if (step === 'say') {
         await this.at.queues.update((d) => ({ ...d, junkSaid: { ...d.junkSaid, own: now } }));
-        notes.push(t('Junk comes to your new queue too, so one of your contacts or the relay sends it. Erevos does not change it again before tomorrow.'));
+        notes.push(t('Junk comes to your new queue too, so one of your contacts or the server sends it. Erevos does not change it again before tomorrow.'));
       }
     }
     q = await this.at.queues.load();
@@ -434,7 +434,7 @@ export class QueueMove {
       if (ids) {
         own = queue = await this.settle(queueOf(ids), here, 'bridge', now, look.own);
         q = await this.at.queues.update((d) => (d.bridged === was ? { ...d, bridged: undefined } : d));
-        notes.push(t('A phone nearby brought your messages, so Erevos gave you a new relay queue and told your contacts. That phone does not know the new one.'));
+        notes.push(t('A phone nearby brought your messages, so Erevos gave you a new server queue and told your contacts. That phone does not know the new one.'));
       }
     }
     // A ring queue due to move since the relay could not be reached: before the tells, which say it.
@@ -467,7 +467,7 @@ export class QueueMove {
         const ids = await createQueue(look.own).catch(() => null);
         if (!ids) continue;
         this.say(await this.at.queues.update((d) => (same(d.link, kept.queue) ? { ...d, link: { queue: queueOf(ids), ...here }, linkAt: now, linkUntil: now } : d)));
-        notes.push(t('The relay had lost the queue your contact link names, so you have a new link. The links and QR codes you gave before no longer work.'));
+        notes.push(t('The server had lost the queue your contact link names, so you have a new link. The links and QR codes you gave before no longer work.'));
         continue;
       }
       if (!found || !this.meter.look(`${kind}:${kept.queue.recipientHex}`, found, now)) continue;

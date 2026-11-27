@@ -866,10 +866,10 @@ export function forgetChat(state: NostrDmState, key: string): void {
 /** Sets the inbox: 1 to 3 relays, wss:// (or ws:// to an onion). Throws for one that is not. */
 export function setInbox(state: NostrDmState, relays: string[]): void {
   const list = [...new Set(relays.map((r) => r.trim().replace(/\/+$/, '')).filter(Boolean))];
-  if (!list.length) throw new Error(t('Name at least one relay.'));
-  if (list.length > INBOX_MOST) throw new Error(t('Three relays at most: NIP-17 asks to keep it small.'));
+  if (!list.length) throw new Error(t('Name at least one server.'));
+  if (list.length > INBOX_MOST) throw new Error(t('Three servers at most: NIP-17 asks to keep it small.'));
   const bad = list.find((r) => !isNostrRelay(r));
-  if (bad) throw new Error(t('{relay} is not a Nostr relay address (wss://…).', { relay: bad }));
+  if (bad) throw new Error(t('{relay} is not a Nostr server address (wss://…).', { relay: bad }));
   // A relay new to it is read from the start: what it keeps already comes too.
   if (list.some((relay) => !state.inbox.includes(relay))) state.caught = 0;
   state.inbox = list;

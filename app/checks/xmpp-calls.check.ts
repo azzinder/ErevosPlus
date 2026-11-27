@@ -10,6 +10,7 @@
 // turned down, taken back, answered on another device of ours, rung while in another call, from
 // someone not in the contacts, or from an older app that starts with Jingle at once; and a Jingle
 // question about a session nobody knows is said no to. Each call leaves one line in its chat.
+// In INVISIBLE (lib/modes.ts) none rings, in the space or a closed hidden place: its line says why.
 // Video is added to a voice call both ways, as Conversations adds it (content-add): said no to,
 // the call goes on as it was; said yes to, each side's description is the call's as it is now.
 // Run with: npm run check
@@ -25,6 +26,7 @@ import { setCore, type Core } from '../lib/core';
 import { hiddenRinging, setHiddenRinging } from '../lib/hidden-ring';
 import { onPlaceNetworkRing } from '../lib/network-notices';
 import { ICE, JINGLE, jingleToSdp, RTP, sdpToJingle } from '../lib/jingle-sdp';
+import { setThroughTor } from '../lib/relay';
 import { addCallLine, addXmppContact, NS, takeStanza, XmppError, type Taken, type XmppConnection, type XmppState } from '../lib/xmpp';
 import { startXmppCall, takeHeldXmppCall, watchXmppCalls, xmppCallSessions, xmppPlaceCalls, type XmppCallsSpace } from '../lib/xmpp-calls';
 import { child, children, el, type XmlElement } from '../lib/xmpp-xml';
@@ -631,7 +633,7 @@ test("a hidden place's own account rings and calls as itself, and its call ends 
   }
 });
 
-test("a call to a closed hidden place's own account that receives rings with no name, and rings in it once the PIN opens it", { skip: !coreReady }, async () => {
+test("a call to a closed hidden place's own account that receives rings with no name, and rings in it once the PIN opens it; in INVISIBLE, nowhere", { skip: !coreReady }, async () => {
   const server = new Server();
   const { ann, bob } = await pair(server);
   const CAT = `cat@${DOMAIN}`;
@@ -713,7 +715,30 @@ test("a call to a closed hidden place's own account that receives rings with no 
     assert.deepEqual(calls(ann, BOB), []);
     assert.equal(xmppCallSessions(), 0);
     other.connection.close();
+
+    // In INVISIBLE (lib/modes.ts) no call rings, here or in the closed place, not even with no
+    // name: each is kept at once as missed, its line saying why, and Bob is told nothing. One that
+    // rings with no name as it is chosen rings no more, kept so too.
+    const ringings = () => bob.got.filter((s) => s.name === 'message' && child(s, 'ringing', JMI)).length;
+    await bob.connection.send(jmi(CAT, 'propose', 'p5', el('description', { xmlns: RTP, media: 'audio' })));
+    await both();
+    assert.equal(rang.length, 4);
+    setHiddenRinging({ space: 5, pocket: 2, at: Date.now() });
+    const before = ringings();
+    setThroughTor('all');
+    assert.equal(hiddenRinging(), null);
+    assert.deepEqual(calls(cat, BOB).at(-1), ['call-p5', false, '📞 Missed voice call, in INVISIBLE']);
+    await bob.connection.send(jmi(CAT, 'propose', 'p6', el('description', { xmlns: RTP, media: 'audio' })));
+    await bob.connection.send(jmi(ANN, 'propose', 'p7', el('description', { xmlns: RTP, media: 'audio' }), el('description', { xmlns: RTP, media: 'video' })));
+    await both();
+    assert.equal(shownCall(), null);
+    assert.equal(rang.length, 4);
+    assert.equal(ringings(), before);
+    assert.deepEqual(calls(cat, BOB).at(-1), ['call-p6', false, '📞 Missed voice call, in INVISIBLE']);
+    assert.deepEqual(calls(ann, BOB), [['call-p7', false, '📞 Missed video call, in INVISIBLE']]);
+    assert.equal(xmppCallSessions(), 0);
   } finally {
+    setThroughTor('off');
     stop();
     stopRang();
     for (const device of [ann, bob, cat]) device.connection.close();

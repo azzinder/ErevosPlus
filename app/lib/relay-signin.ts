@@ -27,8 +27,10 @@ export type SignIn = {
 };
 
 /** The token this phone got as its own from a relay, by an invite or a sign-in: that relay, and
- *  the token's SHA-256 in hex. Kept sealed with the space's relay settings (lock/space-data.ts). */
-export type OwnToken = { relay: string; hash: string };
+ *  the token's SHA-256 in hex; `open` when it is a free place the relay gave by itself (an open
+ *  place, lib/open-place.ts), which has a day's limits there. Kept sealed with the space's relay
+ *  settings (lock/space-data.ts). */
+export type OwnToken = { relay: string; hash: string; open?: true };
 export const NO_OWN_TOKEN: OwnToken = { relay: '', hash: '' };
 
 // The relay keeps a sign-in for 10 minutes from its start.

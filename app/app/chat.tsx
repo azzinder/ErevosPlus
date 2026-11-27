@@ -20,8 +20,9 @@ import { currentCall, soon } from '../lib/call';
 import { currentGroupCall } from '../lib/group-call';
 import { inMatrixCall, onMatrixCallChange } from '../lib/matrix-calls';
 import { callPermissions } from '../lib/call-permissions';
-import { callLineMessage, callSignal, endCallsOf, onCallChange, startCall as beginCall, type CallPlace } from '../lib/calls';
-import { shownLine } from '../lib/call-lines';
+import { callsOff, callsOffNote } from '../lib/modes';
+import { callLineMessage, callSignal, endCallsOf, keptLineMessage, onCallChange, startCall as beginCall, type CallPlace } from '../lib/calls';
+import { inviteLine, isInviteCame, shownLine } from '../lib/call-lines';
 import { onSpaceCallLine, spaceCalls } from '../lib/space-calls';
 import { rtc } from '../lib/webrtc';
 import { canChangeVoice, clearLeftovers, playVoice, useVoiceRecorder } from '../lib/audio';
@@ -65,6 +66,7 @@ import { canPairWithCode, TheirCode } from '../components/their-code';
 import { RelayKeyNote, useRelayCheck } from '../components/relay-key-note';
 import { BackIcon, GlobeIcon, MoreIcon, PlusIcon, ShieldIcon, TimerIcon } from '../components/icons';
 import { canDial, DialTile } from '../components/dial-tile';
+import { useDirectNow } from '../components/mode-picker';
 import { CollectionSign, PhoneSign, ShortcutTile, VideoSign } from '../components/shortcut-tile';
 import { AVATAR_COLORS, AVATAR_SIGNS, KeyFace } from '../components/key-face';
 import { ThreadArrows, useThreadAway } from '../components/thread-arrows';
@@ -103,7 +105,7 @@ import { isSharedPhoto, readShared, takeShared } from '../lib/share-in';
 import { messageLine } from '../lib/message-line';
 import { cameAt, canPick, laterLabel, showsAt } from '../lib/later';
 import { inTurn, SAFETY_HOURS, safetyDue, stopSafety } from '../lib/safety';
-import { ask, choose } from '../lib/alert';
+import { ask, choose, confirm } from '../lib/alert';
 import { fasouliPaidLink, payAmount, takePay, type Pay } from '../lib/pay';
 import { contactLink, contactLinkName, offerFor, onContactOffered, parseContact, type ContactCode, type NostrCode, type Offer } from '../lib/contact-code';
 import { onInviteOffered, parseInvite, type Invite } from '../lib/relay-invite';
@@ -116,6 +118,7 @@ import { hostOf } from '../lib/relay-host';
 import { circuitOf } from '../lib/tor-chats';
 import { canGroup, canMatrix, canNostrChat, canRelaySeal, canSealOpen, canTor, canXmpp, hasCore } from '../lib/core';
 import { accountLink, changedHere, linkedRole, onLinked, placeLinksNow } from '../lib/devices';
+import { directNow } from '../lib/direct';
 import type { ChatChange } from '../lib/link-wire';
 import { BlockedContactError, E2E, ONLINE, toBase64Url, type ContactInfo, type Where, type Erase, type Extra } from '../lib/e2e';
 import { sendCopies } from '../lib/fanout';
@@ -187,6 +190,7 @@ import {
   isLentToken,
   isQueueNotFound,
   lendTicket,
+  listInvites,
   makeInvite,
   receiveMessage,
   redeemInvite,
@@ -194,6 +198,7 @@ import {
   RelayUnreachableError,
   sameRelay,
   sendMessage,
+  takeBackInvite,
   takeOwnLine,
   throughTor,
   ticketExpires,
@@ -207,13 +212,13 @@ import {
 import { announceReceived, answersAsk, appShown, awayPace, awayQueues, holdReceiver, isNews, lookNow, openNearby, shownPace, takeNearby, takeNostr, tellOpenLater, waitWhileAway, type Waited } from '../lib/receiver';
 import { nostrOwnTor, nostrReady, readNostr } from '../lib/nostr';
 import { netThroughTor } from '../lib/net-http';
-import { callIpWarning, ipGate, IpQuiet } from '../components/ip-warning';
+import { callIpWarning, ipGate, IpQuiet, quietLineShows } from '../components/ip-warning';
 import type { IpKeep } from '../lib/ip-warning';
 import { goesInPieces, NOSTR_FILE_LIMIT, NostrFileTooLargeError, offerOnNostr } from '../lib/nostr-send-files';
 import { onPiece } from '../lib/nostr-pieces';
 import { useNfcShare } from '../lib/nfc-share';
 import { answerInvites, answerTextInvite, contactCard, expireTextInvites, linkInviter, refreshSmsLink, spaceSmsLink, takeInviteAnswer } from '../lib/sms-relay';
-import { onTextInviteOffered, parseTextInvite, type TextInvite } from '../lib/text-invite';
+import { inviteId, onTextInviteOffered, parseTextInvite, type TextInvite } from '../lib/text-invite';
 import { carriedFor, contactTarget, markOf, relayFor, ringOffer, sendSealed, sentMark, setLastSeen, setTellOpen, spaceChats, type SpaceChats } from '../lib/space-chats';
 import { placeChats, setPlaceLastSeen, setPlaceTellOpen } from '../lib/place-chats';
 import { myNameAt, setMyNameAt } from '../lib/my-name';
@@ -428,6 +433,7 @@ export default function ChatScreen() {
               nearbyOpen={setup === 'nearby'}
               inviteNow={setup === 'invite'}
               codeNow={setup === 'code'}
+              nearNow={setup === 'near'}
               shown={!hiddenKey}
               onLook={setChatLook}
             />
@@ -479,7 +485,7 @@ function BackButton({ onPress }: { onPress?: () => void }) {
 
 // One chat: the space's own (`hiddenKey` null), or hidden chats, sealed with that key, in the
 // space's `pocket` of them.
-function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = null, linkNumber = '', relaySettings = false, nearbyOpen = false, inviteNow = false, codeNow = false, shown, callOnly = false, onHidden, onChangePassword, onLook }: {
+function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = null, linkNumber = '', relaySettings = false, nearbyOpen = false, inviteNow = false, codeNow = false, nearNow = false, shown, callOnly = false, onHidden, onChangePassword, onLook }: {
   hiddenKey: Uint8Array | null;
   pocket?: number;
   initial?: string | null;
@@ -497,6 +503,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   inviteNow?: boolean;
   /** Opens on I have their code: an invite or a link to scan, paste or type (First steps' I have an invite). */
   codeNow?: boolean;
+  /** Opens on Near me: someone beside you scans your QR code, or you scan theirs (the first home's They are beside me). */
+  nearNow?: boolean;
   shown: boolean;
   /** Hidden chats run only for a call answered with no PIN (ChatScreen): its screen shows no name, and they close as it ends. */
   callOnly?: boolean;
@@ -532,6 +540,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const [placeSign, setPlaceSign] = useState(false);
   // Whether the Collection is on, for its way in at the top of hidden chats (lib/modules.ts).
   const modules = useModules();
+  // Direct connections (lib/direct.ts), read again as the switch or a Tor setting changes: never of hidden chats.
+  const directConnections = useDirectNow() && !hiddenKey;
   const watchedNow = useRef(false);
   watchedNow.current = watched || receiving;
   // The links of these chats' own devices (lib/devices.ts): the space's, or these hidden chats' own,
@@ -623,8 +633,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // page of its own. Opened from elsewhere on one of them (the relay's settings, the phones nearby,
   // the home screen's Invite, First steps' I have an invite), Back leaves New chat as it came, not
   // for its first page.
-  const [door, setDoor] = useState<Door>(relaySettings || nearbyOpen ? 'advanced' : inviteNow ? 'far' : codeNow ? 'code' : 'root');
-  const doorFromOutside = useRef(relaySettings || nearbyOpen || inviteNow || codeNow);
+  const [door, setDoor] = useState<Door>(relaySettings || nearbyOpen ? 'advanced' : inviteNow ? 'far' : codeNow ? 'code' : nearNow ? 'near' : 'root');
+  const doorFromOutside = useRef(relaySettings || nearbyOpen || inviteNow || codeNow || nearNow);
   const doorNow = useRef(door);
   doorNow.current = door;
   // You are connected, where the doors end: who was just added.
@@ -1255,7 +1265,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const ours = (mine?.url ?? relayUrl).trim();
     if (code.relayUrl && ours && !sameRelay(code.relayUrl, ours) && !code.relayKey) {
       setNote(
-        t('Not added. That contact uses the relay at {url}, and its link has no key for that relay. Ask them for a new link from an updated Erevos.', { url: code.relayUrl }),
+        t('Not added. That contact uses the server at {url}, and its link has no key for that server. Ask them for a new link from an updated Erevos.', { url: code.relayUrl }),
       );
       return null;
     }
@@ -1290,7 +1300,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     }
     const target = relayFor(url, token, viaUrl, viaToken, spareBackup(spareStore));
     if (!target && !code.key) {
-      setNote(t('Not added. Type the relay address in Relay first.'));
+      setNote(t('Not added. Type the server address in Server first.'));
       return null;
     }
     try {
@@ -1327,14 +1337,16 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         (added
           ? nearbyOnly
             ? noPlace
-              ? t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. Their relay gave no place: {error}. Until you have a relay, you reach each other nearby only.', {
+              ? t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. Their server gave no place: {error}. Until you have a server, you reach each other nearby only.', {
                   error: errorText(noPlace),
                 })
-              : t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. Until you both have a relay, you reach each other nearby only.')
+              : t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. Until you both have a server, you reach each other nearby only.')
             : onNostr
-              ? t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. With no relay between you, texts, stickers, reactions, photos, files and voice messages go through Nostr; calls need a relay or their phone nearby.')
+              ? directNow() && !hiddenKey
+                ? t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. With no server between you, texts, stickers, reactions, photos, files and voice messages go through Nostr, and calls go straight from phone to phone.')
+                : t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. With no server between you, texts, stickers, reactions, photos, files and voice messages go through Nostr; calls need a server or their phone nearby.')
               : lent
-                ? t("Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. With no relay of your own, you now have a place on theirs, lent through their link.")
+                ? t("Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs. With no server of your own, you now have a place on theirs, lent through their link.")
                 : t('Contact added. Messages to it are end-to-end encrypted. Compare the safety number with theirs.')
           : t('Already a contact. Where to reach them is updated.')) + turnOn + linked,
       );
@@ -1374,10 +1386,10 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const same = !!ours && sameRelay(ours, invite.relayUrl);
     if (ours && (!same || (relayToken.trim() && !isLentToken(relayToken)))) {
       const go = await choose(
-        t('Use the relay in the invite?'),
+        t('Use the server in the invite?'),
         same
-          ? t('This phone has a token for this relay already. The invite gives it one of its own instead.')
-          : t('This phone uses the relay at {url}. With the invite it uses the one at {other} instead, and contacts learn your new queue from your next message.', {
+          ? t('This phone has a token for this server already. The invite gives it one of its own instead.')
+          : t('This phone uses the server at {url}. With the invite it uses the one at {other} instead, and contacts learn your new queue from your next message.', {
               url: ours,
               other: invite.relayUrl,
             }),
@@ -1470,7 +1482,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     // A contact card brings no relay: the answer goes from this phone's own, and theirs comes back there.
     if (invite.card) {
       if (!relayUrl.trim() || !ownQueue) {
-        setNote(t('To add them with their contact QR code, your phone needs a relay first: ask them for an invite instead, with Invite on their home screen.'));
+        setNote(t('To add them with their contact QR code, your phone needs a server first: ask them for an invite instead, with Invite on their home screen.'));
         return;
       }
       answerTextInvite(invite, name);
@@ -1518,11 +1530,11 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       tellJoined.current = true;
       setNote(
         name
-          ? t('{name} gave you a place on their relay, by itself. Photos, voice messages and calls now go there too, with everyone.', { name })
-          : t('A contact gave you a place on their relay, by itself. Photos, voice messages and calls now go there too, with everyone.'),
+          ? t('{name} gave you a place on their server, by itself. Photos, voice messages and calls now go there too, with everyone.', { name })
+          : t('A contact gave you a place on their server, by itself. Photos, voice messages and calls now go there too, with everyone.'),
       );
     } catch (error) {
-      setNote(t('An invite to a contact’s relay came, but it was not taken. {error}', { error: errorText(error) }));
+      setNote(t('An invite to a contact’s server came, but it was not taken. {error}', { error: errorText(error) }));
     }
   }
 
@@ -1545,8 +1557,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const joined = first
       ? t('You are in, as {name}. Now add your contacts: by their invite, or by the contact link or QR code they give you.', { name })
       : invited
-        ? t('This phone now uses the relay at {url}, with a token of its own.', { url })
-        : t('This phone now uses the relay at {url}, with a token of its own, named {name} there.', { url, name });
+        ? t('This phone now uses the server at {url}, with a token of its own.', { url })
+        : t('This phone now uses the server at {url}, with a token of its own, named {name} there.', { url, name });
     if (same && ownQueue) {
       setNote(joined);
       return;
@@ -1558,7 +1570,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       setNote(joined);
     } catch (error) {
       setOwnQueue(null);
-      setNote(`${joined} ${t('Its queue could not be made yet: {error}. Tap Create my relay queue.', { error: errorText(error) })}`);
+      setNote(`${joined} ${t('Its queue could not be made yet: {error}. Tap Create my server queue.', { error: errorText(error) })}`);
     }
   }
 
@@ -1599,7 +1611,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     await updateCurrentSpaceData({ token: own.token, ownToken: ownToken(url, own.token) }).catch(() => {
       // Not kept: signing in there later gives this phone one more line instead of its own again.
     });
-    setNote(t('This phone now has a token of its own on the relay, named {name} there, in place of the relay’s token: it can invite others now.', { name: own.name }));
+    setNote(t('This phone now has a token of its own on the server, named {name} there, in place of the server’s token: it can invite others now.', { name: own.name }));
     return { url, token: own.token };
   }
 
@@ -1921,7 +1933,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           });
       })
       .catch((error) => {
-        if (active) setNote(t('Chats through the relay could not open. {error}', { error: errorText(error) }));
+        if (active) setNote(t('Chats through the server could not open. {error}', { error: errorText(error) }));
       })
       .finally(() => {
         if (active) setLoaded(true);
@@ -2228,13 +2240,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         const ticket = await lendTicket({ url, token: relayToken.trim() || undefined });
         if (!active) return;
         setOwnTicket(ticket ?? '');
-        if (!ticket) setPlaceNote(t('Your relay lends no places: its operator has not turned lending on.'));
+        if (!ticket) setPlaceNote(t('Your server lends no places: its operator has not turned lending on.'));
         await updateCurrentSpaceData({ lend: ticket ? { relay: url, ticket } : NO_LENDING });
       } catch {
         // The relay cannot be reached: the one kept, while it lasts, and asked again next time.
         if (!active) return;
         if (left > 0) setOwnTicket(kept.ticket);
-        else setPlaceNote(t('Your relay cannot be reached, so the link has no place in it.'));
+        else setPlaceNote(t('Your server cannot be reached, so the link has no place in it.'));
       }
     })().catch(() => undefined);
     return () => {
@@ -2350,7 +2362,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         const answers = () => {
           if (failed === null || !active) return;
           const shown = failed;
-          setNote((current) => (current === shown ? t('The relay answers again.') : current));
+          setNote((current) => (current === shown ? t('The server answers again.') : current));
           failed = null;
         };
         if (!hiddenKey && !currentCall() && !currentGroupCall()) waited = await waitWhileAway(own, recipient, others.map(fromHex));
@@ -2386,6 +2398,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         await sendReceipts(sends);
         await sendKeys(sends);
         await relayOffers.current(own, sends);
+        await invitesCame.current(own).catch(() => undefined);
         // Imported chats shared, going and coming in rounds (lib/share-rounds.ts).
         shareDrive.current(own);
         // Texts that went through Nostr, not said to have come in time, through the relay as well.
@@ -2411,7 +2424,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           const queue = await mover.current?.lost(own);
           if (!active || !queue) return;
           setOwnQueue(queue);
-          setNote(t('The relay had lost your queue, so you have a new one. Your contacts are told quietly.'));
+          setNote(t('The server had lost your queue, so you have a new one. Your contacts are told quietly.'));
         } catch (retry) {
           if (active) setNote(errorText(retry));
         }
@@ -2488,12 +2501,58 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         const made = await makeInvite(own, await e2e.lineFor(name));
         if (!made) return;
         await sendToContact(sends, identity, '', { more: { ri: { r: own.url, c: made.code } } }, true);
-        await e2e.relayInviteSent(identity);
+        await e2e.relayInviteSent(identity, Date.now(), inviteId(made.code));
       } catch {
         // Tried again the next time Erevos opens.
       }
     }
   };
+
+  // Of the contacts sent such an invite, each whose phone came onto this phone's relay with it:
+  // said once in their chat, on this phone only, with Take back under that line while they are
+  // there (his word, 11-25). The relay is asked only while one of them reads on it and was not said
+  // yet (lib/invite-place.ts invitesToSettle); one it does not list as used is forgotten.
+  const invitesCame = useRef((_own: Relay) => Promise.resolve());
+  invitesCame.current = async (own) => {
+    if (!e2e || hiddenKey) return;
+    const due = e2e.invitesToSettle(own.url);
+    if (due.length === 0) return;
+    // Not answered now: asked again on the next look. Null: this phone cannot invite there (now).
+    const listed = await listInvites(own).catch(() => undefined);
+    if (listed === undefined) return;
+    for (const { identity, id } of due) {
+      const came = !!listed?.some((invite) => invite.id === id && invite.used > 0);
+      await e2e.relayInviteSettled(identity, came);
+      const peer = `${CONTACT_PREFIX}${identity}`;
+      if (came) latest.current.line(keptLineMessage(peer, false, inviteLine('came', label(peer, e2e.contacts())), 0));
+    }
+  };
+
+  // Takes back the place on this phone's relay that the contact of the chat open came onto with
+  // its invite (lib/invite-place.ts holdsPlace), as Your invites does: their phone can no longer use
+  // the relay, and the phones it invited keep theirs.
+  async function takeBackPlace() {
+    const identity = selected?.startsWith(CONTACT_PREFIX) ? selected.slice(CONTACT_PREFIX.length) : '';
+    const own = ownRelay();
+    const id = own && e2e ? e2e.heldPlace(identity, own.url) : null;
+    if (!e2e || !own || !id) return;
+    const peer = `${CONTACT_PREFIX}${identity}`;
+    const name = label(peer, e2e.contacts());
+    const sure = await confirm(
+      t("Take back {name}'s access?", { name }),
+      t('Their phone can no longer use this server from now on. The phones it invited keep theirs.'),
+      t('Take back'),
+    );
+    if (!sure) return;
+    try {
+      const done = await takeBackInvite(own, id);
+      await e2e.relayPlaceTakenBack(identity);
+      if (done) latest.current.line(keptLineMessage(peer, true, inviteLine('back', name), 0));
+      else setNote(t('That invite was gone already.'));
+    } catch (error) {
+      setNote(errorText(error));
+    }
+  }
 
   // With no relay queue, what goes through Nostr to the contacts it is the only way to (lib/nostr-chats.ts
   // nostrOnlyWay), while Tor is ready: what waited, the marks that messages came and were read, new
@@ -2829,13 +2888,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   async function eraseOnBoth(peer: string, erase: Erase, here: () => void) {
     const target = relayTarget();
     if (!target) {
-      setNote(t('Not deleted. Type the relay address in Relay first.'));
+      setNote(t('Not deleted. Type the server address in Server first.'));
       return;
     }
     try {
       await sendToContact(target, peer.slice(CONTACT_PREFIX.length), '', { erase });
       here();
-      setNote(t("Deleted here. {name}'s phone deletes them too when it next looks at the relay.", { name: label(peer, shownContacts) }));
+      setNote(t("Deleted here. {name}'s phone deletes them too when it next looks at the server.", { name: label(peer, shownContacts) }));
     } catch (error) {
       setNote(t('Not deleted. {reason}', { reason: notSentReason(error) }));
     }
@@ -2857,7 +2916,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   function deleteMessage(message: Message) {
     // One a relay holds for later is taken back from it, if it did not go yet (takeBackHeld).
     if (message.held && message.at > Date.now()) {
-      ask(t('Delete message'), t('Delete this message before it goes? The relay that keeps it drops it.'), [
+      ask(t('Delete message'), t('Delete this message before it goes? The server that keeps it drops it.'), [
         { text: t('Cancel'), style: 'cancel' },
         { text: t('Delete'), style: 'destructive', onPress: () => takeBackHeld(message) },
       ]);
@@ -2898,7 +2957,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           setMessages((list) => list.map((m) => (m.id === message.id ? { ...m, at: Math.min(m.at, Date.now()) } : m)));
         }
       })
-      .catch((error) => setNote(t('Not deleted: the relay could not be asked. {reason}', { reason: errorText(error) })));
+      .catch((error) => setNote(t('Not deleted: the server could not be asked. {reason}', { reason: errorText(error) })));
   }
 
   // Deletes the messages chosen, after one question, each as Delete does it alone: one a relay holds
@@ -3637,7 +3696,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     ipKeep: () => ipKeep().keep,
     send: async (identity, extra) => {
       const target = relayTarget();
-      if (!target) throw new Error(t('No relay.'));
+      if (!target) throw new Error(t('No server.'));
       await sendToContact(target, identity, '', extra);
     },
     line: (message) => {
@@ -3661,8 +3720,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   function callDirectly(): Promise<boolean> {
     return new Promise((resolve) =>
       ask(
-        t('Call without a call relay?'),
-        t("Your relay has no call relay beside it, so the call would go straight between the phones. That only works on the same Wi-Fi, and each phone sees the other's address on it. With a call relay, neither does."),
+        t('Call without a call server?'),
+        t("Your server has no call server beside it, so the call would go straight between the phones. That only works on the same Wi-Fi, and each phone sees the other's address on it. With a call server, neither does."),
         [
           { text: t('Cancel'), style: 'cancel', onPress: () => resolve(false) },
           { text: t('Call'), onPress: () => resolve(true) },
@@ -3672,8 +3731,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   }
 
   async function startCall(video: boolean) {
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) {
+      setNote(callsOffNote());
+      return;
+    }
     if (!selectedContact) {
-      setNote(video ? t('Video calls go to contacts through the relay. Pick one first.') : t('Calls go to contacts through the relay. Pick one first.'));
+      setNote(video ? t('Video calls go to contacts through the server. Pick one first.') : t('Calls go to contacts through the server. Pick one first.'));
       return;
     }
     const peer = selectedContact;
@@ -3689,13 +3753,27 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     // On the same Wi-Fi or a hotspot, with no internet, a call is set up over the link nearby and
     // goes straight between the two: to the contact's link when heard on one, else to every link.
     const near = nearby.isNear(identity) || nearby.count() > 0;
-    if (!e2e || ((!ownQueue || !relayUrl.trim()) && !near)) {
-      setNote(e2e ? t('Calls are set up through the relay, or with a contact on the same Wi-Fi. Type the relay address in Relay first.') : notOpen());
+    const relayed = !!ownQueue && !!relayUrl.trim();
+    // With Direct connections on (lib/direct.ts), in the space's own chats: the helper servers of a
+    // call straight between the two phones, and with no relay between the two the call is set up
+    // through Nostr, as their texts go (lib/space-calls.ts). Null with it off, in hidden chats, and
+    // for a chat set to go only through Tor: then all is as before it.
+    const helpers = hiddenKey || !e2e ? null : ((await spaceCalls.direct?.(identity).catch(() => null)) ?? null);
+    const throughNostr = !!helpers && !!e2e && !(relayed && !!e2e.queueOf(identity)?.sender) && e2e.readsOnNostr(identity) && nostrReady();
+    if (!e2e || (!relayed && !near && !throughNostr)) {
+      setNote(
+        !e2e
+          ? notOpen()
+          : helpers
+            ? t('With no server between you two, a call is set up through Nostr, and Nostr is off here or on their phone. Turn it on under Settings, Server and networks, Nostr, or get on the same Wi-Fi.')
+            : t('Calls are set up through the server, or with a contact on the same Wi-Fi. Type the server address in Server first.'),
+      );
       return;
     }
     // Calls never go through Tor: that the call relay sees this phone's internet address is said
-    // once for the chat, before (lib/ip-warning.ts). Nearby, the call stays on the same network.
-    if (!near && !(await ipGate(callIpWarning(identity, ipKeep().keep)))) return;
+    // once for the chat, before (lib/ip-warning.ts), unless Direct connections says nothing of it.
+    // Nearby, the call stays on the same network.
+    if (!near && !(await ipGate(callIpWarning(identity, ipKeep().keep, isTorChat(peer))))) return;
     if (!(await callPermissions(video))) {
       setNote(video ? t('A video call needs the camera and the microphone.') : t('A call needs the microphone.'));
       return;
@@ -3711,9 +3789,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         }
       }
     }
-    if (!relay && !(await callDirectly())) return;
+    // With Direct connections on (SPEED): straight between the two phones over the internet, with
+    // nothing asked, and through the call relay too where it cannot go straight. With neither, only
+    // on the same Wi-Fi, asked first.
+    const open = helpers;
+    if (!relay && !open && !(await callDirectly())) return;
     try {
-      beginCall(callPlace, peer, video, relay, rtc);
+      beginCall(callPlace, peer, video, relay, rtc, open);
     } catch (error) {
       setNote(errorText(error));
     }
@@ -3727,11 +3809,11 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // Where a message's menu says it went or came, when this phone knows.
   function wayLine(m: Message): string | undefined {
     if (m.nostr) return m.mine ? t('Went through Nostr.') : t('Came through Nostr.');
-    if (m.route === 'relay') return m.mine ? t('Went through the relay.') : t('Came through the relay.');
+    if (m.route === 'relay') return m.mine ? t('Went through the server.') : t('Came through the server.');
     if (m.route === 'nearby') return m.mine ? t('Went to their phone nearby.') : t('Came from a phone nearby.');
     if (m.route === 'lora') return t('Went over LoRa.');
     if (m.route === 'sms') return m.mine ? t('Went by SMS, end-to-end encrypted.') : t('Came by SMS, end-to-end encrypted.');
-    if (m.route === 'carried') return t('Went to the phones nearby, which carry it to their relay.');
+    if (m.route === 'carried') return t('Went to the phones nearby, which carry it to their server.');
     if (m.route === 'spread') return t('Went to the phones nearby, in case theirs is one of them.');
     return undefined;
   }
@@ -3739,27 +3821,27 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // What the note under the messages says once something went (`what`: Sent, Voice message sent…).
   function sentNote(way: Delivery, what: string, name: string): string {
     if (way === 'nearby') return t('{what} nearby, end-to-end encrypted.', { what });
-    if (way === 'relay') return t('{what} through the relay, end-to-end encrypted.', { what });
+    if (way === 'relay') return t('{what} through the server, end-to-end encrypted.', { what });
     if (way === 'nostr') return t('{what} through Nostr, end-to-end encrypted.', { what });
     if (way === 'sms') {
       return t("{what} by SMS, end-to-end encrypted, as nothing else could take it. The phone company sees that you wrote to {name}'s number, and when, as with any SMS.", { what, name });
     }
     if (way === 'lora') {
-      return t("{what} over LoRa, end-to-end encrypted, as the relay could not be reached. It comes if {name}'s Erevos has a radio on the same mesh, within reach.", { what, name });
+      return t("{what} over LoRa, end-to-end encrypted, as the server could not be reached. It comes if {name}'s Erevos has a radio on the same mesh, within reach.", { what, name });
     }
     if (way === 'carried') {
       return t(
-        "{what} to the Erevos phones nearby, end-to-end encrypted, as the relay could not be reached. If {name}'s is not one of them, they hand it to {name}'s relay once they reach the internet, and so does this phone.",
+        "{what} to the Erevos phones nearby, end-to-end encrypted, as the server could not be reached. If {name}'s is not one of them, they hand it to {name}'s server once they reach the internet, and so does this phone.",
         { what, name },
       );
     }
-    return t("{what} to the Erevos phones nearby, end-to-end encrypted, as the relay could not be reached. It comes only if {name}'s is one of them.", { what, name });
+    return t("{what} to the Erevos phones nearby, end-to-end encrypted, as the server could not be reached. It comes only if {name}'s is one of them.", { what, name });
   }
 
   // Why something could not go, without the words that say so.
   function notSentReason(error: unknown): string {
     return isQueueNotFound(error)
-      ? t("The relay does not have this contact's queue any more. Ask them to write to you, or for their new contact link.")
+      ? t("The server does not have this contact's queue any more. Ask them to write to you, or for their new contact link.")
       : errorText(error);
   }
 
@@ -3860,8 +3942,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       const reason = waitingReason(error, to, t('It is too long for LoRa.'));
       setNote(
         hiddenKey
-          ? withClosedNote(t('Waiting. {reason} It goes by itself once the relay can take it.', { reason }))
-          : t('Waiting. {reason} It goes by itself once the relay or their phone nearby can take it.', { reason }),
+          ? withClosedNote(t('Waiting. {reason} It goes by itself once the server can take it.', { reason }))
+          : t('Waiting. {reason} It goes by itself once the server or their phone nearby can take it.', { reason }),
       );
     }
   }
@@ -3899,7 +3981,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const parts = answering(peer);
     const heldNote = safety
       ? t('Safety message kept. It goes on {when}, unless you open Erevos before then: each time you do, it moves on to {time} from then. Delete it here to stop it.', { when, time: timerLabel(safety * 3600) })
-      : t('Scheduled for {when}. The relay sends it then, even if this phone is off. Until then you can delete it here.', { when });
+      : t('Scheduled for {when}. The server sends it then, even if this phone is off. Until then you can delete it here.', { when });
     addMessage(peer, text, true, tag, lasts, voice, file, WAITING, at, safety ? { ...parts, safety } : parts);
     setReplying(null);
     const went = await sendWaitingNow.current(true);
@@ -3907,8 +3989,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       went.some((w) => w.peer === peer && w.tag === tag && w.held)
         ? heldNote
         : safety
-          ? t('Safety message kept here. It is not safe yet: it goes to the relay once one can be reached. Until then it cannot go without this phone.')
-          : t('Scheduled for {when}. It goes to the relay once one can be reached, and from there at that time, even if this phone is off then. Until then you can delete it here.', { when }),
+          ? t('Safety message kept here. It is not safe yet: it goes to the server once one can be reached. Until then it cannot go without this phone.')
+          : t('Scheduled for {when}. It goes to the server once one can be reached, and from there at that time, even if this phone is off then. Until then you can delete it here.', { when }),
     );
     return true;
   }
@@ -3949,15 +4031,15 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     // their phone when it is near.
     if (hiddenKey && HAS_LINKS && (relayTarget() || !(error instanceof RelayUnreachableError))) {
       const name = label(peer, contacts);
-      return relayTarget() ? t("The relay cannot be reached, and {name}'s phone is not near.", { name }) : t("There is no relay, and {name}'s phone is not near.", { name });
+      return relayTarget() ? t("The server cannot be reached, and {name}'s phone is not near.", { name }) : t("There is no server, and {name}'s phone is not near.", { name });
     }
-    if (hiddenKey) return relayTarget() ? t('The relay cannot be reached.') : error instanceof RelayUnreachableError ? error.message : t('There is no relay.');
-    if (error instanceof TooLargeForSmsError) return `${t('It is too long for SMS.')} ${relayTarget() ? t('The relay cannot be reached.') : t('There is no relay.')}`;
-    if (error instanceof TooLargeForSlowWayError) return `${lora} ${relayTarget() ? t('The relay cannot be reached.') : t('There is no relay.')}`;
+    if (hiddenKey) return relayTarget() ? t('The server cannot be reached.') : error instanceof RelayUnreachableError ? error.message : t('There is no server.');
+    if (error instanceof TooLargeForSmsError) return `${t('It is too long for SMS.')} ${relayTarget() ? t('The server cannot be reached.') : t('There is no server.')}`;
+    if (error instanceof TooLargeForSlowWayError) return `${lora} ${relayTarget() ? t('The server cannot be reached.') : t('There is no server.')}`;
     const name = label(peer, contacts);
     return relayTarget()
-      ? t("The relay cannot be reached, and {name}'s phone is not near.", { name })
-      : t("There is no relay, and {name}'s phone is not near.", { name });
+      ? t("The server cannot be reached, and {name}'s phone is not near.", { name })
+      : t("There is no server, and {name}'s phone is not near.", { name });
   }
 
   // What hidden chats that do not receive while closed add to a note that something waits: only
@@ -3971,10 +4053,10 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     return choose(
       t('Not sent yet'),
       what === 'voice'
-        ? t('{reason} The voice message can wait here, marked Waiting, and go by itself once the relay or their phone nearby can take it.', { reason })
+        ? t('{reason} The voice message can wait here, marked Waiting, and go by itself once the server or their phone nearby can take it.', { reason })
         : what === 'photo'
-          ? t('{reason} The photo can wait here, marked Waiting, and go by itself once the relay or their phone nearby can take it.', { reason })
-          : t('{reason} The file can wait here, marked Waiting, and go by itself once the relay or their phone nearby can take it.', { reason }),
+          ? t('{reason} The photo can wait here, marked Waiting, and go by itself once the server or their phone nearby can take it.', { reason })
+          : t('{reason} The file can wait here, marked Waiting, and go by itself once the server or their phone nearby can take it.', { reason }),
       t('Delete it'),
       t('Keep it waiting'),
     );
@@ -4164,7 +4246,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       block ? t('Block contact') : t('Delete contact'),
       block
         ? t('Block {name}? As with deleting, and what they send later is dropped, a request too. You can unblock them under Blocked contacts.', { name })
-        : t('Delete {name}? Your chat with them goes from this phone. Erevos gives you a new relay queue and tells your other contacts quietly, so {name} can no longer write to you. With your contact link they can still ask to talk again.', { name }),
+        : t('Delete {name}? Your chat with them goes from this phone. Erevos gives you a new server queue and tells your other contacts quietly, so {name} can no longer write to you. With your contact link they can still ask to talk again.', { name }),
       [
         { text: t('Cancel'), style: 'cancel' },
         { text: block ? t('Block') : t('Delete'), style: 'destructive', onPress: () => void deleted(peer, name, block) },
@@ -4204,8 +4286,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         ? t('Blocked.')
         : ''
       : block
-        ? t('{name} is blocked. Your other contacts learn your new queue as soon as the relay answers.', { name })
-        : t('{name} is deleted. Your other contacts learn your new queue as soon as the relay answers.', { name });
+        ? t('{name} is blocked. Your other contacts learn your new queue as soon as the server answers.', { name })
+        : t('{name} is deleted. Your other contacts learn your new queue as soon as the server answers.', { name });
     const url = relayUrl.trim();
     // Their own queue goes at once (lib/queue-move.ts dropGone).
     if (url && mover.current) void mover.current.dropGone({ url, token: relayToken.trim() || undefined }).catch(() => undefined);
@@ -4218,7 +4300,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
           setOwnQueue(moved.queue);
         }
       } catch {
-        said = t('The relay could not be reached, so your queue changes as soon as it can. Until then {name} can still write to it, but nothing they send shows.', { name });
+        said = t('The server could not be reached, so your queue changes as soon as it can. Until then {name} can still write to it, but nothing they send shows.', { name });
       }
     }
     if (shared > 0) {
@@ -4254,7 +4336,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   function newContactLink() {
     const url = relayUrl.trim();
     if (!url || !ownQueue || !mover.current) {
-      setNote(t('Create your relay queue first, on New chat.'));
+      setNote(t('Create your server queue first, on New chat.'));
       return;
     }
     const date = new Date(Date.now() + 14 * 24 * 3600_000).toLocaleDateString(locale());
@@ -4312,7 +4394,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   // Starts recording while the microphone is held. Letting go sends it; a minute sends it anyway.
   function startTalking() {
     if (!selectedContact) {
-      setNote(t('Voice messages go to contacts through the relay. Pick one first.'));
+      setNote(t('Voice messages go to contacts through the server. Pick one first.'));
       return;
     }
     holding.current = true;
@@ -4446,8 +4528,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         setReplying(null);
         setNote(
           hiddenKey
-            ? withClosedNote(t('The voice message waits, and goes by itself once the relay can take it.'))
-            : t('The voice message waits, and goes by itself once the relay or their phone nearby can take it.'),
+            ? withClosedNote(t('The voice message waits, and goes by itself once the server can take it.'))
+            : t('The voice message waits, and goes by itself once the server or their phone nearby can take it.'),
         );
       } catch (failed) {
         setNote(t('Not sent, and it could not wait. {error}', { error: errorText(failed) }));
@@ -4749,7 +4831,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     // file server, when the contact reads on Nostr (lib/nostr-send-files.ts).
     const toNostr = peer && e2e && (!target || !own || !ownQueue?.senderHex || !e2e.queueOf(peer.slice(CONTACT_PREFIX.length))?.sender) ? e2e.nostrPlace(peer.slice(CONTACT_PREFIX.length)) : null;
     if (!peer || ((!target || !own) && !toNostr)) {
-      setNote(t('Photos and files go to contacts through the relay. Type its address in Relay, and pick a contact.'));
+      setNote(t('Photos and files go to contacts through the server. Type its address in Server, and pick a contact.'));
       return;
     }
     if (!(await ipBeforeSend(peer))) return;
@@ -4843,10 +4925,10 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       setContacts(e2e.contacts());
       setNote(
         picked.sticker
-          ? toNostr ? t('Sticker sent through Nostr, end-to-end encrypted.') : t('Sticker sent through the relay, end-to-end encrypted.')
+          ? toNostr ? t('Sticker sent through Nostr, end-to-end encrypted.') : t('Sticker sent through the server, end-to-end encrypted.')
           : kind === 'photo'
-            ? toNostr ? t('Photo sent through Nostr, end-to-end encrypted.') : t('Photo sent through the relay, end-to-end encrypted.')
-            : toNostr ? t('File sent through Nostr, end-to-end encrypted.') : t('File sent through the relay, end-to-end encrypted.'),
+            ? toNostr ? t('Photo sent through Nostr, end-to-end encrypted.') : t('Photo sent through the server, end-to-end encrypted.')
+            : toNostr ? t('File sent through Nostr, end-to-end encrypted.') : t('File sent through the server, end-to-end encrypted.'),
       );
     } catch (error) {
       if (error instanceof OwedError && kept && offer) {
@@ -4869,8 +4951,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       const reason = toNostr
         ? t('Photos and files go through Nostr, which cannot be reached.')
         : nearby.hasSlow() && !hiddenKey
-          ? t('Photos and files go through the relay, which cannot be reached, and LoRa takes only text.')
-          : t('Photos and files go through the relay, which cannot be reached.');
+          ? t('Photos and files go through the server, which cannot be reached, and LoRa takes only text.')
+          : t('Photos and files go through the server, which cannot be reached.');
       if (!(await askToWait(what, reason))) {
         setNote(t('Not sent.'));
         return;
@@ -4886,7 +4968,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         setReplying(null);
         const waits = toNostr
           ? what === 'photo' ? t('The photo waits, and goes by itself once Nostr can take it.') : t('The file waits, and goes by itself once Nostr can take it.')
-          : what === 'photo' ? t('The photo waits, and goes by itself once the relay can take it.') : t('The file waits, and goes by itself once the relay can take it.');
+          : what === 'photo' ? t('The photo waits, and goes by itself once the server can take it.') : t('The file waits, and goes by itself once the server can take it.');
         setNote(hiddenKey ? withClosedNote(waits) : waits);
       } catch (failed) {
         setNote(t('Not sent, and it could not wait. {error}', { error: errorText(failed) }));
@@ -4969,7 +5051,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       }
       const own = ownRelay();
       if (own || !onRelay(file.from)) void take(own, message.peer, message.tag, file);
-      else setNote(t('Type the relay address in Relay first.'));
+      else setNote(t('Type the server address in Server first.'));
       return;
     }
     setViewing(message);
@@ -5171,7 +5253,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     }
     const target = relayTarget();
     try {
-      if (!target) throw new Error(t('Type the relay address in Relay first.'));
+      if (!target) throw new Error(t('Type the server address in Server first.'));
       await sendToContact(target, identity, '', { on: appShown() ? ONLINE : 0 });
       setNote(t('{name} sees again when you are online, and which messages you read.', { name: label(peer, shownContacts) }));
     } catch {
@@ -5238,7 +5320,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         ? { url: data.url, token: data.token, via: data.via, viaToken: data.viaToken }
         : { url: relayUrl, token: relayToken, via: viaUrl, viaToken };
       const target = relayFor(settings.url, settings.token, settings.via, settings.viaToken);
-      if (!target) throw new Error(t('Type the relay address in Relay first.'));
+      if (!target) throw new Error(t('Type the server address in Server first.'));
       let queue = data.ownQueue;
       if (!queue) {
         const ids = await createQueue(target);
@@ -5309,7 +5391,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     try {
       const data = await loadCurrentSpaceData();
       const target = relayFor(data.url, data.token, data.via, data.viaToken);
-      if (!target || !data.ownQueue) throw new Error(t("The space's chats have no relay queue yet: create it under Relay there first."));
+      if (!target || !data.ownQueue) throw new Error(t("The space's chats have no server queue yet: create it under Server there first."));
       const space = await spaceChats();
       checkMove(identity, e2e, space.e2e);
       // A contact who knows about devices is told first, as the move into hidden chats tells them:
@@ -5381,7 +5463,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       // the relay can then tell the two spaces are one phone's.
       let settings = { url: data.url, token: data.token, via: data.via, viaToken: data.viaToken };
       if (!settings.url.trim()) {
-        if (!relayUrl.trim()) throw new Error(t('Neither space has a relay yet: set one under Relay in that space first.'));
+        if (!relayUrl.trim()) throw new Error(t('Neither space has a server yet: set one under Server in that space first.'));
         if (!shareRelay) {
           setRelayOffer(true);
           return;
@@ -5389,7 +5471,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         settings = { url: relayUrl, token: relayToken, via: viaUrl, viaToken };
       }
       const target = relayFor(settings.url, settings.token, settings.via, settings.viaToken);
-      if (!target) throw new Error(t('Type the relay address in Relay first.'));
+      if (!target) throw new Error(t('Type the server address in Server first.'));
       // Its queue there, made now when it has none yet, or when it takes this space's relay.
       let queue = settings.url === data.url ? data.ownQueue : null;
       if (!queue) {
@@ -5449,7 +5531,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       : t('New messages in this chat no longer disappear.');
     const target = relayTarget();
     try {
-      if (!target) throw new Error(t('Type the relay address in Relay first.'));
+      if (!target) throw new Error(t('Type the server address in Server first.'));
       await sendToContact(target, identity, '');
       setNote(set);
     } catch (error) {
@@ -5471,7 +5553,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const set = on ? t('Screenshots of this chat are now blocked on both phones.') : t('Screenshots of this chat are allowed again.');
     const target = relayTarget();
     try {
-      if (!target) throw new Error(t('Type the relay address in Relay first.'));
+      if (!target) throw new Error(t('Type the server address in Server first.'));
       await sendToContact(target, identity, '');
       setNote(set);
     } catch (error) {
@@ -5484,24 +5566,24 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     setHomeNote('');
     const address = homeUrl.trim();
     if (address && !/^wss?:\/\/[^\s/?#]+(\/[^\s]*)?$/i.test(address)) {
-      setHomeNote(t('A relay address starts with ws:// or wss://.'));
+      setHomeNote(t('A server address starts with ws:// or wss://.'));
       return;
     }
     const space = await loadCurrentSpaceData().catch(() => null);
     if (address && (sameRelay(address, relayUrl) || (space ? homeRelays(space.spare).some((one) => one.url && sameRelay(address, one.url)) : false))) {
-      setHomeNote(t('Use another relay than this relay, and than the space’s home relay: one relay seeing both would tie them together.'));
+      setHomeNote(t('Use another server than this server, and than the space’s home server: one server seeing both would tie them together.'));
       return;
     }
     try {
       await setSpareRelay(address, homeToken, spareStore);
       if (!address) {
-        setHomeNote(t('No home relay for these hidden chats.'));
+        setHomeNote(t('No home server for these hidden chats.'));
         return;
       }
       await readySpare(spareStore);
-      setHomeNote(t('The queue on the home relay is ready. Contacts learn it from your next message, or from your contact link.'));
+      setHomeNote(t('The queue on the home server is ready. Contacts learn it from your next message, or from your contact link.'));
     } catch (error) {
-      setHomeNote(t('Saved, but the home relay could not be reached: {error}. It is tried again with each look.', { error: errorText(error) }));
+      setHomeNote(t('Saved, but the home server could not be reached: {error}. It is tried again with each look.', { error: errorText(error) }));
     }
   }
 
@@ -5606,13 +5688,13 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     for (const field of [typedRelay, typedToken, typedVia, typedViaToken]) field.done();
     const target = relayFor(typedRelay.shown, typedToken.shown, typedVia.shown, typedViaToken.shown, spareBackup(spareStore));
     if (!target) {
-      setNote(t('Type the relay address first.'));
+      setNote(t('Type the server address first.'));
       return;
     }
     try {
       const ids = await createQueue(target);
       setOwnQueue({ recipientHex: toHex(ids.recipientId), senderHex: toHex(ids.senderId) });
-      setNote(t('Relay queue created.'));
+      setNote(t('Server queue created.'));
       // The new queue is the one to say a message came from.
       if (hiddenKey && watched) {
         const { space, key } = currentSpace();
@@ -5697,7 +5779,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     try {
       if (on) {
         if (!url || !ownQueue) {
-          setWatchNote(t('Create the relay queue of these hidden chats first, below.'));
+          setWatchNote(t('Create the server queue of these hidden chats first, below.'));
           return;
         }
         await watchPocket(space, key, pocket, { url, token, recipientHex: ownQueue.recipientHex });
@@ -5721,7 +5803,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     try {
       if (on) {
         if (!url || !ownQueue) {
-          setRingNote(t('Create the relay queue of these hidden chats first, below.'));
+          setRingNote(t('Create the server queue of these hidden chats first, below.'));
           return;
         }
         let queue = ringQueue;
@@ -5756,7 +5838,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     const invite = parseInvite(text);
     if (invite) {
       setContactDraft('');
-      if (hiddenKey) setNote(t('An invite to a relay is taken in the chats of the space, not in hidden chats.'));
+      if (hiddenKey) setNote(t('An invite to a server is taken in the chats of the space, not in hidden chats.'));
       else void joinRelay(invite);
       return true;
     }
@@ -5921,6 +6003,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     choose: (message) => !message.sending && selection.toggle(message.id),
     saveCard: (card) => saveCard(card, !!hiddenKey),
     thread: openThread,
+    takeBack: () => void takeBackPlace(),
   };
   // The SMS with their number, among the messages by time (lib/sms-chat.ts): never in hidden chats.
   const smsWith = selected?.startsWith(CONTACT_PREFIX) ? selected.slice(CONTACT_PREFIX.length) : '';
@@ -6010,8 +6093,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     }
     const own = ownRelay();
     if (!own) {
-      setImportSaid(t('Type the relay address in Relay first.'));
-      setNote(t('Type the relay address in Relay first.'));
+      setImportSaid(t('Type the server address in Server first.'));
+      setNote(t('Type the server address in Server first.'));
       return;
     }
     const name = label(peer, shownContacts);
@@ -6421,6 +6504,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
     nearby: HAS_LINKS,
     lent: isLentToken(relayToken),
     via: !!viaUrl.trim(),
+    direct: directConnections,
   });
   // Adding someone by what they gave: their contact link or an invite, pasted, or read from a
   // photo of its QR code.
@@ -6453,6 +6537,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const faceChips = findTyped && !draftIsLink ? chips.filter((peer) => (contactName(peer, shownContacts) ?? '').toLowerCase().includes(findTyped.toLowerCase())) : chips;
 
   const selectedName = selected ? label(selected, shownContacts) : '';
+  // Whether the contact of the chat open came onto this phone's relay with its invite and is there
+  // still: Take back shows under the line that says so (lib/invite-place.ts holdsPlace).
+  const placeHeld = !hiddenKey && !!selectedIdentity && !!e2e?.heldPlace(selectedIdentity, relayUrl);
   const selectedOnline = !!selectedIdentity && !selectedHidden && !!e2e && e2e.onlineUntil(selectedIdentity, now) > 0;
   const selectedNearby = !!selectedIdentity && (hiddenKey ? !!nearHeard.current?.isNear(selectedIdentity) : nearby.isNear(selectedIdentity));
   const selectedTyping = !!selected && !selectedHidden && (typing[selected] ?? 0) > Date.now();
@@ -6689,9 +6776,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
   const relayFields = () => (
     <View style={styles.section}>
       <Text variant="caption" tone="muted">
-        {t('A relay of your own, or one whose address and token you were given. Most people need none of this.')}
+        {t('A server of your own, or one whose address and token you were given. Most people need none of this.')}
       </Text>
-      <Field label={t('Relay address')}>
+      <Field label={t('Server address')}>
         <Input
           value={typedRelay.shown}
           onChangeText={typedRelay.type}
@@ -6704,7 +6791,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       </Field>
       {isLentToken(relayToken) ? (
         <Text variant="caption" tone="muted">
-          {t("A place lent on this relay through a contact's link: no token of your own is needed. Type another relay to use that one instead.")}
+          {t("A place lent on this server through a contact's link: no token of your own is needed. Type another server to use that one instead.")}
         </Text>
       ) : (
         <Field label={t('Token (optional)')}>
@@ -6712,7 +6799,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             value={typedToken.shown}
             onChangeText={typedToken.type}
             onBlur={typedToken.done}
-            placeholder={t('Token, if the relay needs one')}
+            placeholder={t('Token, if the server needs one')}
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry
@@ -6730,7 +6817,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
       {!hiddenKey && relayUrl.trim() && relayToken.trim() && !isLentToken(relayToken) ? (
         <RelayInvites relay={{ url: relayUrl.trim(), token: relayToken.trim() }} e2e={e2e} onNote={setNote} />
       ) : null}
-      <Field label={t('Second relay (optional)')}>
+      <Field label={t('Second server (optional)')}>
         <Input
           value={typedVia.shown}
           onChangeText={typedVia.type}
@@ -6742,12 +6829,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         />
       </Field>
       {typedVia.shown.trim() ? (
-        <Field label={t('Second relay token (optional)')}>
+        <Field label={t('Second server token (optional)')}>
           <Input
             value={typedViaToken.shown}
             onChangeText={typedViaToken.type}
             onBlur={typedViaToken.done}
-            placeholder={t('Token, if the second relay needs one')}
+            placeholder={t('Token, if the second server needs one')}
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry
@@ -6755,12 +6842,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
         </Field>
       ) : null}
       <Text variant="caption" tone="muted">
-        {t("With a second relay, what you send goes through it first, sealed for your relay. Your relay then never sees your phone's address, and the second relay never sees who a message is for. Taking messages still goes straight to your relay.")}
+        {t("With a second server, what you send goes through it first, sealed for your server. Your server then never sees your phone's address, and the second server never sees who a message is for. Taking messages still goes straight to your server.")}
       </Text>
-      <Button title={t('Create my relay queue')} compact onPress={createOwnQueue} />
+      <Button title={t('Create my server queue')} compact onPress={createOwnQueue} />
       {hiddenKey ? (
         <>
-          <Field label={t('Home relay for these hidden chats (optional)')}>
+          <Field label={t('Home server for these hidden chats (optional)')}>
             <Input
               value={homeUrl}
               onChangeText={setHomeUrl}
@@ -6771,11 +6858,11 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             />
           </Field>
           {homeUrl.trim() ? (
-            <Field label={t('Home relay token (optional)')}>
+            <Field label={t('Home server token (optional)')}>
               <Input
                 value={homeToken}
                 onChangeText={setHomeToken}
-                placeholder={t('Token, if the home relay needs one')}
+                placeholder={t('Token, if the home server needs one')}
                 autoCapitalize="none"
                 autoCorrect={false}
                 secureTextEntry
@@ -6783,9 +6870,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             </Field>
           ) : null}
           <Text variant="caption" tone="muted">
-            {t("A second relay with a queue of their own, which contacts write to while your relay cannot be reached. It is kept with these hidden chats only, so the space knows nothing of it, and it is looked at while they are open. Use another one than the space's home relay.")}
+            {t("A second server with a queue of their own, which contacts write to while your server cannot be reached. It is kept with these hidden chats only, so the space knows nothing of it, and it is looked at while they are open. Use another one than the space's home server.")}
           </Text>
-          <Button title={t('Save home relay')} kind="secondary" compact onPress={() => void saveHome()} />
+          <Button title={t('Save home server')} kind="secondary" compact onPress={() => void saveHome()} />
           {homeNote ? <Text variant="caption" tone="muted">{homeNote}</Text> : null}
         </>
       ) : null}
@@ -7014,7 +7101,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                             <View style={styles.rule} />
                             <DetailRow title={t('SMS when nothing else works')} checked={selectedSmsWay} onPress={() => void changeSmsWay(selectedContact, !selectedSmsWay)} />
                             <Text variant="caption" tone="muted" style={styles.rowMore}>
-                              {t('Texts go by SMS to their number, end-to-end encrypted, only when the relay, Nostr, the phones nearby and LoRa all fail. Each costs SMS, and the phone company sees who wrote to whom, and when. Both phones need Erevos as the SMS app.')}
+                              {t('Texts go by SMS to their number, end-to-end encrypted, only when the server, Nostr, the phones nearby and LoRa all fail. Each costs SMS, and the phone company sees who wrote to whom, and when. Both phones need Erevos as the SMS app.')}
                             </Text>
                           </>
                         ) : null}
@@ -7027,7 +7114,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                               {!canTor()
                                 ? t('This build of Erevos has no Tor, so this chat sends nothing from here while this is on. Turn it off here, or write from the phone.')
                                 : selectedTor
-                                  ? t('This chat goes only through Tor, on its own circuits, whatever the space’s Tor setting: the relay does not see your address for it. Slower, and it waits while Tor starts. Calls do not go through Tor.')
+                                  ? t('This chat goes only through Tor, on its own circuits, whatever the space’s Tor setting: the server does not see your address for it. Slower, and it waits while Tor starts. Calls do not go through Tor.')
                                   : t('This chat goes as the space’s Tor setting says. Turn on to send it only through Tor.')}
                             </Text>
                           </>
@@ -7064,9 +7151,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                         <DetailRow title={t('Last seen')} checked={lastSeenOn} onPress={() => changeLastSeen(!lastSeenOn)} />
                         <Text variant="caption" tone="muted" style={styles.rowMore}>
                           {lastSeenOn && hiddenKey
-                            ? t('Your contacts here see the exact time you last had these hidden chats open, and you see theirs. It goes end-to-end encrypted to them only, never to the relay. Only in these hidden chats, with a time of their own: the space’s chats have their own switch.')
+                            ? t('Your contacts here see the exact time you last had these hidden chats open, and you see theirs. It goes end-to-end encrypted to them only, never to the server. Only in these hidden chats, with a time of their own: the space’s chats have their own switch.')
                             : lastSeenOn
-                              ? t('Your contacts see the exact time you last had Erevos open, and you see theirs. It goes end-to-end encrypted to them only, never to the relay. In all chats of this space; hidden chats have their own switch.')
+                              ? t('Your contacts see the exact time you last had Erevos open, and you see theirs. It goes end-to-end encrypted to them only, never to the server. In all chats of this space; hidden chats have their own switch.')
                               : hiddenKey
                                 ? t('No one here sees when you last had these hidden chats open, and you see no one’s here either. Those who saw it lose it with your next message.')
                                 : t('No one sees when you last had Erevos open, and you see no one’s either. Those who saw it lose it with your next message.')}
@@ -7077,8 +7164,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                             <DetailRow title={t('Say when I open and close Erevos')} checked={tellOpenOn} onPress={() => changeTellOpen(!tellOpenOn)} />
                             <Text variant="caption" tone="muted" style={styles.rowMore}>
                               {tellOpenOn
-                                ? t('As Erevos opens, the contacts you talked with in the last 30 days, who show their own time too, are told so at once, each after a random wait of up to a minute, at most every 15 minutes. As it closes, those told while it was open are told when it closed. The relay sees that something goes to them then, so it can tell when you open and close Erevos.')
-                                : t('Your time goes only with what goes to your contacts anyway: a message, a mark that theirs came or was read, or an answer while they have your chat open. The relay learns nothing new.')}
+                                ? t('As Erevos opens, the contacts you talked with in the last 30 days, who show their own time too, are told so at once, each after a random wait of up to a minute, at most every 15 minutes. As it closes, those told while it was open are told when it closed. The server sees that something goes to them then, so it can tell when you open and close Erevos.')
+                                : t('Your time goes only with what goes to your contacts anyway: a message, a mark that theirs came or was read, or an answer while they have your chat open. The server learns nothing new.')}
                             </Text>
                           </>
                         ) : null}
@@ -7462,12 +7549,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                                 ) : null}
                                 {relayOffer ? (
                                   <Text variant="caption" tone="muted">
-                                    {t("That space has no relay yet. It can take this space's relay, and keep it: the relay can then tell that both spaces are on one phone.")}
+                                    {t("That space has no server yet. It can take this space's server, and keep it: the server can then tell that both spaces are on one phone.")}
                                   </Text>
                                 ) : null}
                                 <Row wrap>
                                   {relayOffer ? (
-                                    <Button title={t("Move with this space's relay")} compact loading={moving} onPress={() => void moveToOtherSpace(selectedContact, passwordDraft, true)} />
+                                    <Button title={t("Move with this space's server")} compact loading={moving} onPress={() => void moveToOtherSpace(selectedContact, passwordDraft, true)} />
                                   ) : (
                                     <Button title={t('Move')} compact loading={moving} disabled={passwordDraft.length < MIN_PIN} onPress={() => void moveToOtherSpace(selectedContact, passwordDraft)} />
                                   )}
@@ -7782,7 +7869,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                     <Text variant="caption" tone="muted">
                       {receiving
                         ? t('Closed, these hidden chats receive as your other chats do: their contacts see at once that a message came, a notice says only "New message", a call rings with no name, answered with the PIN, and a reminder of their Chat with myself says only "Reminder". For it, their key is kept encrypted with the space, so whoever opens the space and copies what the phone keeps could open them too; the PIN still keeps them out of sight.')
-                        : t('Closed, nothing reads these hidden chats: their key is only behind the PIN, and their messages wait on the relay until you open them.')}
+                        : t('Closed, nothing reads these hidden chats: their key is only behind the PIN, and their messages wait on the server until you open them.')}
                     </Text>
                     <Text variant="caption" tone="muted">
                       {receiving
@@ -7805,7 +7892,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                         <Text variant="caption" tone="muted">
                           {watched
                             ? t('While these hidden chats are closed, with Erevos in the background or showing, a notice says only "New message", or how many came, as for the other chats; that a message came or was read makes none. Whoever sees it and finds nothing new in your chats may guess there are more.')
-                            : t('Closed, these hidden chats say nothing: their messages wait on the relay until you open them.')}
+                            : t('Closed, these hidden chats say nothing: their messages wait on the server until you open them.')}
                         </Text>
                         {watched && background && !(background.on && background.notices) ? (
                           <Text variant="caption" tone="muted">
@@ -7882,7 +7969,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                       </Text>
                       {newcomer ? (
                         <Text variant="caption" tone="muted" style={styles.centered}>
-                          {t('With no relay, messages go through Nostr, or nearby.')}
+                          {t('With no server, messages go through Nostr, or nearby.')}
                         </Text>
                       ) : null}
                     </QrTile>
@@ -7932,8 +8019,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                   {newcomer ? (
                     <Text variant="caption" tone="muted">
                       {linkNostr
-                        ? t('If they have a relay, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')
-                        : t('With no relay, messages go through Nostr, or nearby.')}
+                        ? t('If they have a server, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')
+                        : t('With no server, messages go through Nostr, or nearby.')}
                     </Text>
                   ) : null}
                 </View>
@@ -7963,7 +8050,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                 >
                   {card && !bigQr ? (
                     <Text variant="caption" tone="muted" style={styles.centered}>
-                      {t('This small code works only when both phones have a relay. Otherwise use Near me, or an invite from Far away.')}
+                      {t('This small code works only when both phones have a server. Otherwise use Near me, or an invite from Far away.')}
                     </Text>
                   ) : null}
                   {card && !bigQr && cardNfc === 'on' ? (
@@ -7973,7 +8060,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                   ) : null}
                   {newcomer ? (
                     <Text variant="caption" tone="muted" style={styles.centered}>
-                      {t('With no relay, messages go through Nostr, or nearby.')}
+                      {t('With no server, messages go through Nostr, or nearby.')}
                     </Text>
                   ) : null}
                   {card ? <TextButton title={bigQr ? t('Small QR code') : t('Large QR code, for no internet')} onPress={() => setBigQr(!bigQr)} /> : null}
@@ -7990,14 +8077,14 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                     {ownQueue && canSharePlace ? (
                       <View>
                         <DetailRow
-                          title={t('Share a place on my relay with this link')}
+                          title={t('Share a place on my server with this link')}
                           checked={sharePlace}
                           onPress={() => setSharePlace(!sharePlace)}
                         />
                         <Text variant="caption" tone="muted">
                           {sharePlace
-                            ? t('For a month, whoever adds you with this link and has no relay of their own can take a place on your relay. Anyone who sees the link can, so give it only to whom you mean to.')
-                            : t('The link has no place on your relay in it. Turn this on for someone with no relay of their own.')}
+                            ? t('For a month, whoever adds you with this link and has no server of their own can take a place on your server. Anyone who sees the link can, so give it only to whom you mean to.')
+                            : t('The link has no place on your server in it. Turn this on for someone with no server of their own.')}
                         </Text>
                         {placeNote ? <Text variant="caption" tone="muted">{placeNote}</Text> : null}
                       </View>
@@ -8052,7 +8139,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                           onPress={() => {
                             const url = signInRelay(otherRelay);
                             if (!url) {
-                              setNote(t('That is not a relay address. Type it as its operator gave it, such as relay.example.org.'));
+                              setNote(t('That is not a server address. Type it as its operator gave it, such as relay.example.org.'));
                               return;
                             }
                             setSignInAt(url);
@@ -8070,7 +8157,9 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                         title={t('Start without a server')}
                         line={
                           linkNostr
-                            ? t('Give someone who uses Erevos your QR code or link. Texts go through Nostr.')
+                            ? directConnections
+                              ? t('Give someone who uses Erevos your QR code or link. Texts go through Nostr, and calls straight from phone to phone.')
+                              : t('Give someone who uses Erevos your QR code or link. Texts go through Nostr.')
                             : t('Give someone who uses Erevos your QR code or link. You reach each other when near, over Wi-Fi or Bluetooth.')
                         }
                         open={way === 'own'}
@@ -8087,7 +8176,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                         </Row>
                         {linkNostr ? (
                           <Text variant="caption" tone="muted">
-                            {t('If they have a relay, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')}
+                            {t('If they have a server, an invite to it comes to this phone by itself, and photos, voice messages and calls work too.')}
                           </Text>
                         ) : null}
                         <Text tone="muted">{t('Or add them by their link or QR code:')}</Text>
@@ -8106,7 +8195,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                           <Text variant="caption" tone="muted">
                             {nearbyOn
                               ? t('Erevos phones near this one find each other and talk with no internet, over Bluetooth and the ways below.')
-                              : t('Off: Erevos looks for no phone nearby, and everything goes through the relay. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.')}
+                              : t('Off: Erevos looks for no phone nearby, and everything goes through the server. Turn it on to chat and call with no internet, beside each other or on the same Wi-Fi.')}
                           </Text>
                           {nearbyOn && HAS_RADIO ? (
                             <>
@@ -8150,12 +8239,12 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                           <DetailRow title={t('Carry messages for others')} checked={carrying} onPress={() => changeCarrying(!carrying)} />
                           <Text variant="caption" tone="muted">
                             {carrying
-                              ? t("When the relay cannot be reached, Erevos phones nearby give each other what they could not send, sealed for the contact's relay. This phone keeps those it gets, three days at most, and hands them to that relay through yours. It cannot read them, nor tell who they are from or for: it sees only the relay's address.")
+                              ? t("When the server cannot be reached, Erevos phones nearby give each other what they could not send, sealed for the contact's server. This phone keeps those it gets, three days at most, and hands them to that server through yours. It cannot read them, nor tell who they are from or for: it sees only the server's address.")
                               : t('Off: this phone keeps nothing for others. What it cannot send, phones nearby carry for you if theirs is on.')}
                           </Text>
                           {carrying ? (
                             <Text variant="caption" tone="muted">
-                              {t('It also brings what waits for a phone beside it that has no internet, when that phone asks, never while it goes through Tor: from a relay other than its own only once you say yes, warned that the relay sees this phone\'s internet address. It learns the queue, never what the messages say.')}
+                              {t('It also brings what waits for a phone beside it that has no internet, when that phone asks, never while it goes through Tor: from a server other than its own only once you say yes, warned that the server sees this phone\'s internet address. It learns the queue, never what the messages say.')}
                             </Text>
                           ) : null}
                           {canLora() ? (
@@ -8393,6 +8482,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                   choosing={selection.on}
                   chosen={selection.on && selection.chosen.has(message.id)}
                   answers={threadRoot ? 0 : (threadAnswers.get(message.tag) ?? 0)}
+                  holds={placeHeld && isInviteCame(message.text)}
                   styles={styles}
                   b={b}
                   colors={colors}
@@ -8424,7 +8514,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
             <TextButton title={t('Not now')} onPress={() => setConnecting(null)} />
           </Row>
         ) : null}
-        {selectedContact && !isTorChat(selectedContact) && !throughTor() ? (
+        {selectedContact && !isTorChat(selectedContact) && !throughTor() && !(directConnections && !quietLineShows(!!hiddenKey)) ? (
           <IpQuiet fix={canTor() ? { label: t('Through Tor for this chat'), run: () => changeTor(selectedContact, true) } : undefined} />
         ) : null}
         {selectedContact ? (
@@ -8473,7 +8563,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                   tiles={tiles}
                   quality={{ value: quality, onChange: chooseQuality }}
                   ways={ways}
-                  foot={t('A file goes as it is, up to 100 MB, with whatever it says inside. The relay keeps it, encrypted, until {name} takes it, 14 days at most.', { name: selectedName })}
+                  foot={t('A file goes as it is, up to 100 MB, with whatever it says inside. The server keeps it, encrypted, until {name} takes it, 14 days at most.', { name: selectedName })}
                   page={
                     choosingSafety
                       ? {
@@ -8490,7 +8580,7 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                                 ))}
                               </Row>
                               <Text variant="caption" tone="muted">
-                                {t('The relay keeps it and sends it then by itself, even if this phone is lost, off or taken. Each time you open Erevos, past its password, it moves on that long again. Erevos running in the background does not move it. Delete it in the chat to stop it.')}
+                                {t('The server keeps it and sends it then by itself, even if this phone is lost, off or taken. Each time you open Erevos, past its password, it moves on that long again. Erevos running in the background does not move it. Delete it in the chat to stop it.')}
                               </Text>
                             </>
                           ),
@@ -8505,8 +8595,8 @@ function Chat({ hiddenKey, pocket = 0, initial = null, at = null, initialCall = 
                               <Text variant="caption" tone="muted">
                                 {nothingTyped ? `${t('With nothing typed, the next photo, file or voice message goes then.')} ` : ''}
                                 {hiddenKey
-                                  ? t('The relay keeps it and sends it at that time, even if this phone is off then. In hidden chats the relay has to be reachable now.')
-                                  : t('The relay keeps it and sends it at that time, even if this phone is off then.')}
+                                  ? t('The server keeps it and sends it at that time, even if this phone is off then. In hidden chats the server has to be reachable now.')
+                                  : t('The server keeps it and sends it at that time, even if this phone is off then.')}
                               </Text>
                             </>
                           ),

@@ -69,6 +69,12 @@ export type MessengerNative = {
   /** The words of Session's call screen and notifications (lib/session-calls.ts). */
   setCallTexts(words: string): void;
   /**
+   * Calls off (INVISIBLE, lib/modes.ts): a Signal or Session call that comes does not ring, nor
+   * reaches the calling library, so nothing of this phone's address goes to it. Missing in a build
+   * from before it.
+   */
+  setCallsOff?(off: boolean): void;
+  /**
    * Calls the person of a one-to-one Session chat (its key) on a screen of its own, which asks for
    * the microphone, and the camera for video. False when another Session call is on.
    */

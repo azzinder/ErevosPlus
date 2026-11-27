@@ -175,7 +175,7 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
         const own = await onOwnLine(relay);
         if (!own) {
           setFailed(
-            t('Your phone cannot let anyone in to your relay yet: it uses a token typed in, not one of its own. On New chat, under For advanced users, sign in to the relay below the Token, or take an invite to it, then make this invite again.'),
+            t('Your phone cannot let anyone in to your server yet: it uses a token typed in, not one of its own. On New chat, under For advanced users, sign in to the server below the Token, or take an invite to it, then make this invite again.'),
           );
           return;
         }
@@ -264,8 +264,8 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
         {/* The short invite's link is a web page that offers Erevos first; the long one opens only in Erevos. */}
         <Text variant="caption" tone="muted" style={styles.center}>
           {made.short
-            ? t('They scan it with their phone’s camera. With no Erevos yet, it shows them where to get it; then it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.')
-            : t('They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.')}
+            ? t('They scan it with their phone’s camera. With no Erevos yet, it shows them where to get it; then it gets ready by itself, with no server or codes to type, and you are each other’s contacts.')
+            : t('They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no server or codes to type, and you are each other’s contacts.')}
         </Text>
         {made.short ? (
           <Text variant="caption" tone="muted" style={styles.center}>
@@ -345,7 +345,7 @@ export function WelcomeInvite({ visible, inline = false, onPlain, e2e, relay, on
       )}
       {made.access ? null : (
         <Text variant="caption" tone="muted" style={styles.under}>
-          {t('Your relay lets this phone invite no one, so their phone uses it only as your contact link lets it: if it needs a token, they need one of their own.')}
+          {t('Your server lets this phone invite no one, so their phone uses it only as your contact link lets it: if it needs a token, they need one of their own.')}
         </Text>
       )}
       <View style={styles.tiles}>

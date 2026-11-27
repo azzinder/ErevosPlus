@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { setHardKey } from './crypto';
+import { setHardKey, utf8Decode, utf8Encode } from './crypto';
 import { t } from './i18n';
 // The Erevos core (Rust, crates/erevos-ffi): PQXDH to start a conversation and the double ratchet
 // for every message after it. The app plugs in the core at startup: the Android module
@@ -144,6 +144,10 @@ export interface Core {
   nostrPublic?(secret: Uint8Array): Promise<Uint8Array>;
   nostrWrap?(to: Uint8Array, bytes: Uint8Array, now: Uint8Array): Promise<string>;
   nostrUnwrap?(secret: Uint8Array, event: string): Promise<Uint8Array>;
+  /** Set on the WebAssembly core (lib/core-guard.ts), which gives an event as its bytes and takes one
+   *  so (crates/erevos-ffi/src/web.rs), where Android's gives and takes it as text, as Core says:
+   *  nostrSeal turns them into text. */
+  eventsAsBytes?: true;
   /** Matrix accounts (crates/erevos-matrix, lib/matrix.ts): the JSON of one request in, the JSON
    *  of its answer out. Missing in a build made before them. */
   matrix?(request: Uint8Array): Promise<Uint8Array>;
@@ -266,12 +270,28 @@ export function tor(): Required<Pick<Core, 'torStart' | 'torStatus' | 'torStop' 
   };
 }
 
-/** Whether this build can reach Nostr relays through Tor, and make and open their events. */
-export function canNostr(): boolean {
+// Whether this build reaches Nostr relays straight over WebSocket, having no Tor of its own: the
+// web app, the computer app and Sailfish OS's (lib/crypto-setup.ts). Off unless set, as in the
+// checks, whose core has no Tor either.
+let nostrStraightOnly = false;
+
+/** Says that this build reaches Nostr relays straight over WebSocket, as it has no Tor (lib/crypto-setup.ts). */
+export function setNostrStraight(on: boolean): void {
+  nostrStraightOnly = on;
+}
+
+/** Whether this build can reach Nostr relays through Tor (crates/erevos-tor text_open): on Android. */
+export function canNostrTor(): boolean {
   return canTor() && typeof core?.torTextOpen === 'function' && typeof core?.nostrWrap === 'function';
 }
 
-/** The core's calls for Nostr, or an error saying this build has none. */
+/** Whether this build can make and open Nostr events and reach Nostr relays: through Tor, or,
+ *  where it has no Tor, straight over WebSocket (setNostrStraight). */
+export function canNostr(): boolean {
+  return canNostrTor() || (nostrStraightOnly && nostrKeys() !== null && typeof WebSocket === 'function');
+}
+
+/** The core's calls for Nostr through Tor, or an error saying this build has none. */
 export function nostrCore(): Required<
   Pick<Core, 'torTextOpen' | 'torTextSend' | 'torTextNext' | 'torTextClose' | 'nostrSecret' | 'nostrPublic' | 'nostrWrap' | 'nostrUnwrap'>
 > {
@@ -298,6 +318,19 @@ export function nostrKeys(): Required<Pick<Core, 'nostrSecret' | 'nostrPublic' |
   const it = core;
   if (!it?.nostrSecret || !it.nostrPublic || !it.nostrWrap || !it.nostrUnwrap) return null;
   return { nostrSecret: it.nostrSecret.bind(it), nostrPublic: it.nostrPublic.bind(it), nostrWrap: it.nostrWrap.bind(it), nostrUnwrap: it.nostrUnwrap.bind(it) };
+}
+
+/** The core's Nostr keys and wraps, with Tor or without (lib/nostr.ts, lib/e2e.ts), an event as
+ *  text whichever core it is (Core.eventsAsBytes), or an error saying this build has none. */
+export function nostrSeal(): Required<Pick<Core, 'nostrSecret' | 'nostrPublic' | 'nostrWrap' | 'nostrUnwrap'>> {
+  const keys = nostrKeys();
+  if (!keys) throw new Error(t('This build of Erevos has no Nostr.'));
+  if (!core?.eventsAsBytes) return keys;
+  return {
+    ...keys,
+    nostrWrap: async (to, bytes, now) => utf8Decode((await keys.nostrWrap(to, bytes, now)) as unknown as Uint8Array),
+    nostrUnwrap: (secret, event) => keys.nostrUnwrap(secret, utf8Encode(event) as unknown as string),
+  };
 }
 
 /** Whether this build can encrypt for Matrix accounts (lib/matrix.ts). */

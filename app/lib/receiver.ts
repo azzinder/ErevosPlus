@@ -736,7 +736,7 @@ async function lookOnce(state: State, stop: () => boolean): Promise<boolean> {
     if (!queue) return changed;
     state.place = { ...place, queue };
     if (state.place.keyAsked) lastPlace = state.place;
-    mover.hold([t('The relay had lost your queue, so you have a new one. Your contacts are told quietly.')]);
+    mover.hold([t('The server had lost your queue, so you have a new one. Your contacts are told quietly.')]);
     return changed;
   }
   if (!failed && !stop()) {

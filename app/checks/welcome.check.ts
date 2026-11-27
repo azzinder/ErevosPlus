@@ -98,17 +98,17 @@ test('an invite goes to the chat of the space it was opened in, and to no other'
 });
 
 // New chat's first page asks where the other person is; someone setting Erevos up with an invite in
-// hand is past that question. The card's own words are what I have their code takes: its QR code
-// scanned, its link pasted.
-test("First steps' I have an invite opens the page that takes one, not the question before it", () => {
+// hand is past that question, so the page that takes their code opens on its own (setup=code). The
+// first start no longer asks about invites: Erevos's open server needs none, and the invite stays
+// under For advanced users (app/first-steps.tsx: Another server, setup=relay).
+test("setup=code opens the page that takes an invite, not the question before it, and the first start asks for none", () => {
   const read = (name: string) => readFileSync(join(import.meta.dirname, '..', 'app', name), 'utf8');
   const steps = read('first-steps.tsx');
-  const card = steps.slice(steps.indexOf("{t('I have an invite')}"), steps.indexOf("{t('Other ways in')}"));
-  assert.ok(card.includes("t('Scan its QR code, or open or paste the link they sent you.')"));
-  assert.ok(card.includes("router.push('/chat?setup=code')"));
+  assert.ok(!steps.includes("t('I have an invite')") && !steps.includes("t('I have no invite')"));
+  assert.ok(steps.includes("router.push('/chat?setup=relay')"));
   // The chat opens on that page for it, and Back there leaves New chat as it came.
   const chat = read('chat.tsx');
   assert.ok(chat.includes("codeNow={setup === 'code'}"));
-  assert.ok(chat.includes("inviteNow ? 'far' : codeNow ? 'code' : 'root'"));
-  assert.ok(chat.includes('useRef(relaySettings || nearbyOpen || inviteNow || codeNow)'));
+  assert.ok(chat.includes("inviteNow ? 'far' : codeNow ? 'code' : nearNow ? 'near' : 'root'"));
+  assert.ok(chat.includes('useRef(relaySettings || nearbyOpen || inviteNow || codeNow || nearNow)'));
 });

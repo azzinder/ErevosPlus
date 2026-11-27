@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { AppState, Linking, PermissionsAndroid, Platform, View } from 'react-native';
 
 import { BlockedNumbers } from '../components/blocked-numbers';
+import { useDirectNow } from '../components/mode-picker';
 import { SpeedDialPick } from '../components/speed-dial';
 import { Button, Card, Input, Page, Row, Sheet, Text } from '../components/ui';
 import { askFullScreen, backgroundState } from '../lib/background';
@@ -60,6 +61,7 @@ import { accountLabel, PhoneSims } from '../lib/phone-sims';
 import { currentSpace } from '../lock/keys';
 import { SPEED_KEYS } from '../lock/phone-data';
 import { confirm } from '../lib/alert';
+import { directNow } from '../lib/direct';
 import { netThroughTor } from '../lib/net-http';
 import { downloadSpamList, setSpamWeekly, spamAddress, spamWithoutTor } from '../lib/spam-list';
 import { space } from '../theme/colors';
@@ -601,6 +603,8 @@ function SpamList({ screens }: { screens: boolean }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [plainOk, setPlainOk] = useState(true);
+  // Direct connections of the open space (lib/direct.ts): on, the list comes without Tor unasked.
+  const directOn = useDirectNow();
   useEffect(() => {
     void spamWithoutTor().then(setPlainOk);
   }, []);
@@ -624,7 +628,8 @@ function SpamList({ screens }: { screens: boolean }) {
   }
 
   async function weekly(on: boolean) {
-    const withoutTor = on && !netThroughTor();
+    // With Direct connections on (lib/direct.ts) it is not asked, and nothing is kept as said.
+    const withoutTor = on && !netThroughTor() && !directNow();
     if (withoutTor) {
       const go = await confirm(
         t('Your internet address can be seen'),
@@ -643,7 +648,7 @@ function SpamList({ screens }: { screens: boolean }) {
       setNote(t('Type the https:// address of a list.'));
       return;
     }
-    if (!netThroughTor()) {
+    if (!netThroughTor() && !directNow()) {
       const go = await confirm(
         t('Your internet address can be seen'),
         t("Without Tor, the list's server sees this phone's internet address (IP address), though no number of yours: the list comes whole, and is matched on the phone."),
@@ -700,9 +705,9 @@ function SpamList({ screens }: { screens: boolean }) {
           <Text variant="caption" tone="faint">
             {t("With Erevos unlocked, the list comes again from the same address when it is a week old, through Tor when the space's Tor way is on.")}
           </Text>
-          {state.auto && !plainOk && !netThroughTor() ? (
+          {state.auto && !plainOk && !netThroughTor() && !directOn ? (
             <Text variant="caption" tone="faint">
-              {t('Tor is off, so the list does not come again: it was switched on with Tor. Switch it off and on again to let it come without Tor.')}
+              {t('Tor is off, so the list does not come again: it was switched on with Tor, or with SPEED. Switch it off and on again to let it come without Tor.')}
             </Text>
           ) : null}
         </>

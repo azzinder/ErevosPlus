@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Ό,τι κρατά εδώ το Erevos σβήνεται τώρα, για πάντα: κάθε χώρος με τις κρυφές συνομιλίες του, τις επαφές, τα μηνύματα και τα κλειδιά. Μετά το Erevos ανοίγει σαν μόλις εγκατεστημένο. Δεν γυρίζει πίσω.",
   "Wipe": "Σβήσιμο",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "Σε κίνδυνο, σβήσε το Erevos αμέσως: κάθε χώρο με τις κρυφές συνομιλίες του, με τις επαφές, τα μηνύματα, τις φωτογραφίες, τα αρχεία και τα κλειδιά τους, το κλείδωμα, τους λογαριασμούς Matrix, XMPP και Nostr, τα tokens του relay, και τις ρυθμίσεις και τον κωδικό των αυτόματων αντιγράφων και του server τους.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "Ό,τι δεν φτάνει μένει: αντίγραφα που αντέγραψες αλλού ή έστειλες σε server (τα προστατεύει ακόμα ο κωδικός τους), ό,τι κρατά το relay για σένα ώσπου να λήξει, και ό,τι έχουν οι επαφές σου.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "Σε κίνδυνο, σβήσε το Erevos αμέσως: κάθε χώρο με τις κρυφές συνομιλίες του, με τις επαφές, τα μηνύματα, τις φωτογραφίες, τα αρχεία και τα κλειδιά τους, το κλείδωμα, τους λογαριασμούς Matrix, XMPP και Nostr, τα tokens του server, και τις ρυθμίσεις και τον κωδικό των αυτόματων αντιγράφων και του server τους.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "Ό,τι δεν φτάνει μένει: αντίγραφα που αντέγραψες αλλού ή έστειλες σε server (τα προστατεύει ακόμα ο κωδικός τους), ό,τι κρατά ο server για σένα ώσπου να λήξει, και ό,τι έχουν οι επαφές σου.",
   "Wipe now": "Σβήσιμο τώρα",
   "Wipe everything now": "Σβήσε τα πάντα τώρα",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Εδώ το Erevos δεν μπορεί να σβηστεί μόνο του: σβήσε καλύτερα τα δεδομένα του από τον υπολογιστή.",

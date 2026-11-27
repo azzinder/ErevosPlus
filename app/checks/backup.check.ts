@@ -105,7 +105,7 @@ import type { MatrixState } from '../lib/matrix';
 import { newNostrDm, type NostrDmState } from '../lib/nostr-dm';
 import type { XmppState } from '../lib/xmpp';
 import { cloudRequest as browserRequest } from '../lib/backup-http.web';
-import { changeAutoBackup, CHECK_MS, checkAutoBackup, checkMadeBackup, checkSentBackup, isAutoBackupPassword, KEEP, loadAutoBackup, runAutoBackup, startAutoBackup, stopAutoBackup } from '../lib/backup-folder';
+import { changeAutoBackup, CHECK_MS, checkAutoBackup, checkMadeBackup, checkSentBackup, folderOfAnotherApp, isAutoBackupPassword, KEEP, loadAutoBackup, runAutoBackup, setSettleWaits, startAutoBackup, stopAutoBackup } from '../lib/backup-folder';
 import { phoneCallsEntry } from '../lib/backup-calls';
 import { checkedWhole, checkListed, loadChecks } from '../lib/backup-check';
 import { folderPlace, loadLedger, saveLedger, serverPlace, type Ledger } from '../lib/backup-ledger';
@@ -115,7 +115,7 @@ import { deleteBackupFiles, listBackupFiles, partsIn, writeBackup } from '../lib
 import { rulesFrom, rulesJson } from '../lib/phone-rules';
 import { blobs, files, stampsTold } from './files-memory';
 import { nativeFolders } from './device-memory';
-import { folders, looks, writes } from './folder-memory';
+import { folders, looks, sending, sendOn, writes } from './folder-memory';
 import { panic } from './panic-memory';
 import { clearPhone, phone as phoneModule } from './phone-memory';
 import { ready as relayReady, startRelay } from './real-relay';
@@ -1696,6 +1696,23 @@ t('into a folder on the phone: the parts as they are made, then the backup; the 
     writes.failAt = 0;
     assert.deepEqual([...folder.keys()].sort(), before, `at write ${failAt}`);
   }
+  // What Android says when a folder takes no file is said in plain words, with what to do (#75):
+  // never Expo's function or Java's error. None of its files stay either.
+  const rejected = (cause: string) => `Call to function 'ErevosDevice.folderWrite' has been rejected.\n→ Caused by: ${cause}`;
+  for (const [said, plain] of [
+    [rejected('java.lang.IllegalStateException: The folder made no file.'), /^The app this folder belongs to made no file in it\. Choose a folder on the phone instead, or try again later\.$/],
+    [rejected('java.lang.SecurityException: Permission Denial: writing com.android.externalstorage.ExternalStorageProvider uri content://x'), /^Erevos may no longer write in this folder\. Choose it again\.$/],
+    [rejected('java.io.IOException: write failed: ENOSPC (No space left on device)'), /^There is no room left in this folder\. Make room, or choose another one\.$/],
+    [rejected('java.io.FileNotFoundException: Missing file for primary:Backups at /storage/emulated/0/Backups'), /^That folder is not there any more\. Choose it again\.$/],
+    [rejected('java.lang.IllegalStateException: The file could not be written.'), /^The backup could not be written in this folder: The file could not be written\.$/],
+  ] as const) {
+    writes.failAt = 1;
+    writes.said = said;
+    await assert.rejects(writeBackup(uri, (parts) => makeBackup(key, { parts }), day(5), 3), (error: Error) => plain.test(error.message));
+    writes.failAt = 0;
+    assert.deepEqual([...folder.keys()].sort(), before, said);
+  }
+  writes.said = 'No room left.';
   // A folder gone says so.
   await assert.rejects(writeBackup('content://gone', (parts) => makeBackup(key, { parts }), day(6), 3), /not there/);
   // All through the folder functions, off the thread the screen answers on (Folders.kt): never a
@@ -2759,6 +2776,108 @@ t('a backup made by hand into a folder is checked as it is made: read back, open
   assert.match((await checkMadeBackup(uri, written.name, key))?.error ?? '', /not there/);
 });
 
+t("a backup made by hand into another app's folder, as DAVx5's, is checked once that app sent it on, saying so as it waits; Check again looks once", async () => {
+  await phone();
+  photos(5);
+  // DAVx5's folder of a WebDAV server: it takes each file at once, and sends it on after (#75).
+  const uri = 'content://at.bitfire.davdroid.webdav/tree/205';
+  folders.set(uri, new Map());
+  sending.add(uri);
+  const key = await backupKey('hand-pass');
+  const waits: number[] = [];
+  const told: number[] = [];
+  // Its server has the backup once the second wait is over.
+  setSettleWaits([15_000, 30_000, 45_000], async (ms) => {
+    waits.push(ms);
+    if (waits.length === 2) sendOn(uri);
+  });
+  try {
+    assert.equal(folderOfAnotherApp(uri), true);
+    const written = await writeBackup(uri, (parts) => makeBackup(key, { parts }), new Date(2026, 10, 26, 22, 35).getTime());
+    assert.equal(written.parts, 2);
+    // Right after it is written, the folder gives it back empty: said plainly, as such.
+    const first = await checkMadeBackup(uri, written.name, key, 1000, { once: true });
+    assert.equal(first?.error, 'The backup itself is still empty there.');
+    assert.deepEqual(waits, []);
+    // The check after it says each wait before it, and finds it whole once it is there.
+    const checked = await checkMadeBackup(uri, written.name, key, 1000, { waiting: (ms) => told.push(ms) });
+    assert.ok(checked && checkedWhole(checked));
+    assert.deepEqual({ ...checked, at: 0 }, { at: 0, parts: 2, read: 2, missing: 0, damaged: 0, opened: true, error: '' });
+    assert.deepEqual(waits, [15_000, 30_000]);
+    assert.deepEqual(told, [15_000, 30_000]);
+    assert.equal(checked.at, 1000 + 45_000);
+    // Check again: once more, with no wait.
+    const again = await checkMadeBackup(uri, written.name, key, 2000, { once: true });
+    assert.ok(again && checkedWhole(again));
+    assert.deepEqual(waits, [15_000, 30_000]);
+    // One that is never sent on is looked at after every wait, then said not whole.
+    const later = await writeBackup(uri, (parts) => makeBackup(key, { parts }), new Date(2026, 10, 26, 22, 45).getTime());
+    const waited: number[] = [];
+    setSettleWaits([15_000, 30_000, 45_000], async (ms) => void waited.push(ms));
+    const never = await checkMadeBackup(uri, later.name, key, 3000);
+    assert.deepEqual(waited, [15_000, 30_000, 45_000]);
+    assert.ok(never && !checkedWhole(never));
+    assert.equal(never.error, 'The backup itself is still empty there.');
+    assert.equal(never.at, 3000 + 90_000);
+  } finally {
+    setSettleWaits(null);
+    sending.delete(uri);
+  }
+  // In the phone's own storage it is looked at once: what is not whole there will not come later.
+  const own = 'content://com.android.externalstorage.documents/tree/primary%3AByHandToo';
+  folders.set(own, new Map());
+  let paused = 0;
+  setSettleWaits([15_000], async () => void paused++);
+  try {
+    const written = await writeBackup(own, (parts) => makeBackup(key, { parts }), new Date(2026, 10, 26, 22, 50).getTime());
+    folders.get(own)!.set(written.name, new Uint8Array(0));
+    assert.equal((await checkMadeBackup(own, written.name, key, 4000))?.error, 'The backup itself is still empty there.');
+    assert.equal(paused, 0);
+  } finally {
+    setSettleWaits(null);
+  }
+  assert.equal(folderOfAnotherApp(own), false);
+  assert.equal(folderOfAnotherApp('content://com.android.providers.downloads.documents/tree/downloads'), false);
+  assert.equal(folderOfAnotherApp('content://com.google.android.apps.docs.storage/tree/acc%3D1%3Bdoc%3Dencoded'), true);
+  // A computer's folder is its own disk's.
+  assert.equal(folderOfAnotherApp('/home/me/Backups'), false);
+});
+
+t("an automatic backup into another app's folder, as DAVx5's, is made once that app sent it on, and failed, saying why, if it never does", async () => {
+  await phone();
+  photos(3);
+  const uri = 'content://at.bitfire.davdroid.webdav/tree/206';
+  folders.set(uri, new Map());
+  sending.add(uri);
+  const waits: number[] = [];
+  setSettleWaits([15_000, 30_000], async (ms) => {
+    waits.push(ms);
+    sendOn(uri);
+  });
+  try {
+    const start = new Date(2026, 5, 2, 3, 12).getTime();
+    await startAutoBackup(1, uri, await backupKey('auto-pass'));
+    const run = await runAutoBackup(false, start);
+    assert.equal(run.auto?.error, '');
+    assert.equal(run.auto?.last, start);
+    assert.deepEqual(waits, [15_000]);
+    const checked = (await loadChecks()).folder;
+    assert.ok(checked && checkedWhole(checked));
+    assert.equal(checked.at, start + 15_000);
+    // The next one never sent on: failed, saying why, and not counted as made.
+    const waited: number[] = [];
+    setSettleWaits([15_000, 30_000], async (ms) => void waited.push(ms));
+    const next = await runAutoBackup(true, start + 86_400_000);
+    assert.deepEqual(waited, [15_000, 30_000]);
+    assert.equal(next.auto?.error, 'The check after it found a problem: The backup itself is still empty there.');
+    assert.equal(next.auto?.last, start);
+  } finally {
+    setSettleWaits(null);
+    sending.delete(uri);
+    await stopAutoBackup();
+  }
+});
+
 t('a backup sent to the server by hand is checked there by what the server lists, of its size and every part', async () => {
   const there = new Map<string, Uint8Array>();
   setCloudHttp(async (method, url, headers, body) => davServer(there, () => 'app-pass')(method, url, headers, body));
@@ -2835,7 +2954,7 @@ t('the server stays when automatic backups stop, and Make a backup sends one the
     await stopAutoBackup();
     assert.equal(await loadAutoBackup(), null);
     assert.equal((await loadCloudBackup())?.names.length, onServer + 1);
-    assert.deepEqual(await loadChecks(), { folder: null, server: null });
+    assert.deepEqual(await loadChecks(), { folder: null, server: null, drive: null });
   } finally {
     setCloudHttp(null);
     await stopCloudBackup();
@@ -2857,11 +2976,18 @@ t('the backup screen says of a backup made by hand its size in all, when it bega
   assert.match(screen, /total: spaceText\(size \+ partsSize\)/);
   assert.match(screen, /timesText\(start, end\)/);
   assert.match(screen, /notInText\(out\)/);
-  assert.match(screen, /const checked = await checkMadeBackup\(asking\.folder, name, key\);/);
+  assert.match(screen, /const target = asking\.folder;\n\s+const checked = await checkMadeBackup\(target, name, key, Date\.now\(\), \{\n\s+waiting: \(ms\) =>/);
   assert.match(screen, /const checked = await checkSentBackup\(sent, named, size\);/);
   assert.match(screen, /writeBackup\(\n\s+asking\.folder,[\s\S]*?\n\s+start,\n\s+\);/);
   // What the check found shows under what is said.
   assert.match(screen, /\{madeNote\?\.checked && !making \? \(\n\s+<CheckLine/);
+  // Under it, where it was not whole, Check again: the same backup, looked at once, with what it was made with.
+  assert.match(screen, /\(\) => checkMadeBackup\(target, name, key, Date\.now\(\), \{ once: true \}\),/);
+  assert.match(screen, /\(\) => checkSentBackup\(sent, named, size\),/);
+  assert.match(screen, /\{madeNote\?\.checked && madeNote\.again && !making && !checkedWhole\(madeNote\.checked\.checked\) \? \(\n\s+<Row wrap>\n\s+<Button\n\s+title=\{t\("Check again"\)\}/);
+  // In another app's folder, what was not whole says that app may still be sending it on.
+  assert.match(screen, /later=\{madeNote\.checked\.later\}/);
+  assert.match(screen, /later=\{folderOfAnotherApp\(auto\.folder\)\}/);
 });
 
 t('a backup sent to the server by hand says before it starts that all of it goes each time, and about how much', async () => {

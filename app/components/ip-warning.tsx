@@ -3,6 +3,7 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { ask } from '../lib/alert';
+import { directSaysNothing } from '../lib/direct';
 import { afterGuide } from '../lib/guide-shown';
 import { openHiddenPlace } from '../lib/hidden-contacts';
 import { t } from '../lib/i18n';
@@ -29,9 +30,9 @@ export function hiddenKeep(): IpKeep {
   return open ? { space: open.space, pocket: open.pocket, key: open.key } : 'memory';
 }
 
-/** The warning before a call with an Erevos contact (`identity`, hex) goes through a call relay, the same for one made and one answered; `keep` for the hidden chats'. */
-export function callIpWarning(identity: string, keep?: IpKeep): IpWarning {
-  return { network: 'Erevos', act: 'call', of: circuitOf(identity), ...(keep ? { keep } : {}) };
+/** The warning before a call with an Erevos contact (`identity`, hex) goes through a call relay, the same for one made and one answered; `keep` for the hidden chats'; `tor` for a chat set to go only through Tor, which a call does not. */
+export function callIpWarning(identity: string, keep?: IpKeep, tor = false): IpWarning {
+  return { network: 'Erevos', act: 'call', of: circuitOf(identity), ...(keep ? { keep } : {}), ...(tor ? { tor } : {}) };
 }
 
 /**
@@ -51,9 +52,11 @@ export function groupIpGate(id: string, hidden: boolean): Promise<boolean> {
  * to go on without showing the address, such as Tor for the chat), which is done and then goes on,
  * else Cancel; Guide, which opens the guide's section on it and asks again once it is closed, so
  * what was about to go (a voice message recorded, a file shared) waits for it and is not lost; and
- * Go on, which goes on and keeps that it was said.
+ * Go on, which goes on and keeps that it was said. With Direct connections on (lib/direct.ts), one
+ * it covers is not asked, and goes on with nothing kept: turned off, it is asked as before.
  */
 export function ipGate(warning: IpWarning, fix?: IpFix): Promise<boolean> {
+  if (directSaysNothing(warning)) return Promise.resolve(true);
   const key = ipKey(warning);
   const open = asking.get(key);
   if (open) return open;
@@ -112,6 +115,11 @@ export function IpNotice({ warning, fix }: { warning: IpWarning; fix?: IpFix }) 
   );
 }
 
+/** Whether the quiet line of a chat or group shows (IpQuiet): not while Direct connections cover what is sent there (lib/direct.ts), which they never do in hidden chats (`hidden`). */
+export function quietLineShows(hidden: boolean): boolean {
+  return !directSaysNothing({ network: 'Erevos', act: 'send', ...(hidden ? { keep: 'memory' as const } : {}) });
+}
+
 /**
  * The quiet line of a chat or group that goes without Tor, above where you write, once the warning
  * of what is sent was said (ipKey: once for the network): that the relays see this phone's internet
@@ -121,7 +129,7 @@ export function IpQuiet({ fix }: { fix?: IpFix }) {
   return (
     <Row wrap style={{ alignItems: 'center', gap: 4 }}>
       <Text variant="caption" tone="faint">
-        {t('Without Tor: the relays see your internet address.')}
+        {t('Without Tor: the servers see your internet address.')}
       </Text>
       {fix ? <TextButton title={fix.label} onPress={() => void fix.run()} /> : null}
       <TextButton title={t('Guide')} onPress={() => openGuideLink(IP_GUIDE)} />

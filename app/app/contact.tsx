@@ -34,7 +34,7 @@ export default function Contact() {
     return (
       <Page>
         <Text variant="title">{t('Not a contact code')}</Text>
-        <Text tone="muted">{t('This link does not hold a relay sender id that Erevos can use.')}</Text>
+        <Text tone="muted">{t('This link does not hold a server sender id that Erevos can use.')}</Text>
         <Button title={t('Close')} onPress={() => router.dismissTo('/')} />
       </Page>
     );
@@ -58,14 +58,14 @@ export default function Contact() {
           <Text selectable>{name}</Text>
         </Field>
       ) : null}
-      <Field label={t('Relay sender id')}>
+      <Field label={t('Server sender id')}>
         <Text selectable variant="mono" style={{ fontSize: 13 }}>
-          {code.senderHex || t('None yet: their phone has no relay queue. You reach them nearby, over Wi-Fi or Bluetooth, until it has.')}
+          {code.senderHex || t('None yet: their phone has no server queue. You reach them nearby, over Wi-Fi or Bluetooth, until it has.')}
         </Text>
       </Field>
-      <Field label={t('Relay')}>
+      <Field label={t('Server')}>
         <Text selectable variant="mono" style={{ fontSize: 13 }}>
-          {code.relayUrl || (code.senderHex ? t('Not given. The chat uses the relay this phone already has.') : t('None yet.'))}
+          {code.relayUrl || (code.senderHex ? t('Not given. The chat uses the server this phone already has.') : t('None yet.'))}
         </Text>
       </Field>
       <Field label={t('Keys')}>

@@ -97,7 +97,7 @@ export function nostrOnlyWay(e2e: E2E, identity: string, sealed: ForNostr & { fi
     try {
       for (const wrap of wraps) await publishNostr(to, wrap, tor);
     } catch (error) {
-      throw new RelayUnreachableError(t('No Nostr relay took it: {reason}', { reason: error instanceof Error ? error.message : String(error) }));
+      throw new RelayUnreachableError(t('No Nostr server took it: {reason}', { reason: error instanceof Error ? error.message : String(error) }));
     }
     const tag = sealed.tag ?? '';
     if (tag) {

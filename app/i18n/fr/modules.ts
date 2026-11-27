@@ -20,7 +20,7 @@ export const modulesText: Record<string, string> = {
   "{module} is off": "{module} est désactivé",
   "This part of Erevos is off on this phone, so this screen does not open. Nothing of it is deleted: it is all there again once you turn it on in Settings → General → Modules.": "Cette partie d’Erevos est désactivée sur ce téléphone, donc cet écran ne s’ouvre pas. Rien n’en est supprimé : tout est de retour dès que tu l’actives dans Réglages → Général → Modules.",
   "Open Modules": "Ouvrir les modules",
-  "Erevos's own chats, groups and calls, end-to-end encrypted, through the relay, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.": "Les discussions, groupes et appels propres à Erevos, chiffrés de bout en bout, par le relais, Nostr, les téléphones proches ou LoRa. Sans compte et sans numéro de téléphone. Les discussions masquées en font partie.",
+  "Erevos's own chats, groups and calls, end-to-end encrypted, through the server, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.": "Les discussions, groupes et appels propres à Erevos, chiffrés de bout en bout, par le serveur, Nostr, les téléphones proches ou LoRa. Sans compte et sans numéro de téléphone. Les discussions masquées en font partie.",
   "Erevos as the phone app: the keypad, the calls and the favourites, and every call on its own screen.": "Erevos comme app Téléphone : le clavier, les appels et les favoris, et chaque appel sur son propre écran.",
   "Erevos as the SMS app: the SMS in the same list as the chats.": "Erevos comme app SMS : les SMS dans la même liste que les discussions.",
   "Chats with other Nostr apps, and the public posts of those you follow.": "Discussions avec d’autres apps Nostr, et les publications publiques des personnes que tu suis.",
@@ -30,9 +30,6 @@ export const modulesText: Record<string, string> = {
   "The Phone and its icon go. Nothing is deleted.": "Le Téléphone et son icône disparaissent. Rien n’est supprimé.",
   "The SMS leave the list, and their icon goes. Nothing is deleted.": "Les SMS quittent la liste, et leur icône disparaît. Rien n’est supprimé.",
   "Its chats leave the list, and their messages do not come while it is off. Nothing is deleted: the account and the chats are there again when you turn it on.": "Ses discussions quittent la liste, et ses messages n’arrivent pas tant qu’elle est désactivée. Rien n’est supprimé : le compte et les discussions sont de retour quand tu l’actives.",
-  "Setting up Erevos · step {n} of {m}": "Configuration d’Erevos · étape {n} sur {m}",
-  "Welcome to Erevos": "Bienvenue dans Erevos",
-  "What Android should allow": "Ce qu’Android doit autoriser",
   "A backup was just restored. What Android lets Erevos do, and which apps make calls and send SMS, stay with each phone and come with no backup: this is what the modules on need on this phone.":
     "Une sauvegarde vient d’être restaurée. Ce qu’Android permet à Erevos, et quelles apps passent les appels et envoient les SMS, restent propres à chaque téléphone et ne viennent avec aucune sauvegarde : voici ce dont les modules activés ont besoin sur ce téléphone.",
 };

@@ -175,6 +175,15 @@ export type Contact = {
   /** When this chat sent them, by itself, an invite to its relay (app/chat.tsx offerRelays), as they
    *  had no queue of their own: sent once. */
   ri?: number;
+  /** The id of that invite (lib/text-invite.ts inviteId), to tell whether their phone came onto the
+   *  relay with it, and to take that place back. Missing for one sent before, and once the relay
+   *  said it was not used. */
+  rid?: string;
+  /** When this chat saw their phone came onto its relay with that invite, and said so in their chat:
+   *  said once (app/chat.tsx invitesCame). */
+  rin?: number;
+  /** When this phone took that place back (Take back under that line): said once too. */
+  rib?: number;
   /** The PIN this chat opens with, when locked with one of its own (lock/chat-pin.ts), as kept.
    *  Missing when it has none. Only this phone knows it; it asks nothing while in hidden chats. */
   pin?: ChatPin;
@@ -749,6 +758,9 @@ function checkedContact(value: unknown): Contact | null {
     ...(isText(v.nostrSaid) && v.nostrSaid.length <= 2048 ? { nostrSaid: v.nostrSaid } : {}),
     ...(Array.isArray(v.nostrBackup) ? { nostrBackup: v.nostrBackup.map(checkedNostrBackup).filter((b): b is NostrBackup => b !== null).slice(-MAX_NOSTR_BACKUP) } : {}),
     ...(isTime(v.ri) && v.ri > 0 ? { ri: v.ri } : {}),
+    ...(isHex(v.rid) && v.rid.length === 32 ? { rid: v.rid } : {}),
+    ...(isTime(v.rin) && v.rin > 0 ? { rin: v.rin } : {}),
+    ...(isTime(v.rib) && v.rib > 0 ? { rib: v.rib } : {}),
     ...(checkedChatPin(v.pin) ? { pin: checkedChatPin(v.pin)! } : {}),
     ...(checkedChatNotify(v.notify) ? { notify: checkedChatNotify(v.notify)! } : {}),
     ...(checkedMine(v.mine) ? { mine: checkedMine(v.mine)! } : {}),

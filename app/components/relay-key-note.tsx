@@ -34,21 +34,21 @@ export function RelayKeyNote({ url }: { url: string }) {
   if (check === 'proven') {
     return (
       <Text variant="caption" color={colors.success}>
-        {t('✓ Your relay proved its own key: no one in between can pass for it.')}
+        {t('✓ Your server proved its own key: no one in between can pass for it.')}
       </Text>
     );
   }
   if (check === 'none') {
     return (
       <Text variant="caption" tone="muted">
-        {t('Your relay does not prove its own key yet: it is older than this app. It works as before; once its operator updates it, Erevos checks its key every time.')}
+        {t('Your server does not prove its own key yet: it is older than this app. It works as before; once its operator updates it, Erevos checks its key every time.')}
       </Text>
     );
   }
   async function forget() {
     const sure = await confirm(
-      t('Forget the key kept for this relay?'),
-      t('Only when its operator told you it has a new key. Erevos then takes the key the relay gives next, and checks it every time from then on.'),
+      t('Forget the key kept for this server?'),
+      t('Only when its operator told you it has a new key. Erevos then takes the key the server gives next, and checks it every time from then on.'),
       t('Forget it'),
     );
     if (sure) forgetRelayKey(url);
@@ -56,7 +56,7 @@ export function RelayKeyNote({ url }: { url: string }) {
   return (
     <View style={styles.refused}>
       <Text variant="caption" color={colors.danger}>
-        {t('Your relay did not prove the key Erevos keeps for it: someone may be in between, or it has a new key. Nothing goes to it until it proves it; your messages wait.')}
+        {t('Your server did not prove the key Erevos keeps for it: someone may be in between, or it has a new key. Nothing goes to it until it proves it; your messages wait.')}
       </Text>
       <Button title={t('It has a new key')} kind="secondary" compact onPress={() => void forget()} />
     </View>

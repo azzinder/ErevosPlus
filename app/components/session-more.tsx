@@ -9,6 +9,7 @@ import { ipGate } from './ip-warning';
 import { Button, Chip, Input, Row, Sheet, Text } from './ui';
 import { ask } from '../lib/alert';
 import { t } from '../lib/i18n';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { threadList } from '../lib/messenger';
 import { messengerNow, sessionCall, sessionGroupChange, sessionMembers, sessionNewGroup, type SessionMember } from '../lib/messenger-store';
 import { space } from '../theme/colors';
@@ -25,6 +26,8 @@ const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export function SessionCallButtons({ chatKey, name, onError }: { chatKey: string; name: string; onError: (e: unknown) => void }) {
   async function call(video: boolean) {
     try {
+      // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+      if (callsOff()) throw new Error(callsOffNote());
       if (!(await ipGate({ network: 'Session', act: 'call', of: `session:${chatKey}` }))) return;
       if (!(await sessionCall(chatKey, name, video))) onError(new Error(t('Another Session call is on.')));
     } catch (e) {

@@ -14,12 +14,20 @@
 // Fixed, whatever the build says: what other phones read the same way (an invite by SMS with no
 // relay in it names LPHL's, so every build reads it alike), and where Erevos's own releases are
 // announced (lib/release-notice.ts, lib/update-signature.ts), which goes with the release key.
+// The helper servers of a call straight between two phones (lib/direct.ts) follow EREVOS_START_RELAY:
+// the call relay beside that relay first (LPHL_HELPER for LPHL's), and PUBLIC_HELPERS only when it
+// does not answer.
 // Expo is asked only when it is there, so the checks, in plain Node, can load this file.
 
 /** LPHL's relay: the relay an invite by SMS with no relay in it names, in every build. */
 export const LPHL_RELAY = 'wss://erevos.lphl.nekten.eu';
 /** LPHL's web server: where Erevos's releases are announced and signed for, in every build. */
 export const LPHL_WEB = 'https://erevos-web.lphl.nekten.eu';
+/**
+ * The helper server (STUN) beside LPHL's relay: its call relay, which listens on 3480 there, as
+ * another service of that machine has the usual 3478 (lib/direct.ts helperOf).
+ */
+export const LPHL_HELPER = 'stun:erevos.lphl.nekten.eu:3480';
 
 /** An origin as the build may give it: https, a host, maybe a port, no path. */
 export const WEB_ORIGIN_SHAPE = /^https:\/\/[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:[0-9]{1,5})?$/;
@@ -45,6 +53,14 @@ export function webOriginOf(value: string): string {
 export function startRelayOf(value: string): string {
   return RELAY_SHAPE.test(value) ? value : LPHL_RELAY;
 }
+
+/**
+ * Public helper servers (STUN) that tell a phone its own internet address, which anyone may ask:
+ * Cloudflare's and Nextcloud's. A call straight between two phones (lib/direct.ts callHelpers) asks
+ * them only as a reserve, when the helper beside this build's first relay does not answer, and
+ * never when the owner typed helpers of their own. They see the address that asks, nothing else.
+ */
+export const PUBLIC_HELPERS: readonly string[] = ['stun:stun.cloudflare.com:3478', 'stun:stun.nextcloud.com:443'];
 
 /** The web server with this build's pages and models. */
 export const WEB_ORIGIN = webOriginOf(given('webOrigin'));

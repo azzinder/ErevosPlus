@@ -37,4 +37,9 @@ export const giveApp: Record<string, string> = {
   "This build of Erevos cannot take itself from a phone nearby. Update Erevos for it.": "Αυτή η έκδοση του Erevos δεν μπορεί να παρθεί από κοντινό τηλέφωνο. Ενημέρωσε το Erevos γι' αυτό.",
   "Erevos {version} came whole and is signed as this one is. Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.": "Το Erevos {version} ήρθε ολόκληρο και είναι υπογεγραμμένο όπως αυτό. Το Android δείχνει τον εγκαταστάτη του: πάτα Εγκατάσταση. Το Erevos κλείνει και ανοίγει ως η νέα έκδοση, με όλα κρατημένα.",
   "From a phone nearby": "Από κοντινό τηλέφωνο",
+  "This is the Erevos from F-Droid: only the F-Droid app updates it. Once this phone has internet, install F-Droid on it too.": "Αυτό είναι το Erevos του F-Droid: το ενημερώνει μόνο η εφαρμογή F-Droid. Μόλις αυτό το τηλέφωνο έχει internet, εγκατάστησε σε αυτό και το F-Droid.",
+  "Erevos from F-Droid": "Erevos του F-Droid",
+  "The other phone gives the Erevos from F-Droid. Installed over this one, it keeps everything, but from then on only the F-Droid app updates it: it has no Check for updates and no From a phone nearby, and sends no backups to Google Drive.": "Το άλλο τηλέφωνο δίνει το Erevos του F-Droid. Αν εγκατασταθεί πάνω από αυτό, κρατά τα πάντα, αλλά από εκεί και πέρα το ενημερώνει μόνο η εφαρμογή F-Droid: δεν έχει «Έλεγχος για ενημερώσεις» ούτε «Από κοντινό τηλέφωνο», και δεν στέλνει αντίγραφα στο Google Drive.",
+  "Nothing was installed.": "Δεν εγκαταστάθηκε τίποτα.",
+  "This is the Erevos from F-Droid: on the other phone too, only the F-Droid app will update it. An Erevos there that is not from F-Droid asks before it installs it.": "Αυτό είναι το Erevos του F-Droid: και στο άλλο τηλέφωνο θα το ενημερώνει μόνο η εφαρμογή F-Droid. Ένα Erevos εκεί που δεν είναι από το F-Droid ρωτά πριν το εγκαταστήσει.",
 };

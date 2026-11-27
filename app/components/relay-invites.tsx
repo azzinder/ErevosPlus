@@ -64,7 +64,7 @@ export function RelayInvites({ relay, e2e = null, onNote }: { relay: Relay | nul
       // The relay has a name of random letters for them; the one typed stays here (lib/e2e.ts lineFor).
       const got = await makeInvite(relay, e2e ? await e2e.lineFor(typed) : typed);
       if (!got) {
-        onNote(t('This relay does not take invites from this phone.'));
+        onNote(t('This server does not take invites from this phone.'));
         return;
       }
       setMade({ link: inviteLink({ relayUrl: relay.url, code: got.code }), name: typed, expires: got.expires });
@@ -99,7 +99,7 @@ export function RelayInvites({ relay, e2e = null, onNote }: { relay: Relay | nul
     const sure = invite.used
       ? await confirm(
           t("Take back {name}'s access?", { name: shownName(invite) }),
-          t('Their phone can no longer use this relay from now on. The phones it invited keep theirs.'),
+          t('Their phone can no longer use this server from now on. The phones it invited keep theirs.'),
           t('Take back'),
         )
       : await confirm(t('Take back this invite?'), t('Its QR code no longer lets a phone in.'), t('Take back'));
@@ -126,12 +126,12 @@ export function RelayInvites({ relay, e2e = null, onNote }: { relay: Relay | nul
         </>
       ) : (
         <Row wrap>
-          <Button title={t('Invite to the relay')} kind="secondary" compact onPress={() => setNaming(true)} />
+          <Button title={t('Invite to the server')} kind="secondary" compact onPress={() => setNaming(true)} />
         </Row>
       )}
       <Text variant="caption" tone="muted">
         {t(
-          "An invite lets one more phone use this relay, with a token of its own, which stays even once yours goes. The relay's operator sees that you invited it, and for it only a name of random letters and digits: the name you give stays on this phone.",
+          "An invite lets one more phone use this server, with a token of its own, which stays even once yours goes. The server's operator sees that you invited it, and for it only a name of random letters and digits: the name you give stays on this phone.",
         )}
       </Text>
       {listed.length > 0 ? (
@@ -143,7 +143,7 @@ export function RelayInvites({ relay, e2e = null, onNote }: { relay: Relay | nul
                 <Text>{shownName(invite)}</Text>
                 <Text variant="caption" tone="muted">
                   {invite.used
-                    ? t('Uses the relay since {day}', { day: laterDay(invite.used) })
+                    ? t('Uses the server since {day}', { day: laterDay(invite.used) })
                     : t('Waiting, until {when}', { when: laterLabel(invite.expires) })}
                 </Text>
               </View>
@@ -157,7 +157,7 @@ export function RelayInvites({ relay, e2e = null, onNote }: { relay: Relay | nul
         {made ? (
           <Text variant="caption" tone="muted">
             {t(
-              "For one phone, until {when}. Let their phone scan it with its camera and open the link in Erevos: it then uses this relay with a token of its own, typing nothing. Whoever takes it first has it, so show it to them only.",
+              "For one phone, until {when}. Let their phone scan it with its camera and open the link in Erevos: it then uses this server with a token of its own, typing nothing. Whoever takes it first has it, so show it to them only.",
               { when: laterLabel(made.expires) },
             )}
           </Text>

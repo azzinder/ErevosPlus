@@ -27,9 +27,10 @@ import { opensSpace } from './space-data';
 // sealed key is kept, the phone can check a fingerprint or face, and the lock is on. Whether
 // Android still has its key, and whether it still works, is found out as the button is pressed,
 // which turns it off and says so (unlockWithBiometric), and where the setting shows (biometricOn).
-// Asking the Keystore whether the key works starts a use of it, in the phone's security chip
-// where it has one, and that is slow, and only a few may be started at once: asked each time the
-// password screen showed, the button came seconds late, and the prompt after it.
+// Asking the Keystore whether the key works starts a use of it, which takes a while (seconds where
+// an older Erevos made the key in the phone's separate security chip), and only a few may be
+// started at once: asked each time the password screen showed, the button came late, and the
+// prompt after it.
 //
 // 'unknown': it cannot be told now (the phone itself is locked, as when an Erevos call shows over
 // its lock screen, or the Keystore did not answer). That never turns it off by itself.

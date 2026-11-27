@@ -475,7 +475,9 @@ release workflow: `npx expo prebuild --platform android`, then Gradle, with carg
 lyrebird.
 With `EREVOS_DISTRIBUTION=fdroid` set for the prebuild and Gradle, it is the F-Droid build, which
 F-Droid updates: Updates has no **Check for updates** and the app may not install packages
-(`app/app.config.js`). Every build leaves out the Google Play services entry that expo-image-picker
+(`app/app.config.js`). The releases build it as F-Droid builds it (`scripts/fdroid-build.sh`,
+`deploy/fdroid/`) and sign it apart with the release key (`scripts/fdroid-sign.sh`), so that
+F-Droid hands out that signed APK (docs/reproducible-builds.md). Every build leaves out the Google Play services entry that expo-image-picker
 puts in the manifest (`app/plugins/with-no-gms-entry.js`).
 
 ## Releases

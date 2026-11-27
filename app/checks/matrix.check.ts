@@ -972,7 +972,7 @@ test('restored from a backup, the account is let go of, never signed out, and si
   }
 });
 
-test("a Matrix account goes through Tor only as its own choice says: Off unless chosen, a room «Through Tor» makes it Always", async () => {
+test("a Matrix account goes through Tor as its own choice says, and always in INVISIBLE: Off unless chosen, a room «Through Tor» makes it Always", async () => {
   const sent: { head: Json; body: string }[] = [];
   const fake = {
     torRequest: async () => new Uint8Array(0),
@@ -997,8 +997,8 @@ test("a Matrix account goes through Tor only as its own choice says: Off unless 
     assert.deepEqual(sent[0].head, { method: 'POST', url: `${HS}/_matrix/client/v3/login`, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer tok' } });
     assert.equal(sent[0].body, '{"a":1}');
     assert.ok(matrixThroughTor('space'));
-    // Off, the default, whatever the space: not through Tor.
-    assert.equal(matrixThroughTor(), false);
+    // Off, the default, still through Tor while the space is INVISIBLE (Everything).
+    assert.equal(matrixThroughTor(), true);
     assert.equal(matrixWayOf({ homeserver: HS }), 'never');
     // With the way 'messages' and Tor not ready yet, As the space goes straight; Always still through Tor.
     setThroughTor('messages');
@@ -1014,6 +1014,8 @@ test("a Matrix account goes through Tor only as its own choice says: Off unless 
     await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x`, tor: 'always' }), /Tor is not ready/);
     setThroughTor('all');
     await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x`, tor: 'space' }), /Tor is not ready/);
+    // INVISIBLE: even an account set to Off never goes straight.
+    await assert.rejects(defaultMatrixHttp({ method: 'GET', url: `${HS}/x`, tor: 'never' }), /Tor is not ready/);
   } finally {
     setThroughTor('off');
     setCore(wasmCore);

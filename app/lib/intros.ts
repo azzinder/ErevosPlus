@@ -123,7 +123,7 @@ export async function answerIntro(e2e: E2E, from: string, i: string, yes: boolea
   if (!asked) throw new Error(t('That introduction is no longer open.'));
   let signal: IntroSignal = { i, s: yes ? 'yes' : 'no' };
   if (yes && asked.g) {
-    if (!ownLink) throw new Error(t('Your contact link is not ready yet: you need a relay, or to try again in a moment.'));
+    if (!ownLink) throw new Error(t('Your contact link is not ready yet: you need a server, or to try again in a moment.'));
     // Their phone says it back in its first message: this one takes them at once, named so.
     const hi = await e2e.welcome(asked.n);
     signal = { i, s: 'yes', l: ownLink, h: hi };

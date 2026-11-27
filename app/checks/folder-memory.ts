@@ -4,12 +4,38 @@
 
 // expo-file-system's folders, as lib/backup-place.ts uses them, for checks under Node: folders by
 // their uri, each with its files' bytes, in memory. A file made with a name taken gets another, as
-// Android's folders give it; `writes.failAt` makes that write from now fail, as a full memory card.
+// Android's folders give it; `writes.failAt` makes that write from now fail, as a full memory card,
+// with `writes.said` as what Android says.
 export const folders = new Map<string, Map<string, Uint8Array>>();
-export const writes = { failAt: 0 };
+export const writes = { failAt: 0, said: 'No room left.' };
 // How often a folder was listed or written in through these, as a build before the folder functions
 // of modules/erevos-device does (checks/device-memory.ts).
 export const looks = { count: 0 };
+// Folders of another app that, as DAVx5's, give a file written there back empty until that app has
+// sent it on to its server: `sendOn` has it do so with what was written there until then.
+export const sending = new Set<string>();
+const unsent = new Map<string, Map<string, Uint8Array>>();
+
+/** Keeps `bytes` as `name` in the folder `uri`: empty for now in one of `sending`. */
+export function keep(uri: string, name: string, bytes: Uint8Array): void {
+  const folder = inFolder(uri);
+  if (!sending.has(uri)) {
+    folder.set(name, bytes.slice());
+    return;
+  }
+  folder.set(name, new Uint8Array(0));
+  const waiting = unsent.get(uri) ?? new Map<string, Uint8Array>();
+  waiting.set(name, bytes.slice());
+  unsent.set(uri, waiting);
+}
+
+/** What was written in the folder `uri` reached its app's server: it reads back whole from now on. */
+export function sendOn(uri: string): void {
+  const waiting = unsent.get(uri);
+  unsent.delete(uri);
+  const folder = folders.get(uri);
+  if (waiting && folder) for (const [name, bytes] of waiting) if (folder.has(name)) folder.set(name, bytes);
+}
 
 function inFolder(uri: string): Map<string, Uint8Array> {
   const folder = folders.get(uri);
@@ -47,8 +73,8 @@ export class File {
   }
 
   writeSync(bytes: Uint8Array): void {
-    if (writes.failAt > 0 && --writes.failAt === 0) throw new Error('No room left.');
-    inFolder(this.folder).set(this.name, bytes.slice());
+    if (writes.failAt > 0 && --writes.failAt === 0) throw new Error(writes.said);
+    keep(this.folder, this.name, bytes);
   }
 
   async bytes(): Promise<Uint8Array> {

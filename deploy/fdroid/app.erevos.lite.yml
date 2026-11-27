@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 azzinder
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+
+# F-Droid's recipe for Erevos Lite (app.erevos.lite), as F-Droid's own list of apps (fdroiddata,
+# metadata/app.erevos.lite.yml) would carry it. scripts/fdroid-build.sh builds each release's F-Droid
+# APK from it, the way F-Droid builds: in F-Droid's build server, with F-Droid's `fdroid build`,
+# in F-Droid's folder; the release signs that APK. F-Droid, building the release's commit with it,
+# gets the same APK and hands out the signed one (Binaries, AllowedAPKSigningKeys), so Erevos Lite from
+# F-Droid and from the releases install over each other (docs/reproducible-builds.md).
+# '@VERSION@', '@BUILD@' and '@COMMIT@' are the release's (the build number without its quotes).
+# Nothing here is sent to F-Droid.
+
+Categories:
+  - Internet
+  - Security
+License: AGPL-3.0-or-later
+AuthorName: azzinder
+WebSite: https://lphl.nekten.eu/erevos/
+SourceCode: https://github.com/azzinder/Erevos
+IssueTracker: https://github.com/azzinder/Erevos/issues
+Changelog: https://github.com/azzinder/Erevos/blob/HEAD/CHANGELOG.md
+
+AutoName: Erevos Lite
+
+RepoType: git
+Repo: https://github.com/azzinder/Erevos.git
+Binaries: https://github.com/azzinder/erevos-lite-releases/releases/download/v%v/erevos-lite-android-fdroid.apk
+
+Builds:
+  - versionName: '@VERSION@'
+    versionCode: '@BUILD@'
+    commit: '@COMMIT@'
+    sudo:
+      - echo 'deb https://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential golang-go openjdk-21-jdk-headless rustup
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+      - curl -Lo /tmp/node.tar.gz https://nodejs.org/dist/v22.23.5/node-v22.23.5-linux-x64.tar.gz
+      - echo 'c54118104acc524633b5abe106bbf44a53126ec8b4e5fa105cb92b5d7de8a1a1  /tmp/node.tar.gz'
+        | sha256sum -c -
+      - tar -xzf /tmp/node.tar.gz -C /opt
+      - mv /opt/node-v22.23.5-linux-x64 /opt/node
+    output: app/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    build:
+      - deploy/fdroid/build.sh lite $$VERSION$$ $$VERCODE$$
+    ndk: 27.1.12297006
+
+AllowedAPKSigningKeys: 49f0d9be60092f02cf27c5246752550193a67b812129bf53417953b7c8798e69
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '@VERSION@'
+CurrentVersionCode: '@BUILD@'

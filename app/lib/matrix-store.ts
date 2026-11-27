@@ -388,7 +388,7 @@ export async function matrixSetPush(on: boolean): Promise<void> {
   if (on === !!was) return;
   const relay = await spaceRelayOf(it.space, it.key);
   if (on) {
-    if (!relay) throw new Error(t('This space has no queue at a relay yet: it can say nothing while closed.'));
+    if (!relay) throw new Error(t('This space has no queue at a server yet: it can say nothing while closed.'));
     const push = await startMatrixPush(it.state, relay);
     await changeAccount(it, async () => {
       it.state.push = push;

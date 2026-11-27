@@ -29,6 +29,7 @@ internal object NearbyApk {
   @Volatile private var server: ApkServer? = null
   @Volatile private var fetch: ApkFetch? = null
   private const val MINUTES = 10
+  private const val INSTALL_PACKAGES = "android.permission.REQUEST_INSTALL_PACKAGES"
 
   /** The address of a network nearby on this phone, and its prefix. */
   private data class Lan(val name: String, val address: InetAddress, val prefix: Int)
@@ -84,7 +85,7 @@ internal object NearbyApk {
 code{font-size:15px;word-break:break-all}a.get{display:inline-block;margin:8px 0;padding:12px 20px;border-radius:10px;background:#2b5f8e;color:#fff;text-decoration:none;font-weight:600}
 @media (prefers-color-scheme:dark){body{color:#e9eaee;background:#121418}a.get{background:#4f8cc4}}</style></head>
 <body><h1>Erevos ${escape(version)}</h1><p>${w("lead")}</p>
-<p><a class="get" href="${ApkServer.APK}" download>${w("button")}</a><br>${Math.round(size / 1_000_000.0)} MB</p>
+${if (words["note"].isNullOrEmpty()) "" else "<p><strong>${w("note")}</strong></p>\n"}<p><a class="get" href="${ApkServer.APK}" download>${w("button")}</a><br>${Math.round(size / 1_000_000.0)} MB</p>
 <p>${w("hash")}<br><code>${grouped(sha256)}</code></p>
 <p>${w("cert")}<br><code>$certs</code></p>
 <p>${w("after")}</p></body></html>
@@ -141,7 +142,8 @@ code{font-size:15px;word-break:break-all}a.get{display:inline-block;margin:8px 0
    * Takes the package a phone nearby gives into the cache (cache/updates/nearby.apk, where
    * lib/give-app.ts hands it to the installer) and checks it. "error" says why not: "link",
    * "network", "gone", "size", "short", "hash", "cancelled", "not-apk", "other-app",
-   * "other-signer", "older", "same"; else "version" and "build".
+   * "other-signer", "older", "same"; else "version", "build" and "fdroid", whether it is F-Droid's
+   * build.
    */
   fun receive(context: Context, host: String, port: Int, token: String, sha256: String): Map<String, Any?> {
     fetch?.cancel()
@@ -157,8 +159,14 @@ code{font-size:15px;word-break:break-all}a.get{display:inline-block;margin:8px 0
       dest.delete()
       return mapOf("error" to error)
     }
-    val archive = context.packageManager.getPackageArchiveInfo(dest.path, 0)
-    return mapOf("version" to (archive?.versionName ?: ""), "build" to (archive?.let { build(it).toDouble() } ?: 0.0))
+    val archive = context.packageManager.getPackageArchiveInfo(dest.path, PackageManager.GET_PERMISSIONS)
+    return mapOf(
+      "version" to (archive?.versionName ?: ""),
+      "build" to (archive?.let { build(it).toDouble() } ?: 0.0),
+      // F-Droid's build may not install packages (app.config.js), as F-Droid updates it: signed with
+      // the same key, it is asked about before Android's installer opens (lib/give-app.ts).
+      "fdroid" to (archive?.requestedPermissions?.contains(INSTALL_PACKAGES) != true),
+    )
   }
 
   private fun check(context: Context, apk: File): String? {

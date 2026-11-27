@@ -147,3 +147,35 @@ test('a video call: the camera asked for goes with the sound, theirs is told, an
   await calls.hangUp(9);
   assert.equal(asked.at(-1)?.is_video, true);
 });
+
+test('calls off (INVISIBLE): none goes out, none rings or is answered, and one going on ends', async () => {
+  const asked: Record<string, unknown>[] = [];
+  let off: string | null = null;
+  const native: CallsNativeLike = {
+    callProtocol: async () => JSON.stringify({ '@type': 'callProtocol' }),
+    callStart: async () => undefined,
+    callSignal: async () => undefined,
+    callMute: async () => undefined,
+    callStop: async () => undefined,
+  };
+  const calls = new TelegramCalls(async (body) => (asked.push(body), {}), () => native, () => undefined, () => 1000, () => off);
+  calls.take(call(1, false, { '@type': 'callStatePending', is_created: true, is_received: true }));
+  assert.equal(calls.current()?.stage, 'ringing');
+  off = 'No calls in INVISIBLE';
+  await calls.endAll();
+  assert.equal(asked.at(-1)?.['@type'], 'discardCall');
+  calls.take(call(1, false, { '@type': 'callStateDiscarded', reason: { '@type': 'callDiscardReasonHungUp' } }));
+  await assert.rejects(calls.call(5), /No calls in INVISIBLE/);
+  await assert.rejects(calls.answer(1), /No calls in INVISIBLE/);
+  const before = asked.length;
+  // A call that comes while off never shows, to its end.
+  calls.take(call(2, false, { '@type': 'callStatePending', is_created: true, is_received: true }));
+  assert.notEqual(calls.current()?.id, 2);
+  calls.take(call(2, false, { '@type': 'callStateDiscarded', reason: { '@type': 'callDiscardReasonMissed' } }));
+  assert.notEqual(calls.current()?.id, 2);
+  assert.equal(asked.length, before);
+  // On again: a new call rings.
+  off = null;
+  calls.take(call(3, false, { '@type': 'callStatePending', is_created: true, is_received: true }));
+  assert.equal(calls.current()?.id, 3);
+});

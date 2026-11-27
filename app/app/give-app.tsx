@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { QrCode } from '../components/QrCode';
 import { Button, Card, Page, Row, SectionTitle, Text } from '../components/ui';
+import { FDROID } from '../lib/distribution';
 import { CAN_GIVE, givingState, startGiving, stopGiving, type GivingApp } from '../lib/give-app';
 import { t } from '../lib/i18n';
 import { grouped, nearbyLink, nearbyPage } from '../lib/nearby-link';
@@ -16,6 +17,7 @@ import { useTheme } from '../theme/context';
 // lib/give-app.ts): with no internet, this phone serves the Erevos it runs over its Wi-Fi or its
 // hotspot while this screen shows, ten minutes at most. The QR code opens the download page in the
 // other phone's browser; an Erevos there scans it in Updates and checks the package by itself.
+// F-Droid's build says that it is F-Droid's, here and on the page: there too only F-Droid updates it.
 
 export default function GiveApp() {
   const { colors } = useTheme();
@@ -74,6 +76,11 @@ export default function GiveApp() {
               <QrCode text={nearbyLink({ host, port: given.port, token: given.token, sha256: given.sha256 })} size={260} />
             </Row>
             <Text style={hint}>{t('On the other phone, scan this with the camera: its browser opens a page to download Erevos {version} ({size}).', { version: given.version, size: formatSize(given.size) })}</Text>
+            {FDROID ? (
+              <Text variant="bodyStrong" style={hint}>
+                {t('This is the Erevos from F-Droid: on the other phone too, only the F-Droid app will update it. An Erevos there that is not from F-Droid asks before it installs it.')}
+              </Text>
+            ) : null}
             <Text variant="caption" tone="muted" style={hint}>
               {t('With Erevos already on it, scan it there under Settings → General → Updates → From a phone nearby instead: Erevos checks the package by itself.')}
             </Text>

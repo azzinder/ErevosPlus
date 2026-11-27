@@ -99,6 +99,27 @@ test('the giving phone serves under a random path, only nearby, a page with no s
   assert.match(nearby, /fun w\(key: String\) = escape\(/);
 });
 
+test("F-Droid's build, signed with the same key, says it is F-Droid's, and an Erevos not from F-Droid asks before it installs it", () => {
+  const nearby = read(KOTLIN, 'NearbyApk.kt');
+  // Told by its manifest: F-Droid's build may not install packages (app.config.js).
+  assert.match(read(ROOT, 'app.config.js'), /blockedPermissions: \[\.\.\.\(config\.android\?\.blockedPermissions \|\| \[\]\), INSTALL_PACKAGES\]/);
+  assert.match(nearby, /private const val INSTALL_PACKAGES = "android\.permission\.REQUEST_INSTALL_PACKAGES"/);
+  assert.match(nearby, /getPackageArchiveInfo\(dest\.path, PackageManager\.GET_PERMISSIONS\)/);
+  assert.match(nearby, /"fdroid" to \(archive\?\.requestedPermissions\?\.contains\(INSTALL_PACKAGES\) != true\)/);
+  // The receiving side asks before Android's installer opens, and keeps nothing when told no.
+  const lib = read(ROOT, 'lib', 'give-app.ts');
+  const take = lib.slice(lib.indexOf('export async function takeFromNearby('));
+  const ask = take.indexOf('if (taken.fdroid && !FDROID && !(await askTakeFdroid())) {');
+  assert.ok(ask > 0);
+  assert.ok(ask < take.indexOf("startActivityAsync('android.intent.action.VIEW'"));
+  assert.match(take.slice(ask), /^[^]*?apk\.delete\(\);[^]*?throw new Error\(t\('Nothing was installed\.'\)\);/);
+  assert.match(lib, /t\('Cancel'\),\n\s+t\('Install'\),/);
+  // The giving side says it, on its screen and on the page, only in F-Droid's build; the page's words are escaped.
+  assert.match(lib, /\.\.\.\(FDROID \? \{ note: t\('This is the Erevos from F-Droid: only the F-Droid app updates it\./);
+  assert.match(nearby, /\$\{if \(words\["note"\]\.isNullOrEmpty\(\)\) "" else "<p><strong>\$\{w\("note"\)\}<\/strong><\/p>\\n"\}/);
+  assert.match(read(ROOT, 'app', 'give-app.tsx'), /\{FDROID \? \(\n\s+<Text variant="bodyStrong" style=\{hint\}>\n\s+\{t\('This is the Erevos from F-Droid: on the other phone too/);
+});
+
 test('the giving screen stops when left', () => {
   const screen = read(ROOT, 'app', 'give-app.tsx');
   assert.match(screen, /useEffect\(\(\) => \(\) => stopGiving\(\), \[\]\)/);

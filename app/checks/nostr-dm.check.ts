@@ -180,7 +180,7 @@ test('a look-up of the follow list that found no one says why, whose list, and h
     { url: 'wss://e.example', how: 'all' as const },
   ];
   assert.deepEqual(sayFollowsReport({ relays, lists: 0, checked: 0, people: 0 }, key), [
-    'No list of people you follow was found on your relays.',
+    'No list of people you follow was found on your servers.',
     'Looked for the list of npub10elf…jptg.',
     'Answered: a.example, e.example.',
     'Too slow: b.example.',
@@ -190,18 +190,18 @@ test('a look-up of the follow list that found no one says why, whose list, and h
   assert.equal(sayFollowsReport({ relays, lists: 2, checked: 0, people: 0 }, key)[0], 'Lists of people you follow were found, but none passed the signature check.');
   assert.equal(sayFollowsReport({ relays, lists: 1, checked: 1, people: 0 }, key)[0], 'Your newest list of people you follow has no one in it.');
   const none = sayFollowsReport({ relays: relays.filter((r) => r.how !== 'all'), lists: 0, checked: 0, people: 0 }, key);
-  assert.equal(none[0], 'No relay answered. Try again in a while.');
+  assert.equal(none[0], 'No server answered. Try again in a while.');
   assert.ok(!none.some((line) => line.startsWith('Answered')));
 });
 
 test("the Public tab's newest page with no post says whether posts came, or none did, and how each relay answered", () => {
   const relays = [
     { url: 'wss://a.example', how: 'all' as const },
-    { url: 'wss://d.example', how: 'unreached' as const, why: 'The Nostr relay did not answer.' },
+    { url: 'wss://d.example', how: 'unreached' as const, why: 'The Nostr server did not answer.' },
   ];
-  assert.deepEqual(sayFeedReport({ follows: 40, came: 0, relays }), ['You follow 40 people, but no relay sent a post of theirs.', 'Answered: a.example.', 'Not reached: d.example.']);
-  assert.equal(sayFeedReport({ follows: 1, came: 0, relays })[0], 'You follow 1 person, but no relay sent a post of theirs.');
-  assert.equal(sayFeedReport({ follows: 40, came: 12, relays })[0], '12 posts came from the relays, but none could be shown.');
+  assert.deepEqual(sayFeedReport({ follows: 40, came: 0, relays }), ['You follow 40 people, but no server sent a post of theirs.', 'Answered: a.example.', 'Not reached: d.example.']);
+  assert.equal(sayFeedReport({ follows: 1, came: 0, relays })[0], 'You follow 1 person, but no server sent a post of theirs.');
+  assert.equal(sayFeedReport({ follows: 40, came: 12, relays })[0], '12 posts came from the servers, but none could be shown.');
 });
 
 test("NIP-17's own example opens, for its reader and as its sender's copy", { skip: !coreReady }, async () => {

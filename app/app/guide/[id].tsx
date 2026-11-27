@@ -9,6 +9,7 @@ import { Pressable, View } from 'react-native';
 import { GuideBlockView } from '../../components/guide';
 import { Card, Page, Row, Text } from '../../components/ui';
 import { GUIDE_UI, guideFor, guideLang } from '../../guide';
+import { sectionAt } from '../../lib/guide';
 import { guideShown } from '../../lib/guide-shown';
 import { space } from '../../theme/colors';
 import { useColors } from '../../theme/context';
@@ -21,7 +22,8 @@ export default function GuideSectionScreen() {
   const lang = guideLang();
   const ui = GUIDE_UI[lang];
   const sections = guideFor(lang);
-  const at = sections.findIndex((s) => s.id === id);
+  // A link to a heading inside a section ("### … {#id}") opens that section.
+  const at = sectionAt(sections, id);
   const section = sections[at];
   const previous = at > 0 ? sections[at - 1] : null;
   const next = at >= 0 && at < sections.length - 1 ? sections[at + 1] : null;

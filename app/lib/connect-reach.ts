@@ -7,7 +7,9 @@ import { t } from './i18n';
 // How this phone reaches its contacts now, as New chat says it at the top (app/chat.tsx,
 // components/connect-cards.tsx): everywhere through its relay, or a linked device (or hidden chats
 // linked on their own) through the phone; only part of the way with a relay but no queue on it, or
-// through Nostr with no relay; or only nearby. Self-contained on purpose (but for i18n), so it can
+// through Nostr with no relay: its messages, photos, files and voice messages, with calls too while
+// Direct connections are on (lib/direct.ts), and groups never; or
+// only nearby. Self-contained on purpose (but for i18n), so it can
 // run under plain Node for checks.
 
 /** How far this phone reaches its contacts: everywhere through a relay, only part of the way, or only nearby. */
@@ -30,12 +32,14 @@ export type Connection = {
   lent: boolean;
   /** Whether what is sent goes through a second relay first. */
   via: boolean;
+  /** Whether Direct connections are on (lib/direct.ts), never in hidden chats: with no relay, calls then go straight from phone to phone. */
+  direct?: boolean;
 };
 
 /** What New chat says of `c`: how far it reaches, a title, a line in plain words, and the relay's address with what goes with it. */
 export function connectReach(c: Connection): { reach: Reach; title: string; line: string; detail?: string } {
   const host = c.relayUrl.trim().replace(/^wss?:\/\//i, '').replace(/\/+$/, '');
-  const detail = c.linked || !host ? undefined : [host, c.lent ? t('lent by a contact') : '', c.via ? t('through a second relay') : ''].filter(Boolean).join(' · ');
+  const detail = c.linked || !host ? undefined : [host, c.lent ? t('lent by a contact') : '', c.via ? t('through a second server') : ''].filter(Boolean).join(' · ');
   if (c.linked) {
     const line = c.hidden
       ? t('These hidden chats are linked to the same hidden chats on your phone: they have their contacts, and their contact link is the phone’s.')
@@ -46,7 +50,7 @@ export function connectReach(c: Connection): { reach: Reach; title: string; line
     const line = c.hidden
       ? t('These hidden chats have a queue of their own on it, which the space knows nothing of.')
       : `${t('Everything works: texts, photos, voice messages, calls and groups, end-to-end encrypted.')}${c.nearby ? ` ${t('Contacts near you reach you with no internet too.')}` : ''}`;
-    return { reach: 'ready', title: t('Through your relay'), line, detail };
+    return { reach: 'ready', title: t('Through your server'), line, detail };
   }
   // In plain words (#11): New chat makes the queue by itself (app/chat.tsx), so this shows only
   // while it does, or when it could not.
@@ -55,15 +59,21 @@ export function connectReach(c: Connection): { reach: Reach; title: string; line
     return c.hidden
       ? {
           reach: 'part',
-          title: t('Through Nostr, with no relay'),
-          line: t('Texts, stickers and reactions go through Nostr. Photos, voice messages and calls need a relay: type its address under For advanced users, then create their queue.'),
+          title: t('Through Nostr, with no server'),
+          line: t('Texts, stickers and reactions go through Nostr. Photos, voice messages and calls need a server: type its address under For advanced users, then create their queue.'),
         }
-      : {
-          reach: 'part',
-          title: t('Texts only, for now'),
-          line: t('Your contacts reach you with texts, stickers and reactions. For photos, voice messages, calls and groups, ask someone who uses Erevos for an invite and tap I have their code.'),
-        };
+      : c.direct
+        ? {
+            reach: 'part',
+            title: t('Messages and calls, for now'),
+            line: t('Your contacts reach you with texts, photos, files, voice messages and calls. For groups, and for calls that connect from any network, ask someone who uses Erevos for an invite and tap I have their code.'),
+          }
+        : {
+            reach: 'part',
+            title: t('Messages only, for now'),
+            line: t('Your contacts reach you with texts, photos, files and voice messages. For calls and groups, ask someone who uses Erevos for an invite and tap I have their code.'),
+          };
   }
-  if (c.hidden) return { reach: 'none', title: t('No relay yet'), line: t('Hidden chats need a relay: type its address under For advanced users, then create their queue.') };
+  if (c.hidden) return { reach: 'none', title: t('No server yet'), line: t('Hidden chats need a server: type its address under For advanced users, then create their queue.') };
   return { reach: 'none', title: t('Only nearby, for now'), line: t('Your contacts reach you only when near, over Wi-Fi or Bluetooth. To be reached from anywhere, ask someone who uses Erevos for an invite and tap I have their code.') };
 }

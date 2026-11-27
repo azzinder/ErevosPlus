@@ -42,7 +42,7 @@ export { announceMovedOut, CAN_MOVE, cancelMove, clearMove, clearStaleMove, move
 //
 // The phone's SMS and calls are not in it: they stay in Android's own stores, where the edition moved
 // to finds them once it is the SMS or phone app. Without Move.kt (an Erevos from before moves, or
-// one signed with another key, F-Droid's), Backups does the same by hand.
+// one signed with another key, built on a computer for testing), Backups does the same by hand.
 
 const BACKUP_FILE = 'move.erevos';
 const partName = (n: number) => `move-part-${n}.erevos`;

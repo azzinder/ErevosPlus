@@ -37,4 +37,9 @@ export const giveApp: Record<string, string> = {
   "This build of Erevos cannot take itself from a phone nearby. Update Erevos for it.": "Ova verzija Erevosa ne može se uzeti s obližnjeg telefona. Ažurirajte Erevos za to.",
   "Erevos {version} came whole and is signed as this one is. Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.": "Erevos {version} stigao je u cijelosti i potpisan je kao ovaj. Android prikazuje svoj instalacijski program: dodirnite Instaliraj. Erevos se zatvara i otvara kao nova verzija, sa svime sačuvanim.",
   "From a phone nearby": "S obližnjeg telefona",
+  "This is the Erevos from F-Droid: only the F-Droid app updates it. Once this phone has internet, install F-Droid on it too.": "Ovo je Erevos iz F-Droida: ažurira ga samo aplikacija F-Droid. Čim ovaj telefon bude imao internet, instalirajte na njega i F-Droid.",
+  "Erevos from F-Droid": "Erevos iz F-Droida",
+  "The other phone gives the Erevos from F-Droid. Installed over this one, it keeps everything, but from then on only the F-Droid app updates it: it has no Check for updates and no From a phone nearby, and sends no backups to Google Drive.": "Drugi telefon daje Erevos iz F-Droida. Instaliran preko ovoga, zadržava sve, ali odtad ga ažurira samo aplikacija F-Droid: nema „Provjeri ažuriranja“ ni „S obližnjeg telefona“ i ne šalje rezervne kopije na Google Drive.",
+  "Nothing was installed.": "Ništa nije instalirano.",
+  "This is the Erevos from F-Droid: on the other phone too, only the F-Droid app will update it. An Erevos there that is not from F-Droid asks before it installs it.": "Ovo je Erevos iz F-Droida: i na drugom telefonu ažurirat će ga samo aplikacija F-Droid. Erevos tamo koji nije iz F-Droida pita prije nego što ga instalira.",
 };

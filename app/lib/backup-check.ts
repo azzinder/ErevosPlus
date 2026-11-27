@@ -18,15 +18,15 @@ import { t } from "./i18n";
 import { secureGet, secureSet } from "./secure";
 
 // Whether the newest automatic backup in each place it goes to is there whole, as a restore would
-// need it (lib/backup-folder.ts, lib/backup-cloud.ts).
+// need it (lib/backup-folder.ts, lib/backup-cloud.ts, lib/google-drive.ts).
 //
 // After each automatic backup, by itself: in the folder, the backup is read back and opened with
 // automatic backups' key, every part it names is there, of its size, and a few of them, picked at
-// random, are read whole and opened. On a server only what costs no download: the backup and every
-// part it named are listed there, of their sizes. Checked by hand, the server's backup is
-// downloaded and opened too, and a few of its parts, as in the folder. Every part read whole would
-// be the whole backup again, many GB on a server: a few at random find a place that damages or
-// cuts what it is given, and the sizes find one missing or cut short.
+// random, are read whole and opened. On a server and in Google Drive only what costs no download:
+// the backup and every part it named are listed there, of their sizes. Checked by hand, the backup
+// there is downloaded and opened too, and a few of its parts, as in the folder. Every part read
+// whole would be the whole backup again, many GB on a server: a few at random find a place that
+// damages or cuts what it is given, and the sizes find one missing or cut short.
 //
 // What was found stays on the phone (CHECKED), in no backup: only the place, when, how many parts,
 // and what was wrong.
@@ -45,8 +45,8 @@ export type Checked = {
   error: string;
 };
 
-/** The last check of each place: the folder's, and the server's. */
-export type Checks = { folder: Checked | null; server: Checked | null };
+/** The last check of each place: the folder's, the server's, and Google Drive's. */
+export type Checks = { folder: Checked | null; server: Checked | null; drive: Checked | null };
 
 const CHECKED = "erevos.backup-checked";
 
@@ -98,9 +98,10 @@ export async function loadChecks(): Promise<Checks> {
     return {
       folder: checkedOf(value?.folder),
       server: checkedOf(value?.server),
+      drive: checkedOf(value?.drive),
     };
   } catch {
-    return { folder: null, server: null };
+    return { folder: null, server: null, drive: null };
   }
 }
 
@@ -175,6 +176,9 @@ export async function checkBackup(
   }
   if (!bytes)
     return { ...checked, error: t("The backup itself is not there.") };
+  // Empty, as another app's folder gives a file back before that app sent it to its server (#75).
+  if (bytes.length === 0)
+    return { ...checked, error: t("The backup itself is still empty there.") };
   let parts;
   try {
     parts = (await openBackupWithKey(bytes, key)).parts;
@@ -307,16 +311,28 @@ export function newestIn(
 }
 
 /** Checks the newest backup sent to the server, downloading it and `sample` of its parts. */
-export async function checkServer(
+export function checkServer(
   cloud: CloudBackup,
   key: Pick<BackupKey, "key" | "salt">,
   sample: number,
   now = Date.now(),
 ): Promise<Checked | null> {
-  const name = cloud.names[cloud.names.length - 1];
+  return checkNewestSent(cloud.names, () => cloudFiles(cloud), key, sample, now);
+}
+
+/** Checks the newest of the backups `names` sent to a place, downloading it and `sample` of its
+ *  parts from the place's `files`: a server's (checkServer), or Google Drive's. */
+export async function checkNewestSent(
+  names: readonly string[],
+  files: () => Promise<BackupFiles>,
+  key: Pick<BackupKey, "key" | "salt">,
+  sample: number,
+  now = Date.now(),
+): Promise<Checked | null> {
+  const name = names[names.length - 1];
   if (!name) return null;
   try {
-    return await checkBackup(await cloudFiles(cloud), name, key, sample, now);
+    return await checkBackup(await files(), name, key, sample, now);
   } catch (error) {
     return {
       at: now,

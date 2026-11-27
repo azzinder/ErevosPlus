@@ -103,7 +103,7 @@ export class QuickChannel {
   /** Told once every relay failed to open; at once when they all failed already. */
   whenDown(listener: (why: string) => void): void {
     this.onDown = listener;
-    if (this.failed.size >= QUICK_RELAYS.length) listener(t('No Nostr relay could be reached.'));
+    if (this.failed.size >= QUICK_RELAYS.length) listener(t('No Nostr server could be reached.'));
   }
 
   private async read(url: string): Promise<void> {
@@ -119,7 +119,7 @@ export class QuickChannel {
         this.relays.delete(url);
       } catch {
         this.failed.add(url);
-        if (this.failed.size >= QUICK_RELAYS.length) this.onDown?.(t('No Nostr relay could be reached.'));
+        if (this.failed.size >= QUICK_RELAYS.length) this.onDown?.(t('No Nostr server could be reached.'));
       }
       if (!this.stopped) await new Promise((resolve) => setTimeout(resolve, RETRY));
     }
@@ -149,7 +149,7 @@ export class QuickChannel {
       const relay = open?.open ? open : await NostrRelay.open(url, null);
       try {
         const said = await relay.publish(event);
-        if (!said.ok) throw new Error(said.why || t('The Nostr relay did not take it.'));
+        if (!said.ok) throw new Error(said.why || t('The Nostr server did not take it.'));
       } finally {
         if (relay !== open) relay.close();
       }
@@ -160,7 +160,7 @@ export class QuickChannel {
       for (const tried of tries) {
         tried.then(resolve, () => {
           left -= 1;
-          if (left === 0) reject(new Error(t('No Nostr relay took it.')));
+          if (left === 0) reject(new Error(t('No Nostr server took it.')));
         });
       }
     });

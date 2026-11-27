@@ -137,8 +137,8 @@ type Device = {
   giveAppStop?(): void;
   /** Whether it is still given, and how many phones took it whole. */
   giveAppState?(): { on: boolean; given: number };
-  /** Takes the APK a phone nearby gives into cache/updates/nearby.apk, and checks it. */
-  takeNearbyApp?(host: string, port: number, token: string, sha256: string): Promise<{ version: string; build: number } | { error: string }>;
+  /** Takes the APK a phone nearby gives into cache/updates/nearby.apk, and checks it; `fdroid` when it is F-Droid's build. */
+  takeNearbyApp?(host: string, port: number, token: string, sha256: string): Promise<{ version: string; build: number; fdroid?: boolean } | { error: string }>;
   /** How much of it came, in bytes. */
   nearbyAppProgress?(): { received: number; total: number };
   /** Stops taking it. */

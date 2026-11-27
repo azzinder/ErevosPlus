@@ -19,8 +19,8 @@ export const devices: Record<string, string> = {
   'These hidden chats have chats of their own. Link from hidden chats with none, such as those a new PIN sets.':
     'Αυτές οι κρυφές συνομιλίες έχουν δικές τους συνομιλίες. Κάνε τη σύνδεση από κρυφές συνομιλίες χωρίς καμία, όπως αυτές που ανοίγει ένα νέο PIN.',
   'Too long to go through the phone.': 'Πολύ μεγάλο για να περάσει από το τηλέφωνο.',
-  'Type the relay address in Relay first: linked devices reach this phone through it.':
-    'Γράψε πρώτα τη διεύθυνση του relay στο «Relay»: οι συνδεδεμένες συσκευές φτάνουν σε αυτό το τηλέφωνο μέσω αυτού.',
+  'Type the server address in Server first: linked devices reach this phone through it.':
+    'Γράψε πρώτα τη διεύθυνση του server στον «Server»: οι συνδεδεμένες συσκευές φτάνουν σε αυτό το τηλέφωνο μέσω αυτού.',
   '{n} devices are linked already, the most there can be.': 'Είναι ήδη συνδεδεμένες {n} συσκευές, όσες μπορούν να είναι το πολύ.',
 
   // The menu, and the chat on a linked device (app/index.tsx, app/chat.tsx).
@@ -65,10 +65,10 @@ export const devices: Record<string, string> = {
   'Photos and files too': 'Και φωτογραφίες και αρχεία',
   'Linked to {name}': 'Συνδεδεμένη με: {name}',
   'Since {when}. Last heard from {last}.': 'Από {when}. Τελευταία επαφή {last}.',
-  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
-    'Αυτή η συσκευή έχει τις συνομιλίες και τις ομάδες του τηλεφώνου που έχει τον λογαριασμό. Ό,τι γράφεις εδώ περνά από το τηλέφωνο, που πρέπει να είναι ανοιχτό και να φτάνει στο relay. Οι κλήσεις χτυπούν κι εδώ. Νέες ομάδες, δημόσιες ομάδες και ομαδικές κλήσεις μένουν στο τηλέφωνο προς το παρόν.',
-  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
-    'Αυτές οι κρυφές συνομιλίες έχουν τις συνομιλίες και τις ομάδες των ίδιων κρυφών συνομιλιών του τηλεφώνου που έχει τον λογαριασμό. Ό,τι γράφεις εδώ περνά από το τηλέφωνο, που πρέπει να είναι ανοιχτό και να φτάνει στο relay, με αυτές τις κρυφές συνομιλίες ανοιχτές εκεί ή με λήψη όσο είναι κλειστές. Οι κλήσεις χτυπούν κι εδώ. Νέες ομάδες και ομαδικές κλήσεις μένουν στο τηλέφωνο προς το παρόν.',
+  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
+    'Αυτή η συσκευή έχει τις συνομιλίες και τις ομάδες του τηλεφώνου που έχει τον λογαριασμό. Ό,τι γράφεις εδώ περνά από το τηλέφωνο, που πρέπει να είναι ανοιχτό και να φτάνει στον server. Οι κλήσεις χτυπούν κι εδώ. Νέες ομάδες, δημόσιες ομάδες και ομαδικές κλήσεις μένουν στο τηλέφωνο προς το παρόν.',
+  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
+    'Αυτές οι κρυφές συνομιλίες έχουν τις συνομιλίες και τις ομάδες των ίδιων κρυφών συνομιλιών του τηλεφώνου που έχει τον λογαριασμό. Ό,τι γράφεις εδώ περνά από το τηλέφωνο, που πρέπει να είναι ανοιχτό και να φτάνει στον server, με αυτές τις κρυφές συνομιλίες ανοιχτές εκεί ή με λήψη όσο είναι κλειστές. Οι κλήσεις χτυπούν κι εδώ. Νέες ομάδες και ομαδικές κλήσεις μένουν στο τηλέφωνο προς το παρόν.',
   'Make or join groups on the phone that holds this account.': 'Φτιάξε ομάδες ή μπες σε ομάδες από το τηλέφωνο που έχει τον λογαριασμό.',
   'Group calls ring on the phone that holds this account, for now. Call from there.':
     'Οι ομαδικές κλήσεις χτυπούν στο τηλέφωνο που έχει τον λογαριασμό, προς το παρόν. Κάλεσε από εκεί.',
@@ -110,10 +110,10 @@ export const devices: Record<string, string> = {
     'Χρησιμοποίησέ το όταν αυτή η συσκευή είναι ο υπολογιστής: οι συνομιλίες του γίνονται του τηλεφώνου που έχει τον λογαριασμό.',
   'Use this when this device is the computer: these hidden chats become those of the same hidden chats on the phone that holds the account.':
     'Χρησιμοποίησέ το όταν αυτή η συσκευή είναι ο υπολογιστής: αυτές οι κρυφές συνομιλίες γίνονται οι ίδιες κρυφές συνομιλίες του τηλεφώνου που έχει τον λογαριασμό.',
-  'These hidden chats have no relay queue yet: in them, type the relay address under For advanced users, then create their queue.':
-    'Αυτές οι κρυφές συνομιλίες δεν έχουν ακόμα ουρά στο relay: μέσα σε αυτές, γράψε τη διεύθυνση του relay στο «Για προχωρημένους» και μετά φτιάξε την ουρά τους.',
-  'The phone answers on a queue of this device on a relay: the one the phone uses, or any other. If the relay asks for a token, sign in when it offers that, or type one.':
-    'Το τηλέφωνο απαντά σε μια ουρά αυτής της συσκευής σε ένα relay: σε αυτό που χρησιμοποιεί το τηλέφωνο ή σε οποιοδήποτε άλλο. Αν το relay χρειάζεται token, συνδέσου όταν σου προσφέρει σύνδεση, ή γράψε ένα.',
+  'These hidden chats have no server queue yet: in them, type the server address under For advanced users, then create their queue.':
+    'Αυτές οι κρυφές συνομιλίες δεν έχουν ακόμα ουρά στον server: μέσα σε αυτές, γράψε τη διεύθυνση του server στο «Για προχωρημένους» και μετά φτιάξε την ουρά τους.',
+  'The phone answers on a queue of this device on a server: the one the phone uses, or any other. If the server asks for a token, sign in when it offers that, or type one.':
+    'Το τηλέφωνο απαντά σε μια ουρά αυτής της συσκευής σε έναν server: σε αυτόν που χρησιμοποιεί το τηλέφωνο ή σε οποιονδήποτε άλλον. Αν ο server χρειάζεται token, συνδέσου όταν σου προσφέρει σύνδεση, ή γράψε ένα.',
   'Name of this device': 'Όνομα αυτής της συσκευής',
   'Tap Link to my phone, and a QR code for the phone shows here.':
     'Πάτα «Σύνδεση με το τηλέφωνό μου» και εδώ εμφανίζεται ένας κωδικός QR για το τηλέφωνο.',
@@ -148,13 +148,13 @@ export const devices: Record<string, string> = {
   "The groups go to {name} once it hears it.": "Οι ομάδες πηγαίνουν στο {name} μόλις το μάθει.",
   "Groups stay on": "Οι ομάδες μένουν σε",
   "Moving: both devices have to be on.": "Μετακινούνται: πρέπει να είναι ανοιχτές και οι δύο συσκευές.",
-  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the relay. Public groups stay on the phone.": "Τα κλειδιά των ομάδων βρίσκονται σε μία συσκευή κάθε φορά, ποτέ αντίγραφο. Εκεί οι ομάδες δουλεύουν και με το τηλέφωνο κλειστό· οι άλλες συσκευές γράφουν σε αυτές μέσω εκείνης, που πρέπει να είναι ανοιχτή. Για να μετακινηθούν χρειάζονται ανοιχτές και οι δύο, και το relay. Οι δημόσιες ομάδες μένουν στο τηλέφωνο.",
+  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the server. Public groups stay on the phone.": "Τα κλειδιά των ομάδων βρίσκονται σε μία συσκευή κάθε φορά, ποτέ αντίγραφο. Εκεί οι ομάδες δουλεύουν και με το τηλέφωνο κλειστό· οι άλλες συσκευές γράφουν σε αυτές μέσω εκείνης, που πρέπει να είναι ανοιχτή. Για να μετακινηθούν χρειάζονται ανοιχτές και οι δύο, και ο server. Οι δημόσιες ομάδες μένουν στο τηλέφωνο.",
   "The groups are held here": "Οι ομάδες είναι σε αυτή τη συσκευή",
   "Groups work on this device with the phone off, and you can make new ones here. The phone and the other devices write in them through this one, so it has to be on.": "Οι ομάδες δουλεύουν σε αυτή τη συσκευή και με το τηλέφωνο κλειστό, και μπορείς να φτιάξεις καινούργιες εδώ. Το τηλέφωνο και οι άλλες συσκευές γράφουν σε αυτές μέσω αυτής, που πρέπει να είναι ανοιχτή.",
   "The groups are held on this device. On the phone, move them back to it first, under Groups stay on.": "Οι ομάδες είναι σε αυτή τη συσκευή. Στο τηλέφωνο, φέρε τις πρώτα πίσω σε αυτό, στο Οι ομάδες μένουν σε.",
   "The groups are held on {name}. Move them back to this phone first, under Groups stay on.": "Οι ομάδες είναι στο {name}. Φέρε τις πρώτα πίσω σε αυτό το τηλέφωνο, στο Οι ομάδες μένουν σε.",
   "That device is no longer linked.": "Αυτή η συσκευή δεν είναι πια συνδεδεμένη.",
-  "The groups go to the other device through the relay. Type its address in Relay first.": "Οι ομάδες πηγαίνουν στην άλλη συσκευή μέσω του relay. Γράψε πρώτα τη διεύθυνσή του στο Relay.",
+  "The groups go to the other device through the server. Type its address in Server first.": "Οι ομάδες πηγαίνουν στην άλλη συσκευή μέσω του server. Γράψε πρώτα τη διεύθυνσή του στον Server.",
   "Unlink all the same?": "Αποσύνδεση παρ’ όλα αυτά;",
   "Unlinked now, the groups go from this device, and the phone shows each as left.": "Με την αποσύνδεση, οι ομάδες φεύγουν από αυτή τη συσκευή και το τηλέφωνο δείχνει ότι βγήκες από την καθεμία.",
   "Unlinked now, this phone shows each of the groups as left, unless they are still on their way to it: those stay here. Do it if the device is lost.": "Με την αποσύνδεση, αυτό το τηλέφωνο δείχνει ότι βγήκες από κάθε ομάδα, εκτός από όσες είναι ακόμα καθ’ οδόν προς αυτό: αυτές μένουν εδώ. Κάν’ το αν χάθηκε η συσκευή.",
@@ -165,14 +165,14 @@ export const devices: Record<string, string> = {
   // Linking with the short code (components/quick-link.tsx, lib/link-nostr.ts).
   'Inside hidden chats, link with the code Link to my phone shows inside the same hidden chats on the computer.':
     'Μέσα στις κρυφές συνομιλίες, σύνδεσε με τον κωδικό που δείχνει το «Σύνδεση με το τηλέφωνό μου» μέσα στις ίδιες κρυφές συνομιλίες στον υπολογιστή.',
-  '{why} Link this way instead: sign in to the relay below, then tap Link to my phone.':
-    '{why} Σύνδεσε αλλιώς: συνδέσου στο relay παρακάτω και μετά πάτα «Σύνδεση με το τηλέφωνό μου».',
+  '{why} Link this way instead: sign in to the server below, then tap Link to my phone.':
+    '{why} Σύνδεσε αλλιώς: συνδέσου στον server παρακάτω και μετά πάτα «Σύνδεση με το τηλέφωνό μου».',
   'Link another way':
     'Σύνδεση με άλλον τρόπο',
   'The phone that answered is not the one that read the code. Make a new code, and link again.':
     'Το τηλέφωνο που απάντησε δεν είναι αυτό που διάβασε τον κωδικό. Φτιάξε νέο κωδικό και σύνδεσε ξανά.',
-  'The phone answered, but this computer could not use its relay: {error}':
-    'Το τηλέφωνο απάντησε, αλλά αυτός ο υπολογιστής δεν μπόρεσε να χρησιμοποιήσει το relay του: {error}',
+  'The phone answered, but this computer could not use its server: {error}':
+    'Το τηλέφωνο απάντησε, αλλά αυτός ο υπολογιστής δεν μπόρεσε να χρησιμοποιήσει τον server του: {error}',
   'The phone answered. Setting up this computer…':
     'Το τηλέφωνο απάντησε. Ρυθμίζεται αυτός ο υπολογιστής…',
   'Linking with the phone…':
@@ -185,8 +185,8 @@ export const devices: Record<string, string> = {
     'Φτιάχνεται ο κωδικός…',
   'The phone sends this computer what it needs through Nostr, end-to-end encrypted. The code works for half an hour.':
     'Το τηλέφωνο στέλνει σε αυτόν τον υπολογιστή ό,τι χρειάζεται μέσω Nostr, κρυπτογραφημένα από άκρη σε άκρη. Ο κωδικός ισχύει μισή ώρα.',
-  'The computer did not answer. On it, tap Link another way and sign in to the relay there, then scan its code again.':
-    'Ο υπολογιστής δεν απάντησε. Σε αυτόν, πάτα «Σύνδεση με άλλον τρόπο», συνδέσου εκεί στο relay και σάρωσε ξανά τον κωδικό του.',
+  'The computer did not answer. On it, tap Link another way and sign in to the server there, then scan its code again.':
+    'Ο υπολογιστής δεν απάντησε. Σε αυτόν, πάτα «Σύνδεση με άλλον τρόπο», συνδέσου εκεί στον server και σάρωσε ξανά τον κωδικό του.',
   'Linked to {name}. The chats go to it now.':
     'Η συσκευή «{name}» συνδέθηκε. Οι συνομιλίες πηγαίνουν τώρα και εκεί.',
   'Link {name} to this phone?':
@@ -195,12 +195,12 @@ export const devices: Record<string, string> = {
     'Σύνδεσε μόνο υπολογιστή δικό σου, του οποίου τον κωδικό σάρωσες μόλις τώρα. Παίρνει τις συνομιλίες αυτού του χώρου και τα μηνύματα που διαλέγεις παρακάτω.',
   'Waiting for the computer…':
     'Αναμονή για τον υπολογιστή…',
-  'No Nostr relay could be reached.':
-    'Δεν ήταν δυνατή η σύνδεση με κανένα relay Nostr.',
-  'The Nostr relay did not take it.':
-    'Το relay Nostr δεν το δέχτηκε.',
-  'No Nostr relay took it.':
-    'Κανένα relay Nostr δεν το δέχτηκε.',
+  'No Nostr server could be reached.':
+    'Δεν ήταν δυνατή η σύνδεση με κανέναν server Nostr.',
+  'The Nostr server did not take it.':
+    'Ο server Nostr δεν το δέχτηκε.',
+  'No Nostr server took it.':
+    'Κανένας server Nostr δεν το δέχτηκε.',
   'Asked. On {name}, tap Link again: it links to this phone and keeps its chats.':
     'Ζητήθηκε. Στη συσκευή «{name}» πάτα «Επανασύνδεση»: συνδέεται με αυτό το τηλέφωνο και κρατά τις συνομιλίες της.',
   'Let go of {name}':

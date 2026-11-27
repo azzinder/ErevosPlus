@@ -1,0 +1,170 @@
+# SPDX-FileCopyrightText: 2026 azzinder
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+
+name: fdroid-build
+
+# Checks that an edition's F-Droid APK comes out the same, byte for byte, wherever it is built:
+# builds it twice, on two of GitHub's machines, each time as F-Droid builds it
+# (scripts/fdroid-build.sh: F-Droid's build server image, its `fdroid build`, the recipe in
+# deploy/fdroid/), and compares the two (scripts/apk-compare.py). The first takes Maven Central's
+# files from Google's copy of it, as a release does (scripts/maven-central-mirror.gradle); the
+# second takes them from Maven Central itself, as F-Droid does, with fewer processors. So a release
+# can build its F-Droid APK the same way and sign it, and F-Droid hand out that signed APK when its
+# own build of the release's commit is the same (docs/reproducible-builds.md): the first build is
+# signed as a release would sign it (scripts/fdroid-sign.sh), with a key made for the test, and its
+# signature, copied onto the second, must verify, as F-Droid checks. With a published F-Droid APK's
+# address it also compares the first build with that one, apart from its signature. No release key
+# is used, and nothing is published or sent anywhere. Only by hand: Actions, fdroid-build, Run
+# workflow; each run takes about two hours of Actions minutes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: erevos (app.erevos) or lite (app.erevos.lite).
+        type: choice
+        options:
+          - erevos
+          - lite
+        default: erevos
+      version:
+        description: The version the APK says it is, e.g. 3.0.0-rc.4.
+        required: true
+        default: 3.0.0-rc.4
+      build:
+        description: The build number it says it is.
+        required: true
+        default: '1'
+      patch:
+        description: A change to try before it is committed, as `git diff --binary | gzip -9 | base64 -w0`; both builds apply it as the same commit.
+        required: false
+        default: ''
+      binary:
+        description: The address of a published F-Droid APK of this version and build, to compare the first build with, apart from its signature.
+        required: false
+        default: ''
+      force:
+        description: Build on when F-Droid's scanner finds a problem in the source (a test only).
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One run of an edition at a time; Erevos and Lite may build side by side.
+concurrency:
+  group: fdroid-build-${{ inputs.edition }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # As a release builds it: Maven Central's files from Google's copy of it.
+          - name: one
+            docker: ''
+            mirror: '1'
+          # As F-Droid builds it: Maven Central's files from Maven Central, so that a file Google's
+          # copy had otherwise shows; and fewer processors, so that whatever depends on how many
+          # there are shows too.
+          - name: two
+            docker: --cpuset-cpus=0-1
+            mirror: ''
+    name: build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Apply the change to try, as one commit, the same in both builds
+        if: ${{ inputs.patch != '' }}
+        env:
+          PATCH: ${{ inputs.patch }}
+        run: |
+          printf '%s' "$PATCH" | base64 -d | gunzip > "$RUNNER_TEMP/change.diff"
+          git apply --index "$RUNNER_TEMP/change.diff"
+          when=$(git log -1 --format=%cI)
+          GIT_AUTHOR_NAME=test GIT_AUTHOR_EMAIL=test@example.invalid GIT_AUTHOR_DATE="$when" \
+            GIT_COMMITTER_NAME=test GIT_COMMITTER_EMAIL=test@example.invalid GIT_COMMITTER_DATE="$when" \
+            git commit -q -m "A change to try"
+          git show --stat --format='%H %s' HEAD
+
+      # F-Droid's image, the source, its packages and the build need more disk than the runner
+      # leaves free.
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift /usr/local/share/powershell /usr/local/lib/android
+          sudo docker image prune --all --force
+          df -h /
+
+      - name: Build as F-Droid builds
+        env:
+          EDITION: ${{ inputs.edition }}
+          VERSION: ${{ inputs.version }}
+          BUILD: ${{ inputs.build }}
+          FDROID_DOCKER: ${{ matrix.docker }}
+          FDROID_FORCE: ${{ inputs.force && '1' || '' }}
+          FDROID_MAVEN_MIRROR: ${{ matrix.mirror }}
+        run: scripts/fdroid-build.sh "$EDITION" "$VERSION" "$BUILD" "unsigned-${{ matrix.name }}.apk"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-${{ matrix.name }}
+          path: unsigned-${{ matrix.name }}.apk
+          retention-days: 2
+
+  compare:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: unsigned-*
+          merge-multiple: true
+
+      - name: Compare the two builds
+        run: python3 -I scripts/apk-compare.py unsigned-one.apk unsigned-two.apk
+
+      # apksigcopier, with which F-Droid copies a signature onto its build, by its SHA-256, and
+      # apksigner, with which it checks the result.
+      - name: Get apksigcopier and apksigner
+        if: always()
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet --require-hashes --no-deps --only-binary :all: -r scripts/apksigcopier-requirements.txt
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)" >> "$GITHUB_PATH"
+
+      # As a release signs its F-Droid APK (scripts/fdroid-sign.sh), here with a key made for the
+      # test, and as F-Droid then checks it against its own build: the first build's signature,
+      # copied onto the second, must verify.
+      - name: Sign the first build, and copy its signature onto the second
+        if: always()
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.p12" -storetype PKCS12 -storepass test-only \
+            -alias test -keyalg RSA -keysize 4096 -validity 2 -dname CN=test
+          ANDROID_KEYSTORE="$RUNNER_TEMP/test.p12" ANDROID_KEYSTORE_PASSWORD=test-only ANDROID_KEY_ALIAS=test \
+            ANDROID_KEY_PASSWORD=test-only scripts/fdroid-sign.sh unsigned-one.apk signed-one.apk
+          # The signature alone was added, as a release checks after signing.
+          apksigcopier compare --unsigned signed-one.apk unsigned-one.apk
+          apksigcopier compare --unsigned signed-one.apk unsigned-two.apk
+          echo "F-Droid would take it: the first build's signature, copied onto the second, verifies."
+
+      # As F-Droid does: the published APK's signature, copied onto the build, must verify.
+      - name: Compare with the published F-Droid APK
+        if: ${{ always() && inputs.binary != '' }}
+        env:
+          BINARY: ${{ inputs.binary }}
+        run: |
+          curl -fsSL --retry 3 -o published.apk "$BINARY"
+          if apksigcopier compare --unsigned published.apk unsigned-one.apk; then
+            echo "SAME as the published APK, apart from its signature."
+          else
+            python3 -I scripts/apk-compare.py published.apk unsigned-one.apk || true
+            exit 1
+          fi

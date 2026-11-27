@@ -12,7 +12,7 @@ internet.
 
 - **Nearby, without internet:** two Android phones talk directly over Bluetooth, Wi-Fi Aware or Wi-Fi Direct, end-to-end
   encrypted, and phones and computers on the same Wi-Fi or a phone's hotspot do too. With a LoRa radio, texts go kilometres.
-- **Through a relay:** over Wi-Fi or the internet, through a small server (a relay) that you can run yourself.
+- **Through a server:** over Wi-Fi or the internet, through a small server that you can run yourself.
 - **Spaces:** a password lock, a second password that opens a separate, empty Erevos, and hidden chats in every
   space.
 - **Appearance:** the LPHL looks: Classic, Modernist and Nocturne, twelve palettes, and glass as on lphl.nekten.eu.
@@ -20,7 +20,7 @@ internet.
 {-**Erevos+** is the same app with more: chats with people on Telegram, Messenger, Signal, Session, Matrix, XMPP
 and Nostr, on Android 8.0 or newer. Move to it, or back, in **Updates**: see [Erevos, Erevos+ or Erevos Lite, and betas](#update-channel).}
 
-> Messages are **end-to-end encrypted**, through a relay and nearby alike, but nothing has been audited yet by
+> Messages are **end-to-end encrypted**, through a server and nearby alike, but nothing has been audited yet by
 > independent experts. [What is protected today](#privacy) says exactly what is and is not.
 
 This guide opens from **User guide** in the home screen's menu (the three dots at the top). The search at its top finds any word in it. The guide
@@ -29,8 +29,8 @@ is in every language of the app, and shows in the one you chose, see [Language](
 ### Who makes it, and why
 
 - **Who:** Erevos, by azzinder: the same person who made [Fasouli](https://github.com/azzinder/lphl-chrima-releases/releases/latest), a private app for your money.
-- **Where:** it does not matter. What matters is that the relay and the app for the browser run on the maker's own
-  server (lphl.nekten.eu).
+- **Where:** it does not matter. What matters is that the server and the app for the browser are the maker's own
+  (lphl.nekten.eu).
 - **For whom:** for anyone who wants to talk with their own people without giving a phone number, an email or an
   account: friends, families, groups, and those who live where the internet is cut off or watched. And for those who,
   with nothing to hide, want to keep their personal space private, away from prying eyes.
@@ -76,8 +76,45 @@ This part opens from **Settings** → **General** → **About Erevos** too.
 
 Erevos is downloaded from its releases page, one file for each system: see [Updates](#updates) for where, and how to
 update it. It runs on Android, on a computer (Linux, macOS and Windows), on Sailfish OS and, from the browser, on an
-iPhone. If you are new to it, start with an invite from someone who uses it: one QR code or link, and you are in,
-with them as a contact (see Inviting someone new, under [Chat through a relay](#relay)).
+iPhone. If you are new to it, just open it: at its first start, as below, Erevos takes a place for your messages on
+LPHL's server by itself, with no phone number, email or account. An invite from someone who uses it, one QR code or
+link, brings you in with them as a contact at once (see Inviting someone new, under [Chat through a server](#relay)).
+
+The very first time Erevos starts, it sets itself up in a few short steps, with a dot for each. Before its first space
+opens: **Welcome to Erevos**, with what you do not give (no phone number, email, user name or account: you add people
+with a QR code or a link) and a name for your contacts if you want one, with the language at the top{~; then **What
+will you use?**, the modules (see [Modules](#modules)): what you turn off does not run at all. Erevos's chats, the
+Phone, the SMS and the Collection are on at first}{+, the other networks, under **Other networks**, off}. Then, in the
+space:
+
+1. **How visible are you?**: the three choices of [How visible are you?](#direct), with SPEED chosen already. As you
+   continue, Erevos takes a place for your messages on LPHL's server by itself, with no invite and no account (see
+   **An open place** under [Chat through a server](#relay)), unless the invite Erevos was opened with brings a server
+   of its own. **Another server (for advanced users)**, under the choices, opens the other ways in: an account at a
+   server, or a server of your own.
+2. **Miss nothing**: every permission Erevos asks for, in five groups by what they are for (Notices, Calls, Messages,
+   In the background, Reminders), with how many are allowed. **Allow all** asks the questions Android asks in Erevos
+   itself first{~, then for Erevos as the phone app and as the SMS app}, then opens each screen of Android's settings
+   in turn, as you come back from the one before; **Continue without them** leaves them for **Settings** → **General**
+   → **Permissions**. In a browser the step has what the browser asks about; the computer app has no such step.
+3. **Keep it safe**: a password for Erevos, typed twice, with a meter and four tips for a stronger one, the fingerprint
+   or face, and where automatic backups go: **On this device**, in a folder you choose, **WebDAV** (Nextcloud,
+   ownCloud and others), or on Android **Google Drive**, which first says what Google then knows, each set up on the
+   Backups screen that **Done** opens (see [Backups](#backup)).
+
+Then the home screen says **Ready**, with your name, and offers **They are beside me** and **They are far away** for
+your first contact, with what a free place on LPHL's server may do each day and a line for a permission still missing.
+Until **Done**, the steps show again when Erevos starts. Opened with an invite, Erevos shows it once the steps are done.
+
+- **The name:** it is not a user name: no one searches for it, and it need not be unique. It goes, encrypted, only to
+  those you add, and **My name** under Settings → Privacy and security changes it.
+- **Moving from another phone:** on Android, **Move it here**, beside **I already have Erevos on another phone** on the
+  first screen, skips the name{~ and the modules}, which the backup brings. The space opens, **Open Backups** restores
+  it (see [Moving to a new phone](#new-phone)), and the steps go on without **How visible are you?**, which the backup
+  brings too: the permissions, then the fingerprint and where automatic backups go, which stay with each phone; a
+  password lock the backup brought shows as on. **I have no backup yet** says how to make one, and **Start without a
+  backup** begins as someone new.
+- [~] **On a computer or in a browser:** **Link to my phone** skips the steps and opens **Linked devices**.
 
 The home screen is the list of your chats, the one that moved last at the top. Each shows the contact's picture,
 the last message with its marks, when it came, and how many of their messages you have not read. A clock beside it
@@ -107,7 +144,7 @@ SMS too,} and tap it again to go back. Hidden chats keep their own pinned and ar
 
 - **The picture** is drawn from the contact's key: the same key always gives the same colours and moon{+ (in greens under Matrix)}, so you know
   a chat at a glance without any photo. It is not a check of the key; the [safety number](#relay) is.
-- **The line under the search** says whether a relay is set and your queue is ready. Tap it to set one up.
+- **The line under the search** says whether a server is set and your queue is ready. Tap it to set one up.
 - **The search and that line stay** under the top bar{~, with the services button,|} while the list scrolls.
 - **Chat with myself**, always first in the chats, with a pin, holds your notes to yourself: see Chat with myself and
   reminders below.
@@ -133,7 +170,7 @@ SMS too,} and tap it again to go back. Hidden chats keep their own pinned and ar
   and share; under a Matrix message: answer, react and share. **New post**, the pen at the bottom, writes a public
   post, with up to four photos. See [Chats with other Nostr apps](#nostr-chats).
 - **New chat**, at the bottom, asks where the other person is, **Near me**, **Far away** or **I have their code**, and
-  adds them; the rows under these open your own link, who is blocked and the relay settings. **Remind me**, the orange
+  adds them; the rows under these open your own link, who is blocked and the server settings. **Remind me**, the orange
   bell beside it, writes a reminder for you.
 - **{~The green handset and the violet person|The violet person}** at the top, on Android, {~open **Phone** and **Contacts** at once, in the
   colours of their icons|opens **Contacts** at once, in the colour of its icon} on the phone's home screen. {~They are|It is} not in the menu under the three dots as well.
@@ -166,7 +203,7 @@ SMS too,} and tap it again to go back. Hidden chats keep their own pinned and ar
 | --- | --- |
 | **New group** | A group chat with your contacts. See [Group chats](#groups). |
 | **Public groups** | A group anyone with its link can ask to join, with an owner and admins. See [Public groups](#public-groups). |
-| **Starred messages** | The messages you starred, in all your chats. See A message's menu, under Chat through a relay. |
+| **Starred messages** | The messages you starred, in all your chats. See A message's menu, under Chat through a server. |
 | **Nearby phones** | Your contacts over Bluetooth and Wi-Fi Aware, or on the same Wi-Fi, without internet. See [Chat with a nearby phone](#nearby). |
 | **User guide** | This guide. |
 | **Settings** | The last row, with a cog: everything you can set, in groups, with a search. See Settings below. |
@@ -182,7 +219,7 @@ closes them.
 own tab with how many there are: **Photos** (in a grid), **Videos**, **Voice messages**, **Music**, **Files** and
 **Links**, the newest first under their months, those imported from Telegram or WhatsApp too. A tap opens a photo or a
 file to look at or save, plays a sound right there, or opens a link after asking; held, each offers **Show in chat**,
-which goes to its message. One not yet taken from the relay is gone to in the chat, where a tap takes it. The calendar
+which goes to its message. One not yet taken from the server is gone to in the chat, where a tap takes it. The calendar
 at the top goes to a day: the days that have any of that kind are marked. **Go to a day**, under it in the details,
 does the same for the chat itself: it goes to that day's first message.
 
@@ -205,8 +242,8 @@ A good first hour:
    picks up the phone can open Erevos.
 2. Open **Nearby phones** from the menu on two phones that are close to each other, and allow what Android asks for.
 3. Add each other with **New chat** → **Near me**, on both phones, as in [Chat with a nearby phone](#nearby), and send
-   a message: it goes nearby, end-to-end encrypted, with no relay and no internet.
-4. To talk from further away, set up a relay as in [Chat through a relay](#relay).
+   a message: it goes nearby, end-to-end encrypted, with no server and no internet.
+4. To talk from further away, set up a server as in [Chat through a server](#relay).
 
 ### Chat with myself and reminders
 
@@ -245,7 +282,7 @@ with chats.
 
 **Why:** a notice shows on the locked screen to whoever holds the phone, so what a reminder says stays encrypted in its
 space and Android is told only its time: the notice cannot tell anyone what you wanted to remember, nor which space it
-is in. And the notes go to no one but your own devices, end-to-end encrypted between them as your chats are: the relay
+is in. And the notes go to no one but your own devices, end-to-end encrypted between them as your chats are: the server
 carries them only sealed.
 
 - [~] **From other chats:** a message of {+a Matrix, XMPP, Nostr or }{-an }SMS {+chat}{-conversation} can come here too, with a reminder: **Remind
@@ -273,11 +310,13 @@ phone's own settings do. In the other languages it is named in that language and
 
 - **Search the settings,** at the top, finds a setting by the start of its words, with or without accents, and shows
   where it is, such as {~**Phone and SMS › SMS**|**Privacy and security › Hidden chats**}. Tap it to open it.
-- **Language · Γλώσσα,** the row under the search, opens the list of languages, see Language below.
+- **How visible are you?** Under the search, three choices for who sees your phone's internet address: **SPEED**,
+  **ANONYMOUS** and **INVISIBLE**. **What it changes** opens their screen. See [How visible are you?](#direct).
+- **Language · Γλώσσα,** the row under it, opens the list of languages, see Language below.
 - **A group** opens the list of its settings, and a setting opens its screen. A setting with parts, such as {~**SMS**|**Backups**},
   lists them, and each part opens alone.
 - **Only what works here shows:** on a computer, on Sailfish OS and in the web app there is no {~**Phone and SMS**,
-  |}Tor, Nostr or LoRa, and a group with nothing to set here does not show.
+  |}Tor or LoRa, and a group with nothing to set here does not show.
 - [~] **Only the modules on show:** the settings of a module that is off, such as {+**Matrix** or }**Phone and SMS**, do not
   show either: see [Modules](#modules).
 
@@ -286,11 +325,11 @@ phone's own settings do. In the other languages it is named in that language and
 | **General** | **Language**, {~**Modules**, |}**Updates**, **Give Erevos to a phone nearby** (Android), **What's new**, **About Erevos**, **Support Erevos** and **Permissions** (Android and the web app). See Language below, {~[Modules](#modules), |}[Updates](#updates) and [Erevos to a phone nearby](#give-app). |
 | **Appearance** | **Style and colours** (look, glass, style, theme, colours and text on coloured areas, with the preview), **Wallpaper**, **Messages** (the bubbles' shape), **Launcher icons** (Android), **Widget** (Android) and **Vibrate on touch** (Android). See [Appearance](#appearance). |
 | **Notifications** | **In the background** (Android and the computer app): receiving and ringing while Erevos is closed, and the notice for messages; on a computer, whether Erevos keeps running with its window closed. **Notifications while closed** (the web app): Web Push. **Number on the icon**: how many messages are not read, on Erevos's icon. See [On an iPhone](#iphone) and [On a computer](#desktop). |
-| **Privacy and security** | **Lock and second password** (lock when Erevos opens, the password, screen privacy, fingerprint or face, the second password), **Hidden chats** (the PINs of the 4 places), **Panic button** (with the panic password), **Calculator in place of Erevos** (Android, under Appearance), **Screenshots** (Android) and **This web app** (the web app only). See [Password lock](#lock), [Second password](#second), [Hidden chats](#hidden) and [Panic button](#panic). See also [Delete me from everywhere](#forget). |
-| **Relay and networks** | **Ways**, **Relay** (it opens **New chat** with **For advanced users** open), **Home relay**, **Tor** (Android), **Nostr** (Android){+,}{- and} **LoRa radio** (Android){+, **Matrix**, **XMPP** and **Nostr chats**}. See [Chat through a relay](#relay), [Home relay](#home-relay), [Through Tor](#tor), [Through Nostr](#nostr){+,}{- and} [Over a LoRa radio](#lora){+, [Matrix](#matrix), [XMPP](#xmpp) and [Chats with other Nostr apps](#nostr-chats)}. |
+| **Privacy and security** | **How visible are you?** (SPEED, ANONYMOUS or INVISIBLE: who sees your internet address, and how calls go), **Lock and second password** (lock when Erevos opens, the password, screen privacy, fingerprint or face, the second password), **Hidden chats** (the PINs of the 4 places), **Panic button** (with the panic password), **Calculator in place of Erevos** (Android, under Appearance), **Screenshots** (Android) and **This web app** (the web app only). See [How visible are you?](#direct), [Password lock](#lock), [Second password](#second), [Hidden chats](#hidden) and [Panic button](#panic). See also [Delete me from everywhere](#forget). |
+| **Server and networks** | **Ways**, **Server** (it opens **New chat** with **For advanced users** open), **Home server**, **Tor** (Android), **Nostr**{+,}{- and} **LoRa radio** (Android){+, **Matrix**, **XMPP** and **Nostr chats**}. See [Chat through a server](#relay), [Home server](#home-relay), [Through Tor](#tor), [Through Nostr](#nostr){+,}{- and} [Over a LoRa radio](#lora){+, [Matrix](#matrix), [XMPP](#xmpp) and [Chats with other Nostr apps](#nostr-chats)}. |
 [~] | **Phone and SMS** (Android) | **Phone**, the phone app's settings, the same as **Phone** → **Settings**. **SMS**, in parts: **Erevos as the SMS app**, **Find Erevos on a number**, **SMS when nothing else works**, **Names from your contacts**, **Archived, Spam and Trash**, **Spam filter**, **Blocked numbers**, **Taking an SMS back**, **Two SIMs** (only with two SIMs) and **New SMS**. See [Phone](#phone) and [SMS](#sms). |
 | **Data and devices** | **Backups**, **Backup pieces**, **Linked devices** and **Imported chats**. See [Backups](#backup), [Backup pieces with friends](#backup-pieces), [Linked devices](#devices) and [Imported chats](#import). |
-| **For testing** | **Relay test** and **Radio test** (Android). See [The test screens](#tests). |
+| **For testing** | **Server test** and **Radio test** (Android). See [The test screens](#tests). |
 
 ### Language
 
@@ -317,24 +356,8 @@ Erevos is made of parts, its modules: **Erevos** itself (its own chats, groups a
 the hidden chats), the **Phone**{- and}{+,} the **SMS**{+, the chats with **Nostr**, **Matrix** and **XMPP** apps, and **Telegram**, **Messenger**, **Signal** and **Session**}. The **Collection** (your photos and files, encrypted) is a module too. The Phone and the SMS are only on Android, the Collection on Android, in the desktop app, in the web app and on Sailfish OS. Any of them can be on, Erevos itself too, one or more, at least one: **Settings** →
 **General** → **Modules** turns each on or off at any time.
 
-The very first time Erevos starts, it sets itself up as an installer does. Before its first space opens: what you
-do not give (no phone number, email, user name or account: you add people with a QR code or a link, or they invite
-you), a name for your contacts if you want one, and the language; then which modules to use, each with what it does.
-Then, in the space: a screen for each module chosen, with how to begin with it (for Erevos, how you join; for the Phone
-and the SMS, Erevos as the phone app and as the SMS app{+; for Nostr, Matrix and XMPP, your account there}) and what
-Android, or the browser, should allow for it. Each permission is on the first screen that needs it, and **Allow all,
-one by one** asks the questions Android asks in Erevos itself one after another. Then the password lock and automatic
-backups, then what is ready and what is missing, with **Invite someone**. **Do the rest later** leaves the rest for
-Settings; until you finish or put it off, the steps show again when Erevos starts. Opened with an invite, Erevos shows
-it once the steps are done. After an update every module stays on, as before, until you change them.
-
-- **The name:** it is not a user name: no one searches for it, and it need not be unique. It goes, encrypted, only to
-  those you add, and **My name** under Settings → Privacy and security changes it.
-- **Moving from another phone:** on Android, **I already have {=Erevos} on another phone** skips the name and the
-  modules, which come with the backup. The space opens, **Open Backups** restores it (see
-  [Moving to a new phone](#new-phone)), and the screens of the modules it brings follow, then the fingerprint and the
-  folder of automatic backups, which stay with each phone. **I have no backup yet** says how to make one.
-- **On a computer or in a browser:** **Link to my phone** skips the steps and opens **Linked devices**.
+At the first start, **What will you use?** chooses them, each with what it does (see [Getting started](#start)). After
+an update every module stays on, as before, until you change them.
 
 - **Off:** a module that is off does not start: nothing of it runs, waits at a server or rings, so Erevos is lighter,
   opens faster and uses less battery. It shows nowhere: not on the home screen, in its menu or in Settings, and the
@@ -360,22 +383,22 @@ does only that, and a phone that does not wait in the background for messages th
 
 While a space is open, on any screen, Erevos looks for other {=Erevos} phones around it, over Bluetooth and, where the
 phone has it, Wi-Fi Aware, and on the Wi-Fi it is on, phones and computers alike. No internet, SIM or Wi-Fi network is
-needed. It carries messages to your contacts, end-to-end encrypted like those through the relay.
+needed. It carries messages to your contacts, end-to-end encrypted like those through the server.
 
 It looks only once **Look for phones nearby** is on, under **For advanced users** → **Nearby, with no internet**, on
-**New chat**: it is off until you turn it on, on both phones, and until then everything goes through the relay. Only
+**New chat**: it is off until you turn it on, on both phones, and until then everything goes through the server. Only
 **Near me**, on New chat, looks without it, while its page is open, to add a contact.
 
 1. Open **Nearby phones** from the menu on both phones. The first time, Android asks to find nearby devices (on Android 12 and
    older, also for the location); allow it, or the phones cannot find each other.
 2. If you are not contacts yet, add each other: on both phones tap **New chat** and then **Near me**, and tap **Yes,
-   the same** once both show the same pictures, as in [Chat through a relay](#relay). Without a relay each phone gives
+   the same** once both show the same pictures, as in [Chat through a server](#relay). Without a server each phone gives
    only its keys, and you reach each other nearby only, until you have one.
 3. Pick the contact, type in the message bar at the bottom and tap the send arrow. Once their phone answers, the top of the chat says
    **Nearby**.
 
 - **While a space is open:** the links start when a space opens, whatever screen shows, and stop when another space
-  opens: locked, the space goes on behind the password screen. A message from nearby shows on the home screen as one through the relay does, and a call rings
+  opens: locked, the space goes on behind the password screen. A message from nearby shows on the home screen as one through the server does, and a call rings
   there too. On Android they stay up with Erevos in the background, while **In the background** is on **Receive and
   ring**. To spare the battery there, it looks for phones less often: Wi-Fi Direct every ten minutes, Wi-Fi Aware a
   minute in every five, and on the same Wi-Fi it hears the others twenty seconds in every two minutes. A phone nearby
@@ -398,28 +421,28 @@ It looks only once **Look for phones nearby** is on, under **For advanced users*
   them.
 - **Other phones nearby** get only sealed bytes they cannot open, and only until your contact's phone is known: from
   then on what you send goes to it alone. Voice messages go only to a contact known to be near. Photos and files need
-  the relay.
-- **With a relay as well,** each message also goes through it, so nothing is lost if the link drops; the copy that
-  comes second is not shown again. If the relay cannot be reached, the copy nearby is the one that counts.
-- **Carried by other phones:** when the relay cannot be reached and your contact is not near, the {=Erevos} phones nearby
-  also take your message sealed for your contact's relay. Each keeps it, three days at most, gives it to two more
-  phones at most that it meets, and hands it to that relay through its own relay once it can; so does yours. They
-  cannot read it, nor tell who it is from or for: they see only the relay's address. It stays when Erevos closes,
+  the server.
+- **With a server as well,** each message also goes through it, so nothing is lost if the link drops; the copy that
+  comes second is not shown again. If the server cannot be reached, the copy nearby is the one that counts.
+- **Carried by other phones:** when the server cannot be reached and your contact is not near, the {=Erevos} phones nearby
+  also take your message sealed for your contact's server. Each keeps it, three days at most, gives it to two more
+  phones at most that it meets, and hands it to that server through its own server once it can; so does yours. They
+  cannot read it, nor tell who it is from or for: they see only the server's address. It stays when Erevos closes,
   sealed on the phone. Yours stay in your space, and go only while it is open. Carrying for others is on unless you
   turn off **Carry messages for others** under **For advanced users** → **Nearby, with no internet**, on **New chat**,
-  and only for relays on the internet over TLS (wss://): a stranger nearby never has your phone, or your relay, reach
+  and only for servers on the internet over TLS (wss://): a stranger nearby never has your phone, or your server, reach
   one on a local network or on the phone itself. Your own messages are carried by the phones nearby that have it on.
 - **Brought by other phones:** the other way round, when your phone has no internet, an {=Erevos} phone beside it that
-  has internet, and carries for others, takes what waits for you on your relay and hands it over nearby. Erevos asks
+  has internet, and carries for others, takes what waits for you on your server and hands it over nearby. Erevos asks
   once about each such phone, a contact's too, as a stranger can pass on a contact's messages to seem to be them, and
   only while it is in front: **A phone near you has internet. Should it bring your messages?** That phone learns which
-  queue on your relay is yours, and when you read it; never what your messages say, which only your phone opens.
+  queue on your server is yours, and when you read it; never what your messages say, which only your phone opens.
   Knowing the queue, it could take your messages before they reach you, so once your phone has internet again it moves
   to a new queue by itself and tells your contacts quietly. Hidden chats are asked about apart, and only while they
   are on the screen, since that phone would learn there is a second queue, and so that there may be hidden chats.
-  Never for a relay reached only through Tor. Your phone does the same for the phones beside it while **Carry messages
-  for others** is on, never while it goes through Tor, and from a relay other than its own only once you say yes,
-  warned that this relay then sees your phone's internet address.
+  Never for a server reached only through Tor. Your phone does the same for the phones beside it while **Carry messages
+  for others** is on, never while it goes through Tor, and from a server other than its own only once you say yes,
+  warned that this server then sees your phone's internet address.
 
 **Why:** a packet does not say who it is for, so no one nearby can tell from it whose it is. Until your contact's
 phone answers on a link, your phone cannot tell which of the phones nearby is theirs either: so the short packets go to
@@ -451,16 +474,16 @@ radio, and on Android only.
 
 1. Set up the radio in the Meshtastic app first, its **region** above all: without one it sends nothing. Then close
    the Meshtastic app, or disconnect it there: a radio links to one app at a time.
-2. Open **Settings** → **Relay and networks** → **LoRa radio**, tap **Find my radio**, read what it says, and tap
+2. Open **Settings** → **Server and networks** → **LoRa radio**, tap **Find my radio**, read what it says, and tap
    your radio when it shows. A radio not paired yet asks for its PIN: it shows on the radio's screen, or is 123456.
 3. Your contact does the same with theirs, on the same mesh: the same region and the same first channel.
-4. Write as always. When the relay cannot be reached and no phone is near, a text goes over LoRa,
+4. Write as always. When the server cannot be reached and no phone is near, a text goes over LoRa,
    and the line under the chat says so.
 
 - **Only text, and slowly:** a message goes in pieces of about 220 bytes, each a second or two on the air, and the law
   allows a radio only so much air time (in the EU, a tenth of each hour). So LoRa takes only texts and deletes, and
   only when nothing else does. Voice messages, photos and files wait in the chat, marked **Waiting**, and go by
-  themselves once the relay or a phone nearby can take them; calls need one of those too. The first message to a
+  themselves once the server or a phone nearby can take them; calls need one of those too. The first message to a
   contact takes longer, as it holds the keys.
 - **Marks:** **✓✓** comes with their next message, as marks alone do not go over LoRa.
 - **Spare pieces, and long texts packed:** a message of two pieces or more goes with spare pieces after it, one for
@@ -488,56 +511,56 @@ never for what other phones would have it carry.
 > stays end-to-end encrypted, but anyone with a radio can tell that yours sends, when and how much. With
 > **Said to all in reach**, anyone with a radio can also read its name and where it is.
 
-## Chat through a relay {#relay}
+## Chat through a server {#relay}
 
-A relay is a small server that keeps one-way queues: each phone has its own queue, and whoever has its **contact
-link** can drop messages into it. The relay holds no accounts, names or phone numbers, and cannot read the messages:
-they are end-to-end encrypted, and only the two phones have the keys. Each phone may use a relay of its own: a message
-to a contact on another relay is sealed for theirs and handed to yours, which passes it on, so their relay never sees
-your phone's address. A phone with no relay gets a place on its contact's, see **No relay of your own** below.
+The server keeps one-way queues: each phone has its own queue, and whoever has its **contact
+link** can drop messages into it. The server holds no accounts, names or phone numbers, and cannot read the messages:
+they are end-to-end encrypted, and only the two phones have the keys. Each phone may use a server of its own: a message
+to a contact on another server is sealed for theirs and handed to yours, which passes it on, so their server never sees
+your phone's address. A phone with no server gets a place on its contact's, see **No server of your own** below.
 
 **Why:** with queues and no accounts, no server holds a list of who knows whom, and no one needs your phone number or
 email to reach you: whoever has your contact link can write to your queue, and only you read it.
 
 1. On the home screen, tap **New chat**. While something is missing, **How you connect now** at the top says in plain
-   words how your contacts reach you: through your relay, through Nostr with no relay, or only nearby; when everything
-   works it is not shown. With a relay, a field at the top finds a contact by name or adds a link pasted into it. Then
+   words how your contacts reach you: through your server, through Nostr with no server, or only nearby; when everything
+   works it is not shown. With a server, a field at the top finds a contact by name or adds a link pasted into it. Then
    comes one question, **Where is the other person?**, and each answer opens a page of its own: **Near me**, **Far
    away** and **I have their code**, as in 4 to 6 below. Three small buttons under them open the rest: **My link**,
-   **Blocked contacts** and **For advanced users**, where the relay's own settings are, and a phone with no relay yet
-   has one more, **I have no invite**, which opens the same page; **Settings** → **Relay and networks** → **Relay**
+   **Blocked contacts** and **For advanced users**, where the server's own settings are, and a phone with no server yet
+   has one more, **I have no invite**, which opens the same page; **Settings** → **Server and networks** → **Server**
    opens New chat with them open.
-2. Under **For advanced users**, type the **Relay address**: \`ws://<computer address>:7879\` for a relay on your own network, or
-   \`wss://relay.example.org\` for one on the internet. Add the **Token** if the relay needs one.
-3. Erevos makes your queue on it by itself, a few seconds later, and says **Relay queue created**: everything works, texts,
+2. Under **For advanced users**, type the **Server address**: \`ws://<computer address>:7879\` for a server on your own network, or
+   \`wss://relay.example.org\` for one on the internet. Add the **Token** if the server needs one.
+3. Erevos makes your queue on it by itself, a few seconds later, and says **Server queue created**: everything works, texts,
    photos, voice messages, calls and groups, and **How you connect now** goes, as nothing is missing. If it cannot, the note
-   says why; **Create my relay queue**, under the address, tries again.
+   says why; **Create my server queue**, under the address, tries again.
 4. **Near me**, for someone beside you: on both phones, tap **New chat** and then **Near me**. The two phones find
    each other by themselves, over Bluetooth or the Wi-Fi they share, and each shows **A phone was found** with six
    pictures. Look at both screens: when the pictures are the same, in the same order, each of you taps **Yes, the
-   same**, and you are each other's contacts, with no relay, no internet and nothing typed. **No, others** leaves that
+   same**, and you are each other's contacts, with no server, no internet and nothing typed. **No, others** leaves that
    phone aside. The pictures come from a key the two phones make with each other, so a phone that sat between them
    would show each of you different ones; each phone gives its contact link only once its owner says yes, encrypted
    with that key. The page looks for phones only while it is open, also with **Look for phones nearby** off, which
    stays off; in hidden chats and in the web app nothing looks. Under **If it is not found** the page has the other
-   ways for someone beside you: a QR code for their camera, which is an invite where your relay lets this phone invite
+   ways for someone beside you: a QR code for their camera, which is an invite where your server lets this phone invite
    and your contact link otherwise; **Show a code of 8 digits**, which they type as in 6; **Scan theirs** and **Type
    their code**, for theirs; and, on Android, **No Erevos on their phone?**, which hands them the app itself. The QR
    code there shows small; a tap shows it large.
 5. **Far away**, for someone who is not with you: the page makes an invite, one link for one person, inside a message
    ready to send. Tap **Send with…** and choose the app it goes with (in a browser and on a computer, **Copy the
    invite**), or **Its QR code** to show it as a code. They tap the link: with Erevos on their phone it opens there,
-   and with none the link first shows where to get it. Their phone then joins your relay with access of its own,
+   and with none the link first shows where to get it. Their phone then joins your server with access of its own,
    typing nothing, and you are each other's contacts. The page says how far things are, **The invite is ready**,
    **Waiting for them to open it**, **You are connected**, and you may leave it meanwhile: once their phone has
    joined, they show in your chats. More about invites is in Inviting someone new, below. Where this phone can make no
-   invite, with no relay yet, in hidden chats or on a linked computer, the page gives your contact link to send
+   invite, with no server yet, in hidden chats or on a linked computer, the page gives your contact link to send
    instead: they open it in Erevos, or paste it under **I have their code**. On the page the link in the message shows
    short, its middle left out; what is sent, copied or shown as a QR code is always the whole link.
 6. **I have their code**, for what they gave you. Type the 8 digits their phone shows under **Near me** → **Show a
    code of 8 digits**, beside you or said on a call: each phone then has the other as a contact. The code itself never
    leaves the phones: they prove to each other that they know it, and their contact links go encrypted with a key only
-   the same code makes. They meet on public Nostr relays, which see neither the code nor the links, and whoever
+   the same code makes. They meet on public Nostr servers, which see neither the code nor the links, and whoever
    guesses gets 3 tries before the code closes. A code lasts 10 minutes. Under the digits, paste their contact link or
    invite into the field and tap **Add**, or tap **Scan their QR code** and take a photo of the QR code on their
    screen, or **From a photo of their QR code** for a screenshot or a photo of it they sent you. Erevos reads it and
@@ -552,7 +575,7 @@ email to reach you: whoever has your contact link can write to your queue, and o
    message request first. **Large QR code, for no internet** shows the whole code instead, which works nearby with no
    internet, and **Small QR code** goes back. **Share**, under it, sends a short link that any app lets you tap; on
    Android it opens Erevos, which asks before it takes it. To add someone with their contact QR code, your phone needs
-   a relay first. This QR code works only when both phones have a relay, as the page says: otherwise use **Near me**,
+   a server first. This QR code works only when both phones have a server, as the page says: otherwise use **Near me**,
    or an invite from **Far away**. **Scan theirs** and **From a photo of their QR code**, under it, read the other
    phone's code from here. Touch works too: while the small contact QR code shows and NFC is on, on Android, the other
    phone takes it when you hold the back of their phone to the back of yours. It works only while Erevos is open in
@@ -567,57 +590,75 @@ none of its own, and the contact's card shows the chat. Hidden chats offer only 
 It is enough that one phone adds the other: adding a link starts an encrypted conversation and tells the other phone
 how to answer, so it lists the chat the next time it looks at its queue, which it does every few seconds.
 
-**What the relay sees of a chat:** all your contacts write to your one queue. Once each phone has had a message from
+**What the server sees of a chat:** all your contacts write to your one queue. Once each phone has had a message from
 the other, every message between them is sealed once more for the phone it goes to, with a key that phone gave inside
-the chat, so to the relay each is random bytes of one of a few sizes, and it cannot tell from them which conversation
-they belong to. The first message of a chat, and any sent before the answer comes, still show it. The relay still sees
-which address puts each message in, and when. And each one tells the relay, in a byte it reads, what it carries: a
+the chat, so to the server each is random bytes of one of a few sizes, and it cannot tell from them which conversation
+they belong to. The first message of a chat, and any sent before the answer comes, still show it. The server still sees
+which address puts each message in, and when. And each one tells the server, in a byte it reads, what it carries: a
 message someone reads, word between phones (that a message came or was read, typing, being online, reactions, new
-keys), or a call that rings. So the relay sees which are messages, and when a call starts, whether notifications are
+keys), or a call that rings. So the server sees which are messages, and when a call starts, whether notifications are
 on or not: it is how a closed web app's notice can count them, and the notice of closed hidden chats.
 
-### Ways in to the relay
+### Ways in to the server
 
-A relay that needs a token lets a phone in three ways. Each way ends with a token of the phone's own there, so whoever
-runs the relay can take any one phone out alone.
+A server that needs a token lets a phone in four ways. Each way ends with a token of the phone's own there, so whoever
+runs the server can take any one phone out alone.
 
-- **An invite:** a QR code or link from a phone already on the relay (see Inviting someone new below). Nothing to type,
+- **An open place:** a server that gives them, as LPHL's does, gives a phone with no place there one by itself, with no
+  invite and no account. At the first start, once you choose how visible you are, Erevos takes one on LPHL's server and
+  makes your queue there (see [Getting started](#start)); **Use LPHL’s server**, on the home screen of a space with no
+  server and no chats, takes one too. The phone makes its token itself and gives the server only its SHA-256. Such a
+  place is for your own chats: it cannot invite or lend places. Each day it may make 20 queues, move 50 MB of files
+  through the server, take what a call through the server needs 30 times and send 5000 messages on to other servers:
+  past one of those, Erevos says so, and it goes on the next day. At once it may have 8 MB of messages waiting and 20
+  held for later, and open places together keep at most half of what the server keeps of each, and of files, so they
+  never fill it for everyone. LPHL's server gives 3000 of them at most, 300 a day and 5 a day to one internet address
+  (an IPv6 one counted with its whole network, by its first 48 bits), and takes out one whose phone has not connected
+  for 100 days, or for 30 when it never connected again after the day it was made; another server gives 1000, 100 and 3,
+  and takes one out after 60 days, or 7, unless whoever runs it chose otherwise.
+  Should it take yours out, Erevos asks for it again by itself, with the same token, the next time it reaches the
+  server: your queue, links and contacts stay as they were, as the server keeps queues for months. It counts addresses
+  only for the day, in memory, and never writes them down. When it gives none, the home screen says why, above the two
+  ways to add someone or above the chats, with **Try again** and **Another server**, and Erevos tries again each time
+  it opens.
+- **An invite:** a QR code or link from a phone already on the server (see Inviting someone new below). Nothing to type,
   and you are contacts at once.
-- **An account:** **Sign in with LPHL**, when the relay offers it (see Signing in to the relay below). Any LPHL account
+- **An account:** **Sign in with LPHL**, when the server offers it (see Signing in to the server below). Any LPHL account
   can, on up to 10 phones.
-- **The relay's token:** the one token for all, from whoever runs the relay, typed in under **Token**. Erevos trades
+- **The server's token:** the one token for all, from whoever runs the server, typed in under **Token**. Erevos trades
   it at once, by itself, for a token of the phone's own, named there as you name yourself in invites (\`phone\` when
-  you gave no name), says so, and uses only that from then on. So this phone can invite too. It needs a relay that
-  takes invites, from after Erevos 3.1.0; with an older one, or one that takes no invites, the phone keeps the relay's
+  you gave no name), says so, and uses only that from then on. So this phone can invite too. It needs a server that
+  takes invites, from after Erevos 3.1.0; with an older one, or one that takes no invites, the phone keeps the server's
   token and cannot invite.
 - **The limits:** a phone may have 5 invites waiting at once and make 10 a day (the day by UTC); each is for one phone
-  and lasts 7 days. The relay lets in 100 phones by invite in all, the invites still waiting counting too, unless its
-  operator chose otherwise. Phones that came with an account or with the relay's token do not count in those 100: the
-  relay gives a token of their own to 50 phones a day that came with its token, and an account has 10 phones. The
-  relay serves 512 connections at once, whoever they are, unless its operator chose otherwise.
-- **Taking a phone out:** whoever runs the relay deletes its line in the relay's file of tokens: it can no longer use
-  the relay, while the phones it invited keep theirs. When it ever had the relay's token, they also change that token,
+  and lasts 7 days. The server lets in 100 phones by invite in all, the invites still waiting counting too, unless its
+  operator chose otherwise. Phones that came with an account or with the server's token do not count in those 100: the
+  server gives a token of their own to 50 phones a day that came with its token, and an account has 10 phones. The
+  server serves 512 connections at once, whoever they are, unless its operator chose otherwise.
+- **Taking a phone out:** whoever runs the server deletes its line in the server's file of tokens: it can no longer use
+  the server, while the phones it invited keep theirs. When it ever had the server's token, they also change that token,
   so it cannot come back with it. Phones with tokens of their own go on as they are: only a phone with the old token
   still typed in (not opened since, or with an older {=Erevos}) needs the new one.
-- **Hidden chats** keep the relay token typed in for them: trading it at the same moment as the space's would show the
-  relay that they are this phone's. When the relay's token changes, type the new one under their **For advanced users**.
+- **Hidden chats** keep the server token typed in for them: trading it at the same moment as the space's would show the
+  server that they are this phone's. When the server's token changes, type the new one under their **For advanced users**.
 
-**Why:** the relay gives each connection a thread of its own, so it serves only so many at once; and it adds only so
+**Why:** the server gives each connection a thread of its own, so it serves only so many at once; and it adds only so
 many lines a day for phones that came with its one token, so a token that went where it should not cannot fill its file
-of tokens.
+of tokens. Open places are counted the same way, so that no one can take them all, and one that hands out no access
+cannot bring others in.
 
 ### Inviting someone new
 
-One QR code or link brings someone new in: their phone joins {=Erevos} on your relay, with access of its own, typing
+One QR code or link brings someone new in: their phone joins {=Erevos} on your server, with access of its own, typing
 nothing, and you are each other's contacts at once, with no message request.
 
-- **To invite:** on the home screen, tap **Invite** beside the relay's line, or, on **New chat**, tap **Far away**.
+- **To invite:** on the home screen, tap **Invite** beside the server's line, or, on **New chat**, tap **Far away**.
   The invite is made at once and shows inside a message ready to send: tap **Send with…** and choose the app, or tap
   **Its QR code** and let them scan it with their phone's camera. **Who is it for?**, below it, opens two fields,
   their name in your chats and **Your name, for them**: fill them in, or leave both empty. Opened again while no one
   took it and it has a day left, it shows the same invite, so it spends none of the 5 waiting and 10 a day; **Invite
   someone else** makes a new one, and **Take this invite back** closes its link while no phone has taken it. It is for
-  one person, for 7 days, or less when the relay's invite ends sooner. Whoever takes it first has it, so give it to
+  one person, for 7 days, or less when the server's invite ends sooner. Whoever takes it first has it, so give it to
   them only. For someone beside you, **Near me** shows such an invite as a QR code too. On an Android phone with NFC
   on, you can also hand it over by touch: hold the back of their phone to the back of yours while the code shows, and
   their phone opens the link by itself, in Erevos if it is installed, otherwise on Erevos's web page, which offers
@@ -626,146 +667,148 @@ nothing, and you are each other's contacts at once, with no message request.
   invites you to {=Erevos}**, and you tap **Join** only if it came from them. Inside Erevos, **I have their code** on
   **New chat** takes an invite too: tap **Scan their QR code** and take a photo of the invite on their screen, or
   **From a photo of their QR code**, or paste the link into the field there and tap **Add**. Erevos takes access of
-  its own to their relay and a queue there, adds them and says **Welcome to {=Erevos}**. Its first message tells their
+  its own to their server and a queue there, adds them and says **Welcome to {=Erevos}**. Its first message tells their
   phone, which adds this one as a contact at once, named as they typed.
 - **The other ways in:** on **New chat**, **For advanced users** opens the rest, for whoever looks for them: **Sign in
-  with LPHL** signs this phone in to LPHL's relay with an LPHL account, in the browser (see Signing in to the relay
-  below), and then you add your contacts by their invites or links; **Start without a server**, as in With no relay at
-  all, under Through Nostr; and the relay settings, as in 1 to 3 above. An invite is the simplest way in, and on the
-  relay an invited phone has only a name of random letters and digits.
+  with LPHL** signs this phone in to LPHL's server with an LPHL account, in the browser (see Signing in to the server
+  below), and then you add your contacts by their invites or links; **Start without a server**, as in With no server at
+  all, under Through Nostr; and the server settings, as in 1 to 3 above. An invite is the simplest way in, and on the
+  server an invited phone has only a name of random letters and digits.
 - **A server of your own:** on the same screen, under **Where your messages wait**, **I have a server of my own**
-  takes the address of a relay that is yours, or your family's, group's or workplace's, and the code you were given
-  for it (the relay's token; leave it empty if the relay has none). **Connect** tries it at once, and nothing is kept
-  if the server does not answer. While this phone has no relay yet, **I have no invite** on **New chat** opens this
+  takes the address of a server that is yours, or your family's, group's or workplace's, and the code you were given
+  for it (the server's token; leave it empty if the server has none). **Connect** tries it at once, and nothing is kept
+  if the server does not answer. While this phone has no server yet, **I have no invite** on **New chat** opens this
   screen too.
-- **Another relay:** under **Sign in with LPHL**, **My account is at another server…** takes the address of another relay,
-  as its operator gave it, such as relay.example.org: the card then signs in there, named after the accounts that relay
+- **Another server:** under **Sign in with LPHL**, **My account is at another server…** takes the address of another server,
+  as its operator gave it, such as relay.example.org: the card then signs in there, named after the accounts that server
   takes, or says it offers no sign-in, and then its operator can give you an invite. **Back to** brings LPHL's back.
-- **What your relay must allow:** the access of its own is an invite to your relay (see Invites to the relay below),
-  so it comes only from a phone with a token of its own on a relay that takes invites. It counts among your invites,
-  under a name of random letters and digits, and stays even once yours goes. A phone with the relay's one token for
-  all trades it for one of its own first (see Ways in to the relay above); where the relay does not, it makes no
-  invite: sign in to the relay first (below the **Token**, under **For advanced users**), or take an invite to it.
-  When your relay takes no invites, the invite still makes you contacts, and their phone uses your relay only as your
-  contact link lets it, as in No relay of your own below. Such an invite opens only on a phone that has Erevos
+- **What your server must allow:** the access of its own is an invite to your server (see Invites to the server below),
+  so it comes only from a phone with a token of its own on a server that takes invites. It counts among your invites,
+  under a name of random letters and digits, and stays even once yours goes. A phone with the server's one token for
+  all trades it for one of its own first (see Ways in to the server above); where the server does not, it makes no
+  invite: sign in to the server first (below the **Token**, under **For advanced users**), or take an invite to it.
+  When your server takes no invites, the invite still makes you contacts, and their phone uses your server only as your
+  contact link lets it, as in No server of your own below. Such an invite opens only on a phone that has {=Erevos}
   already.
-- **A phone with a relay already** keeps its own: the invite only adds you, and you are contacts at once all the same.
+- **A phone with a server already** keeps its own: the invite only adds you, and you are contacts at once all the same.
 - **What is kept:** your phone keeps each invite's secret and the name for them, sealed in the space, until it is used
-  or its 7 days end, 20 at most at once. Nothing of it is on the relay but the invite to the relay.
+  or its 7 days end, 20 at most at once. Nothing of it is on the server but the invite to the server.
 - [~] **By SMS, to someone with no {=Erevos} yet:** on Android, the card of a contact who is not in Erevos has **Invite by
   SMS**. It writes an SMS to their first number with a short link, in the SMS app (Erevos's own when it is the phone's
   SMS app), for you to send or not. The link's page on LPHL's web server offers them {=Erevos} (the Android app, or the
   web app on an iPhone) and then opens the invite in it; in the web app on an iPhone, they paste the link under **I
-  have an invite**. They tap **Join**: their phone joins your relay as above and answers yours through it, which adds
+  have an invite**. They tap **Join**: their phone joins your server as above and answers yours through it, which adds
   them, linked to that number and named as on the card. Its first message, which goes by itself, makes you their
   contact, named as you named yourself in your last invite. The invite follows the **#** in the link, which no web
   server is sent, but the phone company sees the SMS, as every SMS: so it is for one person, for two days, and when
-  the two days end with no phone having used it, your phone takes its invite to the relay back. It needs a relay
+  the two days end with no phone having used it, your phone takes its invite to the server back. It needs a server
   that lets your phone invite, as above.
 
-### No relay of your own
+### No server of your own
 
-A phone with no relay chats over the internet all the same: adding the link of a contact whose relay lends places, it
+A phone with no server chats over the internet all the same: adding the link of a contact whose server lends places, it
 takes a place there, with no token.
 
-- **How:** add their link as in 6, with nothing under **Relay**. Erevos says you now have a place on their relay, lent
+- **How:** add their link as in 6, with nothing under **Server**. Erevos says you now have a place on their server, lent
   through their link, and uses it as its own from then on: your own link names it, so others reach you there too.
-- **Who lends:** your link carries a ticket for a place on your relay only when you turn on **Share a place on my
-  relay with this link**, under **My link** on **New chat**, and only for the link shown then: the next time the chat
-  opens, it is off again. The relay needs a key for two-hop sending, and lends only once whoever runs it turns lending
+- **Who lends:** your link carries a ticket for a place on your server only when you turn on **Share a place on my
+  server with this link**, under **My link** on **New chat**, and only for the link shown then: the next time the chat
+  opens, it is off again. The server needs a key for two-hop sending, and lends only once whoever runs it turns lending
   on; they can also take back a ticket's places. A ticket lasts 30 days and gives up to four places. Anyone who sees a
   link with a ticket can take a place with it, so give such a link only to whom you mean to.
-- **What a lent place does not do:** messages to contacts on other relays go straight to their relay, which then sees
-  your phone's address. It keeps nothing for later (a message sent later waits on the phone), gives no call relay
+- **What a lent place does not do:** messages to contacts on other servers go straight to their server, which then sees
+  your phone's address. It keeps nothing for later (a message sent later waits on the phone), gives no call server
   (calls go straight between the phones), and makes 4 more queues and sends 50 MB of files a day at most. Your link
   lends nothing on.
-- **Your own relay instead:** type its address under **Relay**: the lent place is let go of, and contacts learn the
+- **Your own server instead:** type its address under **Server**: the lent place is let go of, and contacts learn the
   new one from your next message.
-- **A link without a ticket** (from an older relay or Erevos): a relay that needs no token is used as it is;
-  otherwise you reach each other nearby only, until you have a relay.
+- **A link without a ticket** (from an older server or Erevos): a server that needs no token is used as it is;
+  otherwise you reach each other nearby only, until you have a server.
 
-**Why:** a link with a ticket is a key to your relay for whoever sees it, so your link carries one only when you choose,
-for the link shown then, and the relay lends only once whoever runs it allows it. A lent place's files are kept to a few
-photos and voice messages a day, so it never takes the relay's whole store.
+**Why:** a link with a ticket is a key to your server for whoever sees it, so your link carries one only when you choose,
+for the link shown then, and the server lends only once whoever runs it allows it. A lent place's files are kept to a few
+photos and voice messages a day, so it never takes the server's whole store.
 
-### Invites to the relay
+### Invites to the server
 
-A phone with a token of its own on a relay that takes invites can let one more phone use that relay, with a token of
+A phone with a token of its own on a server that takes invites can let one more phone use that server, with a token of
 that phone's own, so no token is typed or passed on.
 
-- **To invite:** under **For advanced users** on **New chat**, below the **Token**, tap **Invite to the relay**, type who it is
+- **To invite:** under **For advanced users** on **New chat**, below the **Token**, tap **Invite to the server**, type who it is
   for and tap **Make the invite**. A QR code opens: let their phone scan it with its camera and open the link in
   Erevos, or tap **Share the invite** and send it to them. It is good for one phone for 7 days, and whoever takes it
   first has it, so show it to them only.
-- **To take one:** the link opens **Invite to a relay**, with the relay's address: tap **Use this relay** only if it
+- **To take one:** the link opens **Invite to a server**, with the server's address: tap **Use this server** only if it
   came from someone you know. In Erevos, **I have their code** on **New chat** takes an invite too: with **Scan their
   QR code**, **From a photo of their QR code**, or its link pasted into the field there. Erevos makes a token for this
-  phone, keeps it with the relay's address in this space only, and makes your queue there. If the phone uses another
-  relay, it asks first, and contacts learn your new queue from your next message. Erevos takes an invite to a wss://
-  relay, or to a ws:// one on a home network only (such as \`ws://192.168.1.10:7879\`). Hidden chats take no invites.
+  phone, keeps it with the server's address in this space only, and makes your queue there. If the phone uses another
+  server, it asks first, and contacts learn your new queue from your next message. Erevos takes an invite to a wss://
+  server, or to a ws:// one on a home network only (such as \`ws://192.168.1.10:7879\`). Hidden chats take no invites.
 - **Your invites:** listed under the button, waiting or in use. **Take back** takes back one still waiting, or cuts off
-  the phone that took it at once, only that one: the phones it invited keep theirs.
-- **Theirs to keep:** a phone you invited keeps its line on the relay even once yours goes, because the phone that
-  invited you took it back, the account you signed in with may no longer use the relay, or its operator took it out, and
+  the phone that took it at once, only that one: the phones it invited keep theirs. One your phone sent by itself to a
+  contact with no server (see [With no server at all](#nostr-only)) is one of these: once their phone came in with it,
+  their chat says so, on your phone only, with **Take back** under that line while they are there.
+- **Theirs to keep:** a phone you invited keeps its line on the server even once yours goes, because the phone that
+  invited you took it back, the account you signed in with may no longer use the server, or its operator took it out, and
   so do the phones it invited. Only your invites still waiting then let no one in.
-- **What the relay keeps:** a name of random letters and digits for that phone, which says nothing of who it is (the
-  name you typed stays on your phone; an Erevos before 6.0.0 gave the relay that name, in Latin letters), that you
-  invited it, and a fingerprint of its token, not the token. Whoever runs the relay sees this, and can take any phone
-  off it. A phone may have 5 invites waiting at once, and make 10 a day, and the relay lets in only so many phones by
+- **What the server keeps:** a name of random letters and digits for that phone, which says nothing of who it is (the
+  name you typed stays on your phone; an {=Erevos} before 6.0.0 gave the server that name, in Latin letters), that you
+  invited it, and a fingerprint of its token, not the token. Whoever runs the server sees this, and can take any phone
+  off it. A phone may have 5 invites waiting at once, and make 10 a day, and the server lets in only so many phones by
   invite (100, unless its operator chose otherwise).
-- **Who can invite:** a phone with a token of its own, on a relay whose operator turned invites on (see [Running your
-  own relay](#own-relay)). A phone with the relay's one token for all trades it for one of its own first (see Ways in
-  to the relay above). With a lent place there is no **Invite to the relay**.
+- **Who can invite:** a phone with a token of its own, on a server whose operator turned invites on (see [Running your
+  own server](#own-relay)). A phone with the server's one token for all trades it for one of its own first (see Ways in
+  to the server above). With a lent place there is no **Invite to the server**.
 
-**Why:** the relay keeps only a fingerprint of each token, never the token, so its file tells no one how to connect.
-And an invite names a wss:// relay, or a ws:// one at home, so it can never send your phone's requests across the
+**Why:** the server keeps only a fingerprint of each token, never the token, so its file tells no one how to connect.
+And an invite names a wss:// server, or a ws:// one at home, so it can never send your phone's requests across the
 internet in the clear.
 
-### Signing in to the relay
+### Signing in to the server
 
-A relay can let phones sign in with an account its operator trusts, such as LPHL, for a token of their own, with
+A server can let phones sign in with an account its operator trusts, such as LPHL, for a token of their own, with
 nothing to type in Erevos.
 
-- **To sign in:** type the relay's address under **Relay**. When the relay offers it, **Sign in with LPHL** shows
+- **To sign in:** type the server's address under **Server**. When the server offers it, **Sign in with LPHL** shows
   below the **Token**. Tap it: the browser opens the sign-in page, where you type your name and password, which Erevos
-  never sees. The relay's page then shows six digits. On Android, tap **Open {=Erevos}** there and Erevos finishes
+  never sees. The server's page then shows six digits. On Android, tap **Open {=Erevos}** there and Erevos finishes
   signing in by itself; otherwise type them as described next. Back in Erevos, which puts you straight in **Code from
-  the page**, type them there and tap **Finish signing in**: the phone keeps its token with the relay's address in
+  the page**, type them there and tap **Finish signing in**: the phone keeps its token with the server's address in
   this space only, and makes your queue there. Type the code only in Erevos on your own phone and give it to no one,
-  even if asked: whoever types it uses the relay as you. After 5 wrong codes the sign-in is over: sign in again.
-  Erevos opens only a sign-in page on the relay's own address, over https.
-- **Signing in again** on the same phone takes the place of its line on the relay, when its token is the one it got
-  from that relay. Each phone gets a line of its own, 10 at most for one account.
-- **What the relay and LPHL see:** the relay names the phone's line after your user name (\`lphl:nekten\`), and every
+  even if asked: whoever types it uses the server as you. After 5 wrong codes the sign-in is over: sign in again.
+  Erevos opens only a sign-in page on the server's own address, over https.
+- **Signing in again** on the same phone takes the place of its line on the server, when its token is the one it got
+  from that server. Each phone gets a line of its own, 10 at most for one account.
+- **What the server and LPHL see:** the server names the phone's line after your user name (\`lphl:nekten\`), and every
   hour it asks LPHL whether the account may still use it: once the account is closed or disabled, or LPHL cannot be
-  asked for 3 days, the line goes, and the phone can no longer use the relay; the phones it invited keep theirs. LPHL
+  asked for 3 days, the line goes, and the phone can no longer use the server; the phones it invited keep theirs. LPHL
   sees each sign-in and these checks, but nothing of your spaces, chats or contacts. Signing in from another space with
-  the same account shows the relay that both are yours.
+  the same account shows the server that both are yours.
 - **Hidden chats** do not sign in.
 
 **Why:** the page shows the code and you type it in Erevos, not the other way round, so a sign-in link someone else
 sends you gets them nothing: only whoever signed in sees the code, and five wrong ones end it. Erevos opens a sign-in
-page only on the relay's own address, over https, so nothing answering in the relay's place can send you to a page
+page only on the server's own address, over https, so nothing answering in the server's place can send you to a page
 somewhere else. And a provider that cannot be asked for a while cuts no phone off at once: only 3 days without a good
 answer do. And the **Open Erevos** button is just as safe: the link holds only the six digits, which claim nothing
 without the secret that only the phone that started the sign-in holds, so an app that caught the link gets nothing.
 
-### The relay's own key
+### The server's own key
 
-Once Erevos knows your relay's key (it asks the relay the first time, or a contact link gives it), every connection to
-that relay starts with a check: the relay must prove it holds that key, and the token and everything after it go
+Once Erevos knows your server's key (it asks the server the first time, or a contact link gives it), every connection to
+that server starts with a check: the server must prove it holds that key, and the token and everything after it go
 encrypted to that key, inside the connection's own encryption (TLS). Under **How you connect now**, Erevos then says
-that your relay proved its own key. From then on, this space never reaches that relay without the check.
+that your server proved its own key. From then on, this space never reaches that server without the check.
 
-- A relay older than this app proves nothing: it works as before, and **How you connect now** says it is older. Erevos
+- A server older than this app proves nothing: it works as before, and **How you connect now** says it is older. Erevos
   tries again every hour.
-- A relay that cannot prove the key Erevos keeps for it gets nothing, and your messages wait; **How you connect now**
+- A server that cannot prove the key Erevos keeps for it gets nothing, and your messages wait; **How you connect now**
   says so in red. Only if its operator told you it has a new key, tap **It has a new key**: Erevos then takes the key
-  the relay gives next.
+  the server gives next.
 
-**Why:** the connection's certificate says only that whoever answers holds a certificate for the relay's name, which a
-company that issues certificates can also give someone else, by mistake or when made to. The relay's own key is only on
-its server, so no one in between can pass for it, and a renewed certificate changes nothing.
+**Why:** the connection's certificate says only that whoever answers holds a certificate for the server's name, which a
+company that issues certificates can also give someone else, by mistake or when made to. The server's own key is only on
+the server itself, so no one in between can pass for it, and a renewed certificate changes nothing.
 
 ### The safety number
 
@@ -793,7 +836,7 @@ answers **Say yes** or **Say no** in that chat. Only if both say yes do they bec
 introduced from writes first, and the other's phone takes them at once, named as you named them. If one says no,
 nothing happens, and the other is not told. An introduction waits a week.
 
-**Why:** everything of it goes inside the encryption of your chats with each of them, so no relay sees who is
+**Why:** everything of it goes inside the encryption of your chats with each of them, so no server sees who is
 introduced to whom. You pass on only the contact link the second one chose to give, after saying yes. As whoever
 introduces could pass someone else off, compare the safety number with the new contact as with any other.
 
@@ -803,10 +846,10 @@ Over the first message of each day, in every chat, groups and Chat with myself t
 **Today**, **Yesterday**, the weekday within the last week, and before that the weekday and date, such as **Tuesday,
 November 10**.
 
-Under each of your messages to a contact, **✓** says the relay or a phone nearby took it, **✓✓** that it came to
+Under each of your messages to a contact, **✓** says the server or a phone nearby took it, **✓✓** that it came to
 their phone, and **✓✓✓** that they read it. Their phone tells yours, inside the encryption, the next time each looks
-at the relay, or at once when they are nearby. A message counts as read once its chat shows on the screen. **Mark all as
-read** in the ⋮ menu counts the same: their phones are told with the next look at the relay.
+at the server, or at once when they are nearby. A message counts as read once its chat shows on the screen. **Mark all as
+read** in the ⋮ menu counts the same: their phones are told with the next look at the server.
 
 In a group that is not public, your messages have the same marks, for all the other members together: **✓** once sent,
 **✓✓** once the message reached the phone of every member who was in the group when you sent it, and **✓✓✓** once
@@ -818,43 +861,43 @@ choose **Who read it** to see who read it and when, whose phone it reached and w
 message stays at **✓**. Public groups have no marks. A computer linked to this phone shows the same marks.
 
 - **Sending…:** the moment you press Send, the phone gives a short buzz, the field empties and the message shows,
-  marked **Sending…** until the relay or their phone takes it. If it cannot go and cannot wait, its words go back in
+  marked **Sending…** until the server or their phone takes it. If it cannot go and cannot wait, its words go back in
   the field. Leaving the chat while it shows **Sending…** does not lose it: it goes, or waits marked **Waiting**.
-- **Waiting:** a message nothing could take, as the relay cannot be reached and their phone is not near, stays in
-  the chat marked **Waiting**, and goes by itself, in order, once the relay or their phone nearby can take it, while a
+- **Waiting:** a message nothing could take, as the server cannot be reached and their phone is not near, stays in
+  the chat marked **Waiting**, and goes by itself, in order, once the server or their phone nearby can take it, while a
   space is open; then it shows **✓**. A text waits at once. A voice message, photo or file asks first: **Keep it
   waiting** or **Delete it**. A waiting message is deleted on this phone only. In hidden chats it waits too, but goes
-  through their relay only, never to the phone nearby or over LoRa: while they are open, or, with **Receive while
-  closed** on, while the space is open. When the contact's queue on the relay is full, a text, voice message, photo or file still goes to their linked
+  through their server only, never to the phone nearby or over LoRa: while they are open, or, with **Receive while
+  closed** on, while the space is open. When the contact's queue on the server is full, a text, voice message, photo or file still goes to their linked
   devices, if they have any, shows as sent, and is tried again for their phone while hidden chats stay open: closed
   before it went, their phone never gets it.
 - **Send later:** hold the send arrow down and choose **Later…**, or tap **+** and then **Send later**. Choose a time
   at a tap (**In 1 hour**, **Tonight 20:00**, **Tomorrow 09:00**) or the day, hour and minutes, up to a year ahead, then **Send later**. The message stays in the chat marked
-  **Scheduled** with its time. It goes encrypted to the relay, which keeps it and sends it at that time, even if this
-  phone is off or locked then, and their phone shows it from that time, not sooner. With no relay reachable now, it
-  waits on this phone and goes to the relay once one can be reached. With nothing typed, the time you choose is for
-  the next photo, file or voice message: a photo or file goes to your relay at once and stays there until they take
-  it, 14 days after its time at most. Hidden chats have it too, the same way, through their relay. Until its time, delete it to take it back from the relay, and it never goes. Should their relay queue
-  change before then, Erevos holds it again for the new one the next time it reaches the relay.
-  With a token of this phone's own, it goes only if the phone still has its line on that relay then. A message without sound
-  stays without sound. A relay from before this keeps nothing for later: then the message waits on this phone and
+  **Scheduled** with its time. It goes encrypted to the server, which keeps it and sends it at that time, even if this
+  phone is off or locked then, and their phone shows it from that time, not sooner. With no server reachable now, it
+  waits on this phone and goes to the server once one can be reached. With nothing typed, the time you choose is for
+  the next photo, file or voice message: a photo or file goes to your server at once and stays there until they take
+  it, 14 days after its time at most. Hidden chats have it too, the same way, through their server. Until its time, delete it to take it back from the server, and it never goes. Should their server queue
+  change before then, Erevos holds it again for the new one the next time it reaches the server.
+  With a token of this phone's own, it goes only if the phone still has its line on that server then. A message without sound
+  stays without sound. A server from before this keeps nothing for later: then the message waits on this phone and
   goes at its time while Erevos runs, in the background too while **In the background** is on **Receive and ring**
   (below), or when Erevos next opens.
 - **Safety message:** type it, tap **+** and then **Safety message**, and choose how long: 6 or 12 hours, 1, 2 or 3
-  days, or a week. It goes to the relay at once, as one sent for later, and the relay sends it by itself at that time.
+  days, or a week. It goes to the server at once, as one sent for later, and the server sends it by itself at that time.
   Each time you open Erevos, past its password, it moves on that long again, so it goes only if you do not open Erevos
   in time: if the phone is lost, taken, broken or kept from the internet, or something happened to you. Erevos running
   in the background does not move it, nor does its password screen, nor a window left open that no one has touched or
   typed in for 10 minutes. In hidden chats it moves on while their place receives, or when you open it. In the chat it
   is marked **Safety message** with the time it would go; delete it to stop it. Write it so that it says what it is: to
-  your contact it comes as an ordinary message. If the relay cannot be reached when you open Erevos, it keeps its time.
-  It is encrypted once and goes to the relay again as it is each time it moves on, so it costs your chat nothing.
-  **Why:** a message held by the relay needs nothing from this phone to go, so no one who takes the phone can stop it,
+  your contact it comes as an ordinary message. If the server cannot be reached when you open Erevos, it keeps its time.
+  It is encrypted once and goes to the server again as it is each time it moves on, so it costs your chat nothing.
+  **Why:** a message held by the server needs nothing from this phone to go, so no one who takes the phone can stop it,
   except by opening Erevos with its password.
 - **Send without sound:** hold the send arrow down and choose **Without sound**: their phone shows the notice without
   a sound or vibration. An Erevos from before it does not know this and sounds as usual, and so does Erevos as a web
   app, whose notice comes from the browser. So does the notice of a place of hidden chats that is closed, with **Say
-  when a message comes** on, and of a closed space with **Also while another space is open**: these only ask the relay
+  when a message comes** on, and of a closed space with **Also while another space is open**: these only ask the server
   how many came, and it cannot tell one without sound from another, as only the encrypted message says so.
 - **Links:** a web address in a message is underlined, also a bare one such as t.me/name or example.org/page, as
   Telegram and Signal show them; an e-mail address or a file's name (photo.jpg) is not. Tap it and Erevos shows it
@@ -868,16 +911,16 @@ message stays at **✓**. Public groups have no marks. A computer linked to this
   in, with a key only in Erevos's memory, and waits so on the phone, also while you give the password if Erevos locks
   first; it goes once sent, or when you leave **Send to**.
 - **They see when you read:** your phone tells theirs, as theirs tells yours, unless that chat appears offline (below).
-- **When messages come:** Erevos looks at the relay every few seconds while it is open and unlocked, on any screen,
+- **When messages come:** Erevos looks at the server every few seconds while it is open and unlocked, on any screen,
   and the home screen moves the chat to the top by itself. On Android each new message sounds, with a notice that
   says only how many came, while Erevos shows too; in the chat or group open on the screen only the sound plays, and
   opening a chat takes what came there off the count. Typing, and that a message came or was read, make none. On
   Android it goes on in the background too, while **In
-  the background** is on **Receive and ring** (below): there it waits at the relay until something comes, a minute at
+  the background** is on **Receive and ring** (below): there it waits at the server until something comes, a minute at
   a time, instead of asking every few seconds, and asks nothing more when nothing came, so the battery lasts, and a
   notice says only how many messages came. Closed, locked, or
-  long in the background otherwise, it does not: messages wait on the relay, up to 14 days, and come once Erevos
-  opens again. A question to the relay with no answer in time (a wait there its minute and half a minute more,
+  long in the background otherwise, it does not: messages wait on the server, up to 14 days, and come once Erevos
+  opens again. A question to the server with no answer in time (a wait there its minute and half a minute more,
   anything else 45 seconds, a part of a file 2 minutes) counts as failed and is asked again, so a connection that
   died on the way, as when the phone's network sleeps or changes, holds nothing back.
 
@@ -886,7 +929,7 @@ message stays at **✓**. Public groups have no marks. A computer linked to this
 While a contact's chat is open on your screen, Erevos asks their phone now and then whether it is open, and says yours
 is. If theirs is, the chat says **Online** under their name with a green dot, and the home screen shows the dot on
 their picture. Writing to someone also shows you online to them for two minutes. All of it goes inside the encryption,
-only between you and that contact: the relay sees a message now and then, as with any chat.
+only between you and that contact: the server sees a message now and then, as with any chat.
 
 When they are not online, the chat says when they last had Erevos open, to the minute: **last seen today at 14:32**. Your
 phone tells your contacts yours the same way, inside what goes to them anyway (a message, or that one came), and once
@@ -901,7 +944,7 @@ With **Say when I open and close Erevos** on (under **Last seen**, on unless you
 contacts at once, without waiting for a message: only those you talked with in the last 30 days who show their own time
 too, each after a random wait of up to a minute, at most every 15 minutes, never a chat that appears offline or a
 message request. As Erevos closes, or its hidden chats do, those told while it was open are told at once when it
-closed, so their **last seen** is that time. The relay then sees something go to them as you open and close Erevos, so it
+closed, so their **last seen** is that time. The server then sees something go to them as you open and close Erevos, so it
 can tell when you do: turn it off
 and your time goes only with what goes to them anyway.
 
@@ -909,9 +952,9 @@ While you type to a contact who shows online, their chat shows **typing…** und
 yours under theirs when they type. It is said every few seconds at most, only while they show online, never to a
 message request, and not in groups.
 
-**Why:** being online is said only between you and a contact whose chat is open, inside the encryption, so the relay
+**Why:** being online is said only between you and a contact whose chat is open, inside the encryption, so the server
 sees no more than a message now and then between two people talking. The time you were last seen rides inside the same
-messages, end-to-end encrypted: the relay never learns it. It does tell your contacts when you sleep or work, and two
+messages, end-to-end encrypted: the server never learns it. It does tell your contacts when you sleep or work, and two
 contacts seen at the same minute may be guessed to talk: turn it off if that matters to you. Someone who only has your
 link, writing as a message request, hears nothing back until you accept: not that you read, nor that you are online,
 typing or last seen. Until you accept, only its words show: its photos and files wait, not taken, and its links show no
@@ -926,7 +969,7 @@ To hide it from one contact, open their chat, tap its name and then **Appear off
 - **You do not see them online either**, since your phone does not ask, nor when they were last seen; and they get
   no time of yours.
 
-It is set for each chat, on this phone only. Turn it off again and they see what you read with your next look at the relay.
+It is set for each chat, on this phone only. Turn it off again and they see what you read with your next look at the server.
 
 ### Names and deleting
 
@@ -959,13 +1002,13 @@ To delete one message, press and hold it and tap **Delete**. To delete all the m
 Either way Erevos asks where:
 
 - **This phone:** only here. The other phone keeps its own.
-- **Both phones:** their phone deletes them too, the next time it looks at the relay. Their Erevos does so, but a
+- **Both phones:** their phone deletes them too, the next time it looks at the server. Their Erevos does so, but a
   changed app, a screenshot or a copy can still keep them.
 
 ### Deleting and blocking a contact
 
 Tap a chat's name and then **Delete contact** to forget them: their chat goes from this phone, and Erevos gives you a
-new relay queue at once. Your other contacts are told it quietly, in a message with nothing in it, and again 7, 14 and
+new server queue at once. Your other contacts are told it quietly, in a message with nothing in it, and again 7, 14 and
 21 days later while they have not written to the new one; what they wrote to the old one meanwhile still shows for 14
 days. The one you deleted is not told, and nothing they send there shows. Your contact link stays as it was, so they
 can still ask to talk again with it, as a message request, like anyone who has it.
@@ -974,16 +1017,16 @@ can still ask to talk again with it, as a message request, like anyone who has i
 can no longer write to you there, nor can whoever sent the junk below. Your contact link names a queue of its own,
 which a deletion leaves alone, so every link and QR code you gave keeps working.
 
-**A queue for each contact:** at a relay updated for it, each contact writes to a queue of their own, which only they
-know, said inside your encrypted messages; your contact link's queue is then only for first messages. So the relay
+**A queue for each contact:** at a server updated for it, each contact writes to a queue of their own, which only they
+know, said inside your encrypted messages; your contact link's queue is then only for first messages. So the server
 cannot tell from where messages go that two contacts write to the same phone, and deleting or blocking someone deletes
 their queue alone: your own moves only if they knew it too, as contacts from before this do, and someone who came
 through your contact link before its first move. Contacts from before get one of their own in turn, a few at a time,
 quietly, and an Erevos of theirs from before takes it too. These queues are read with no token, so the token, which
 names your phone, does not tie them together; through Tor, eight at a time, each eight on circuits of their own. They
-are still made and deleted with the token, so a relay that keeps logs can tie them together then. Hidden chats and
+are still made and deleted with the token, so a server that keeps logs can tie them together then. Hidden chats and
 linked computers keep one queue for everyone, for now. The web app has no Tor, so while it is open it waits on all
-your contacts' queues together, from one address; with notifications while closed turned on, your relay also has one
+your contacts' queues together, from one address; with notifications while closed turned on, your server also has one
 push address for all your contacts' queues (see [On an iPhone](#iphone)).
 
 - **Block contact**, under it, does the same, and also drops what they send later, a request too. **Block**, beside
@@ -996,20 +1039,20 @@ push address for all your contacts' queues (see [On an iPhone](#iphone)).
   stops whoever has the old link once its 14 days are over.
 - **Groups:** someone in one of your groups can still write to you there. Erevos says in how many you are together:
   leave them, or ask their admin to take them out.
-- **When the relay cannot be reached**, the queue changes as soon as it answers, and until then nothing they send
+- **When the server cannot be reached**, the queue changes as soon as it answers, and until then nothing they send
   shows.
-- **Scheduled messages** you had for them are taken back from the relay, at once or as soon as it answers, so they
+- **Scheduled messages** you had for them are taken back from the server, at once or as soon as it answers, so they
   never go.
 - **Junk:** when your queue fills with what is for no one here, Erevos gives you a new one the same way and says so, at
   most once a day. When junk fills the queue your contact link names, you get a new link instead. A flood of made-up
   message requests counts as junk too, while a batch of real ones still comes.
 - **New contact link**, under **My link** on **New chat**, gives you a new link: the links and QR codes you gave
-  before work for 14 more days, then no more. Your contacts are not affected. Should the relay lose the queue your
+  before work for 14 more days, then no more. Your contacts are not affected. Should the server lose the queue your
   link names, you get a new link the same way, but the ones you gave before stop working at once.
 - **Link for a website**, beside it, in the space's chats, gives you a link to put on a web page, such as your contact
   page, with the name you choose for it. It opens a page that offers {=Erevos} to whoever has none yet, on Android, an
   iPhone or a computer, and then adds you. Anyone who sees it can write to you, so what they send comes as a message
-  request, which you accept, refuse or block. It gives no place on your relay, and it works for as long as your contact
+  request, which you accept, refuse or block. It gives no place on your server, and it works for as long as your contact
   link does: **New contact link** ends it too.
 - **On a linked computer** it goes to the phone, which deletes or blocks them too and moves its queues, the computer's
   as well. The phone keeps who is blocked and tells the computer: adding them there from their link asks you to
@@ -1027,7 +1070,7 @@ Press and hold a message for its menu: the reactions at the top, then what you c
 
 - **Reactions:** tap one, or **+** for more. It shows under the message on both phones, yours lit; tap it
   again to take it back. Each of you has one reaction on a message. It goes at once, or not at all: when neither
-  the relay nor their phone nearby can take it, nothing changes.
+  the server nor their phone nearby can take it, nothing changes.
 - **Reply:** your next message answers it, and shows it quoted above your words, on both phones. Tap the quote to go
   to the message it answers; **✕** drops it. An Erevos from before this shows the answer without the quote.
 - **Reply in thread:** answers it in a thread, as in a group: the thread shows alone, with **Thread** at the top, and
@@ -1097,7 +1140,7 @@ shows over the field. Tap the time to pick another, or **✕** to turn it off. I
 words, a voice message, a photo or file, a sticker, a place or a poll, now or later.{~ An SMS cannot disappear: sent as
 an SMS, it stays on both phones (Erevos says so first), and the stopwatch is off again.} Its time starts when the other phone shows it on the screen, and your copy starts when their phone says so
 (**✓✓✓**). Each message says when it disappears. The other phone learns the chat's setting the next time it looks at
-the relay, and either phone can change it: the later change wins. Messages already in the chat stay.
+the server, and either phone can change it: the later change wins. Messages already in the chat stay.
 
 - **Until it is read** a disappearing message stays on both phones, sealed like the rest. If their {=Erevos} never says
   it read it, your copy stays.
@@ -1176,8 +1219,8 @@ before iOS 18.4 and macOS 15.4, it is AAC at 64 kbit/s, about 480 KB a minute. M
 would be slower to send, over Bluetooth most of all. Every Erevos plays both: Safari before 18.4 plays Opus once Erevos
 repacks it for it, and where a browser cannot play one, Erevos says so.
 
-- **Through the relay, or nearby,** end-to-end encrypted like the words, in several pieces. No one in between can
-  hear them, but from the pieces the relay, or whoever listens nearby, can tell that something long was sent, and
+- **Through the server, or nearby,** end-to-end encrypted like the words, in several pieces. No one in between can
+  hear them, but from the pieces the server, or whoever listens nearby, can tell that something long was sent, and
   roughly how long. Nearby they go only to a contact's phone known to be near.
 - **On the phone** each sound is kept in a file of its own, sealed with its own key, which only the chat's sealed
   history holds. When the message goes, deleted, disappeared or the oldest, its file goes too. How many of these files
@@ -1211,10 +1254,10 @@ disappearing setting.
   file opens or the space locks. Erevos asks first, as that app is outside Erevos and its encryption, and never opens
   web pages, drawings or app packages that way, as they could reach the internet outside Tor: save those instead.
 - **How they travel:** each file is encrypted on the phone with a key of its own, in pieces all of one size, and put
-  on your relay. Only where the pieces are and the key go to the contact, end-to-end encrypted. Their phone takes the
-  pieces through their own relay, so your relay never sees their phone's address, checks every piece, and then
-  deletes them from the relay. Pieces nobody takes are deleted after 14 days.
-- **What the relay sees:** how many pieces there are and their size, so roughly how big the file is, and when. Not
+  on your server. Only where the pieces are and the key go to the contact, end-to-end encrypted. Their phone takes the
+  pieces through their own server, so your server never sees their phone's address, checks every piece, and then
+  deletes them from the server. Pieces nobody takes are deleted after 14 days.
+- **What the server sees:** how many pieces there are and their size, so roughly how big the file is, and when. Not
   what it is or who it is for.
 - **A file goes as it is,** with whatever it says inside: a document's author, or a photo's place and phone if you
   send it with **File**. Send photos with **Photo**.
@@ -1224,7 +1267,7 @@ disappearing setting.
   The phone's photo picker hands over a copy in Erevos's cache, deleted once read, and a photo taken here is not kept
   in the phone's photos.
 - **Saved** photos and files are outside Erevos, not sealed: anyone with the phone can open them.
-- **Through the relay only:** files need its file store, even when the contact is nearby. A relay older than this
+- **Through the server only:** files need its file store, even when the contact is nearby. A server older than this
   version cannot take files: update it.
 
 ### More under +
@@ -1244,7 +1287,7 @@ stickers too):
   small (512 by 512, about 100 KB at most) and keeps only its picture, nothing of where or with what it was taken. It is
   kept sealed in the space, or in the hidden chats it was made in, and shows only there, up to 100 of them; hold one to
   delete it. Like the rest, it goes into a backup, sealed, and never to the account's other devices. It goes as a photo
-  goes, end-to-end encrypted through the relay, marked as a sticker, so it shows on its own with no bubble; an Erevos
+  goes, end-to-end encrypted through the server, marked as a sticker, so it shows on its own with no bubble; an {=Erevos}
   from before this shows it as a photo. Hold a sticker someone sent you and tap **Add to my stickers** to keep it.
 - **Location** (on Android): sends where you are, once, as a place. The first time, Android asks whether Erevos may use
   the location. The phone looks on every way it has at once: by satellite, when you allowed the precise location, and by
@@ -1330,18 +1373,25 @@ keypad at the top of their chat, before the camera, opens a keypad with that num
 top of an SMS conversation}. It is {~Erevos's **Phone** when Erevos is the phone app, or else }the phone's own: tap the call key there. Such a
 call goes over the phone company's network and is not encrypted{~, as a plain SMS is not}. Hidden chats and computers do not have it.
 
-- **End-to-end encrypted:** the call is set up with messages through the relay, encrypted like the rest. Those carry
-  the key that encrypts the call itself, so no one in between can listen, not even the call relay below.
-- **Through the call relay:** a relay set up with the kit in \`deploy/relay\` has a call relay beside it. The call
-  goes through it, so neither phone learns the other's IP address. Over Wi-Fi or mobile data, anywhere.
-- **Without a call relay** (a relay on your own computer, for example), Erevos asks first: the call then goes
-  straight between the phones, only works on the same Wi-Fi, and each phone sees the other's address on it.
+- **End-to-end encrypted:** the call is set up with messages through the server, or through Nostr when no server is
+  between you, encrypted like the rest. Those carry the key that encrypts the call itself, so no one in between can
+  listen, not even the call server below.
+- **Through the call server:** a server set up with the kit in \`deploy/relay\` has a call server beside it. With
+  **ANONYMOUS**, the call goes through it, so your contact's phone does not learn your IP address. With **SPEED**, the
+  call goes straight from phone to phone where it can, the fastest way, and through the call server where it cannot;
+  your contact's phone sees your address either way. Over Wi-Fi or mobile data, anywhere.
+- **Without a call server** (a server on your own computer, for example, or no server at all): with **SPEED**, the
+  call goes straight from phone to phone over the internet, with no question first. Each phone then sees the other's
+  internet address, and a helper server tells each phone its own. Some networks, mobile ones above all, let nothing in
+  from outside: the call screen then says **The call could not connect directly**, and another network, such as a
+  Wi-Fi, often helps. With **ANONYMOUS**, Erevos asks first, and the call works only on the same Wi-Fi. With
+  **INVISIBLE** there are no calls at all. See [How visible are you?](#direct).
 - **Without internet:** on the same Wi-Fi, a phone's hotspot, or the Wi-Fi two phones make (Wi-Fi Direct), with a
-  space open on both, a call needs no relay at all: it is set up over the nearby link and goes straight between the phones (or computers). The same goes for group
+  space open on both, a call needs no server at all: it is set up over the nearby link and goes straight between the phones (or computers). The same goes for group
   messages and group calls.
 - **In the background (Android):** while a space is open, Erevos keeps running when you leave it, with Home, Back on
   its first screen or by swiping it away from the recent apps, with a quiet notice, "Erevos – Ready for calls and messages", that does not
-  show on the lock screen. It waits at the relay and on the links to phones nearby, so messages come: a notice
+  show on the lock screen. It waits at the server and on the links to phones nearby, so messages come: a notice
   says only "New message", or how many came, and on a locked phone only "Erevos". A message request, from someone who
   has only your contact link, makes the same notice and sound, and counts on the icon, as any message does. A call
   rings with the phone's ringtone and a notice, "Incoming call" (or "Incoming video call") – "Open Erevos to answer",
@@ -1352,8 +1402,8 @@ call goes over the phone company's network and is not encrypted{~, as a plain SM
   came, or ring with no name, if you let them (see Hidden chats). Set it under **Settings** → **Notifications** → **In the background**:
   **Receive and ring** (the default) or **Only while Erevos shows**, and **Say a message came** (the default) or **No
   notice**, which goes for while Erevos shows too. There too, if Android asks for them, **Keep running on battery** and **Show calls over the lock
-  screen**. Below them, **Only the waste** (the default), **And nearby phones** and **And sleep** choose how much battery it spares in the background: the second also turns off the radios for phones nearby while Erevos is in the background, the third also lets the phone sleep, so Erevos looks at the relay about once a minute, and a message or a call can be a minute or two late.
-- **And light sleep:** a fourth choice there, between **And nearby phones** and **And sleep**. The phone may sleep, but Erevos leaves its wait at the relay open, so what comes wakes the phone and a message or a call still comes at once where the network and Android allow it; Erevos also looks by itself every few minutes. It is new and not tried on many phones yet: if messages come late with it, choose another.
+  screen**. Below them, **Only the waste** (the default), **And nearby phones** and **And sleep** choose how much battery it spares in the background: the second also turns off the radios for phones nearby while Erevos is in the background, the third also lets the phone sleep, so Erevos looks at the server about once a minute, and a message or a call can be a minute or two late.
+- **And light sleep:** a fourth choice there, between **And nearby phones** and **And sleep**. The phone may sleep, but Erevos leaves its wait at the server open, so what comes wakes the phone and a message or a call still comes at once where the network and Android allow it; Erevos also looks by itself every few minutes. It is new and not tried on many phones yet: if messages come late with it, choose another.
 - **The number on the icon:** with **Say a message came** on, when you leave Erevos with messages not read in the open
   space's chats and groups, the notice stays, without sound, and says how many, with those it tells of after; it goes
   while Erevos shows, and comes back as you leave it, until you have read them. Messages in a muted chat are not
@@ -1366,21 +1416,21 @@ call goes over the phone company's network and is not encrypted{~, as a plain SM
   **Why:** on Android only a notice can put a number on an app's icon, so the notice stays while messages wait; it
   says no more than how many, as it always did.
 - **A space that is closed:** it receives nothing, as its key is only in memory while it is open: its messages wait at
-  its relay and come when you open it. Unless you choose, in that space, **Also while another space is open** under
+  its server and come when you open it. Unless you choose, in that space, **Also while another space is open** under
   **Settings** → **Notifications** → **In the background** (the default is **This space only while open**): then, while
   another space is open and receives, it says only "New message", or how many came, with the same notice as that space,
-  never which space, and its hidden chats say nothing. What other phones carried to its relay counts as a message,
-  deletes too, and a message sent to it without sound sounds as usual (see **Send without sound**). For it the phone keeps the addresses of its queues at its relay
+  never which space, and its hidden chats say nothing. What other phones carried to its server counts as a message,
+  deletes too, and a message sent to it without sound sounds as usual (see **Send without sound**). For it the phone keeps the addresses of its queues at its server
   outside its password, including the queue each contact writes to, for up to 64 contacts, never its keys, who its
-  contacts are, or its messages, and asks the relay only how many came, never for them: they stay there until the space
+  contacts are, or its messages, and asks the server only how many came, never for them: they stay there until the space
   opens. A space that goes through Tor (**Messages** or **Everything**, under **What goes through Tor**) is asked
   about only through Tor: while the open space has Tor off, or its Tor is starting or has just failed, the closed space
   says nothing, and what came is told once Tor is ready there.
 
   **Why:** a space behind a second password must not show that it is there, so it is off unless you turn it on, and then
   it says no more than the space that is open would. Asked straight from the phone while another space is open, its
-  relay or someone watching the network could tie the two spaces together by the phone's internet address. Since each contact writes to a queue of their own, the space must
-  ask about each of those too, or their messages would say nothing. The cost is that its relay may tell that the two
+  server or someone watching the network could tie the two spaces together by the phone's internet address. Since each contact writes to a queue of their own, the space must
+  ask about each of those too, or their messages would say nothing. The cost is that its server may tell that the two
   spaces are on one phone, and someone who examines the phone with tools may find that a second space keeps addresses
   there, and how many contacts it has.
 - **A dot for the other spaces:** in a space set to **Also while another space is open**, **Dot in the other spaces**,
@@ -1394,7 +1444,7 @@ call goes over the phone company's network and is not encrypted{~, as a plain SM
   background**, is the default, and **Wait until I open it** there leaves it closed until you open it. It starts with
   no space open, as a space with a password opens only with it and Erevos keeps no key on the phone. So until you open
   a space it reads no message, shows nothing of what came, and rings for no call. Only the spaces set to **Also while
-  another space is open** ask their relay whether something came, without taking it: a quiet notice says "Locked: says
+  another space is open** ask their server whether something came, without taking it: a quiet notice says "Locked: says
   only that messages came", and "New message", or how many came, shows when something does, never which space, nor who
   or what; a call counts as something that came, and does not ring. Spaces that go through Tor say nothing until a
   space is open. With no such space, or with **No notice**, only a quiet notice says "Locked. Open it to receive calls
@@ -1439,7 +1489,7 @@ otherwise. So after the phone restarts, nothing can be read and nothing rings un
 and hidden chats, whose key is in memory only while they are open unless **Receive while closed** keeps it with the
 space, otherwise only say that a message came, or ring with no name, if you let them.
 
-> The relay settings, your queue, your contacts and their names, the keys of your conversations and the messages are
+> The server settings, your queue, your contacts and their names, the keys of your conversations and the messages are
 > kept in this space, sealed. History has no limit: it is kept in sealed pages of the same size, mixed with the pages
 > of the other spaces and hidden chats, so only how much they all take together shows, not whose they are. The rest
 > is kept the same size for every space and hidden chats, used or not; what is larger goes to pages like the
@@ -1452,7 +1502,7 @@ space, otherwise only say that a message came, or ring with no name, if you let 
 From the home screen's menu, **New group**: give it a name, tick the contacts to ask, and tap **Make the group**.
 You are its admin. Each contact's phone answers by itself the next time {=Erevos} is open there, and joins: the group
 then shows on their home screen, with a note of who added them. A phone joins only a group whose admin is the contact
-who asked it, and an admin lets a contact in only as themselves, never as someone else. Groups go through the relay,
+who asked it, and an admin lets a contact in only as themselves, never as someone else. Groups go through the server,
 so it has to be set.
 
 **Why:** only the admin's phone changes the group (who is in it, its name), so no server has to put the changes in
@@ -1472,8 +1522,8 @@ out members.
   they say, and no contact link goes to either or is taken from either. Not in public groups. Asking is for the phone
   that holds the account; **Name** works on a linked device too.
 - **End-to-end encrypted for the group:** MLS (RFC 9420). Each message is encrypted once for the group, then sealed
-  again for each member, so what reaches each member's queue looks like nothing the others get, and no relay can tell
-  who is in a group. It goes straight to each member's queue, through your relay. Every week each phone's keys in the
+  again for each member, so what reaches each member's queue looks like nothing the others get, and no server can tell
+  who is in a group. It goes straight to each member's queue, through your server. Every week each phone's keys in the
   group are made new, the admin's by itself and each member's through the admin, so keys taken from a phone once stop
   reading the group.
 - **Members:** tap the group's name at the top, or **⋯** beside it. The admin adds contacts, takes members out and renames the group. A
@@ -1491,18 +1541,18 @@ out members.
 - **Group calls:** the green handset at the top of the group starts a voice call in it, and the blue camera beside it
   a video call (also **Video call** under **⋯**). While one is going on, only its own button shows, to join it. It
   rings on the members' phones where Erevos is open, and whoever answers is in it. A call going on shows at the top of
-  the group, to join it later. Up to eight people: each phone connects to each other one, through the call relay, so
-  no phone sees another's IP address; without a call relay, only on the same Wi-Fi. End-to-end encrypted between each
+  the group, to join it later. Up to eight people: each phone connects to each other one, through the call server, so
+  no phone sees another's IP address; without a call server, only on the same Wi-Fi. End-to-end encrypted between each
   two phones, their keys sent in the group's encryption. In a video call each phone sends its picture to each other
   one, so pictures show for up to four people; with more, they pause and the sound goes on, until a server for bigger
   video calls is set up. A call that rings offers **Join** and **Join with video**.
 - **Photos, files and voice messages:** **+** beside the field sends a photo or a file, as in a contact's chat,
   with the same **Photo quality**; hold the microphone while you talk, and let go to send. Each is encrypted with a key of
-  its own and put on your relay once, and only where it is and its key go to the group, in its encryption. Each
-  member's phone takes it from there through its own relay: up to 16 MB by itself while the group is open, a bigger
+  its own and put on your server once, and only where it is and its key go to the group, in its encryption. Each
+  member's phone takes it from there through its own server: up to 16 MB by itself while the group is open, a bigger
   one when tapped. Tap a photo to see it whole, a file to save it, a voice message to play it.
-  - **The relay keeps it 14 days,** encrypted, as it cannot know when every member has taken it.
-  - **Through the relay only,** even when members are nearby.
+  - **The server keeps it 14 days,** encrypted, as it cannot know when every member has taken it.
+  - **Through the server only,** even when members are nearby.
   - **A member who joins later** does not get what came before, as with the words. A member whose {=Erevos} is from
     before this version sees nothing of it.
   - **On the phone** each is kept in its pieces, sealed, as in a contact's chat. Deleting the group here deletes them.
@@ -1510,7 +1560,7 @@ out members.
   **Copy**, **Edit** and **Delete**. Each member has one reaction on a message, and a poll shows who chose what. A pin is for
   everyone, and any member can **Unpin** it. **Edit** gives your own words new ones for every member, up to a day after
   they went, marked **Edited**. **Delete** asks **This phone** or, for your own message, **Everyone**:
-  the members' Erevos delete it too, and a photo, file or voice message of yours leaves your relay at once instead of
+  the members' Erevos delete it too, and a photo, file or voice message of yours leaves your server at once instead of
   in 14 days. **+** has **Sticker**, **Location** and **Poll** here too. Links are underlined and asked before
   they open, and **Link previews**, when on, go with yours. In the members sheet, or a public group's own screen, **Search in this chat** goes through the group's messages and **Export chat**
   writes them out, and **Media, links and files** lists the group's photos, videos, voice messages, music, files and links, each kind apart, as in a contact's chat (see above), each going to its message; **Starred messages** and the home screen's search take in the groups too. A member whose {=Erevos} is
@@ -1529,14 +1579,14 @@ out members.
 A public group is one anyone with its link, or its QR code, can ask to join: for a club, a street or a class, where
 not everyone is your contact. From the home screen's menu, **Public groups**: give it a name and the name you go by in
 it, choose who comes in, and tap **Make the public group**. You own it. Its messages are end-to-end encrypted with MLS
-and go to each member as in any group, and no relay learns who is in it.
+and go to each member as in any group, and no server learns who is in it.
 
 - **The link:** tap the group's name at the top for its link and QR code, and **Share the link**. Whoever opens it, or
   scans the code with the phone's camera, chooses the name the group sees and taps **Ask to join**. A link can also be
   pasted under **Join by a link**. Every member has the link, and can pass it on.
 - **Description:** the owner or an admin writes it in the group's own screen, under **Description**, and taps **Save**;
   everyone in the group reads it.
-- **Joining while you are away:** the request waits on your relay, sealed so that only your phone opens it, until
+- **Joining while you are away:** the request waits on your server, sealed so that only your phone opens it, until
   Erevos is open on your phone: it looks every few seconds while Erevos shows, and about every minute in the
   background. Then it lets them in, and the group shows on their phone.
 - **Who comes in:** **Anyone with the link**, or **An admin lets them in**: then whoever asks waits under **Asking to
@@ -1547,14 +1597,14 @@ and go to each member as in any group, and no relay learns who is in it.
     undoes it.
   - **Take out:** they read nothing the group says from then on, and can ask to join again by the link.
   - **Ban:** taken out, and what their phone asks after is turned away. **Lift the ban**, under **Banned**, undoes it.
-    A ban stops the same phone, not someone who comes back with a new relay queue: against that, choose **An admin
+    A ban stops the same phone, not someone who comes back with a new server queue: against that, choose **An admin
     lets them in**, or change the link.
   - **Delete for everyone:** the latest messages are listed at the bottom; **Delete** takes one off every member's
     phone. Whoever read it already may have kept a copy.
 - **Change the link:** the link and QR code shared so far stop working at once, and every member gets the new one.
   Requests still waiting at the old one are lost.
 - **Hand the group over:** under a member's **Moderate**. Their phone owns it from then on and lets people in, so the
-  link changes to one on their relay; you stay an admin. If your phone is lost before you hand it over, no one can let
+  link changes to one on their server; you stay an admin. If your phone is lost before you hand it over, no one can let
   anyone in again, though the group goes on for those in it.
 - **Close the group** takes every member out. A member's **Leave the group** asks your phone to take them out.
 - **A burner group,** for one event: before you make it, under **It ends**, choose **After a day**, **After 3 days**
@@ -1574,167 +1624,167 @@ phones.
 > Anyone with the link can read the group from when they are let in, never what was said before, and the link can be
 > passed on: change it to stop that.
 
-- **The link** shows the group's name and your relay's address to whoever sees it.
-- **Every member sees every member's** chosen name, a key made for this group alone, their relay's address and their
+- **The link** shows the group's name and your server's address to whoever sees it.
+- **Every member sees every member's** chosen name, a key made for this group alone, their server's address and their
   queue's sender id. The key says nothing of who they are in their chats, nor which other groups they are in. The
   queue is one their public groups alone read on, not the one in their contact link, the same in each of their public
   groups (an Erevos before 2.0.0 says the one in its contact link).
 - **Names are chosen, not proven:** anyone can call themselves anything. The start of each member's key shows beside
   the name, and the owner and the admins are marked.
-- **Whatever is said can be copied** by anyone in the group: end-to-end encryption keeps the relays out, not the members.
-- **The relays** read nothing and learn no one in the group. Yours sees requests come to the group's door, how many and
-  when, not from whom. Members can fill each other's queue with what cannot be read, up to what the relay takes.
+- **Whatever is said can be copied** by anyone in the group: end-to-end encryption keeps the servers out, not the members.
+- **The servers** read nothing and learn no one in the group. Yours sees requests come to the group's door, how many and
+  when, not from whom. Members can fill each other's queue with what cannot be read, up to what the server takes.
 
 ## How Erevos picks the path {#paths}
 
 When you send a message, Erevos picks the path by itself:
 
-1. **Their phone is near** (the top of the chat says **Nearby**): it goes over the nearby link, and through the relay
+1. **Their phone is near** (the top of the chat says **Nearby**): it goes over the nearby link, and through the server
    too when there is one.
-2. **Otherwise, with a relay:** it goes through the relay, and a short message also goes to the {=Erevos} phones linked
-   nearby, so theirs can answer nearby if it is one of them. If the relay cannot be reached, that copy is the one
-   that counts, and those phones carry it to your contact's relay too, as in [Chat with a nearby phone](#nearby).
-3. **Otherwise, with no relay,** it goes to the {=Erevos} phones linked nearby, as in 2.
-4. **And over LoRa,** when a radio is set and the relay could not take a text, as in [Over a LoRa radio](#lora). With
+2. **Otherwise, with a server:** it goes through the server, and a short message also goes to the {=Erevos} phones linked
+   nearby, so theirs can answer nearby if it is one of them. If the server cannot be reached, that copy is the one
+   that counts, and those phones carry it to your contact's server too, as in [Chat with a nearby phone](#nearby).
+3. **Otherwise, with no server,** it goes to the {=Erevos} phones linked nearby, as in 2.
+4. **And over LoRa,** when a radio is set and the server could not take a text, as in [Over a LoRa radio](#lora). With
    no way at all, the message waits, marked **Waiting**, and goes by itself once there is one, as in
    [Sent, came and read](#relay); a line under the chat says why.
 5. [~] **And by SMS,** last of all, when you turned it on for that contact and nothing else took a text, as in
    [SMS](#sms).
 
-Every path is end-to-end encrypted: no relay and no phone in between can read what you send.
+Every path is end-to-end encrypted: no server and no phone in between can read what you send.
 
-**Ways**, under **Settings** → **Relay and networks**, shows every path at a glance: a card for the relay, Nostr, the phones nearby, LoRa{~, SMS} and Tor, each with how it is now and a line under it, full when it works, faint when it is on but reaches no one now, and dashed when it is off. Above them it says how many of your messages wait to go, with an orange dot for each. A card opens the settings of its path. It shows only the space that is open, never hidden chats. On home, the line under the top bar is **Ways** too, once a relay is set: a dot for each way, and how many of your messages wait; a tap opens it.
+**Ways**, under **Settings** → **Server and networks**, shows every path at a glance: a card for the server, Nostr, the phones nearby, LoRa{~, SMS} and Tor, each with how it is now and a line under it, full when it works, faint when it is on but reaches no one now, and dashed when it is off. Above them it says how many of your messages wait to go, with an orange dot for each. A card opens the settings of its path. It shows only the space that is open, never hidden chats. On home, the line under the top bar is **Ways** too, once a server is set: a dot for each way, and how many of your messages wait; a tap opens it.
 
 | Line under the chat | What to do |
 | --- | --- |
 | **Sent nearby, end-to-end encrypted.** | Nothing: their phone is near and has it. |
-| **Sent through the relay, end-to-end encrypted.** | Nothing: it is on its way. |
-| **Sent to the {=Erevos} phones nearby, end-to-end encrypted, as the relay could not be reached.** | It comes only if one of them is theirs: wait for **✓✓**, or check the relay. |
-| **… If their phone is not one of them, they hand it to their relay once they reach the internet, and so does this phone.** | Nothing: it comes once one of them, or this phone, reaches the internet. Wait for **✓✓**. |
-| **Sent over LoRa, end-to-end encrypted, as the relay could not be reached.** | It comes if their {=Erevos} has a radio on the same mesh, within reach: wait for **✓✓**, or check the relay. |
-[~] | **Sent by SMS, end-to-end encrypted, as nothing else could take it.** | Nothing: it costs SMS, and the phone company sees that you wrote to their number. **✓✓** comes once the relay or Nostr can be reached. |
-| **Waiting. The relay cannot be reached (or There is no relay), and their phone is not near.** | Nothing: it goes by itself once the relay or their phone nearby can take it, and then shows **✓**. Without a relay, fill in its address, as in [Chat through a relay](#relay), or come near their phone. |
-| **Waiting. It is too long for LoRa.** | Nothing: it goes once the relay or their phone nearby can take it. Or send it in shorter parts. |
-[~] | **Waiting. It is too long for SMS.** | Nothing: it goes once the relay or their phone nearby can take it. Or send it in shorter parts. |
-| **Not sent. The relay does not have this contact's queue any more.** | Ask them to write to you, or for their new contact link. |
-| **This build cannot encrypt, so chats through the relay are off.** | Build the app again: this build is older than its encryption. |
+| **Sent through the server, end-to-end encrypted.** | Nothing: it is on its way. |
+| **Sent to the {=Erevos} phones nearby, end-to-end encrypted, as the server could not be reached.** | It comes only if one of them is theirs: wait for **✓✓**, or check the server. |
+| **… If their phone is not one of them, they hand it to their server once they reach the internet, and so does this phone.** | Nothing: it comes once one of them, or this phone, reaches the internet. Wait for **✓✓**. |
+| **Sent over LoRa, end-to-end encrypted, as the server could not be reached.** | It comes if their {=Erevos} has a radio on the same mesh, within reach: wait for **✓✓**, or check the server. |
+[~] | **Sent by SMS, end-to-end encrypted, as nothing else could take it.** | Nothing: it costs SMS, and the phone company sees that you wrote to their number. **✓✓** comes once the server or Nostr can be reached. |
+| **Waiting. The server cannot be reached (or There is no server), and their phone is not near.** | Nothing: it goes by itself once the server or their phone nearby can take it, and then shows **✓**. Without a server, fill in its address, as in [Chat through a server](#relay), or come near their phone. |
+| **Waiting. It is too long for LoRa.** | Nothing: it goes once the server or their phone nearby can take it. Or send it in shorter parts. |
+[~] | **Waiting. It is too long for SMS.** | Nothing: it goes once the server or their phone nearby can take it. Or send it in shorter parts. |
+| **Not sent. The server does not have this contact's queue any more.** | Ask them to write to you, or for their new contact link. |
+| **This build cannot encrypt, so chats through the server are off.** | Build the app again: this build is older than its encryption. |
 
 ## Erevos on your own servers {#own-servers}
 
 Erevos does not need its maker's servers. LPHL's are only what it offers first: you can use your own for each thing
 below, from inside the app, with nothing else to install on the phone.
 
-- **Messages, photos and files:** they wait, end-to-end encrypted, on a small server called a relay. To use yours, or
+- **Messages, photos and files:** they wait, end-to-end encrypted, on a small server. To use yours, or
   your group's: on **New chat**, **I have no invite**, then **I have a server of my own**, and type its address and
-  the code you were given. Later, the same two are the relay address and the token under **For advanced users**.
-- **Calls:** nothing more to set. The call relay comes with your relay, so with your own relay your calls go through
-  your own server too.
+  the code you were given. Later, the same two are the server address and the token under **For advanced users**.
+- **Calls:** nothing more to set. The call server comes with your server, so with your own server a call goes through
+  your own server too, where it does not go straight from phone to phone (see [How visible are you?](#direct)).
 - **Backups:** on **Backups**, **To a server too** sends each backup, encrypted, to a folder on a server you choose,
   such as your own Nextcloud. See [Backups](#backup).
 - [~] **The Collection:** in its settings, **Also on a WebDAV server** keeps its encrypted files on a server you
   choose. See [Collection](#collection).
 - **Speech and translation models:** where Erevos asks to download them, **Download from another server…** takes a
   web folder of yours that holds the same files. Erevos checks every file and refuses one that was changed.
-- **No server at all:** **Start without a server** on the same screen. Texts then go through public Nostr relays, or
-  straight between phones that are near. See [With no relay at all](#nostr).
+- **No server at all:** **Start without a server** on the same screen. Texts then go through public Nostr servers, or
+  straight between phones that are near. See [With no server at all](#nostr).
 
-**What still reaches LPHL:** only a phone whose relay is LPHL's asks LPHL's web server, once a day, whether a new
+**What still reaches LPHL:** only a phone whose server is LPHL's asks LPHL's web server, once a day, whether a new
 version is out (see [Told when a new version is out](#updates)); **Check for updates** asks GitHub. {~A contact
 link made for a website and an invite by SMS open|A contact link made for a website opens} a page on LPHL's web server, which gets nothing of what the link
 says: that part never leaves the phone. The same pages on another server are read too, when you paste or scan them.
 
-**To set up a relay yourself:** see [Running your own relay](#own-relay), next.
+**To set up a server yourself:** see [Running your own server](#own-relay), next.
 
-## Running your own relay {#own-relay}
+## Running your own server {#own-relay}
 
-A relay you run yourself is the safest one, since whoever runs a relay sees who connects to it. The source code
+A server you run yourself is the safest one, since whoever runs a server sees who connects to it. The source code
 has everything in \`deploy/relay\`.
 
-- **On your own network:** run the relay on a computer, open port 7879 in its firewall, and type
+- **On your own network:** run the server on a computer, open port 7879 in its firewall, and type
   \`ws://<its address>:7879\` on every phone. Close the port again when you are done.
 - **On the internet:** a server (VPS) with Debian 12 or Ubuntu 22.04 or later, a domain name (or a free
-  \`sslip.io\` name) and ports 80 and 443 open. One command installs the relay behind Caddy, with a certificate from
+  \`sslip.io\` name) and ports 80 and 443 open. One command installs the server behind Caddy, with a certificate from
   Let's Encrypt and a random token. Every phone then uses \`wss://<your domain>\` and that token. The same command
-  sets up the call relay for calls, which needs port 3478 and the UDP ports 50000 to 50999 open too.
+  sets up the call server for calls, which needs port 3478 and the UDP ports 50000 to 50999 open too.
 
 Queues and waiting messages are kept on the server's disk, and so are the encrypted pieces of photos and files until
 they are taken (1024 MB together at most), so a restart loses nothing, and no request is logged.
-Messages sent for later are kept there until their time too, 10,000 or 256 MB at most: the relay sees when
+Messages sent for later are kept there until their time too, 10,000 or 256 MB at most: the server sees when
 each is to go, not what it says.
 
-**Why:** what the relay keeps has limits, so the phones that use it cannot fill its disk or its memory.
+**Why:** what the server keeps has limits, so the phones that use it cannot fill its disk or its memory.
 
-**Its own key:** the relay's key file (\`EREVOS_RELAY_KEY\`, which the one command sets up) is what it proves on every
-connection, so phones know it by that key rather than by its certificate (see [The relay's own key](#relay)). Keep that
-file, in its backups too: with a new one, every phone that knew the old key refuses the relay until someone taps **It
+**Its own key:** the server's key file (\`EREVOS_RELAY_KEY\`, which the one command sets up) is what it proves on every
+connection, so phones know it by that key rather than by its certificate (see [The server's own key](#relay)). Keep that
+file, in its backups too: with a new one, every phone that knew the old key refuses the server until someone taps **It
 has a new key** on it.
 
-**Invites:** the relay can let each phone have a token of its own, in a file of tokens, and then let those phones invite
-more, each invite for one phone (see [Invites to the relay](#relay)). Turn it on with \`EREVOS_RELAY_INVITES=on\` beside
-\`EREVOS_RELAY_TOKENS\`; the relay then writes the lines of invited phones in that file itself, with who invited them
+**Invites:** the server can let each phone have a token of its own, in a file of tokens, and then let those phones invite
+more, each invite for one phone (see [Invites to the server](#relay)). Turn it on with \`EREVOS_RELAY_INVITES=on\` beside
+\`EREVOS_RELAY_TOKENS\`; the server then writes the lines of invited phones in that file itself, with who invited them
 and when, and taking a line out cuts that phone off, that one alone: the phones it invited keep theirs, so to take those
 off too, delete each of their lines (each says who invited it). It lets in 100 phones by invite at most
-(\`EREVOS_RELAY_MAX_INVITED\`). \`erevos-relay free-line NAME\`, run with the relay stopped, makes a line one of yours:
+(\`EREVOS_RELAY_MAX_INVITED\`). \`erevos-relay free-line NAME\`, run with the server stopped, makes a line one of yours:
 the phone that invited it can no longer take it back, and it no longer counts among the 100. A phone that comes with the
-relay's token (\`EREVOS_RELAY_TOKEN\`) asks once for a line of its own, which the relay adds as one of yours, saying it
-came with the relay's token and when, 50 a day at most: so you can hand out that token, delete any one phone's line, and
+server's token (\`EREVOS_RELAY_TOKEN\`) asks once for a line of its own, which the server adds as one of yours, saying it
+came with the server's token and when, 50 a day at most: so you can hand out that token, delete any one phone's line, and
 then change the token without cutting off the others. \`deploy/relay/README.md\` says how.
 
-**Signing in:** with a file of tokens, the relay can also let phones sign in with an OpenID Connect provider, such as
+**Signing in:** with a file of tokens, the server can also let phones sign in with an OpenID Connect provider, such as
 Authentik, for a token of their own, and checks each account every hour, taking its phones off after 3 days without an
-answer and two more checks of each phone that fail an hour apart (see [Signing in to the relay](#relay)). One browser
+answer and two more checks of each phone that fail an hour apart (see [Signing in to the server](#relay)). One browser
 may start 10 sign-ins a minute. With \`EREVOS_RELAY_OIDC_GROUP\`, only the accounts in that group may.
-It needs a client at the provider, a few settings, and \`/signin/\` passed to the relay as plain HTTP:
+It needs a client at the provider, a few settings, and \`/signin/\` passed to the server as plain HTTP:
 \`deploy/relay/README.md\` says how.
 
 > Never post the token where others can read it. Whoever runs the server sees the IP addresses that connect, the
 > queue ids, and when and how much arrives. They cannot read the messages, which are end-to-end encrypted.
 
-## Home relay {#home-relay}
+## Home server {#home-relay}
 
-Under **Settings** → **Relay and networks** → **Home relay**, a space can have a second relay with a queue of its own:
-one at home, on a Raspberry Pi or an old computer, or any other relay you trust. It is optional.
+Under **Settings** → **Server and networks** → **Home server**, a space can have a second server with a queue of its own:
+one at home, on a Raspberry Pi or an old computer, or any other server you trust. It is optional.
 
-- **What it does:** your contact link and every message say that queue beside your relay. While your relay cannot be
+- **What it does:** your contact link and every message say that queue beside your server. While your server cannot be
   reached, contacts write there, and Erevos takes what comes there with each look. What you send goes through it
-  when your own relay is down.
-- **How to set it up:** run a relay as in [Running your own relay](#own-relay), type its address (and token, if it
+  when your own server is down.
+- **How to set it up:** run a server as in [Running your own server](#own-relay), type its address (and token, if it
   has one) and choose **Save**. Contacts learn it from your next message to them, or from your new contact link.
-- **What it sees:** what your relay sees, this phone's address when it takes messages (but not when it is only through
+- **What it sees:** what your server sees, this phone's address when it takes messages (but not when it is only through
   Tor), and when and how much comes. Hidden chats do not use it.
-- **Only through Tor:** a switch for each home relay. That relay never sees this phone's address, whatever Tor is set to
-  for the rest. With no token typed, it gives a token for a coupon: your relay, the space's own, signs the coupon blind,
-  so neither relay can tell whose the token is. The coupon is taken up to an hour after it was signed, at a random time, so
-  the times the two relays saw do not match, and the token comes from the home relay within the hour. The token lasts 90
-  days, and Erevos takes a new coupon by itself on a random day between day 30 and day 60. A limit: with few phones on a relay, whoever runs both
-  could still guess by the times alone. So two spaces (see [Second password](#second)) can each use the other's relay as
-  their home relay, and no relay ties them together. Both relays must have coupons turned on, and it needs a build with
+- **Only through Tor:** a switch for each home server. That server never sees this phone's address, whatever Tor is set to
+  for the rest. With no token typed, it gives a token for a coupon: your server, the space's own, signs the coupon blind,
+  so neither server can tell whose the token is. The coupon is taken up to an hour after it was signed, at a random time, so
+  the times the two servers saw do not match, and the token comes from the home server within the hour. The token lasts 90
+  days, and Erevos takes a new coupon by itself on a random day between day 30 and day 60. A limit: with few phones on a server, whoever runs both
+  could still guess by the times alone. So two spaces (see [Second password](#second)) can each use the other's server as
+  their home server, and no server ties them together. Both servers must have coupons turned on, and it needs a build with
   Tor, on Android (see [Through Tor](#tor)).
-- **Automatically from your relay:** a switch, off unless you turn it on, on Android, where Erevos has Tor. When your relay
-  names a relay paired with it (its operator sets that up), a space with no home relay takes that one by itself, only
-  through Tor, with its token from a coupon as above: nothing to type, and nothing to do when your relay names another.
-  Turning it off lets go of the home relay it took, and removing the home relay by hand turns it off for that space; a home relay you typed yourself stays as it is. Hidden
+- **Automatically from your server:** a switch, off unless you turn it on, on Android, where Erevos has Tor. When your server
+  names a server paired with it (its operator sets that up), a space with no home server takes that one by itself, only
+  through Tor, with its token from a coupon as above: nothing to type, and nothing to do when your server names another.
+  Turning it off lets go of the home server it took, and removing the home server by hand turns it off for that space; a home server you typed yourself stays as it is. Hidden
   places never take one so.
-- **For hidden chats:** each hidden place can have a home relay of its own, under **For advanced users** on its
+- **For hidden chats:** each hidden place can have a home server of its own, under **For advanced users** on its
   screen with no chat picked, while it is open. It is kept with that place only, sealed with its PIN, so the space knows nothing of it, and it is looked
-  at while the place is open. Use another relay than the space's: one relay seeing both queues would tie them
+  at while the place is open. Use another server than the space's: one server seeing both queues would tie them
   together.
 
-**More than one:** **Add another home relay** gives up to two more, each with a queue of its own, for example one at
+**More than one:** **Add another home server** gives up to two more, each with a queue of its own, for example one at
 home and one at a friend's. Contacts try them in the order shown, and Erevos takes what comes on each. Your contact
 link names the others only while it stays short enough for one QR code; the rest reach contacts with your next
 message. A contact with an older {=Erevos} uses only the first.
 
 ## Through Tor {#tor}
 
-Under **Settings** → **Relay and networks** → **Tor**, **What goes through Tor** chooses which of this space's
-requests to its relays go through the Tor network. Each space has its own choice:
+Under **Settings** → **Server and networks** → **Tor**, **What goes through Tor** chooses which of this space's
+requests to its servers go through the Tor network. Each space has its own choice:
 
 | Choice | What goes through Tor |
 | --- | --- |
-| **Nothing** | Unless you change it. The relay and the Nostr relays see your phone's IP address for everything. |
-| **Messages** | What you write, and what tells your contacts something, such as that a message was read. Pictures, files and voice messages go straight, which is faster: for them the relay sees your phone's IP address. |
-| **Everything** | Files too. Nothing goes to a relay without Tor. |
+| **Nothing** | Unless you change it. The server and the Nostr servers see your phone's IP address for everything. |
+| **Messages** | What you write, and what tells your contacts something, such as that a message was read. Pictures, files and voice messages go straight, which is faster: for them the server sees your phone's IP address. |
+| **Everything** | Files too. Nothing goes to a server without Tor. |
 
 **Why:** a new space starts with **Nothing**, as Tor makes messages slower; a space made before keeps its choice. With
 **Messages**, what you write is hidden by Tor and never waits for it, while pictures, files and voice messages, which
@@ -1745,7 +1795,7 @@ are large, go straight and so faster.
 
 - **One chat only through Tor:** in an Erevos chat, **Details** → **Through Tor** sends that chat's messages and files
   only through Tor, on Tor circuits of its own, whatever this space's choice; it is off unless you turn it on. The
-  relay then does not see your phone's IP address for that chat, and no Tor exit carries it together with another
+  server then does not see your phone's IP address for that chat, and no Tor exit carries it together with another
   chat. It is slower, and what goes waits while Tor starts. Calls do not go through Tor. Hidden chats have it too,
   each in its own **Details**.
   It is the same on your linked devices: switched on or off on any of them, it is switched on or off everywhere. On a
@@ -1755,19 +1805,19 @@ are large, go straight and so faster.
   own queue, their first messages come to the space's own queue, which is read the space's way. See [Who sees your
   internet address](#ip).
 
-- **What it hides:** the relay no longer sees your phone's IP address, only a Tor exit (or nothing, for a relay
-  with a \`.onion\` address). Your phone company or the Wi-Fi sees only that you use Tor, not which relay.
+- **What it hides:** the server no longer sees your phone's IP address, only a Tor exit (or nothing, for a server
+  with a \`.onion\` address). Your phone company or the Wi-Fi sees only that you use Tor, not which server.
 - **What it costs:** what goes through Tor comes and goes slower, and the first start of Tor takes a while. The screen
   shows how far Tor is. To spare the battery, Erevos sends the reduced padding Tor made for phones: the filler Tor
   sends to hide when you talk goes every 9 to 14 seconds, not every few, and none comes to the phone.
 - **What it does not cover:** calls, whose sound and picture go straight between the phones or through the call
-  relay; nearby phones{~ and SMS}, which do not use the internet.
+  server; nearby phones{~ and SMS}, which do not use the internet.
 - **On Android only:** {=Erevos} on a computer and the web app have no Tor yet, so there everything goes straight.
 
-> With **Messages**, a message never waits for Tor: one Tor could not take to the relay goes straight at once, and so
-> do messages while Tor starts, or for a minute after it could not reach the relay; then Tor is tried again. With
-> **Everything**, nothing goes to a relay without Tor:
-> when Tor cannot reach the relay, the message waits and is tried again; Erevos never falls back to your own
+> With **Messages**, a message never waits for Tor: one Tor could not take to the server goes straight at once, and so
+> do messages while Tor starts, or for a minute after it could not reach the server; then Tor is tried again. With
+> **Everything**, nothing goes to a server without Tor:
+> when Tor cannot reach the server, the message waits and is tried again; Erevos never falls back to your own
 > connection by itself.
 
 ### Bridges
@@ -1783,7 +1833,7 @@ is **No bridges** unless you choose, each space has its own, and it counts only 
 | **My own** | Bridge lines from bridges.torproject.org, from bridges@torproject.org by email, or from @GetBridgesBot on Telegram, pasted one per line; then tap **Use these bridges**. obfs4, Snowflake, WebTunnel, meek and plain bridges work. |
 
 - **Only through them:** with bridges, Tor never goes straight to its relays. When no bridge answers, with
-  **Everything** messages wait, as they do when Tor cannot reach the relay; with **Messages** they go to the relay
+  **Everything** messages wait, as they do when Tor cannot reach the server; with **Messages** they go to the server
   without Tor until one does. Lines that are not bridges are not taken, and Tor stays off.
 - **Check my connection**, under them, says whether Tor connects, and which way, never this phone's address. With
   **Automatic**, it looks again from the start.
@@ -1793,95 +1843,160 @@ is **No bridges** unless you choose, each space has its own, and it counts only 
 
 ## Through Nostr {#nostr}
 
-Under **Settings** → **Relay and networks** → **Nostr**, **Texts through Nostr** is **On** unless you change it. Then
-what you write to a contact whose {=Erevos} reads on Nostr too goes through your relays first: your relay, then their home
-relays, then your home relay; and through public Nostr relays only when none of them took it. Each space has its own
-choice, and its own Nostr relays.
+Under **Settings** → **Server and networks** → **Nostr**, **Texts through Nostr** is **On** unless you change it. Then
+what you write to a contact whose {=Erevos} reads on Nostr too goes through your servers first: your server, then their home
+servers, then your home server; and through public Nostr servers only when none of them took it. Each space has its own
+choice, and its own Nostr servers.
 
 - **How it is sealed:** end-to-end encrypted as always, then sealed once more for a key your contact gave this chat
-  alone, and signed by a key made for that one text (a NIP-59 gift wrap). The Nostr relays see that someone wrote to a
-  key that names no one, when, and how big; not who wrote it, nor to whom. Your relay does not see what went that way.
-- **What the Nostr relays can tell:** your phone asks each of them for all its keys at once: a relay can tell that those
-  keys are read together. Through Tor, never from where: each relay is reached on Tor circuits of its own, so no Tor
+  alone, and signed by a key made for that one text (a NIP-59 gift wrap). The Nostr servers see that someone wrote to a
+  key that names no one, when, and how big; not who wrote it, nor to whom. Your server does not see what went that way.
+- **What the Nostr servers can tell:** your phone asks each of them for all its keys at once: a server can tell that those
+  keys are read together. Through Tor, never from where: each server is reached on Tor circuits of its own, so no Tor
   exit carries what goes to two of them, and none can tell it is one phone's. With **Nothing** it goes straight, so
-  they see your phone's IP address, still not who wrote to whom. Some relays refuse some Tor exits, and some exits
-  cannot reach a relay: after a failure like that, the next try goes through another exit.
-- **How it goes:** with **Nothing**, texts go to the Nostr relays straight. With **Messages**, through Tor once Tor is
-  ready, and through your relay while Tor starts. With **Everything**, only through Tor. When the way changes, the Nostr
+  they see your phone's IP address, still not who wrote to whom. Some servers refuse some Tor exits, and some exits
+  cannot reach a server: after a failure like that, the next try goes through another exit.
+- **How it goes:** with **Nothing**, texts go to the Nostr servers straight. With **Messages**, through Tor once Tor is
+  ready, and through your server while Tor starts. With **Everything**, only through Tor. When the way changes, the Nostr
   connections close and open again the new way.
 - **Nostr through Tor:** on the **Nostr** screen, **Nostr through Tor** is **Off** unless you turn it on. **On**,
-  Erevos reaches the Nostr relays and the Nostr file servers only through Tor and starts Tor for it, even when the
+  Erevos reaches the Nostr servers and the Nostr file servers only through Tor and starts Tor for it, even when the
   space's Tor is **Nothing**; a text that goes there waits while Tor starts. It only adds Tor: with Tor on for the
   space, Nostr goes through Tor whatever this says, and a chat set to **Through Tor** goes through Tor whatever this
   says. See [Who sees your internet address](#ip).
-- **The relays:** relay.damus.io, nos.lol and relay.primal.net unless you change them; you can add your own, five at
-  most. Your contacts are told the relays you read on, and write to you there; one that takes a text is enough.
-- **What stays on your relay:** calls, reactions, and the marks that a message came or was read; and what you write to contacts on an iPhone or a computer, which do not read on Nostr. Pictures, files and voice messages go through your relay when one is between you; with no relay between you they go through Nostr too (see With no relay at all).
+- **The servers:** relay.damus.io, nos.lol and relay.primal.net unless you change them; you can add your own, five at
+  most. Your contacts are told the servers you read on, and write to you there; one that takes a text is enough.
+- **What stays on your server:** calls, reactions, and the marks that a message came or was read; and what you write to contacts whose {=Erevos} does not read on Nostr. Pictures, files and voice messages go through your server when one is between you; with no server between you they go through Nostr too (see With no server at all), and so does what sets up a call, with **SPEED**.
 - **Which way it went:** hold a message: its menu says **Went through Nostr** or **Came through Nostr** when a Nostr
-  relay took it. From now on it also says **Went through the relay**, **Came through the relay**, **Went to their phone
+  server took it. From now on it also says **Went through the server**, **Came through the server**, **Went to their phone
   nearby**, **Came from a phone nearby** or **Went over LoRa**; a message from before says nothing. The note under the
   messages says **Sent through Nostr** too. Two phones side by side give each other texts nearby first, then through
-  the relays; Nostr carries a text only when the relays did not take it.
-- **What the relays did last:** the **Nostr** screen shows, for each relay, whether it took the last text it was given
+  the servers; Nostr carries a text only when the servers did not take it.
+- **What the servers did last:** the **Nostr** screen shows, for each server, whether it took the last text it was given
   and how many seconds after, or why not, and whether your phone reads on it. It is kept on this phone only, until
-  Erevos closes. A text never waits for the Nostr relays while your relays take it.
-- **On Android only,** as Tor is.
+  Erevos closes. A text never waits for the Nostr servers while your servers take it.
+- **On a computer, in the web app and on Sailfish OS:** there is no Tor there, so Erevos reaches the Nostr servers
+  straight, as it reaches your server, and they see that device's IP address; it reads there while Erevos is open.
+  With **Everything** for the space, or **Nostr through Tor** on, as a phone's backup may bring them, it reaches none
+  there, and the **Nostr** screen says so.
 
-**Why:** the Nostr relays are public, so when Tor is on for the space Erevos reaches them through Tor, and they never
+**Why:** the Nostr servers are public, so when Tor is on for the space Erevos reaches them through Tor, and they never
 learn where your phone is; with **Nothing** it reaches them straight. Only texts go there, as the backup of your
-relays: a text that went there goes through your relay again should it not come, while the marks that a message came or
-was read would have none, and a message sent for later needs your relay to hold it until its time. With no relay between
-you, pictures, files and voice messages go there too (see With no relay at all).
+servers: a text that went there goes through your server again should it not come, while the marks that a message came or
+was read would have none, and a message sent for later needs your server to hold it until its time. With no server between
+you, pictures, files and voice messages go there too (see With no server at all).
 
-> A text that went through Nostr goes through your relay again should your contact's phone not say within five minutes
-> that it came, and they see it once. When neither your relays nor a Nostr relay takes it, it waits and goes again, as
+> A text that went through Nostr goes through your server again should your contact's phone not say within five minutes
+> that it came, and they see it once. When neither your servers nor a Nostr server takes it, it waits and goes again, as
 > any message does.
 
 - **Hidden chats:** they read on Nostr too, while they are open, and closed as well while **Receive while closed** is
   on for them and the space is open (see [Hidden chats](#hidden)). Closed, they still show "New message": with each
-  text through Nostr, your contact also sends your relay a bell, a message that says nothing, which your relay counts
-  as one, as before. With no relay, their contact link and QR code say where they read on Nostr, with a key of that
-  place alone, and texts, reactions and the marks that a message came go there, as from a phone with no relay.
+  text through Nostr, your contact also sends your server a bell, a message that says nothing, which your server counts
+  as one, as before. With no server, their contact link and QR code say where they read on Nostr, with a key of that
+  place alone, and texts, reactions and the marks that a message came go there, as from a phone with no server.
 
-### With no relay at all {#nostr-only}
+### With no server at all {#nostr-only}
 
-A phone with no relay, no invite and no LPHL account can still begin: its contact link and QR code say where it reads
+A phone with no server, no invite and no LPHL account can still begin: its contact link and QR code say where it reads
 on Nostr, and that is enough to talk.
 
 - **To begin:** on **New chat**, under **For advanced users**, tap **Start without a server**, then **Show my QR code**
   or **Share my contact link**, and give it to someone who uses {=Erevos}. Who adds it writes to you through Nostr, and
   shows as a message request, which you accept. You can add their link or QR code too, the same way.
-- **What goes:** texts, stickers, reactions, edits, and the marks that a message came or was read, all through Nostr; and photos, files and voice messages too. A voice message goes in wraps like a text. A photo up to 3 MB goes in pieces of 32 KB, a wrap each, sent before the message that offers it; the other phone keeps them, encrypted with the rest of the space or the hidden chats they came for, until all have come, four days at most. A larger photo, a video or any other file, up to 20 MB, goes as one blob, encrypted on the phone, to a Blossom file server (blossom.primal.net, blossom.band or nostr.download), through Tor as the space's Tor choice says (straight with **Nothing**): the server keeps only what it cannot read. Calls and groups need a relay, or the other phone nearby. Hidden chats work so too, through Nostr only (see [Hidden chats](#hidden)).
-- **When it does not come:** the Nostr relays keep a text for two days. Until your contact's phone says it came, Erevos
+- **What goes:** texts, stickers, reactions, edits, and the marks that a message came or was read, all through Nostr; and photos, files and voice messages too. A voice message goes in wraps like a text. A photo up to 3 MB goes in pieces of 32 KB, a wrap each, sent before the message that offers it; the other phone keeps them, encrypted with the rest of the space or the hidden chats they came for, until all have come, four days at most. A larger photo, a video or any other file, up to 20 MB, goes as one blob, encrypted on the phone, to a Blossom file server (blossom.primal.net, blossom.band or nostr.download), through Tor as the space's Tor choice says (straight with **Nothing**): the server keeps only what it cannot read. Groups need a server, or the other phone nearby. Calls are set up through Nostr and go straight from phone to phone with **SPEED** (see [How visible are you?](#direct)); with **ANONYMOUS** they need a server or the other phone nearby, and with **INVISIBLE** there are none. Hidden chats work so too, through Nostr only, though a call there needs a server or the other phone nearby (see [Hidden chats](#hidden)).
+- **When it does not come:** the Nostr servers keep a text for two days. Until your contact's phone says it came, Erevos
   gives it to them again once a day, for two weeks.
-- **A relay by itself:** when your contact has a relay that lets them invite, their {=Erevos} sends yours an invite to it
-  by itself, once, in the chat, whether you first met through Nostr or nearby, over Bluetooth, Wi-Fi or a QR code.
-  Your phone takes it by itself, and from then on photos, voice messages and calls work too, with everyone. It counts
-  as one of their invites. Someone whose message request you have not accepted chooses no relay for you: their invite
-  waits until you accept them, a week at most.
-- **An older Erevos** does not read the Nostr part of a link: it reaches you nearby only, until you have a relay.
+- **A server by itself:** when your contact has a server that lets them invite, their {=Erevos} sends yours an invite to it
+  by itself, once, in the chat, whether you first met through Nostr or nearby, over Bluetooth, Wi-Fi or a QR code. Your
+  phone takes it by itself (with **ANONYMOUS** or **INVISIBLE** it asks first, as their server then sees your internet
+  address), and from then on groups work too, and calls connect from any network, with everyone. It counts as one of
+  their invites, and once you are in, their chat with you says so, with **Take back** under that line. Someone whose
+  message request you have not accepted chooses no server for you: their invite waits until you accept them, a week at
+  most.
+- **An older {=Erevos}** does not read the Nostr part of a link: it reaches you nearby only, until you have a server.
 
-**Why:** Nostr is only the way in. No one needs an invite to begin, and once one of you has a relay, it carries what
+**Why:** Nostr is only the way in. No one needs an invite to begin, and once one of you has a server, it carries what
 is too big for Nostr.
+
+## How visible are you? {#direct}
+
+**How visible are you?** stands at the top of **Settings**, under the search: three choices for who sees your phone's
+internet address (IP address), which shows roughly where the phone is, and on which network. Each space has its own,
+and a space is on **SPEED** until you choose another, unless Tor is on in it. **What it changes**, under them, opens
+their screen, which says what this section says. Messages are end-to-end encrypted with all three.
+
+- **SPEED:** the servers and your contacts see your address. Erevos does not ask before the things below: it does
+  them at once. Calls and video calls with a contact go straight from phone to phone where they can, the fastest way,
+  and through a call server where they cannot; with no server between you two, the call is set up through Nostr.
+  Group calls do not go straight over the internet: they go through the call server, or between phones on the same
+  Wi-Fi.
+- **ANONYMOUS:** only the server sees it, never your contacts. Before each of the things below, Erevos says once who
+  would see the address, and you choose whether to go on (see [Who sees your internet address](#ip)). Calls go only
+  through a call server, which hides each phone's address from the other, or between two phones on the same Wi-Fi. A
+  call from a contact with no server between you two does not ring: the chat shows it as missed, and says that
+  **SPEED** lets such calls through. Tor for messages only, or Nostr through Tor, chosen on their own screens, keep a
+  space on ANONYMOUS.
+- **INVISIBLE:** no one sees it. Everything of the space goes through Tor, files and Nostr too: the servers see an
+  address of Tor, never yours, and your contacts see none. Messages and files come and go slower, and the first start
+  of Tor takes a while. There are no voice or video calls, as calls do not go through Tor: trying one says why, a
+  contact's call does not ring (the chat shows it as missed, in INVISIBLE), and a call going on ends when INVISIBLE is
+  chosen. **Everything** on the Tor screen (**Settings** → **Server and networks** → **Tor**) is INVISIBLE too. {+ In Erevos+ every account of the other networks goes only through Tor too, whatever its own Tor choice, and none of their calls goes or rings.}
+
+**Who sees your internet address with SPEED:**
+
+- The servers that carry what you send and your calls: yours, your contact's, and one a contact invites you to.
+- Your contact's phone, in a call, and the helper servers, which tell each phone its own address.
+- A server your contact chose for a file.
+- The public Nostr servers, when two phones pair by a code of 8 digits.
+- [~] A radio station or a TV channel of the Collection, while it plays.
+- [~] The site the list of spam numbers comes from, in **Phone**.
+
+None of them sees what you write or say: that stays end-to-end encrypted.
+
+**What none of them changes:**
+
+- Hidden chats, and chats set to **Through Tor**, never connect directly and still ask.
+- Erevos still asks before it opens a web link or shows a link's preview, and before it brings the messages of a phone
+  beside this one from a server this phone does not use.
+- Tor turned off on its own screen leaves the space on **ANONYMOUS**: nothing connects directly until you choose
+  **SPEED** again, which turns off Tor, and Nostr through Tor, in that space.
+
+**Good to know:**
+
+- **A call cannot always go straight:** some networks, mobile ones above all, let nothing in from outside. It then goes
+  through a call server, which connects from any network. Where neither of you has a call server, the call screen says
+  **The call could not connect directly**, and the chat keeps that line.
+- **An older {=Erevos}** rings for such a call, and then cannot connect.
+- **With no server,** Erevos hears such a call only while it reads on Nostr: on Android, left to sleep to spare the
+  battery, it may miss one; on a computer, in the web app and on Sailfish OS, it reads there only while it is open.
+- **Helper servers, for advanced users:** to call straight from phone to phone, each phone asks a helper server what its
+  own internet address is. The helper sees that address, once a call, and nothing of the call itself. Unless you choose
+  otherwise, Erevos asks the one beside your server and the one beside LPHL's first, and two public ones, Cloudflare's
+  and Nextcloud's, only when none of those answers. On their screen, with **SPEED**, **My own servers** takes up
+  to three of yours, and **No helper** asks none: a direct call then connects only where the two phones find each other
+  by themselves, as on the same Wi-Fi. **Check now** asks them as a call does, so they see your address then too.
 
 ## Who sees your internet address {#ip}
 
 Your phone's internet address, its IP address, shows roughly where you are and which provider you use. It does not
 show what you write. Whoever your phone connects to sees it, unless the connection goes through Tor.
 
-- **Your relay and your contact's relays:** they see it. To hide it, turn Tor on for the space (**Settings** → **Relay
-  and networks** → **Tor**), or turn on **Through Tor** in one chat's **Details**. See [Through Tor](#tor).
+- **Your server and your contact's servers:** they see it. To hide it, choose **INVISIBLE** at the top of **Settings**,
+  turn Tor on for the space's messages (**Settings** → **Server and networks** → **Tor**), or turn on **Through Tor** in
+  one chat's **Details**. See [How visible are you?](#direct) and [Through Tor](#tor).
 
 - [+] **XMPP:** your XMPP server sees it while Erevos is connected, unless the account goes through Tor; the servers of
   your contacts and groups do not, as your server carries your messages to them. Erevos warns before you send in a chat
   while the account does not go through Tor (with **Through Tor** for that chat as the fix), before every call, and
   before fetching a file from another server than yours. See [XMPP](#xmpp).
 
-- **The public Nostr relays and the Nostr file servers:** they see it unless the connection goes through Tor. Turn on
-  **Nostr through Tor** under **Settings** → **Relay and networks** → **Nostr**, or **Through Tor** for one chat. See
-  [Through Nostr](#nostr).
+- **The public Nostr servers and the Nostr file servers:** they see it unless the connection goes through Tor. Turn on
+  **Nostr through Tor** under **Settings** → **Server and networks** → **Nostr**, or **Through Tor** for one chat. On a
+  computer, in the web app and on Sailfish OS there is no Tor: there only **Texts through Nostr** turned **Off** hides
+  it from them. See [Through Nostr](#nostr).
 - **A code of 8 digits**, under **Near me** and **I have their code**: the two phones meet on those same public Nostr
-  relays, so without Nostr through Tor they see the address, though not the code or the contact links. Erevos says so
+  servers, so without Nostr through Tor they see the address, though not the code or the contact links. Erevos says so
   before the first one.
 
 - [+] **Matrix:** only your own Matrix server sees it, not your contacts' servers: photos and files from other servers
@@ -1890,7 +2005,7 @@ show what you write. Whoever your phone connects to sees it, unless the connecti
 - [+] **Telegram:** Telegram's servers see it, unless the account goes through Tor: choose **Always through Tor** under
   **Tor for this Telegram account** in Telegram's settings, or turn on **Through Tor** in one chat's info, which sends
   the whole account through Tor. See [Telegram](#telegram).
-- [+] **Chats with other Nostr apps and the Public feed:** their relays and file servers see it unless the account goes
+- [+] **Chats with other Nostr apps and the Public feed:** their servers and file servers see it unless the account goes
   through Tor (**Tor** on the **Nostr chats** screen) or the chat's **Through Tor** is on. Posting, liking or voting in
   the Public feed, and its photos and link previews fetched without Tor, show it too. See [Chats with other Nostr
   apps](#nostr-chats).
@@ -1900,8 +2015,10 @@ show what you write. Whoever your phone connects to sees it, unless the connecti
   in, Signal's captcha, Messenger's pictures and **Open Facebook** go the same way. Erevos warns before you send in a chat while the
   account does not go through Tor, and before every call. See [Messenger](#messenger), [Signal](#signal) and [Session](#session).
 
-- **Calls:** they never go through Tor. The call relay, yours or your contact's, sees the address, though not what is
-  said. A call between phones nearby on the same network stays on that network.
+- **Calls:** they never go through Tor, so **INVISIBLE** has none. The call server, yours or your contact's, sees the
+  address, though not what is said. A call between phones nearby on the same network stays on that network. With
+  **SPEED** chosen, the call goes straight from phone to phone where it can, and through the call server where it
+  cannot: your contact's phone sees the address either way, and so do the helper servers that tell each phone its own.
 
 - **A file on a server your contact chose:** the server sees the address when your phone fetches the file. Tor hides
   it.
@@ -1910,35 +2027,41 @@ show what you write. Whoever your phone connects to sees it, unless the connecti
   preview is fetched from its site too, and the site sees the address the same way.
   With **Through Tor** on for link previews, it does not.
 
-- **A contact's relay:** while your space has no relay of its own, or only a place lent on one, a contact can give
-  you a place on theirs, and it comes with their message. Their relay then sees the address, so Erevos asks before it
-  takes it, unless the space sends everything through Tor. Not taken, the invite is let go.
+- **A contact's server:** while your space has no server of its own, or only a place lent on one, a contact can give you a
+  place on theirs, and it comes with their message. Their server then sees the address, so Erevos asks before it takes
+  it, unless the space is on **SPEED**, or on **INVISIBLE**, which sends everything through Tor. Not taken, the invite is
+  let go.
 
 - **Groups:** a message in an Erevos group goes through a server, which sees the address. Tor for the space hides it;
   a group has no switch of its own.
 
 - **Backups, {~the Collection's server, radio and TV lists, |}link previews and updates:** each has its own **Through
   Tor** switch, in its own screen, off unless you turn it on. See [Backups](#backup), {~[Collection](#collection), |}[Chat
-  through a relay](#relay) and [Updates](#updates).
+  through a server](#relay) and [Updates](#updates).
 
 - [~] **Radio stations and TV channels:** each sees the address while it plays. **Play through Tor**, in the Collection's
   settings on Android, off unless you turn it on, plays them only through Tor. See [Collection](#collection).
 
-Erevos warns once before each of these, with the title **Your internet address can be seen**, a **Guide** button that
-opens this section and, where it can, a button that fixes it, such as **Through Tor for this chat**. **Go on** goes
-on. For what you send, it is said once for the whole network, not in each chat: after that, a chat or group that goes
-without Tor shows only a quiet line above where you write, **Without Tor: the relays see your internet address.**,
-with **Through Tor for this chat** and **Guide** beside it.
+With **ANONYMOUS** or **INVISIBLE**, Erevos warns once before each of these, with the title **Your internet address can be
+seen**, a **Guide** button that opens this section and, where it can, a button that fixes it, such as **Through Tor for
+this chat**. **Go on** goes on. For what you send, it is said once for the whole network, not in each chat: after that,
+a chat or group that goes without Tor shows only a quiet line above where you write, **Without Tor: the servers see your
+internet address.**, with **Through Tor for this chat** and **Guide** beside it.
 
 After the guide, the same question comes back, and what you were sending, such as a voice message or a file, waits
 for it. A call that rings here says it under the call, and answering goes on. Hidden chats keep what was said with
 them, apart from the space.
 
+With **SPEED**, the default, it does not ask before these: they go at once, and no quiet line shows. It
+still asks before it opens a web link or shows a link's preview{+, before what goes to Matrix, XMPP or other Nostr
+apps}, and before it brings the messages of a phone beside this one from a server this phone does not use; and hidden
+chats, and chats set to **Through Tor**, still ask. See [How visible are you?](#direct).
+
 Nearby phones{~, LoRa and SMS| and LoRa} do not use the internet, so they show no internet address.
 
 ## Matrix {#matrix}
 
-Under **Settings** → **Relay and networks** → **Matrix**, a space can sign in to a Matrix account, to chat with people
+Under **Settings** → **Server and networks** → **Matrix**, a space can sign in to a Matrix account, to chat with people
 who use Element or another Matrix app. Erevos talks to the Matrix server itself, as Element does: no bridge sits in
 between.
 
@@ -1968,19 +2091,16 @@ between.
   A chat that is not encrypted says so.
 - **Not anonymous:** the Matrix server sees your account, who talks with whom and when, and, without Tor, from where.
   In a chat with people on other servers, those servers see it too.
-- **Through Tor:** on Android, the Matrix screen, before signing in too, has the Tor choice every account has:
-  **Off** (the default) goes straight, and the Matrix server sees your address; **As the space** follows **Settings**
-  → **Relay and networks** → **Tor**: with **Messages**, through Tor once it is ready and straight while it starts,
-  photos and files straight; with **Everything**, all of it only through Tor; **Always through Tor** sends this
-  account only through Tor, signing in too, and nothing without it. Tor uses the space's bridges. A chat's
-  **Through Tor**, under its buttons, makes the whole account go only through Tor while it is on: Matrix has one
-  connection for all chats of an account. Calls never go through Tor.
+- **Through Tor:** on Android, Matrix follows this space's choice under **Settings** → **Server and networks** →
+  **Tor**. With **Messages**, all of it, photos too, goes through Tor once Tor is ready, and straight while Tor starts
+  or when it fails; with **Everything**, only through Tor; with **Nothing**, straight. The Matrix screen says which
+  way it goes now.
 - **Messages from before:** a message sent before Erevos signed in, or one whose key has not come yet, shows as locked.
 - **Photos and files:** **Photo** and **File** send them, up to 50 MB, encrypted on the phone before they go to the
   Matrix server, so it keeps only what it cannot read. A photo you get is fetched only when you tap **Show photo**;
   **Save** keeps any file on the phone.
   Tap a photo that shows to see it on the whole screen, as in a contact's chat: two fingers or a double tap zoom in,
-  it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat through a relay](#relay)).
+  it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat through a server](#relay)).
 - **Stickers:** a sticker that Element, FluffyChat or Element X send shows in the chat; **Show sticker** fetches it
   through your Matrix server. **Sticker** sends your own stickers made from photos (**Mine**) as pictures, encrypted
   where the chat is. The built-in sets are there too: each sticker goes as its picture, made on your device, with its
@@ -2065,9 +2185,9 @@ between.
   screen lets this space say "New message" when something comes on Matrix while another space is open, as its own
   chats do with **Also while another space is open** under **Settings** → **Notifications** → **In the background**,
   which it needs too. It never says what, from whom or in which chat, and a call does not ring then: only the space's
-  key opens what came. For it the Matrix server tells this space's relay of each message, with no words in it, so the
-  Matrix server learns the relay's address, and the relay when messages come. Off unless you turn it on; it needs a
-  relay updated for it, which the Matrix server can reach.
+  key opens what came. For it the Matrix server tells this space's own server of each message, with no words in it, so the
+  Matrix server learns that server's address, and that server when messages come. Off unless you turn it on; it needs a
+  server updated for it, which the Matrix server can reach.
 - **Threads:** hold a message and choose **Reply in thread** to answer it in a thread. A thread opens on a screen of
   its own, and a message with answers says how many; tap it to open the thread. Apps without threads show the answers
   as plain answers.
@@ -2097,14 +2217,14 @@ between.
   longer read what comes. The Matrix server asks for your password first.
 - **Older calls:** in a chat with one person, the call tiles ask for **Element Call** or **Older call**. The older
   call works with FluffyChat, Nheko and Element on a computer, and rings here when they call. Its signals go as the
-  chat does, encrypted in an encrypted chat, through your relay when the space has one, else through your Matrix
-  server's call relay; the call itself is encrypted (DTLS-SRTP).
+  chat does, encrypted in an encrypted chat, through your server when the space has one, else through your Matrix
+  server's call server; the call itself is encrypted (DTLS-SRTP).
 
 **Why:** Erevos's own chats hide who talks with whom; a Matrix server cannot. So Matrix chats are kept apart and
 marked, for the people you would otherwise reach only on Matrix.
 
 - **What a message carries:** the marks for how words look, such as bold and hidden words, show as in an Erevos chat
-  (see [Chat through a relay](#relay)), and go with the message, so Element shows them too. Of what another app sends,
+  (see [Chat through a server](#relay)), and go with the message, so Element shows them too. Of what another app sends,
   only bold, italic, struck through, code and hidden words show: nothing in it runs, no picture is fetched, and a link
   shows where it really goes. Web addresses can be tapped, and Erevos asks before opening one. Beside **Photo** and
   **File** are **Camera**, **Video**, **Contact card** and **Photo quality**: a contact card goes as a .vcf file that
@@ -2139,7 +2259,7 @@ marked, for the people you would otherwise reach only on Matrix.
 
 ## XMPP {#xmpp}
 
-Under **Settings** → **Relay and networks** → **XMPP**, a space can sign in to an XMPP account, to chat with people who
+Under **Settings** → **Server and networks** → **XMPP**, a space can sign in to an XMPP account, to chat with people who
 use Conversations, Monal, Gajim, Dino or another XMPP app. Erevos talks to the XMPP server itself, as those apps do: no
 bridge sits in between.
 
@@ -2198,7 +2318,7 @@ bridge sits in between.
   photo, sound or file that comes is fetched only when you tap **Show photo**, **Play** or **Save**. On Android, files
   go through Tor as the chat does. Tap a photo that shows to see it on the whole screen, as in a contact's chat: two
   fingers or a double tap zoom in, it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat
-  through a relay](#relay)).
+  through a server](#relay)).
 - **Stickers:** **Sticker** sends your own stickers made from photos (**Mine**) as photos, encrypted as the chat is;
   other XMPP apps show them as photos. The built-in sets are there too: each sticker goes as its picture, made on your
   device. A sticker pack that another app sends (XEP-0449) is not fetched: it shows its words.
@@ -2228,9 +2348,9 @@ bridge sits in between.
   Erevos's own calls, and their calls ring here the same way, while this space is open; a call from someone not in your
   contacts only shows as missed. It works with apps that call as Conversations does (Jingle, rung with XEP-0353). The
   call itself is encrypted (DTLS-SRTP), but the fingerprint of its key goes through the XMPP servers as it is, not
-  end-to-end encrypted, so those servers could put themselves in between. It goes through this space's call relay when
+  end-to-end encrypted, so those servers could put themselves in between. It goes through this space's call server when
   there is one, else through the XMPP server's TURN server, and only through it, so the other person does not learn your
-  address; with neither, it goes straight, and they do. A call never goes through Tor: the call relay or the TURN server
+  address; with neither, it goes straight, and they do. A call never goes through Tor: the call server or the TURN server
   sees this phone's address.
   In a voice call, either of you can turn on video: **Add video**, on the call screen, turns your camera on and asks the
   other person first, who chooses **Not now** or **Turn on video**. Video starts only if they say yes, and a no leaves
@@ -2240,24 +2360,18 @@ bridge sits in between.
   at the top and a line under its name say so, and tapping either joins it, until its last person leaves. It works with
   Dino, which calls in groups the same way (MUJI): each call has a room of its own on the group service, which only the
   group's members may join, and each phone in the call connects straight to each other one, as in Erevos's own group
-  calls, through this space's call relay or the XMPP server's TURN server, eight people at most. As in a call with one
+  calls, through this space's call server or the XMPP server's TURN server, eight people at most. As in a call with one
   person, the call is encrypted (DTLS-SRTP), but the fingerprints of its keys, and the invitations, go through the XMPP
   servers as they are, and the group service sees who is in the call and when. A hidden chats' own XMPP account calls in
   its groups the same way, while the hidden chats are open; while they are closed, with **Receive while closed** on, a
   call that comes in one of its groups shows as missed.
 - **Not anonymous:** the XMPP server sees your account, your contacts, who talks with whom and when, and, without Tor,
   from where. The other person's server sees the same of its chats with you.
-- **Through Tor:** on Android, the XMPP screen, and the one before signing in, chooses the account's Tor: **Off** (the
-  default: straight, and the server sees your address), **As the space** (as this space's choice under **Settings** →
-  **Relay and networks** → **Tor** says: with **Messages** through Tor once Tor is ready, its files straight; with
-  **Everything** only through Tor, files too; with **Nothing** straight) or **Always through Tor** (only through Tor,
-  whatever the space does, signing in too, and nothing goes while Tor cannot connect). Its connection, the look for its
-  server and its files follow the choice; Tor uses the space's bridges. Calls never go through Tor, and no link preview
-  is made while the account must not go straight. Where Erevos cannot open a connection of its own (the web app, a
-  computer), it uses the server's WebSocket, straight, and a server without one cannot be reached.
-- **A chat through Tor:** **Through Tor** under a chat or group, off unless turned on, sends it only through Tor. One
-  connection to the server carries all the account's chats, so while any chat has it on, the whole account goes only
-  through Tor, whatever is chosen for the account, and the XMPP screen says so.
+- **Through Tor:** on Android, XMPP follows this space's choice under **Settings** → **Server and networks** → **Tor**:
+  with **Messages**, it goes through Tor once Tor is ready, and straight while Tor starts or when it fails; with
+  **Everything**, only through Tor; with **Nothing**, straight. The XMPP screen says which way it goes now. Where Erevos
+  cannot open a connection of its own (the web app, a computer), it uses the server's WebSocket, straight, and a server
+  without one cannot be reached.
 - **Notifications:** a message that comes shows a notice and counts in the number on Erevos's icon, as in Erevos's own
   chats, while this space is open; on a computer, while Erevos runs. On Android, **Notifications** at the bottom of a
   chat mutes it or gives it a sound of its own; a muted chat is not counted. **Chat look** beside it gives the chat a look
@@ -2269,8 +2383,8 @@ bridge sits in between.
   screen lets this space say "New message" when something comes on XMPP while another space is open, as its own chats
   do with **Also while another space is open** under **Settings** → **Notifications** → **In the background**, which it
   needs too. It never says what, from whom or in which chat, and a call does not ring then: only the space's key opens
-  what came. For it the XMPP server tells this space's relay of each message while no app of the account is on, so the
-  XMPP server learns the relay's name, and the relay when messages come. Off unless you turn it on; it needs a relay
+  what came. For it the XMPP server tells this space's own server of each message while no app of the account is on, so the
+  XMPP server learns that server's name, and that server when messages come. Off unless you turn it on; it needs a server
   updated for it, which XMPP servers can reach (its owner opens a port for them), and an XMPP server that sends notices
   to apps that are away, as most do.
 - **A new account:** on the sign-in screen, **Make a new account** makes one on an XMPP server that allows it
@@ -2322,12 +2436,12 @@ the people you would otherwise reach only on XMPP.
 
 ## Chats with other Nostr apps {#nostr-chats}
 
-Under **Settings** → **Relay and networks** → **Nostr chats**, a space can have a Nostr key of its own, to chat one to
+Under **Settings** → **Server and networks** → **Nostr chats**, a space can have a Nostr key of its own, to chat one to
 one or in groups with people who use Damus, Amethyst, Primal, 0xchat or another Nostr app that sends private messages as
 NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats.
 
 - **The key:** **Make a Nostr key** makes one for this space; **Or bring a key from another Nostr app** takes the nsec
-  of one you already have, and reads what its relays still keep. The key and its chats are kept encrypted in this space,
+  of one you already have, and reads what its servers still keep. The key and its chats are kept encrypted in this space,
   and are in backups: after a restore, they come back as they were. Its hidden chats can have a Nostr key of their own,
   see [Hidden chats](#hidden). **Show the secret key (nsec)** shows it, to write down or to take to another app: whoever
   has it reads these chats and writes as you.
@@ -2336,8 +2450,8 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
   words that another app of your key put in your profile stay.
 - **Chats:** **New chat** takes their npub (or nprofile), from their profile in their app, or a name such as
   name@example.org (NIP-05). **Show the people you follow**, under it, lists the people your Nostr key follows (its
-  public follow list, looked for also on relays that gather such lists and on the relays your key writes on), with
-  their names: tap one to write to them. When it finds no one, it says why, whose list it looked for and how each relay
+  public follow list, looked for also on servers that gather such lists and on the servers your key writes on), with
+  their names: tap one to write to them. When it finds no one, it says why, whose list it looked for and how each server
   answered. Nothing is loaded until you tap it, and no profile pictures. The chats are in the home list too, each
   marked **Nostr**; the **Nostr** chip shows only them, and there **New chat** opens this screen.
   **Name them here** gives a chat a name that only you see.
@@ -2354,7 +2468,7 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
   change them. A photo or file that comes is fetched only when you tap **Show photo** or **Save**, and opens only if it
   is the one that was sent.
   Tap a photo that shows to see it on the whole screen, as in a contact's chat: two fingers or a double tap zoom in,
-  it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat through a relay](#relay)).
+  it turns with the phone, and **Save** keeps it (see Photos and files, under [Chat through a server](#relay)).
 - **Reactions:** hold a message to open its menu and react with 👍, ❤️, 😂, 😮, 😢 or 🙏, or with one of more behind **+**;
   under it show the reactions, the last one of each person, as other Nostr apps send them (NIP-25). Tap a reaction under
   a message to add the same, or tap yours to take it back; the others' apps are asked to remove it.
@@ -2376,24 +2490,24 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
 - **Stickers:** **Sticker** sends your own stickers made from photos (**Mine**) as photos, encrypted: other Nostr apps
   show them as photos. The built-in sets are there too: each sticker goes as its picture, made on your device.
 - **Encryption:** each message is encrypted for them and signed by you, then wrapped again by a key made for that
-  message alone, its time set back by up to two days (NIP-17, with NIP-44 and NIP-59). The relays see whom it is for,
-  not who wrote it, when, or what it says. A copy goes to your own relays, so your other Nostr apps with this key read
+  message alone, its time set back by up to two days (NIP-17, with NIP-44 and NIP-59). The servers see whom it is for,
+  not who wrote it, when, or what it says. A copy goes to your own servers, so your other Nostr apps with this key read
   along. It is Erevos's own code, not audited, checked against NIP-17's own example and against nostr-tools.
-- **Where your messages arrive:** the relays other apps send your messages to: relay.damus.io, nos.lol and
+- **Where your messages arrive:** the servers other apps send your messages to: relay.damus.io, nos.lol and
   relay.primal.net unless you change them, three at most. Erevos tells other apps about them (a kind 10050 list) when
-  they change and once a week. It sends to the relays the other person's app names; an app that names none cannot get
+  they change and once a week. It sends to the servers the other person's app names; an app that names none cannot get
   a message yet, and Erevos says so. A key brought from another app reads where that app said your messages arrive
   (its own kind 10050 list), unless you changed them here, and says that list again, so both apps get the same messages;
-  it reads those relays from their start, and fetches once what relays named in older lists of the key still keep.
+  it reads those servers from their start, and fetches once what servers named in older lists of the key still keep.
 - **Old private messages:** many apps still send and keep private messages the older way (NIP-04, kind 4), which
   Damus and Primal showed for years. Erevos reads them too, past and new, and shows them in the same chats: on the
-  relays where your messages arrive and on up to four more, those your key's other app reads (its kind 10002 list, for
+  servers where your messages arrive and on up to four more, those your key's other app reads (its kind 10002 list, for
   a key brought from another app) and relay.damus.io, nos.lol and relay.primal.net. These are encrypted too, but the
-  relays see who wrote to whom and when. Erevos itself sends only the NIP-17 way.
+  servers see who wrote to whom and when. Erevos itself sends only the NIP-17 way.
 - **Public posts:** in a chat with one person, **Public posts** shows what they post for everyone (kind 1) and the
   posts of others they shared again, newest first, thirty at a time, with **Older posts** for more. It is read only:
-  nothing can be answered, reacted to or posted from here. It is looked up when it opens, on the relays used for
-  look-ups and on those their relay list (NIP-65) says they write on, as the space's Tor way says, and nothing of it is
+  nothing can be answered, reacted to or posted from here. It is looked up when it opens, on the servers used for
+  look-ups and on those their server list (NIP-65) says they write on, as the space's Tor way says, and nothing of it is
   kept. No pictures or links are opened: they show as their addresses, which can be copied. A post with a content
   warning shows its words after a tap on **Show**. An account that only posts for everyone, such as a project's, sends
   no private messages: its chat stays empty, and its posts are here.
@@ -2405,7 +2519,7 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
   the room. More come as you scroll to the end, or with **Older posts**; pull the list down for the newest (in a
   browser, **Look again**). Following people is still done in another Nostr app with the same key. Your follow list,
   where the people in it write (their NIP-65 lists) and their posts are looked up only while the feed shows, on the
-  relays used for look-ups, on those that gather lists and on those they write on, as the space's Tor way says; names
+  servers used for look-ups, on those that gather lists and on those they write on, as the space's Tor way says; names
   only for the posts that show. Nothing is kept.
   **Photos**, above the feed, is the choice that matters for privacy. A photo or a link card comes from the server where
   whoever wrote the post put it, and that server sees the address it was fetched from, through Tor a Tor exit's, and
@@ -2427,16 +2541,14 @@ NIP-17 asks. It is not [Through Nostr](#nostr), which carries Erevos's own chats
   public: anyone can see what you chose. A reaction of yours under a post can be taken back by tapping it again.
 - **Custom emoji:** in the Public feed, the emoji that other apps make load like post photos do, as **Photos** and Tor
   say above. In private chats they show as :name: and are never loaded.
-- **Marks:** one tick once one of their relays took the message. NIP-17 sends nothing back: not when their app has it,
+- **Marks:** one tick once one of their servers took the message. NIP-17 sends nothing back: not when their app has it,
   nor when they read it. Reading a chat here tells no one.
 - **Not anonymous:** your key is the same to everyone you write to, and anyone who has an npub can write to it. The
-  relays where your messages arrive see your key read them and, without Tor, from where. Only the connection that reads
-  your relays tells them who reads, when a relay asks (NIP-42); sending and looking people up never do.
-- **Through Tor:** on Android, **Tor** on this screen chooses how this Nostr account reaches its relays and file
-  servers, as each network's account does: **Off**, the default for a new key, straight; **As the space**, as this
-  space's choice under **Settings** → **Relay and networks** → **Tor** says (with **Messages** through Tor once Tor is
-  ready, with **Everything** only through Tor); **Always through Tor**, only through Tor, Tor started for it, never
-  straight. A key made before this choice starts on **Off** too. The screen says which way they go now. In the web
+  servers where your messages arrive see your key read them and, without Tor, from where. Only the connection that reads
+  your servers tells them who reads, when a server asks (NIP-42); sending and looking people up never do.
+- **Through Tor:** on Android, Nostr chats follow this space's choice under **Settings** → **Server and networks** →
+  **Tor**: with **Messages**, they go through Tor once Tor is ready, and straight while Tor starts or when it fails;
+  with **Everything**, only through Tor; with **Nothing**, straight. The screen says which way they go now. In the web
   app and on a computer, they go straight.
   **Through Tor**, at the foot of a chat, sends that chat alone only through Tor, whatever the space's way, on circuits
   of its own, so no Tor exit carries its messages and another chat's: what you send in it, the look-up of where they
@@ -2470,7 +2582,7 @@ because a Nostr key is the same to everyone you write to, while Erevos's own cha
 - **Remind me:** a message's menu has **Remind me**. Pick a time: the message, with the name of its chat, goes into
   **Chat with myself** and reminds you then. It needs **Erevos** on in [Modules](#modules).
 - **Disappearing messages:** **Disappearing messages**, in **Chat options**, deletes new messages, sent or received,
-  from this phone that long after they were sent. Yours carry that time (NIP-40), so their app and the relays that
+  from this phone that long after they were sent. Yours carry that time (NIP-40), so their app and the servers that
   honour it delete them then; those that do not keep them. **Disappearing message**, under **+**, does it for the next
   message only. A message that comes with its own time goes at that time.
 - **Blocking:** **Block**, at the bottom of a chat, drops what that key sends on this phone, unread; it does not come
@@ -2481,7 +2593,7 @@ because a Nostr key is the same to everyone you write to, while Erevos's own cha
 
 ## Telegram {#telegram}
 
-Only in Erevos+, on Android, a space can sign in to your Telegram account and chat with people on Telegram, under **Settings** → **Relay and networks** → **Telegram**. Erevos is not made by Telegram, and uses the Telegram API. The chats join the home list, marked **Telegram**, with a chip of their own.
+Only in Erevos+, on Android, a space can sign in to your Telegram account and chat with people on Telegram, under **Settings** → **Server and networks** → **Telegram**. Erevos is not made by Telegram, and uses the Telegram API. The chats join the home list, marked **Telegram**, with a chip of their own.
 
 - **Signing in:** tap **Sign in to Telegram**, give your phone number with the country code, then the code Telegram sends: to its app on your other devices, by SMS or by a call; **Send the code again** asks for it anew. If your account has a two-step password, Erevos asks for it and shows your hint. If Telegram wants you to confirm on another device, Erevos shows the link to open there. A new Telegram account, or signing in by e-mail, Erevos cannot do yet: do it once in the official Telegram app first. What Telegram keeps on this phone is kept encrypted in this space.
 - **Normal chats:** Telegram can read them. An ordinary Telegram chat is encrypted only between you and Telegram's servers, and groups and channels are never encrypted end to end. A private chat says so at its top: **Telegram can read this chat**.
@@ -2511,7 +2623,7 @@ Only in Erevos+, on Android, a space can sign in to your Telegram account and ch
 
 ## Messenger {#messenger}
 
-Only in Erevos+, on Android, Erevos can sign in to your Facebook Messenger account and chat with people on Messenger, under **Settings** → **Relay and networks** → **Messenger**, or from its card on the home screen. Erevos speaks with Meta's servers itself, with no bridge in between; it is not made by Meta. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Messenger**, with a card of their own. Turn Messenger on or off under **Settings** → **General** → **Modules**.
+Only in Erevos+, on Android, Erevos can sign in to your Facebook Messenger account and chat with people on Messenger, under **Settings** → **Server and networks** → **Messenger**, or from its card on the home screen. Erevos speaks with Meta's servers itself, with no bridge in between; it is not made by Meta. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Messenger**, with a card of their own. Turn Messenger on or off under **Settings** → **General** → **Modules**.
 
 - **Signing in:** **Sign in to Messenger** opens Facebook's own sign-in page. Sign in there as on facebook.com, with any code or check Facebook asks for, and Erevos keeps the sign-in, encrypted, on this phone. If Messenger ends it later, the Messenger screen says **Messenger asks you to sign in again**.
 - **What Meta can read:** under a chat's name, Erevos says whether it is end-to-end encrypted. Meta cannot read an end-to-end encrypted chat, but knows who talks with whom and when; any other chat, Meta can read.
@@ -2522,12 +2634,12 @@ Only in Erevos+, on Android, Erevos can sign in to your Facebook Messenger accou
 - **Chat options:** the sliders button beside where you write, or **⋯** at the top, opens the chat's **Notifications** and **Through Tor** in one tidy list, in reach however long the chat.
 - **Attach and more:** **+** beside where you write opens, as in an Erevos chat, a grid with icons: **Photo**, **Camera** and **File**, and **Sticker** where the chat has stickers. Signal and Session chats have it too.
 - **Notifications and reading:** new messages notify you and count on Erevos's icon, as other chats do. Opening a chat marks it read, and it stays read until someone writes again, even before Messenger has heard of it. Each chat has its own **Notifications** below its message box: muted, or with a sound of its own.
-- **Through Tor:** **Tor for this Messenger account**, on the Messenger screen and before signing in too, is **Off** by default, and Meta's servers see your internet address; **As the space** follows **Settings** → **Relay and networks** → **Tor**; **Always through Tor** sends the account, its sign-in and its pictures only through Tor. **Through Tor** under a chat sends the whole account through Tor, as Messenger has one connection for all its chats. Meta may ask to confirm, or lock for a while, an account that signs in through Tor. See [Who sees your internet address](#ip).
-- **Signing out:** **Sign out of Messenger on this phone** takes its chats out of Erevos; you can sign in again. Backups keep each chat's notifications and the Tor choice, not the sign-in: after a restore, sign in again.
+- **Through Tor:** **Tor for this Messenger account**, on the Messenger screen and before signing in too, is **Off** by default, and Meta's servers see your internet address; **As the space** follows **Settings** → **Server and networks** → **Tor**; **Always through Tor** sends the account, its sign-in and its pictures only through Tor. **Through Tor** under a chat sends the whole account through Tor, as Messenger has one connection for all its chats. Meta may ask to confirm, or lock for a while, an account that signs in through Tor. See [Who sees your internet address](#ip).
+- **Signing out:** **Sign out of Messenger on this phone** takes its chats out of Erevos; you can sign in again. Backups keep each chat's notifications, the Tor choice and the sign-in, encrypted: after a restore Messenger is signed in again. Use it on one phone only: on the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too. See [Backups](#backup).
 
 ## Signal {#signal}
 
-Only in Erevos+, on Android, Erevos can hold your Signal account and chat with people on Signal, under **Settings** → **Relay and networks** → **Signal**, or from its card on the home screen. Erevos speaks Signal's own protocol with Signal's servers, and every chat is end-to-end encrypted; it is not made by Signal. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Signal**, with a card of their own. Turn Signal on or off under **Settings** → **General** → **Modules**.
+Only in Erevos+, on Android, Erevos can hold your Signal account and chat with people on Signal, under **Settings** → **Server and networks** → **Signal**, or from its card on the home screen. Erevos speaks Signal's own protocol with Signal's servers, and every chat is end-to-end encrypted; it is not made by Signal. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Signal**, with a card of their own. Turn Signal on or off under **Settings** → **General** → **Modules**.
 
 - **Two ways in:** **New Signal account with my phone number** makes Erevos the Signal of that number, and the Signal app on another phone with the same number then stops. **Link to Signal on another phone** keeps your Signal where it is and adds Erevos as one of its linked devices.
 - **A new account:** write your number with its country code, as +30 69…, and choose whether the code comes by SMS or, with **The code comes by a call**, by a call. Signal first asks you to solve a captcha on its own page. Then write the code Signal sent, and the name others see on Signal (the last name is optional).
@@ -2542,7 +2654,7 @@ Only in Erevos+, on Android, Erevos can hold your Signal account and chat with p
 
 ## Session {#session}
 
-Only in Erevos+, on Android, Erevos can hold a Session account and chat with people on Session, under **Settings** → **Relay and networks** → **Session**, or from its card on the home screen. Session asks for no phone number and no email: the account is 13 recovery words, and its messages go end-to-end encrypted through the onion routing of Session's nodes. Erevos is not made by Session. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Session**, with a card of their own. Turn Session on or off under **Settings** → **General** → **Modules**.
+Only in Erevos+, on Android, Erevos can hold a Session account and chat with people on Session, under **Settings** → **Server and networks** → **Session**, or from its card on the home screen. Session asks for no phone number and no email: the account is 13 recovery words, and its messages go end-to-end encrypted through the onion routing of Session's nodes. Erevos is not made by Session. The account belongs to the phone, not to a space: its chats join the home list of the first space, marked **Session**, with a card of their own. Turn Session on or off under **Settings** → **General** → **Modules**.
 
 - **A new account:** tap **New Session account**, write your name on Session and tap **Make the account**. Erevos shows **Your 13 recovery words**: write them down, keep them safe, and tap **I wrote them down**. They are the only way to bring the account back, and anyone who has them can read your chats.
 - **An account you already have:** **Bring back an account with its 13 words** takes the words, with spaces between them, and your name; then tap **Bring it back**.
@@ -2602,7 +2714,7 @@ app**, tap **Make Erevos the SMS app**. The home screen then shows SMS and Erevo
   disappear nor answer a message: with the stopwatch on, or a message being answered, Erevos says so when it asks.
 - **Hidden invites:** with the first SMS to a number that is not a contact, Erevos also sends a short hidden invite.
   None goes to an Erevos contact's number, linked or on their contact card. A phone without {=Erevos} shows nothing; a
-  phone with {=Erevos} answers through the relay and the two become contacts. It answers by itself only a number it
+  phone with {=Erevos} answers through the server and the two become contacts. It answers by itself only a number it
   knows, in its contacts or one you have written to by SMS; for any other it asks first, **An invite by SMS**, as the
   sender of an SMS can be made up. Each number is asked once a month at most,
   and **Turn invites off**, under **Settings** → **Phone and SMS** → **SMS** → **Find Erevos on a number**, stops
@@ -2681,15 +2793,15 @@ invite is a data SMS, which messaging apps do not show, so a phone without {=Ere
 
 ### Encrypted SMS when nothing else works
 
-When the relay, Nostr, the phones nearby and LoRa all fail, a text to an Erevos contact whose number is linked can go
-by SMS instead, end-to-end encrypted like any Erevos message. It is off unless you turn it on: for all such contacts
+When the server, Nostr, the phones nearby and LoRa all fail, a text to an {=Erevos} contact whose number is linked can go
+by SMS instead, end-to-end encrypted like any {=Erevos} message. It is off unless you turn it on: for all such contacts
 under **Settings** → **Phone and SMS** → **SMS** → **SMS when nothing else works** (**Turn on for all contacts**), or
 for one in their chat's **Details** → **SMS when nothing else works**.
 
 - **What it costs:** each SMS costs what your plan says. A short text takes 3 SMS, a longer one up to 10; abroad an
   SMS can cost much more.
 - **What the phone company sees:** which number wrote to which, when, and how many SMS, as with any SMS; never what
-  was written, which goes as the same encrypted message the relay would have carried.
+  was written, which goes as the same encrypted message the server would have carried.
 - **What goes:** only texts and deletes. Not photos, files, voice messages, calls, reactions or the marks that a
   message came or was read, nor texts longer than about 800 Latin letters (400 Greek ones), nor the very first message
   to a new contact, which holds the keys. Those wait, marked **Waiting**, as in [How Erevos picks the path](#paths).
@@ -2697,7 +2809,7 @@ for one in their chat's **Details** → **SMS when nothing else works**.
 - **Both phones** need {=Erevos} as the SMS app, and the contact's number linked to their chat. The SMS are hidden data
   SMS for Erevos, which no SMS app shows, and nothing of them is kept in the phone's SMS.
 - **Which way it went:** hold the message: its menu says **Went by SMS** or **Came by SMS**. **✓✓** comes once the
-  relay or Nostr can be reached again: no SMS goes back by itself.
+  server or Nostr can be reached again: no SMS goes back by itself.
 
 **Why:** SMS reach a phone with no internet at all, wherever there is a mobile network. But they cost money and tell
 the phone company who talks to whom, which Erevos otherwise hides, so SMS is the last way, and only when you choose it.
@@ -3068,7 +3180,7 @@ choices: **No lock** and **Password**.
   on, which no one can set, so moving the date and time forward does not end it; turned off and on during a wait, the
   phone waits it again from its beginning, as the time already waited cannot be known. In the web app and on a
   computer it goes the same way while Erevos stays open, and starts again from its beginning when Erevos opens anew.
-- **What is sealed:** each space's contacts, the keys of its conversations, its messages, its relay settings and its
+- **What is sealed:** each space's contacts, the keys of its conversations, its messages, its server settings and its
   look are kept on the phone sealed with a key that only its password opens.
 - **The list at once:** the home screen keeps a sealed copy of its first rows, so the list shows as soon as the space
   opens and then updates. It is always the same size, so it tells no one how many chats there are or which spaces
@@ -3111,9 +3223,13 @@ is off unless you turn it on.
 - **Under pressure:** someone who holds you can press your finger to the phone, or hold it to your face. If that may
   happen, keep it off: then they need a password, and you can give them the second one.
 - **How it is kept:** the first space's key is sealed by a key in the phone's secure hardware (the Android Keystore)
-  that works only right after a strong fingerprint or face check, once for each use. Adding or removing a fingerprint
-  or face makes Android drop that key: it is then off, and you turn it on again. A key that stops working in some
-  other way turns it off too, after three tries in a row in which the key could not be used. Nothing leaves the phone.
+  that works only right after a strong fingerprint or face check, once for each use. That key is kept in the phone's
+  secure area, not in its separate security chip where it has one, so that Android asks for the finger or face at
+  once: the chip starts each use a moment late, and the finger or face is checked in the secure area either way. A key
+  an older Erevos made may still be in the chip: turn it off and on once for a new one. Adding or removing a
+  fingerprint or face makes Android drop that key: it is then off, and you turn it on again. A key that stops working
+  in some other way turns it off too, after three tries in a row in which the key could not be used. Nothing leaves
+  the phone.
 - **Which face:** a face counts only where Android rates its face unlock as strong, as on the Pixel 8 and later;
   elsewhere it is the fingerprint.
 - **Wrong passwords** are counted as before: a fingerprint does not change the count.
@@ -3126,7 +3242,7 @@ nothing, in the same shape, so what is stored does not show which space it was t
 ## Second password {#second}
 
 If someone forces you to open Erevos, type the second password instead of your own. It opens a separate, empty
-Erevos with its own contacts, relay and look. Your real chats stay hidden, and nothing in the app shows that they
+Erevos with its own contacts, server and look. Your real chats stay hidden, and nothing in the app shows that they
 exist.
 
 1. With the password lock on, tap **Set second password**.
@@ -3145,8 +3261,8 @@ exist.
   this space's own, moves nothing. A chat with someone the other space already has a chat with stays where it is.
   Whoever reads the other space with a forensic tool could tell the chat came from elsewhere: its contact still knows it
   by this space's key.
-  If that space has no relay yet, Erevos offers this space's: **Move with this space's relay** moves the chat and
-  gives that space this relay to keep, and the relay can then tell that both spaces are on one phone.
+  If that space has no server yet, Erevos offers this space's: **Move with this space's server** moves the chat and
+  gives that space this server to keep, and the server can then tell that both spaces are on one phone.
 - **Discretion:** for privacy, the app never shows whether a second password is set. In the web app with
   notifications while closed on, the number on Erevos's icon stays while Erevos is closed: one that does not match
   the space you open may hint at another (**Number on the icon** turns it off).{~ On Android, what the camera took
@@ -3191,12 +3307,12 @@ what the places taken away hold.
    my chats** and **Move**. It goes with its messages, name, picture, look and imported chats, and its phone is told
    where to write.
 
-- **Relay, Nostr and phones nearby:** hidden chats have their own relay queue and their own keys. While they are open,
+- **Server, Nostr and phones nearby:** hidden chats have their own server queue and their own keys. While they are open,
   or receive while closed, they also reach a contact's phone nearby, as your other chats do (see [Chat with a nearby
   phone](#nearby)), but other phones never carry them, and they never go over LoRa{~ or by SMS}.
-  With no relay, their contact link says where they read on Nostr, with a key of that place alone, and texts go there,
-  as from a phone with no relay; photos, voice messages, calls and groups need a relay. While they are closed, their
-  messages wait on the relay, or on Nostr for two days, unless **Receive while closed** is on.
+  With no server, their contact link says where they read on Nostr, with a key of that place alone, and texts go there,
+  as from a phone with no server; photos, voice messages, calls and groups need a server. While they are closed, their
+  messages wait on the server, or on Nostr for two days, unless **Receive while closed** is on.
 - **Receive while closed:** a switch at the top of each place. On, its hidden chats receive as your other chats do while
   the space is open, whatever screen shows and with Erevos in the background: their contacts see at once that a message
   came, a notice says only "New message", on Android a call rings with "Incoming call" and no name (on the ringing screen, **Answer** takes it with no PIN, on a call screen with no name and no face, and the hidden chats stay closed; the small sign, the PIN and **Connect** open them and answer it there), and a reminder of their Chat with myself
@@ -3207,7 +3323,7 @@ what the places taken away hold.
   for each other place, so opening the space does not show which places receive, or are set. But whoever opens the space
   and copies what the phone keeps could open that place too, with no PIN: the PIN then keeps them out of sight of
   whoever holds the phone, not of a forensic tool. Off, their key is only behind the PIN, and their messages wait on the
-  relay until you open them. Backups keep the switch.
+  server until you open them. Backups keep the switch.
 - **Dot for unread messages:** with **Receive while closed** on, a switch under it (off unless you turn it on). On,
   while one of the place's chats or groups has a message unread{+, or one of its own Matrix, XMPP or Nostr chats had one
   since you last opened it}, a small dot shows on the magnifier of **Search chats** on the home screen: never how many,
@@ -3219,15 +3335,15 @@ what the places taken away hold.
 - **While they are open,** a message that comes plays the sound for new messages, as in your other chats. With Erevos
   in the background before they close, a notice says "New message" only if **Receive while closed** or **Say when a
   message comes** is on for that place.
-- **Like your other chats:** what cannot go now waits, marked **Waiting**, through their relay only, or Nostr with no
-  relay (see **Waiting** under [Chat through a relay](#relay)), **Send later** works as there, and a chat exported
+- **Like your other chats:** what cannot go now waits, marked **Waiting**, through their server only, or Nostr with no
+  server (see **Waiting** under [Chat through a server](#relay)), **Send later** works as there, and a chat exported
   from another app can be imported into a hidden chat's details (see [Imported chats](#import)). A contact can be
   added from a photo of their QR code there too, taken or picked while they stay open. Each place has its own
   **Chat with myself**, first in its list (see **Chat with myself and reminders** under [Getting started](#start)).
 - **Groups:** **New group**, under their list, makes a group with their contacts, as on the home screen (see
   [Group chats](#groups)), and it shows in their list among their chats. Its members are only contacts of that place,
   and one you add as a contact from it becomes a contact of that place. What is written in it goes through the place's
-  relay only, to a queue of its own there, never to a phone nearby; while the place is closed it is read only with
+  server only, to a queue of its own there, never to a phone nearby; while the place is closed it is read only with
   **Receive while closed** on, and **Say when a message comes** does not count it. Its calls ring only while the
   hidden chats are open: one started while they are closed shows as missed. A group there has no PIN of its own, and
   none is public.
@@ -3248,21 +3364,21 @@ what the places taken away hold.
   own accounts go there, and nothing of it shows in the space (see **Hidden chats and second passwords** under [Linked
   devices](#devices)). Not linked, they are on this phone only.
 - **Link previews** have a switch of their own in a hidden chat's details, for all the chats of that place, off unless
-  you turn it on (see **Link previews** under [Chat through a relay](#relay)).
+  you turn it on (see **Link previews** under [Chat through a server](#relay)).
 - **Say when a message comes** (Android): at the top of a place while **Receive while closed** is off. Turned on,
   while the place is closed a notice says only "New message", or how many came, as for the other chats, with Erevos in the background or showing, each message
   once, also when Erevos was closed and started again; what came while the place was open makes none once it closes. That a message of yours came to them or was read, typing and new keys make none, nor does a call that rang (see **Ring
   calls when closed**); one that did not ring counts as a message. A message or a delete that other {=Erevos} phones
-  carried to the relay (see **Carried by other phones** in [Chat with a nearby phone](#nearby)) cannot say what it carries, since the phones that carry it
+  carried to the server (see **Carried by other phones** in [Chat with a nearby phone](#nearby)) cannot say what it carries, since the phones that carry it
   must not know: it counts as a message, so a delete shows "New message" too, and the first message of a chat may count
   as two; and one sent without sound sounds as usual (see **Send without sound**). It needs **Receive and ring** and
-  **Say a message came** under **In the background**, which the switch says when they are not on, and a relay that
+  **Say a message came** under **In the background**, which the switch says when they are not on, and a server that
   waits (from 18 October 2026 on); one from before 23 October
   2026 can only say that something waits, so then "New message" shows for that too, once until you open that place.
-  For it, the space keeps a relay queue for each of its 4 places, those not in use made for nothing on the same
-  relay, so opening the space shows neither whether hidden chats are set nor which, as long as they use the space's
-  relay; the relay is asked only how many messages came, as it counts them by the byte each one carries (see what
-  the relay sees, above), never for them. Whoever sees the notice and finds nothing new in your chats may guess there
+  For it, the space keeps a server queue for each of its 4 places, those not in use made for nothing on the same
+  server, so opening the space shows neither whether hidden chats are set nor which, as long as they use the space's
+  server; the server is asked only how many messages came, as it counts them by the byte each one carries (see what
+  the server sees, above), never for them. Whoever sees the notice and finds nothing new in your chats may guess there
   are more. After you delete or block someone in the place, a first message from someone new, by the place's contact
   link or QR code, makes none: it shows when you open the place. Backups keep it.
 - **Ring calls when closed** (Android): below **Say when a message comes**, while **Receive while closed** is off.
@@ -3271,8 +3387,8 @@ what the places taken away hold.
   type the PIN and tap **Connect** to answer; **Decline** stops the ring. Whoever taps **Answer** without the PIN gets
   no further than the PIN field. The
   ring lasts about 45 seconds. It needs **Receive and ring** under **In the background**, which the switch says when
-  it is not on, and a relay that waits, and
-  uses a relay queue of its own for each of the 4 places, those not ringing made for nothing on the same relay, the
+  it is not on, and a server that waits, and
+  uses a server queue of its own for each of the 4 places, those not ringing made for nothing on the same server, the
   same as the message notice above, so opening the space gives nothing away. The caller only rings a queue there; the
   call itself waits on the chat's own queue until the PIN opens it. A contact you have deleted can still make it ring,
   but the call can never connect. A call placed from a linked computer rings only while the hidden chats are open.
@@ -3337,7 +3453,7 @@ The Collection is an encrypted place for your photos, files and folders, in ever
 - **Backups:** a backup holds the Collection with the rest of the phone. **Settings** → **Data and devices** → **Collection**, or the three dots in the Collection, can leave that Collection out of the backups made while it is open: each Collection has its own choice.
 - **On a WebDAV server:** in the Collection's settings, **Also on a WebDAV server** copies that Collection's files as they are, still encrypted, to a folder on a server you choose, Nextcloud, ownCloud or any that speaks WebDAV: give the folder's address, a user name and, best, an app password, then tap **Connect**; **Test the connection** checks them first. Each space and hidden place has its own choice and server; the backups' server is offered first. Only what is not there yet goes, a piece at a time, while the place is open, going on where it stopped after the network drops, and a file deleted here is deleted there too; nothing else in the folder is touched. The server sees only pieces with random names, in a subfolder with a random name, and cannot open them. A phone that lacks a file, as after a backup restored on a new phone, fetches it from there as it opens, and keeps only pieces that open with the file's key. Erevos shows how much of it has come, with **Cancel**: what came stays, and the next time only the rest comes; music, videos, PDFs and **Open with another app** fetch it first too. While everything is copied, backups made while the place is open may leave its pieces out, after Erevos starts again too, until a file is added or deleted. It has a **Through Tor** switch of its own, off unless you turn it on: with it on, the copy goes only through Tor, whatever the space's Tor setting, so the server does not see your IP address; it is slower, and waits while Tor starts. Where there is no Tor, in the desktop app and the web app, a server with it on gets nothing. Under the server, a line says how much of this Collection's own files, encrypted, is on it, and when the last copy began and ended; the chats' photos and backups are not among them. After each copy Erevos lists the folder again, and a piece that is not there whole goes again with the next copy. **Check** looks without changing anything: every piece is there, of its size, and 4 of them, picked at random, are fetched and open with their key, so one the server changed or swapped shows. **Bring back the files not on this phone** fetches at once every file not whole here, as after a backup restored on a new phone, with **Cancel**: what came stays, and Erevos says how many came back and how many the server does not have whole either.
 - **With Nextcloud, as LPHL’s:** in that form, and in the backups’ **Add a server**, type your Nextcloud’s address under **Your Nextcloud** and tap **Sign in with Nextcloud**: sign in in the browser, as Fasouli does, through Authentik or however it signs in, and choose **Grant access**. Erevos gets an app password of its own and fills the form with its own folder in your files, **Erevos/Collection** or **Erevos/Backups**, made if it is not there, beside Fasouli’s, which it never reads; then tap **Connect**. Take that app password back in Nextcloud → Settings → Security. The sign-in follows the **Through Tor** switch of the server it signs in for: with it on, Erevos asks your Nextcloud only through Tor, but the browser page itself goes as the browser always does.
-- **On your linked devices:** in the Collection's settings, **On my linked devices too** sends that Collection to the [linked devices](#devices) of its space or hidden place, and the switch goes to all of them. A file added, renamed, moved or deleted on one is so on all. Small pictures come at once; a file itself comes at once on the same Wi-Fi, else when you open it, from the WebDAV server if the Collection has one, or through the relay up to 100 MB. Each piece is kept only once it opens with the file's key, and a transfer cut off goes on from the piece that was missing. A file is deleted elsewhere only when it is deleted on one of your devices, never because it is missing there. A hidden place's Collection goes only to that place's own linked devices.
+- **On your linked devices:** in the Collection's settings, **On my linked devices too** sends that Collection to the [linked devices](#devices) of its space or hidden place, and the switch goes to all of them. A file added, renamed, moved or deleted on one is so on all. Small pictures come at once; a file itself comes at once on the same Wi-Fi, else when you open it, from the WebDAV server if the Collection has one, or through the server up to 100 MB. Each piece is kept only once it opens with the file's key, and a transfer cut off goes on from the piece that was missing. A file is deleted elsewhere only when it is deleted on one of your devices, never because it is missing there. A hidden place's Collection goes only to that place's own linked devices.
 - **Music, videos and PDFs:** a PDF reads page by page inside Erevos (Android 11 and later), decrypted in memory only. Music and videos play straight from their encrypted pieces, never from a copy: a video on the whole screen, music with the next ones in the folder, going on with the screen off, with play, pause, next and previous in the notification and on the phone's lock screen, and only those there. The list goes on after the space locks, unless **Stop playing when the space locks** is on in the Collection's settings; **Stop** and the panic button end it. The notification says only **Playing** unless **Show the title in the notification** is on. **Open with another app** hands the file over as it is decrypted, with no copy on the phone, until you leave the Collection; the other app may keep one of its own.
 - **Gallery originals:** with **Delete the original from the gallery after importing** on, a photo or video picked from the phone's files is deleted from the gallery once it is in the Collection, after Android asks you to confirm. It needs Android 11 or later. A photo from the camera never goes to the gallery. If Android does not say which photo of the gallery it is (as from **Recent** in the file picker), the original stays and Erevos says so: pick it from **Images** or the phone's storage.
 - **Photos and videos:** in **+**, **Camera** is Erevos's own: photos and videos one after the other, with the flash and the front camera, straight into the Collection, never to the gallery, and no other app sees them; a photo is never written anywhere, not even for a moment, and holds nothing but its picture. Where the phone's maker offers them, as on a Pixel, **Night** and **Portrait** stand beside **Photo**, and **HDR on** at the top: they are the phone's own, made on the phone, and nothing goes out. A tap focuses and sets the light there; two fingers zoom, and the buttons above the shutter go to the wide lens (**0.5×**), **1×**, **2×** and **5×** where the phone has them. **More** has a timer of 3 or 10 seconds, a grid, a silent shutter where the law allows it, **Darker** and **Brighter** and, for videos, HD, Full HD or 4K, and **HDR video on** where the phone films it; in video the light can stay on. **From the gallery** brings in many photos and videos at once; with **Delete the original from the gallery after importing** on, Android then asks once for all of them. HEIC and AVIF photos show among the **Photos** (Android draws HEIC from 9 and AVIF from 12); one the device cannot draw offers **Open with another app**. Under a photo, **Edit** turns it a quarter at a time and cuts it with a frame dragged by its corners: it is kept as a new photo, and the one it came from stays as it was. **Information** says whether a photo or video says where it was taken. A JPEG, PNG, WebP or GIF photo saved out or opened with another app goes without where and when it was taken and the phone, unless **Photos leave with their place and time** is on in the Collection's settings; a video or a HEIC photo goes as it is, and Erevos says first when it names a place. The camera, the gallery and **Edit** are on Android; in the desktop app and a browser AVIF photos show too.
@@ -3389,7 +3505,10 @@ automatic backup uses the files of the ones before it too: keep the whole folder
    voice messages that are new since the one before, and names again the files of the earlier ones for the rest, so
    one every 6 hours costs little. The folder keeps the 3 newest, with every file they need, and deletes the files none
    of them needs. One that failed is tried again when a space opens, or an hour later. Under them are **Back up now**,
-   **Change folder** and **Change password**; **Off** stops them, and the ones made stay in the folder.
+   **Change folder** and **Change password**; **Off** stops them, and the ones made stay in the folder. They can go
+   only to a server, with no folder here: the first start's **WebDAV** sets them up so, every day, and their card then
+   reads **Only to** and the server's name, with **Choose a folder** for one more copy close at hand. **Stop sending**,
+   for that server, stops them too.
 3. **To a server too:** a backup can also go to a folder on a server you choose that speaks WebDAV, such as your own
    Nextcloud. **Add a server** under **To a server too**, or **To a server (WebDAV)** under **Make a backup**, asks
    for the folder's address, a user name and, best, an app password made for Erevos alone: tap **Connect**, and the
@@ -3404,12 +3523,25 @@ automatic backup uses the files of the ones before it too: keep the whole folder
    is on Android. Turning automatic backups off keeps the server, for the backups you send; **Stop sending** forgets
    it, and those there stay. Each server has a **Through Tor** switch, in its card and in the form that adds one, off
    unless you turn it on (see **On a server** below).
-4. **Restore:** tap **Restore a backup**, choose the file and type its password. Erevos asks once more, finds the
+4. **To Google Drive too:** on Android, automatic backups can also go to your Google Drive, into a folder named {=Erevos}
+   that Erevos makes there, or only there. **Sign in with Google** under **To Google Drive too** first says what Google
+   then knows, as the first start's **Google Drive** does: the backups leave encrypted and Google cannot read them, but
+   it knows who you are, sees when one comes and how big it is, and may hand that over if asked; in INVISIBLE, also
+   that signing in happens in your browser, outside Erevos, not through Tor. Google's page then asks in the browser to
+   let Erevos keep files in your Google Drive: Erevos reaches only the files it made there, nothing else of it. Each
+   automatic backup then goes there too, sent and checked as on a server, and the folder keeps the 3 newest. With no
+   folder on the phone and no server, their card reads **Only to Google Drive**. **Stop sending** takes Erevos's access
+   back at Google, and the backups there stay. Requests to Google go as the space's Tor choice says, as backups to a
+   server do. It is not in the F-Droid build: installed over an Erevos that sent backups there, it sends none, says so
+   under **To Google Drive too**, and its **Stop sending** still takes Erevos's access back at Google.
+5. **Restore:** tap **Restore a backup**, choose the file and type its password. Erevos asks once more, finds the
    backup's files beside it, or asks you to choose them or their folder (for an automatic backup, choose every file of
    the folder, as some of its files may start as an earlier backup's name), then puts the backup in place of everything on
    the phone, and opens as it was when the backup was made, with the passwords used then. With one of its files missing, damaged or another backup's, Erevos says which, and nothing is changed unless you choose to restore the rest without it: then the photos, files and voice messages on the phone stay as they are, and those it holds do not come back. **Restore from a server** looks in the folder automatic
    backups go to, or in one you give with its user name and password, and lists the backups there, newest first:
-   choose one, type its password, and it is restored the same way, with its files from there.
+   choose one, type its password, and it is restored the same way, with its files from there. **Restore from Google
+   Drive** does the same with the backups in its folder {=Erevos}, after a sign-in with Google when automatic backups do
+   not go there.
 
 - **Keep the backup's password:** nothing opens a backup without it, and no one can recover it. Without a password
   lock, the backup's password is all that protects it. Whoever has the file can try passwords on it as fast as their
@@ -3418,14 +3550,14 @@ automatic backup uses the files of the ones before it too: keep the whole folder
   folder still needs the spaces' passwords to read the chats.
 - **What takes room:** on Android, **Measure** under **What takes room** shows how much room Erevos takes on the phone, by kind: {~the Collection with |}the chats' photos and files, voice messages, chat history, Tor, and what writes that did not end left over. Each automatic backup holds it all, so this tells why one is large. Only the files' names and sizes are looked at, on the phone, and nothing is sent.
 - **Leftovers:** photos and files no chat{~, Collection|} or import names any more, as those of an import that stopped in its middle, stay on the phone and in every backup. Under **Leftovers**, type one at a time, or several at once separated by commas or spaces, the PIN of each of your hidden chats and the password of any other space, then tap **Find leftovers**: Erevos reads which files each of them and this space name, and shows how much none of them names. **Delete them** deletes those, after you say so once more. A place you did not open there loses its photos and files: open every one first. A file written in the last day is never taken{~, nor what the camera took with Erevos locked while it waits for its space}, and backups already made keep everything.
-- **Check the backups:** after each backup into a folder, automatic or made by hand, on Android and in the desktop app, Erevos reads it back from the folder: it opens with its password, every part it names is there, of its size, and two parts picked at random are read through. Of a server it then only looks at the listing: the backup and every part it names are there, each of the size it was sent with, so nothing is downloaded. **Check now** also downloads the server’s newest backup and ten of its parts. A part missing or damaged shows in red: back up now, then check again. **Full check of the folder** reads every part there through and compares it with the SHA-256 the backup wrote down for it: a few minutes for many GB, and nothing leaves the phone.
+- **Check the backups:** after each backup into a folder, automatic or made by hand, on Android and in the desktop app, Erevos reads it back from the folder: it opens with its password, every part it names is there, of its size, and two parts picked at random are read through. In a cloud app's folder, that app may still be sending the backup to its server as Erevos reads it: then a check that does not find it whole looks again a few times over about four minutes. After a backup made by hand, **Check again** under what its check found looks once more, while its space stays open. Of a server it then only looks at the listing: the backup and every part it names are there, each of the size it was sent with, so nothing is downloaded. **Check now** also downloads the server’s newest backup and ten of its parts. A part missing or damaged shows in red: back up now, then check again. **Full check of the folder** reads every part there through and compares it with the SHA-256 the backup wrote down for it: a few minutes for many GB, and nothing leaves the phone.
 - **On a server:** the backup sent there is sealed with its password like the others, and that password never leaves
   the phone, so the server cannot open it. Its name is random and the file looks like random bytes, of one of a few
   sizes, so neither says it is Erevos's nor tells exactly how much it holds. Its photos, files and voice messages go
   as uploads of their own, all of one size, each under a random name too and sealed with the backup's password, bound
   to that backup and to their place in it, so none can be swapped, dropped or taken from another backup unseen; the
   server keeps each as long as one of the backups it keeps needs it, and then deletes it. Their names are as long as the backup's, but their size tells them from it, so the server can count them, and so tell roughly how much the backup holds. What a backup cut short left there is deleted before the next one goes, so a server that had no room left has some again. The server still sees your account, when one comes and
-  roughly how big it is. On Android, backups go to it as the space's choice under **Settings** → **Relay
+  roughly how big it is. On Android, backups go to it as the space's choice under **Settings** → **Server
   and networks** → **Tor** says{+, as Matrix does}: with **Everything** only through Tor, so the server does not see the
   phone's address; with **Messages** through Tor once Tor is ready, and straight while Tor starts or when it fails;
   with **Nothing** straight, and the server sees the phone's address. A backup first waits up to two minutes for Tor
@@ -3437,8 +3569,8 @@ automatic backup uses the files of the ones before it too: keep the whole folder
   way, through Tor as the space says, and writes nothing there; a password typed for it is used for that restore only
   and not kept. Through Tor no file of a backup larger than 64 MB comes, and straight none larger than 100 MB, the
   most Erevos takes in any download: then download the backup and its files from the server and tap **Restore a
-  backup**. An Erevos from before this version does not open such a backup. Google Drive is left out on
-  purpose: Google ties the file to your name, and Erevos would need Google's apps and a Google sign-in on the phone.
+  backup**. An Erevos from before this version does not open such a backup. Google Drive is not one of these
+  servers: it has a place of its own, **To Google Drive too** above, as Google ties the backups to your account.
   Each server's **Through Tor** switch, off unless you turn it on, goes before the space's choice for that server: on,
   its backups go only through Tor, whatever the space's Tor setting, and wait for Tor to start, so the server does not
   see the phone's address. **Restore from a server** and the form that adds a server have the same switch, and the
@@ -3474,12 +3606,12 @@ automatic backup uses the files of the ones before it too: keep the whole folder
   this phone has a group of that name in the same account. Automatic backups and their server come back with their
   password, but not their folder, which Android lets only the phone it was chosen on write in: on another phone,
   **Backups** says to choose one, and until then they go only to the server.
-- **One phone at a time:** a backup restored on a second phone reads the same relay queues as the first, and each
+- **One phone at a time:** a backup restored on a second phone reads the same server queues as the first, and each
   takes messages the other then never gets. Use it to move to a new phone, not to keep two.
-- **The old phone was lost:** a phone that was lost or stolen and is still on goes on reading the relay queues it
+- **The old phone was lost:** a phone that was lost or stolen and is still on goes on reading the server queues it
   knew, so messages sent there may reach it and never the new phone. After restoring the backup on the new phone, tap
   **The old phone was lost** under **Backups** (after a restore of a backup from another phone, Erevos points at it)
-  and say **Move the queues**. Every space and its hidden chats then move to new relay queues, each the next time it
+  and say **Move the queues**. Every space and its hidden chats then move to new server queues, each the next time it
   opens here, and your contacts and groups are told quietly. The old queues are read here until each contact writes
   to the new ones, 14 days at most, and the contact links and QR codes you gave before work for 14 days, then no more.
   What comes through Nostr{+, XMPP or Matrix} still reaches the old phone. After another restore, tap it again.
@@ -3560,12 +3692,12 @@ chat, under **Pieces you keep for friends**.
   whose {=Erevos} is older than this version sees the message but keeps no piece.
 
 **Why:** a backup is only as safe as its password, and a strong password is easy to lose. Split this way (Shamir's
-secret sharing), no single friend, and no relay, holds anything that opens it.
+secret sharing), no single friend, and no server, holds anything that opens it.
 
 ## Moving to a new phone {#new-phone}
 
 Everything Erevos keeps goes to a new phone in one backup: every space with its hidden chats, contacts, messages,
-photos{~, files and Collection| and files}, its accounts and relays, the lock, the panic password and your settings. No server
+photos{~, files and Collection| and files}, its accounts and servers, the lock, the panic password and your settings. No server
 keeps a copy of it for you, so nothing comes over by itself: the backup carries it, sealed with its password.
 
 1. **On the new phone, install {=Erevos}:** the same version as on the old phone, or newer, as an older {=Erevos} refuses
@@ -3575,7 +3707,7 @@ keeps a copy of it for you, so nothing comes over by itself: the backup carries 
    [Collection](#collection).{+ Have your Matrix Security Key at hand, as Matrix signs in again on the new phone.}
 3. **On the old phone, make the backup:** under **Settings** → **Data and devices** → **Backups**, tap **Make a
    backup**, or **Back up now** with automatic backups. Make it last, just before you move, and from then on do not
-   open Erevos on the old phone: what comes after waits on the relays for the new one.
+   open Erevos on the old phone: what comes after waits on the servers for the new one.
 4. **Bring it over:** copy the backup and every file whose name starts as its name, all in one folder, to the new
    phone, by cable, a memory card or a cloud app. A backup on your server needs no copying.
 5. **On the new phone, restore:** at the first start, tap **I already have {=Erevos} on another phone** (or go through
@@ -3587,11 +3719,11 @@ keeps a copy of it for you, so nothing comes over by itself: the backup carries 
    under **Backups**, and the SIM for each number{+, and sign in to Matrix with its Security Key}.
 7. **On the old phone, wipe Erevos:** once the new phone shows your chats and new messages come there, tap **Wipe
    everything now** under **Settings** → **Privacy and security** → **Panic button**. Not **Delete me from
-   everywhere**: that deletes the relay queues the new phone reads.
+   everywhere**: that deletes the server queues the new phone reads.
 
-- **One phone at a time:** both phones read the same relay queues, and a message goes to whichever takes it first,
+- **One phone at a time:** both phones read the same server queues, and a message goes to whichever takes it first,
   so the other never gets it. Keep the old one closed from the backup on, and wipe it at the end.
-- **Your contacts:** each space keeps its relay, its token and its home relay, so there is nothing to type again and
+- **Your contacts:** each space keeps its server, its token and its home server, so there is nothing to type again and
   no invite to ask for. Your contacts write to you as before.
 - **Hidden chats:** every hidden place comes with the backup, each with its PIN, and nothing on the new phone tells
   that there are any, see [Hidden chats](#hidden).
@@ -3609,7 +3741,7 @@ keeps a copy of it for you, so nothing comes over by itself: the backup carries 
 - **A file missing:** with a file of the backup missing or damaged, Erevos says which and changes nothing, unless you
   choose to restore the rest without it.
 - **If the old phone is lost:** restore your newest backup on the new phone as soon as you can, from your server too,
-  then tap **The old phone was lost** under **Backups**, so it reads nothing more of yours on the relays.
+  then tap **The old phone was lost** under **Backups**, so it reads nothing more of yours on the servers.
   If you lost the backup's password, friends holding its pieces can give it back, see
   [Backup pieces with friends](#backup-pieces).
 
@@ -3626,11 +3758,11 @@ lock at the top of the home screen opens it at once. A tap on the lock still loc
 panic button, and there **Wipe everything now** still asks once more.
 
 - **What goes:** every space and its hidden chats, with their contacts, messages, photos, files and keys; the lock and
-  its passwords; {+the Matrix, XMPP and Nostr accounts and }the relay tokens; the settings and password of automatic
+  its passwords; {+the Matrix, XMPP and Nostr accounts and }the server tokens; the settings and password of automatic
   backups, and of their server. On Android, Erevos then closes, and opens next time as if just installed. With **Also the
   automatic backups in** the folder chosen, the backup files there go first.
 - **What stays:** what Erevos cannot reach: backups you copied elsewhere or sent to a server (their password still
-  guards them), what the relay holds for you until it expires, and what your contacts have.
+  guards them), what the server holds for you until it expires, and what your contacts have.
 
 1. **From a panic app:** on Android, a panic app such as Ripple wipes the apps you choose with one gesture. Install
    one, choose Erevos in it: Erevos opens this screen, after its password, and asks. Tap **Say yes**.
@@ -3685,26 +3817,26 @@ When you want what the servers keep for you gone, under **Settings** → **Priva
 everywhere**: tap **Delete me from everywhere** and say yes twice. Your phone keeps everything it has; this is not the
 [Panic button](#panic), which wipes the phone.
 
-- **What goes:** every queue this space has on the relays, with the messages waiting in them: your own, the one your
-  contact link names, your groups', your contacts', your home relay's, {+the ones for Matrix and XMPP notices, }the doors of
-  your public groups and those of your linked devices. Also the messages a relay holds for you to send later, the files
+- **What goes:** every queue this space has on the servers, with the messages waiting in them: your own, the one your
+  contact link names, your groups', your contacts', your home server's, {+the ones for Matrix and XMPP notices, }the doors of
+  your public groups and those of your linked devices. Also the messages a server holds for you to send later, the files
   that came and wait on it, and the invites you made and nobody used. Hidden chats that receive while closed go with the
   space; the others when you open them while the space is stopped. The screen's lists leave hidden chats out, so they
-  never show that there are any. Erevos also asks every Nostr relay to forget the keys your chats read on (a
+  never show that there are any. Erevos also asks every Nostr server to forget the keys your chats read on (a
   request to vanish, NIP-62): through Tor when Tor is on, straight when it is off. With Tor on but not ready yet, Nostr
   is not asked; wait until it is, and delete again.
 - [+] **Matrix, XMPP, Nostr:** with **Also sign out of Matrix and XMPP, and delete the Nostr account made here**, those
   accounts are signed out here. Their accounts stay on their servers, which are theirs, not Erevos's. A Nostr account you
   brought from another app is left alone.
 - **The space is stopped:** it receives and sends nothing, so no queue is made again at once (Erevos makes a lost queue
-  anew by itself). **Start again** ends it: new queues are made, as after a relay lost them, and your contacts are told
+  anew by itself). **Start again** ends it: new queues are made, as after a server lost them, and your contacts are told
   quietly. Give them a new contact link too, as the old links name queues that are gone.
-- **What it cannot reach:** your contacts' phones, Nostr relays that do not do as asked,{- and} files you sent through a file
+- **What it cannot reach:** your contacts' phones, Nostr servers that do not do as asked,{- and} files you sent through a file
   server{+, and the Matrix and XMPP servers}. The screen lists what was deleted, what was gone already and what could not be
   reached; **Delete again** tries the rest.
 
-**Why:** a relay, even one you trust, is a place that keeps something of you. This is the one tap that takes it all back
-without wiping the phone, for when you leave a relay, or a chapter of your life.
+**Why:** a server, even one you trust, is a place that keeps something of you. This is the one tap that takes it all back
+without wiping the phone, for when you leave a server, or a chapter of your life.
 
 ## Imported chats {#import}
 
@@ -3736,7 +3868,7 @@ Then:
 
 To go on with the conversation in Erevos, the other person needs Erevos too:
 
-1. With **New chat**, add them as a contact through the relay, as in [Chat through a relay](#relay).
+1. With **New chat**, add them as a contact through the server, as in [Chat through a server](#relay).
 2. Open the imported chat, tap **Continue in Erevos** and pick them.
 3. Their chat now shows the old messages ahead of the new ones, as if they had always been in Erevos: in bubbles, by
    day, with their times, and **Continued in Erevos** between them and the new. **Open the chat** takes you there, and
@@ -3778,7 +3910,7 @@ and the list in **Settings** keeps only what has nowhere else to go. Nothing of 
 **Imported chats**, tap **Share with** and their name; in **Settings** → **Data and devices** → **Imported chats** a
 chat that goes on with someone has the same button, which opens their chat. Erevos says how many messages and how many
 MB go, and asks first. Then all the chats imported with them go together, whatever their size, every message with
-every photo, video, voice message and file kept, to them alone, end-to-end encrypted through your relay, and the chat
+every photo, video, voice message and file kept, to them alone, end-to-end encrypted through your server, and the chat
 says you shared it.
 
 - **On their side** there is nothing to do: their {=Erevos} keeps the messages at once, says in the chat who shared them,
@@ -3791,15 +3923,15 @@ says you shared it.
   is not shared on.
 - **Only with them:** only with an Erevos contact the chat goes on with, never with a group, and it cannot be forwarded.
   In hidden chats it works the same, and on their side it stays in the place your chat is in, hidden chats too.
-- **In rounds:** the photos and files go after the messages, a few dozen MB at a time: each round waits on your relay
+- **In rounds:** the photos and files go after the messages, a few dozen MB at a time: each round waits on your server
   until their phone takes it and deletes it there, and then the next goes. So a chat of any size goes, each file up to
-  4 GB, and needs little of the relay's room, which other files share; when the relay is full, Erevos waits and asks
+  4 GB, and needs little of the server's room, which other files share; when the server is full, Erevos waits and asks
   again, a little longer each time. It goes on whenever both phones run Erevos, also after either was off or offline
-  for a while; a round not taken in 12 days is put on the relay again before it expires. A file deleted from this phone
+  for a while; a round not taken in 12 days is put on the server again before it expires. A file deleted from this phone
   since is named as one that stayed behind.
 - **How far it is** shows under your line in the chat, **Sharing, 40%**. Tap it to **Stop sharing**: what waits on the
-  relay is taken off, and their {=Erevos} deletes what came of it. If they delete the chats, it stops the same way.
-- **From a relay their {=Erevos} does not take from by itself**, the chats wait on their side for a tap on their line; then
+  server is taken off, and their {=Erevos} deletes what came of it. If they delete the chats, it stops the same way.
+- **From a server their {=Erevos} does not take from by itself**, the chats wait on their side for a tap on their line; then
   it says how far they have come, **Coming, 40%**, and your line says **Sharing · their phone is taking it**. If they
   could not be taken, both phones say so and theirs buzzes twice: they tap it to try again. Taking them from there
   without Tor shows that server their internet address, and {=Erevos} says so first.
@@ -3880,7 +4012,7 @@ always reads well, on glass too.
 
 ## On a computer {#desktop}
 
-Erevos also runs on a computer, Linux, macOS or Windows, as an app of its own. It chats through a relay, end-to-end
+Erevos also runs on a computer, Linux, macOS or Windows, as an app of its own. It chats through a server, end-to-end
 encrypted as on the phone, and keeps its contacts, messages and settings sealed the same way.
 
 1. Install it. On Linux: the package for Arch-based systems (\`erevos-linux-x86_64.pacman\`, with \`sudo pacman -U\`) or the
@@ -3889,7 +4021,7 @@ encrypted as on the phone, and keeps its contacts, messages and settings sealed 
    \`erevos-windows-x64-setup.exe\`, which installs Erevos for you alone, with no administrator, and puts it in the
    Start menu; or keep \`erevos-windows-x64-portable.exe\` where you like and run it, with nothing installed. Neither
    has a paid signature, so the first time Windows says it protected your PC: tap **More info**, then **Run anyway**.
-2. Set the relay and add contacts as on the phone, see [Chat through a relay](#relay). **Copy my contact link** copies
+2. Set the server and add contacts as on the phone, see [Chat through a server](#relay). **Copy my contact link** copies
    your link, to paste where it should go.
 
 - **What only the phone does:** Bluetooth, Wi-Fi Aware and LoRa, and their tests. Contacts on the same Wi-Fi it reaches
@@ -3907,7 +4039,7 @@ encrypted as on the phone, and keeps its contacts, messages and settings sealed 
 there unless you choose it with \`--plain-secrets\`: no password slot lies there unsealed by surprise.
 
 - **Windows' firewall** asks, the first time Erevos opens, whether it may use the network. Allow it on private
-  networks, or phones and computers on the same Wi-Fi cannot reach it; relays work either way.
+  networks, or phones and computers on the same Wi-Fi cannot reach it; servers work either way.
 - **Voice messages** recorded on a computer are Opus, on a phone AAC. Both play on both.
 - **Photos** come from the computer's files; there is no camera. **Save** asks where to put a photo or file.
 - **A computer and a phone can share an account:** link the computer to the phone, and both have the same chats and
@@ -3915,11 +4047,11 @@ there unless you choose it with \`--plain-secrets\`: no password slot lies there
   [Backups](#backup), and from then on use only the one.
 - **In the background:** closing its window leaves Erevos running in the system tray (on a Mac, in the Dock), unless you
   turn it off: **Settings** → **Notifications** → **In the background** → **Quit when closed**. It goes on waiting at
-  the relay: a call rings, with a ring of its own, and brings the window back, and a notification says how many messages
+  the server: a call rings, with a ring of its own, and brings the window back, and a notification says how many messages
   are not read, never who or what, until Erevos shows again. Open it from its icon in the tray, or by starting Erevos
   again, and quit it from that icon's menu (on a Mac, from its menu). Where the desktop shows no tray, as GNOME without
   an extension for it, starting Erevos again brings the window back. Quit, it receives nothing: messages wait on the
-  relay, and a call shows as a missed call once it opens.
+  server, and a call shows as a missed call once it opens.
 - **Calls** ring while Erevos shows, with a ring of its own: two short rings every 3 seconds, until the call is
   answered or ends.
 - **Tested so far** on Linux. The Mac and Windows versions are built and opened on GitHub's computers, not yet by a
@@ -3949,9 +4081,9 @@ To link a computer:
    **Link**. That is all: the phone gives the computer what it needs through Nostr, end-to-end encrypted, and the
    computer shows its own code to the phone and the safety codes are compared on their own, so nothing is typed or
    compared by you.
-3. If Nostr cannot be reached, or the computer cannot use the relay, it says so. Tap **Link another way** there: if it
-   asks for a relay, LPHL's is filled in, so tap **Sign in with LPHL** for a token of the computer's own, or type
-   another relay and its token. Name the device and tap **Link to my phone**: it then shows a larger QR code. Scan it
+3. If Nostr cannot be reached, or the computer cannot use the server, it says so. Tap **Link another way** there: if it
+   asks for a server, LPHL's is filled in, so tap **Sign in with LPHL** for a token of the computer's own, or type
+   another server and its token. Name the device and tap **Link to my phone**: it then shows a larger QR code. Scan it
    with the phone, or copy the code, paste it on the phone under **Code from the computer** and tap **Next**. The phone
    shows the computer's name and a code of four groups of five digits; choose as above and tap **Link**.
 4. Only in that way does the computer show a code too: if it is the phone's, tap **They match**. If not, tap **They
@@ -3970,52 +4102,52 @@ The chats then come to the computer, and after them the messages chosen.
   pictures, appearing offline and accepting requests go both ways. A star, or deleting on **This phone**, done on the
   phone goes to the computer too; done on the computer, it stays there.
 - **With the phone off**, contacts on this version still reach the computer, and the computer them: what they write,
-  read and react to comes, and what you write goes. If the phone stays off so long that its queue on the relay fills
+  read and react to comes, and what you write goes. If the phone stays off so long that its queue on the server fills
   (1000 messages), what they write and read still reaches the computer, a long voice message whole; what they react
   to, pin, vote on or delete, and their calls, do not go through until the phone is on again. For contacts on older
   versions (adding them too) and groups, **the phone has to be on** and reach the
-  relay: what the computer writes meanwhile waits on the relay, and goes once the phone is back. Someone new whose contact link is from this version the computer adds with the phone off
+  server: what the computer writes meanwhile waits on the server, and goes once the phone is back. Someone new whose contact link is from this version the computer adds with the phone off
   too: it starts the chat with them itself, they see your account as a request, and the phone adds them too once it is
   on. Two or more linked
   devices also reach each other directly: with the phone off, each still shows what the others write, read and react
   to, and the changes they make to contacts; one that missed the first message of another gets a new one a day or more
-  later. A computer that was off for longer than the relay keeps messages (14 days), or missed a contact's first
+  later. A computer that was off for longer than the server keeps messages (14 days), or missed a contact's first
   message to it, still gets what they write after: their {=Erevos} starts again with it a day or more later, then ever
   less often, until it answers. After a contact deletes you and adds you again, the computer starts again with their
   devices too.
-- **Photos and files** that come stay on the relay until both the phone and the computer took them; then the phone
+- **Photos and files** that come stay on the server until both the phone and the computer took them; then the phone
   deletes them there. One the computer never takes goes when it is unlinked, or after 14 days, as any not taken.
 - **Chat with myself** is the same on each device: a note, photo, file or voice message written on one goes to the
   others, and so do a reminder set, changed or seen and a note deleted; of two changes to one note, the later stays.
   Those written before linking go once, both ways, as soon as both have this version. A reminder shows on each device
-  at its time, and seen on one it goes from the others. A note's photo or file goes as a copy on the relay, deleted
+  at its time, and seen on one it goes from the others. A note's photo or file goes as a copy on the server, deleted
   there once taken, or, for two devices or more, left there until it expires (14 days). Hidden chats' notes go only
   within their own link, below.
 - **Settings:** the language, the look (the style, the colours, the size of the text) and **Last seen** are the same on
   every device of the space: changed on one, they change on the others too. A photo behind the screens stays on the device it was
   chosen on, and so does all that is about one device alone: passwords, PINs and the panic code, the lock's time,
-  vibration, the relay and Tor,{~ the modules,} the device's name. A device that should keep its own: **Settings** →
+  vibration, the server and Tor,{~ the modules,} the device's name. A device that should keep its own: **Settings** →
   **Data and devices** → **Linked devices** → **Same settings on every device** off. Turned on again, it takes the
   others' at once. Hidden chats keep their own.
 - **Through Tor for one chat:** the **Through Tor** switch in an Erevos chat's **Details** is the same on every device:
   switched on or off on one, it is switched on or off on all. On a device without Tor, such as the web app, that chat
   sends nothing while it is on. A device on an older version never turns it off for the others. See [Through Tor](#tor).
 - **On the same Wi-Fi:** the phone and a computer on the same Wi-Fi or hotspot (with **Find Erevos on the same Wi-Fi** on)
-  give each other what changes straight there, with no internet too; the relay still gets its copy, which then changes
-  nothing more. Only the space's: hidden chats' links go through the relay.
+  give each other what changes straight there, with no internet too; the server still gets its copy, which then changes
+  nothing more. Only the space's: hidden chats' links go through the server.
 - **Calls** ring on the phone and on the computer. Answer on either: the other stops ringing, and says it was
   answered on another device. Turning a call down on one turns it down on both. With a contact on this version, the
   computer calls and is called by itself, with the phone off too; with one on an older version it calls through the
   phone, which has to stay on only to set it up. Either way the call itself goes straight between the computer and the
   contact, encrypted between them.
-- **Send later** works on the computer too. To a contact on this version the computer hands it to the relay itself, and
+- **Send later** works on the computer too. To a contact on this version the computer hands it to the server itself, and
   a copy for each of their devices, so it goes at its time with your phone off and reaches theirs with their phone off;
   to one on an older version it goes through the phone. Every device of yours shows it as scheduled, and deleting it
   on any of them before its time takes it back everywhere.
 - **Groups** are on the computer too, with their messages, photos, files and voice messages. Write in them, answer,
   react, vote, pin, delete your own for everyone, add and take out members, rename one or leave it, there as on the
   phone: the phone does it for the computer, as its own. A photo or file the phone keeps goes to the computer as a copy
-  on the relay, deleted there once the computer took it. What the members do later to a message (react, vote, pin,
+  on the server, deleted there once the computer took it. What the members do later to a message (react, vote, pin,
   delete it for everyone) shows on the computer too, as does a star or deleting on **This phone** done on the phone. A
   message the phone could not send to the group (one closed meanwhile, say) shows on the computer as **Not sent by the
   phone**. Making a group, public groups and group calls stay on the phone for now.
@@ -4023,12 +4155,12 @@ The chats then come to the computer, and after them the messages chosen.
   devices** → **Groups stay on**, pick **This phone** or a linked computer. The keys of the groups then move there, never
   copied, so the groups work there with the phone off, and new ones can be made there; the phone and the other devices
   write in them through it, so it has to be on. Members see nothing new: the same you, whose group messages come to
-  another queue. Moving needs both on and the relay, and public groups stay on the phone (leave them first). To unlink
+  another queue. Moving needs both on and the server, and public groups stay on the phone (leave them first). To unlink
   that computer, move the groups back to the phone first. If it is lost, unlink it all the same: the groups
   then show as left on the phone. A computer whose {=Erevos} is older cannot hold them.
 - **Hidden chats and second passwords** never go with the space's link: each links on its own, from inside it. For a
   place of hidden chats: on the computer, open that place with its PIN, new and empty as a new PIN sets it, and give it
-  a relay queue of its own under **For advanced users** there; then tap **Linked devices** under its list, and **Link to
+  a server queue of its own under **For advanced users** there; then tap **Linked devices** under its list, and **Link to
   my phone**. On the phone, open the same place with its PIN, tap **Linked devices** under its list, and scan the
   computer's code with the camera while the place stays open, or paste it there; then as above. A code shown in a place
   links only a place, and a space's only a space: read by the other, it just goes, and **Link to my phone** starts again on the computer. The
@@ -4039,7 +4171,7 @@ The chats then come to the computer, and after them the messages chosen.
   shows in the space, on its screens or on its linked devices, and the space's link never carries anything of a place:
   what a place keeps of its link is encrypted with its own key, among values made for nothing for the other places, in a
   file of the same size whether any place links or none. The link runs while the place is open, and while it is closed
-  too if **Receive while closed** is on; closed with it off, nothing of it syncs, and what comes waits on the relay (14
+  too if **Receive while closed** is on; closed with it off, nothing of it syncs, and what comes waits on the server (14
   days) until it opens, on either side. On the computer, new groups and group calls stay on the phone, a chat cannot be
   moved into the place or out of it (move it on the phone), and a call answered there stops the phone's ring only while
   the place is open on the phone. Hidden chats write to the devices of a contact on this version as your other chats do,
@@ -4066,7 +4198,7 @@ The chats then come to the computer, and after them the messages chosen.
 - [~] **SMS**: the phone's SMS can show on the devices too, and be answered there through the phone, once you turn it on
   under **Settings** → **Phone and SMS** → **SMS** → **On my linked devices too**, see [SMS](#sms).
 - **Unlink**, on the phone, cuts a device off at once: nothing more goes to it, and nothing it sends is taken.
-  Contacts on this version are told the next time the phone reaches the relay: they stop writing to it, and take
+  Contacts on this version are told the next time the phone reaches the server: they stop writing to it, and take
   nothing more from it. That is how to cut off a lost computer. If it is on, it is told, and the account's chats leave
   it. On the computer, **Unlink this device** does the same from there.
 - **Up to four** devices link to one phone. A backup does not carry the links, but after restoring one on
@@ -4076,7 +4208,7 @@ The chats then come to the computer, and after them the messages chosen.
 ## On an iPhone, from the browser {#iphone}
 
 Erevos has no App Store app. On an iPhone it runs as a web app, added to the home screen from Safari, with no Apple
-account. It chats through a relay, end-to-end encrypted as on the phone, and keeps its contacts, messages and settings
+account. It chats through a server, end-to-end encrypted as on the phone, and keeps its contacts, messages and settings
 sealed the same way, in Safari's storage for the app.
 
 1. Open the address of the Erevos server you were given in **Safari**. Erevos shows how to add it: tap **Share** (on
@@ -4086,7 +4218,7 @@ sealed the same way, in Safari's storage for the app.
    tell whoever gave you the address.
 3. Set a password lock (in Erevos, **Settings** → **Privacy and security** → **Lock and second password**). On the
    web it matters most: see below.
-4. Set the relay and add contacts as on the phone, see [Chat through a relay](#relay).
+4. Set the server and add contacts as on the phone, see [Chat through a server](#relay).
 
 **How it checks itself.** A web app is code the server sends, so a server that is broken into, or ordered to, could
 send changed code. Erevos does not take that code on trust:
@@ -4110,35 +4242,35 @@ send changed code. Erevos does not take that code on trust:
   not open Erevos from that server again until it is explained. With a password lock your chats stay sealed.
 - **No Bluetooth or nearby link**{~ and no SMS}: Safari does not allow them.
 - **Only while it is open:** iOS stops web apps in the background, so messages arrive when you open Erevos; they wait
-  on the relay until then.
+  on the server until then.
 - **Calls** ring while Erevos is open, with a ring of its own: two short rings every 3 seconds. Safari lets it sound
   only once you have touched Erevos since it opened, and not with the iPhone on silent. With Erevos closed a call does
   not ring: only the notification "Call" shows, once notifications are on. Apple allows a web app nothing more; ringing
   as a phone does would take an app from the App Store.
 - **Notifications** while Erevos is closed are off unless you turn them on: in Erevos, **Settings** →
   **Notifications** → **Notifications while closed** → **Turn on** (iOS 16.4 or later, from the home screen). When
-  messages come, or a call rings, your relay sends a push through Apple, and Erevos shows how many messages came since
+  messages come, or a call rings, your server sends a push through Apple, and Erevos shows how many messages came since
   you last opened it (**3 new messages**), or **Call** when only a call rang, in the app's language, nothing more. The
   count is encrypted for your iPhone: Apple sees when something comes for your iPhone, and that it uses {=Erevos}, never
-  what or from whom. With a relay or a sender's {=Erevos} older than 2.0.0, or a message that other phones carried to the
-  relay, there is no number: Erevos shows **New message**, or **New messages** once more came, until you open it. They
-  are per space, never for hidden chats, and your relay must be set up to send them. They come for each contact's own
-  queue too: your relay then has one push address for all your contacts' queues, and Apple gets one push for each
+  what or from whom. With a server or a sender's {=Erevos} older than 2.0.0, or a message that other phones carried to the
+  server, there is no number: Erevos shows **New message**, or **New messages** once more came, until you open it. They
+  are per space, never for hidden chats, and your server must be set up to send them. They come for each contact's own
+  queue too: your server then has one push address for all your contacts' queues, and Apple gets one push for each
   contact who wrote, 15 seconds apart, so from such a run it can guess how many wrote at once, never who. Erevos's
   icon on the home screen then shows a number too: the messages not read in the space you had open, which stays once
   Erevos is closed, and those that came since (what came with no number counts as one), never a hidden chat's.
   **Settings** → **Notifications** → **Number on the icon** turns it off. Notifications work through Apple's push
   service, Google's (Chrome, and Edge on Android, Brave and Opera), Mozilla's (Firefox) and Microsoft's (Edge on
-  Windows): a browser that uses another cannot turn them on, unless whoever runs your relay allows its push service.
-  Each space that turns them on has a push address of its own, so no relay is ever given another space's, and the
+  Windows): a browser that uses another cannot turn them on, unless whoever runs your server allows its push service.
+  Each space that turns them on has a push address of its own, so no server is ever given another space's, and the
   address does not tie your spaces together. For it each such space has a service worker of its own in the browser:
   whoever can look into the browser's settings can count them, and so how many spaces have notifications on. A message
   request from someone new, through your contact link, may show only once Erevos opens. The number on the icon shows
   also on a Mac with Safari's Add to Dock, and in the web app installed from Chrome or Edge on Windows, macOS or
   ChromeOS. No **New message** banner shows over Erevos while it is open on the screen. The **Notifications while
-  closed** screen says when the browser or the phone does not allow them and, after you turn them off, when your relay
+  closed** screen says when the browser or the phone does not allow them and, after you turn them off, when your server
   could not be told yet and may still send one: Erevos tells it as soon as it can reach it. When the browser changes
-  its push address, or its push service drops it, Erevos gives your relay the new one by itself as it comes back on
+  its push address, or its push service drops it, Erevos gives your server the new one by itself as it comes back on
   the screen.
 - **Permissions:** in Erevos, **Settings** → **General** → **Permissions** shows what the browser lets Erevos do:
   whether it runs from the home screen, notifications while closed (needed once this space turned them on), the
@@ -4158,7 +4290,7 @@ send changed code. Erevos does not take that code on trust:
 
 On a Sailfish OS phone Erevos is an app of its own: the same app as in the browser, shown by Sailfish's own browser
 engine inside a Sailfish window, with its code installed with the app and not fetched from a server. It chats through a
-relay, end-to-end encrypted as on the phone, and keeps its contacts, messages and settings sealed the same way.
+server, end-to-end encrypted as on the phone, and keeps its contacts, messages and settings sealed the same way.
 
 1. Allow apps from outside the Jolla Store: **Settings → Untrusted software → Allow untrusted software**.
 2. Copy \`erevos-sailfish-aarch64.rpm\` to the phone (Downloads) and tap it in **Files**, then **Install**. From a
@@ -4166,7 +4298,7 @@ relay, end-to-end encrypted as on the phone, and keeps its contacts, messages an
    64-bit (aarch64) version.
 3. Set a password lock (in Erevos, **Settings** → **Privacy and security** → **Lock and second password**). See
    below why it matters here.
-4. Set the relay and add contacts as on the phone, see [Chat through a relay](#relay).
+4. Set the server and add contacts as on the phone, see [Chat through a server](#relay).
 
 - **What only Android does:** Bluetooth, Wi-Fi Aware, Wi-Fi Direct{~, LoRa and SMS| and LoRa}. The same Wi-Fi works here too, as on
   a computer: see [Chat with a nearby phone](#nearby). Sailfish OS's firewall already lets its port, 47905, in: only
@@ -4180,13 +4312,13 @@ relay, end-to-end encrypted as on the phone, and keeps its contacts, messages an
 - **Calls** ring while Erevos shows, with a ring of its own: two short rings every 3 seconds, and the phone vibrates
   where it can, until the call is answered or ends. A call that comes before you have touched Erevos since it opened may
   show without sound.
-- **While it is closed:** with a space open, a small helper of Erevos waits at the relay while Erevos is out of sight
+- **While it is closed:** with a space open, a small helper of Erevos waits at the server while Erevos is out of sight
   or closed, and takes nothing. A notice says only how many messages came, never who or what, and a call rings with
   the phone's ringtone, as its profile sets it, for 45 seconds at most; a tap on either opens Erevos. Hidden chats say
   nothing then. Locking the space stops it, and after the phone restarts it waits again only once Erevos opens the
   space. Like the rest of Erevos here it goes straight, without Tor. Each wait wakes the phone about once a minute, as
   on Android.
-- **Tested so far** on Sailfish's browser engine (Gecko 91) on a computer, chatting with a browser through a relay.
+- **Tested so far** on Sailfish's browser engine (Gecko 91) on a computer, chatting with a browser through a server.
   The same Wi-Fi was checked against the computer's, on a computer. Not yet on a Sailfish phone.
 
 ## Updates {#updates}
@@ -4236,7 +4368,7 @@ On Android, **Updates** also says which releases are offered to this phone:
   before. Once the new one took it, the old one offers **Delete everything here** and **Uninstall**; a move not taken
   within a day is deleted, and the old app opens as before. A new app already set up asks too, and what it brings
   takes the place of everything it has. The move needs free room on the phone for a copy of everything: Erevos says so
-  first when there is not enough. The F-Droid build, signed with another key, cannot move this way: use
+  first when there is not enough. The F-Droid build has no **Check for updates**, so it cannot start a move: use
   [Backups](#backup) instead.
 - **Beta versions**: off, only regular versions are offered. On, betas too (such as **7.0.1-beta.1**): they come out
   first, for trying, and may have problems. A beta has it on at first. Turn it off to leave the betas: the next regular
@@ -4262,7 +4394,7 @@ Each version, there as here, says first what changes **For you**, what you see a
 
 ### Told when a new version is out {#release-notice}
 
-On Android, once a day, Erevos asks LPHL's server, which runs the relay too, whether a new version is out. When one is,
+On Android, once a day, Erevos asks LPHL's server whether a new version is out. When one is,
 **Erevos** shows at the top of the chats, pinned, with its icon: **Erevos 3.3.0 is out. Tap to see what is new and
 update.**, marked until you open it, and a notice says **Erevos 3.3.0 is out** too. Tap either for **Updates**, then
 **Check for updates**. It goes once you have that version.
@@ -4270,9 +4402,9 @@ update.**, marked until you open it, and a notice says **Erevos 3.3.0 is out** t
 - **Only when signed:** it counts only once the release computer has signed both the build and its name, the same
   signature that lets **Updates** install it. So it comes once that version can be installed, and the server alone
   cannot make one up.
-- **Only on LPHL's relay:** a space asks only while it uses LPHL's relay and does not send everything through Tor
-  (**Everything** under Tor): the server then sees nothing it does not see already. A space on another relay, or with
-  no relay, asks nothing; there **Check for updates** tells you.
+- **Only on LPHL's server:** a space asks only while it uses LPHL's server and does not send everything through Tor
+  (**Everything** under Tor): the server then sees nothing it does not see already. A space on another server, or with
+  no server, asks nothing; there **Check for updates** tells you.
   The **Through Tor** switch in **Updates**, one for this notice and for **Check for updates**, on this phone only,
   makes it ask through Tor: the server then does not see the phone's address, and a space that sends everything
   through Tor asks too. A new version is told, but installs only with the switch off.
@@ -4311,9 +4443,11 @@ files \`sha256sum -c --ignore-missing SHA256SUMS\` must say **OK** for each.
   another key, and Android refuses to install over it (**App not installed**). Make a backup, uninstall {=Erevos},
   install the one from the releases page and restore the backup. After that, every update installs over it.
 - **{=Erevos} from F-Droid**, once it is there, is updated by F-Droid: its **Updates** shows the version and says so,
-  with no **Check for updates**. F-Droid signs it with a key of its own, so Android installs neither it over the
-  Erevos from the releases page nor that one over it. To switch: make a backup, uninstall {=Erevos}, install the other one
-  and restore the backup.
+  with no **Check for updates**. It is signed with the same key as the Erevos from the releases page: F-Droid builds
+  each version again from its source and hands out the releases page's signed file only when its own build comes out
+  the same. So each installs over the other, and everything stays: to switch, install the other one, of the same
+  version or newer. The F-Droid one has no **Check for updates**, no **From a phone nearby** and no backups to Google
+  Drive: switching to it, those stop, and they come back with the other.
 - **Never older:** do not install an older version over a newer one. Its data may be in a form the older one cannot
   read. Restore a backup made with that older version instead.
 - **A release that lacks your system** says so in its notes: that build failed, so take the release before.
@@ -4341,9 +4475,9 @@ this phone's hotspot: turn the hotspot on in Android's settings first.
   certificate, so once you have internet compare the certificate with the one on Erevos's website or releases page.
   Erevos itself, in **Updates**, refuses a package signed otherwise.
 - **Not from a store:** an {=Erevos} installed in parts, as some stores install apps, cannot be given whole and says so.
-  {=Erevos} from F-Droid is signed by F-Droid: it can go to a phone without {=Erevos}, or over F-Droid's Erevos through the
-  browser, but an Erevos from the releases page refuses it in **Updates**, as Android would. F-Droid's Erevos takes
-  nothing in **Updates**: F-Droid updates it.
+  {=Erevos} from F-Droid, signed with the same key, is given like any other, but says so on its screen and on the page:
+  on the other phone too, only F-Droid then updates it, and an Erevos there that is not from F-Droid asks before it
+  installs it. F-Droid's Erevos takes nothing in **Updates**: F-Droid updates it.
 - Android only. Anyone on the same network who sees the code can download Erevos too; nothing else is there to take.
 
 **Why:** where the internet is cut, or watched, or a phone may not reach the website at all, Erevos can still go from
@@ -4356,11 +4490,11 @@ Two screens under **Settings** → **For testing** are there to test the connect
 - **Radio test (Android):** **Permissions** asks Android for what the radio needs, **Start** and **Stop** turn
   Bluetooth and Wi-Fi Aware on and off, **Send hello** sends a plain test message to the nearby phone's Radio test (a
   chat does not show it), and the **Log** shows what happened.
-- **Relay test (Wi-Fi):** **Create queue** makes a queue on a relay and shows two ids. Give the **sender id** to
+- **Server test (Wi-Fi):** **Create queue** makes a queue on a server and shows two ids. Give the **sender id** to
   the phone that writes to you, and keep the **recipient id** private. **Send** and **Receive** move messages by hand.
 
-> With one phone you can still try a chat through the relay: your chats and your **Hidden chats** each have their
-> own relay queue and their own keys. Create both queues on the same relay, tap **Share my contact link** in one and
+> With one phone you can still try a chat through the server: your chats and your **Hidden chats** each have their
+> own server queue and their own keys. Create both queues on the same server, tap **Share my contact link** in one and
 > copy it, then add it in the other, and write both ways. A chat's own link is refused as a contact.
 
 ## What is protected today {#privacy}
@@ -4369,16 +4503,16 @@ Erevos says plainly what it protects and what it does not, yet.
 
 | What | Today | Coming |
 | --- | --- | --- |
-| **Account, phone number, email** | None needed. Contacts are pairs of one-way relay queues. | |
-| **Contacts and their names, keys, relay settings, look** | Sealed on the phone with each space's key. | |
-| **Messages through a relay** | End-to-end encrypted: PQXDH with ML-KEM-768 to start, then the double ratchet. The relay cannot read them, and once both phones have had a message from each other it cannot tell them apart by conversation either: each is sealed once more for the phone it goes to. It sees which are messages someone reads, which are word between phones, and which are calls that ring, as each says. Not audited yet. | An outside audit. |
-| **Messages to a nearby phone** | End-to-end encrypted, the same as through the relay. Whoever listens nearby can tell that {=Erevos} phones are near each other, and when and how much they send; on the same Wi-Fi, so can anyone on it, and over Wi-Fi Direct anyone who joins the phones' own Wi-Fi. Until your contact's phone is known, the other {=Erevos} phones linked nearby get your short messages, sealed. | |
-| **Messages carried by other phones** | Sealed twice: end-to-end for your contact, and for their relay. A phone that carries one sees which relay it goes to, when, and how big; not who it is from or for. Its relay sees which relay it goes to, and that relay sees the carrier's relay, not its phone. Kept sealed on the phone, three days at most: those for others in a file of the phone's, whose size shows roughly how many; your own in your space, sealed with its key. Hidden chats are never carried. | |
-| **Messages over LoRa** | End-to-end encrypted, the same as through the relay. Anyone with a radio, kilometres away, can tell that yours sends, when and how much, and its signal can be traced to where it is. Erevos keeps your radio from saying its name and where it is (role Client hidden, GPS off, no fixed position) unless you let it; it still answers a radio that asks its name. Every Erevos on the mesh gets your LoRa messages, sealed. | Setting the radio's name from Erevos. |
-[~] | **Messages by SMS, when nothing else works** | End-to-end encrypted, the same as through the relay, in hidden data SMS. Off unless you turn it on. The phone company sees which number wrote to which, when, and how many SMS; never what was written. Each costs what an SMS costs. | |
-| **Who talks to whom** | The relay sees IP addresses, queue ids, and when and how much. With a second relay, your relay never sees your address. From a place lent on a contact's relay, every relay you send to sees it. [Through Tor](#tor), once you turn it on, with **Messages** no relay sees it for what you write, and with **Everything** for pictures and files too; with bridges, for where Tor is blocked, the network sees only a bridge. Snowflake's broker and STUN servers see your address. | Tor on a computer. |
-| **The connection to the relay** | TLS, and inside it, once the relay's key is known, a channel to that key: the relay proves it holds it on every connection, and the token and every request go encrypted to it, so someone in between with a certificate for the relay's name cannot pass for it. A relay that proved its key once is never reached without it again. A relay older than this app goes as before, and **How you connect now** says so. The first key comes from the relay the first time it is asked, or from a contact link: whoever is in between that very first time could give one of their own. [The relay's own key](#relay). Not audited. | Our relay's key built into the app, and in invites. |
-| **Texts through Nostr** | End-to-end encrypted as through a relay, then wrapped once more for a key your contact gave that chat alone, signed by a key made for that text alone. The Nostr relays see when and how big, and that a key that names no one gets a text; your phone reads all its keys on one connection, through Tor when Tor is on, so a relay can tell they are read together, and from where only with Tor off. Your relay sees them only as the backup, and a bell for hidden chats. [Through Nostr](#nostr). | |
+| **Account, phone number, email** | None needed. Contacts are pairs of one-way server queues. | |
+| **Contacts and their names, keys, server settings, look** | Sealed on the phone with each space's key. | |
+| **Messages through a server** | End-to-end encrypted: PQXDH with ML-KEM-768 to start, then the double ratchet. The server cannot read them, and once both phones have had a message from each other it cannot tell them apart by conversation either: each is sealed once more for the phone it goes to. It sees which are messages someone reads, which are word between phones, and which are calls that ring, as each says. Not audited yet. | An outside audit. |
+| **Messages to a nearby phone** | End-to-end encrypted, the same as through the server. Whoever listens nearby can tell that {=Erevos} phones are near each other, and when and how much they send; on the same Wi-Fi, so can anyone on it, and over Wi-Fi Direct anyone who joins the phones' own Wi-Fi. Until your contact's phone is known, the other {=Erevos} phones linked nearby get your short messages, sealed. | |
+| **Messages carried by other phones** | Sealed twice: end-to-end for your contact, and for their server. A phone that carries one sees which server it goes to, when, and how big; not who it is from or for. Its server sees which server it goes to, and that server sees the carrier's server, not its phone. Kept sealed on the phone, three days at most: those for others in a file of the phone's, whose size shows roughly how many; your own in your space, sealed with its key. Hidden chats are never carried. | |
+| **Messages over LoRa** | End-to-end encrypted, the same as through the server. Anyone with a radio, kilometres away, can tell that yours sends, when and how much, and its signal can be traced to where it is. Erevos keeps your radio from saying its name and where it is (role Client hidden, GPS off, no fixed position) unless you let it; it still answers a radio that asks its name. Every Erevos on the mesh gets your LoRa messages, sealed. | Setting the radio's name from Erevos. |
+[~] | **Messages by SMS, when nothing else works** | End-to-end encrypted, the same as through the server, in hidden data SMS. Off unless you turn it on. The phone company sees which number wrote to which, when, and how many SMS; never what was written. Each costs what an SMS costs. | |
+| **Who talks to whom** | The server sees IP addresses, queue ids, and when and how much. With a second server, your server never sees your address. From a place lent on a contact's server, every server you send to sees it. [Through Tor](#tor), once you turn it on, with **Messages** no server sees it for what you write, and with **Everything** for pictures and files too; with bridges, for where Tor is blocked, the network sees only a bridge. Snowflake's broker and STUN servers see your address. | Tor on a computer. |
+| **The connection to the server** | TLS, and inside it, once the server's key is known, a channel to that key: the server proves it holds it on every connection, and the token and every request go encrypted to it, so someone in between with a certificate for the server's name cannot pass for it. A server that proved its key once is never reached without it again. A server older than this app goes as before, and **How you connect now** says so. The first key comes from the server the first time it is asked, or from a contact link: whoever is in between that very first time could give one of their own. [The server's own key](#relay). Not audited. | Our server's key built into the app, and in invites. |
+| **Texts through Nostr** | End-to-end encrypted as through a server, then wrapped once more for a key your contact gave that chat alone, signed by a key made for that text alone. The Nostr servers see when and how big, and that a key that names no one gets a text; your phone reads all its keys on one connection, through Tor when Tor is on, so a server can tell they are read together, and from where only with Tor off. Your server sees them only as the backup, and a bell for hidden chats. [Through Nostr](#nostr). | |
 [~] | **SMS** | A plain SMS is read by the phone company, as every SMS. To a number linked to an Erevos contact it goes through Erevos instead. A hidden invite is one more short SMS the phone company sees. | |
 | **The phone's contacts** | In Android's own contacts, not sealed by Erevos, as with every contacts app: every app allowed to read them sees them, and an account (Google) may sync them. Erevos sends them nowhere. A .vcf file saved from them is outside Erevos, not sealed.{~ A contact's calls and SMS are read from the phone's own call log and SMS only to show its history, and kept nowhere.} | |
 | **Contacts kept only in Erevos** | Sealed with the space's key, or with the hidden chats' for theirs, in one file for every space whose size shows roughly how many there are in all, not whose they are; their photos each in a file of its own. Never in Android's contacts. A .vcf file saved from them, hidden chats' too, is outside Erevos, not encrypted. Calls{~ and SMS} to them go through the phone, and show in its call log{~ and SMS}. | |
@@ -4386,18 +4520,18 @@ Erevos says plainly what it protects and what it does not, yet.
 | **Imported chats** | Sealed in the space they were brought into, their photos and files too, each in its pieces as a chat's file is. The file's size, and how many pieces there are, tell roughly how much was imported, not where. | Viber's photos and files, and files over 4 GB. |
 | **Message history** | Kept on the phone, sealed in its space, with no limit, in same-size pages mixed for all spaces. Only how much it all takes shows, not which space it belongs to. Deleting on both phones, and disappearing messages, rely on the other phone's Erevos. | |
 | **Nearby messages** | Open only in the space that has the contact. One for another space waits in memory, six hours at most, until that space opens. One for hidden chats opens only while they are open, or receive while closed, and the space never learns that one of their contacts is near. | |
-| **Voice messages** | End-to-end encrypted through the relay or nearby, in pieces: the relay, or whoever listens nearby, can tell roughly how long each is. Each sound is sealed in a file of its own; how many files there are, and their sizes, show roughly how many are kept, not in which space. Unsealed in the cache only while it plays. | Sound files all of one size. |
-| **Photos and files** | End-to-end encrypted, through the relay's file store, in pieces of one size: the relay sees how many and when, so roughly how big. Your relay sees your address, as for messages; the contact takes them through their own relay. Photos lose their place, phone and time, unless sent as a file; a file keeps what it says inside. Sealed on the phone in their pieces, shown from memory. Saved copies are outside Erevos. Backups hold them, sealed with the backup's password, in files of their own. | |
+| **Voice messages** | End-to-end encrypted through the server or nearby, in pieces: the server, or whoever listens nearby, can tell roughly how long each is. Each sound is sealed in a file of its own; how many files there are, and their sizes, show roughly how many are kept, not in which space. Unsealed in the cache only while it plays. | Sound files all of one size. |
+| **Photos and files** | End-to-end encrypted, through the server's file store, in pieces of one size: the server sees how many and when, so roughly how big. Your server sees your address, as for messages; the contact takes them through their own server. Photos lose their place, phone and time, unless sent as a file; a file keeps what it says inside. Sealed on the phone in their pieces, shown from memory. Saved copies are outside Erevos. Backups hold them, sealed with the backup's password, in files of their own. | |
 | **On a computer** | Sealed as on the phone, in the app's own folder. Its keystore is sealed with the system's keyring (on Windows, your account's key); on a Linux system without one, Erevos keeps nothing unless started with \`--plain-secrets\`, and then keeps it as it is. | |
 | **Backups** | Sealed with their own password, holding every space as it is sealed on the phone, its photos, files and voice messages in files of their own beside the backup. Their names say they are an Erevos backup, and their number and size show roughly how much is kept. Automatic backups keep their password on the phone. Sent to a server only once you add one: random bytes under random names, of padded sizes; the server sees your account and when, and your address unless it goes through Tor. | |
-| **Marks ✓✓ and ✓✓✓** | The contact's phone learns when yours got and read their messages, encrypted. In a group that is not public, so does the phone of whoever sent the message. The relay, or whoever listens nearby, sees one more small message. | A switch to stop telling when you read. |
+| **Marks ✓✓ and ✓✓✓** | The contact's phone learns when yours got and read their messages, encrypted. In a group that is not public, so does the phone of whoever sent the message. The server, or whoever listens nearby, sees one more small message. | A switch to stop telling when you read. |
 | **Fingerprint or face (Android)** | Off unless turned on. Opens only the first password's space: its key sealed in the Android Keystore, usable only right after a strong fingerprint or face check, and dropped when they change. Someone who holds you can use your finger. | |
 | **Notices (Android)** | In the background: "Erevos – Ready for calls and messages" (not on the lock screen), "Incoming call" or "Incoming video call" – "Open Erevos to answer", and "New message" or how many came; when Android or the password stops it, "Closed by Android" or "Locked" – "Open it to receive calls and messages again"; a reminder, "Reminder" or how many; a new version, "Erevos X is out". Never who or what. On a locked phone the one for messages says only "Erevos". Hidden chats that may say so show the same notice, counted with the rest: whoever sees it and finds nothing new may guess there are more. As the phone app, the notice of a phone call names who calls, over the lock screen too, as every phone app's does, but never by a name only hidden chats know: a call from one of their contacts shows the number. | |
 | **Widget{~ and Phone} (Android)** | The widget, once added, shows how many {~missed calls, unread SMS and |}new messages there are, never who or what.{~ The Phone opens without the password only if you let it: then anyone holding the unlocked phone sees the calls and favourites Android keeps, with the names of the phone's contacts only.} | |
-| **Calls** | End-to-end encrypted (DTLS-SRTP, its key sent in the encrypted chat). Through the call relay, neither phone sees the other's IP address; the server running it sees both, when and how long, and how much passes. Without a call relay, on the same Wi-Fi only, each phone sees the other's address. The relays see when a call starts ringing. | Ringing in the web app while closed. Calls over Bluetooth (the walkie-talkie works there). |
-| **Group chats** | End-to-end encrypted with MLS (RFC 9420); members taken out read nothing after. Each member's copy is sealed apart, so relays cannot tell who is in a group; each relay still sees a message reach a queue. Members see each other's keys and relay addresses. Photos, files and voice messages go through the sender's relay's file store, as to a contact, and stay there 14 days. Not audited. | |
-| **Group calls** | Voice and video, end-to-end encrypted between each two phones in the call (DTLS-SRTP, its keys sent in the group's encryption). Through the call relay, no phone sees another's IP address; the server running it sees each phone's, when and how long, and how much passes. Every member, in the call or not, learns who is in it. The relays see when one starts. | Video with more than four people, through a server; more than eight people. |
-| **Public groups** | As group chats, and anyone with the link can ask to join and read from when let in. Requests come to the owner's relay sealed for the owner's phone: the relay sees how many and when, not from whom. Members see each other's chosen names, keys made for that group alone, relay addresses and queue sender ids. Not audited. | |
+| **Calls** | End-to-end encrypted (DTLS-SRTP, its key sent in the encrypted chat). With **ANONYMOUS**, through the call server: your contact's phone does not see your IP address; the server running it sees both phones', when and how long, and how much passes. With **SPEED**, straight from phone to phone where it can, else through the call server: your contact's phone sees your address either way, and so do the helper servers. On the same Wi-Fi, each phone sees the other's address. With **INVISIBLE** there are no calls. The servers see when a call starts ringing. | Ringing in the web app while closed. Calls over Bluetooth (the walkie-talkie works there). |
+| **Group chats** | End-to-end encrypted with MLS (RFC 9420); members taken out read nothing after. Each member's copy is sealed apart, so servers cannot tell who is in a group; each server still sees a message reach a queue. Members see each other's keys and server addresses. Photos, files and voice messages go through the sender's server's file store, as to a contact, and stay there 14 days. Not audited. | |
+| **Group calls** | Voice and video, end-to-end encrypted between each two phones in the call (DTLS-SRTP, its keys sent in the group's encryption). Through the call server, no phone sees another's IP address; the server running it sees each phone's, when and how long, and how much passes. Every member, in the call or not, learns who is in it. The servers see when one starts. | Video with more than four people, through a server; more than eight people. |
+| **Public groups** | As group chats, and anyone with the link can ask to join and read from when let in. Requests come to the owner's server sealed for the owner's phone: the server sees how many and when, not from whom. Members see each other's chosen names, keys made for that group alone, server addresses and queue sender ids. Not audited. | |
 | **Link previews** | Off unless turned on. Then, as you send a link, your phone fetches its page straight from the site, which sees your IP address and when, not who the message is for. The preview goes inside the encrypted message; the phone that gets it fetches nothing. With **Through Tor** on, the page is fetched only through Tor, and the site does not see your IP address. None while the space sends everything through Tor, unless **Through Tor** is on; in hidden chats only with their place's own switch. | |
 
 ## Transparency {#transparency}
@@ -4411,7 +4545,7 @@ or no longer says "none", take it as a sign. **Why:** a request that comes with 
 but a sentence that stops being written can be noticed. That works only as long as it is renewed: each release says it
 again.
 
-What the relay keeps, and for how long:
+What the server keeps, and for how long:
 
 | What | For how long |
 | --- | --- |
@@ -4424,15 +4558,15 @@ What the relay keeps, and for how long:
 
 What it does not keep:
 
-- **No list of connections.** The relay writes no log of who connected or when, and the web server in front of the
-  relay and of the web app keeps no access log since 24 October 2026. Errors are logged, and an error can name an
+- **No list of connections.** The server writes no log of who connected or when, and the web server in front of it
+  and of the web app keeps no access log since 24 October 2026. Errors are logged, and an error can name an
   address.
 - **No contacts, names or phone numbers.** It has none to keep.
 
 What it still sees while it runs: the IP addresses that connect, when messages come and go, and how big they are, as
-[What is protected today](#privacy) says. During a call through the call relay, the IP addresses of the phones in it.
+[What is protected today](#privacy) says. During a call through the call server, the IP addresses of the phones in it.
 
-**Copies.** The relay's folder is backed up every day, with the waiting messages still encrypted end to end. The copies
+**Copies.** The server's folder is backed up every day, with the waiting messages still encrypted end to end. The copies
 hold what the table above lists, for as long as they are kept.
 
 **Others who see something:** the hosting company (Hetzner), which runs the machine and its network; LPHL's sign-in
@@ -4484,7 +4618,7 @@ This part opens from **Settings** → **General** → **Licence** too.
 
 ## What is coming {#coming}
 
-End-to-end encryption is here, through the relay and over the nearby link, and most of what follows is built on it.
+End-to-end encryption is here, through the server and over the nearby link, and most of what follows is built on it.
 
 - **More ways to stay in touch:** Tor bridges for where Tor is blocked are here, see [Through Tor](#tor). Next: Tor
   on a computer.
@@ -4493,7 +4627,7 @@ End-to-end encryption is here, through the relay and over the nearby link, and m
   - [~] **Phone:** Erevos as the phone app is here, with its own call screen, see [Phone](#phone).
   - **Email, QR codes, USB, NFC:** for when nothing else gets through.
 - **Calls:** voice and video calls are here, and on Android they ring in the background, see [Chat through a
-  relay](#relay), and so is a walkie-talkie that works even over Bluetooth.
+  server](#relay), and so is a walkie-talkie that works even over Bluetooth.
 - **Groups:** group chats, with photos, files and voice messages, and group voice and video calls are here, see [Group chats](#groups). Next: video with
   more than four people, through a server the call moves to by itself, still encrypted end to end.
 - **Bringing your chats:** Telegram and WhatsApp already come in, with their photos and files, and Viber with its
@@ -4527,25 +4661,25 @@ There is no way to recover it. Erevos keeps nothing that could open your data wi
 
 - Both radios need the same region and the same first channel (its name and key) in the Meshtastic app, and to be in
   reach of each other, or of radios between.
-- **LoRa radio**, under **Settings** → **Relay and networks**, must say **Linked**. If it does not, close the
+- **LoRa radio**, under **Settings** → **Server and networks**, must say **Linked**. If it does not, close the
   Meshtastic app: a radio links to one app at a time.
-- Only texts go, and only when the relay cannot be reached and no phone is near.
+- Only texts go, and only when the server cannot be reached and no phone is near.
 - In the EU a radio may send only so much each hour: after many messages, it waits.
 
 ### A contact code was not added.
 
-A contact on another relay needs a link with that relay's key, which links from an up-to-date {=Erevos} have: the line
-under the chat names that relay. A code from an older {=Erevos} has no keys and is refused: ask for a new one.
+A contact on another server needs a link with that server's key, which links from an up-to-date {=Erevos} have: the line
+under the chat names that server. A code from an older {=Erevos} has no keys and is refused: ask for a new one.
 
-### Can the relay read my messages?
+### Can the server read my messages?
 
-No. Messages through a relay are end-to-end encrypted, and only the two phones have the keys. The relay still
-sees which queues are used, and when and how much arrives ([Running your own relay](#own-relay)). Compare the safety
-number, as in [Chat through a relay](#relay), to be sure no one is in between. Nothing has been audited yet.
+No. Messages through a server are end-to-end encrypted, and only the two phones have the keys. The server still
+sees which queues are used, and when and how much arrives ([Running your own server](#own-relay)). Compare the safety
+number, as in [Chat through a server](#relay), to be sure no one is in between. Nothing has been audited yet.
 
 ### Why does Erevos not ask for my phone number?
 
-Because nothing needs it. Each contact is a pair of one-way relay queues, so no server holds a list of who knows
+Because nothing needs it. Each contact is a pair of one-way server queues, so no server holds a list of who knows
 whom.
 
 ### Does it work on an iPhone or a computer?

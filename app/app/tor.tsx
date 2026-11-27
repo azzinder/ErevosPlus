@@ -4,11 +4,14 @@
 
 import { useEffect, useState } from 'react';
 
+import { askInvisible } from '../components/mode-picker';
 import { Button, Card, Chip, Input, Page, Row, SectionTitle, Text } from '../components/ui';
 import { confirm } from '../lib/alert';
 import { BRIDGE_CHOICES, NO_BRIDGES, readBridgeLines, type BridgeChoice, type Bridges, type TorRoute } from '../lib/bridges';
 import { canTor } from '../lib/core';
+import { setDirect } from '../lib/direct';
 import { mark, plural, t } from '../lib/i18n';
+import { modeOf, modeSaid } from '../lib/modes';
 import type { TorWay } from '../lib/relay';
 import { applyTor, autoState, NoBridgesError, onAutoState, retryAuto, torStatus, type AutoState, type TorStatus } from '../lib/tor';
 import { loadCurrentSpaceData, updateCurrentSpaceData } from '../lock/space-data';
@@ -97,22 +100,28 @@ export default function TorScreen() {
   async function choose(next: TorWay) {
     if (next === way) return;
     setNote('');
-    // Tor going on: slower, so asked first.
-    if (way === 'off') {
-      const ok = await confirm(
-        t('Turn Tor on?'),
-        next === 'all'
-          ? t('Messages and files then come and go slower, and the first start of Tor takes a while. Until Tor is ready, nothing goes: messages wait for it.')
-          : t('Messages then come and go slower, and the first start of Tor takes a while. Until Tor is ready, messages go straight, as now.'),
-        t('Turn on'),
-      );
+    // Everything through Tor is INVISIBLE (lib/modes.ts), with no calls: asked first, as at the top
+    // of Settings. Tor going on for messages: slower, so asked first too.
+    if (next === 'all') {
+      if (!(await askInvisible())) return;
+    } else if (way === 'off') {
+      const ok = await confirm(t('Turn Tor on?'), t('Messages then come and go slower, and the first start of Tor takes a while. Until Tor is ready, messages go straight, as now.'), t('Turn on'));
       if (!ok) return;
     }
     try {
-      await updateCurrentSpaceData({ tor: next });
+      // Tor on: Direct connections goes off with it (SPEED becomes ANONYMOUS, or INVISIBLE), and
+      // stays off until the owner chooses SPEED again, so that turning Tor off later connects nothing
+      // directly unasked (lib/direct.ts).
+      const data = await loadCurrentSpaceData();
+      const direct = next !== 'off' && data.direct;
+      await updateCurrentSpaceData(direct ? { tor: next, direct: false } : { tor: next });
+      if (direct) setDirect(false);
       setWay(next);
       // The Nostr connections open again the new way as it changes (lib/nostr.ts).
       await applyTor(next, bridges);
+      const was = modeOf(data);
+      const now = modeOf({ ...data, tor: next, direct: data.direct && !direct });
+      if (now !== was) setNote(modeSaid(now));
     } catch (error) {
       setNote(shown(error));
     }
@@ -144,7 +153,7 @@ export default function TorScreen() {
   async function checkConnection() {
     setNote('');
     if (!on) {
-      setNote(t('Tor is off for this space: messages go straight to the relay.'));
+      setNote(t('Tor is off for this space: messages go straight to the server.'));
       return;
     }
     setChecking(true);
@@ -174,7 +183,7 @@ export default function TorScreen() {
         <Text variant="bodyStrong">{t('What goes through Tor')}</Text>
         <Text tone="muted">
           {t(
-            "Through Tor, this space reaches its relays through the Tor network. The relay then does not see this phone's internet address, and the phone company or the Wi-Fi sees only that Tor is used, not which relay. Messages come and go slower, and the first start of Tor takes a while.",
+            "Through Tor, this space reaches its servers through the Tor network. The server then does not see this phone's internet address, and the phone company or the Wi-Fi sees only that Tor is used, not which server. Messages come and go slower, and the first start of Tor takes a while.",
           )}
         </Text>
         <Row wrap>
@@ -186,17 +195,21 @@ export default function TorScreen() {
           <Text tone="muted">
             {way === 'messages'
               ? t(
-                  "What you write goes through Tor, and what tells your contacts something, as that a message was read. Pictures, files and voice messages go straight, which is faster: for them the relay sees this phone's internet address. While Tor starts, or cannot connect, messages go straight too, so they never wait for it.",
+                  "What you write goes through Tor, and what tells your contacts something, as that a message was read. Pictures, files and voice messages go straight, which is faster: for them the server sees this phone's internet address. While Tor starts, or cannot connect, messages go straight too, so they never wait for it.",
                 )
               : way === 'all'
-                ? t('Everything goes through Tor, files too, and nothing goes to a relay without it: when Tor cannot reach the relay, the message waits.')
-                : t("Nothing goes through Tor, the way a new space starts: messages go fastest, and the relay and the Nostr relays see this phone's internet address.")}
+                ? t('Everything goes through Tor, files too, and nothing goes to a server without it: when Tor cannot reach the server, the message waits.')
+                : t("Nothing goes through Tor, the way a new space starts: messages go fastest, and the server and the Nostr servers see this phone's internet address.")}
           </Text>
         ) : null}
         <Text tone="muted">
-          {t(
-            'Calls do not go through Tor: their sound and picture go straight between the phones, or through the call relay. Nearby phones and SMS do not use the internet, so Tor has nothing to do with them.',
-          )}
+          {way === 'all'
+            ? t(
+                'With everything through Tor this space is INVISIBLE, and there are no calls, as calls do not go through Tor. Nearby phones and SMS do not use the internet, so Tor has nothing to do with them.',
+              )
+            : t(
+                'Calls do not go through Tor: their sound and picture go straight between the phones, or through the call server. Nearby phones and SMS do not use the internet, so Tor has nothing to do with them.',
+              )}
         </Text>
       </Card>
       {on && status ? (
@@ -286,7 +299,7 @@ export default function TorScreen() {
         ) : null}
         <Text variant="caption" tone="muted">
           {way === 'messages'
-            ? t('With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the relay without Tor until one does.')
+            ? t('With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the server without Tor until one does.')
             : t('With bridges, Tor never goes straight to its relays: when no bridge answers, messages wait. Bridges count only while Tor is on.')}
         </Text>
       </Card>

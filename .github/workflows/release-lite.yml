@@ -7,7 +7,8 @@ name: release-lite
 # Releases Erevos Lite (EREVOS_EDITION=lite, docs/editions.md): Erevos's own chats and calls alone,
 # the Android app app.erevos.lite, versions 3.2.x (the second number says the edition: 3.0.x
 # Erevos, 3.1.x Erevos+, 3.2.x Erevos Lite). Android only: two APKs from the same commit, signed
-# with the release key, the one Updates installs and the F-Droid one, as release.yml makes Erevos's.
+# with the release key, the one Updates installs and the F-Droid one, built as F-Droid builds it,
+# as release.yml makes Erevos's.
 #
 # Erevos Lite downloads from a repository of its own, azzinder/erevos-lite-releases (app/lib/updates.ts
 # LITE_RELEASES_REPO): its releases, its latest, and channel-beta for its betas, whose version.json
@@ -139,24 +140,15 @@ jobs:
           echo "Build $number (the highest so far ${highest:-none})."
           echo "number=$number" >> "$GITHUB_OUTPUT"
 
-  # As release.yml's apk job, with EREVOS_EDITION=lite: the APK is app.erevos.lite, without the
-  # Phone's and the SMS's native modules or their permissions.
+  # As release.yml's apk job, with EREVOS_EDITION=lite: the APK Updates installs is app.erevos.lite,
+  # without the Phone's and the SMS's native modules or their permissions. The F-Droid one is built
+  # apart, as F-Droid builds it (fdroid below).
   apk:
     needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - distribution: ""
-            file: erevos-lite-android.apk
-          - distribution: fdroid
-            file: erevos-lite-android-fdroid.apk
-    name: apk ${{ matrix.file }}
     env:
       EREVOS_VERSION: ${{ needs.version.outputs.version }}
       EREVOS_BUILD: ${{ needs.version.outputs.number }}
-      EREVOS_DISTRIBUTION: ${{ matrix.distribution }}
-      APK: ${{ matrix.file }}
+      APK: erevos-lite-android.apk
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -210,6 +202,26 @@ jobs:
           grep -q "expoAutolinking.exclude = \['erevos-phone', 'erevos-sms'\]" android/settings.gradle \
             || { echo "::error::settings.gradle does not leave out the Phone and the SMS"; cat android/settings.gradle; exit 1; }
 
+      # Gradle's own download, and the plugins it fetches before it builds anything (React Native's
+      # from the Gradle Plugin Portal), fail now and then (7.0.0-rc.5: HTTP 504, and the release went
+      # out without its APK; 2026-11-27: a plugin not found): fetched first, before the release key
+      # is there, tried four times. Gradle remembers a plugin it did not find, so a try after the
+      # first asks for each again. `help` builds nothing. Maven Central's files come from Google's
+      # copy of it, here and in the build after (scripts/maven-central-mirror.gradle).
+      - name: Fetch Gradle and its plugins
+        working-directory: app/android
+        run: |
+          install -D -m 644 "$GITHUB_WORKSPACE/scripts/maven-central-mirror.gradle" ~/.gradle/init.d/maven-central-mirror.gradle
+          refresh=""
+          for wait in 15 30 60 0; do
+            ./gradlew --version --no-daemon && ./gradlew help --no-daemon $refresh -PreactNativeArchitectures=arm64-v8a && exit 0
+            [ "$wait" = 0 ] && break
+            echo "::warning::Gradle, or a plugin it needs, could not be fetched; again in $wait s"
+            sleep "$wait"
+            refresh=--refresh-dependencies
+          done
+          exit 1
+
       - name: Set up the release signing key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -221,12 +233,6 @@ jobs:
             sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f' > release-fingerprint
           [ -s release-fingerprint ] || { echo "::error::The release key's fingerprint could not be read"; exit 1; }
           echo "Release key SHA-256: $(cat release-fingerprint)"
-
-      - name: Fetch Gradle
-        working-directory: app/android
-        run: |
-          for wait in 15 30 60 0; do ./gradlew --version --no-daemon && exit 0; [ "$wait" = 0 ] && break; echo "::warning::Gradle's download failed; again in $wait s"; sleep "$wait"; done
-          exit 1
 
       - name: Build the release APK
         working-directory: app/android
@@ -267,12 +273,131 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ matrix.file }}
-          path: ${{ matrix.file }}
+          name: erevos-lite-android.apk
+          path: erevos-lite-android.apk
+          retention-days: 1
+
+  # As release.yml's fdroid job: Erevos Lite's F-Droid APK, built as F-Droid builds it
+  # (scripts/fdroid-build.sh, deploy/fdroid/app.erevos.lite.yml), so that F-Droid's own build of
+  # this commit comes out the same, byte for byte. No key here: the job after it signs it.
+  fdroid:
+    needs: version
+    env:
+      EREVOS_VERSION: ${{ needs.version.outputs.version }}
+      EREVOS_BUILD: ${{ needs.version.outputs.number }}
+    runs-on: ubuntu-latest
+    # About 35 minutes, as .github/workflows/fdroid-build.yml builds it too; a build that hangs holds
+    # the release two hours at most.
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift /usr/local/share/powershell /usr/local/lib/android
+          sudo docker image prune --all --force
+          df -h /
+
+      # Maven Central's files from Google's copy of it, as in the apk job (FDROID_MAVEN_MIRROR); F-Droid
+      # takes the same files from Maven Central.
+      - name: Build as F-Droid builds
+        env:
+          FDROID_MAVEN_MIRROR: '1'
+        run: scripts/fdroid-build.sh lite "$EREVOS_VERSION" "$EREVOS_BUILD" fdroid-unsigned.apk
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fdroid-unsigned
+          path: fdroid-unsigned.apk
+          retention-days: 1
+
+  # As release.yml's fdroid-sign job: signed with the release key, the signature added and nothing
+  # else changed (scripts/fdroid-sign.sh), so F-Droid hands out this APK once its own build matches.
+  fdroid-sign:
+    needs: [version, fdroid]
+    env:
+      EREVOS_VERSION: ${{ needs.version.outputs.version }}
+      EREVOS_BUILD: ${{ needs.version.outputs.number }}
+      APK: erevos-lite-android-fdroid.apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fdroid-unsigned
+
+      - name: Sign it with the release key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            [ -n "${!name}" ] || { echo "::error::The secret $name is missing."; exit 1; }
+          done
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          keytool -list -v -keystore "$RUNNER_TEMP/release.keystore" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" |
+            sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f' > release-fingerprint
+          status=0
+          if [ -s release-fingerprint ]; then
+            echo "Release key SHA-256: $(cat release-fingerprint)"
+            ANDROID_KEYSTORE="$RUNNER_TEMP/release.keystore" scripts/fdroid-sign.sh fdroid-unsigned.apk "$APK" || status=$?
+          else
+            echo "::error::The release key's fingerprint could not be read"; status=1
+          fi
+          rm -f "$RUNNER_TEMP/release.keystore"
+          exit "$status"
+
+      # Only now, with the key gone, anything from outside the runner: apksigcopier, with which
+      # F-Droid copies a signature onto its build, by its SHA-256. The signed APK must be the
+      # unsigned one and its signature, nothing else.
+      - name: Check that the signature alone was added
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet --require-hashes --no-deps --only-binary :all: -r scripts/apksigcopier-requirements.txt
+          PATH="$RUNNER_TEMP/venv/bin:$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1):$PATH"
+          apksigcopier compare --unsigned "$APK" fdroid-unsigned.apk
+
+      - name: Check the APK
+        run: |
+          unzip -l "$APK" 'lib/arm64-v8a/*' | grep -q 'erevos' \
+            || { echo "::error::The Erevos core is missing from the APK"; unzip -l "$APK" 'lib/*'; exit 1; }
+          unzip -v "$APK" 'lib/arm64-v8a/liblyrebird.so' | grep -q 'Defl.*liblyrebird' \
+            || { echo "::error::lyrebird (Tor bridges) is missing from the APK, or Android would not unpack it"; unzip -v "$APK" 'lib/*'; exit 1; }
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$tools/apksigner" verify --print-certs "$APK" | tee signature
+          grep -i 'certificate SHA-256 digest' signature | tr -d ':' | tr 'A-F' 'a-f' | grep -q "$(cat release-fingerprint)" \
+            || { echo "::error::The APK is not signed with the release key"; exit 1; }
+          "$tools/aapt2" dump badging "$APK" | tee badging | head -1
+          grep -q "package: name='app.erevos.lite'" badging || { echo "::error::The APK is not app.erevos.lite"; exit 1; }
+          grep -q "versionCode='$EREVOS_BUILD'" badging || { echo "::error::The APK is not build $EREVOS_BUILD"; exit 1; }
+          "$tools/aapt2" dump permissions "$APK" | tee permissions
+          if grep -E "SMS|MMS|WAP_PUSH|CALL_LOG|CALL_PHONE|READ_PHONE_STATE|BIND_INCALL_SERVICE|BIND_SCREENING_SERVICE|CELL_BROADCASTS" permissions; then
+            echo "::error::Erevos Lite asks for a permission of the Phone or the SMS"; exit 1
+          fi
+          if unzip -p "$APK" 'classes*.dex' | grep -aqE 'expo/modules/(erevossms|erevosphone)/'; then
+            echo "::error::The Phone's or the SMS's code is in Erevos Lite"; exit 1
+          fi
+          # The F-Droid build may not install packages: F-Droid updates it.
+          if grep -q REQUEST_INSTALL_PACKAGES permissions; then
+            echo "::error::The F-Droid APK asks to install packages"; exit 1
+          fi
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erevos-lite-android-fdroid.apk
+          path: erevos-lite-android-fdroid.apk
           retention-days: 1
 
   publish:
-    needs: [version, apk]
+    needs: [version, apk, fdroid-sign]
     if: ${{ !cancelled() && needs.version.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
@@ -307,7 +432,7 @@ jobs:
           cat files/version.json
           fdroid=""
           if [ -f files/erevos-lite-android-fdroid.apk ]; then
-            fdroid="- **Android, the F-Droid build**: erevos-lite-android-fdroid.apk, the same Erevos Lite without Check for updates, signed with the same key."
+            fdroid="- **Android, the F-Droid build**: erevos-lite-android-fdroid.apk, the same Erevos Lite, signed with the same key, without Check for updates, From a phone nearby or backups to Google Drive: it installs over the other with everything kept, and from then on only F-Droid updates it. F-Droid builds it again from this release's source and hands out this signed copy when the two match."
           fi
           cat > notes.md <<NOTES
           **Erevos Lite $EREVOS_VERSION**, $(TZ=Europe/Athens date +%-d/%-m/%Y), from commit ${GITHUB_SHA::7}.

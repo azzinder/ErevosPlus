@@ -46,6 +46,16 @@
 // made before and the code typed from the page (claimSignIn, lib/relay-signin.ts), giving the relay
 // only the new token's SHA-256. The relay drops the sign-in after 5 wrong codes.
 //
+// Open places (crates/erevos-relay/src/open.rs): a relay may give a place to any phone that asks,
+// with no invite and no sign-in, so a new phone has a relay from its first start (takeOpenPlace).
+// The phone makes a token for itself and gives the relay only its SHA-256, on the /join path, as
+// for an invite; the relay adds a line named `open-` and 8 hex characters for it. The relay gives
+// only so many in all, a day, and a day to phones from one address, and each place may do only so
+// much a day: make queues, move file bytes, take credentials for the call relay. An open place
+// invites no one, lends no places and has no coupons signed, and its line goes when its token is
+// not used for some time (60 days, or 7 after the day it was made when it never came back, unless
+// whoever runs the relay sets otherwise; LPHL's server 100 and 30).
+//
 // Marks: a send may say what it carries (Mark), for a web app's notice while it is closed
 // (lib/web-push.web.ts): a message someone reads, which the relay counts in the push, word between
 // phones, which pushes nothing, or a call that rings, which pushes, counts as no message, and has
@@ -130,6 +140,7 @@ const COUPON_KEYS = 35;
 const COUPON_REDEEM = 36;
 const ACK = 37;
 const PAIR = 38;
+const OPEN = 39;
 
 // The marks' bytes (crates/erevos-relay/src/server.rs).
 const MARKS = { message: 1, quiet: 2, ring: 3 } as const;
@@ -149,6 +160,10 @@ const WRONG = 5;
 // For a push address only: the push service said it is gone (crates/erevos-relay/src/push.rs). An
 // older relay never says it.
 const EXPIRED = 6;
+// For an open place only (takeOpenPlace): the relay gave all the open places it gives a day, or all
+// it gives a day to phones from this phone's address.
+const DAY_FULL = 7;
+const ADDRESS_FULL = 8;
 
 // Same limit as the relay's MAX_MESSAGE.
 const MAX_MESSAGE = 64 * 1024;
@@ -193,6 +208,35 @@ export class RelayError extends Error {
 
 /** The relay could not be reached, or the connection to it ended before it answered. */
 export class RelayUnreachableError extends RelayError {}
+
+/**
+ * The relay ended the channel at its token, as it does for a token it does not take, such as a free
+ * place's whose line it took out once its phone did not connect for long (crates/erevos-relay
+ * open.rs). Everywhere else it reads as unreachable, as before. `sure` when the relay said so
+ * itself, closing the WebSocket for policy (`unauthorized`); through Tor, which tells only that it
+ * closed, or when the connection was lost then, it may also have been the way.
+ */
+export class RelayTokenError extends RelayUnreachableError {
+  readonly sure: boolean;
+
+  constructor(message: string, sure: boolean) {
+    super(message);
+    this.sure = sure;
+  }
+}
+
+// Told each time a relay ended a channel at its token (RelayTokenError): lib/open-place.ts asks for
+// a free place again with the same token.
+const tokenListeners = new Set<(relay: Relay, sure: boolean) => void>();
+
+/** Has `listener` called with the relay, as asked, each time one ended a channel at its token
+ *  (RelayTokenError). Returns how to stop. */
+export function onTokenRefused(listener: (relay: Relay, sure: boolean) => void): () => void {
+  tokenListeners.add(listener);
+  return () => {
+    tokenListeners.delete(listener);
+  };
+}
 
 /** The address is not one a connection can be opened to; what waits for it goes once it is fixed. */
 export class BadRelayAddressError extends RelayUnreachableError {
@@ -239,11 +283,17 @@ export function isRelayAddress(url: string): boolean {
 
 /**
  * Whether what failed may go later: the relay could not be reached, or said to try again later
- * (full, could not save it, or could not reach the next relay).
+ * (full, could not save it, could not reach the next relay, or a free place there used its day).
  */
 export function canTryLater(error: unknown): boolean {
   if (error instanceof RelayUnreachableError) return true;
-  return error instanceof RelayError && (error.status === FULL || error.status === FAILED || error.status === UNREACHABLE);
+  return error instanceof RelayError && (error.status === FULL || error.status === FAILED || error.status === UNREACHABLE || error.status === DAY_FULL);
+}
+
+/** Whether the relay said a free place there (an open place) used all it may today: new chats,
+ *  files, calls through it or sends to other servers, each its own share. It goes on tomorrow. */
+export function isDayFull(error: unknown): boolean {
+  return error instanceof RelayError && error.status === DAY_FULL;
 }
 
 /** Whether the relay said the queue is full: as many wait there as it keeps for one, unread. */
@@ -457,7 +507,7 @@ async function viaTor<T>(call: () => Promise<T>, rest = true): Promise<T> {
     if (rest && torWay === 'messages') torRestUntil = Date.now() + TOR_REST_MS;
     // Tor's own words for a relay that took too long, said as a direct connection's are.
     const reason = coreReason(error);
-    throw new RelayUnreachableError(t('Through Tor: {reason}', { reason: /timed? ?out/i.test(reason) ? t('the relay did not answer in time') : reason }));
+    throw new RelayUnreachableError(t('Through Tor: {reason}', { reason: /timed? ?out/i.test(reason) ? t('the server did not answer in time') : reason }));
   }
 }
 
@@ -488,7 +538,7 @@ export function answerWithin(bytes: Uint8Array): number {
 }
 
 /** Thrown when the relay did not answer in time: the connection died on the way, or the relay is stuck. */
-const lateError = () => new RelayUnreachableError(t('the relay did not answer in time'));
+const lateError = () => new RelayUnreachableError(t('the server did not answer in time'));
 
 // A stopped space (lib/forget-me.ts, "Delete me from everywhere"): its queues were deleted on the
 // relays, and nothing may make them again, read them or send from them, or the delete is undone in
@@ -500,7 +550,7 @@ const lateError = () => new RelayUnreachableError(t('the relay did not answer in
 /** What a stopped space asks of a relay: nothing, as a relay that cannot be reached. */
 export class SpaceStoppedError extends RelayUnreachableError {
   constructor() {
-    super(t('This space is stopped: it reaches no relay until you start it again.'));
+    super(t('This space is stopped: it reaches no server until you start it again.'));
   }
 }
 
@@ -543,7 +593,7 @@ function refuseStopped(bytes: Uint8Array | null): void {
 /** The relay at `url` could not prove the key this phone keeps for it: someone may be in between, or the relay has a new key. */
 export class RelayKeyError extends RelayUnreachableError {
   constructor(url: string) {
-    super(t('the relay at {url} did not prove its key: someone may be in between, or the relay has a new key', { url }));
+    super(t('the server at {url} did not prove its key: someone may be in between, or the server has a new key', { url }));
   }
 }
 
@@ -710,7 +760,7 @@ class Channel {
     try {
       return chacha20poly1305(this.toPhone, countNonce(this.received++)).decrypt(sealed);
     } catch {
-      throw new RelayUnreachableError(t('the relay sent what its channel does not hold'));
+      throw new RelayUnreachableError(t('the server sent what its channel does not hold'));
     }
   }
 }
@@ -737,11 +787,13 @@ class SocketLine implements Line {
     };
     socket.onmessage = (event) => answer(new Uint8Array(event.data as ArrayBuffer));
     socket.onerror = () => {
-      this.ended ??= new RelayUnreachableError(t('lost the connection to the relay'));
+      this.ended ??= new RelayUnreachableError(t('lost the connection to the server'));
       answer(this.ended);
     };
-    socket.onclose = () => {
-      this.ended ??= new RelayUnreachableError(t('the relay closed the connection'));
+    socket.onclose = (event) => {
+      // Closed for policy, `unauthorized`: the relay did not take the token (RelayTokenError).
+      const refused = event?.code === 1008 && event?.reason === 'unauthorized';
+      this.ended ??= refused ? new RelayTokenError(t('the server closed the connection'), true) : new RelayUnreachableError(t('the server closed the connection'));
       answer(this.ended);
     };
   }
@@ -761,11 +813,11 @@ class SocketLine implements Line {
       };
       socket.onerror = () => {
         clearTimeout(late);
-        reject(new RelayUnreachableError(t('cannot reach the relay at {url}, or the token is wrong', { url: relay.url })));
+        reject(new RelayUnreachableError(t('cannot reach the server at {url}, or the token is wrong', { url: relay.url })));
       };
       socket.onclose = () => {
         clearTimeout(late);
-        reject(new RelayUnreachableError(t('the relay closed the connection')));
+        reject(new RelayUnreachableError(t('the server closed the connection')));
       };
     });
   }
@@ -886,7 +938,7 @@ async function openChannel(
     hello.set(await sealPublic(secret), 1);
     const answer = await line.call(hello, within, false);
     // Something else than an answer to a hello: no channel there, as from a relay from before them.
-    if (answer.length !== 64) throw new RelayUnreachableError(t('the relay has no channel'));
+    if (answer.length !== 64) throw new RelayUnreachableError(t('the server has no channel'));
     let keys: Uint8Array;
     try {
       keys = await relayChannelKeys(pin.key, secret, answer);
@@ -905,7 +957,15 @@ async function openChannel(
     } catch (error) {
       // The relay ends the connection on a wrong token, as it refuses it in the handshake without a channel.
       if (error instanceof RelayError && !(error instanceof RelayUnreachableError && /did not answer/.test(error.message))) {
-        throw new RelayUnreachableError(t('cannot reach the relay at {url}, or the token is wrong', { url: relay.url }));
+        const refused = new RelayTokenError(t('cannot reach the server at {url}, or the token is wrong', { url: relay.url }), error instanceof RelayTokenError && error.sure);
+        for (const listener of tokenListeners) {
+          try {
+            listener(relay, refused.sure);
+          } catch {
+            // A listener's own trouble changes nothing here.
+          }
+        }
+        throw refused;
       }
       throw error;
     }
@@ -978,7 +1038,7 @@ async function requestOnce(relay: Relay, bytes: Uint8Array, signal?: AbortSignal
   if (!isRelayAddress(relay.url)) throw new BadRelayAddressError(relay.url);
   // A space that goes through Tor, waited on while another is open: never straight.
   if (relay.torOnly && !torFor(false)) throw new RelayUnreachableError(t('Tor is not ready.'));
-  if (relay.tor && !canTor()) throw new RelayUnreachableError(t('This relay is reached only through Tor, which this build of Erevos does not have.'));
+  if (relay.tor && !canTor()) throw new RelayUnreachableError(t('This server is reached only through Tor, which this build of Erevos does not have.'));
   if (relay.torChat && !canTor()) throw new RelayUnreachableError(t('This chat goes only through Tor, which this build of Erevos does not have.'));
   if (relay.torChat) await torStarter?.();
   const pin = channelPin(relay);
@@ -1052,11 +1112,11 @@ function plainRequest(relay: Relay, bytes: Uint8Array, signal?: AbortSignal, way
     };
     socket.onerror = () => {
       settled();
-      reject(new RelayUnreachableError(t('cannot reach the relay at {url}, or the token is wrong', { url: relay.url })));
+      reject(new RelayUnreachableError(t('cannot reach the server at {url}, or the token is wrong', { url: relay.url })));
     };
     socket.onclose = () => {
       settled();
-      reject(new RelayUnreachableError(t('the relay closed the connection')));
+      reject(new RelayUnreachableError(t('the server closed the connection')));
     };
   });
 }
@@ -1070,9 +1130,12 @@ function check(reply: Uint8Array, what: string): void {
   if (reply[0] === OK) return;
   if (reply[0] === NOT_FOUND) throw queueNotFound(what);
   if (reply[0] === FULL) throw new RelayError(t('{what}: queue is full', { what }), FULL);
-  if (reply[0] === FAILED) throw new RelayError(t('{what}: the relay could not save it, try again later', { what }), FAILED);
+  // A free place on the server (an open place) has a day's share of new chats, calls and sends to
+  // other servers: past it, it goes on the next day.
+  if (reply[0] === DAY_FULL) throw new RelayError(t('{what}: your free place on this server has used all it may today. It goes on tomorrow.', { what }), DAY_FULL);
+  if (reply[0] === FAILED) throw new RelayError(t('{what}: the server could not save it, try again later', { what }), FAILED);
   if (reply[0] === UNREACHABLE)
-    throw new RelayError(t('{what}: the second relay could not reach your relay, try again later', { what }), UNREACHABLE);
+    throw new RelayError(t('{what}: the second server could not reach your server, try again later', { what }), UNREACHABLE);
   throw new RelayError(`${what}: unexpected reply ${reply[0]}`, reply[0]);
 }
 
@@ -1226,7 +1289,7 @@ async function sendOne(relay: Relay, senderId: Uint8Array, message: Uint8Array, 
 async function sendRequest(relay: Relay, senderId: Uint8Array, message: Uint8Array): Promise<{ to: Relay; bytes: Uint8Array }> {
   if (relay.via) {
     const key = await relayKey(relay);
-    if (!key) throw new RelayError(t('your relay has no key for two-hop sending, so it was not sent through the second relay'));
+    if (!key) throw new RelayError(t('your server has no key for two-hop sending, so it was not sent through the second server'));
     const sealed = await relaySeal(key, senderId, message);
     if (isLentToken(relay.via.token)) return { to: relayPath(relay.url, '/sealed'), bytes: sealedSendRequest(sealed) };
     return { to: relay.via, bytes: forwardRequest(relay.url, sealed) };
@@ -1302,7 +1365,7 @@ export async function sendMessageLater(relay: Relay, senderId: Uint8Array, messa
         const made = await sendRequest(route.relay, route.senderId, message);
         const to = forSender(made.to, route.senderId);
         const bytes = made.bytes;
-        if (!(await canHoldAt(to))) throw new CannotHoldError(t('the relay at {url} cannot keep messages for later: update it', { url: to.url }));
+        if (!(await canHoldAt(to))) throw new CannotHoldError(t('the server at {url} cannot keep messages for later: update it', { url: to.url }));
         holder = to;
         const id = randomBytes(16);
         const held = new Uint8Array(1 + 8 + 16 + 4 + bytes.length);
@@ -1812,7 +1875,7 @@ export async function lendTicket(relay: Relay): Promise<string | null> {
  */
 export async function borrowPlace(url: string, ticket: string): Promise<{ queue: QueueIds; token: string }> {
   const reply = await request({ url, token: ticket }, Uint8Array.of(BORROW));
-  if (reply[0] === FULL) throw new RelayError(t('the link has given all its places on its relay. Ask them for a new link'), FULL);
+  if (reply[0] === FULL) throw new RelayError(t('the link has given all its places on its server. Ask them for a new link'), FULL);
   check(reply, 'borrow');
   const token = utf8Decode(reply.slice(49));
   if (!isLentToken(token)) throw new RelayError('borrow: unexpected reply');
@@ -1851,7 +1914,7 @@ export async function makeInvite(relay: Relay, name: string): Promise<{ code: st
     throw error;
   }
   if (reply[0] === NOT_FOUND) return null;
-  if (reply[0] === FULL) throw new RelayError(t('No invite now: you may have 5 waiting at once and make 10 a day, and this relay lets in only so many phones by invite.'), FULL);
+  if (reply[0] === FULL) throw new RelayError(t('No invite now: you may have 5 waiting at once and make 10 a day, and this server lets in only so many phones by invite.'), FULL);
   check(reply, 'invite');
   const code = utf8Decode(reply.slice(9));
   if (reply.length < 9 || !/^[0-9a-f]{64}$/.test(code)) throw new RelayError('invite: unexpected reply');
@@ -1919,7 +1982,7 @@ export function newPhoneToken(): string {
  * is no longer good (NOT_FOUND), another phone took it (FULL), or the relay cannot be reached.
  */
 export async function redeemInvite(url: string, code: string): Promise<{ token: string; name: string }> {
-  if (!/^[0-9a-f]{64}$/.test(code)) throw new RelayError(t('That is not an invite to a relay.'));
+  if (!/^[0-9a-f]{64}$/.test(code)) throw new RelayError(t('That is not an invite to a server.'));
   const token = madeFor.get(code) ?? newPhoneToken();
   madeFor.set(code, token);
   const secret = Uint8Array.from(code.match(/../g)!, (pair) => parseInt(pair, 16));
@@ -1929,6 +1992,82 @@ export async function redeemInvite(url: string, code: string): Promise<{ token: 
   check(reply, 'invite');
   madeFor.delete(code);
   return { token, name: utf8Decode(reply.slice(1)) };
+}
+
+/** Why a relay gave no open place (takeOpenPlace): it gives none, or is from before them ('off');
+ *  it gave all it gives ('full'), all it gives a day ('day'), or all it gives a day to phones from
+ *  this phone's address ('address'). */
+export type OpenPlaceRefusal = 'off' | 'full' | 'day' | 'address';
+
+// What each refusal says. A screen that shows one says it in its own words, from openPlaceRefusal.
+const OPEN_REFUSED: Record<OpenPlaceRefusal, string> = {
+  off: 'open place: the server gives none',
+  full: 'open place: the server gave all it gives',
+  day: 'open place: the server gave all it gives today',
+  address: 'open place: the server gave all it gives today to phones from this address',
+};
+
+/** What takeOpenPlace throws when the relay gives no open place: `refusal` says why. */
+export class OpenPlaceRefusedError extends RelayError {
+  readonly refusal: OpenPlaceRefusal;
+
+  constructor(refusal: OpenPlaceRefusal, status: number) {
+    super(OPEN_REFUSED[refusal], status);
+    this.refusal = refusal;
+  }
+}
+
+/** Why the relay gave no open place, when `error` is what takeOpenPlace threw for that; null for
+ *  any other error, such as a relay that cannot be reached, which may give one later. */
+export function openPlaceRefusal(error: unknown): OpenPlaceRefusal | null {
+  return error instanceof OpenPlaceRefusedError ? error.refusal : null;
+}
+
+/**
+ * Takes an open place on the relay at `url` (crates/erevos-relay/src/open.rs), one it gives a phone
+ * that asks, with no invite: makes a token of this phone's own and has the relay add a line for it,
+ * from the /join path, which needs no token. Returns the token, for where the relay's token goes,
+ * and the name on its line there (`open-` and 8 hex characters). Each call makes a new token, as
+ * the relay adds no line for a token it has one for, but for `again`: the token of a free place
+ * there whose line the relay took out (RelayTokenError), asked for again as it was, so every queue
+ * made with it stays the space's. Throws an OpenPlaceRefusedError (see openPlaceRefusal) when the
+ * relay gives no place; a RelayError when it could not add the line (FAILED, as when it has one
+ * for that token still), or cannot be reached.
+ */
+export async function takeOpenPlace(url: string, again?: string): Promise<{ token: string; name: string }> {
+  const relay = relayPath(url, '/join');
+  const token = again ?? newPhoneToken();
+  let reply: Uint8Array;
+  try {
+    reply = await request(relay, Uint8Array.of(OPEN, ...sha256Bytes(utf8Encode(token))));
+  } catch (error) {
+    // The /join path takes no KEY. SIGN_IN changes nothing, and a relay answers it there whether it
+    // signs phones in or not.
+    if (await fromBefore(relay, error, Uint8Array.of(SIGN_IN))) throw new OpenPlaceRefusedError('off', NOT_FOUND);
+    throw error;
+  }
+  if (reply[0] === NOT_FOUND) throw new OpenPlaceRefusedError('off', NOT_FOUND);
+  if (reply[0] === FULL) throw new OpenPlaceRefusedError('full', FULL);
+  if (reply[0] === DAY_FULL) throw new OpenPlaceRefusedError('day', DAY_FULL);
+  if (reply[0] === ADDRESS_FULL) throw new OpenPlaceRefusedError('address', ADDRESS_FULL);
+  check(reply, 'open place');
+  const name = utf8Decode(reply.slice(1));
+  if (!/^open-[0-9a-z]+$/i.test(name)) throw new RelayError('open place: unexpected reply');
+  return { token, name };
+}
+
+/**
+ * Whether the relay takes `relay.token` now: a channel opened with the token alone, with no request.
+ * False when the relay ended it at the token (RelayTokenError); throws when it could not be reached.
+ */
+export async function tokenTaken(relay: Relay): Promise<boolean> {
+  try {
+    (await RelaySession.open(relay)).close();
+    return true;
+  } catch (error) {
+    if (error instanceof RelayTokenError) return false;
+    throw error;
+  }
 }
 
 /**
@@ -1955,7 +2094,7 @@ export async function takeOwnLine(relay: Relay, name: string): Promise<{ token: 
     throw error;
   }
   if (reply[0] === NOT_FOUND) return null;
-  if (reply[0] === FULL) throw new RelayError(t('The relay gives only so many phones a token of their own a day. Try again tomorrow.'), FULL);
+  if (reply[0] === FULL) throw new RelayError(t('The server gives only so many phones a token of their own a day. Try again tomorrow.'), FULL);
   check(reply, 'own');
   madeFor.delete(asked);
   return { token, name: utf8Decode(reply.slice(1)) };
@@ -2017,8 +2156,8 @@ export function pairOf(reply: Uint8Array): string[] {
  *  this phone had all the coupons it may signed today. */
 export async function signCoupon(relay: Relay, blinded: Uint8Array): Promise<Uint8Array> {
   const reply = await request(relay, Uint8Array.of(COUPON_SIGN, blinded.length >> 8, blinded.length & 0xff, ...blinded));
-  if (reply[0] === FULL) throw new RelayError(t('Your relay signs only a few coupons a day for each phone. Erevos tries again tomorrow.'), FULL);
-  if (reply[0] === NOT_FOUND) throw new RelayError(t('Your relay signs no coupons for this phone.'), NOT_FOUND);
+  if (reply[0] === FULL) throw new RelayError(t('Your server signs only a few coupons a day for each phone. Erevos tries again tomorrow.'), FULL);
+  if (reply[0] === NOT_FOUND) throw new RelayError(t('Your server signs no coupons for this phone.'), NOT_FOUND);
   check(reply, 'coupon');
   return reply.slice(1);
 }
@@ -2065,9 +2204,9 @@ export async function redeemCoupon(url: string, tor: boolean, coupon: Coupon, to
     undefined,
     tor ? `coupon ${toHex(randomBytes(8))}` : undefined,
   );
-  if (reply[0] === NOT_FOUND) throw new RelayError(t('The home relay does not take coupons from your relay.'), NOT_FOUND);
+  if (reply[0] === NOT_FOUND) throw new RelayError(t('The home server does not take coupons from your server.'), NOT_FOUND);
   if (reply[0] === WRONG) throw new RelayError(t('This coupon was taken already.'), WRONG);
-  if (reply[0] === FULL) throw new RelayError(t('The home relay gives no more tokens for coupons now.'), FULL);
+  if (reply[0] === FULL) throw new RelayError(t('The home server gives no more tokens for coupons now.'), FULL);
   check(reply, 'coupon');
   return utf8Decode(reply.slice(1));
 }
@@ -2121,17 +2260,18 @@ export async function claimSignIn(
   );
   if (reply[0] === NOT_FOUND) return null;
   if (reply[0] === WRONG && reply.length === 2) return { wrong: reply[1] };
-  if (reply[0] === FULL) throw new RelayError(t('This account is signed in on all the phones it may be on this relay. Ask whoever runs it to take one off.'), FULL);
+  if (reply[0] === FULL) throw new RelayError(t('This account is signed in on all the phones it may be on this server. Ask whoever runs it to take one off.'), FULL);
   check(reply, 'claim');
   madeFor.delete(claim);
   return { token, name: utf8Decode(reply.slice(1)) };
 }
 
 // A relay from before a request closes the connection, as for any it does not know: then one that
-// answers a plain request is from before it. Throws what failed when that relay cannot be reached.
-async function fromBefore(relay: Relay, error: unknown): Promise<boolean> {
+// answers a plain request (`plain`, KEY unless another is given) is from before it. Throws what
+// failed when that relay cannot be reached.
+async function fromBefore(relay: Relay, error: unknown, plain = Uint8Array.of(KEY)): Promise<boolean> {
   if (!(error instanceof RelayUnreachableError)) return false;
-  await request(relay, Uint8Array.of(KEY)).catch(() => {
+  await request(relay, plain).catch(() => {
     throw error;
   });
   return true;
@@ -2190,7 +2330,7 @@ export class RelaySession {
     if (stopped && clearing === 0) throw new SpaceStoppedError();
     // As a single request (requestOnce): an address that may come from a contact, never opened unread.
     if (!isRelayAddress(relay.url)) throw new BadRelayAddressError(relay.url);
-    if (relay.tor && !canTor()) throw new RelayUnreachableError(t('This relay is reached only through Tor, which this build of Erevos does not have.'));
+    if (relay.tor && !canTor()) throw new RelayUnreachableError(t('This server is reached only through Tor, which this build of Erevos does not have.'));
     if (relay.torChat && !canTor()) throw new RelayUnreachableError(t('This chat goes only through Tor, which this build of Erevos does not have.'));
     if (relay.torChat) await torStarter?.();
     const throughTor = torTo(relay, files);
@@ -2200,7 +2340,7 @@ export class RelaySession {
         const { line, channel, reply } = await openChannel(relay, pin, throughTor, null);
         if (reply[0] === OK) return new RelaySession(line, channel);
         line.close();
-        throw new RelayUnreachableError(t('cannot reach the relay at {url}, or the token is wrong', { url: relay.url }));
+        throw new RelayUnreachableError(t('cannot reach the server at {url}, or the token is wrong', { url: relay.url }));
       } catch (error) {
         if (!mayGoWithout(error, pin)) throw error;
       }
@@ -2283,17 +2423,19 @@ export class RelaySends {
 
 function checkFile(reply: Uint8Array, what: string): void {
   if (reply[0] === OK) return;
-  if (reply[0] === NOT_FOUND) throw new RelayError(t('{what}: the file is not on the relay any more', { what }), NOT_FOUND);
-  if (reply[0] === FULL) throw new RelayError(t('{what}: the relay has no room for files now, try again later', { what }), FULL);
-  if (reply[0] === FAILED) throw new RelayError(t('{what}: the relay could not keep it, try again later', { what }), FAILED);
-  if (reply[0] === UNREACHABLE) throw new RelayError(t('{what}: your relay could not reach the relay the file is on', { what }), UNREACHABLE);
+  if (reply[0] === NOT_FOUND) throw new RelayError(t('{what}: the file is not on the server any more', { what }), NOT_FOUND);
+  if (reply[0] === FULL) throw new RelayError(t('{what}: the server has no room for files now, try again later', { what }), FULL);
+  // A free place on the server (an open place) moves so many megabytes of files a day.
+  if (reply[0] === DAY_FULL) throw new RelayError(t('{what}: your free place on this server has moved all the files it may today. Files go again tomorrow.', { what }), DAY_FULL);
+  if (reply[0] === FAILED) throw new RelayError(t('{what}: the server could not keep it, try again later', { what }), FAILED);
+  if (reply[0] === UNREACHABLE) throw new RelayError(t('{what}: your server could not reach the server the file is on', { what }), UNREACHABLE);
   throw new RelayError(`${what}: unexpected reply ${reply[0]}`, reply[0]);
 }
 
 // A relay from before files closes the connection at a file request.
 function older(error: unknown): unknown {
   if (error instanceof RelayError && error.status === undefined) {
-    return new RelayError(t('{reason}. A relay older than this app cannot take files: update it.', { reason: error.message }));
+    return new RelayError(t('{reason}. A server older than this app cannot take files: update it.', { reason: error.message }));
   }
   return error;
 }

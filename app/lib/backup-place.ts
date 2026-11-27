@@ -7,6 +7,7 @@ import { Directory, File } from 'expo-file-system';
 import { backupFileName, backupFileOf, backupStem, freeStem, partFileName, staleBackups, type PartReader, type PartSink } from '../lock/backup';
 import { device } from '../modules/erevos-device';
 import type { BackupFiles } from './backup-check';
+import { coreReason } from './core';
 import { t } from './i18n';
 import { whilePicking } from './picking';
 
@@ -78,21 +79,40 @@ async function entriesOf(folder: string, sizes = false): Promise<Entry[]> {
   return filesIn(new Directory(folder)).map((file) => ({ name: file.name, size: sizes ? (file.size ?? -1) : -1, file }));
 }
 
+/**
+ * What Android said when a file could not be made or written in the folder, in plain words, with
+ * what to do: Expo's own words name a function of the app and a Java error, which tell the owner
+ * nothing (#75). A folder's app that makes no file (Folders.kt) is often a cloud app's.
+ */
+export function folderTrouble(error: unknown): Error {
+  const text = error instanceof Error ? error.message : String(error);
+  const said = coreReason(error);
+  if (/made no file/i.test(said)) return new Error(t('The app this folder belongs to made no file in it. Choose a folder on the phone instead, or try again later.'));
+  if (/SecurityException|Permission Denial|EACCES|EPERM/.test(text)) return new Error(t('Erevos may no longer write in this folder. Choose it again.'));
+  if (/ENOSPC|No space left/i.test(text)) return new Error(t('There is no room left in this folder. Make room, or choose another one.'));
+  if (/FileNotFoundException|ENOENT/.test(text)) return new Error(t('That folder is not there any more. Choose it again.'));
+  return new Error(t('The backup could not be written in this folder: {reason}', { reason: said }));
+}
+
 // Writes `bytes` as a new file of the folder, named `name`, or as the folder names it where that
-// is taken. One that could not be written whole is not left there.
+// is taken. One that could not be written whole is not left there. Why not is said plainly.
 async function writeEntry(folder: string, name: string, bytes: Uint8Array): Promise<Entry> {
-  if (device?.folderWrite) {
-    const made = await device.folderWrite(folder, name, bytes);
-    return { name: made.name || name, size: bytes.length, uri: made.uri };
-  }
-  const file = new Directory(folder).createFile(name, 'application/octet-stream');
   try {
-    file.writeSync(bytes);
+    if (device?.folderWrite) {
+      const made = await device.folderWrite(folder, name, bytes);
+      return { name: made.name || name, size: bytes.length, uri: made.uri };
+    }
+    const file = new Directory(folder).createFile(name, 'application/octet-stream');
+    try {
+      file.writeSync(bytes);
+    } catch (error) {
+      deleteQuietly(file);
+      throw error;
+    }
+    return { name: file.name || name, size: bytes.length, file };
   } catch (error) {
-    deleteQuietly(file);
-    throw error;
+    throw folderTrouble(error);
   }
-  return { name: file.name || name, size: bytes.length, file };
 }
 
 function deleteQuietly(file: File): void {

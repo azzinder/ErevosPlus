@@ -33,8 +33,8 @@ export const publicFeed: Record<string, string> = {
     "Podijeliti ovu objavu ponovo sa svojim pratiocima?",
   "Take back this post?":
     "Povući ovu objavu?",
-  "The relays that keep it are asked to drop it. Copies that others made may stay.":
-    "Relayi koji je čuvaju zamoljeni su da je obrišu. Kopije koje su napravili drugi mogu ostati.",
+  "The servers that keep it are asked to drop it. Copies that others made may stay.":
+    "Serveri koji je čuvaju zamoljeni su da je obrišu. Kopije koje su napravili drugi mogu ostati.",
   "Copy text":
     "Kopiraj tekst",
   "Open the room":
@@ -91,6 +91,6 @@ export const publicFeed: Record<string, string> = {
     "Prikaži pregled",
   "Tap to show a preview of {site}":
     "Dodirni za pregled {site}",
-  "No Nostr relay took it. Try again in a while.":
-    "Nijedan Nostr relay je nije primio. Pokušaj ponovo za malo.",
+  "No Nostr server took it. Try again in a while.":
+    "Nijedan Nostr server je nije primio. Pokušaj ponovo za malo.",
 };

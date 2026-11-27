@@ -62,6 +62,8 @@ export function callStatus(call: Call, now: number): string {
       if (ended.elsewhere) return ended.reason === 'decline' ? t('Turned down') : t('Answered on another device');
       // Theirs, not answered here.
       if (ended.reason === 'missed' && !call.outgoing) return t('Missed call');
+      // Straight between the two phones, with no call relay, and never connected (lib/direct.ts).
+      if (call.failedDirect) return t('The call could not connect directly');
       return t(ended.byUs ? ENDS[ended.reason].ours : ENDS[ended.reason].theirs);
     }
   }

@@ -567,6 +567,11 @@ which. The ones below are all optional.
 | `EREVOS_RELAY_QUEUE_DAYS` | 180 | Days a queue lasts once its phone stops using it. |
 | `EREVOS_RELAY_QUEUED_MB` | 1024 | Room for waiting messages, all together, held in memory (see [Queues](#queues)). |
 | `EREVOS_RELAY_QUEUED_PER_PHONE_MB` | 64 | Of that, room for the messages waiting in the queues one phone made with a token of its own or a lent one. |
+| `EREVOS_RELAY_OPEN` | `off` | `on` gives a place to a phone that has none here, as the app asks at its first start (see [Open places](#open-places)). Needs `EREVOS_RELAY_TOKENS` in a folder the relay may write in. |
+| `EREVOS_RELAY_OPEN_PLACES`, `_DAY`, `_PER_ADDRESS` | 1000, 100, 3 | Open places at once, new ones a day, and new ones a day to one address. |
+| `EREVOS_RELAY_OPEN_UNUSED_DAYS`, `_FIRST_DAYS` | 60, 7 | Days with no connection after which an open place goes; for one that never connected again after the day it was made, days after that day. |
+| `EREVOS_RELAY_OPEN_QUEUES`, `_FILES_MB`, `_CALLS`, `_FORWARDS` | 20, 50, 30, 5000 | What each open place may do a day: new queues, megabytes of files put or fetched, credentials for calls, and connections to other relays. |
+| `EREVOS_RELAY_OPEN_QUEUED_MB`, `_LATER` | 8, 20 | What each open place may keep at once: megabytes of messages waiting in its queues, and messages held for later. |
 | `EREVOS_RELAY_LEND` | `off` | `on` lends places to phones that have no relay. |
 | `EREVOS_RELAY_COUPON_KEY` | none | This relay's key for coupons, from `erevos-relay new-coupon-key` (see [Coupons for a second relay](#coupons-for-a-second-relay)). Needs `EREVOS_RELAY_TOKENS`. |
 | `EREVOS_RELAY_COUPON_ISSUERS` | none | The file of the public keys of the relays whose coupons this one takes, one on each line. Needs `EREVOS_RELAY_TOKENS` in a folder the relay may write in. |
@@ -829,6 +834,67 @@ set. To turn it on (on a relay installed with `install.sh`):
 
 To see it work from another machine: `openssl s_client -starttls xmpp-server -xmpphost
 erevos.example.org -connect erevos.example.org:5269` shows the certificate.
+
+## Open places
+
+A relay can give a place to a phone that has none here, by itself, as the app
+asks at its first start: no invite, no account, nothing to type. Off unless you
+turn it on. The relay then adds lines to the file of tokens itself, so the file
+has to be in the relay's own folder, as for [Invites](#invites). With
+`EREVOS_RELAY_TOKENS=/var/lib/erevos-relay/phones.tokens` set, add to
+`/etc/erevos-relay.env`:
+
+    EREVOS_RELAY_OPEN=on
+
+and restart. The relay does not start with it on and no file of tokens. Its
+log then says how many open places it gives and its limits for them.
+
+The phone makes a token of its own and sends only its SHA-256, on `/join`. The
+relay adds a line for it, named `open-` and 8 hex digits, with the day it was
+made:
+
+    3b7c0e5a8d16...91e1 open-5f3a9c01 # open place on 2026-11-26
+
+An open place is for the phone's own chats: its queues, contacts here and on
+other relays, messages held for later and calls. It may not invite, lend or
+have coupons signed. Each day (days are UTC days), each one may make 20 queues,
+put or fetch 50 MB of files through the relay, take credentials for the call
+relay 30 times and have the relay connect to another relay for it 5000 times;
+past that the relay answers that its day is full, and the app says it goes on
+tomorrow. At once it may have 8 MB of messages waiting in its queues and 20
+messages held for later, and all open places together at most half of the
+messages waiting, the files and the messages held for later that the relay
+keeps, so that they never fill it for the phones with places of their own.
+
+The relay gives 1000 open places at most, 100 new ones a day and 3 a day to
+one internet address, an IPv6 one counted by its first 48 bits, its whole
+network. It counts the addresses in memory only, under a keyed hash, for the
+day, and never writes or logs them. It takes out the line of a place whose
+token connected on none of the last 60 days, and of one that never connected
+again after the day it was made, 7 days after that day. Its queues stay as any
+queue does (see [Queues](#queues)): a phone whose place was taken out asks for
+it again by itself, with the same token, and finds them as they were. What it
+counts of each place is kept beside the file of tokens, in the same name with
+`.open` after it. Every line named `open-` is an open place's, one you wrote
+too. Turned off again, no new ones are given, and those in the file stay open
+places, with their limits.
+
+Behind a proxy on the same machine, the proxy must pass each phone's address on
+in `X-Forwarded-For`, or every phone counts as one address, the proxy's, and
+the 3 a day are soon taken: the relay says so in its log, once an hour at most.
+Apache's `ProxyPass` and Caddy set it themselves (see
+[In front of the relay](#in-front-of-the-relay)). Behind nginx, the `location`
+that passes the WebSocket on needs this line too:
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+To see how they are used:
+
+    sudo env EREVOS_RELAY_TOKENS=/var/lib/private/erevos-relay/phones.tokens erevos-relay open-places
+
+says, from the file and its `.open` alone, how many open places there are, how
+many were made today and in the last 7 days, and how many were used (their
+token connected, or they were made) today and in the last 7 and 30 days.
 
 ## Lending places
 

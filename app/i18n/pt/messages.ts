@@ -677,7 +677,7 @@ export const messages: Record<string, string> = {
     'As figurinhas que você faz aqui ficam só nestas conversas ocultas, seladas, e vão criptografadas de ponta a ponta como as fotos. Segure uma para apagá-la.',
   "This sticker's picture is gone.": 'A imagem desta figurinha não existe mais.',
   'Sending the sticker…': 'Enviando a figurinha…',
-  'Sticker sent through the relay, end-to-end encrypted.': 'Figurinha enviada pelo relay, criptografada de ponta a ponta.',
+  'Sticker sent through the server, end-to-end encrypted.': 'Figurinha enviada pelo servidor, criptografada de ponta a ponta.',
   'Add to my stickers': 'Adicionar às minhas figurinhas',
   'Added to your stickers.': 'Adicionada às suas figurinhas.',
   // A place sent once (lib/place.ts, components/message-parts.tsx).

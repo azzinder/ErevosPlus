@@ -3,6 +3,7 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { BRIDGE, EDITION, type Edition } from './edition';
+import { CAN_DRIVE } from './google-drive-ids';
 import { mark } from './i18n';
 import { laterThan } from './version-name';
 
@@ -14,7 +15,8 @@ import { laterThan } from './version-name';
 // [links](#guide-section) are written as in the guide. NEXT is what is on main and not out yet: it
 // shows under the number of the version that runs. After a release its two lists move into a new
 // entry of VERSIONS under the release's number; checks/whats-new.check.ts holds VERSIONS to the
-// releases of CHANGELOG.md.
+// releases of CHANGELOG.md. A line about Google Drive shows only where Erevos can use it
+// (lib/google-drive-ids.ts).
 
 /** What changed, in its two kinds. */
 export type Changes = { forYou: string[]; underTheHood: string[] };
@@ -22,15 +24,48 @@ export type Changes = { forYou: string[]; underTheHood: string[] };
 export type WhatsNew = Changes & { version: string };
 
 export const NEXT: Changes = {
-  forYou: [
-    mark("**Messenger's chats read elsewhere are read here too**: in Erevos+, a Messenger message you read in **In its case**, on Facebook or in Messenger's own app no longer stays unread in Erevos+."),
-    mark("**Messenger's case no longer locks you out**: in Erevos+, after half a minute in Messenger **In its case**, or on Facebook, Erevos+ no longer locks as if you had left it, nor closes the page. The lock's time now counts only from when you leave Erevos+ itself."),
-    mark("**Telegram and Messenger in backups**: in Erevos+, a backup now holds Messenger's sign-in and each space's Telegram sign-in, encrypted, and after a restore they are signed in again; their chats come back as far as each network keeps them. Use such a sign-in on one phone only: on the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too. See [Backups](#backup)."),
-  ],
+  forYou: [],
   underTheHood: [],
 };
 
 export const VERSIONS: WhatsNew[] = [
+  {
+    version: '3.1.0-rc.4',
+    forYou: [
+      mark("**Release candidate 4**: Erevos+ with everything Erevos 3.0.0-rc.4 brought, and what is below."),
+      mark("**INVISIBLE for every network**: in Erevos+, in a space on **INVISIBLE** every account of the other networks goes only through Tor too, whatever its own Tor choice, and none of their calls goes or rings. See [How visible are you?](#direct)."),
+    mark("**Messenger's chats read elsewhere are read here too**: in Erevos+, a Messenger message you read in **In its case**, on Facebook or in Messenger's own app no longer stays unread in Erevos+."),
+    mark("**Messenger's case no longer locks you out**: in Erevos+, after half a minute in Messenger **In its case**, or on Facebook, Erevos+ no longer locks as if you had left it, nor closes the page. The lock's time now counts only from when you leave Erevos+ itself."),
+    mark("**Telegram and Messenger in backups**: in Erevos+, a backup now holds Messenger's sign-in and each space's Telegram sign-in, encrypted, and after a restore they are signed in again; their chats come back as far as each network keeps them. Use such a sign-in on one phone only: on the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too. See [Backups](#backup)."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.2.0-rc.4',
+    forYou: [
+      mark("**Release candidate 4**: Erevos Lite with what Erevos 3.0.0-rc.4 brought to its chats: a new first start in four short steps that takes a place on LPHL's server by itself, a choice of how visible you are, with calls straight from phone to phone, the fingerprint or face at once, and backups that say why a folder did not take them."),
+    ],
+    underTheHood: [],
+  },
+  {
+    version: '3.0.0-rc.4',
+    forYou: [
+      mark("**How visible are you?** Three choices at the top of **Settings**, for who sees your phone's internet address, each space its own. **SPEED**: the servers and your contacts see it; Erevos no longer asks first, and calls with a contact go straight from phone to phone where they can, through the call server where they cannot, and work even with no server between you two. **ANONYMOUS**: only the server sees it, never your contacts; Erevos asks first, as before, and calls go through a server. **INVISIBLE**: no one sees it; everything goes through Tor, and there are no voice or video calls. A space is on SPEED until you choose another, unless Tor is on in it. See [How visible are you?](#direct)."),
+      mark("**New chat says what works with no server**: messages, photos, files and voice messages, and calls too with **SPEED**."),
+      mark("**Who came in with your invite**: when a contact takes the invite your phone sent them by itself, their chat says so, on this phone only, with **Take back** under that line."),
+      mark("**Server, in plain words**: Erevos now says server, on every screen, in every notice and in the guide, for what keeps your messages, encrypted, until the other phone takes them. Nothing changes in how it works."),
+      mark("**Fingerprint or face, at once**: Android asks for the finger or face without a moment's wait, as its key is now kept in the phone's secure area, not in its separate security chip. Where it is on already, turn it off and on once under **Settings** → **Privacy and security** → **Lock and second password**. See [Password lock](#lock)."),
+      mark("**Nostr on a computer, in the web app and on Sailfish OS**: texts there now go through the public Nostr servers too when your servers do not take them, as on Android, and with no server at all. There is no Tor there, so they go straight: the Nostr servers see that device's internet address. See [Through Nostr](#nostr)."),
+      mark("**Backups into a cloud app's folder**: when Android does not let a backup into a folder, Erevos now says why, in plain words, and what to do. In a cloud app's folder, such as DAVx5's, the check after a backup waits for that app to send it to its server, and **Check again** under it looks once more. See [Backups](#backup)."),
+      mark("**A new first start**: five short steps, in each edition's own colours: your name if you like, what you will use, how visible you are, every permission in five groups with **Allow all**, a password with tips for a stronger one, and where automatic backups go. Then **They are beside me** or **They are far away** adds your first person. See [Getting started](#start)."),
+      mark("**LPHL's server, by itself**: a new phone needs no invite and no account: at the first start Erevos takes a place for your messages on LPHL's free server by itself, with nothing to type. Such a place is for your own chats, with limits for each day. Should the server let it go, after 100 days without your phone, or 30 days when it never came back after its first day, Erevos asks for it again by itself, and your chats stay as they were. See [Chat through a server](#relay)."),
+      mark("**Automatic backups only to a server**: they can now go to a WebDAV server with no folder on this device; a folder there is optional, for one more copy close at hand. See [Backups](#backup)."),
+      mark("**Automatic backups to Google Drive**: on Android they can now go to your Google Drive too, encrypted, into a folder named Erevos, or only there. Erevos first says what Google then knows: your account, when a backup comes and how big it is. Sign in with Google under **Backups** or at the first start; **Restore from Google Drive** brings one back. See [Backups](#backup)."),
+    ],
+    underTheHood: [
+      mark("A call with no server between the two phones is set up through Nostr, end-to-end encrypted like a message, and the public helper servers are asked only when LPHL's does not answer."),
+    ],
+  },
   {
     version: '3.1.0-rc.3',
     forYou: [
@@ -52,27 +87,27 @@ export const VERSIONS: WhatsNew[] = [
   {
     version: '3.0.0-rc.3',
     forYou: [
-      mark("**Erevos starts by itself after the phone turns on**: where it receives in the background, it now does so unless you choose **Wait until I open it**, under **Settings** → **Notifications** → **In the background**; until now, only once you turned it on there. Before you open a space it reads no message and rings for no call: the spaces set to **Also while another space is open** say only that something came. See [Chat through a relay](#relay)."),
+      mark("**Erevos starts by itself after the phone turns on**: where it receives in the background, it now does so unless you choose **Wait until I open it**, under **Settings** → **Notifications** → **In the background**; until now, only once you turned it on there. Before you open a space it reads no message and rings for no call: the spaces set to **Also while another space is open** say only that something came. See [Chat through a server](#relay)."),
       mark("**Nothing of a space shows before its password**: on Android, the phone covers Erevos's screens as it goes to the background, and back after the 30 seconds they show only after the password. **Lock now** covers them at once, and **Fingerprint or face** is there as soon as the password screen shows. See [Password lock](#lock)."),
       mark("**Camera before the password**: on Android, with Erevos locked, the camera's icon opens the camera at once. What it takes is encrypted as it is taken and shows only after the password, in the Collection; to have the camera wait for the password, turn off **Open the camera without the password** in the Collection's settings. See [Collection](#collection)."),
       mark("**Backups to your own server, by hand too**: **Make a backup** offers **To a server (WebDAV)** beside **Into a folder**, also with automatic backups off; once a server is set, its button sends a backup there at once. See [Backups](#backup)."),
       mark("**Clear numbers for a backup**: once one is made, Erevos says how big it is in all, with the files beside it, when it began and when it ended, and what is not in it. See [Backups](#backup)."),
       mark("**The Collection's server, checked and brought back**: in the Collection's settings, **Check** looks whether every piece of its files is on its WebDAV server, whole, and opens 4 picked at random; **Bring back the files not on this phone** fetches at once every file this phone lacks. See [Collection](#collection)."),
-      mark("**New chat, as it was meant to look**: **Near me**, **Far away** and **I have their code** are three large buttons, with **My link**, **Blocked contacts** and **For advanced users** small under them; the QR code for someone beside you shows small, and large at a tap, and an invite's link shows short on the page, though what is sent is always the whole link. See [Chat through a relay](#relay)."),
+      mark("**New chat, as it was meant to look**: **Near me**, **Far away** and **I have their code** are three large buttons, with **My link**, **Blocked contacts** and **For advanced users** small under them; the QR code for someone beside you shows small, and large at a tap, and an invite's link shows short on the page, though what is sent is always the whole link. See [Chat through a server](#relay)."),
       mark("**SMS conversations like Erevos's own chats**: **+** opens under the field as in them, with **Send later** among the rest, and in a short conversation the field stays at the bottom. See [SMS](#sms)."),
       mark("**Nostr, Matrix and XMPP chats like Erevos's own**: **+** opens under the field as in them, with **Disappearing message** and **Send later**, and in a short chat the field stays at the bottom."),
-      mark("**Your own server from the first start**: on a phone with no relay yet, **I have no invite**, at the first start and on **New chat**, opens one screen that says where your messages wait and offers every way to begin: an account at a server such as LPHL, **I have a server of my own**, with its address and the code you were given, or **Start without a server**. See [Erevos on your own servers](#own-servers)."),
+      mark("**Your own server from the first start**: on a phone with no server yet, **I have no invite**, at the first start and on **New chat**, opens one screen that says where your messages wait and offers every way to begin: an account at a server such as LPHL, **I have a server of my own**, with its address and the code you were given, or **Start without a server**. See [Erevos on your own servers](#own-servers)."),
       mark("**Speech and translation models from a server of yours**: where Erevos asks to download them, **Download from another server…** takes a web folder of yours that holds the same files; Erevos checks every file and refuses one that was changed. See [Erevos on your own servers](#own-servers)."),
     ],
     underTheHood: [
-      mark("The home screen no longer says, for a few seconds after the password on a phone with many chats, that there is no relay yet: the line waits until it knows."),
+      mark("The home screen no longer says, for a few seconds after the password on a phone with many chats, that there is no server yet: the line waits until it knows."),
       mark("On Android and in the desktop app, a backup made by hand is now read back from its folder, as the automatic ones are, and a backup sent to a server is checked there: it and every part it names are there, each of the size it was sent with."),
       mark("After each copy of the Collection to its WebDAV server, Erevos lists the folder again: a piece that is not there whole goes again with the next copy."),
       mark("On Android, the lock's 30 seconds are counted on a clock that changing the phone's date and time does not move."),
       mark("What the camera takes with Erevos locked is encrypted for the Collection of the space opened last, with a key of its own: the locked camera keeps no key that opens anything."),
       mark("A contact link made for a website is read when pasted or scanned whatever web server its page is on; until now, only from LPHL's."),
       mark("An invite by SMS is read the same way, whatever web server its page is on."),
-      mark("LPHL's addresses are now in one place in the code: a community that builds Erevos for itself can name its own web server and first relay instead."),
+      mark("LPHL's addresses are now in one place in the code: a community that builds Erevos for itself can name its own web server and first server for messages instead."),
     ],
   },
   {
@@ -95,7 +130,7 @@ export const VERSIONS: WhatsNew[] = [
   {
     version: '3.0.0-rc.2',
     forYou: [
-      mark("**New chat asks where the other person is**: **Near me** makes two phones side by side each other's contacts with nothing typed, once both show the same six pictures; **Far away** sends an invite with any app; **I have their code** takes 8 digits, a link or a QR code. See [Chat through a relay](#relay)."),
+      mark("**New chat asks where the other person is**: **Near me** makes two phones side by side each other's contacts with nothing typed, once both show the same six pictures; **Far away** sends an invite with any app; **I have their code** takes 8 digits, a link or a QR code. See [Chat through a server](#relay)."),
       mark("**QR codes and invites with SMS invites off**: a contact QR code or an invite link you take yourself now works also with the invites by SMS turned off under **Find Erevos on a number**; until now nothing happened then."),
       mark("**Camera at a tap**: on Android, **Appearance** → **Launcher icons** → **Camera** gives the Collection's camera an icon of its own among the phone's apps, and holding Erevos's icon down offers **Camera** too. See [Collection](#collection)."),
       mark("**Speed dial with Erevos locked**: if you turn it on under **Phone** → **Settings**, holding 2 to 9 on the Phone opened without the password calls your speed dial numbers with Erevos locked too. See [Phone](#phone)."),
@@ -133,7 +168,7 @@ export const VERSIONS: WhatsNew[] = [
       mark("**Calls on a locked phone**: a call that rings with the phone locked or its screen off now turns the screen on by itself. See [Phone](#phone)."),
     ],
     underTheHood: [
-      mark("From a code review made with the help of AI: a restore that cannot finish leaves the phone as it was, and the relay keeps its lent places, held messages and deletions right, also after a power cut."),
+      mark("From a code review made with the help of AI: a restore that cannot finish leaves the phone as it was, and the server keeps its lent places, held messages and deletions right, also after a power cut."),
     ],
   },
   {
@@ -196,12 +231,27 @@ export const VERSIONS: WhatsNew[] = [
  * before the 3.x ones and is a release all the same; else (a build of main for testing) with no
  * number, then every release.
  */
-export function whatsNewFor(running: string, edition: Edition = EDITION, bridge = BRIDGE): (Changes & { version: string | null })[] {
-  return whatsNewOf(VERSIONS, NEXT, running, edition, bridge);
+export function whatsNewFor(running: string, edition: Edition = EDITION, bridge = BRIDGE, drive = CAN_DRIVE): (Changes & { version: string | null })[] {
+  return whatsNewOf(VERSIONS, NEXT, running, edition, drive, bridge);
 }
 
+// A line about Google Drive, which shows only where Erevos can use it (`drive`).
+const DRIVE_LINE = /\bGoogle Drive\b/;
+
 /** whatsNewFor, of any list of releases and what is not out yet: for the checks. */
-export function whatsNewOf(versions: WhatsNew[], next: Changes, running: string, edition: Edition, bridge = false): (Changes & { version: string | null })[] {
+export function whatsNewOf(versions: WhatsNew[], next: Changes, running: string, edition: Edition, drive = CAN_DRIVE, bridge = false): (Changes & { version: string | null })[] {
+  if (!drive) {
+    const shown = (text: string) => !DRIVE_LINE.test(text);
+    const without = (changes: Changes): Changes => ({ forYou: changes.forYou.filter(shown), underTheHood: changes.underTheHood.filter(shown) });
+    return whatsNewOf(
+      versions.map((v) => ({ ...v, ...without(v) })),
+      without(next),
+      running,
+      edition,
+      true,
+      bridge,
+    );
+  }
   // A release of Erevos Lite (x.2.y) is told only in Erevos Lite: what it brought of Erevos's own is
   // told in Erevos's releases already.
   const lite = (v: { version: string | null }) => v.version !== null && LITE_RELEASE.test(v.version);

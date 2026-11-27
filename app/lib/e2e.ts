@@ -22,6 +22,7 @@ import { fromBase64, fromBase64Url, fromHex, randomBytes, sha256Bytes, toBase64,
 import { packed, unpacked } from './packing';
 import { circuitOf, tellTorChats } from './tor-chats';
 import { canTryLater, isQueueFull, sameRelay } from './relay';
+import { holdsPlace, invitesToSettle } from './invite-place';
 import { TooLargeForSlowWayError } from './nearby';
 import type { Look } from '../theme/look';
 import { deletePhoto } from '../lock/avatar-photos';
@@ -745,7 +746,7 @@ function laterThan(before = 0): number {
 
 // A Nostr key for a contact (lib/nostr.ts), hex.
 async function newNostrKey(): Promise<NostrKey> {
-  const nostr = core.nostrCore();
+  const nostr = core.nostrSeal();
   const secret = await nostr.nostrSecret();
   return { s: toHex(secret), p: toHex(await nostr.nostrPublic(secret)) };
 }
@@ -1620,11 +1621,49 @@ export class E2E {
     return this.data.contacts.filter((contact) => !contact.request && !contact.sender && !contact.ri).map((contact) => contact.identity);
   }
 
-  /** An invite to this chat's relay went to them: none goes again. */
-  relayInviteSent(identity: string, at = Date.now()): Promise<void> {
+  /** An invite to this chat's relay went to them, by its `id` there: none goes again. */
+  relayInviteSent(identity: string, at = Date.now(), id?: string): Promise<void> {
     return this.run(async () => {
       if (!this.find(identity)) return;
-      await this.save({ ...this.data, contacts: this.data.contacts.map((c) => (c.identity === identity ? { ...c, ri: at } : c)) });
+      await this.save({ ...this.data, contacts: this.data.contacts.map((c) => (c.identity === identity ? { ...c, ri: at, ...(id ? { rid: id } : {}) } : c)) });
+    });
+  }
+
+  /** What the relay said of the invite sent them (invitesToSettle): their phone
+   *  came in with it (`came`), said once; or not, and it is forgotten, so the relay is not asked again. */
+  relayInviteSettled(identity: string, came: boolean, at = Date.now()): Promise<void> {
+    return this.run(async () => {
+      if (!this.find(identity)) return;
+      await this.save({
+        ...this.data,
+        contacts: this.data.contacts.map((c) => {
+          if (c.identity !== identity) return c;
+          if (came) return { ...c, rin: at };
+          const { rid: _gone, ...rest } = c;
+          return rest;
+        }),
+      });
+    });
+  }
+
+  /** The contacts sent an invite to this chat's relay at `relay` who read there now, not yet said
+   *  (lib/invite-place.ts invitesToSettle), with the invite's id there. */
+  invitesToSettle(relay: string): { identity: string; id: string }[] {
+    return invitesToSettle(this.data.contacts, relay).map((c) => ({ identity: c.identity, id: c.rid! }));
+  }
+
+  /** The id of the place they came onto this chat's relay at `relay` with, while this phone holds it
+   *  (lib/invite-place.ts holdsPlace); null otherwise. */
+  heldPlace(identity: string, relay: string): string | null {
+    const contact = this.find(identity);
+    return contact && holdsPlace(contact, relay) ? contact.rid! : null;
+  }
+
+  /** This phone took back the place they came onto its relay with: Take back shows no more. */
+  relayPlaceTakenBack(identity: string, at = Date.now()): Promise<void> {
+    return this.run(async () => {
+      if (!this.find(identity)) return;
+      await this.save({ ...this.data, contacts: this.data.contacts.map((c) => (c.identity === identity ? { ...c, rib: at } : c)) });
     });
   }
 

@@ -52,6 +52,24 @@ jobs:
           cache-dependency-path: transports/go.sum
       - run: npm ci
       - run: npx expo prebuild --platform android --no-install
+      # As in the releases: Gradle's own download, and the plugins it fetches before it builds anything,
+      # fail now and then, so they are fetched first, tried four times, a plugin not found asked for
+      # again after the first; Maven Central's files come from Google's copy of it, here and in the
+      # build after (scripts/maven-central-mirror.gradle).
+      - name: Fetch Gradle and its plugins
+        working-directory: app/android
+        run: |
+          install -D -m 644 "$GITHUB_WORKSPACE/scripts/maven-central-mirror.gradle" ~/.gradle/init.d/maven-central-mirror.gradle
+          refresh=""
+          for wait in 15 30 60 0; do
+            ./gradlew --version --no-daemon && ./gradlew help --no-daemon $refresh -PreactNativeArchitectures=x86_64 && exit 0
+            [ "$wait" = 0 ] && break
+            echo "::warning::Gradle, or a plugin it needs, could not be fetched; again in $wait s"
+            sleep "$wait"
+            refresh=--refresh-dependencies
+          done
+          exit 1
+
       - name: Gradle
         working-directory: app/android
         run: ./gradlew assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon

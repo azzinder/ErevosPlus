@@ -149,6 +149,12 @@ class ErevosMessengerModule : Module() {
 
     // The words of Session's call screen and notifications, in the app's language (lib/messenger-store.ts).
     Function("setCallTexts") { words: String -> SessionCalls.setTexts(JSONObject(words)) }
+    Function("setCallsOff") { off: Boolean ->
+      SessionCalls.callsOff = off
+      SignalCalls.callsOff = off
+      // A Session call going on or ringing ends, as none goes through Tor (Signal's: lib/messenger-store.ts).
+      if (off) android.os.Handler(android.os.Looper.getMainLooper()).post { if (SessionCalls.state != SessionCalls.State.IDLE) SessionCalls.hangUp() }
+    }
 
     // Each Session chat's notification choice (muted until, own ringtone), which its calls follow.
     Function("setSessionMuted") { choices: String -> SessionCalls.setChoices(JSONObject(choices)) }

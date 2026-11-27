@@ -41,7 +41,7 @@ const disable = (push: XmppPushTo) => el('disable', { xmlns: NS_PUSH, jid: push.
  */
 export async function startXmppPush(state: XmppState, connection: XmppConnection, relay: Relay): Promise<XmppPushTo> {
   const jid = await xmppPushName(relay);
-  if (!jid) throw new Error(t('Your relay does not take XMPP notices yet: it needs updating.'));
+  if (!jid) throw new Error(t('Your server does not take XMPP notices yet: it needs updating.'));
   if (!(await serverPushes(state, connection).catch(() => false))) throw new Error(t('Your XMPP server does not send notices to apps that are away.'));
   const ids = await createQueue(relay);
   const push: XmppPushTo = { url: relay.url, recipientHex: toHex(ids.recipientId), senderHex: toHex(ids.senderId), jid };

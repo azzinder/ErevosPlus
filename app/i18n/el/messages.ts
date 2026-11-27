@@ -677,7 +677,7 @@ export const messages: Record<string, string> = {
     'Τα αυτοκόλλητα που φτιάχνεις εδώ μένουν κλειδωμένα μόνο σε αυτές τις κρυφές συνομιλίες και στέλνονται όπως οι φωτογραφίες, κρυπτογραφημένα από άκρη σε άκρη. Κράτα ένα πατημένο για να το διαγράψεις.',
   "This sticker's picture is gone.": 'Η εικόνα αυτού του αυτοκόλλητου δεν υπάρχει πια.',
   'Sending the sticker…': 'Αποστολή του αυτοκόλλητου…',
-  'Sticker sent through the relay, end-to-end encrypted.': 'Το αυτοκόλλητο στάλθηκε μέσω του relay, κρυπτογραφημένο από άκρη σε άκρη.',
+  'Sticker sent through the server, end-to-end encrypted.': 'Το αυτοκόλλητο στάλθηκε μέσω του server, κρυπτογραφημένο από άκρη σε άκρη.',
   'Add to my stickers': 'Προσθήκη στα αυτοκόλλητά μου',
   'Added to your stickers.': 'Προστέθηκε στα αυτοκόλλητά σου.',
   // A place sent once (lib/place.ts, components/message-parts.tsx).

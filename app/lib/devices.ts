@@ -2197,7 +2197,7 @@ export class Links implements Link, TakenFiles {
         );
       }
       const here = await this.here();
-      if (!here) throw new Error(t('Type the relay address first.'));
+      if (!here) throw new Error(t('Type the server address first.'));
       const account = await core.newAccount();
       const secret = toHex(randomBytes(16));
       await this.save({ ...this.data, offer: { account: toBase64(account), secret, name: cleanDeviceName(name), made: Date.now() }, answer: null });
@@ -2262,7 +2262,7 @@ export class Links implements Link, TakenFiles {
     if (!code) throw new Error(t('That is not a code from Linked devices.'));
     if (this.data.primary) throw new Error(t('This is a linked device. Link from the phone that holds the account.'));
     if (this.data.devices.filter((d) => d.linked).length >= MAX_DEVICES) throw new Error(t('{n} devices are linked already, the most there can be.', { n: MAX_DEVICES }));
-    if (!(await this.here())) throw new Error(t('Type the relay address in Relay first: linked devices reach this phone through it.'));
+    if (!(await this.here())) throw new Error(t('Type the server address in Server first: linked devices reach this phone through it.'));
     let device: Uint8Array;
     const bundle = fromBase64Url(code.key);
     try {
@@ -2283,7 +2283,7 @@ export class Links implements Link, TakenFiles {
     if (!pending) throw new Error(t('That is not a code from Linked devices.'));
     this.pending = null;
     const here = await this.here();
-    if (!here) throw new Error(t('Type the relay address in Relay first: linked devices reach this phone through it.'));
+    if (!here) throw new Error(t('Type the server address in Server first: linked devices reach this phone through it.'));
     const peer = await this.linkPeer(pending, history, phone, here);
     await this.run(async () => {
       await this.save({ ...this.data, devices: [...this.data.devices.filter((d) => d.id !== peer.id), peer] });
@@ -2575,7 +2575,7 @@ export class Links implements Link, TakenFiles {
     if (!back || !core.canSign()) return;
     if (this.linked().length >= MAX_DEVICES) throw new Error(t('{n} devices are linked already, the most there can be.', { n: MAX_DEVICES }));
     const here = await this.here();
-    if (!here) throw new Error(t('Type the relay address in Relay first: linked devices reach this phone through it.'));
+    if (!here) throw new Error(t('Type the server address in Server first: linked devices reach this phone through it.'));
     const { e2e } = this.chats;
     const key = newPacketKey();
     const said = await makeAgain((context, message) => e2e.sign(context, message), fromBase64Url(back.key), { a: e2e.identityHex(), e: back.id, at: Date.now(), name: t('Phone') });
@@ -2688,7 +2688,7 @@ export class Links implements Link, TakenFiles {
       if (!asking || !primary) throw new Error(t('The phone no longer asks this device to link again.'));
       if (asking.offer) return;
       const here = await this.here();
-      if (!here) throw new Error(t('Type the relay address first.'));
+      if (!here) throw new Error(t('Type the server address first.'));
       const account = await core.newAccount();
       const secret = toHex(randomBytes(16));
       const bundle = await core.accountBundle(account);
@@ -3652,7 +3652,7 @@ export class Links implements Link, TakenFiles {
       do {
         this.again = false;
         const here = await this.here();
-        if (!here) throw new Error(t('Type the relay address first.'));
+        if (!here) throw new Error(t('Type the server address first.'));
         const told = JSON.stringify(here.place);
         if (this.linked().some((p) => p.told !== told)) {
           for (const p of this.linked()) if (p.told !== told) await this.say({ k: 'here' }, p.id);
@@ -3886,7 +3886,7 @@ export class Links implements Link, TakenFiles {
     const send = () => sendSealed(here.sends, sealed, [sealed.packet], mark, () => this.chats.e2e.firstSent(identity));
     const relay = sealed.sender ? orNostr(this.chats.e2e, here.sends, identity, sealed, [sealed.packet], send) : null;
     if (this.pocket !== null) {
-      await this.chats.e2e.copiesAfter(sealed.copies, relay ? relay() : Promise.reject(new Error(t('There is no relay.'))), waits && 'full');
+      await this.chats.e2e.copiesAfter(sealed.copies, relay ? relay() : Promise.reject(new Error(t('There is no server.'))), waits && 'full');
       return;
     }
     await this.chats.e2e.copiesAfter(sealed.copies, nearby.deliver(identity, sealed.first ? [sealed.first, sealed.packet] : [sealed.packet], relay), waits);
@@ -4278,7 +4278,7 @@ export class Links implements Link, TakenFiles {
   private async handGroups(to: string): Promise<void> {
     const shared = this.groups;
     const here = await this.here();
-    if (!shared || !here) throw new Error(t('The groups go to the other device through the relay. Type its address in Relay first.'));
+    if (!shared || !here) throw new Error(t('The groups go to the other device through the server. Type its address in Server first.'));
     await shared.groups.moveOut(to);
     await this.handedFlags();
     this.announce();

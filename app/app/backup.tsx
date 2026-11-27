@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
-import { useEffect, useRef, useState } from "react";
+import * as Linking from "expo-linking";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 
 import {
   MIN_BACKUP_PASSWORD,
   PasswordSheet,
 } from "../components/PasswordSheet";
+import { useMode } from "../components/mode-picker";
 import { NextcloudSignIn } from "../components/nextcloud-sign-in";
 import { serverTorLine, TorSwitch } from "../components/tor-switch";
 import {
@@ -16,10 +19,12 @@ import {
   Card,
   Chip,
   Field,
+  font,
   Input,
   Page,
   Row,
   SectionTitle,
+  Sheet,
   Text,
 } from "../components/ui";
 import { ask, choose as chooseOne, confirm } from "../lib/alert";
@@ -42,6 +47,24 @@ import {
   type CloudServer,
 } from "../lib/backup-cloud";
 import { canTor } from "../lib/core";
+import { FDROID } from "../lib/distribution";
+import {
+  beginDriveSignIn,
+  driveLeftBehind,
+  driveParts,
+  driveRestoreAccount,
+  fetchFromDrive,
+  forgetDriveRestore,
+  listDrive,
+  loadDriveBackup,
+  stopDriveBackup,
+  takeDriveSignIn,
+  type DriveAccount,
+  type DriveBackup,
+  type DriveFile,
+  type DrivePurpose,
+} from "../lib/google-drive";
+import { CAN_DRIVE } from "../lib/google-drive-ids";
 import { onTorReady } from "../lib/relay";
 import {
   CAN_AUTO_BACKUP,
@@ -61,6 +84,7 @@ import {
   checkFolderFully,
   checkMadeBackup,
   checkSentBackup,
+  folderOfAnotherApp,
   runAutoBackup,
   startAutoBackup,
   stopAutoBackup,
@@ -143,12 +167,16 @@ import { beginBackupMaking, clearBackupMadeNote, useBackupMaking, type BackupTol
 // blocked numbers (lib/backup-calls.ts), added to the phone's. On Android, automatic
 // backups can go to a server too (lib/backup-cloud.ts), once the owner gives one, and a backup there
 // can be restored from the server itself; in the desktop app too, and in the web app, which makes
-// no backups by itself, one sent there when the owner asks. A backup's photos, files and voice
-// messages are in parts beside it (lock/backup.ts): restored, they are read from where the backup
-// came from, the server, or the folder automatic backups go to, else from the folder or files the
-// owner chooses; all of them are there, and open, before anything is replaced. Should one be
-// missing or damaged, the screen says which, and the owner may restore all the rest without such
-// files: the photos, files and voice messages on the phone then stay as they are.
+// no backups by itself, one sent there when the owner asks. On Android they can go to Google Drive
+// as well (lib/google-drive.ts), once the owner signs in with Google there, each time after a
+// warning of what Google learns, and a backup there can be restored from Google Drive itself; in a
+// build with no client ID of Google's for the app (lib/google-drive-ids.ts), nothing of it shows. A
+// backup's photos, files and voice messages are in parts beside it (lock/backup.ts): restored, they
+// are read from where the backup came from, the server or Google Drive, or the folder automatic
+// backups go to, else from the folder or files the owner chooses; all of them are there, and open,
+// before anything is replaced. Should one be missing or damaged, the screen says which, and the
+// owner may restore all the rest without such files: the photos, files and voice messages on the
+// phone then stay as they are.
 //
 // A backup made by hand goes into a folder the owner picks, or to a server (Make a backup → To a
 // server), the same as automatic backups go to, which the owner gives there if there is none yet:
@@ -164,11 +192,11 @@ import { beginBackupMaking, clearBackupMadeNote, useBackupMaking, type BackupTol
 // backup from another phone, the card points at it; nothing moves until it is pressed.
 
 // What the password sheet is for: a backup made now, automatic backups' password, or a backup to open.
-// A backup to open says the server it came from, if one: its parts are there too.
+// A backup to open says the server or the Google Drive it came from, if one: its parts are there too.
 type Asking =
   | { kind: "make"; folder: string }
   | { kind: "auto"; every: number; folder: string }
-  | { kind: "open"; bytes: Uint8Array; name: string; server?: CloudServer }
+  | { kind: "open"; bytes: Uint8Array; name: string; server?: CloudServer; drive?: DriveAccount }
   | { kind: "cloud" }
   | null;
 
@@ -268,12 +296,13 @@ export default function Backups() {
   const [callsToo, setCallsToo] = useState(false);
   // The server automatic backups go to as well, and what is typed to add one or to restore from one.
   const [cloud, setCloud] = useState<CloudBackup | null>(null);
-  const [checks, setChecks] = useState<Checks>({ folder: null, server: null });
+  const [checks, setChecks] = useState<Checks>({ folder: null, server: null, drive: null });
   const [checking, setChecking] = useState(false);
   const [fully, setFully] = useState("");
   const stopFull = useRef(false);
-  // A server's fields shown: to add one, under To a server too (add) or Make a backup (make), or to restore from one.
-  const [form, setForm] = useState<"add" | "make" | "restore" | null>(null);
+  // A server's fields shown: to add one, under To a server too (add) or Make a backup (make), or to restore from one;
+  // or, from the first start, the server automatic backups go to (start).
+  const [form, setForm] = useState<"add" | "make" | "restore" | "start" | null>(null);
   const adding = form === "add";
   // The backups on a server to restore from, newest first, once listed.
   const [listed, setListed] = useState<{
@@ -288,6 +317,20 @@ export default function Backups() {
   const [serverTor, setServerTor] = useState(false);
   // Whether the last backup put back here came from another phone, and when the old phone was said lost since (0: not).
   const [lost, setLost] = useState<{ other: boolean; at: number } | null>(null);
+  // Google Drive, which automatic backups go to as well once the owner signed in with Google there.
+  const [drive, setDrive] = useState<DriveBackup | null>(null);
+  // In F-Droid's build, which has no Google Drive: when the last backup went there, when they went
+  // there from an Erevos installed before it (lib/google-drive.ts driveLeftBehind).
+  const [driveLeft, setDriveLeft] = useState<{ last: number } | null>(null);
+  // The warning before a sign-in with Google, open for what the sign-in is for.
+  const [warnDrive, setWarnDrive] = useState<DrivePurpose | null>(null);
+  // The backups in a Google Drive to restore from, newest first, once listed, with its account.
+  const [driveListed, setDriveListed] = useState<{
+    account: DriveAccount;
+    files: DriveFile[];
+  } | null>(null);
+  // In INVISIBLE the warning says that signing in with Google does not go through Tor.
+  const mode = useMode();
 
   useEffect(() => {
     loadAutoBackup().then(setAuto);
@@ -296,6 +339,8 @@ export default function Backups() {
       if (loaded?.tor) setServerTor(true);
     });
     void loadChecks().then(setChecks);
+    if (CAN_DRIVE) void loadDriveBackup().then(setDrive);
+    else if (FDROID) void driveLeftBehind().then(setDriveLeft);
     void backsUpSms().then(setSmsToo);
     void backsUpCalls().then(setCallsToo);
     void Promise.all([restoredFromOther(), lostAt()]).then(([other, at]) =>
@@ -308,6 +353,35 @@ export default function Backups() {
   // How backups to the server go through Tor changes as Tor becomes ready.
   const [, setTorTick] = useState(0);
   useEffect(() => onTorReady(() => setTorTick((n) => n + 1)), []);
+  // Where the first start's last step chose automatic backups to go (app/first-steps.tsx): they
+  // begin here at once, every day, into a folder of this device, to a WebDAV server once it is
+  // added, or to Google Drive once signed in there, whose warning the first start showed. Not
+  // again when they are on already.
+  const { start: startAt } = useLocalSearchParams<{ start?: string }>();
+  const begun = useRef(false);
+  useEffect(() => {
+    if (begun.current || !CAN_AUTO_BACKUP || (startAt !== "device" && startAt !== "webdav" && !(startAt === "drive" && CAN_DRIVE))) return;
+    begun.current = true;
+    void loadAutoBackup().then((on) => {
+      if (on) return;
+      if (startAt === "device") void choose(1);
+      else if (startAt === "drive") void signInDrive("backup");
+      else setForm("start");
+    });
+  }, [startAt]);
+  // Back from Google's sign-in (app/oauth2redirect.tsx): automatic backups go on to Google Drive,
+  // or begin there, or its backups are listed to restore one.
+  useFocusEffect(
+    useCallback(() => {
+      if (!CAN_DRIVE) return;
+      const purpose = takeDriveSignIn();
+      if (purpose === "backup") void driveSigned();
+      else if (purpose === "restore") {
+        const account = driveRestoreAccount();
+        if (account) void listDriveBackups(account);
+      }
+    }, []),
+  );
 
   if (!CAN_BACK_UP) {
     return (
@@ -321,10 +395,11 @@ export default function Backups() {
   }
 
   // `made`: said of a backup made by hand, in its own card, while its space stays open
-  // (lib/backup-making.ts), with what the check right after it found (`checked`).
-  function say(text: string, bad = false, made: BackupTold | null = null, checked?: MadeNote["checked"]) {
+  // (lib/backup-making.ts), with what the check right after it found (`checked`), and how to
+  // check it again (`again`).
+  function say(text: string, bad = false, made: BackupTold | null = null, checked?: MadeNote["checked"], again?: MadeNote["again"]) {
     if (made) {
-      made.note(text ? { text, bad, ...(checked ? { checked } : {}) } : null);
+      made.note(text ? { text, bad, ...(checked ? { checked } : {}), ...(again ? { again } : {}) } : null);
       setNote("");
       return;
     }
@@ -384,6 +459,21 @@ export default function Backups() {
     await backUpNow();
   }
 
+  // Check again, under what the check of a backup made by hand found: the same backup, once more,
+  // its progress shown as a backup's is.
+  async function checkMadeAgain() {
+    const note = madeNote;
+    if (!note?.again || !note.checked) return;
+    const told = beginBackupMaking();
+    told.making({ step: t("Checking the backup…"), percent: null });
+    try {
+      const checked = await note.again();
+      told.note(checked ? { ...note, checked: { ...note.checked, checked } } : note);
+    } finally {
+      told.making(null);
+    }
+  }
+
   async function checkNow() {
     say("");
     setChecking(true);
@@ -420,29 +510,34 @@ export default function Backups() {
   async function backUpNow() {
     setBusy(true);
     try {
-      const { auto: next, cloud: sent } = await runAutoBackup(true);
+      const { auto: next, cloud: sent, drive: went } = await runAutoBackup(true);
       setAuto(next);
       setCloud(sent);
+      setDrive(went);
       setChecks(await loadChecks());
-      if (next?.error) say(t("Not made. {error}", { error: next.error }), true);
+      // What Google Drive got, said after what the folder and the server did.
+      const toDrive = went
+        ? went.error
+          ? t("Not sent to Google Drive. {error}", { error: went.error })
+          : t("Sent a backup to Google Drive.")
+        : "";
+      const sayAll = (text: string, bad = false) =>
+        say([text, toDrive].filter(Boolean).join(" "), bad || !!went?.error);
+      if (next?.error) sayAll(t("Not made. {error}", { error: next.error }), true);
       else if (next && !next.folder) {
-        // Restored from a backup made elsewhere: no folder here yet.
+        // No folder here: restored from a backup made elsewhere, or only to the server or Google
+        // Drive, as the first start chose; its card says a folder can be chosen too.
         const choosing = t(
           "Automatic backups need a folder on {device}: choose one.",
           { device: t(THIS_DEVICE) },
         );
-        if (sent?.error)
-          say(
-            `${t("Not sent. {error}", { error: sent.error })} ${choosing}`,
-            true,
-          );
+        if (sent?.error) sayAll(t("Not sent. {error}", { error: sent.error }), true);
         else if (sent)
-          say(
-            `${t("Sent a backup to {server}.", { server: cloudLabel(sent) })} ${choosing}`,
-          );
+          sayAll(t("Sent a backup to {server}.", { server: cloudLabel(sent) }));
+        else if (went) sayAll("");
         else say(choosing, true);
       } else if (next && sent?.error)
-        say(
+        sayAll(
           t(
             "Made a backup in {folder}, but it did not go to the server. {error}",
             { folder: folderLabel(next.folder), error: sent.error },
@@ -450,14 +545,14 @@ export default function Backups() {
           true,
         );
       else if (next && sent)
-        say(
+        sayAll(
           t("Made a backup in {folder} and sent it to {server}.", {
             folder: folderLabel(next.folder),
             server: cloudLabel(sent),
           }),
         );
       else if (next)
-        say(
+        sayAll(
           t("Made a backup in {folder}.", { folder: folderLabel(next.folder) }),
         );
     } finally {
@@ -466,8 +561,10 @@ export default function Backups() {
   }
 
   async function addServer() {
-    // Added from Make a backup: a backup goes there now, and only there.
+    // Added from Make a backup: a backup goes there now, and only there. Added from the first
+    // start: automatic backups begin, to the server alone until a folder is chosen too.
     const fromMake = form === "make";
+    const fromStart = form === "start";
     say("");
     setBusy(true);
     try {
@@ -482,6 +579,7 @@ export default function Backups() {
       setBusy(false);
     }
     if (CAN_AUTO_BACKUP && auto) await (fromMake ? serverNow() : backUpNow());
+    else if (CAN_AUTO_BACKUP && fromStart) setAsking({ kind: "auto", every: 1, folder: "" });
     else setAsking({ kind: "cloud" });
   }
 
@@ -528,7 +626,7 @@ export default function Backups() {
   async function lostPhone() {
     say("");
     const told = t(
-      "Every space and its hidden chats move to new relay queues as each next opens here, and your contacts and groups are told quietly. The old queues are read here until each contact writes to the new ones, 14 days at most. The contact links and QR codes you gave before work for 14 days, then no more. What comes through Nostr, XMPP or Matrix still reaches the old phone.",
+      "Every space and its hidden chats move to new server queues as each next opens here, and your contacts and groups are told quietly. The old queues are read here until each contact writes to the new ones, 14 days at most. The contact links and QR codes you gave before work for 14 days, then no more. What comes through Nostr, XMPP or Matrix still reaches the old phone.",
     );
     if (
       !(await confirm(t("The old phone was lost"), told, t("Move the queues")))
@@ -545,18 +643,145 @@ export default function Backups() {
   }
 
   async function stopServer() {
-    const told = CAN_AUTO_BACKUP && auto
+    // Automatic backups with no folder here went only to the server, or to Google Drive too: they
+    // stop with it when it was the only place.
+    const alone = CAN_AUTO_BACKUP && !!auto && !auto.folder && !drive;
+    const told = alone
       ? t(
-          "Automatic backups will go only to the folder from now on. Those already on the server stay there until you delete them.",
+          "Automatic backups stop too, as they have no folder on {device}. Those already on the server stay there until you delete them.",
+          { device: t(THIS_DEVICE) },
         )
-      : t(
-          "Erevos forgets the server and its password here. The backups already on it stay there until you delete them.",
-        );
+      : CAN_AUTO_BACKUP && auto && drive
+        ? auto.folder
+          ? t(
+              "Automatic backups will go only to the folder and Google Drive from now on. Those already on the server stay there until you delete them.",
+            )
+          : t(
+              "Automatic backups will go only to Google Drive from now on. Those already on the server stay there until you delete them.",
+            )
+        : CAN_AUTO_BACKUP && auto
+          ? t(
+              "Automatic backups will go only to the folder from now on. Those already on the server stay there until you delete them.",
+            )
+          : t(
+              "Erevos forgets the server and its password here. The backups already on it stay there until you delete them.",
+            );
     if (!(await confirm(t("Stop sending to the server"), told))) return;
     await stopCloudBackup();
     setCloud(null);
-    setChecks(await saveCheck("server", null));
+    if (alone) {
+      await stopAutoBackup();
+      setAuto(null);
+    }
+    setChecks(await (alone ? loadChecks() : saveCheck("server", null)));
     say(t("Backups no longer go to the server."));
+  }
+
+  // Google's page in the browser, outside Erevos, for automatic backups to Google Drive or a
+  // restore from it: the browser comes back to app/oauth2redirect.tsx, then here.
+  async function signInDrive(purpose: DrivePurpose) {
+    say("");
+    try {
+      await Linking.openURL(await beginDriveSignIn(purpose));
+    } catch (error) {
+      say(errorText(error), true);
+    }
+  }
+
+  // Signed in with Google for automatic backups: they go there now, or begin, every day, with only
+  // Google Drive until a folder is chosen too.
+  async function driveSigned() {
+    const [on, signed] = await Promise.all([loadAutoBackup(), loadDriveBackup()]);
+    setAuto(on);
+    setDrive(signed);
+    setChecks(await saveCheck("drive", null));
+    if (!CAN_AUTO_BACKUP || !signed) return;
+    if (on) await backUpNow();
+    else setAsking({ kind: "auto", every: 1, folder: "" });
+  }
+
+  async function stopDrive() {
+    // Automatic backups with no folder here and no server went only to Google Drive: they stop with it.
+    const alone = CAN_AUTO_BACKUP && !!auto && !auto.folder && !cloud;
+    const told = alone
+      ? t(
+          "Automatic backups stop too, as they have no folder on {device}. Those already in your Google Drive stay there until you delete them.",
+          { device: t(THIS_DEVICE) },
+        )
+      : t(
+          "Google takes back Erevos's access to your Google Drive, and Erevos forgets the sign-in here. The backups already there stay until you delete them.",
+        );
+    if (!(await confirm(t("Stop sending to Google Drive"), told))) return;
+    say("");
+    setBusy(true);
+    let taken: boolean;
+    try {
+      taken = await stopDriveBackup();
+    } finally {
+      setBusy(false);
+    }
+    setDrive(null);
+    setDriveLeft(null);
+    if (alone) {
+      await stopAutoBackup();
+      setAuto(null);
+    }
+    setChecks(await (alone ? loadChecks() : saveCheck("drive", null)));
+    if (taken) say(t("Backups no longer go to Google Drive."));
+    else
+      say(
+        t(
+          "Backups no longer go to Google Drive, but Google could not be reached to take back Erevos's access: you can take it back in your Google account's security settings.",
+        ),
+        true,
+      );
+  }
+
+  // Lists the backups in the Google Drive automatic backups go to, or in the one signed in to for
+  // a restore.
+  async function listDriveBackups(account: DriveAccount) {
+    say("");
+    setBusy(true);
+    try {
+      const files = await listDrive(account);
+      if (!files.length) {
+        setDriveListed(null);
+        say(t("There is no Erevos backup in that Google Drive."), true);
+      } else setDriveListed({ account, files });
+    } catch (error) {
+      say(errorText(error), true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // With automatic backups going to Google Drive, its backups at once; else a sign-in with Google
+  // for the restore alone, after the warning.
+  function restoreFromDrive() {
+    say("");
+    if (drive) void listDriveBackups(drive);
+    else setWarnDrive("restore");
+  }
+
+  async function openFromDrive(file: DriveFile) {
+    if (!driveListed) return;
+    // Google Drive said how large it is: one too large is not downloaded only to be stopped.
+    if (file.size > CLOUD_RESTORE_MOST) {
+      say(tooLargeText(CLOUD_RESTORE_MOST), true);
+      return;
+    }
+    say("");
+    setBusy(true);
+    try {
+      const { account } = driveListed;
+      const bytes = await fetchFromDrive(account, file, CLOUD_RESTORE_MOST);
+      setDriveListed(null);
+      setAsking({ kind: "open", bytes, name: fileText(file), drive: account });
+    } catch (error) {
+      say(errorText(error), true);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function pickBackup() {
@@ -767,12 +992,14 @@ export default function Backups() {
       t("Restore the rest"),
     );
 
-  // Where the parts of a backup being opened are: on the server it came from, in the folder
-  // automatic backups go to, else where the owner chooses. With those not there named, the owner
-  // may restore the rest without them (`without`). Null when the owner went back.
+  // Where the parts of a backup being opened are: on the server or in the Google Drive it came
+  // from, in the folder automatic backups go to, else where the owner chooses. With those not
+  // there named, the owner may restore the rest without them (`without`). Null when the owner
+  // went back.
   async function findParts(
     names: string[],
     server: CloudServer | undefined,
+    fromDrive?: DriveAccount,
   ): Promise<{ source: PartSource | null; without: boolean } | null> {
     const found = async (source: PartSource | null, missing: string[]) => {
       if (!missing.length) return { source, without: false };
@@ -787,6 +1014,10 @@ export default function Backups() {
     };
     if (server) {
       const there = await cloudParts(server);
+      return found(there, there.missing(names));
+    }
+    if (fromDrive) {
+      const there = await driveParts(fromDrive);
       return found(there, there.missing(names));
     }
     // A backup in the folder automatic backups go to has its files beside it there.
@@ -926,9 +1157,19 @@ export default function Backups() {
         );
         const end = Date.now();
         const folder = where ?? folderLabel(asking.folder);
-        // Read back from the folder as it lies there, where its files can be listed.
+        // Read back from the folder as it lies there, where its files can be listed: in another
+        // app's folder, again a few times while that app may still be sending it on.
         made.making({ step: t("Checking the backup…"), percent: null });
-        const checked = await checkMadeBackup(asking.folder, name, key);
+        const target = asking.folder;
+        const checked = await checkMadeBackup(target, name, key, Date.now(), {
+          waiting: (ms) =>
+            made.making({
+              step: t("Not all there yet: the folder's app may still be sending it to its server. Checking again in {seconds} seconds…", {
+                seconds: Math.round(ms / 1000),
+              }),
+              percent: null,
+            }),
+        });
         say(
           [
             parts > 0
@@ -953,7 +1194,8 @@ export default function Backups() {
             .join("\n"),
           false,
           made,
-          checked ? { where: folder, checked } : undefined,
+          checked ? { where: folder, checked, later: folderOfAnotherApp(target) } : undefined,
+          () => checkMadeBackup(target, name, key, Date.now(), { once: true }),
         );
         // The phone's notice names the backup too: not once the space that made it has closed.
         if (made.kept()) tellBackupMade(name, spaceText(size + partsSize), folder, parts);
@@ -1040,6 +1282,7 @@ export default function Backups() {
           false,
           made,
           checked ? { where: cloudLabel(sent), checked } : undefined,
+          () => checkSentBackup(sent, named, size),
         );
         if (made.kept()) tellBackupSent(cloudLabel(sent), total);
       } catch (error) {
@@ -1075,7 +1318,7 @@ export default function Backups() {
       if (names.length) {
         setBusy(true);
         try {
-          parts = await findParts(names, opening.server);
+          parts = await findParts(names, opening.server, opening.drive);
         } catch (error) {
           parts = null;
           say(errorText(error), true);
@@ -1192,6 +1435,8 @@ export default function Backups() {
                 }),
             );
           }
+          // A sign-in for this restore alone is not needed any more.
+          forgetDriveRestore();
           closeNow();
         } finally {
           setBusy(false);
@@ -1224,6 +1469,8 @@ export default function Backups() {
   const every = auto?.every ?? 0;
   // Whether automatic backups go to the server; otherwise only those sent by hand do.
   const autoOn = CAN_AUTO_BACKUP && !!auto;
+  // When automatic backups with no folder last went to the server or Google Drive.
+  const sentLast = Math.max(cloud?.last ?? 0, drive?.last ?? 0);
   // A server's fields, with Connect and Cancel, where a server is added.
   const addForm = (
     <>
@@ -1259,6 +1506,20 @@ export default function Backups() {
         <Text variant="caption" tone="muted" style={hint}>
           {t(NETWORKS_LEFT)}
         </Text>
+      ) : null}
+
+      {form === "start" && !cloud ? (
+        <>
+          <SectionTitle title={t("Automatic backups to a server")} />
+          <Card>
+            <Text variant="caption" tone="muted" style={hint}>
+              {t(
+                "Add the WebDAV folder they go to, such as one in your Nextcloud. Then choose their password: from then on Erevos sends one by itself every day, encrypted.",
+              )}
+            </Text>
+            {addForm}
+          </Card>
+        </>
       ) : null}
 
       <SectionTitle title={t("Make a backup")} />
@@ -1341,7 +1602,19 @@ export default function Backups() {
           <CheckLine
             where={madeNote.checked.where}
             checked={madeNote.checked.checked}
+            later={madeNote.checked.later}
           />
+        ) : null}
+        {madeNote?.checked && madeNote.again && !making && !checkedWhole(madeNote.checked.checked) ? (
+          <Row wrap>
+            <Button
+              title={t("Check again")}
+              kind="secondary"
+              compact
+              onPress={() => void checkMadeAgain()}
+              disabled={busy}
+            />
+          </Row>
         ) : null}
       </Card>
 
@@ -1432,15 +1705,72 @@ export default function Backups() {
               />
             ))}
           </Row>
-          {auto && !auto.folder ? (
+          {auto && !auto.folder && (cloud || drive) ? (
+            <Card>
+              <Text variant="bodyStrong">
+                {cloud && drive
+                  ? t("Only to {server} and Google Drive", { server: cloudLabel(cloud) })
+                  : cloud
+                    ? t("Only to {server}", { server: cloudLabel(cloud) })
+                    : t("Only to Google Drive")}
+              </Text>
+              <Text variant="caption" tone="muted" style={hint}>
+                {sentLast
+                  ? t("Last one sent {when}.", { when: whenText(sentLast) })
+                  : t("None sent yet.")}{" "}
+                {t(
+                  "Made while Erevos is open, and as it goes to the background, once the last one is older than that. A folder on {device} as well keeps one more copy close at hand.",
+                  { device: t(THIS_DEVICE) },
+                )}
+              </Text>
+              {auto.error ? (
+                <Text variant="caption" color={colors.danger} style={hint}>
+                  {t(
+                    "The last one failed: {error} Erevos tries again next time it opens.",
+                    { error: auto.error },
+                  )}
+                </Text>
+              ) : null}
+              <Row wrap>
+                <Button
+                  title={busy ? t("One moment…") : t("Back up now")}
+                  kind="secondary"
+                  compact
+                  onPress={backUpNow}
+                  disabled={busy}
+                />
+                {SHELL === "sailfish" ? null : (
+                  <Button
+                    title={t("Choose a folder")}
+                    kind="secondary"
+                    compact
+                    onPress={moveAuto}
+                    disabled={busy}
+                  />
+                )}
+                <Button
+                  title={t("Change password")}
+                  kind="secondary"
+                  compact
+                  onPress={changePassword}
+                  disabled={busy}
+                />
+              </Row>
+            </Card>
+          ) : auto && !auto.folder ? (
             <Card>
               <Text variant="bodyStrong">
                 {t("No folder on {device} yet", { device: t(THIS_DEVICE) })}
               </Text>
               <Text variant="caption" tone="muted" style={hint}>
-                {t(
-                  "These automatic backups came with a backup made on another device, with their password; the folder they went to stays with that device. Choose a folder here, and they go on into it.",
-                )}
+                {driveLeft && !cloud
+                  ? t(
+                      "Automatic backups went only to Google Drive, and the Erevos from F-Droid sends none there, so none goes anywhere now. Choose a folder on {device}, or add a server, and they go on there.",
+                      { device: t(THIS_DEVICE) },
+                    )
+                  : t(
+                      "These automatic backups came with a backup made on another device, with their password; the folder they went to stays with that device. Choose a folder here, and they go on into it.",
+                    )}
                 {cloud ? ` ${t("Until then they go only to the server.")}` : ""}
               </Text>
               <Row wrap>
@@ -1619,6 +1949,116 @@ export default function Backups() {
         </>
       ) : null}
 
+      {CAN_DRIVE && CAN_AUTO_BACKUP ? (
+        <>
+          <SectionTitle title={t("To Google Drive too")} />
+          <Card>
+            {drive ? (
+              <>
+                <Text variant="bodyStrong">{t("To Google Drive")}</Text>
+                <Text variant="caption" tone="muted" style={hint}>
+                  {drive.last
+                    ? t("Last one sent {when}.", { when: whenText(drive.last) })
+                    : t("None sent yet.")}{" "}
+                  {autoOn
+                    ? t(
+                        "Each automatic backup goes there too, into the folder named Erevos, which keeps the {n} newest.",
+                        { n: KEEP },
+                      )
+                    : t(
+                        "Automatic backups are off, so none goes there. Turn them on to send one every day.",
+                      )}
+                </Text>
+                {drive.error ? (
+                  <Text variant="caption" color={colors.danger} style={hint}>
+                    {autoOn
+                      ? t(
+                          "The last one did not go: {error} Erevos tries again next time it opens.",
+                          { error: drive.error },
+                        )
+                      : t("The last one did not go: {error}", {
+                          error: drive.error,
+                        })}
+                  </Text>
+                ) : null}
+                <Row wrap>
+                  {autoOn ? null : (
+                    <Button
+                      title={t("Turn on automatic backups")}
+                      kind="secondary"
+                      compact
+                      onPress={() => setAsking({ kind: "auto", every: 1, folder: "" })}
+                      disabled={busy}
+                    />
+                  )}
+                  {drive.error ? (
+                    <Button
+                      title={t("Sign in with Google again")}
+                      kind="secondary"
+                      compact
+                      onPress={() => setWarnDrive("backup")}
+                      disabled={busy}
+                    />
+                  ) : null}
+                  <Button
+                    title={t("Stop sending")}
+                    kind="secondary"
+                    compact
+                    onPress={() => void stopDrive()}
+                    disabled={busy}
+                  />
+                </Row>
+              </>
+            ) : (
+              <>
+                <Text variant="caption" tone="muted" style={hint}>
+                  {t(
+                    "Each automatic backup can also go to your Google Drive, into a folder named Erevos that Erevos makes there. Google gets random bytes under a random name and cannot open them, but it knows your account, when one comes and how big it is. Nothing goes until you sign in with Google.",
+                  )}
+                </Text>
+                <Row wrap>
+                  <Button
+                    title={t("Sign in with Google")}
+                    kind="secondary"
+                    compact
+                    onPress={() => setWarnDrive("backup")}
+                    disabled={busy}
+                  />
+                </Row>
+              </>
+            )}
+          </Card>
+        </>
+      ) : null}
+
+      {driveLeft && CAN_AUTO_BACKUP ? (
+        <>
+          <SectionTitle title={t("To Google Drive too")} />
+          <Card>
+            <Text variant="bodyStrong">
+              {t("No longer sent to Google Drive")}
+            </Text>
+            <Text variant="caption" tone="muted" style={hint}>
+              {driveLeft.last
+                ? `${t("Last one sent {when}.", { when: whenText(driveLeft.last) })} `
+                : ""}
+              {t(
+                "The Erevos from F-Droid keeps to services anyone may run, so it sends no backups to Google Drive. Those already there stay until you delete them. Stop sending also takes back, at Google, Erevos's access to your Google Drive.",
+              )}
+            </Text>
+            <Row wrap>
+              <Button
+                title={t("Stop sending")}
+                kind="secondary"
+                compact
+                onPress={() => void stopDrive()}
+                disabled={busy}
+              />
+            </Row>
+          </Card>
+        </>
+      ) : null}
+
       {CAN_AUTO_BACKUP && auto?.hard ? (
         <>
           <SectionTitle title={t("Check the backups")} />
@@ -1632,10 +2072,19 @@ export default function Backups() {
               <CheckLine
                 where={folderLabel(auto.folder)}
                 checked={checks.folder}
+                later={folderOfAnotherApp(auto.folder)}
               />
             ) : null}
             {cloud ? (
               <CheckLine where={cloudLabel(cloud)} checked={checks.server} />
+            ) : null}
+            {drive ? (
+              <>
+                <Text variant="caption" tone="muted" style={hint}>
+                  {t("Google Drive is checked as a server is.")}
+                </Text>
+                <CheckLine where="Google Drive" checked={checks.drive} />
+              </>
             ) : null}
             <Row wrap>
               <Button
@@ -1771,6 +2220,15 @@ export default function Backups() {
               disabled={busy || form === "restore"}
             />
           ) : null}
+          {CAN_CLOUD_RESTORE && CAN_DRIVE ? (
+            <Button
+              title={t("Restore from Google Drive")}
+              kind="secondary"
+              compact
+              onPress={restoreFromDrive}
+              disabled={busy}
+            />
+          ) : null}
         </Row>
         {form === "restore" ? (
           <>
@@ -1827,19 +2285,50 @@ export default function Backups() {
             </Row>
           </>
         ) : null}
+        {driveListed ? (
+          <>
+            <Text variant="caption" tone="muted" style={hint}>
+              {t(
+                "Backups in Google Drive, newest first. Choose one, then type its password.",
+              )}
+            </Text>
+            <Row wrap>
+              {driveListed.files.slice(0, SHOWN).map((file) => (
+                <Button
+                  key={file.id}
+                  title={fileText(file)}
+                  kind="secondary"
+                  compact
+                  onPress={() => void openFromDrive(file)}
+                  disabled={busy}
+                />
+              ))}
+              <Button
+                title={t("Cancel")}
+                kind="secondary"
+                compact
+                onPress={() => {
+                  setDriveListed(null);
+                  forgetDriveRestore();
+                }}
+                disabled={busy}
+              />
+            </Row>
+          </>
+        ) : null}
       </Card>
 
       <SectionTitle title={t("A lost phone")} />
       <Card>
         <Text variant="caption" tone="muted" style={hint}>
           {t(
-            "A phone that was lost or stolen and is still on keeps reading the relay queues it knew, so messages sent to them may reach it and never come here. This moves every space, with its hidden chats, to new relay queues, each as it next opens here.",
+            "A phone that was lost or stolen and is still on keeps reading the server queues it knew, so messages sent to them may reach it and never come here. This moves every space, with its hidden chats, to new server queues, each as it next opens here.",
           )}
         </Text>
         {lost?.at ? (
           <Text variant="caption" style={hint}>
             {t(
-              "The old phone was said lost on {date}. Every space and its hidden chats move to new relay queues as each next opens here.",
+              "The old phone was said lost on {date}. Every space and its hidden chats move to new server queues as each next opens here.",
               { date: new Date(lost.at).toLocaleDateString(locale()) },
             )}
           </Text>
@@ -1865,6 +2354,18 @@ export default function Backups() {
         <Text variant="label" color={failed ? colors.danger : colors.success}>
           {note}
         </Text>
+      ) : null}
+
+      {CAN_DRIVE ? (
+        <DriveWarning
+          purpose={warnDrive}
+          invisible={mode === "invisible"}
+          onSignIn={(purpose) => {
+            setWarnDrive(null);
+            void signInDrive(purpose);
+          }}
+          onClose={() => setWarnDrive(null)}
+        />
       ) : null}
 
       <PasswordSheet
@@ -1920,13 +2421,81 @@ function byHandText(bytes: number | null): string {
     .join(" ");
 }
 
-// What the last check of a place found (lib/backup-check.ts).
+// Before each sign-in with Google, what Google then learns, as the first start says it
+// (app/first-steps.tsx); in INVISIBLE also that the sign-in is in the browser, outside Tor.
+function DriveWarning({
+  purpose,
+  invisible,
+  onSignIn,
+  onClose,
+}: {
+  purpose: DrivePurpose | null;
+  invisible: boolean;
+  onSignIn: (purpose: DrivePurpose) => void;
+  onClose: () => void;
+}) {
+  // What the sheet was opened for, so it stays while it closes.
+  const shown = useRef<DrivePurpose>("backup");
+  if (purpose) shown.current = purpose;
+  return (
+    <Sheet
+      visible={purpose !== null}
+      onClose={onClose}
+      title={t("Before you sign in with Google")}
+    >
+      {[
+        t("The backups leave **encrypted**. Google cannot read them."),
+        t(
+          "But Google **knows who you are**. It sees that you use Erevos, when you make a backup and how big it is, and may hand that over if asked.",
+        ),
+        invisible
+          ? t(
+              "This space is INVISIBLE, but signing in happens **in your browser, outside Erevos**, not through Tor: Google sees your internet address then.",
+            )
+          : "",
+        t("For more privacy, choose **this device** or **WebDAV**."),
+      ]
+        .filter(Boolean)
+        .map((text) => (
+          <BoldText key={text} text={text} />
+        ))}
+      <Button
+        title={t("I understand, sign in with Google")}
+        onPress={() => onSignIn(shown.current)}
+      />
+      <Button title={t("Back")} kind="secondary" onPress={onClose} />
+    </Sheet>
+  );
+}
+
+// A text with **bold** words in it, as the first start writes them.
+function BoldText({ text }: { text: string }) {
+  return (
+    <Text variant="caption" tone="muted" style={hint}>
+      {text.split("**").map((part, i) =>
+        i % 2 === 1 ? (
+          <Text key={i} variant="caption" style={[hint, font("700")]}>
+            {part}
+          </Text>
+        ) : (
+          part
+        ),
+      )}
+    </Text>
+  );
+}
+
+// What the last check of a place found (lib/backup-check.ts). `later`: the folder is another
+// app's, which may still have been sending the backup on to its server (lib/backup-folder.ts
+// folderOfAnotherApp), so a check that did not find it whole says to look again.
 function CheckLine({
   where,
   checked,
+  later = false,
 }: {
   where: string;
   checked: Checked | null;
+  later?: boolean;
 }) {
   const { colors } = useTheme();
   if (!checked)
@@ -1972,6 +2541,9 @@ function CheckLine({
     >
       {whole ? "✓ " : "⚠ "}
       {text}
+      {!whole && later
+        ? ` ${t("This folder belongs to another app, which may still be sending the backup to its server: check again in a few minutes.")}`
+        : ""}
     </Text>
   );
 }

@@ -15,7 +15,6 @@ import android.os.Looper
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
-import android.security.keystore.StrongBoxUnavailableException
 import android.util.Base64
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
@@ -31,18 +30,19 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 // Unlocking with a fingerprint or face (lock/biometric.ts), on Android 11 and later. A key in the
-// Android Keystore, kept in the phone's secure hardware, seals what the app gives it with AES-GCM.
-// Android uses the key only right after a strong fingerprint or face check made for that one use,
-// and drops it for good when fingerprints or faces are added or removed. A new key is made each
-// time unlocking is turned on. The sealed data stays with the app (lock/biometric.ts), and nothing
-// leaves the phone.
+// Android Keystore, kept in the phone's secure area (its TEE), seals what the app gives it with
+// AES-GCM. Android uses the key only right after a strong fingerprint or face check made for that
+// one use, and drops it for good when fingerprints or faces are added or removed. A new key is made
+// each time unlocking is turned on. The sealed data stays with the app (lock/biometric.ts), and
+// nothing leaves the phone.
 //
-// Where the key is in the phone's separate security chip (StrongBox), each use of it takes a while,
-// and the chip lets only a few be started at once. So all of it runs on a thread of its own, never
-// on the app's, nor on the one the phone's modules share; and a cipher that was started and then
-// not used (the prompt closed, or only whether the key still works was asked) is let go at once
-// (letGo, release): Android ends what it started only when it finds the cipher gone, and until
-// then the next use of the key waits, for seconds once a few are left so.
+// Each use of the key is started before Android's prompt shows, and the Keystore lets only a few
+// be started at once. So all of it runs on a thread of its own, never on the app's, nor on the one
+// the phone's modules share; and a cipher that was started and then not used (the prompt closed,
+// or only whether the key still works was asked) is let go at once (letGo, release): Android ends
+// what it started only when it finds the cipher gone, and until then the next use of the key
+// waits, for seconds once a few are left so. A key an older Erevos made in the phone's separate
+// security chip (StrongBox) still works there, slower, until unlocking is turned off and on again.
 class ErevosBiometricModule : Module() {
   private val keystore = Executors.newSingleThreadExecutor { work -> Thread(work, "erevos-biometric").apply { isDaemon = true } }
   private val main = Handler(Looper.getMainLooper())
@@ -260,10 +260,13 @@ class ErevosBiometricModule : Module() {
 
   // A 256-bit AES key that only a strong fingerprint or face check opens, for each single use,
   // only while the phone itself is unlocked, and that Android drops when fingerprints or faces
-  // change. In the phone's separate security chip where it has one (StrongBox), else in its
-  // secure area.
+  // change. In the phone's secure area (TEE), not in its separate security chip (StrongBox) where
+  // it has one: the chip took a moment or more to start each use, and Android's prompt waited for
+  // it (#76). The fingerprint or face check that lets the key be used is made in the secure area
+  // all the same, and the chip takes the secure area's word for it, so the chip kept this key no
+  // safer.
   private fun newKey(): SecretKey {
-    fun spec(strongBox: Boolean) = KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+    val spec = KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
       .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
       .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
       .setKeySize(256)
@@ -271,16 +274,10 @@ class ErevosBiometricModule : Module() {
       .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
       .setInvalidatedByBiometricEnrollment(true)
       .setUnlockedDeviceRequired(true)
-      .setIsStrongBoxBacked(strongBox)
       .build()
     val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
-    return try {
-      generator.init(spec(true))
-      generator.generateKey()
-    } catch (e: StrongBoxUnavailableException) {
-      generator.init(spec(false))
-      generator.generateKey()
-    }
+    generator.init(spec)
+    return generator.generateKey()
   }
 
   private fun encode(bytes: ByteArray): String = Base64.encodeToString(bytes, Base64.NO_WRAP)

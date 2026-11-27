@@ -33,8 +33,8 @@ export const publicFeed: Record<string, string> = {
     "Diesen Beitrag erneut mit deinen Followern teilen?",
   "Take back this post?":
     "Diesen Beitrag zurückziehen?",
-  "The relays that keep it are asked to drop it. Copies that others made may stay.":
-    "Die Relays, die ihn speichern, werden gebeten, ihn zu löschen. Kopien, die andere gemacht haben, können bleiben.",
+  "The servers that keep it are asked to drop it. Copies that others made may stay.":
+    "Die Server, die ihn speichern, werden gebeten, ihn zu löschen. Kopien, die andere gemacht haben, können bleiben.",
   "Copy text":
     "Text kopieren",
   "Open the room":
@@ -91,6 +91,6 @@ export const publicFeed: Record<string, string> = {
     "Die Vorschau zeigen",
   "Tap to show a preview of {site}":
     "Antippen für eine Vorschau von {site}",
-  "No Nostr relay took it. Try again in a while.":
-    "Kein Nostr-Relay hat ihn angenommen. Versuch es in einer Weile noch einmal.",
+  "No Nostr server took it. Try again in a while.":
+    "Kein Nostr-Server hat ihn angenommen. Versuch es in einer Weile noch einmal.",
 };

@@ -392,8 +392,8 @@ export default function UpdatesScreen() {
               <Text variant="caption" tone="muted">
                 {telling
                   ? torOn
-                    ? t("Once a day Erevos asks LPHL's server, which runs the relay too, through Tor whether a new version is out, and says so at the top of the chats and in a notice. It asks only while this space uses LPHL's relay. The answer counts only when signed by the release computer.")
-                    : t("Once a day Erevos asks LPHL's server, which runs the relay too, whether a new version is out, and says so at the top of the chats and in a notice. It asks only while this space uses LPHL's relay and does not send everything through Tor, so the server learns nothing it did not know. The answer counts only when signed by the release computer.")
+                    ? t("Once a day Erevos asks LPHL's server through Tor whether a new version is out, and says so at the top of the chats and in a notice. It asks only while this space uses LPHL's server. The answer counts only when signed by the release computer.")
+                    : t("Once a day Erevos asks LPHL's server whether a new version is out, and says so at the top of the chats and in a notice. It asks only while this space uses LPHL's server and does not send everything through Tor, so the server learns nothing it did not know. The answer counts only when signed by the release computer.")
                   : t('Erevos does not ask whether a new version is out: only Check for updates tells you.')}
               </Text>
             </>

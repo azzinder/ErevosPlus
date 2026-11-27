@@ -7,10 +7,11 @@ import { currentSpace } from '../lock/keys';
 import { POCKETS } from '../lock/sealed-file';
 import { loadCurrentSpaceData } from '../lock/space-data';
 import { openHiddenPlace, onHiddenPlaceChange } from './hidden-contacts';
-import { hiddenRinging, onHiddenRingingChange } from './hidden-ring';
+import { hiddenRinging, onHiddenRingingChange, setHiddenRinging } from './hidden-ring';
+import { callsOff } from './modes';
 import { onNetworkChange } from './network-change';
 import { receivesPocket } from './place-receiver';
-import { canWaitAt, fromHex, isQueueNotFound, receiveMessage, waitForMessage, type Relay } from './relay';
+import { canWaitAt, fromHex, isQueueNotFound, onTorWay, receiveMessage, waitForMessage, type Relay } from './relay';
 
 // While Erevos receives (lib/background.ts), in the background or showing, a hidden place that rings (lock/hidden-ring.ts)
 // makes the phone ring when one of its contacts calls, though the place is closed. For every pocket
@@ -114,8 +115,10 @@ export function startHiddenRinging(ring: (space: number, pocket: number, at?: nu
           // the place was open or a ring showed rang already, and is only drained. A place that
           // receives while closed rings from its own queue (lib/place-receiver.ts), as the call's
           // offer comes: its ring here, still sent by contacts told of the queue before, is drained.
+          // In INVISIBLE (lib/modes.ts) no call rings: the offer, read as the place opens, is kept
+          // as missed there (lib/calls.ts).
           await drain(relay, kept.recipientHex);
-          if (mayRing(pocket) && !receivesPocket(space, pocket)) ring(space, pocket, cameAt);
+          if (mayRing(pocket) && !receivesPocket(space, pocket) && !callsOff()) ring(space, pocket, cameAt);
         }
       } catch (error) {
         // A queue the relay no longer has is not asked again until the slot names another: the
@@ -145,11 +148,18 @@ export function startHiddenRinging(ring: (space: number, pocket: number, at?: nu
     waits.forEach((wait) => wait.abort());
     wake();
   });
+  // INVISIBLE chosen (lib/modes.ts): a hidden call that rings stops, whatever brought it, as no call
+  // rings then; what held its call keeps it as missed (lib/place-receiver.ts, lib/xmpp-calls.ts,
+  // lib/matrix-calls.ts), or, as here, its offer as its place opens.
+  const way = onTorWay(() => {
+    if (callsOff() && hiddenRinging()?.space === space) setHiddenRinging(null);
+  });
   return () => {
     stopped = true;
     ended();
     opened();
     network();
+    way();
     waits.forEach((wait) => wait.abort());
     wake();
   };

@@ -185,6 +185,26 @@ jobs:
           npm ci
           npx expo prebuild --platform android --no-install
 
+      # Gradle's own download, and the plugins it fetches before it builds anything, fail now and
+      # then: fetched first, before the release key is there, tried four times, as Erevos's release
+      # does (release-android.yml). Gradle remembers a plugin it did not find, so a try after the
+      # first asks for each again. `help` builds nothing. Maven Central's files come from Google's
+      # copy of it, here and in the build after (scripts/maven-central-mirror.gradle), as Maven
+      # Central answers some of GitHub's machines with 429.
+      - name: Fetch Gradle and its plugins
+        working-directory: app/android
+        run: |
+          install -D -m 644 "$GITHUB_WORKSPACE/scripts/maven-central-mirror.gradle" ~/.gradle/init.d/maven-central-mirror.gradle
+          refresh=""
+          for wait in 15 30 60 0; do
+            ./gradlew --version --no-daemon && ./gradlew help --no-daemon $refresh -PreactNativeArchitectures=arm64-v8a && exit 0
+            [ "$wait" = 0 ] && break
+            echo "::warning::Gradle, or a plugin it needs, could not be fetched; again in $wait s"
+            sleep "$wait"
+            refresh=--refresh-dependencies
+          done
+          exit 1
+
       - name: Set up the release signing key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -195,12 +215,6 @@ jobs:
           keytool -list -v -keystore app/android/app/release.keystore -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" |
             sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f' > release-fingerprint
           [ -s release-fingerprint ] || { echo "::error::The release key's fingerprint could not be read"; exit 1; }
-
-      - name: Fetch Gradle
-        working-directory: app/android
-        run: |
-          for wait in 15 30 60 0; do ./gradlew --version --no-daemon && exit 0; [ "$wait" = 0 ] && break; echo "::warning::Gradle's download failed; again in $wait s"; sleep "$wait"; done
-          exit 1
 
       - name: Build the ErevosGram APK
         working-directory: app/android

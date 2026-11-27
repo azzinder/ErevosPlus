@@ -34,7 +34,7 @@ import { onXmppChange, runXmpp, xmppAddContact, xmppBlock, xmppCreateGroup, xmpp
 import { radius, space } from '../theme/colors';
 import { useColors } from '../theme/context';
 
-// The space's XMPP account (lib/xmpp-store.ts, docs/xmpp.md), under Settings → Relay and networks
+// The space's XMPP account (lib/xmpp-store.ts, docs/xmpp.md), under Settings → Server and networks
 // → XMPP: signing in, then the people who asked to add the account and the groups that invited it,
 // a new chat with an address, a new private group of its contacts, joining a group by its address
 // (a channel is not encrypted, and says so), its chats and groups and its contacts, the key of this
@@ -527,7 +527,7 @@ function ClosedPush({ busy, run }: { busy: boolean; run: (work: () => Promise<un
         </Row>
         <Text variant="caption" tone="muted">
           {on
-            ? t('While another space is open, this one says "New message" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space\'s relay of each message while no app of the account is on: the XMPP server learns the relay\'s name, and the relay when messages come.')
+            ? t('While another space is open, this one says "New message" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space\'s own server of each message while no app of the account is on: the XMPP server learns that server\'s name, and that server when messages come.')
             : t('Closed, this space hears nothing from XMPP: what came shows when it opens.')}
         </Text>
         {on && door === false ? (

@@ -45,10 +45,10 @@ export function hostOf(url: string): string {
 }
 
 function relayWay({ url, answered, failed, spare, via }: WaysInput['relay']): Way {
-  const base = { id: 'relay' as const, title: t('Relay'), href: '/chat?setup=relay' };
-  if (!url.trim()) return { ...base, line: t('No relay yet. Contacts reach you only nearby or through Nostr.'), figure: t('none'), look: 'off' };
+  const base = { id: 'relay' as const, title: t('Server'), href: '/chat?setup=relay' };
+  if (!url.trim()) return { ...base, line: t('No server yet. Contacts reach you only nearby or through Nostr.'), figure: t('none'), look: 'off' };
   const figure = hostOf(url);
-  const more = [spare.trim() ? t('Home relay: {host}.', { host: hostOf(spare) }) : '', via ? t('Sends go through a second relay first.') : ''].filter(Boolean).join(' ');
+  const more = [spare.trim() ? t('Home server: {host}.', { host: hostOf(spare) }) : '', via ? t('Sends go through a second server first.') : ''].filter(Boolean).join(' ');
   const with_ = (line: string) => (more ? `${line} ${more}` : line);
   if (answered > 0 && answered >= failed) return { ...base, line: with_(t('It answers.')), figure, look: 'up' };
   if (failed > 0) return { ...base, line: with_(t('It cannot be reached now. Erevos tries again by itself.')), figure, look: 'trying' };
@@ -59,8 +59,8 @@ function nostrWay({ on, relays, reading }: NonNullable<WaysInput['nostr']>): Way
   const base = { id: 'nostr' as const, title: 'Nostr', href: '/nostr' };
   if (!on || relays === 0) return { ...base, line: t('Off: your texts do not go through Nostr.'), figure: t('off'), look: 'off' };
   const figure = `${reading}/${relays}`;
-  if (reading === 0) return { ...base, line: t('None of its relays answers now.'), figure, look: 'trying' };
-  return { ...base, line: plural(relays, '{reading} of {n} Nostr relay answers.', '{reading} of {n} Nostr relays answer.', { reading }), figure, look: 'up' };
+  if (reading === 0) return { ...base, line: t('None of its servers answers now.'), figure, look: 'trying' };
+  return { ...base, line: plural(relays, '{reading} of {n} Nostr server answers.', '{reading} of {n} Nostr servers answer.', { reading }), figure, look: 'up' };
 }
 
 function nearbyWay({ phones, bluetooth, lan, direct, carried }: NonNullable<WaysInput['nearby']>): Way {
@@ -96,7 +96,7 @@ function smsWay({ app, contacts }: NonNullable<WaysInput['sms']>): Way {
 
 function torWay({ way, ready }: NonNullable<WaysInput['tor']>): Way {
   const base = { id: 'tor' as const, title: 'Tor', href: '/tor' };
-  if (way === 'off') return { ...base, line: t('Off: the relays see your IP address.'), figure: t('off'), look: 'off' };
+  if (way === 'off') return { ...base, line: t('Off: the servers see your IP address.'), figure: t('off'), look: 'off' };
   const what = way === 'all' ? t('Everything goes through Tor.') : t('Your messages go through Tor.');
   if (!ready) return { ...base, line: `${what} ${t('Tor is starting…')}`, figure: '…', look: 'trying' };
   return { ...base, line: what, figure: t('on'), look: 'up' };

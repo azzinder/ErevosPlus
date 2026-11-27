@@ -21,7 +21,14 @@
 //! folder, chunks live in memory and are lost when the relay stops.
 //!
 //! All chunks together may take `cap` bytes. Past that, new chunks are
-//! refused with `Full` until others are taken or expire.
+//! refused with `Full` until others are taken or expire. Of that, the chunks
+//! open places put (see `open.rs`), which anyone may take with no invite or
+//! account, may take at most half all together, so that however many of them
+//! there are, the other half is left to the phones with places of their own;
+//! past it, an open place's new chunk is refused with `Full`, and deleting or
+//! expiry gives the room back. Which chunks are an open place's is kept in
+//! memory only, as which phone made a queue is: after a restart, a chunk read
+//! back from the folder counts as anyone's.
 //!
 //! Not audited.
 
@@ -60,6 +67,8 @@ struct Entry {
     /// The hour it came.
     at: u64,
     size: u64,
+    /// Whether an open place put it, in memory only.
+    open: bool,
 }
 
 pub struct FileStore {
@@ -68,6 +77,8 @@ pub struct FileStore {
     /// The chunks themselves, when there is no folder.
     memory: HashMap<ChunkId, Vec<u8>>,
     used: u64,
+    /// Of `used`, what the chunks open places put take.
+    open_used: u64,
     cap: u64,
     ttl: u64,
     clock: fn() -> u64,
@@ -105,6 +116,7 @@ impl FileStore {
             entries: HashMap::new(),
             memory: HashMap::new(),
             used: 0,
+            open_used: 0,
             cap,
             ttl,
             clock: system_now,
@@ -152,7 +164,15 @@ impl FileStore {
                 continue;
             }
             store.used += size - 8;
-            store.entries.insert(id, Entry { at, size: size - 8 });
+            // Whoever put it: which chunks are an open place's is not kept on disk.
+            store.entries.insert(
+                id,
+                Entry {
+                    at,
+                    size: size - 8,
+                    open: false,
+                },
+            );
         }
         Ok(store)
     }
@@ -174,7 +194,9 @@ impl FileStore {
         self.dir.as_ref().map(|dir| dir.join(hex(id)))
     }
 
-    /// Keeps a chunk and returns its new id.
+    /// Keeps a chunk and returns its new id, as `put_from` does with its
+    /// time to expire starting now (the relay calls `put_from` or `put_open`).
+    #[cfg(test)]
     pub fn put(&mut self, chunk: Vec<u8>) -> Result<ChunkId, FileError> {
         self.put_from(chunk, 0)
     }
@@ -183,8 +205,20 @@ impl FileStore {
     /// or now if that is sooner, and returns its new id: a file in a message
     /// sent for later stays until a while after the message goes.
     pub fn put_from(&mut self, chunk: Vec<u8>, from: u64) -> Result<ChunkId, FileError> {
+        self.keep(chunk, from, false)
+    }
+
+    /// Keeps a chunk an open place put (see `open.rs`), as `put_from` does,
+    /// while the chunks of all open places together take at most half of
+    /// `cap`; past that, `Full`.
+    pub fn put_open(&mut self, chunk: Vec<u8>, from: u64) -> Result<ChunkId, FileError> {
+        self.keep(chunk, from, true)
+    }
+
+    /// Keeps a chunk as `put_from` says, an open place's if `open`.
+    fn keep(&mut self, chunk: Vec<u8>, from: u64, open: bool) -> Result<ChunkId, FileError> {
         let size = chunk.len() as u64;
-        if self.used + size > self.cap {
+        if self.used + size > self.cap || (open && self.open_used + size > self.cap / 2) {
             return Err(FileError::Full);
         }
         let mut id = [0u8; 24];
@@ -196,8 +230,11 @@ impl FileStore {
                 self.memory.insert(id, chunk);
             }
         }
-        self.entries.insert(id, Entry { at, size });
+        self.entries.insert(id, Entry { at, size, open });
         self.used += size;
+        if open {
+            self.open_used += size;
+        }
         Ok(id)
     }
 
@@ -216,9 +253,7 @@ impl FileStore {
             Ok(_) => Err(FileError::Storage),
             Err(e) if e.kind() == ErrorKind::NotFound => {
                 // Removed by hand: forget it.
-                if let Some(entry) = self.entries.remove(id) {
-                    self.used -= entry.size;
-                }
+                self.forget(id);
                 Err(FileError::NotFound)
             }
             Err(e) => Err(storage(e)),
@@ -241,11 +276,20 @@ impl FileStore {
                 Err(e) => return Err(storage(e)),
             }
         }
+        self.forget(id);
+        Ok(())
+    }
+
+    /// Forgets the chunk `id`, gone from the folder or to be dropped from
+    /// memory, and gives back the room it took.
+    fn forget(&mut self, id: &ChunkId) {
         self.memory.remove(id);
         if let Some(entry) = self.entries.remove(id) {
             self.used -= entry.size;
+            if entry.open {
+                self.open_used -= entry.size;
+            }
         }
-        Ok(())
     }
 
     /// Removes every expired chunk. The relay calls this now and then.
@@ -346,6 +390,78 @@ mod tests {
         assert_eq!(s.put(vec![2; 6]), Err(FileError::Full));
         s.delete(&id).unwrap();
         s.put(vec![2; 6]).unwrap();
+    }
+
+    #[test]
+    fn open_places_chunks_take_half_the_room_at_most() {
+        let mut s = FileStore::in_memory(10, DEFAULT_TTL);
+        let first = s.put_open(vec![1; 3], 0).unwrap();
+        s.put_open(vec![2; 2], 0).unwrap();
+        // All open places' chunks together hold half the room: one more is refused.
+        assert_eq!(s.put_open(vec![3; 1], 0), Err(FileError::Full));
+        assert_eq!(
+            s.put_open(vec![3; 1], system_now() + HOUR),
+            Err(FileError::Full)
+        );
+        // The other half is the phones' with places of their own.
+        s.put(vec![4; 5]).unwrap();
+        assert_eq!(s.put(vec![5; 1]), Err(FileError::Full));
+        assert_eq!((s.used(), s.open_used), (10, 5));
+        // Deleted, an open place's chunk gives its room back.
+        s.delete(&first).unwrap();
+        assert_eq!((s.used(), s.open_used), (7, 2));
+        let again = s.put_open(vec![6; 3], 0).unwrap();
+        assert_eq!(s.put_open(vec![7; 1], 0), Err(FileError::Full));
+        assert_eq!(s.get(&again).unwrap(), vec![6; 3]);
+        // A phone's chunk deleted makes no room for open places past their half.
+        let mut s = FileStore::in_memory(10, DEFAULT_TTL);
+        let phones = s.put(vec![8; 4]).unwrap();
+        s.put_open(vec![9; 5], 0).unwrap();
+        s.delete(&phones).unwrap();
+        assert_eq!(s.put_open(vec![9; 1], 0), Err(FileError::Full));
+        s.put(vec![8; 5]).unwrap();
+    }
+
+    static OPEN_NOW: AtomicU64 = AtomicU64::new(1_800_000_000);
+    fn open_now() -> u64 {
+        OPEN_NOW.load(Ordering::SeqCst)
+    }
+
+    // One test moves this clock, so all of them that use it run in this one.
+    #[test]
+    fn an_open_place_s_chunks_give_back_their_room_as_they_go_and_are_anyones_after_a_restart() {
+        let day = 24 * 60 * 60;
+        // Expired, an open place's chunk gives its room back.
+        let mut s = FileStore {
+            clock: open_now,
+            ..FileStore::in_memory(10, 14 * day)
+        };
+        s.put_open(vec![1; 5], 0).unwrap();
+        assert_eq!(s.put_open(vec![2; 1], 0), Err(FileError::Full));
+        OPEN_NOW.fetch_add(15 * day, Ordering::SeqCst);
+        assert_eq!(s.expire(), 1);
+        assert_eq!((s.used(), s.open_used), (0, 0));
+        s.put_open(vec![2; 5], 0).unwrap();
+
+        // Kept in a folder: read back after a restart, it counts as anyone's.
+        let dir = TempDir::new();
+        let id = {
+            let mut s = FileStore::open_clocked(&dir.0, 10, 14 * day, open_now).unwrap();
+            let id = s.put_open(vec![3; 5], 0).unwrap();
+            assert_eq!(s.put_open(vec![4; 1], 0), Err(FileError::Full));
+            id
+        };
+        let mut s = FileStore::open_clocked(&dir.0, 10, 14 * day, open_now).unwrap();
+        assert_eq!((s.used(), s.open_used), (5, 0));
+        let other = s.put_open(vec![5; 5], 0).unwrap();
+        assert_eq!(s.get(&id).unwrap(), vec![3; 5]);
+        // Removed by hand, it gives its room back once found gone.
+        fs::remove_file(dir.0.join(hex(&other))).unwrap();
+        assert_eq!(s.get(&other), Err(FileError::NotFound));
+        assert_eq!((s.used(), s.open_used), (5, 0));
+        s.delete(&id).unwrap();
+        s.put_open(vec![6; 5], 0).unwrap();
+        assert_eq!(s.used(), 5);
     }
 
     // A truncated committed file is not a successful read. This is not an

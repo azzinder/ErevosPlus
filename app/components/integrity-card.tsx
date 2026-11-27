@@ -146,12 +146,12 @@ export function IntegrityCard({ part }: { part?: 'web' | 'push' }) {
             ) : null}
             {push === false && pushLeft ? (
               <Text variant="caption" color={colors.warning} style={hint}>
-                {t('Your relay could not be told yet, so notifications may still come. Erevos tells it once it can be reached.')}
+                {t('Your server could not be told yet, so notifications may still come. Erevos tells it once it can be reached.')}
               </Text>
             ) : null}
             <Text variant="caption" tone="muted" style={hint}>
               {t(
-                'When messages come, or a call rings, while Erevos is closed, your relay sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a relay or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the relay, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their relay.',
+                'When messages come, or a call rings, while Erevos is closed, your server sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a server or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the server, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their server.',
               )}
             </Text>
             {/* A call while closed: Web Push can only show it, it cannot ring. */}

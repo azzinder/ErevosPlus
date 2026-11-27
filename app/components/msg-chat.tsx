@@ -28,6 +28,7 @@ import { PhoneSign, ShortcutTile, VideoSign } from './shortcut-tile';
 import { ask, confirm } from '../lib/alert';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { t } from '../lib/i18n';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { SERVICE_NAMES, type MsgMessage, type MsgService } from '../lib/messenger';
 import { accountThroughTor } from '../lib/account-tor';
 import { messengerMedia, messengerMediaThroughTor, messengerNow, msgTorNow, msgDelete, msgNotifyOf, msgOpenChat, msgReact, msgReadChat, msgSetNotify, msgSend, msgSendFile, onMessengerChange, msgChatTor, msgSetChatTor, signalCallStart } from '../lib/messenger-store';
@@ -156,6 +157,8 @@ function MsgChat({ service }: { service: MsgService }) {
   function startCall(video: boolean) {
     setNote('');
     void (async () => {
+      // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+      if (callsOff()) throw new Error(callsOffNote());
       if (!(await ipGate({ network: 'Signal', act: 'call', of: `signal:${key}` }))) return;
       if (!(await callPermissions(video))) throw new Error(video ? t('Allow the microphone and the camera for a video call.') : t('Allow the microphone to call.'));
       await signalCallStart(key, video);

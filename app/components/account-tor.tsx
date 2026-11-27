@@ -8,6 +8,7 @@ import { Chip, Row, Text, Toggle } from './ui';
 import { tap } from '../lib/haptics';
 import { mark, t } from '../lib/i18n';
 import { accountThroughTor, canAccountTor, type AccountTor } from '../lib/account-tor';
+import { throughTor } from '../lib/relay';
 import { space } from '../theme/colors';
 
 // Tor for one account of another network (lib/account-tor.ts), the same on every account's screen:
@@ -48,7 +49,9 @@ export function AccountTorChoice({
         ))}
       </Row>
       <Text variant="caption" tone="muted">
-        {chatsThroughTor && way !== 'always'
+        {way !== 'always' && throughTor()
+          ? t('This space is INVISIBLE: the whole account goes only through Tor too, whatever is chosen here, and has no calls. Never straight.')
+          : chatsThroughTor && way !== 'always'
           ? t('A chat of this account is set to go through Tor, so the whole account goes only through Tor while it is: {network} has one connection for all its chats. Never straight.', { network })
           : way === 'always'
             ? t('Always through Tor, whatever the space does, signing in too: the {network} server never sees your address. Slower, and nothing goes while Tor cannot connect. Calls do not go through Tor.', { network })
@@ -56,10 +59,10 @@ export function AccountTorChoice({
               ? t('Not through Tor: the {network} server sees your address. Choose As the space or Always through Tor to hide it.', { network })
               : through
                 ? t('Through Tor, as the space: the {network} server does not see your address. Files too only when the space sends Everything through Tor.', { network })
-                : t('As the space, which does not go through Tor now: the {network} server sees your address. Tor is under Settings → Relay and networks → Tor.', { network })}
+                : t('As the space, which does not go through Tor now: the {network} server sees your address. Tor is under Settings → Server and networks → Tor.', { network })}
       </Text>
       <Text variant="caption" tone="muted">
-        {t('Tor uses the bridges chosen under Settings → Relay and networks → Tor, as Erevos does.')}
+        {t('Tor uses the bridges chosen under Settings → Server and networks → Tor, as Erevos does.')}
       </Text>
     </View>
   );

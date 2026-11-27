@@ -48,7 +48,7 @@ export function comingText(file: FileRef, state?: string): string | null {
     : state === 'stranger'
       ? t('Waits until you accept the request')
       : state === 'gone'
-      ? t('No longer on the relay')
+      ? t('No longer on the server')
       : state === 'failed'
         ? t('Did not come · tap to try again')
         : state

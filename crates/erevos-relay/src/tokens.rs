@@ -22,10 +22,11 @@
 //! that is not there holds no tokens.
 //!
 //! The relay adds lines itself too, for a phone invited by another (see
-//! `invites.rs`) or signed in with a provider (see `signin.rs`), and takes
-//! them out again when the phone that invited it takes its invite back, or
-//! the provider no longer lets the account in. It writes the whole file again
-//! then, through a file beside it and a rename (`journal::write_whole_then`),
+//! `invites.rs`), signed in with a provider (see `signin.rs`) or given an
+//! open place (see `open.rs`), and takes them out again when the phone that
+//! invited it takes its invite back, the provider no longer lets the account
+//! in, or the open place went unused. It writes the whole file again then,
+//! through a file beside it and a rename (`journal::write_whole_then`),
 //! keeping every other line as it was, so the folder the file is in must be
 //! one the relay can write. What it adds says where the line came from, after
 //! the name:
@@ -33,7 +34,11 @@
 //! ```text
 //! 3b7c0e5a8d16...91e1 maria # invited by pixel on 2026-10-21
 //! 5d41402abc4b...e2a0 lphl:nekten # signed in with LPHL on 2026-10-21
+//! 9c56cc51b374...7f03 open-5f3a9c01 # open place on 2026-11-26
 //! ```
+//!
+//! A line named `open-` and more is an open place's, whoever wrote it, and
+//! the relay names no other line so (`open::not_open`).
 //!
 //! A line an invite made stands on its own once it is in the file, as a line
 //! the operator wrote does: whatever takes out the line of the phone that
@@ -69,6 +74,7 @@ use sha2::{Digest, Sha256};
 
 use crate::journal;
 use crate::lock::lock;
+use crate::open;
 
 const TOKENS_LOCK: &str = "lock of the phones' tokens";
 
@@ -240,10 +246,10 @@ impl Tokens {
     /// Adds a line for the token whose SHA-256 is `hash`, named `name`, and
     /// `note` after it as a comment. With `unique`, a name another line has
     /// already gets `-2`, `-3` and so on after it. With `instead`, the line of
-    /// that token goes in the same write. Returns the name written. The file
-    /// is read again first, so a line the operator just added stays; one for
-    /// `hash` already there is an error (`AlreadyExists`), and nothing is
-    /// written.
+    /// that token goes in the same write. Returns the name written, which is
+    /// never an open place's (`open::not_open`). The file is read again first,
+    /// so a line the operator just added stays; one for `hash` already there is
+    /// an error (`AlreadyExists`), and nothing is written.
     pub fn add(
         &self,
         hash: &[u8; 32],
@@ -251,6 +257,42 @@ impl Tokens {
         unique: bool,
         note: &str,
         instead: Option<&[u8; 32]>,
+    ) -> io::Result<String> {
+        let name = open::not_open(name);
+        self.add_named(hash, note, instead, |taken| {
+            let mut written = name.clone();
+            let mut n = 1;
+            while unique && taken.contains(&written.to_lowercase()) {
+                n += 1;
+                written = open::not_open(&format!("{name}-{n}"));
+            }
+            written
+        })
+    }
+
+    /// Adds a line for the token whose SHA-256 is `hash`, for an open place
+    /// (see `open.rs`): named `open-` and 8 random hex digits that no other
+    /// line has, with `note` after it as a comment. Returns the name written.
+    /// As for `add`, one for `hash` already there is an error
+    /// (`AlreadyExists`), and nothing is written.
+    pub fn add_open(&self, hash: &[u8; 32], note: &str) -> io::Result<String> {
+        self.add_named(hash, note, None, |taken| loop {
+            let name = open::new_name();
+            if !taken.contains(&name) {
+                break name;
+            }
+        })
+    }
+
+    /// Adds a line for the token whose SHA-256 is `hash`, with `note` after
+    /// it, named as `name` says from the names other lines have (in lower
+    /// case), in place of the line of `instead` if given, all in one write.
+    fn add_named(
+        &self,
+        hash: &[u8; 32],
+        note: &str,
+        instead: Option<&[u8; 32]>,
+        name: impl Fn(&[String]) -> String,
     ) -> io::Result<String> {
         let mut seen = lock(&self.seen, TOKENS_LOCK);
         let written = self.rewrite(&mut seen, |lines| {
@@ -266,12 +308,7 @@ impl Tokens {
                 .filter_map(|line| line_name(line))
                 .map(|name| name.to_lowercase())
                 .collect();
-            let mut written = name.to_string();
-            let mut n = 1;
-            while unique && taken.contains(&written.to_lowercase()) {
-                n += 1;
-                written = format!("{name}-{n}");
-            }
+            let written = name(&taken);
             lines.push(format!("{} {written} # {note}", to_hex(hash)));
             Ok(written)
         })?;
@@ -391,6 +428,12 @@ impl Tokens {
         seen.read = false;
         self.refresh(seen);
         Ok(())
+    }
+
+    /// The file as it is now, each line as written; empty when it is not
+    /// there. An error when it cannot be read, or changed while it was read.
+    pub fn text(&self) -> io::Result<String> {
+        self.read_now().map(|(text, _)| text)
     }
 
     /// How many tokens the file holds now, reading it if it changed.
@@ -535,7 +578,7 @@ pub fn plain_file(path: &Path) -> io::Result<()> {
 }
 
 /// The SHA-256 a line of the file starts with, if it is one.
-fn line_hash(line: &str) -> Option<[u8; 32]> {
+pub(crate) fn line_hash(line: &str) -> Option<[u8; 32]> {
     let line = line.trim();
     if line.starts_with('#') {
         return None;
@@ -544,7 +587,7 @@ fn line_hash(line: &str) -> Option<[u8; 32]> {
 }
 
 /// The name on a line of the file, after the SHA-256, if it has one.
-fn line_name(line: &str) -> Option<&str> {
+pub(crate) fn line_name(line: &str) -> Option<&str> {
     line_hash(line)?;
     line.split_whitespace()
         .nth(1)
@@ -787,6 +830,34 @@ mod tests {
             .unwrap_err();
         assert_eq!(e.kind(), ErrorKind::AlreadyExists);
         assert_eq!(fs::read_to_string(&path.0).unwrap(), before);
+    }
+
+    #[test]
+    fn only_an_open_place_s_line_is_named_as_one() {
+        let path = TempPath::new("open");
+        let tokens = Tokens::new(path.0.clone());
+        let line = |token: &str| -> [u8; 32] { Sha256::digest(token.as_bytes()).into() };
+        // A name typed for an invite, or a provider's, is never an open place's.
+        assert_eq!(tokens.add(&line("a"), "Open-maria", true, "invited", None).unwrap(), "Openmaria");
+        assert_eq!(tokens.add(&line("b"), "open", true, "invited", None).unwrap(), "open");
+        assert_eq!(tokens.add(&line("c"), "open", true, "invited", None).unwrap(), "open2");
+        assert_eq!(tokens.add(&line("d"), "open-:x", false, "signed in", None).unwrap(), "open:x");
+        // An open place's has a name no other line has, with its note.
+        let first = tokens.add_open(&line("e"), "open place on 2026-11-26").unwrap();
+        let second = tokens.add_open(&line("f"), "open place on 2026-11-26").unwrap();
+        assert!(open::is_open(&first) && open::is_open(&second) && first != second);
+        let text = fs::read_to_string(&path.0).unwrap();
+        assert!(text.ends_with(&format!(
+            "{} {first} # open place on 2026-11-26\n{} {second} # open place on 2026-11-26\n",
+            to_hex(&line("e")),
+            to_hex(&line("f"))
+        )));
+        assert_eq!(text.lines().filter(|l| line_name(l).is_some_and(open::is_open)).count(), 2);
+        assert_eq!(tokens.text().unwrap(), text);
+        // One for a token already there is refused, and nothing is written.
+        let e = tokens.add_open(&line("a"), "again").unwrap_err();
+        assert_eq!(e.kind(), ErrorKind::AlreadyExists);
+        assert_eq!(fs::read_to_string(&path.0).unwrap(), text);
     }
 
     #[cfg(unix)]

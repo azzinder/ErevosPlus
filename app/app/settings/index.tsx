@@ -6,14 +6,15 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
+import { ModePicker } from '../../components/mode-picker';
 import { LanguageSheet, languageTitle, openLeaf, SettingsCard, SettingsRow, settingsPlace } from '../../components/settings-list';
 import { useModules } from '../../lib/modules';
 import { Input, Page, Text } from '../../components/ui';
 import { LANG_LABELS, lang, t } from '../../lib/i18n';
-import { groupsHere, itemsHere, searchSettings } from '../../lib/settings';
+import { directHere, groupsHere, itemsHere, searchSettings } from '../../lib/settings';
 import { space } from '../../theme/colors';
 
-/** Settings: the language, the groups of settings, and a search through all of them (lib/settings.ts). */
+/** Settings: the three modes at the top (lib/modes.ts: SPEED, ANONYMOUS, INVISIBLE), the language, the groups of settings, and a search through all of them (lib/settings.ts). */
 export default function SettingsScreen() {
   // Read again when a module is turned on or off (lib/modules.ts).
   const modules = useModules();
@@ -54,6 +55,7 @@ export default function SettingsScreen() {
         )
       ) : (
         <View style={{ gap: space.md }}>
+          {directHere(place) ? <ModePicker more={() => router.push('/direct')} /> : null}
           <SettingsCard>
             {[<SettingsRow key="language" icon="globe" title={languageTitle()} detail={LANG_LABELS[lang()]} onPress={() => setLanguages(true)} />]}
           </SettingsCard>

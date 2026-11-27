@@ -38,7 +38,7 @@ export default function PublicPostScreen() {
     try {
       const found = await nostrDmPostTalk(event);
       setTalk(found);
-      if (!found.answered) setSaid(t('No relay answered. Try again in a while.'));
+      if (!found.answered) setSaid(t('No server answered. Try again in a while.'));
     } catch (error) {
       setSaid(error instanceof Error ? error.message : String(error));
     } finally {

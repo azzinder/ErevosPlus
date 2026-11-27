@@ -19,8 +19,8 @@ export const devices: Record<string, string> = {
   'These hidden chats have chats of their own. Link from hidden chats with none, such as those a new PIN sets.':
     'Queste chat nascoste hanno chat proprie. Collega da chat nascoste senza chat, come quelle che apre un nuovo PIN.',
   'Too long to go through the phone.': 'Troppo lungo per passare dal telefono.',
-  'Type the relay address in Relay first: linked devices reach this phone through it.':
-    'Scrivi prima l’indirizzo del relay in «Relay»: i dispositivi collegati raggiungono questo telefono tramite il relay.',
+  'Type the server address in Server first: linked devices reach this phone through it.':
+    'Scrivi prima l’indirizzo del server in «Server»: i dispositivi collegati raggiungono questo telefono tramite il server.',
   '{n} devices are linked already, the most there can be.': 'Sono già collegati {n} dispositivi, il massimo possibile.',
 
   // The menu, and the chat on a linked device (app/index.tsx, app/chat.tsx).
@@ -66,10 +66,10 @@ export const devices: Record<string, string> = {
   'Photos and files too': 'Anche foto e file',
   'Linked to {name}': 'Collegato a {name}',
   'Since {when}. Last heard from {last}.': 'Dal {when}. Ultimo contatto: {last}.',
-  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
-    'Questo dispositivo ha le chat e i gruppi del telefono che ha l’account. Quello che scrivi qui passa dal telefono, che deve essere acceso e raggiungere il relay. Le chiamate squillano anche qui. Per ora i nuovi gruppi, i gruppi pubblici e le chiamate di gruppo restano sul telefono.',
-  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
-    'Queste chat nascoste hanno le chat e i gruppi delle stesse chat nascoste del telefono che ha l’account. Quello che scrivi qui passa dal telefono, che deve essere acceso e raggiungere il relay, con queste chat nascoste aperte lì o che ricevono da chiuse. Le chiamate squillano anche qui. Per ora i nuovi gruppi e le chiamate di gruppo restano sul telefono.',
+  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
+    'Questo dispositivo ha le chat e i gruppi del telefono che ha l’account. Quello che scrivi qui passa dal telefono, che deve essere acceso e raggiungere il server. Le chiamate squillano anche qui. Per ora i nuovi gruppi, i gruppi pubblici e le chiamate di gruppo restano sul telefono.',
+  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
+    'Queste chat nascoste hanno le chat e i gruppi delle stesse chat nascoste del telefono che ha l’account. Quello che scrivi qui passa dal telefono, che deve essere acceso e raggiungere il server, con queste chat nascoste aperte lì o che ricevono da chiuse. Le chiamate squillano anche qui. Per ora i nuovi gruppi e le chiamate di gruppo restano sul telefono.',
   'Make or join groups on the phone that holds this account.': 'Crea gruppi o entra nei gruppi dal telefono che ha questo account.',
   'Group calls ring on the phone that holds this account, for now. Call from there.':
     'Per ora le chiamate di gruppo squillano sul telefono che ha questo account. Chiama da lì.',
@@ -111,10 +111,10 @@ export const devices: Record<string, string> = {
     'Usalo quando questo dispositivo è il computer: le sue chat diventano quelle del telefono che ha l’account.',
   'Use this when this device is the computer: these hidden chats become those of the same hidden chats on the phone that holds the account.':
     'Usalo quando questo dispositivo è il computer: queste chat nascoste diventano le stesse chat nascoste del telefono che ha l’account.',
-  'These hidden chats have no relay queue yet: in them, type the relay address under For advanced users, then create their queue.':
-    'Queste chat nascoste non hanno ancora una coda sul relay: al loro interno, scrivi l’indirizzo del relay in «Per utenti esperti», poi crea la loro coda.',
-  'The phone answers on a queue of this device on a relay: the one the phone uses, or any other. If the relay asks for a token, sign in when it offers that, or type one.':
-    'Il telefono risponde su una coda di questo dispositivo su un relay: quello che usa il telefono, o un altro qualsiasi. Se il relay chiede un token, accedi quando lo offre, oppure scrivine uno.',
+  'These hidden chats have no server queue yet: in them, type the server address under For advanced users, then create their queue.':
+    'Queste chat nascoste non hanno ancora una coda sul server: al loro interno, scrivi l’indirizzo del server in «Per utenti esperti», poi crea la loro coda.',
+  'The phone answers on a queue of this device on a server: the one the phone uses, or any other. If the server asks for a token, sign in when it offers that, or type one.':
+    'Il telefono risponde su una coda di questo dispositivo su un server: quello che usa il telefono, o un altro qualsiasi. Se il server chiede un token, accedi quando lo offre, oppure scrivine uno.',
   'Name of this device': 'Nome di questo dispositivo',
   'Tap Link to my phone, and a QR code for the phone shows here.': 'Tocca «Collega al mio telefono» e qui compare un codice QR per il telefono.',
   'Send the accounts to {name}': 'Invia gli account a {name}',
@@ -148,13 +148,13 @@ export const devices: Record<string, string> = {
   "The groups go to {name} once it hears it.": "I gruppi vanno su {name} appena lo sa.",
   "Groups stay on": "I gruppi restano su",
   "Moving: both devices have to be on.": "Spostamento in corso: tutti e due i dispositivi devono essere accesi.",
-  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the relay. Public groups stay on the phone.": "Le chiavi dei gruppi sono su un solo dispositivo alla volta, mai copiate. Lì i gruppi funzionano a telefono spento; gli altri dispositivi ci scrivono attraverso di esso, quindi deve essere acceso. Per spostarli servono tutti e due accesi, e il relay. I gruppi pubblici restano sul telefono.",
+  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the server. Public groups stay on the phone.": "Le chiavi dei gruppi sono su un solo dispositivo alla volta, mai copiate. Lì i gruppi funzionano a telefono spento; gli altri dispositivi ci scrivono attraverso di esso, quindi deve essere acceso. Per spostarli servono tutti e due accesi, e il server. I gruppi pubblici restano sul telefono.",
   "The groups are held here": "I gruppi sono qui",
   "Groups work on this device with the phone off, and you can make new ones here. The phone and the other devices write in them through this one, so it has to be on.": "I gruppi funzionano su questo dispositivo a telefono spento, e qui puoi crearne di nuovi. Il telefono e gli altri dispositivi ci scrivono attraverso questo, quindi deve essere acceso.",
   "The groups are held on this device. On the phone, move them back to it first, under Groups stay on.": "I gruppi sono su questo dispositivo. Sul telefono, riportali prima lì, in I gruppi restano su.",
   "The groups are held on {name}. Move them back to this phone first, under Groups stay on.": "I gruppi sono su {name}. Riportali prima su questo telefono, in I gruppi restano su.",
   "That device is no longer linked.": "Quel dispositivo non è più collegato.",
-  "The groups go to the other device through the relay. Type its address in Relay first.": "I gruppi vanno sull’altro dispositivo attraverso il relay. Scrivi prima il suo indirizzo in Relay.",
+  "The groups go to the other device through the server. Type its address in Server first.": "I gruppi vanno sull’altro dispositivo attraverso il server. Scrivi prima il suo indirizzo in Server.",
   "Unlink all the same?": "Scollegare comunque?",
   "Unlinked now, the groups go from this device, and the phone shows each as left.": "Scollegando, i gruppi lasciano questo dispositivo e il telefono mostra ciascuno come abbandonato.",
   "Unlinked now, this phone shows each of the groups as left, unless they are still on their way to it: those stay here. Do it if the device is lost.": "Scollegando, questo telefono mostra ogni gruppo come abbandonato, tranne quelli ancora in viaggio verso di lui: quelli restano qui. Fallo se il dispositivo è perso.",
@@ -165,14 +165,14 @@ export const devices: Record<string, string> = {
   // Linking with the short code (components/quick-link.tsx, lib/link-nostr.ts).
   'Inside hidden chats, link with the code Link to my phone shows inside the same hidden chats on the computer.':
     'Dentro le chat nascoste, collega con il codice che «Collega al mio telefono» mostra dentro le stesse chat nascoste sul computer.',
-  '{why} Link this way instead: sign in to the relay below, then tap Link to my phone.':
-    '{why} Collega in un altro modo: accedi al relay qui sotto, poi tocca «Collega al mio telefono».',
+  '{why} Link this way instead: sign in to the server below, then tap Link to my phone.':
+    '{why} Collega in un altro modo: accedi al server qui sotto, poi tocca «Collega al mio telefono».',
   'Link another way':
     'Collega in un altro modo',
   'The phone that answered is not the one that read the code. Make a new code, and link again.':
     'Il telefono che ha risposto non è quello che ha letto il codice. Crea un nuovo codice e collega di nuovo.',
-  'The phone answered, but this computer could not use its relay: {error}':
-    'Il telefono ha risposto, ma questo computer non ha potuto usare il suo relay: {error}',
+  'The phone answered, but this computer could not use its server: {error}':
+    'Il telefono ha risposto, ma questo computer non ha potuto usare il suo server: {error}',
   'The phone answered. Setting up this computer…':
     'Il telefono ha risposto. Preparazione di questo computer…',
   'Linking with the phone…':
@@ -185,8 +185,8 @@ export const devices: Record<string, string> = {
     'Creazione del codice…',
   'The phone sends this computer what it needs through Nostr, end-to-end encrypted. The code works for half an hour.':
     'Il telefono invia a questo computer ciò che serve tramite Nostr, cifrato end-to-end. Il codice vale mezz’ora.',
-  'The computer did not answer. On it, tap Link another way and sign in to the relay there, then scan its code again.':
-    'Il computer non ha risposto. Su di esso, tocca «Collega in un altro modo», accedi lì al relay e inquadra di nuovo il suo codice.',
+  'The computer did not answer. On it, tap Link another way and sign in to the server there, then scan its code again.':
+    'Il computer non ha risposto. Su di esso, tocca «Collega in un altro modo», accedi lì al server e inquadra di nuovo il suo codice.',
   'Linked to {name}. The chats go to it now.':
     'Collegato a {name}. Le chat vanno ora a lui.',
   'Link {name} to this phone?':
@@ -195,12 +195,12 @@ export const devices: Record<string, string> = {
     'Collega solo un tuo computer, di cui hai appena inquadrato il codice. Riceve le chat di questo spazio e i messaggi scelti qui sotto.',
   'Waiting for the computer…':
     'In attesa del computer…',
-  'No Nostr relay could be reached.':
-    'Nessun relay Nostr raggiungibile.',
-  'The Nostr relay did not take it.':
-    'Il relay Nostr non l’ha accettato.',
-  'No Nostr relay took it.':
-    'Nessun relay Nostr l’ha accettato.',
+  'No Nostr server could be reached.':
+    'Nessun server Nostr raggiungibile.',
+  'The Nostr server did not take it.':
+    'Il server Nostr non l’ha accettato.',
+  'No Nostr server took it.':
+    'Nessun server Nostr l’ha accettato.',
   'Asked. On {name}, tap Link again: it links to this phone and keeps its chats.':
     'Richiesto. Su {name}, tocca «Collega di nuovo»: si collega a questo telefono e tiene le sue chat.',
   'Let go of {name}':

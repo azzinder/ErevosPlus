@@ -37,4 +37,9 @@ export const giveApp: Record<string, string> = {
   "This build of Erevos cannot take itself from a phone nearby. Update Erevos for it.": "Questa versione di Erevos non può prendersi da un telefono vicino. Aggiorna Erevos per farlo.",
   "Erevos {version} came whole and is signed as this one is. Android shows its installer: tap Install. Erevos closes and opens as the new version, with everything kept.": "Erevos {version} è arrivato per intero ed è firmato come questo. Android mostra il suo programma di installazione: tocca Installa. Erevos si chiude e si apre come nuova versione, con tutto conservato.",
   "From a phone nearby": "Da un telefono vicino",
+  "This is the Erevos from F-Droid: only the F-Droid app updates it. Once this phone has internet, install F-Droid on it too.": "Questo è l’Erevos di F-Droid: solo l’app F-Droid lo aggiorna. Appena questo telefono ha internet, installa anche F-Droid.",
+  "Erevos from F-Droid": "Erevos di F-Droid",
+  "The other phone gives the Erevos from F-Droid. Installed over this one, it keeps everything, but from then on only the F-Droid app updates it: it has no Check for updates and no From a phone nearby, and sends no backups to Google Drive.": "L’altro telefono dà l’Erevos di F-Droid. Installato sopra questo, conserva tutto, ma da allora solo l’app F-Droid lo aggiorna: non ha «Cerca aggiornamenti» né «Da un telefono vicino», e non invia backup su Google Drive.",
+  "Nothing was installed.": "Non è stato installato nulla.",
+  "This is the Erevos from F-Droid: on the other phone too, only the F-Droid app will update it. An Erevos there that is not from F-Droid asks before it installs it.": "Questo è l’Erevos di F-Droid: anche sull’altro telefono solo l’app F-Droid lo aggiornerà. Un Erevos lì che non viene da F-Droid chiede prima di installarlo.",
 };

@@ -62,7 +62,7 @@ export const parts: Record<string, string> = {
     '{name}: προσπάθησε να σε καλέσει. Αποδέξου το αίτημα μηνυμάτων για να δέχεσαι κλήσεις από αυτή την επαφή.',
   'The call ended.': 'Η κλήση τελείωσε.',
   'The call has ended.': 'Η κλήση έχει τελειώσει.',
-  'Calls are set up through the relay. Type its address in Relay first.': 'Οι κλήσεις στήνονται μέσω του relay. Γράψε πρώτα τη διεύθυνσή του στο «Relay».',
+  'Calls are set up through the server. Type its address in Server first.': 'Οι κλήσεις στήνονται μέσω του server. Γράψε πρώτα τη διεύθυνσή του στον «Server».',
 
   // The web app's card (components/integrity-card.tsx, lib/integrity.web.ts).
   'This web app': 'Αυτή η web εφαρμογή',
@@ -79,10 +79,10 @@ export const parts: Record<string, string> = {
   'Notifications while closed': 'Ειδοποιήσεις όταν είναι κλειστό',
   'On in this space': 'Ενεργές σε αυτόν τον χώρο',
   'Off in this space': 'Ανενεργές σε αυτόν τον χώρο',
-  'When messages come, or a call rings, while Erevos is closed, your relay sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a relay or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the relay, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their relay.':
-    'Όταν έρχονται μηνύματα, ή χτυπά μια κλήση, ενώ το Erevos είναι κλειστό, το relay σου στέλνει μια ειδοποίηση push μέσω της υπηρεσίας push αυτού του browser (της Apple σε iPhone), και το Erevos γράφει πόσα μηνύματα ήρθαν από τότε που το άνοιξες τελευταία φορά, για παράδειγμα «3 νέα μηνύματα», ή «Κλήση» αν χτύπησε μόνο μια κλήση, τίποτα άλλο. Η ειδοποίηση δεν περιέχει ούτε μήνυμα ούτε αποστολέα, και ο αριθμός της είναι κρυπτογραφημένος για αυτόν τον browser, αλλά η υπηρεσία push βλέπει πότε έρχεται κάτι για αυτή τη συσκευή, και ότι χρησιμοποιεί το Erevos. Με ένα relay ή το Erevos ενός αποστολέα παλαιότερο από την έκδοση 2.0.0, ή με ένα μήνυμα που μετέφεραν στο relay άλλα τηλέφωνα, δεν υπάρχει αριθμός: το Erevos γράφει «Νέο μήνυμα», ή «Νέα μηνύματα» αν ήρθαν κι άλλα, μέχρι να το ανοίξεις. Οι κρυφές συνομιλίες δεν παίρνουν ποτέ ειδοποιήσεις. Κάθε χώρος που τις ενεργοποιεί έχει δική του διεύθυνση push, οπότε η διεύθυνση δεν συνδέει δύο χώρους μεταξύ τους στο relay τους.',
-  'Your relay could not be told yet, so notifications may still come. Erevos tells it once it can be reached.':
-    'Δεν ήταν ακόμα δυνατό να ενημερωθεί το relay σου, οπότε μπορεί να έρχονται ακόμα ειδοποιήσεις. Το Erevos το ενημερώνει μόλις το relay είναι διαθέσιμο.',
+  'When messages come, or a call rings, while Erevos is closed, your server sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a server or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the server, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their server.':
+    'Όταν έρχονται μηνύματα, ή χτυπά μια κλήση, ενώ το Erevos είναι κλειστό, ο server σου στέλνει μια ειδοποίηση push μέσω της υπηρεσίας push αυτού του browser (της Apple σε iPhone), και το Erevos γράφει πόσα μηνύματα ήρθαν από τότε που το άνοιξες τελευταία φορά, για παράδειγμα «3 νέα μηνύματα», ή «Κλήση» αν χτύπησε μόνο μια κλήση, τίποτα άλλο. Η ειδοποίηση δεν περιέχει ούτε μήνυμα ούτε αποστολέα, και ο αριθμός της είναι κρυπτογραφημένος για αυτόν τον browser, αλλά η υπηρεσία push βλέπει πότε έρχεται κάτι για αυτή τη συσκευή, και ότι χρησιμοποιεί το Erevos. Με έναν server ή το Erevos ενός αποστολέα παλαιότερο από την έκδοση 2.0.0, ή με ένα μήνυμα που μετέφεραν στον server άλλα τηλέφωνα, δεν υπάρχει αριθμός: το Erevos γράφει «Νέο μήνυμα», ή «Νέα μηνύματα» αν ήρθαν κι άλλα, μέχρι να το ανοίξεις. Οι κρυφές συνομιλίες δεν παίρνουν ποτέ ειδοποιήσεις. Κάθε χώρος που τις ενεργοποιεί έχει δική του διεύθυνση push, οπότε η διεύθυνση δεν συνδέει δύο χώρους μεταξύ τους στον server τους.',
+  'Your server could not be told yet, so notifications may still come. Erevos tells it once it can be reached.':
+    'Δεν ήταν ακόμα δυνατό να ενημερωθεί ο server σου, οπότε μπορεί να έρχονται ακόμα ειδοποιήσεις. Το Erevos τον ενημερώνει μόλις ο server είναι διαθέσιμος.',
   'A call that comes while Erevos is closed does not ring: only the notification "Call" shows. On an iPhone nothing more can be done: Apple lets a web app neither run while it is closed nor ring as a phone does; that would take an app from the App Store. On Android, the Erevos app rings even when closed.':
     'Μια κλήση που έρχεται όσο το Erevos είναι κλειστό δεν χτυπά: βγαίνει μόνο η ειδοποίηση «Κλήση». Στο iPhone δεν γίνεται κάτι παραπάνω: η Apple δεν αφήνει μια web εφαρμογή ούτε να τρέχει όσο είναι κλειστή ούτε να χτυπά όπως ένα τηλέφωνο· γι’ αυτό θα χρειαζόταν εφαρμογή από το App Store. Στο Android, η εφαρμογή του Erevos χτυπά ακόμη κι όταν είναι κλειστή.',
   "Each space with them on has a service worker of its own in this browser, which its settings list: whoever can see them can count the spaces with notifications on. A message request from someone new, through your contact link, may show only once Erevos opens.":
@@ -100,7 +100,7 @@ export const parts: Record<string, string> = {
   // Files and photos (lib/attachments.ts, lib/photo*.ts, lib/pick-*.ts, lib/save-file*.ts, lib/backup-place.web.ts).
   'Files can be 100 MB at most.': 'Τα αρχεία μπορούν να είναι έως 100 MB.',
   'The file was changed on the way, so it was not kept.': 'Το αρχείο άλλαξε στη διαδρομή, γι’ αυτό δεν κρατήθηκε.',
-  'The file is not on the relay any more. Files wait there 14 days.': 'Το αρχείο δεν είναι πια στο relay. Τα αρχεία περιμένουν εκεί 14 μέρες.',
+  'The file is not on the server any more. Files wait there 14 days.': 'Το αρχείο δεν είναι πια στον server. Τα αρχεία περιμένουν εκεί 14 μέρες.',
   'This file is not on this phone.': 'Αυτό το αρχείο δεν είναι σε αυτό το τηλέφωνο.',
   'This file is not on this computer.': 'Αυτό το αρχείο δεν είναι σε αυτόν τον υπολογιστή.',
   // Shown after "in", as «στο {folder}»: no article.
@@ -108,6 +108,12 @@ export const parts: Record<string, string> = {
   'the downloads folder': 'φάκελο λήψεων',
   'Not saved: the share sheet was closed.': 'Δεν αποθηκεύτηκε: το παράθυρο κοινοποίησης έκλεισε.',
   'That folder is not there any more. Choose it again.': 'Αυτός ο φάκελος δεν υπάρχει πια. Διάλεξέ τον ξανά.',
+  // A backup that a folder did not take, in plain words (lib/backup-place.ts folderTrouble).
+  'The app this folder belongs to made no file in it. Choose a folder on the phone instead, or try again later.':
+    'Η εφαρμογή στην οποία ανήκει αυτός ο φάκελος δεν έφτιαξε το αρχείο. Διάλεξε καλύτερα έναν φάκελο στο τηλέφωνο, ή δοκίμασε ξανά αργότερα.',
+  'Erevos may no longer write in this folder. Choose it again.': 'Το Erevos δεν έχει πια άδεια να γράφει σε αυτόν τον φάκελο. Διάλεξέ τον ξανά.',
+  'There is no room left in this folder. Make room, or choose another one.': 'Δεν έχει μείνει χώρος σε αυτόν τον φάκελο. Κάνε χώρο ή διάλεξε άλλον.',
+  'The backup could not be written in this folder: {reason}': 'Το αντίγραφο δεν γράφτηκε σε αυτόν τον φάκελο: {reason}',
   'Ready to save.': 'Έτοιμο για αποθήκευση.',
   Original: 'Αρχική',
   'Original: the photo as it was, full size, with only its place, phone and time taken out.':
@@ -150,8 +156,8 @@ export const parts: Record<string, string> = {
   'That is not a phone number.': 'Αυτός δεν είναι αριθμός τηλεφώνου.',
   'Not a time Erevos keeps messages for.': 'Το Erevos δεν κρατά μηνύματα για τόσο χρόνο.',
   'No conversation with this contact.': 'Δεν υπάρχει συνομιλία με αυτή την επαφή.',
-  'That contact uses the relay at {relay}, and its link has no key for it. Ask them for a new link.':
-    'Αυτή η επαφή χρησιμοποιεί το relay στο {relay}, και ο σύνδεσμός της δεν έχει κλειδί γι’ αυτό. Ζήτησέ της νέο σύνδεσμο.',
+  'That contact uses the server at {relay}, and its link has no key for it. Ask them for a new link.':
+    'Αυτή η επαφή χρησιμοποιεί τον server στο {relay}, και ο σύνδεσμός της δεν έχει κλειδί γι’ αυτόν. Ζήτησέ της νέο σύνδεσμο.',
   'Wrong password for this backup.': 'Λάθος κωδικός για αυτό το αντίγραφο ασφαλείας.',
 
   // Groups (lib/groups.ts, lib/space-groups.ts).
@@ -183,7 +189,7 @@ export const parts: Record<string, string> = {
   'More than one member of this group shows this key, so one of them is not who they say. Ask for their contact link some other way.':
     'Πάνω από ένα μέλος αυτής της ομάδας φαίνεται με αυτό το κλειδί, άρα κάποιο δεν είναι αυτό που λέει. Ζήτησε τον σύνδεσμο επαφής του με άλλον τρόπο.',
   'Another space is open now.': 'Τώρα είναι ανοιχτός άλλος χώρος.',
-  'Groups go through the relay. Type its address in Relay first.': 'Οι ομάδες λειτουργούν μέσω του relay. Γράψε πρώτα τη διεύθυνσή του στο «Relay».',
+  'Groups go through the server. Type its address in Server first.': 'Οι ομάδες λειτουργούν μέσω του server. Γράψε πρώτα τη διεύθυνσή του στον «Server».',
 
   // The build and updates (lib/core.ts, lib/crypto.ts, lib/install-update*.ts, lib/updates.ts, lib/shell.ts).
   'This build has no Erevos core, so it cannot encrypt. Rebuild the app.': 'Αυτή η έκδοση δεν έχει τον πυρήνα του Erevos, οπότε δεν μπορεί να κρυπτογραφήσει. Φτιάξε ξανά την εφαρμογή.',
@@ -210,45 +216,47 @@ export const parts: Record<string, string> = {
 
   // LoRa and nearby phones (lib/lora.ts, lib/nearby.ts).
   'The radio restarts with its new settings, and links again.': 'Ο ασύρματος ξεκινά ξανά με τις νέες ρυθμίσεις του και συνδέεται ξανά.',
-  'There is no relay, and no Erevos phone is linked nearby. Type the relay address in Relay, or come near their phone.':
-    'Δεν υπάρχει relay, ούτε κοντινό τηλέφωνο με Erevos συνδεδεμένο. Γράψε τη διεύθυνση του relay στο «Relay», ή έλα κοντά στο τηλέφωνό του.',
-  'Too large for LoRa, which takes only text. It can go once the relay can be reached, or near their phone.':
-    'Πολύ μεγάλο για LoRa, που παίρνει μόνο κείμενο. Μπορεί να φύγει μόλις το relay είναι προσβάσιμο, ή κοντά στο τηλέφωνό του.',
+  'There is no server, and no Erevos phone is linked nearby. Type the server address in Server, or come near their phone.':
+    'Δεν υπάρχει server, ούτε κοντινό τηλέφωνο με Erevos συνδεδεμένο. Γράψε τη διεύθυνση του server στον «Server», ή έλα κοντά στο τηλέφωνό του.',
+  'Too large for LoRa, which takes only text. It can go once the server can be reached, or near their phone.':
+    'Πολύ μεγάλο για LoRa, που παίρνει μόνο κείμενο. Μπορεί να φύγει μόλις ο server είναι προσβάσιμος, ή κοντά στο τηλέφωνό του.',
 
   // The relay (lib/relay.ts, lib/sms-invite.ts); {what} is the request's name.
   'An id is 48 hex characters.': 'Ένα id έχει 48 δεκαεξαδικούς χαρακτήρες.',
   'Through Tor: {reason}': 'Μέσω Tor: {reason}',
-  'cannot reach the relay at {url}, or the token is wrong': 'δεν είναι δυνατή η σύνδεση με το relay στο {url}, ή το token είναι λάθος',
+  'cannot reach the server at {url}, or the token is wrong': 'δεν είναι δυνατή η σύνδεση με τον server στο {url}, ή το token είναι λάθος',
   'message is not held': 'το μήνυμα δεν κρατιέται',
-  'the relay at {url} cannot keep messages for later: update it': 'το relay στο {url} δεν μπορεί να κρατήσει μηνύματα για αργότερα: ενημέρωσέ το',
-  'The relay at {url} that keeps it is no longer set here.': 'Το relay στο {url} που το κρατά δεν είναι πια ρυθμισμένο εδώ.',
-  'the relay closed the connection': 'το relay έκλεισε τη σύνδεση',
-  'the relay did not answer in time': 'το relay δεν απάντησε εγκαίρως',
-  'lost the connection to the relay': 'χάθηκε η σύνδεση με το relay',
+  'the server at {url} cannot keep messages for later: update it': 'ο server στο {url} δεν μπορεί να κρατήσει μηνύματα για αργότερα: ενημέρωσέ τον',
+  'The server at {url} that keeps it is no longer set here.': 'Ο server στο {url} που το κρατά δεν είναι πια ρυθμισμένος εδώ.',
+  'the server closed the connection': 'ο server έκλεισε τη σύνδεση',
+  'the server did not answer in time': 'ο server δεν απάντησε εγκαίρως',
+  'lost the connection to the server': 'χάθηκε η σύνδεση με τον server',
   '{what}: queue not found': '{what}: η ουρά δεν βρέθηκε',
   '{what}: queue is full': '{what}: η ουρά είναι γεμάτη',
-  '{what}: the relay could not save it, try again later': '{what}: το relay δεν μπόρεσε να το αποθηκεύσει, δοκίμασε ξανά αργότερα',
-  '{what}: the second relay could not reach your relay, try again later': '{what}: το δεύτερο relay δεν μπόρεσε να φτάσει το relay σου, δοκίμασε ξανά αργότερα',
-  '{what}: the file is not on the relay any more': '{what}: το αρχείο δεν είναι πια στο relay',
-  '{what}: the relay has no room for files now, try again later': '{what}: το relay δεν έχει χώρο για αρχεία τώρα, δοκίμασε ξανά αργότερα',
-  '{what}: the relay could not keep it, try again later': '{what}: το relay δεν μπόρεσε να το κρατήσει, δοκίμασε ξανά αργότερα',
-  '{what}: your relay could not reach the relay the file is on': '{what}: το relay σου δεν μπόρεσε να φτάσει το relay όπου είναι το αρχείο',
-  '{reason}. A relay older than this app cannot take files: update it.': '{reason}. Ένα relay παλαιότερο από αυτή την εφαρμογή δεν δέχεται αρχεία: ενημέρωσέ το.',
+  '{what}: your free place on this server has used all it may today. It goes on tomorrow.': '{what}: η δωρεάν θέση σου σε αυτόν τον server έφτασε το σημερινό της όριο. Συνεχίζει αύριο.',
+  '{what}: the server could not save it, try again later': '{what}: ο server δεν μπόρεσε να το αποθηκεύσει, δοκίμασε ξανά αργότερα',
+  '{what}: the second server could not reach your server, try again later': '{what}: ο δεύτερος server δεν μπόρεσε να φτάσει τον server σου, δοκίμασε ξανά αργότερα',
+  '{what}: the file is not on the server any more': '{what}: το αρχείο δεν είναι πια στον server',
+  '{what}: the server has no room for files now, try again later': '{what}: ο server δεν έχει χώρο για αρχεία τώρα, δοκίμασε ξανά αργότερα',
+  '{what}: your free place on this server has moved all the files it may today. Files go again tomorrow.': '{what}: η δωρεάν θέση σου σε αυτόν τον server έφτασε το σημερινό όριο αρχείων. Τα αρχεία συνεχίζουν αύριο.',
+  '{what}: the server could not keep it, try again later': '{what}: ο server δεν μπόρεσε να το κρατήσει, δοκίμασε ξανά αργότερα',
+  '{what}: your server could not reach the server the file is on': '{what}: ο server σου δεν μπόρεσε να φτάσει τον server όπου είναι το αρχείο',
+  '{reason}. A server older than this app cannot take files: update it.': '{reason}. Ένας server παλαιότερος από αυτή την εφαρμογή δεν δέχεται αρχεία: ενημέρωσέ τον.',
   'message is too large': 'το μήνυμα είναι πολύ μεγάλο',
-  'your relay has no key for two-hop sending, so it was not sent through the second relay':
-    'το relay σου δεν έχει κλειδί για αποστολή με δύο βήματα, οπότε δεν στάλθηκε μέσω του δεύτερου relay',
-  'the link has given all its places on its relay. Ask them for a new link': 'ο σύνδεσμος έδωσε ήδη όλες τις θέσεις του στο relay του. Ζήτησέ τους νέο σύνδεσμο',
-  'The relay address is too long for an SMS invite.': 'Η διεύθυνση του relay είναι πολύ μεγάλη για πρόσκληση με SMS.',
+  'your server has no key for two-hop sending, so it was not sent through the second server':
+    'ο server σου δεν έχει κλειδί για αποστολή με δύο βήματα, οπότε δεν στάλθηκε μέσω του δεύτερου server',
+  'the link has given all its places on its server. Ask them for a new link': 'ο σύνδεσμος έδωσε ήδη όλες τις θέσεις του στον server του. Ζήτησέ τους νέο σύνδεσμο',
+  'The server address is too long for an SMS invite.': 'Η διεύθυνση του server είναι πολύ μεγάλη για πρόσκληση με SMS.',
 
   // Notifications in the web app (lib/web-push*.ts).
   'Notifications through the browser are for the web app.': 'Οι ειδοποιήσεις μέσω browser είναι για τη web εφαρμογή.',
-  'Your relay does not send notifications. It needs a newer version, set up with a push key.':
-    'Το relay σου δεν στέλνει ειδοποιήσεις. Χρειάζεται νεότερη έκδοση, ρυθμισμένη με κλειδί push.',
+  'Your server does not send notifications. It needs a newer version, set up with a push key.':
+    'Ο server σου δεν στέλνει ειδοποιήσεις. Χρειάζεται νεότερη έκδοση, ρυθμισμένη με κλειδί push.',
   'This browser cannot show notifications for a closed web app. On an iPhone, add Erevos to the home screen first.':
     'Αυτός ο browser δεν μπορεί να δείξει ειδοποιήσεις για κλειστή web εφαρμογή. Σε iPhone, πρόσθεσε πρώτα το Erevos στην αρχική οθόνη.',
   'Notifications are not allowed for Erevos. Allow them in the settings of this browser or phone.':
     'Οι ειδοποιήσεις δεν επιτρέπονται για το Erevos. Επίτρεψέ τες στις ρυθμίσεις αυτού του browser ή του τηλεφώνου.',
-  'Set up the relay first, under Relay.': 'Ρύθμισε πρώτα το relay, στο «Relay».',
+  'Set up the server first, under Server.': 'Ρύθμισε πρώτα τον server, στον «Server».',
   'Notifications could not be turned on: {reason}': 'Οι ειδοποιήσεις δεν ενεργοποιήθηκαν: {reason}',
   // Calls' lines in a chat (lib/call-lines.ts).
   'Voice call': 'Φωνητική κλήση',

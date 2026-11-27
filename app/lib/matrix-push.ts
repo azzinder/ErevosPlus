@@ -89,12 +89,12 @@ function pusher(push: MatrixPush, gateway: string | null): Record<string, unknow
  */
 export async function startMatrixPush(state: MatrixState, relay: Relay): Promise<MatrixPush> {
   const gateway = gatewayOf(relay.url);
-  if (!gateway) throw new Error(t('This space has no queue at a relay yet: it can say nothing while closed.'));
+  if (!gateway) throw new Error(t('This space has no queue at a server yet: it can say nothing while closed.'));
   const ids = await createQueue(relay);
   const push: MatrixPush = { url: relay.url, recipientHex: toHex(ids.recipientId), senderHex: toHex(ids.senderId) };
   try {
     // The relay answered for the queue a moment ago: one that cannot be asked here does not take pushes.
-    if (!(await gatewayKnows(gateway, push.senderHex).catch(() => false))) throw new Error(t('Your relay does not take Matrix notices yet: it needs updating.'));
+    if (!(await gatewayKnows(gateway, push.senderHex).catch(() => false))) throw new Error(t('Your server does not take Matrix notices yet: it needs updating.'));
     await call(state, 'POST', '/pushers/set', pusher(push, gateway));
   } catch (error) {
     await deleteQueue(relay, ids.recipientId).catch(() => undefined);

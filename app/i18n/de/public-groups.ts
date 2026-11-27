@@ -36,8 +36,8 @@ export const publicGroups: Record<string, string> = {
   'Make a group anyone with its link can join, or join one by a link': 'Eine Gruppe erstellen, der jeder mit ihrem Link beitreten kann, oder einer per Link beitreten',
   'This build of Erevos has no public groups yet. Update it to make or join one.':
     'Diese Version von Erevos hat noch keine öffentlichen Gruppen. Aktualisiere sie, um eine zu erstellen oder einer beizutreten.',
-  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no relay learns who is in it.':
-    'Eine öffentliche Gruppe ist eine, um deren Beitritt jeder mit ihrem Link oder QR-Code bitten kann, mit einem Inhaber und Admins, die sie moderieren. Ihre Nachrichten sind wie in jeder Gruppe Ende-zu-Ende-verschlüsselt, und kein Relay erfährt, wer dabei ist.',
+  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no server learns who is in it.':
+    'Eine öffentliche Gruppe ist eine, um deren Beitritt jeder mit ihrem Link oder QR-Code bitten kann, mit einem Inhaber und Admins, die sie moderieren. Ihre Nachrichten sind wie in jeder Gruppe Ende-zu-Ende-verschlüsselt, und kein Server erfährt, wer dabei ist.',
   'Make a public group': 'Neue öffentliche Gruppe',
   'Whoever sees the link sees it too.': 'Wer den Link sieht, sieht ihn auch.',
   'Your name in it': 'Dein Name darin',
@@ -62,9 +62,9 @@ export const publicGroups: Record<string, string> = {
   'This link does not hold a group Erevos can ask to join.': 'Dieser Link enthält keine Gruppe, um deren Beitritt Erevos bitten kann.',
   'Your name in the group': 'Dein Name in der Gruppe',
   'Everyone in the group sees it, beside the start of a key made for this group alone.': 'Alle in der Gruppe sehen ihn, neben dem Anfang eines Schlüssels, der nur für diese Gruppe erstellt wurde.',
-  'Its owner’s relay': 'Das Relay ihres Inhabers',
-  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your relay and your queue on it), not who you are in your chats.':
-    'Eine öffentliche Gruppe: Wer ihren Link hat, kann beitreten, also kann jeder darin jemand sein, den du nicht kennst, und kopieren, was gesagt wird. Mitglieder sehen den Namen, den du wählst, und wo ihre Nachrichten dich erreichen (dein Relay und deine Warteschlange dort), nicht, wer du in deinen Chats bist.',
+  'Its owner’s server': 'Der Server ihres Inhabers',
+  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your server and your queue on it), not who you are in your chats.':
+    'Eine öffentliche Gruppe: Wer ihren Link hat, kann beitreten, also kann jeder darin jemand sein, den du nicht kennst, und kopieren, was gesagt wird. Mitglieder sehen den Namen, den du wählst, und wo ihre Nachrichten dich erreichen (dein Server und deine Warteschlange dort), nicht, wer du in deinen Chats bist.',
   'Ask to join': 'Beitritt anfragen',
   'Asked to join': 'Beitritt angefragt',
   'The group shows in your chats once its owner’s phone lets you in: when Erevos is open on it, and if the group asks for it, once an admin says yes.':
@@ -85,7 +85,7 @@ export const publicGroups: Record<string, string> = {
   'The group has a new link. The old one no longer works.': 'Die Gruppe hat einen neuen Link. Der alte funktioniert nicht mehr.',
   'Whoever has this link can ask to join, and read the group from when they are let in: never what was said before. Share it only where you mean to.':
     'Wer diesen Link hat, kann um Beitritt bitten und die Gruppe ab dem Moment lesen, in dem er hereingelassen wird: nie, was vorher gesagt wurde. Teile ihn nur dort, wo du es willst.',
-  'The link is made once the owner’s phone has a queue for it on its relay.': 'Der Link entsteht, sobald das Telefon des Inhabers eine Warteschlange dafür auf seinem Relay hat.',
+  'The link is made once the owner’s phone has a queue for it on its server.': 'Der Link entsteht, sobald das Telefon des Inhabers eine Warteschlange dafür auf seinem Server hat.',
   'Asking to join': 'Beitrittsanfragen',
   'Let in': 'Hereinlassen',
   'Turn away': 'Abweisen',
@@ -106,8 +106,8 @@ export const publicGroups: Record<string, string> = {
   'Make an admin': 'Zum Admin machen',
   'No longer an admin': 'Nicht mehr Admin',
   'Hand the group over': 'Gruppe übergeben',
-  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their relay. You stay an admin.':
-    'Ab dann gehört die Gruppe {name}: Das Telefon von {name} lässt Leute herein, und der Link wechselt zu einem auf dem eigenen Relay. Du bleibst Admin.',
+  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their server. You stay an admin.':
+    'Ab dann gehört die Gruppe {name}: Das Telefon von {name} lässt Leute herein, und der Link wechselt zu einem auf dem eigenen Server. Du bleibst Admin.',
   'Hand over': 'Übergeben',
   Banned: 'Gesperrt',
   'Lift the ban': 'Sperre aufheben',

@@ -9,9 +9,12 @@
 // Tor when the space's Tor way says so (lib/net-http.ts); without Tor, the list's server sees this
 // phone's internet address, which app/phone-settings.tsx says before it downloads, and before the
 // weekly download is switched on. The weekly download goes without Tor only when it was switched on
-// without Tor, after that warning: switched on with Tor, it waits while Tor is off.
+// without Tor, after that warning: switched on with Tor, it waits while Tor is off. While Direct
+// connections are on in the open space (lib/direct.ts), nothing is asked and nothing is kept as
+// said: the list comes without Tor for as long as they are on, and waits again once they are off.
 
 import { utf8Decode } from './crypto';
+import { directNow } from './direct';
 import { t } from './i18n';
 import { netHttp, netThroughTor, type Http } from './net-http';
 import { secureDelete, secureGet, secureSet } from './secure';
@@ -74,14 +77,15 @@ export async function spamWithoutTor(): Promise<boolean> {
 
 /** Downloads the list again from where it came, when the weekly download is on and the list is a
  * week old; with Erevos unlocked, as the space's Tor way needs it. Says nothing when it fails: the
- * list kept stays, and the date under Phone settings shows how old it is. Whether it went. */
-export async function refreshSpamList(now = Date.now(), http: Http = netHttp, throughTor: () => boolean = netThroughTor): Promise<boolean> {
+ * list kept stays, and the date under Phone settings shows how old it is. Whether it went.
+ * `direct`: whether Direct connections are on in the open space, when it comes without Tor unasked. */
+export async function refreshSpamList(now = Date.now(), http: Http = netHttp, throughTor: () => boolean = netThroughTor, direct: () => boolean = directNow): Promise<boolean> {
   const state = spamState();
   if (!state?.auto || !state.source || state.at <= 0 || now - state.at < SPAM_EVERY || now - tried < SPAM_EVERY / 7) return false;
   const from = spamAddress(state.source);
   if (!from) return false;
-  // Tor is off, and the owner never said the list may come without it: it waits.
-  if (!throughTor() && !(await spamWithoutTor())) return false;
+  // Tor is off, Direct connections too, and the owner never said the list may come without Tor: it waits.
+  if (!throughTor() && !direct() && !(await spamWithoutTor())) return false;
   tried = now;
   try {
     await downloadSpamList(from, http);

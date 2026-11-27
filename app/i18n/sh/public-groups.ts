@@ -37,8 +37,8 @@ export const publicGroups: Record<string, string> = {
     'Napravite grupu kojoj se mogu pridružiti svi koji imaju njen link ili se pridružite nekoj putem linka',
   'This build of Erevos has no public groups yet. Update it to make or join one.':
     'Ova verzija Erevosa još nema javne grupe. Ažurirajte je da biste napravili javnu grupu ili se pridružili nekoj.',
-  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no relay learns who is in it.':
-    'Javna grupa je grupa u koju svi koji imaju njen link ili QR kod mogu zatražiti ulazak, s vlasnikom i adminima koji je moderiraju. Njene poruke su šifrirane s kraja na kraj kao u svakoj grupi, a nijedan relay ne saznaje njene članove.',
+  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no server learns who is in it.':
+    'Javna grupa je grupa u koju svi koji imaju njen link ili QR kod mogu zatražiti ulazak, s vlasnikom i adminima koji je moderiraju. Njene poruke su šifrirane s kraja na kraj kao u svakoj grupi, a nijedan server ne saznaje njene članove.',
   'Make a public group': 'Napravi javnu grupu',
   'Whoever sees the link sees it too.': 'Vide ga svi koji vide link.',
   'Your name in it': 'Vaše ime u njoj',
@@ -66,9 +66,9 @@ export const publicGroups: Record<string, string> = {
   'Your name in the group': 'Vaše ime u grupi',
   'Everyone in the group sees it, beside the start of a key made for this group alone.':
     'Vide ga svi u grupi, pored početka ključa napravljenog samo za ovu grupu.',
-  'Its owner’s relay': 'Relay njenog vlasnika',
-  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your relay and your queue on it), not who you are in your chats.':
-    'Javna grupa: pridružiti joj se mogu svi koji imaju njen link, pa bilo koji član može biti osoba koju ne poznajete i može kopirati ono što se kaže. Članovi vide ime koje izaberete i gdje vam njihove poruke stižu (vaš relay i vaš red na njemu), a ne kako se predstavljate u svojim razgovorima.',
+  'Its owner’s server': 'Server njenog vlasnika',
+  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your server and your queue on it), not who you are in your chats.':
+    'Javna grupa: pridružiti joj se mogu svi koji imaju njen link, pa bilo koji član može biti osoba koju ne poznajete i može kopirati ono što se kaže. Članovi vide ime koje izaberete i gdje vam njihove poruke stižu (vaš server i vaš red na njemu), a ne kako se predstavljate u svojim razgovorima.',
   'Ask to join': 'Zatraži pridruživanje',
   'Asked to join': 'Pridruživanje zatraženo',
   'The group shows in your chats once its owner’s phone lets you in: when Erevos is open on it, and if the group asks for it, once an admin says yes.':
@@ -90,8 +90,8 @@ export const publicGroups: Record<string, string> = {
   'The group has a new link. The old one no longer works.': 'Grupa ima novi link. Stari više ne radi.',
   'Whoever has this link can ask to join, and read the group from when they are let in: never what was said before. Share it only where you mean to.':
     'Svi koji imaju ovaj link mogu zatražiti pridruživanje i čitati grupu od trenutka kad budu primljeni: nikad ono što je rečeno prije. Dijelite ga samo tamo gdje to zaista želite.',
-  'The link is made once the owner’s phone has a queue for it on its relay.':
-    'Link nastaje kad telefon vlasnika dobije red za njega na svom relayu.',
+  'The link is made once the owner’s phone has a queue for it on its server.':
+    'Link nastaje kad telefon vlasnika dobije red za njega na svom serveru.',
   'Asking to join': 'Zahtjevi za pridruživanje',
   'Let in': 'Primi',
   'Turn away': 'Odbij',
@@ -113,8 +113,8 @@ export const publicGroups: Record<string, string> = {
   'Make an admin': 'Postavi za admina',
   'No longer an admin': 'Oduzmi ulogu admina',
   'Hand the group over': 'Predaj grupu',
-  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their relay. You stay an admin.':
-    '{name} je od tada vlasnik grupe: telefon te osobe pušta ljude unutra, a link se mijenja u link na njenom relayu. Vi ostajete admin.',
+  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their server. You stay an admin.':
+    '{name} je od tada vlasnik grupe: telefon te osobe pušta ljude unutra, a link se mijenja u link na njenom serveru. Vi ostajete admin.',
   'Hand over': 'Predaj',
   Banned: 'Pod zabranom',
   'Lift the ban': 'Ukloni zabranu',

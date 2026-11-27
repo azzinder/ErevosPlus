@@ -677,7 +677,7 @@ export const messages: Record<string, string> = {
     'Naljepnice koje ovdje napravite ostaju zapečaćene samo u ovim skrivenim razgovorima i šalju se šifrirane s kraja na kraj, kao fotografije. Zadržite prst na jednoj da je obrišete.',
   "This sticker's picture is gone.": 'Slika ove naljepnice više ne postoji.',
   'Sending the sticker…': 'Slanje naljepnice…',
-  'Sticker sent through the relay, end-to-end encrypted.': 'Naljepnica je poslana preko relaya, šifrirana s kraja na kraj.',
+  'Sticker sent through the server, end-to-end encrypted.': 'Naljepnica je poslana preko servera, šifrirana s kraja na kraj.',
   'Add to my stickers': 'Dodaj u moje naljepnice',
   'Added to your stickers.': 'Dodano u vaše naljepnice.',
   // A place sent once (lib/place.ts, components/message-parts.tsx).

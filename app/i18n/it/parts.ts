@@ -62,7 +62,7 @@ export const parts: Record<string, string> = {
     '{name} ha provato a chiamarti. Accetta la sua richiesta di messaggio per ricevere le sue chiamate.',
   'The call ended.': 'La chiamata è finita.',
   'The call has ended.': 'La chiamata è terminata.',
-  'Calls are set up through the relay. Type its address in Relay first.': 'Le chiamate si avviano tramite il relay. Scrivi prima il suo indirizzo in «Relay».',
+  'Calls are set up through the server. Type its address in Server first.': 'Le chiamate si avviano tramite il server. Scrivi prima il suo indirizzo in «Server».',
 
   // The web app's card (components/integrity-card.tsx, lib/integrity.web.ts).
   'This web app': 'Questa web app',
@@ -79,10 +79,10 @@ export const parts: Record<string, string> = {
   'Notifications while closed': 'Notifiche ad app chiusa',
   'On in this space': 'Attive in questo spazio',
   'Off in this space': 'Disattivate in questo spazio',
-  'When messages come, or a call rings, while Erevos is closed, your relay sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a relay or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the relay, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their relay.':
-    'Quando arrivano messaggi, o una chiamata, mentre Erevos è chiuso, il tuo relay invia un push tramite il servizio push di questo browser (quello di Apple su un iPhone), ed Erevos mostra quanti messaggi sono arrivati dall’ultima volta che l’hai aperto, per esempio «3 nuovi messaggi», o «Chiamata» se è arrivata solo una chiamata, niente di più. Il push non contiene né il messaggio né il mittente, e il suo conteggio è crittografato per questo browser, ma il servizio push vede quando arriva qualcosa per questo dispositivo, e che usa Erevos. Con un relay o l’Erevos di un mittente con una versione precedente alla 2.0.0, o con un messaggio che altri telefoni hanno portato fino al relay, non c’è alcun numero: Erevos mostra «Nuovo messaggio», o «Nuovi messaggi» se ne sono arrivati altri, finché non lo apri. Le chat nascoste non ricevono mai notifiche. Ogni spazio che le attiva ha un proprio indirizzo push, quindi l’indirizzo non lega due spazi tra loro presso il loro relay.',
-  'Your relay could not be told yet, so notifications may still come. Erevos tells it once it can be reached.':
-    'Non è stato ancora possibile dirlo al tuo relay, quindi le notifiche potrebbero ancora arrivare. Erevos glielo dirà appena riuscirà a raggiungerlo.',
+  'When messages come, or a call rings, while Erevos is closed, your server sends a push through this browser\'s push service (Apple\'s on an iPhone), and Erevos shows how many messages came since you last opened it, such as "3 new messages", or "Call" when only a call rang, nothing more. The push carries no message and no sender, and its count is encrypted for this browser, but the push service sees when something comes for this device, and that it uses Erevos. With a server or a sender\'s Erevos older than 2.0.0, or a message that other phones carried to the server, there is no number: Erevos shows "New message", or "New messages" once more came, until you open it. Hidden chats never get notifications. Each space that turns them on has a push address of its own, so the address does not tie two spaces together at their server.':
+    'Quando arrivano messaggi, o una chiamata, mentre Erevos è chiuso, il tuo server invia un push tramite il servizio push di questo browser (quello di Apple su un iPhone), ed Erevos mostra quanti messaggi sono arrivati dall’ultima volta che l’hai aperto, per esempio «3 nuovi messaggi», o «Chiamata» se è arrivata solo una chiamata, niente di più. Il push non contiene né il messaggio né il mittente, e il suo conteggio è crittografato per questo browser, ma il servizio push vede quando arriva qualcosa per questo dispositivo, e che usa Erevos. Con un server o l’Erevos di un mittente con una versione precedente alla 2.0.0, o con un messaggio che altri telefoni hanno portato fino al server, non c’è alcun numero: Erevos mostra «Nuovo messaggio», o «Nuovi messaggi» se ne sono arrivati altri, finché non lo apri. Le chat nascoste non ricevono mai notifiche. Ogni spazio che le attiva ha un proprio indirizzo push, quindi l’indirizzo non lega due spazi tra loro presso il loro server.',
+  'Your server could not be told yet, so notifications may still come. Erevos tells it once it can be reached.':
+    'Non è stato ancora possibile dirlo al tuo server, quindi le notifiche potrebbero ancora arrivare. Erevos glielo dirà appena riuscirà a raggiungerlo.',
   'A call that comes while Erevos is closed does not ring: only the notification "Call" shows. On an iPhone nothing more can be done: Apple lets a web app neither run while it is closed nor ring as a phone does; that would take an app from the App Store. On Android, the Erevos app rings even when closed.':
     'Una chiamata che arriva mentre Erevos è chiuso non squilla: compare solo la notifica «Chiamata». Su un iPhone non si può fare di più: Apple non lascia che una web app funzioni mentre è chiusa né che squilli come un telefono; servirebbe un’app dell’App Store. Su Android, l’app di Erevos squilla anche da chiusa.',
   "Each space with them on has a service worker of its own in this browser, which its settings list: whoever can see them can count the spaces with notifications on. A message request from someone new, through your contact link, may show only once Erevos opens.":
@@ -100,7 +100,7 @@ export const parts: Record<string, string> = {
   // Files and photos (lib/attachments.ts, lib/photo*.ts, lib/pick-*.ts, lib/save-file*.ts, lib/backup-place.web.ts).
   'Files can be 100 MB at most.': 'I file possono essere al massimo di 100 MB.',
   'The file was changed on the way, so it was not kept.': 'Il file è stato modificato lungo il percorso, quindi non è stato salvato.',
-  'The file is not on the relay any more. Files wait there 14 days.': 'Il file non è più sul relay. I file vi restano 14 giorni.',
+  'The file is not on the server any more. Files wait there 14 days.': 'Il file non è più sul server. I file vi restano 14 giorni.',
   'This file is not on this phone.': 'Questo file non è su questo telefono.',
   'This file is not on this computer.': 'Questo file non è su questo computer.',
   // Shown after "in", as «in {folder}»: with no article.
@@ -108,6 +108,12 @@ export const parts: Record<string, string> = {
   'the downloads folder': 'Download',
   'Not saved: the share sheet was closed.': 'Non salvato: il menu di condivisione è stato chiuso.',
   'That folder is not there any more. Choose it again.': 'Quella cartella non esiste più. Sceglila di nuovo.',
+  // A backup that a folder did not take, in plain words (lib/backup-place.ts folderTrouble).
+  'The app this folder belongs to made no file in it. Choose a folder on the phone instead, or try again later.':
+    'L’app a cui appartiene questa cartella non ha creato nessun file al suo interno. Scegli invece una cartella sul telefono, oppure riprova più tardi.',
+  'Erevos may no longer write in this folder. Choose it again.': 'Erevos potrebbe non poter più scrivere in questa cartella. Sceglila di nuovo.',
+  'There is no room left in this folder. Make room, or choose another one.': 'In questa cartella non c’è più spazio. Fai spazio, oppure scegline un’altra.',
+  'The backup could not be written in this folder: {reason}': 'Non è stato possibile salvare il backup in questa cartella: {reason}',
   'Ready to save.': 'Pronto per il salvataggio.',
   Original: 'Originale',
   'Original: the photo as it was, full size, with only its place, phone and time taken out.':
@@ -150,8 +156,8 @@ export const parts: Record<string, string> = {
   'That is not a phone number.': 'Questo non è un numero di telefono.',
   'Not a time Erevos keeps messages for.': 'Erevos non conserva i messaggi per questo tempo.',
   'No conversation with this contact.': 'Nessuna conversazione con questo contatto.',
-  'That contact uses the relay at {relay}, and its link has no key for it. Ask them for a new link.':
-    'Quel contatto usa il relay {relay}, e il suo link non ha una chiave per esso. Chiedigli un nuovo link.',
+  'That contact uses the server at {relay}, and its link has no key for it. Ask them for a new link.':
+    'Quel contatto usa il server {relay}, e il suo link non ha una chiave per esso. Chiedigli un nuovo link.',
   'Wrong password for this backup.': 'Password errata per questo backup.',
 
   // Groups (lib/groups.ts, lib/space-groups.ts).
@@ -182,7 +188,7 @@ export const parts: Record<string, string> = {
   'More than one member of this group shows this key, so one of them is not who they say. Ask for their contact link some other way.':
     'Più di un membro di questo gruppo mostra questa chiave, quindi uno di loro non è chi dice di essere. Chiedi il suo link di contatto in un altro modo.',
   'Another space is open now.': 'Ora è aperto un altro spazio.',
-  'Groups go through the relay. Type its address in Relay first.': 'I gruppi passano dal relay. Scrivi prima il suo indirizzo in «Relay».',
+  'Groups go through the server. Type its address in Server first.': 'I gruppi passano dal server. Scrivi prima il suo indirizzo in «Server».',
 
   // The build and updates (lib/core.ts, lib/crypto.ts, lib/install-update*.ts, lib/updates.ts, lib/shell.ts).
   'This build has no Erevos core, so it cannot encrypt. Rebuild the app.': 'Questa versione non ha il nucleo di Erevos, quindi non può crittografare. Ricompila l’app.',
@@ -209,45 +215,47 @@ export const parts: Record<string, string> = {
 
   // LoRa and nearby phones (lib/lora.ts, lib/nearby.ts).
   'The radio restarts with its new settings, and links again.': 'La radio si riavvia con le nuove impostazioni e si ricollega.',
-  'There is no relay, and no Erevos phone is linked nearby. Type the relay address in Relay, or come near their phone.':
-    'Non c’è nessun relay, e nessun telefono con Erevos è collegato qui vicino. Scrivi l’indirizzo del relay in «Relay», o avvicinati al suo telefono.',
-  'Too large for LoRa, which takes only text. It can go once the relay can be reached, or near their phone.':
-    'Troppo grande per LoRa, che trasmette solo testo. Potrà partire quando il relay sarà raggiungibile, o vicino al suo telefono.',
+  'There is no server, and no Erevos phone is linked nearby. Type the server address in Server, or come near their phone.':
+    'Non c’è nessun server, e nessun telefono con Erevos è collegato qui vicino. Scrivi l’indirizzo del server in «Server», o avvicinati al suo telefono.',
+  'Too large for LoRa, which takes only text. It can go once the server can be reached, or near their phone.':
+    'Troppo grande per LoRa, che trasmette solo testo. Potrà partire quando il server sarà raggiungibile, o vicino al suo telefono.',
 
   // The relay (lib/relay.ts, lib/sms-invite.ts); {what} is the request's name.
   'An id is 48 hex characters.': 'Un ID è di 48 caratteri esadecimali.',
   'Through Tor: {reason}': 'Tramite Tor: {reason}',
-  'cannot reach the relay at {url}, or the token is wrong': 'impossibile raggiungere il relay {url}, o il token è errato',
+  'cannot reach the server at {url}, or the token is wrong': 'impossibile raggiungere il server {url}, o il token è errato',
   'message is not held': 'il messaggio non è conservato',
-  'the relay at {url} cannot keep messages for later: update it': 'il relay {url} non può conservare messaggi per dopo: aggiornalo',
-  'The relay at {url} that keeps it is no longer set here.': 'Il relay {url} che lo conserva non è più impostato qui.',
-  'the relay closed the connection': 'il relay ha chiuso la connessione',
-  'the relay did not answer in time': 'il relay non ha risposto in tempo',
-  'lost the connection to the relay': 'connessione al relay persa',
+  'the server at {url} cannot keep messages for later: update it': 'il server {url} non può conservare messaggi per dopo: aggiornalo',
+  'The server at {url} that keeps it is no longer set here.': 'Il server {url} che lo conserva non è più impostato qui.',
+  'the server closed the connection': 'il server ha chiuso la connessione',
+  'the server did not answer in time': 'il server non ha risposto in tempo',
+  'lost the connection to the server': 'connessione al server persa',
   '{what}: queue not found': '{what}: coda non trovata',
   '{what}: queue is full': '{what}: la coda è piena',
-  '{what}: the relay could not save it, try again later': '{what}: il relay non è riuscito a salvarlo, riprova più tardi',
-  '{what}: the second relay could not reach your relay, try again later': '{what}: il secondo relay non ha raggiunto il tuo relay, riprova più tardi',
-  '{what}: the file is not on the relay any more': '{what}: il file non è più sul relay',
-  '{what}: the relay has no room for files now, try again later': '{what}: il relay ora non ha spazio per i file, riprova più tardi',
-  '{what}: the relay could not keep it, try again later': '{what}: il relay non è riuscito a conservarlo, riprova più tardi',
-  '{what}: your relay could not reach the relay the file is on': '{what}: il tuo relay non ha raggiunto il relay su cui si trova il file',
-  '{reason}. A relay older than this app cannot take files: update it.': '{reason}. Un relay più vecchio di questa app non accetta file: aggiornalo.',
+  '{what}: your free place on this server has used all it may today. It goes on tomorrow.': '{what}: il tuo posto gratuito su questo server ha già usato oggi tutto quello che può. Riprende domani.',
+  '{what}: the server could not save it, try again later': '{what}: il server non è riuscito a salvarlo, riprova più tardi',
+  '{what}: the second server could not reach your server, try again later': '{what}: il secondo server non ha raggiunto il tuo server, riprova più tardi',
+  '{what}: the file is not on the server any more': '{what}: il file non è più sul server',
+  '{what}: the server has no room for files now, try again later': '{what}: il server ora non ha spazio per i file, riprova più tardi',
+  '{what}: your free place on this server has moved all the files it may today. Files go again tomorrow.': '{what}: il tuo posto gratuito su questo server ha già fatto passare oggi tutti i file che può. I file riprendono domani.',
+  '{what}: the server could not keep it, try again later': '{what}: il server non è riuscito a conservarlo, riprova più tardi',
+  '{what}: your server could not reach the server the file is on': '{what}: il tuo server non ha raggiunto il server su cui si trova il file',
+  '{reason}. A server older than this app cannot take files: update it.': '{reason}. Un server più vecchio di questa app non accetta file: aggiornalo.',
   'message is too large': 'il messaggio è troppo grande',
-  'your relay has no key for two-hop sending, so it was not sent through the second relay':
-    'il tuo relay non ha una chiave per l’invio in due passaggi, quindi non è passato dal secondo relay',
-  'the link has given all its places on its relay. Ask them for a new link': 'il link ha già dato tutti i suoi posti sul suo relay. Chiedigli un nuovo link',
-  'The relay address is too long for an SMS invite.': 'L’indirizzo del relay è troppo lungo per un invito via SMS.',
+  'your server has no key for two-hop sending, so it was not sent through the second server':
+    'il tuo server non ha una chiave per l’invio in due passaggi, quindi non è passato dal secondo server',
+  'the link has given all its places on its server. Ask them for a new link': 'il link ha già dato tutti i suoi posti sul suo server. Chiedigli un nuovo link',
+  'The server address is too long for an SMS invite.': 'L’indirizzo del server è troppo lungo per un invito via SMS.',
 
   // Notifications in the web app (lib/web-push*.ts).
   'Notifications through the browser are for the web app.': 'Le notifiche tramite il browser sono per la web app.',
-  'Your relay does not send notifications. It needs a newer version, set up with a push key.':
-    'Il tuo relay non invia notifiche. Serve una versione più recente, configurata con una chiave push.',
+  'Your server does not send notifications. It needs a newer version, set up with a push key.':
+    'Il tuo server non invia notifiche. Serve una versione più recente, configurata con una chiave push.',
   'This browser cannot show notifications for a closed web app. On an iPhone, add Erevos to the home screen first.':
     'Questo browser non può mostrare notifiche per una web app chiusa. Su un iPhone, aggiungi prima Erevos alla schermata Home.',
   'Notifications are not allowed for Erevos. Allow them in the settings of this browser or phone.':
     'Le notifiche non sono consentite per Erevos. Consentile nelle impostazioni di questo browser o telefono.',
-  'Set up the relay first, under Relay.': 'Configura prima il relay, in «Relay».',
+  'Set up the server first, under Server.': 'Configura prima il server, in «Server».',
   'Notifications could not be turned on: {reason}': 'Impossibile attivare le notifiche: {reason}',
   // Calls' lines in a chat (lib/call-lines.ts).
   'Voice call': 'Chiamata vocale',

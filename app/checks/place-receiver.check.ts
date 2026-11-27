@@ -7,7 +7,8 @@
 // so its entry looks the same whatever hidden chats it has; a new place starts with the switch on.
 // While the space is open, through a real relay and the real core, what comes to such a place is
 // kept in its history and its sender told it came, nothing is taken while its chat screen holds
-// it, a call rings with no name and waits for the PIN, and one ended or too old is kept as missed.
+// it, a call rings with no name and waits for the PIN, and one ended or too old is kept as missed,
+// as is one that rings as INVISIBLE is chosen, saying why.
 // Switched off, nothing reads it any more. A place's groups are its own (lib/place-groups.ts): made
 // with its contacts, they go through its relay to a queue of its own, are read while it is closed,
 // and are kept apart from the space's. Linked on their own to a phone's (lib/devices.ts), they sync
@@ -32,10 +33,11 @@ import { isGroupPacket } from '../lib/groups';
 import { forgetPlaceChats, placeChats, placeChatsNow } from '../lib/place-chats';
 import { onPlaceGroupMessage, placeGroupsAt } from '../lib/place-groups';
 import { startHiddenNotices } from '../lib/hidden-notices';
+import { hiddenRinging, setHiddenRinging } from '../lib/hidden-ring';
 import { holdPlace, onPlaceMessage, onPlaceRing, placesRead, receivesPocket, startPlaceReceiver, takePlaceCalls } from '../lib/place-receiver';
 import { keepReceived, setAppShown } from '../lib/receiver';
 import { hiddenSign } from '../lib/unread-signs';
-import { createQueue, fromHex, receiveMessage, sendMessage, toHex } from '../lib/relay';
+import { createQueue, fromHex, receiveMessage, sendMessage, setThroughTor, toHex } from '../lib/relay';
 import type { SpaceChats } from '../lib/space-chats';
 import { spaceGroups } from '../lib/space-groups';
 import { VoiceAssembler } from '../lib/voice';
@@ -292,6 +294,17 @@ test('a closed place that receives keeps what comes, tells its sender, rings cal
     await write('', { id: callId(), kind: 'offer', video: false, sdp: 'v=0 old', at: Date.now() - OFFER_FRESH_MS - 1000 });
     await until(() => texts().includes(`${CALL_LINE}Missed voice call`));
     assert.equal(rang.length, 2);
+    // One that rings with no name as INVISIBLE is chosen (lib/modes.ts) rings no more, kept at once
+    // as missed, its line saying why. (Out of it at once: in INVISIBLE the relay is read only
+    // through Tor.)
+    await write('', { id: callId(), kind: 'offer', video: false, sdp: 'v=0 invisible', at: Date.now() });
+    await until(() => rang.length === 3);
+    setHiddenRinging({ space: 0, pocket: 1, at: Date.now() });
+    setThroughTor('all');
+    setThroughTor('off');
+    assert.equal(hiddenRinging(), null);
+    assert.deepEqual(takePlaceCalls(0, 1), []);
+    await until(() => texts().includes(`${CALL_LINE}Missed voice call, in INVISIBLE`));
 
     // Read, the dot goes.
     for (const contact of bob.e2e.contacts()) await bob.history.mark(`contact:${contact.identity}`, false, 2, Date.now());
@@ -311,6 +324,8 @@ test('a closed place that receives keeps what comes, tells its sender, rings cal
     // Nor is its dot asked of then.
     assert.equal(await hiddenSign(), false);
   } finally {
+    setThroughTor('off');
+    setHiddenRinging(null);
     stop();
     stopHeard();
     stopRang();

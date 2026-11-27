@@ -16,6 +16,7 @@ import { toBase64Url, type Received } from './e2e';
 import { sendCopies } from './fanout';
 import { isGroupPacket } from './groups';
 import { hiddenRinging, setHiddenRinging } from './hidden-ring';
+import { callsOff, CALLS_OFF_LINE } from './modes';
 import { nostrKeysChanged, nostrReady, readNostr } from './nostr';
 import { nostrReaderOf, sendNostrAgain } from './nostr-chats';
 import { forgetPlaceChats, placeChats } from './place-chats';
@@ -42,7 +43,7 @@ import {
 } from './receiver';
 import { joinSleepLooks, lightSleep, lookBegan, lookEnded, type LookPart } from './sleep-look';
 import { onNetworkChange } from './network-change';
-import { canTryLater, fromHex, isQueueNotFound, receiveMessage, relayKey, type Relay } from './relay';
+import { canTryLater, fromHex, isQueueNotFound, onTorWay, receiveMessage, relayKey, type Relay } from './relay';
 import { relayFor, type SpaceChats } from './space-chats';
 import { hiddenSpare, lookAtSpare, spareBackup, type SpareStore } from './spare';
 import { readNearby } from './bridge';
@@ -95,7 +96,9 @@ type Run = {
   release: () => void;
 };
 
-type Held = { received: Extract<Received, { kind: 'message' }>; timer: ReturnType<typeof setTimeout> | null };
+// A message of a call held for its place to open; an offer that rings, with its timer, and what
+// keeps it as missed, with why.
+type Held = { received: Extract<Received, { kind: 'message' }>; timer: ReturnType<typeof setTimeout> | null; miss?: (why: string) => void };
 
 const runs = new Map<number, Run>();
 const holds = new Map<number, number>();
@@ -190,6 +193,21 @@ export function takePlaceCalls(space: number, pocket: number): Extract<Received,
   for (const call of held) if (call.timer) clearTimeout(call.timer);
   return held.map((call) => call.received);
 }
+
+// INVISIBLE chosen (lib/modes.ts): the calls that ring with no name stop, as none could be answered,
+// each kept as missed at once, its line says why.
+onTorWay(() => {
+  if (!callsOff()) return;
+  for (const [pocket, held] of calls) {
+    for (const h of held) {
+      if (h.timer) clearTimeout(h.timer);
+      h.miss?.(CALLS_OFF_LINE);
+    }
+    const ringing = hiddenRinging();
+    if (ringing && ringing.space === openSpace && ringing.pocket === pocket) setHiddenRinging(null);
+  }
+  calls.clear();
+});
 
 /** Looks at the queues of the open space's places that receive (every `every` milliseconds, in the checks), until the function it gives is called. */
 export function startPlaceReceiver(every?: number): () => void {
@@ -572,10 +590,10 @@ async function heard(run: Run, chats: SpaceChats, received: Extract<Received, { 
   const call = received.call;
   if (call && !received.twice) {
     const held = calls.get(pocket) ?? [];
-    const missed = (offer: Extract<Received, { kind: 'message' }>) => {
+    const missed = (offer: Extract<Received, { kind: 'message' }>, why = '') => {
       const video = offer.call?.kind === 'offer' && offer.call.video;
       const timer = chats.e2e.contacts().find((contact) => contact.identity === offer.identity)?.timer ?? 0;
-      void chats.history.add(callLineMessage(`${CONTACT_PREFIX}${offer.identity}`, false, video ? 'Missed video call' : 'Missed voice call', timer)).catch(() => undefined);
+      void chats.history.add(callLineMessage(`${CONTACT_PREFIX}${offer.identity}`, false, `${video ? 'Missed video call' : 'Missed voice call'}${why}`, timer)).catch(() => undefined);
     };
     const drop = (id: string) => {
       const left = (calls.get(pocket) ?? []).filter((h) => {
@@ -592,8 +610,12 @@ async function heard(run: Run, chats: SpaceChats, received: Extract<Received, { 
       // Made while the place was closed and no look took it: it has stopped ringing on their side.
       if (received.request || offerMissed(call.at)) {
         if (!received.request) missed(received);
+      } else if (callsOff()) {
+        // INVISIBLE (lib/modes.ts): it rings not even with no name, as it could not be answered.
+        // Kept as missed at once, its line says why.
+        missed(received, CALLS_OFF_LINE);
       } else {
-        const entry: Held = { received, timer: null };
+        const entry: Held = { received, timer: null, miss: (why) => missed(received, why) };
         entry.timer = setTimeout(
           () => {
             entry.timer = null;

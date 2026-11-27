@@ -20,8 +20,8 @@ export const devices: Record<string, string> = {
   'These hidden chats have chats of their own. Link from hidden chats with none, such as those a new PIN sets.':
     'Ovi skriveni razgovori imaju vlastite razgovore. Povežite iz skrivenih razgovora bez ijednog, poput onih koje otvara novi PIN.',
   'Too long to go through the phone.': 'Predugo za slanje preko telefona.',
-  'Type the relay address in Relay first: linked devices reach this phone through it.':
-    'Prvo upišite adresu relaya u „Relay“: povezani uređaji dolaze do ovog telefona preko njega.',
+  'Type the server address in Server first: linked devices reach this phone through it.':
+    'Prvo upišite adresu servera u „Server“: povezani uređaji dolaze do ovog telefona preko njega.',
   '{n} devices are linked already, the most there can be.': 'Već je povezan najveći mogući broj uređaja: {n}.',
 
   // The menu, and the chat on a linked device (app/index.tsx, app/chat.tsx).
@@ -70,10 +70,10 @@ export const devices: Record<string, string> = {
   'Photos and files too': 'I fotografije i datoteke',
   'Linked to {name}': 'Povezano s uređajem {name}',
   'Since {when}. Last heard from {last}.': 'Od {when}. Posljednji put se javio {last}.',
-  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
-    'Ovaj uređaj ima razgovore i grupe telefona na kojem je račun. Ono što ovdje napišete ide preko telefona, koji mora biti uključen i povezan s relayem. Pozivi zvone i ovdje. Nove grupe, javne grupe i grupni pozivi zasad ostaju na telefonu.',
-  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the relay, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
-    'Ovi skriveni razgovori imaju razgovore i grupe istih skrivenih razgovora telefona na kojem je račun. Ono što ovdje napišete ide preko telefona, koji mora biti uključen i povezan s relayem, s ovim skrivenim razgovorima tamo otvorenim ili s primanjem dok su zatvoreni. Pozivi zvone i ovdje. Nove grupe i grupni pozivi zasad ostaju na telefonu.',
+  'This device has the chats and groups of the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server. Calls ring here too. New groups, public groups and group calls stay on the phone for now.':
+    'Ovaj uređaj ima razgovore i grupe telefona na kojem je račun. Ono što ovdje napišete ide preko telefona, koji mora biti uključen i povezan sa serverom. Pozivi zvone i ovdje. Nove grupe, javne grupe i grupni pozivi zasad ostaju na telefonu.',
+  'These hidden chats have the chats and groups of the same hidden chats on the phone that holds the account. What you write here goes through the phone, which has to be on and reach the server, with these hidden chats open or receiving while closed there. Calls ring here too. New groups and group calls stay on the phone for now.':
+    'Ovi skriveni razgovori imaju razgovore i grupe istih skrivenih razgovora telefona na kojem je račun. Ono što ovdje napišete ide preko telefona, koji mora biti uključen i povezan sa serverom, s ovim skrivenim razgovorima tamo otvorenim ili s primanjem dok su zatvoreni. Pozivi zvone i ovdje. Nove grupe i grupni pozivi zasad ostaju na telefonu.',
   'Make or join groups on the phone that holds this account.': 'Grupe pravite i pridružujete im se na telefonu na kojem je ovaj račun.',
   'Group calls ring on the phone that holds this account, for now. Call from there.':
     'Grupni pozivi zasad zvone na telefonu na kojem je ovaj račun. Pozovite odande.',
@@ -116,10 +116,10 @@ export const devices: Record<string, string> = {
     'Koristite ovo kad je ovaj uređaj računar: njegovi razgovori postaju razgovori telefona na kojem je račun.',
   'Use this when this device is the computer: these hidden chats become those of the same hidden chats on the phone that holds the account.':
     'Koristite ovo kad je ovaj uređaj računar: ovi skriveni razgovori postaju isti skriveni razgovori telefona na kojem je račun.',
-  'These hidden chats have no relay queue yet: in them, type the relay address under For advanced users, then create their queue.':
-    'Ovi skriveni razgovori još nemaju red na relayu: u njima upišite adresu relaya pod „Za napredne korisnike“, a zatim napravite njihov red.',
-  'The phone answers on a queue of this device on a relay: the one the phone uses, or any other. If the relay asks for a token, sign in when it offers that, or type one.':
-    'Telefon odgovara na redu ovog uređaja na relayu: onom koji telefon koristi ili bilo kojem drugom. Ako relay traži token, prijavite se kad to ponudi ili upišite jedan.',
+  'These hidden chats have no server queue yet: in them, type the server address under For advanced users, then create their queue.':
+    'Ovi skriveni razgovori još nemaju red na serveru: u njima upišite adresu servera pod „Za napredne korisnike“, a zatim napravite njihov red.',
+  'The phone answers on a queue of this device on a server: the one the phone uses, or any other. If the server asks for a token, sign in when it offers that, or type one.':
+    'Telefon odgovara na redu ovog uređaja na serveru: onom koji telefon koristi ili bilo kojem drugom. Ako server traži token, prijavite se kad to ponudi ili upišite jedan.',
   'Name of this device': 'Naziv ovog uređaja',
   'Tap Link to my phone, and a QR code for the phone shows here.': 'Dodirnite „Poveži s mojim telefonom“ i ovdje se prikazuje QR kod za telefon.',
   'Send the accounts to {name}': 'Pošalji račune uređaju {name}',
@@ -153,13 +153,13 @@ export const devices: Record<string, string> = {
   "The groups go to {name} once it hears it.": "Grupe idu na {name} čim to sazna.",
   "Groups stay on": "Grupe ostaju na",
   "Moving: both devices have to be on.": "Premještaju se: oba uređaja moraju biti uključena.",
-  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the relay. Public groups stay on the phone.": "Ključevi grupa su na samo jednom uređaju odjednom, nikad kopirani. Tamo grupe rade i kad je telefon isključen; ostali uređaji pišu u njima preko njega, pa mora biti uključen. Za premještanje oba moraju biti uključena, i relay. Javne grupe ostaju na telefonu.",
+  "The keys of the groups are on one device at a time, never copied. There, groups work with the phone off; the other devices write in them through it, so it has to be on. Moving them needs both on, and the server. Public groups stay on the phone.": "Ključevi grupa su na samo jednom uređaju odjednom, nikad kopirani. Tamo grupe rade i kad je telefon isključen; ostali uređaji pišu u njima preko njega, pa mora biti uključen. Za premještanje oba moraju biti uključena, i server. Javne grupe ostaju na telefonu.",
   "The groups are held here": "Grupe su ovdje",
   "Groups work on this device with the phone off, and you can make new ones here. The phone and the other devices write in them through this one, so it has to be on.": "Grupe rade na ovom uređaju i kad je telefon isključen, i ovdje možeš praviti nove. Telefon i ostali uređaji pišu u njima preko ovoga, pa mora biti uključen.",
   "The groups are held on this device. On the phone, move them back to it first, under Groups stay on.": "Grupe su na ovom uređaju. Na telefonu ih prvo vrati na njega, pod Grupe ostaju na.",
   "The groups are held on {name}. Move them back to this phone first, under Groups stay on.": "Grupe su na {name}. Prvo ih vrati na ovaj telefon, pod Grupe ostaju na.",
   "That device is no longer linked.": "Taj uređaj više nije povezan.",
-  "The groups go to the other device through the relay. Type its address in Relay first.": "Grupe idu na drugi uređaj preko relaya. Prvo upiši njegovu adresu pod Relay.",
+  "The groups go to the other device through the server. Type its address in Server first.": "Grupe idu na drugi uređaj preko servera. Prvo upiši njegovu adresu pod Server.",
   "Unlink all the same?": "Ipak odvojiti?",
   "Unlinked now, the groups go from this device, and the phone shows each as left.": "Nakon odvajanja, grupe odlaze s ovog uređaja, a telefon svaku prikazuje kao napuštenu.",
   "Unlinked now, this phone shows each of the groups as left, unless they are still on their way to it: those stay here. Do it if the device is lost.": "Nakon odvajanja, ovaj telefon svaku grupu prikazuje kao napuštenu, osim onih koje su još na putu do njega: one ostaju ovdje. Učini to ako je uređaj izgubljen.",
@@ -170,14 +170,14 @@ export const devices: Record<string, string> = {
   // Linking with the short code (components/quick-link.tsx, lib/link-nostr.ts).
   'Inside hidden chats, link with the code Link to my phone shows inside the same hidden chats on the computer.':
     'Unutar skrivenih razgovora poveži kodom koji „Poveži s mojim telefonom“ prikazuje unutar istih skrivenih razgovora na računaru.',
-  '{why} Link this way instead: sign in to the relay below, then tap Link to my phone.':
-    '{why} Poveži drugačije: prijavi se na relay ispod, pa dodirni „Poveži s mojim telefonom“.',
+  '{why} Link this way instead: sign in to the server below, then tap Link to my phone.':
+    '{why} Poveži drugačije: prijavi se na server ispod, pa dodirni „Poveži s mojim telefonom“.',
   'Link another way':
     'Poveži drugačije',
   'The phone that answered is not the one that read the code. Make a new code, and link again.':
     'Telefon koji je odgovorio nije onaj koji je pročitao kod. Napravi novi kod i poveži ponovo.',
-  'The phone answered, but this computer could not use its relay: {error}':
-    'Telefon je odgovorio, ali ovaj računar nije mogao koristiti njegov relay: {error}',
+  'The phone answered, but this computer could not use its server: {error}':
+    'Telefon je odgovorio, ali ovaj računar nije mogao koristiti njegov server: {error}',
   'The phone answered. Setting up this computer…':
     'Telefon je odgovorio. Podešava se ovaj računar…',
   'Linking with the phone…':
@@ -190,8 +190,8 @@ export const devices: Record<string, string> = {
     'Pravi se kod…',
   'The phone sends this computer what it needs through Nostr, end-to-end encrypted. The code works for half an hour.':
     'Telefon šalje ovom računaru ono što mu treba preko Nostra, šifrovano od kraja do kraja. Kod važi pola sata.',
-  'The computer did not answer. On it, tap Link another way and sign in to the relay there, then scan its code again.':
-    'Računar nije odgovorio. Na njemu dodirni „Poveži drugačije“, tamo se prijavi na relay i ponovo skeniraj njegov kod.',
+  'The computer did not answer. On it, tap Link another way and sign in to the server there, then scan its code again.':
+    'Računar nije odgovorio. Na njemu dodirni „Poveži drugačije“, tamo se prijavi na server i ponovo skeniraj njegov kod.',
   'Linked to {name}. The chats go to it now.':
     'Povezano s uređajem {name}. Razgovori sada idu tamo.',
   'Link {name} to this phone?':
@@ -200,12 +200,12 @@ export const devices: Record<string, string> = {
     'Povezuj samo svoj računar, čiji si kod upravo skenirao. Dobija razgovore ovog prostora i poruke izabrane ispod.',
   'Waiting for the computer…':
     'Čeka se računar…',
-  'No Nostr relay could be reached.':
-    'Nijedan Nostr relay nije bio dostupan.',
-  'The Nostr relay did not take it.':
-    'Nostr relay ga nije prihvatio.',
-  'No Nostr relay took it.':
-    'Nijedan Nostr relay ga nije prihvatio.',
+  'No Nostr server could be reached.':
+    'Nijedan Nostr server nije bio dostupan.',
+  'The Nostr server did not take it.':
+    'Nostr server ga nije prihvatio.',
+  'No Nostr server took it.':
+    'Nijedan Nostr server ga nije prihvatio.',
   'Asked. On {name}, tap Link again: it links to this phone and keeps its chats.':
     'Zatraženo. Na uređaju {name} dodirnite „Ponovo poveži“: povezuje se s ovim telefonom i zadržava svoje razgovore.',
   'Let go of {name}':

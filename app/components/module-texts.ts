@@ -47,7 +47,7 @@ export function moduleNames(modules: readonly Module[]): string {
 export function moduleAbout(module: Module): string {
   switch (module) {
     case 'erevos':
-      return t("Erevos's own chats, groups and calls, end-to-end encrypted, through the relay, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.");
+      return t("Erevos's own chats, groups and calls, end-to-end encrypted, through the server, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.");
     case 'phone':
       return t('Erevos as the phone app: the keypad, the calls and the favourites, and every call on its own screen.');
     case 'sms':

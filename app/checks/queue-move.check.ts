@@ -484,7 +484,7 @@ test('a link made at any step of a move never names the new own queue; junk on t
   const said = (await space.look()).notes;
   q = await space.queues.load();
   assert.ok(q.link && q.link.queue.senderHex !== lost.senderHex && q.link.queue.senderHex !== (await space.own()).senderHex);
-  assert.ok(said.some((note) => note.startsWith('The relay had lost the queue your contact link names')));
+  assert.ok(said.some((note) => note.startsWith('The server had lost the queue your contact link names')));
   await sendMessage(relay, fromHex(q.link.queue.senderHex), randomBytes(40));
 });
 

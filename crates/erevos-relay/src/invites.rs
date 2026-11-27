@@ -728,7 +728,8 @@ impl Invites {
 /// `typed` made safe for a line of the file: lower case, Greek and Cyrillic
 /// letters written in Latin ones and marks taken off Latin ones (Μαρία is
 /// `maria`), spaces, `_` and `.` as `-`, anything else left out, at most
-/// `MAX_NAME` characters, and `phone` when nothing is left.
+/// `MAX_NAME` characters, and `phone` when nothing is left. Never an open
+/// place's name (`open::not_open`): `Open Maria` is `openmaria`.
 pub fn safe_name(typed: &str) -> String {
     let lower = typed.to_lowercase();
     let chars: Vec<char> = lower.chars().collect();
@@ -767,7 +768,7 @@ pub fn safe_name(typed: &str) -> String {
     if name.is_empty() {
         "phone".to_string()
     } else {
-        name
+        crate::open::not_open(&name)
     }
 }
 
@@ -969,6 +970,8 @@ mod tests {
         assert_eq!(safe_name("lphl:nekten"), "lphlnekten");
         assert_eq!(safe_name("# a comment\nnext"), "a-commentnext");
         assert_eq!(safe_name("😀"), "phone");
+        assert_eq!(safe_name("Open Maria"), "openmaria");
+        assert_eq!(safe_name("open-"), "open");
         assert_eq!(safe_name(""), "phone");
         assert_eq!(safe_name(&"a".repeat(80)).len(), MAX_NAME);
         assert_eq!(safe_name(&format!("{}-b", "a".repeat(31))), "a".repeat(31));

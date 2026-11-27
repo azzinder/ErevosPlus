@@ -36,6 +36,7 @@ import {
 } from '../lib/matrix-calls';
 import { allowedCapability, CALL_MEMBER, HOST_VERSIONS, hostWidget, type WidgetAccount, type WidgetHost, type WidgetMessage, type WidgetNews } from '../lib/matrix-widget';
 import { onPlaceNetworkRing } from '../lib/network-notices';
+import { setThroughTor } from '../lib/relay';
 import { Homeserver, HS, PASSWORD, type Json } from './matrix-server';
 
 const built = new URL('./.core/erevos_ffi.js', import.meta.url);
@@ -752,8 +753,24 @@ test("a ring to a closed hidden place's own account that receives rings with no 
       ['mine', 'Video call, turned down'],
       ['theirs', 'Missed voice call'],
     ]);
+
+    // One that rings with no name as INVISIBLE is chosen (lib/modes.ts) rings no more: kept at once
+    // as missed, its line saying why.
+    open = false;
+    watching.forEach((listener) => listener());
+    await sendEvent(alice, carolRoom, 'org.matrix.msc4075.rtc.notification', { ...ring(false), ...mention });
+    await sync(carol, 0);
+    assert.equal(rang.length, 4);
+    setHiddenRinging({ space: 3, pocket: 1, at: Date.now() });
+    setThroughTor('all');
+    setThroughTor('off');
+    assert.equal(hiddenRinging(), null);
+    await until(() => lines().length === 4, 'the INVISIBLE line');
+    assert.deepEqual(lines().at(-1), ['theirs', 'Missed voice call, in INVISIBLE']);
     assert.equal(w.opened.length, 0);
   } finally {
+    setThroughTor('off');
+    setHiddenRinging(null);
     stop();
     stopRang();
   }

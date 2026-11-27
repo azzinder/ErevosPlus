@@ -24,8 +24,12 @@ export interface Making {
 export interface MadeNote {
   text: string;
   bad: boolean;
-  /** What the check right after it found (lib/backup-check.ts), and where: none where it cannot be checked. */
-  checked?: { where: string; checked: Checked };
+  /** What the check right after it found (lib/backup-check.ts), and where: none where it cannot be
+   *  checked. `later` where the folder is another app's, which may still be sending it on. */
+  checked?: { where: string; checked: Checked; later?: boolean };
+  /** Checks the same backup again (Check again), with what that needs, its key too: kept only while
+   *  the space it was made in stays open, as the rest of the note is. */
+  again?: () => Promise<Checked | null>;
 }
 
 export interface BackupMaking {

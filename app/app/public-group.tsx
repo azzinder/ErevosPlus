@@ -179,7 +179,7 @@ export default function PublicGroupScreen() {
           </Text>
         </Card>
       ) : !out ? (
-        <Text tone="muted">{t('The link is made once the owner’s phone has a queue for it on its relay.')}</Text>
+        <Text tone="muted">{t('The link is made once the owner’s phone has a queue for it on its server.')}</Text>
       ) : null}
 
       {!out && info.owner ? (
@@ -285,7 +285,7 @@ export default function PublicGroupScreen() {
                       onPress={() =>
                         void confirm(
                           t('Hand the group over'),
-                          t('{name} owns the group from then on: their phone lets people in, and the link changes to one on their relay. You stay an admin.', { name: name(m.key) }),
+                          t('{name} owns the group from then on: their phone lets people in, and the link changes to one on their server. You stay an admin.', { name: name(m.key) }),
                           t('Hand over'),
                         ).then((ok) => {
                           if (ok) void run((from) => from.handOver(id, m.key, spaceGroupTransport));

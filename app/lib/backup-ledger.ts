@@ -7,11 +7,11 @@ import type { PartMade } from '../lock/backup';
 import { decryptBytes, encryptBytes, sha256Bytes, utf8Decode, utf8Encode } from './crypto';
 import { readBytes, writeBytes } from './files';
 
-// What automatic backups (lib/backup-folder.ts) made in each place they go to, their folder and
-// their server: each backup's name there, with the parts it names (lock/backup.ts PartMade). The
-// next one there names again those it can, without reading anything back, and the place keeps
-// every part one of the backups it keeps names. The stamps of the parts' files are here only, as
-// no backup holds them.
+// What automatic backups (lib/backup-folder.ts) made in each place they go to, their folder, their
+// server and Google Drive: each backup's name there, with the parts it names (lock/backup.ts
+// PartMade). The next one there names again those it can, without reading anything back, and the
+// place keeps every part one of the backups it keeps names. The stamps of the parts' files are here
+// only, as no backup holds them.
 //
 // Kept on this phone alone, in one file sealed with a key automatic backups' own key gives: in no
 // backup, so a restore leaves it as it is, and their places still hold what it says. With another
@@ -23,7 +23,7 @@ import { readBytes, writeBytes } from './files';
 /** The parts each backup in a place names, by the backup's name there. */
 export type Book = Map<string, PartMade[]>;
 
-/** Every place's book, by the place (folderPlace, serverPlace). */
+/** Every place's book, by the place (folderPlace, serverPlace, drivePlace). */
 export type Ledger = Map<string, Book>;
 
 const FILE = 'erevos-backup-ledger';
@@ -34,6 +34,9 @@ export const folderPlace = (folder: string): string => `folder ${folder}`;
 
 /** The place a server's folder is, by its address. */
 export const serverPlace = (url: string): string => `server ${url}`;
+
+/** The place the folder Erevos made in Google Drive is, by its ID there. */
+export const drivePlace = (folder: string): string => `drive ${folder}`;
 
 // The ledger's key: another than automatic backups' own, so nothing sealed with one opens with the other.
 function ledgerKey(key: Uint8Array): Uint8Array {

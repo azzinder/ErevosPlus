@@ -199,6 +199,8 @@ export type RowActs = {
   saveCard: (card: string) => void;
   /** Shows a thread alone, by the tag of its first message. */
   thread: (tag: string) => void;
+  /** Takes back the place the contact came onto this phone's relay with (lib/invite-place.ts). */
+  takeBack: (message: Message) => void;
 };
 
 /** One RowActs that stays the same, doing what the latest render's does. */
@@ -224,6 +226,7 @@ export function steadyActs(latest: RefObject<RowActs | null>): RowActs {
     choose: (message) => now().choose(message),
     saveCard: (card) => now().saveCard(card),
     thread: (tag) => now().thread(tag),
+    takeBack: (message) => now().takeBack(message),
   };
 }
 
@@ -231,7 +234,7 @@ export type LineLook = { styles: ReturnType<typeof makeStyles>; b: ReturnType<ty
 
 // A message of the thread. It draws again only when what it shows changes, not each time the
 // chat does (a voice message playing, a note), which keeps a long thread light to scroll.
-export const MessageLine = memo(function MessageLine({ message, quoted, name, newDay, tail, lit, played, photo, taking, stranger = false, plays, canAnswer, waits, choosing = false, chosen = false, answers = 0, styles, b, colors, acts }: LineLook & {
+export const MessageLine = memo(function MessageLine({ message, quoted, name, newDay, tail, lit, played, photo, taking, stranger = false, plays, canAnswer, waits, choosing = false, chosen = false, answers = 0, holds = false, styles, b, colors, acts }: LineLook & {
   message: Message;
   /** The message it answers, when here. */
   quoted?: Message;
@@ -258,6 +261,9 @@ export const MessageLine = memo(function MessageLine({ message, quoted, name, ne
   chosen?: boolean;
   /** How many answers its thread has, shown under it outside a thread (lib/chat-parts.ts threadSizes). */
   answers?: number;
+  /** The line that the contact came onto this phone's relay with its invite, while they are there:
+   *  Take back shows under it (lib/invite-place.ts holdsPlace). */
+  holds?: boolean;
 }) {
   useLang();
   const ink = message.mine ? [styles.mineText, b.mineText] : [styles.theirsText, b.theirsText];
@@ -388,6 +394,11 @@ export const MessageLine = memo(function MessageLine({ message, quoted, name, ne
       {answers > 0 && !choosing ? (
         <View style={{ alignSelf: message.mine ? 'flex-end' : 'flex-start', paddingHorizontal: space.sm }}>
           <TextButton title={plural(answers, '{n} answer in the thread', '{n} answers in the thread')} onPress={() => acts.thread(message.tag)} />
+        </View>
+      ) : null}
+      {holds && !choosing ? (
+        <View style={{ alignSelf: message.mine ? 'flex-end' : 'flex-start', paddingHorizontal: space.sm }}>
+          <TextButton title={t('Take back')} onPress={() => acts.takeBack(message)} />
         </View>
       ) : null}
     </View>

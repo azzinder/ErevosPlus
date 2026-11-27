@@ -85,6 +85,7 @@ import { onRulesTick } from './chat-rules';
 import { sweepXmppRules, xmppRulesDue } from './xmpp-rules';
 import { ensureTor } from './tor';
 import { accountTorOf, type AccountTor } from './account-tor';
+import { onTorWay } from './relay';
 
 // The open space's XMPP account as the screens use it (app/xmpp.tsx, app/xmpp-chat.tsx): loaded
 // from its sealed value (lock/xmpp-data.ts), connected to its server while the space is open, and
@@ -346,7 +347,7 @@ export async function xmppSetPush(on: boolean): Promise<void> {
   if (on === !!was) return;
   const relay = await spaceRelayOf(it.space, it.key);
   if (on) {
-    if (!relay) throw new Error(t('This space has no queue at a relay yet: it can say nothing while closed.'));
+    if (!relay) throw new Error(t('This space has no queue at a server yet: it can say nothing while closed.'));
     const push = await startXmppPush(it.state, online(it), relay);
     await changeAccount(it, async () => {
       if (it.state) it.state.push = push;
@@ -1076,3 +1077,13 @@ export function xmppLeaveGroup(room: string): Promise<void> {
   const it = need();
   return changeAccount(it, () => leaveXmppGroup(it.state, it.connection, room));
 }
+
+// INVISIBLE chosen or left (lib/modes.ts): every account goes through Tor in it, whatever it chose
+// (lib/account-tor.ts), so a connection made the other way connects again, at once (the loop sees it
+// closed). One that goes only through Tor anyway stays.
+onTorWay(() => {
+  for (const it of [live, ...places.all()]) {
+    if (!it || it.stopped || !it.state || xmppTorWay(it.state) === 'always') continue;
+    it.connection?.close();
+  }
+});

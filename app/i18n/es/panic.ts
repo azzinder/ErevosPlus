@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Todo lo que Erevos guarda aquí se borra ahora, para siempre: cada espacio con sus chats ocultos, contactos, mensajes y claves. Después Erevos se abre como recién instalado. No se puede deshacer.",
   "Wipe": "Borrar",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "En peligro, borra Erevos al instante: cada espacio con sus chats ocultos, con sus contactos, mensajes, fotos, archivos y claves, el bloqueo, las cuentas de Matrix, XMPP y Nostr, los tokens del relay, y los ajustes y la contraseña de las copias automáticas y de su servidor.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "Lo que no alcanza se queda: copias que copiaste a otro sitio o enviaste a un servidor (su contraseña las sigue protegiendo), lo que el relay guarda para ti hasta que caduca, y lo que tienen tus contactos.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "En peligro, borra Erevos al instante: cada espacio con sus chats ocultos, con sus contactos, mensajes, fotos, archivos y claves, el bloqueo, las cuentas de Matrix, XMPP y Nostr, los tokens del servidor, y los ajustes y la contraseña de las copias automáticas y de su servidor.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "Lo que no alcanza se queda: copias que copiaste a otro sitio o enviaste a un servidor (su contraseña las sigue protegiendo), lo que el servidor guarda para ti hasta que caduca, y lo que tienen tus contactos.",
   "Wipe now": "Borrar ahora",
   "Wipe everything now": "Borrarlo todo ahora",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Aquí Erevos no puede borrarse solo: borra sus datos desde el ordenador.",

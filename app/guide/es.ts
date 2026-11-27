@@ -13,7 +13,7 @@ por internet.
 - **Cerca, sin internet:** dos teléfonos Android hablan directamente por Bluetooth, Wi-Fi Aware o Wi-Fi Direct, con
   cifrado de extremo a extremo, y lo mismo hacen teléfonos y ordenadores en la misma Wi-Fi o en el punto de acceso de un
   teléfono. Con una radio LoRa, los textos llegan a kilómetros.
-- **A través de un relay:** por Wi-Fi o por internet, a través de un pequeño servidor (un relay) que puedes tener tú
+- **A través de un servidor:** por Wi-Fi o por internet, a través de un pequeño servidor que puedes tener tú
   mismo.
 - **Espacios:** un bloqueo con contraseña, una segunda contraseña que abre un Erevos aparte y vacío, y chats ocultos en
   cada espacio.
@@ -22,7 +22,7 @@ por internet.
 {-**Erevos+** es la misma app con más: chats con gente en Telegram, Messenger, Signal, Session, Matrix, XMPP y
 Nostr, en Android 8.0 o posterior. Pasa a ella, o vuelve, en **Actualizaciones**: ver [Erevos, Erevos+ o Erevos Lite, y betas](#update-channel).}
 
-> Los mensajes están **cifrados de extremo a extremo**, tanto a través de un relay como cerca, pero nada ha sido auditado
+> Los mensajes están **cifrados de extremo a extremo**, tanto a través de un servidor como cerca, pero nada ha sido auditado
 > todavía por expertos independientes. [Qué está protegido hoy](#privacy) dice exactamente qué lo está y qué no.
 
 Esta guía se abre desde **Guía de uso** en el menú de la pantalla de inicio (los tres puntos de arriba). La búsqueda de su
@@ -32,7 +32,7 @@ elegiste, ver [Idioma](#start).
 ### Quién lo hace, y por qué
 
 - **Quién:** Erevos, by azzinder: la misma persona que hizo [Fasouli](https://github.com/azzinder/lphl-chrima-releases/releases/latest), una app privada para tus finanzas.
-- **Dónde:** no importa. Lo que importa es que el relay y la app para el navegador funcionan en el servidor propio de
+- **Dónde:** no importa. Lo que importa es que el servidor y la app para el navegador son propios de
   quien lo hace (lphl.nekten.eu).
 - **Para quién:** para cualquiera que quiera hablar con los suyos sin dar un número de teléfono, un email ni una
   cuenta: amigos, familias, grupos, y quienes viven donde internet se corta o se vigila. Y para quienes, sin nada que
@@ -80,8 +80,50 @@ Esta parte también se abre desde **Ajustes** → **General** → **Acerca de Er
 
 Erevos se descarga de su página de versiones, un archivo para cada sistema: ver [Actualizaciones](#updates) para saber
 dónde, y cómo actualizarlo. Funciona en Android, en un ordenador (Linux, macOS y Windows), en Sailfish OS y, desde el
-navegador, en un iPhone. Si eres nuevo, empieza con una invitación de alguien que lo use: un código QR o un enlace, y ya
-estás dentro, con esa persona como contacto (ver Invitar a alguien nuevo, en [Chatear a través de un relay](#relay)).
+navegador, en un iPhone. Si eres nuevo, ábrelo sin más: en su primer inicio, como se explica abajo, Erevos toma por sí
+solo un sitio para tus mensajes en el servidor de LPHL, sin número de teléfono, correo ni cuenta. Una invitación de
+alguien que lo use, un código QR o un enlace, te mete dentro al instante, con esa persona como contacto (ver Invitar a
+alguien nuevo, en [Chatear a través de un servidor](#relay)).
+
+La primera vez que se inicia, Erevos se configura en unos pocos pasos cortos, con un punto para cada uno. Antes de que
+se abra su primer espacio: **Te damos la bienvenida a Erevos**, con lo que no entregas (ni número de teléfono, ni
+correo, ni nombre de usuario, ni cuenta: añades gente con un código QR o un enlace) y un nombre para tus contactos si
+quieres uno, con el idioma arriba{~; luego **¿Qué vas a usar?**, los módulos (ver [Módulos](#modules)): lo que
+desactivas no funciona en absoluto. Los chats de Erevos, el Teléfono, los SMS y la Colección están activados al
+principio}{+, las otras redes, en **Otras redes**, desactivadas}. Después, en el espacio:
+
+1. **¿Cuánto se te ve?**: las tres opciones de [¿Cuánto se te ve?](#direct), con SPEED ya elegida. Al continuar, Erevos
+   toma por sí solo un sitio para tus mensajes en el servidor de LPHL, sin invitación ni cuenta (ver **Un sitio
+   abierto** en [Chatear a través de un servidor](#relay)), salvo que la invitación con la que se abrió Erevos traiga un
+   servidor propio. **Otro servidor (para usuarios avanzados)**, bajo las opciones, abre las otras formas de entrar: una
+   cuenta en un servidor o un servidor propio.
+2. **No te pierdas nada**: cada permiso que pide Erevos, en cinco grupos según para qué sirven (Notificaciones,
+   Llamadas, Mensajes, En segundo plano, Recordatorios), con cuántos están permitidos. **Permitir todo** hace primero
+   las preguntas que hace Android en el propio Erevos{~, luego las de Erevos como app de teléfono y como app de SMS}, y
+   después abre cada pantalla de los ajustes de Android una tras otra, al volver de la anterior; **Continuar sin ellos**
+   los deja para **Ajustes** → **General** → **Permisos**. En un navegador el paso tiene lo que pregunta el navegador;
+   la aplicación de escritorio no tiene este paso.
+3. **Mantenlo seguro**: una contraseña para Erevos, escrita dos veces, con un medidor y cuatro consejos para una más
+   fuerte, la huella o la cara, y adónde van las copias automáticas: **En este dispositivo**, en una carpeta que eliges,
+   **WebDAV** (Nextcloud, ownCloud y otros) o, en Android, **Google Drive**, que primero dice lo que Google sabe
+   entonces, cada una configurada en la pantalla de Copias de seguridad que abre **Hecho** (ver [Copias de
+   seguridad](#backup)).
+
+Luego la pantalla de inicio dice **Listo**, con tu nombre, y ofrece **Está a mi lado** y **Está lejos** para tu primer
+contacto, con lo que puede hacer cada día un sitio gratuito en el servidor de LPHL y una línea para un permiso que aún
+falte. Hasta **Hecho**, los pasos vuelven a salir cuando se inicia Erevos. Si Erevos se abrió con una invitación, la
+muestra cuando terminan los pasos.
+
+- **El nombre:** no es un nombre de usuario: nadie lo busca, y no tiene que ser único. Va, cifrado, solo a quienes
+  añades, y **Mi nombre**, en Ajustes → Privacidad y seguridad, lo cambia.
+- **Pasar desde otro teléfono:** en Android, **Pasarlo aquí**, junto a **Ya tengo Erevos en otro teléfono** en la
+  primera pantalla, se salta el nombre{~ y los módulos}, que trae la copia de seguridad. Se abre el espacio, **Abrir
+  Copias de seguridad** la restaura (mira [Pasar a un teléfono nuevo](#new-phone)), y los pasos siguen sin **¿Cuánto se
+  te ve?**, que la copia también trae: los permisos, luego la huella y adónde van las copias automáticas, que se quedan
+  con cada teléfono; un bloqueo con contraseña que trajo la copia aparece como activado. **Aún no tengo copia** dice
+  cómo hacer una, y **Empezar sin copia** empieza como alguien nuevo.
+- [~] **En un ordenador o en un navegador:** **Vincular a mi teléfono** se salta los pasos y abre **Dispositivos
+  vinculados**.
 
 La pantalla de inicio es la lista de tus chats, con el que se movió por última vez arriba. Cada uno muestra la imagen del
 contacto, el último mensaje con sus marcas, cuándo llegó y cuántos de sus mensajes no has leído. Un reloj al lado
@@ -115,7 +157,7 @@ chats fijados y archivados.
 - **La imagen** se dibuja a partir de la clave del contacto: la misma clave da siempre los mismos colores y la misma luna{+
   (en verdes con Matrix)}, así que reconoces un chat de un vistazo sin ninguna foto. No es una comprobación de la clave;
   el [número de seguridad](#relay) sí lo es.
-- **La línea bajo la búsqueda** dice si hay un relay configurado y si tu cola está lista. Tócala para configurar uno.
+- **La línea bajo la búsqueda** dice si hay un servidor configurado y si tu cola está lista. Tócala para configurar uno.
 - **La búsqueda y esa línea se quedan** bajo la barra superior{~, con el botón de servicios,|} mientras la lista se desplaza.
 - **Chat conmigo**, siempre el primero de los chats, con una chincheta, guarda tus notas para ti: ver Chat conmigo y
   recordatorios más abajo.
@@ -142,7 +184,7 @@ chats fijados y archivados.
   gusta y compartir; bajo un mensaje de Matrix: responder, reaccionar y compartir. **Nueva publicación**, el lápiz de
   abajo, escribe una publicación pública, con hasta cuatro fotos. Ver [Chats con otras apps de Nostr](#nostr-chats).
 - **Chat nuevo**, abajo, pregunta dónde está la otra persona, **A mi lado**, **Lejos** o **Tengo su código**, y la
-  añade; las filas de debajo abren tu propio enlace, los contactos bloqueados y los ajustes del relay. **Recordarme**,
+  añade; las filas de debajo abren tu propio enlace, los contactos bloqueados y los ajustes del servidor. **Recordarme**,
   la campana naranja de al lado, te escribe un recordatorio.
 - **{~El auricular verde y la persona violeta|La persona violeta}** de arriba, en Android, {~abren **Teléfono** y **Contactos** directamente, en
   los colores de sus iconos|abre **Contactos** directamente, en el color de su icono} en la pantalla de inicio del teléfono. {~No están|No está} además en el menú de los tres puntos.
@@ -178,7 +220,7 @@ chats fijados y archivados.
 | --- | --- |
 | **Grupo nuevo** | Un chat de grupo con tus contactos. Ver [Chats de grupo](#groups). |
 | **Grupos públicos** | Un grupo al que cualquiera con su enlace puede pedir unirse, con un propietario y admins. Ver [Grupos públicos](#public-groups). |
-| **Mensajes destacados** | Los mensajes que destacaste, en todos tus chats. Ver El menú de un mensaje, en Chatear a través de un relay. |
+| **Mensajes destacados** | Los mensajes que destacaste, en todos tus chats. Ver El menú de un mensaje, en Chatear a través de un servidor. |
 | **Teléfonos cercanos** | Tus contactos por Bluetooth y Wi-Fi Aware, o en la misma Wi-Fi, sin internet. Ver [Chatear con un teléfono cercano](#nearby). |
 | **Guía de uso** | Esta guía. |
 | **Ajustes** | La última fila, con un engranaje: todo lo que puedes ajustar, en grupos, con una búsqueda. Ver Ajustes más abajo. |
@@ -195,7 +237,7 @@ mensajes**. **Hecho** los cierra.
 en su propia pestaña con cuántos hay: **Fotos** (en cuadrícula), **Vídeos**, **Mensajes de voz**, **Música**, **Archivos**
 y **Enlaces**, los más nuevos primero bajo sus meses, también los importados de Telegram o WhatsApp. Un toque abre una
 foto o un archivo para verlo o guardarlo, reproduce un sonido ahí mismo, o abre un enlace después de preguntar;
-manteniéndolo pulsado, cada uno ofrece **Ver en el chat**, que va a su mensaje. Uno que aún no se ha recogido del relay
+manteniéndolo pulsado, cada uno ofrece **Ver en el chat**, que va a su mensaje. Uno que aún no se ha recogido del servidor
 lleva al chat, donde un toque lo recoge. El calendario de arriba va a un día: están marcados los días que tienen algo de
 ese tipo. **Ir a un día**, debajo en los detalles, hace lo mismo con el propio chat: va al primer mensaje de ese día.
 
@@ -221,8 +263,8 @@ Una buena primera hora:
 2. Abre **Teléfonos cercanos** desde el menú en dos teléfonos que estén cerca el uno del otro, y permite lo que pida
    Android.
 3. Añadíos mutuamente con **Chat nuevo** → **A mi lado**, en los dos teléfonos, como en [Chatear con un teléfono
-   cercano](#nearby), y envía un mensaje: va de cerca, cifrado de extremo a extremo, sin relay y sin internet.
-4. Para hablar desde más lejos, configura un relay como en [Chatear a través de un relay](#relay).
+   cercano](#nearby), y envía un mensaje: va de cerca, cifrado de extremo a extremo, sin servidor y sin internet.
+4. Para hablar desde más lejos, configura un servidor como en [Chatear a través de un servidor](#relay).
 
 ### Chat conmigo y recordatorios
 
@@ -264,7 +306,7 @@ todo, notas, fotos, archivos y mensajes de voz, como con los chats.
 **Por qué:** un aviso se muestra en la pantalla bloqueada a quien tenga el teléfono, así que lo que dice un recordatorio
 se queda cifrado en su espacio y a Android solo se le dice su hora: el aviso no puede contar a nadie qué querías
 recordar, ni en qué espacio está. Y las notas no van a nadie más que a tus propios dispositivos, cifradas de extremo a
-extremo entre ellos como tus chats: el relay solo las lleva cifradas.
+extremo entre ellos como tus chats: el servidor solo las lleva cifradas.
 
 - [~] **Desde otros chats:** un mensaje de {+un chat de Matrix, XMPP, Nostr o }{-una conversación }SMS también puede venir aquí, con un
   recordatorio: **Recordarme** en su menú.
@@ -291,11 +333,13 @@ como **Ajustes · Settings**, para encontrarlo en un idioma que no sabes leer.
 
 - **Buscar en los ajustes,** arriba, encuentra un ajuste por el principio de sus palabras, con o sin tildes, y muestra
   dónde está, como {~**Teléfono y SMS › SMS**|**Privacidad y seguridad › Chats ocultos**}. Tócalo para abrirlo.
-- **Idioma · Language,** la fila bajo la búsqueda, abre la lista de idiomas, ver Idioma más abajo.
+- **¿Cuánto se te ve?** Bajo la búsqueda, tres opciones para quién ve la dirección de internet de tu teléfono:
+  **SPEED**, **ANONYMOUS** e **INVISIBLE**. **Qué cambia** abre su pantalla. Ver [¿Cuánto se te ve?](#direct).
+- **Idioma · Language,** la fila de debajo, abre la lista de idiomas, ver Idioma más abajo.
 - **Un grupo** abre la lista de sus ajustes, y un ajuste abre su pantalla. Un ajuste con partes, como {~**SMS**|**Copias de seguridad**}, las
   lista, y cada parte se abre por separado.
-- **Solo aparece lo que funciona aquí:** en un ordenador, en Sailfish OS y en la app web no hay {~**Teléfono y SMS**, |}Tor,
-  Nostr ni LoRa, y un grupo sin nada que ajustar aquí no aparece.
+- **Solo aparece lo que funciona aquí:** en un ordenador, en Sailfish OS y en la app web no hay {~**Teléfono y SMS**, |}Tor
+  ni LoRa, y un grupo sin nada que ajustar aquí no aparece.
 - [~] **Solo los módulos activados:** los ajustes de un módulo desactivado, como {+**Matrix** o }**Teléfono y SMS**,
   tampoco aparecen: ver [Módulos](#modules).
 
@@ -304,11 +348,11 @@ como **Ajustes · Settings**, para encontrarlo en un idioma que no sabes leer.
 | **General** | **Idioma**, {~**Módulos**, |}**Actualizaciones**, **Dar Erevos a un teléfono cercano** (Android), **Novedades**, **Acerca de Erevos**, **Apoyar Erevos** y **Permisos** (Android y la app web). Ver Idioma más abajo, {~[Módulos](#modules), |}[Actualizaciones](#updates) y [Erevos a un teléfono cercano](#give-app). |
 | **Apariencia** | **Estilo y colores** (acabado, cristal, estilo, tema, colores y texto sobre zonas de color, con la vista previa), **Fondo de pantalla**, **Mensajes** (la forma de las burbujas), **Iconos del lanzador** (Android), **Widget** (Android) y **Vibrar al tocar** (Android). Ver [Apariencia](#appearance). |
 | **Notificaciones** | **En segundo plano** (Android y la app de ordenador): recibir y sonar mientras Erevos está cerrado, y el aviso de mensajes; en un ordenador, si Erevos sigue funcionando con la ventana cerrada. **Notificaciones con la app cerrada** (la app web): Web Push. **Número en el icono**: cuántos mensajes no has leído, en el icono de Erevos. Ver [En un iPhone](#iphone) y [En un ordenador](#desktop). |
-| **Privacidad y seguridad** | **Bloqueo y segunda contraseña** (bloquear al abrir Erevos, la contraseña, la privacidad de la pantalla, huella o cara, la segunda contraseña), **Chats ocultos** (los PIN de los 4 lugares), **Botón de pánico** (con la contraseña de pánico), **Calculadora en lugar de Erevos** (Android, en Apariencia), **Capturas de pantalla** (Android) y **Esta app web** (solo la app web). Ver [Bloqueo con contraseña](#lock), [Segunda contraseña](#second), [Chats ocultos](#hidden) y [Botón de pánico](#panic). Ver también [Borrarme de todas partes](#forget). |
-| **Relay y redes** | **Caminos**, **Relay** (abre **Chat nuevo** con **Para usuarios avanzados** abierto), **Relay de casa**, **Tor** (Android), **Nostr** (Android){+,}{- y} **Radio LoRa** (Android){+, **Matrix**, **XMPP** y **Chats de Nostr**}. Ver [Chatear a través de un relay](#relay), [Relay de casa](#home-relay), [A través de Tor](#tor), [A través de Nostr](#nostr){+,}{- y} [Con una radio LoRa](#lora){+, [Matrix](#matrix), [XMPP](#xmpp) y [Chats con otras apps de Nostr](#nostr-chats)}. |
+| **Privacidad y seguridad** | **¿Cuánto se te ve?** (SPEED, ANONYMOUS o INVISIBLE: quién ve tu dirección de internet, y cómo van las llamadas), **Bloqueo y segunda contraseña** (bloquear al abrir Erevos, la contraseña, la privacidad de la pantalla, huella o cara, la segunda contraseña), **Chats ocultos** (los PIN de los 4 lugares), **Botón de pánico** (con la contraseña de pánico), **Calculadora en lugar de Erevos** (Android, en Apariencia), **Capturas de pantalla** (Android) y **Esta app web** (solo la app web). Ver [¿Cuánto se te ve?](#direct), [Bloqueo con contraseña](#lock), [Segunda contraseña](#second), [Chats ocultos](#hidden) y [Botón de pánico](#panic). Ver también [Borrarme de todas partes](#forget). |
+| **Servidor y redes** | **Caminos**, **Servidor** (abre **Chat nuevo** con **Para usuarios avanzados** abierto), **Servidor de casa**, **Tor** (Android), **Nostr**{+,}{- y} **Radio LoRa** (Android){+, **Matrix**, **XMPP** y **Chats de Nostr**}. Ver [Chatear a través de un servidor](#relay), [Servidor de casa](#home-relay), [A través de Tor](#tor), [A través de Nostr](#nostr){+,}{- y} [Con una radio LoRa](#lora){+, [Matrix](#matrix), [XMPP](#xmpp) y [Chats con otras apps de Nostr](#nostr-chats)}. |
 [~] | **Teléfono y SMS** (Android) | **Teléfono**, los ajustes de la app de teléfono, los mismos que **Teléfono** → **Ajustes**. **SMS**, en partes: **Erevos como app de SMS**, **Descubrir Erevos en un número**, **SMS cuando nada más funciona**, **Nombres de tus contactos**, **Archivadas, spam y papelera**, **Filtro de spam**, **Números bloqueados**, **Deshacer el envío de un SMS**, **Dos SIM** (solo con dos SIM) y **SMS nuevo**. Ver [Teléfono](#phone) y [SMS](#sms). |
 | **Datos y dispositivos** | **Copias de seguridad**, **Piezas de copias**, **Dispositivos vinculados** y **Chats importados**. Ver [Copias de seguridad](#backup), [Piezas de copias con amigos](#backup-pieces), [Dispositivos vinculados](#devices) y [Chats importados](#import). |
-| **Para pruebas** | **Prueba del relay** y **Prueba de radio** (Android). Ver [Las pantallas de prueba](#tests). |
+| **Para pruebas** | **Prueba del servidor** y **Prueba de radio** (Android). Ver [Las pantallas de prueba](#tests). |
 
 ### Idioma
 
@@ -336,26 +380,8 @@ extremo, con los chats ocultos), el **Teléfono**{- y}{+,} los **SMS**{+ y los c
 La **Colección** (tus fotos y archivos, cifrados) también es un módulo. El Teléfono y los SMS solo existen en Android, la Colección en Android, en la aplicación de escritorio, en la app web y en Sailfish OS. Cualquiera puede estar activado, también Erevos mismo, uno o varios, al
 menos uno: **Ajustes** → **General** → **Módulos** activa o desactiva cada uno en cualquier momento.
 
-La primera vez que se inicia, Erevos se configura como lo hace un instalador. Antes de que se abra su primer espacio: lo
-que no entregas (ni número de teléfono, ni correo, ni nombre de usuario, ni cuenta: añades gente con un código QR o un
-enlace, o te invitan ellos), un nombre para tus contactos si quieres uno, y el idioma; luego qué módulos usar, cada uno
-con lo que hace. Después, en el espacio: una pantalla para cada módulo elegido, con cómo empezar con él (para Erevos,
-cómo entras; para el Teléfono y los SMS, Erevos como app de teléfono y como app de SMS{+; para Nostr, Matrix y XMPP, tu
-cuenta allí}) y lo que Android, o el navegador, debe permitir para él. Cada permiso está en la primera pantalla que lo
-necesita, y **Permitir todo, una por una** hace las preguntas que hace Android en el propio Erevos, una tras otra. Luego
-el bloqueo con contraseña y las copias automáticas, y después lo que está listo y lo que falta, con **Invitar a
-alguien**. **El resto, luego** deja el resto para Ajustes; hasta que termines o lo pospongas, los pasos vuelven a salir
-cuando se inicia Erevos. Si Erevos se abrió con una invitación, la muestra cuando terminan los pasos. Tras una
+En el primer inicio, **¿Qué vas a usar?** los elige, cada uno con lo que hace (ver [Primeros pasos](#start)). Tras una
 actualización todos los módulos siguen activados, como antes, hasta que los cambies.
-
-- **El nombre:** no es un nombre de usuario: nadie lo busca, y no tiene que ser único. Va, cifrado, solo a quienes
-  añades, y **Mi nombre**, en Ajustes → Privacidad y seguridad, lo cambia.
-- **Pasar desde otro teléfono:** en Android, **Ya tengo {=Erevos} en otro teléfono** se salta el nombre y los módulos, que
-  vienen con la copia de seguridad. Se abre el espacio, **Abrir copias de seguridad** la restaura (mira [Pasar a un
-  teléfono nuevo](#new-phone)), y siguen las pantallas de los módulos que trae, luego la huella y la carpeta de las
-  copias automáticas, que se quedan con cada teléfono. **Aún no tengo copia** dice cómo hacer una.
-- **En un ordenador o en un navegador:** **Vincular a mi teléfono** se salta los pasos y abre **Dispositivos
-  vinculados**.
 
 - **Desactivado:** un módulo desactivado no se inicia: nada de él funciona, espera en un servidor ni suena, así que
   Erevos es más ligero, abre más rápido y gasta menos batería. No aparece en ningún sitio: ni en la pantalla de inicio,
@@ -383,10 +409,10 @@ hace solo eso, y un teléfono que no espera en segundo plano mensajes que nunca 
 Mientras un espacio está abierto, en cualquier pantalla, Erevos busca otros teléfonos con {=Erevos} a su alrededor, por
 Bluetooth y, donde el teléfono lo tiene, Wi-Fi Aware, y en la Wi-Fi a la que está conectado, teléfonos y ordenadores por
 igual. No hace falta internet, SIM ni red Wi-Fi. Lleva los mensajes a tus contactos, cifrados de extremo a extremo como
-los que van por el relay.
+los que van por el servidor.
 
 Solo busca cuando **Buscar teléfonos cerca** está activado, en **Para usuarios avanzados** → **Cerca, sin internet**,
-en **Chat nuevo**: está apagado hasta que lo actives, en los dos teléfonos, y hasta entonces todo va por el relay.
+en **Chat nuevo**: está apagado hasta que lo actives, en los dos teléfonos, y hasta entonces todo va por el servidor.
 Solo **A mi lado**, en Chat nuevo, busca sin él, mientras su página está abierta, para añadir un contacto.
 
 1. Abre **Teléfonos cercanos** desde el menú en los dos teléfonos. La primera vez, Android pide permiso para encontrar
@@ -394,14 +420,14 @@ Solo **A mi lado**, en Chat nuevo, busca sin él, mientras su página está abie
    encontrarse.
 2. Si aún no sois contactos, añadíos mutuamente: en los dos teléfonos toca **Chat nuevo** y luego **A mi lado**, y
    toca **Sí, las mismas** cuando los dos muestren las mismas imágenes, como en [Chatear a través de un
-   relay](#relay). Sin relay cada teléfono da solo sus claves, y os podéis contactar solo cerca, hasta que tengáis
+   servidor](#relay). Sin servidor cada teléfono da solo sus claves, y os podéis contactar solo cerca, hasta que tengáis
    uno.
 3. Elige el contacto, escribe en la barra de mensajes de abajo y toca la flecha de enviar. En cuanto su teléfono
    responde, la parte de arriba del chat dice **Cerca**.
 
 - **Mientras un espacio está abierto:** los enlaces empiezan cuando se abre un espacio, sea cual sea la pantalla que se
   vea, y se detienen cuando se abre otro espacio: bloqueado, el espacio sigue detrás de la pantalla de la contraseña. Un
-  mensaje de cerca aparece en la pantalla de inicio como uno que llega por el relay, y una llamada también suena ahí. En
+  mensaje de cerca aparece en la pantalla de inicio como uno que llega por el servidor, y una llamada también suena ahí. En
   Android siguen activos con Erevos en segundo plano, mientras **En segundo plano** está en **Recibir y sonar**. Para
   ahorrar batería en ese caso, busca teléfonos con menos frecuencia: Wi-Fi Direct cada diez minutos, Wi-Fi Aware un
   minuto de cada cinco, y en la misma Wi-Fi escucha a los demás veinte segundos de cada dos minutos. Así, un teléfono
@@ -426,30 +452,30 @@ Solo **A mi lado**, en Chat nuevo, busca sin él, mientras su página está abie
   la misma Wi-Fi funcionan sin ellos.
 - **Otros teléfonos cercanos** solo reciben bytes sellados que no pueden abrir, y solo hasta que se conoce el teléfono
   de tu contacto: a partir de entonces, lo que envías va solo a él. Los mensajes de voz solo van a un contacto que se
-  sabe que está cerca. Las fotos y los archivos necesitan el relay.
-- **Con un relay además,** cada mensaje también va por él, así que no se pierde nada si el enlace se corta; la copia que
-  llega en segundo lugar no se vuelve a mostrar. Si el relay no está disponible, la copia de cerca es la que cuenta.
-- **Llevados por otros teléfonos:** cuando el relay no está disponible y tu contacto no está cerca, los teléfonos con
-  {=Erevos} cercanos también se llevan tu mensaje sellado para el relay de tu contacto. Cada uno lo guarda, tres días
-  como mucho, se lo da a dos teléfonos más como mucho de los que encuentre, y lo entrega a ese relay a través de su
-  propio relay en cuanto puede; el tuyo hace lo mismo. No pueden leerlo, ni saber de quién es ni para quién: solo ven
-  la dirección del relay. Se conserva cuando Erevos se cierra, sellado en el teléfono. Los tuyos se quedan en tu
+  sabe que está cerca. Las fotos y los archivos necesitan el servidor.
+- **Con un servidor además,** cada mensaje también va por él, así que no se pierde nada si el enlace se corta; la copia que
+  llega en segundo lugar no se vuelve a mostrar. Si el servidor no está disponible, la copia de cerca es la que cuenta.
+- **Llevados por otros teléfonos:** cuando el servidor no está disponible y tu contacto no está cerca, los teléfonos con
+  {=Erevos} cercanos también se llevan tu mensaje sellado para el servidor de tu contacto. Cada uno lo guarda, tres días
+  como mucho, se lo da a dos teléfonos más como mucho de los que encuentre, y lo entrega a ese servidor a través de su
+  propio servidor en cuanto puede; el tuyo hace lo mismo. No pueden leerlo, ni saber de quién es ni para quién: solo ven
+  la dirección del servidor. Se conserva cuando Erevos se cierra, sellado en el teléfono. Los tuyos se quedan en tu
   espacio, y solo salen mientras está abierto. Llevar mensajes de otros está activado salvo que desactives **Llevar
   mensajes de otros** bajo **Para usuarios avanzados** → **Cerca, sin internet**, en **Chat nuevo**, y solo para
-  relays en internet con TLS (wss://): un desconocido cercano nunca hace que tu teléfono, o tu relay, contacte con uno
+  servidores en internet con TLS (wss://): un desconocido cercano nunca hace que tu teléfono, o tu servidor, contacte con uno
   de una red local o del propio teléfono. Tus propios mensajes los llevan los teléfonos cercanos que lo tienen
   activado.
 - **Traídos por otros teléfonos:** al revés, cuando tu teléfono no tiene internet, un teléfono con Erevos a su lado
-  que tiene internet, y lleva para otros, toma lo que te espera en tu relay y te lo da de cerca. Erevos pregunta una
+  que tiene internet, y lleva para otros, toma lo que te espera en tu servidor y te lo da de cerca. Erevos pregunta una
   vez por cada teléfono así, también por el de un contacto, porque un desconocido puede pasar mensajes de un contacto
   para parecer él, y solo mientras está delante: **Un teléfono cerca de ti tiene internet. ¿Quieres que traiga tus
-  mensajes?** Ese teléfono sabe qué cola de tu relay es la tuya y cuándo la lees; nunca lo que dicen tus mensajes, que
+  mensajes?** Ese teléfono sabe qué cola de tu servidor es la tuya y cuándo la lees; nunca lo que dicen tus mensajes, que
   solo abre tu teléfono. Conociendo la cola, podría llevarse tus mensajes antes de que te lleguen, así que en cuanto
   tu teléfono vuelve a tener internet pasa solo a una cola nueva y se lo dice en silencio a tus contactos. Por los
   chats ocultos pregunta aparte, y solo mientras están en la pantalla, porque ese teléfono sabría que hay una segunda
-  cola, y por tanto que puede haber chats ocultos. Nunca para un relay al que se llega solo por Tor. Tu teléfono hace
+  cola, y por tanto que puede haber chats ocultos. Nunca para un servidor al que se llega solo por Tor. Tu teléfono hace
   lo mismo para los teléfonos a su lado mientras **Llevar mensajes de otros** está activado, nunca mientras va por
-  Tor, y de un relay distinto del suyo solo cuando dices que sí, avisado de que ese relay ve entonces la dirección de
+  Tor, y de un servidor distinto del suyo solo cuando dices que sí, avisado de que ese servidor ve entonces la dirección de
   internet de tu teléfono.
 
 **Por qué:** un paquete no dice para quién es, así que nadie cercano puede saber por él de quién es. Hasta que el
@@ -483,16 +509,16 @@ desactivado salvo que configures una radio, y solo en Android.
 
 1. Configura primero la radio en la app Meshtastic, sobre todo su **región**: sin ella no transmite nada. Luego cierra
    la app Meshtastic, o desconéctala ahí: una radio se conecta a una sola app a la vez.
-2. Abre **Ajustes** → **Relay y redes** → **Radio LoRa**, toca **Buscar mi radio**, lee lo que dice, y toca tu radio
+2. Abre **Ajustes** → **Servidor y redes** → **Radio LoRa**, toca **Buscar mi radio**, lee lo que dice, y toca tu radio
    cuando aparezca. Una radio aún no emparejada pide su PIN: aparece en la pantalla de la radio, o es 123456.
 3. Tu contacto hace lo mismo con la suya, en la misma malla: la misma región y el mismo primer canal.
-4. Escribe como siempre. Cuando el relay no está disponible y no hay ningún teléfono cerca, un texto va por LoRa,
+4. Escribe como siempre. Cuando el servidor no está disponible y no hay ningún teléfono cerca, un texto va por LoRa,
    y la línea bajo el chat lo dice.
 
 - **Solo texto, y despacio:** un mensaje va en trozos de unos 220 bytes, cada uno un segundo o dos en el aire, y la ley
   solo permite a una radio cierto tiempo de emisión (en la UE, una décima parte de cada hora). Así que LoRa solo lleva
   textos y eliminaciones, y solo cuando nada más lo hace. Los mensajes de voz, las fotos y los archivos esperan en el
-  chat, marcados como **En espera**, y salen solos en cuanto el relay o un teléfono cercano pueden recibirlos; las
+  chat, marcados como **En espera**, y salen solos en cuanto el servidor o un teléfono cercano pueden recibirlos; las
   llamadas también necesitan uno de esos. El primer mensaje a un contacto tarda más, porque lleva las claves.
 - **Marcas:** **✓✓** llega con su siguiente mensaje, ya que las marcas solas no van por LoRa.
 - **Piezas de repuesto, y textos largos comprimidos:** un mensaje de dos piezas o más va con piezas de repuesto
@@ -522,41 +548,41 @@ textos, cuando nada más puede llevarlos, nunca para lo que otros teléfonos le 
 > envía sigue cifrado de extremo a extremo, pero cualquiera con una radio puede saber que la tuya transmite, cuándo y
 > cuánto. Con **Anunciados a todos al alcance**, cualquiera con una radio también puede leer su nombre y dónde está.
 
-## Chatear a través de un relay {#relay}
+## Chatear a través de un servidor {#relay}
 
-Un relay es un pequeño servidor que guarda colas de un solo sentido: cada teléfono tiene su propia cola, y quien tenga su
-**enlace de contacto** puede dejar mensajes en ella. El relay no guarda cuentas, nombres ni números de teléfono, y no
+El servidor guarda colas de un solo sentido: cada teléfono tiene su propia cola, y quien tenga su
+**enlace de contacto** puede dejar mensajes en ella. El servidor no guarda cuentas, nombres ni números de teléfono, y no
 puede leer los mensajes: están cifrados de extremo a extremo, y solo los dos teléfonos tienen las claves. Cada teléfono
-puede usar un relay propio: un mensaje para un contacto de otro relay se sella para el suyo y se entrega al tuyo, que lo
-pasa, así que su relay nunca ve la dirección de tu teléfono. Un teléfono sin relay obtiene un sitio en el de su
-contacto, ver **Sin relay propio** más abajo.
+puede usar un servidor propio: un mensaje para un contacto de otro servidor se sella para el suyo y se entrega al tuyo, que lo
+pasa, así que su servidor nunca ve la dirección de tu teléfono. Un teléfono sin servidor obtiene un sitio en el de su
+contacto, ver **Sin servidor propio** más abajo.
 
 **Por qué:** con colas y sin cuentas, ningún servidor tiene una lista de quién conoce a quién, y nadie necesita tu número
 de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto puede escribir en tu cola, y solo tú la lees.
 
 1. En la pantalla de inicio, toca **Chat nuevo**. Mientras falte algo, arriba **Cómo te conectas ahora** dice con
-   palabras sencillas cómo te contactan tus contactos: a través de tu relay, a través de Nostr sin relay, o solo de
-   cerca; cuando todo funciona, no se muestra. Con un relay, un campo arriba del todo encuentra un contacto por su
+   palabras sencillas cómo te contactan tus contactos: a través de tu servidor, a través de Nostr sin servidor, o solo de
+   cerca; cuando todo funciona, no se muestra. Con un servidor, un campo arriba del todo encuentra un contacto por su
    nombre o añade un enlace pegado en él. Luego viene una pregunta, **¿Dónde está la otra persona?**, y cada respuesta
    abre una página propia: **A mi lado**, **Lejos** y **Tengo su código**, como en los pasos 4 a 6 de abajo. Tres
    botones pequeños debajo abren lo demás: **Mi enlace**, **Contactos bloqueados** y **Para usuarios avanzados**,
-   donde están los ajustes propios del relay, y un teléfono que aún no tiene relay tiene uno más, **No tengo
-   invitación**, que abre la misma página; **Ajustes** → **Relay y redes** → **Relay** abre Chat nuevo con ellos
+   donde están los ajustes propios del servidor, y un teléfono que aún no tiene servidor tiene uno más, **No tengo
+   invitación**, que abre la misma página; **Ajustes** → **Servidor y redes** → **Servidor** abre Chat nuevo con ellos
    abiertos.
-2. En **Para usuarios avanzados**, escribe la **Dirección del relay**: \`ws://<dirección del ordenador>:7879\` para un
-   relay en tu propia red, o \`wss://relay.example.org\` para uno en internet. Añade el **Token** si el relay lo pide.
-3. Erevos crea tu cola en él por sí solo, unos segundos después, y dice **Cola del relay creada**: todo funciona, textos, fotos, mensajes de voz,
-   llamadas y grupos, y **Cómo te conectas ahora** desaparece, porque no falta nada. Si no puede, la nota dice por qué; **Crear mi cola en el relay**, debajo de la dirección, lo intenta de nuevo.
+2. En **Para usuarios avanzados**, escribe la **Dirección del servidor**: \`ws://<dirección del ordenador>:7879\` para un
+   servidor en tu propia red, o \`wss://relay.example.org\` para uno en internet. Añade el **Token** si el servidor lo pide.
+3. Erevos crea tu cola en él por sí solo, unos segundos después, y dice **Cola del servidor creada**: todo funciona, textos, fotos, mensajes de voz,
+   llamadas y grupos, y **Cómo te conectas ahora** desaparece, porque no falta nada. Si no puede, la nota dice por qué; **Crear mi cola en el servidor**, debajo de la dirección, lo intenta de nuevo.
 4. **A mi lado**, para alguien que está junto a ti: en los dos teléfonos, tocad **Chat nuevo** y luego **A mi lado**.
    Los dos teléfonos se encuentran solos, por Bluetooth o por la Wi-Fi que comparten, y cada uno muestra **Se ha
    encontrado un teléfono** con seis imágenes. Mirad las dos pantallas: cuando las imágenes son las mismas, en el
-   mismo orden, cada uno toca **Sí, las mismas**, y ya sois contactos, sin relay, sin internet y sin escribir nada.
+   mismo orden, cada uno toca **Sí, las mismas**, y ya sois contactos, sin servidor, sin internet y sin escribir nada.
    **No, otras** deja ese teléfono a un lado. Las imágenes salen de una clave que los dos teléfonos crean entre sí,
    así que un teléfono que se pusiera en medio mostraría a cada uno otras distintas; cada teléfono da su enlace de
    contacto solo cuando su dueño dice que sí, cifrado con esa clave. La página busca teléfonos solo mientras está
    abierta, también con **Buscar teléfonos cerca** apagado, que sigue apagado; en los chats ocultos y en la app web no
    busca nada. Bajo **Si no se encuentra**, la página tiene las otras formas para alguien que está a tu lado: un
-   código QR para su cámara, que es una invitación donde tu relay deja invitar a este teléfono, y si no tu enlace de
+   código QR para su cámara, que es una invitación donde tu servidor deja invitar a este teléfono, y si no tu enlace de
    contacto; **Mostrar un código de 8 dígitos**, que la otra persona escribe como en el paso 6; **Escanear el suyo** y
    **Escribir su código**, para el suyo; y, en Android, **¿No tiene Erevos en su teléfono?**, que le da la app misma.
    El código QR de ahí se ve pequeño; un toque lo muestra grande.
@@ -564,17 +590,17 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    un mensaje listo para enviar. Toca **Enviar con…** y elige la app con la que va (en un navegador y en un ordenador,
    **Copiar la invitación**), o **El código QR de la invitación** para mostrarla como código. La otra persona toca el
    enlace: con Erevos en su teléfono se abre ahí, y sin él el enlace le muestra antes dónde conseguirlo. Su teléfono
-   se une entonces a tu relay con acceso propio, sin escribir nada, y ya sois contactos. La página dice por dónde va,
+   se une entonces a tu servidor con acceso propio, sin escribir nada, y ya sois contactos. La página dice por dónde va,
    **La invitación está lista**, **Esperando a que la abra**, **Estáis conectados**, y mientras tanto puedes salir de
    ella: en cuanto su teléfono se ha unido, aparece en tus chats. Más sobre las invitaciones en Invitar a alguien
-   nuevo, más abajo. Donde este teléfono no puede crear una invitación, aún sin relay, en los chats ocultos o en un
+   nuevo, más abajo. Donde este teléfono no puede crear una invitación, aún sin servidor, en los chats ocultos o en un
    ordenador vinculado, la página da en su lugar tu enlace de contacto para enviar: la otra persona lo abre en Erevos,
    o lo pega en **Tengo su código**. En la página, el enlace del mensaje se ve corto, sin su parte central; lo que se
    envía, se copia o se muestra como código QR es siempre el enlace entero.
 6. **Tengo su código**, para lo que te ha dado la otra persona. Escribe los 8 dígitos que su teléfono muestra en **A
    mi lado** → **Mostrar un código de 8 dígitos**, a tu lado o dichos en una llamada: entonces cada teléfono tiene al
    otro como contacto. El código nunca sale de los teléfonos: se demuestran el uno al otro que lo conocen, y sus
-   enlaces de contacto van cifrados con una clave que solo el mismo código da. Se encuentran en relays públicos de
+   enlaces de contacto van cifrados con una clave que solo el mismo código da. Se encuentran en servidores públicos de
    Nostr, que no ven ni el código ni los enlaces, y quien adivina tiene 3 intentos antes de que el código se cierre.
    Un código dura 10 minutos. Debajo de los dígitos, pega su enlace de contacto o su invitación en el campo y toca
    **Añadir**, o toca **Escanear su código QR** y haz una foto del código en su pantalla, o **Desde una foto de su
@@ -591,7 +617,7 @@ de teléfono ni tu email para contactarte: quien tenga tu enlace de contacto pue
    mensaje. **Código QR grande, sin internet** muestra en su lugar el código entero, que funciona cerca sin internet,
    y **Código QR pequeño** vuelve atrás. **Compartir**, debajo, envía un enlace corto que cualquier app te deja tocar;
    en Android abre Erevos, que pregunta antes de aceptarlo. Para añadir a alguien con su código QR de contacto, tu
-   teléfono necesita antes un relay. Este código QR solo funciona si los dos teléfonos tienen un relay, como dice la
+   teléfono necesita antes un servidor. Este código QR solo funciona si los dos teléfonos tienen un servidor, como dice la
    página: si no, usa **A mi lado**, o una invitación desde **Lejos**. **Escanear el suyo** y **Desde una foto de su
    código QR**, debajo, leen desde aquí el código del otro teléfono. Lo mismo vale por contacto: mientras se muestra
    el código pequeño y el NFC está activado en Android, el otro teléfono lo toma si apoyas su parte trasera contra la
@@ -607,62 +633,81 @@ ocultos solo ofrecen sus propios contactos, nunca los del teléfono. Basta con q
 enlace inicia una conversación cifrada y le dice al otro teléfono cómo responder, así que este muestra el chat la
 próxima vez que consulta su cola, cosa que hace cada pocos segundos.
 
-**Lo que el relay ve de un chat:** todos tus contactos escriben en tu única cola. En cuanto cada teléfono ha recibido un
+**Lo que el servidor ve de un chat:** todos tus contactos escriben en tu única cola. En cuanto cada teléfono ha recibido un
 mensaje del otro, cada mensaje entre ellos se sella una vez más para el teléfono al que va, con una clave que ese
-teléfono dio dentro del chat, así que para el relay cada uno son bytes aleatorios de uno de unos pocos tamaños, y no
+teléfono dio dentro del chat, así que para el servidor cada uno son bytes aleatorios de uno de unos pocos tamaños, y no
 puede saber por ellos a qué conversación pertenecen. El primer mensaje de un chat, y los que se envíen antes de que
-llegue la respuesta, todavía lo muestran. El relay sigue viendo qué dirección deja cada mensaje, y cuándo. Y cada uno le
-dice al relay, en un byte que este lee, lo que lleva: un mensaje que alguien lee, aviso entre teléfonos (que un mensaje
-llegó o se leyó, escribiendo, estar en línea, reacciones, claves nuevas), o una llamada que suena. Así que el relay ve
+llegue la respuesta, todavía lo muestran. El servidor sigue viendo qué dirección deja cada mensaje, y cuándo. Y cada uno le
+dice al servidor, en un byte que este lee, lo que lleva: un mensaje que alguien lee, aviso entre teléfonos (que un mensaje
+llegó o se leyó, escribiendo, estar en línea, reacciones, claves nuevas), o una llamada que suena. Así que el servidor ve
 cuáles son mensajes, y cuándo empieza una llamada, estén las notificaciones activadas o no: así es como el aviso de una
 app web cerrada puede contarlos, y el aviso de los chats ocultos cerrados.
 
-### Formas de entrar al relay
+### Formas de entrar al servidor
 
-Un relay que pide token deja entrar a un teléfono de tres formas. Cada forma acaba con un token propio del teléfono ahí,
-así que quien gestiona el relay puede sacar a cualquier teléfono por separado.
+Un servidor que pide token deja entrar a un teléfono de cuatro formas. Cada forma acaba con un token propio del teléfono ahí,
+así que quien gestiona el servidor puede sacar a cualquier teléfono por separado.
 
-- **Una invitación:** un código QR o un enlace de un teléfono que ya está en el relay (ver Invitar a alguien nuevo más
+- **Un sitio abierto:** un servidor que los da, como el de LPHL, da por sí solo uno a un teléfono que no tiene sitio
+  allí, sin invitación ni cuenta. En el primer inicio, cuando eliges cuánto se te ve, Erevos toma uno en el servidor de
+  LPHL y crea allí tu cola (ver [Primeros pasos](#start)); **Usar el servidor de LPHL**, en la pantalla de inicio de un
+  espacio sin servidor y sin chats, también toma uno. El teléfono crea su token él mismo y da al servidor solo su
+  SHA-256. Un sitio así es para tus propios chats: no puede invitar ni prestar sitios. Cada día puede crear 20 colas,
+  mover 50 MB de archivos por el servidor, tomar 30 veces lo que necesita una llamada por el servidor y enviar 5000
+  mensajes a otros servidores: al llegar a uno de esos límites, Erevos lo dice, y sigue al día siguiente. A la vez puede
+  tener 8 MB de mensajes esperando y 20 guardados para más tarde, y todos los sitios abiertos juntos ocupan como máximo
+  la mitad de lo que el servidor guarda de cada cosa, y de archivos, para que nunca lo llenen para todos. El servidor de
+  LPHL da 3000 como máximo, 300 al día y 5 al día a una misma dirección de internet (una IPv6 cuenta con toda su red,
+  por sus primeros 48 bits), y quita uno cuyo teléfono no se ha conectado en 100 días, o en 30 si nunca volvió a
+  conectarse después del día en que se creó; otro servidor da 1000, 100 y 3, y quita uno a los 60 días, o a los 7, salvo
+  que quien lo gestiona haya elegido otra cosa. Si quita el tuyo, Erevos lo pide
+  de nuevo por sí solo, con el mismo token, la próxima vez que llegue al servidor: tu cola, tus enlaces y tus contactos
+  quedan como estaban, porque el servidor guarda las colas durante meses. Cuenta las direcciones solo durante el día, en
+  memoria, y nunca las anota. Cuando no da ninguno, la pantalla de inicio dice por qué, encima de las dos formas de
+  añadir a alguien o encima de los chats, con **Volver a intentarlo** y **Otro servidor**, y Erevos lo intenta de nuevo
+  cada vez que se abre.
+- **Una invitación:** un código QR o un enlace de un teléfono que ya está en el servidor (ver Invitar a alguien nuevo más
   abajo). Nada que escribir, y sois contactos al instante.
-- **Una cuenta:** **Iniciar sesión con LPHL**, cuando el relay lo ofrece (ver Iniciar sesión en el relay más abajo).
+- **Una cuenta:** **Iniciar sesión con LPHL**, cuando el servidor lo ofrece (ver Iniciar sesión en el servidor más abajo).
   Cualquier cuenta LPHL puede, en hasta 10 teléfonos.
-- **El token del relay:** el token único para todos, de quien gestiona el relay, escrito en **Token**. Erevos lo cambia
+- **El token del servidor:** el token único para todos, de quien gestiona el servidor, escrito en **Token**. Erevos lo cambia
   al instante, por sí solo, por un token propio del teléfono, con el nombre con el que te presentas en las invitaciones
   (\`phone\` si no diste ningún nombre), lo dice, y a partir de entonces solo usa ese. Así este teléfono también puede
-  invitar. Necesita un relay que acepte invitaciones, posterior a Erevos 3.1.0; con uno más antiguo, o uno que no acepte
-  invitaciones, el teléfono se queda con el token del relay y no puede invitar.
+  invitar. Necesita un servidor que acepte invitaciones, posterior a Erevos 3.1.0; con uno más antiguo, o uno que no acepte
+  invitaciones, el teléfono se queda con el token del servidor y no puede invitar.
 - **Los límites:** un teléfono puede tener 5 invitaciones pendientes a la vez y crear 10 al día (el día según UTC); cada
-  una es para un teléfono y dura 7 días. El relay deja entrar 100 teléfonos por invitación en total, contando también
+  una es para un teléfono y dura 7 días. El servidor deja entrar 100 teléfonos por invitación en total, contando también
   las invitaciones pendientes, salvo que quien lo gestiona haya elegido otra cosa. Los teléfonos que entraron con una
-  cuenta o con el token del relay no cuentan en esos 100: el relay da un token propio a 50 teléfonos al día que llegaron
-  con su token, y una cuenta tiene 10 teléfonos. El relay atiende 512 conexiones a la vez, sean de quien sean, salvo que
+  cuenta o con el token del servidor no cuentan en esos 100: el servidor da un token propio a 50 teléfonos al día que llegaron
+  con su token, y una cuenta tiene 10 teléfonos. El servidor atiende 512 conexiones a la vez, sean de quien sean, salvo que
   quien lo gestiona haya elegido otra cosa.
-- **Sacar un teléfono:** quien gestiona el relay borra su línea en el archivo de tokens del relay: ya no puede usar el
-  relay, mientras que los teléfonos que invitó conservan su acceso. Si alguna vez tuvo el token del relay, también
+- **Sacar un teléfono:** quien gestiona el servidor borra su línea en el archivo de tokens del servidor: ya no puede usar el
+  servidor, mientras que los teléfonos que invitó conservan su acceso. Si alguna vez tuvo el token del servidor, también
   cambia ese token, para que no pueda volver con él. Los teléfonos con tokens propios siguen como están: solo un
   teléfono que todavía tenga escrito el token antiguo (sin abrirse desde entonces, o con un {=Erevos} más antiguo) necesita
   el nuevo.
-- **Los chats ocultos** conservan el token del relay escrito para ellos: cambiarlo en el mismo momento que el del
-  espacio mostraría al relay que son de este teléfono. Cuando cambia el token del relay, escribe el nuevo en su **Para
+- **Los chats ocultos** conservan el token del servidor escrito para ellos: cambiarlo en el mismo momento que el del
+  espacio mostraría al servidor que son de este teléfono. Cuando cambia el token del servidor, escribe el nuevo en su **Para
   usuarios avanzados**.
 
-**Por qué:** el relay da a cada conexión un hilo propio, así que solo atiende cierto número a la vez; y solo añade cierto
+**Por qué:** el servidor da a cada conexión un hilo propio, así que solo atiende cierto número a la vez; y solo añade cierto
 número de líneas al día para teléfonos que llegaron con su token único, así que un token que fue a parar donde no debía
-no puede llenar su archivo de tokens.
+no puede llenar su archivo de tokens. Los sitios abiertos se cuentan igual, para que nadie pueda tomarlos todos, y uno
+que no da acceso a nadie no puede traer a otros.
 
 ### Invitar a alguien nuevo
 
-Un código QR o un enlace trae a alguien nuevo: su teléfono se une a {=Erevos} en tu relay, con acceso propio, sin escribir
+Un código QR o un enlace trae a alguien nuevo: su teléfono se une a {=Erevos} en tu servidor, con acceso propio, sin escribir
 nada, y sois contactos el uno del otro al instante, sin solicitud de mensaje.
 
-- **Para invitar:** en la pantalla de inicio, toca **Invitar** junto a la línea del relay o, en **Chat nuevo**, toca
+- **Para invitar:** en la pantalla de inicio, toca **Invitar** junto a la línea del servidor o, en **Chat nuevo**, toca
   **Lejos**. La invitación se crea al instante y aparece dentro de un mensaje listo para enviar: toca **Enviar con…**
   y elige la app, o toca **El código QR de la invitación** y deja que lo escanee con la cámara de su teléfono. **¿Para
   quién es?**, debajo, abre dos campos, su nombre en tus chats y **Tu nombre, para esa persona**: rellénalos, o deja
   ambos vacíos. Si la abres de nuevo mientras nadie la haya tomado y le quede al menos un día, muestra la misma
   invitación, así que no gasta ninguna de las 5 en espera ni de las 10 al día; **Invitar a otra persona** crea una
   nueva, y **Retirar esta invitación** cierra su enlace mientras ningún teléfono la haya tomado. Es para una persona,
-  por 7 días, o menos si la invitación del relay termina antes. Quien la toma primero la tiene, así que dásela solo a
+  por 7 días, o menos si la invitación del servidor termina antes. Quien la toma primero la tiene, así que dásela solo a
   esa persona. Para alguien que está a tu lado, **A mi lado** también muestra una invitación así como código QR. En un
   teléfono Android con NFC activado también puedes dársela por contacto: apoya la parte trasera de su teléfono contra
   la trasera del tuyo mientras se muestra el código, y su teléfono abre el enlace solo, en Erevos si está instalado, y
@@ -672,154 +717,157 @@ nada, y sois contactos el uno del otro al instante, sin solicitud de mensaje.
   abre **… te invita a Erevos**, y tocas **Unirse** solo si viene de esa persona. Dentro de Erevos, **Tengo su
   código** en **Chat nuevo** también acepta una invitación: toca **Escanear su código QR** y haz una foto de la
   invitación en su pantalla, o **Desde una foto de su código QR**, o pega el enlace en el campo de ahí y toca
-  **Añadir**. Erevos obtiene acceso propio a su relay y una cola ahí, la añade y dice **Te damos la bienvenida a
+  **Añadir**. Erevos obtiene acceso propio a su servidor y una cola ahí, la añade y dice **Te damos la bienvenida a
   Erevos**. Su primer mensaje avisa a su teléfono, que añade este como contacto al instante, con el nombre que
   escribió.
 - **Las otras formas de entrar:** en **Chat nuevo**, **Para usuarios avanzados** abre las demás, para quien las
-  busque: **Iniciar sesión con LPHL** inicia sesión en el relay de LPHL desde este teléfono con una cuenta LPHL, en el
-  navegador (ver Iniciar sesión en el relay más abajo), y luego añades a tus contactos con sus invitaciones o enlaces;
-  **Empezar sin servidor**, como en Sin ningún relay, en A través de Nostr; y los ajustes del relay, como en los pasos 1
-  a 3 de arriba. Una invitación es la forma más sencilla de entrar, y en el relay un teléfono invitado solo tiene un
+  busque: **Iniciar sesión con LPHL** inicia sesión en el servidor de LPHL desde este teléfono con una cuenta LPHL, en el
+  navegador (ver Iniciar sesión en el servidor más abajo), y luego añades a tus contactos con sus invitaciones o enlaces;
+  **Empezar sin servidor**, como en Sin ningún servidor, en A través de Nostr; y los ajustes del servidor, como en los pasos 1
+  a 3 de arriba. Una invitación es la forma más sencilla de entrar, y en el servidor un teléfono invitado solo tiene un
   nombre de letras y cifras al azar.
-- **Un servidor propio:** en la misma pantalla, bajo **Dónde esperan tus mensajes**, **Tengo un servidor propio** toma la dirección de un relay que es tuyo, o de tu familia, tu grupo o tu trabajo, y el código que te dieron para él (el token del relay; déjalo vacío si el relay no tiene). **Conectar** lo prueba al momento, y no se guarda nada si el servidor no responde. Mientras este teléfono no tiene relay todavía, **No tengo invitación** en **Chat nuevo** abre también esta pantalla.
-- **Otro relay:** debajo de **Iniciar sesión con LPHL**, **Mi cuenta está en otro servidor…** toma la dirección de otro
-  relay, tal como te la dio quien lo gestiona, por ejemplo relay.example.org: la tarjeta inicia sesión allí, con el
-  nombre de las cuentas que acepta ese relay, o dice que no ofrece inicio de sesión, y entonces quien lo gestiona puede
+- **Un servidor propio:** en la misma pantalla, bajo **Dónde esperan tus mensajes**, **Tengo un servidor propio** toma la dirección de un servidor que es tuyo, o de tu familia, tu grupo o tu trabajo, y el código que te dieron para él (el token del servidor; déjalo vacío si el servidor no tiene). **Conectar** lo prueba al momento, y no se guarda nada si el servidor no responde. Mientras este teléfono no tiene servidor todavía, **No tengo invitación** en **Chat nuevo** abre también esta pantalla.
+- **Otro servidor:** debajo de **Iniciar sesión con LPHL**, **Mi cuenta está en otro servidor…** toma la dirección de otro
+  servidor, tal como te la dio quien lo gestiona, por ejemplo relay.example.org: la tarjeta inicia sesión allí, con el
+  nombre de las cuentas que acepta ese servidor, o dice que no ofrece inicio de sesión, y entonces quien lo gestiona puede
   darte una invitación. **Volver a** trae de nuevo el de LPHL.
-- **Lo que tu relay debe permitir:** el acceso propio es una invitación a tu relay (ver Invitaciones al relay más
-  abajo), así que solo sale de un teléfono con token propio en un relay que acepte invitaciones. Cuenta entre tus
+- **Lo que tu servidor debe permitir:** el acceso propio es una invitación a tu servidor (ver Invitaciones al servidor más
+  abajo), así que solo sale de un teléfono con token propio en un servidor que acepte invitaciones. Cuenta entre tus
   invitaciones, con un nombre de letras y cifras al azar, y se queda aunque el tuyo se vaya. Un teléfono con el token
-  único del relay para todos lo cambia antes por uno propio (ver Formas de entrar al relay más arriba); donde el relay
-  no lo hace, no crea ninguna invitación: inicia sesión en el relay primero (debajo del **Token**, en **Para usuarios
-  avanzados**), o usa una invitación a él. Cuando tu relay no acepta invitaciones, la invitación igualmente os hace
-  contactos, y su teléfono usa tu relay solo como le permite tu enlace de contacto, como en Sin relay propio más
-  abajo. Una invitación así solo se abre en un teléfono que ya tiene Erevos.
-- **Un teléfono que ya tiene relay** conserva el suyo: la invitación solo te añade, y sois contactos al instante igual.
+  único del servidor para todos lo cambia antes por uno propio (ver Formas de entrar al servidor más arriba); donde el servidor
+  no lo hace, no crea ninguna invitación: inicia sesión en el servidor primero (debajo del **Token**, en **Para usuarios
+  avanzados**), o usa una invitación a él. Cuando tu servidor no acepta invitaciones, la invitación igualmente os hace
+  contactos, y su teléfono usa tu servidor solo como le permite tu enlace de contacto, como en Sin servidor propio más
+  abajo. Una invitación así solo se abre en un teléfono que ya tiene {=Erevos}.
+- **Un teléfono que ya tiene servidor** conserva el suyo: la invitación solo te añade, y sois contactos al instante igual.
 - **Lo que se guarda:** tu teléfono guarda el secreto de cada invitación y el nombre para esa persona, sellados en el
-  espacio, hasta que se usa o acaban sus 7 días, 20 como mucho a la vez. Nada de ello está en el relay salvo la
-  invitación al relay.
+  espacio, hasta que se usa o acaban sus 7 días, 20 como mucho a la vez. Nada de ello está en el servidor salvo la
+  invitación al servidor.
 - [~] **Por SMS, a alguien que aún no tiene {=Erevos}:** en Android, la ficha de un contacto que no está en Erevos tiene
   **Invitar por SMS**. Escribe un SMS a su primer número con un enlace corto, en la app de SMS (la propia de Erevos
   cuando es la app de SMS del teléfono), para que lo envíes o no. La página del enlace en el servidor web de LPHL le
   ofrece {=Erevos} (la app de Android, o la app web en un iPhone) y luego abre en ella la invitación; en la app web en un
-  iPhone, pega el enlace en **Tengo una invitación**. Toca **Unirse**: su teléfono se une a tu relay como arriba y
+  iPhone, pega el enlace en **Tengo una invitación**. Toca **Unirse**: su teléfono se une a tu servidor como arriba y
   responde al tuyo a través de él, lo que lo añade, vinculado a ese número y con el nombre de la ficha. Su primer
   mensaje, que sale solo, te hace su contacto, con el nombre con el que te presentaste en tu última invitación. La
   invitación va tras la **#** del enlace, que no se envía a ningún servidor web, pero la compañía telefónica ve el SMS,
   como todo SMS: por eso es para una persona, durante dos días, y cuando acaban los dos días sin que ningún teléfono la
-  haya usado, tu teléfono retira su invitación al relay. Necesita un relay que deje invitar a tu teléfono, como arriba.
+  haya usado, tu teléfono retira su invitación al servidor. Necesita un servidor que deje invitar a tu teléfono, como arriba.
 
-### Sin relay propio
+### Sin servidor propio
 
-Un teléfono sin relay chatea por internet igualmente: al añadir el enlace de un contacto cuyo relay presta sitios, toma
+Un teléfono sin servidor chatea por internet igualmente: al añadir el enlace de un contacto cuyo servidor presta sitios, toma
 un sitio ahí, sin token.
 
-- **Cómo:** añade su enlace como en el paso 6, sin nada en **Relay**. Erevos dice que ahora tienes un sitio en su
-  relay, prestado a través de su enlace, y a partir de entonces lo usa como propio: tu propio enlace lo nombra, así
+- **Cómo:** añade su enlace como en el paso 6, sin nada en **Servidor**. Erevos dice que ahora tienes un sitio en su
+  servidor, prestado a través de su enlace, y a partir de entonces lo usa como propio: tu propio enlace lo nombra, así
   que los demás también te contactan ahí.
-- **Quién presta:** tu enlace lleva un billete para un sitio en tu relay solo cuando activas **Compartir un sitio en
-  mi relay con este enlace**, bajo **Mi enlace** en **Chat nuevo**, y solo para el enlace que se muestra entonces: la
-  próxima vez que se abra el chat, vuelve a estar desactivado. El relay necesita una clave para el envío en dos
+- **Quién presta:** tu enlace lleva un billete para un sitio en tu servidor solo cuando activas **Compartir un sitio en
+  mi servidor con este enlace**, bajo **Mi enlace** en **Chat nuevo**, y solo para el enlace que se muestra entonces: la
+  próxima vez que se abra el chat, vuelve a estar desactivado. El servidor necesita una clave para el envío en dos
   saltos, y solo presta cuando quien lo gestiona activa el préstamo; también puede retirar los sitios de un billete.
   Un billete dura 30 días y da hasta cuatro sitios. Cualquiera que vea un enlace con billete puede tomar un sitio con
   él, así que da ese enlace solo a quien quieras.
-- **Lo que no hace un sitio prestado:** los mensajes a contactos de otros relays van directamente a su relay, que
+- **Lo que no hace un sitio prestado:** los mensajes a contactos de otros servidores van directamente a su servidor, que
   entonces ve la dirección de tu teléfono. No guarda nada para más tarde (un mensaje enviado más tarde espera en el
-  teléfono), no da relay de llamadas (las llamadas van directamente entre los teléfonos), y crea 4 colas más y envía 50
+  teléfono), no da servidor de llamadas (las llamadas van directamente entre los teléfonos), y crea 4 colas más y envía 50
   MB de archivos al día como mucho. Tu enlace no presta nada a su vez.
-- **Tu propio relay en su lugar:** escribe su dirección en **Relay**: se deja el sitio prestado, y los contactos conocen
+- **Tu propio servidor en su lugar:** escribe su dirección en **Servidor**: se deja el sitio prestado, y los contactos conocen
   el nuevo con tu siguiente mensaje.
-- **Un enlace sin billete** (de un relay o un Erevos más antiguo): un relay que no pide token se usa tal cual; si no,
-  os podéis contactar solo cerca, hasta que tengas un relay.
+- **Un enlace sin billete** (de un servidor o un Erevos más antiguo): un servidor que no pide token se usa tal cual; si no,
+  os podéis contactar solo cerca, hasta que tengas un servidor.
 
-**Por qué:** un enlace con billete es una llave de tu relay para quien lo vea, así que tu enlace solo lleva uno cuando
-tú lo eliges, para el enlace que se muestra entonces, y el relay solo presta cuando quien lo gestiona lo permite. Los
+**Por qué:** un enlace con billete es una llave de tu servidor para quien lo vea, así que tu enlace solo lleva uno cuando
+tú lo eliges, para el enlace que se muestra entonces, y el servidor solo presta cuando quien lo gestiona lo permite. Los
 archivos de un sitio prestado se limitan a unas pocas fotos y mensajes de voz al día, para que nunca ocupe todo el
-almacenamiento del relay.
+almacenamiento del servidor.
 
-### Invitaciones al relay
+### Invitaciones al servidor
 
-Un teléfono con token propio en un relay que acepta invitaciones puede dejar que un teléfono más use ese relay, con un
+Un teléfono con token propio en un servidor que acepta invitaciones puede dejar que un teléfono más use ese servidor, con un
 token propio de ese teléfono, así que no se escribe ni se pasa ningún token.
 
-- **Para invitar:** en **Para usuarios avanzados** de **Chat nuevo**, debajo del **Token**, toca **Invitar al relay**,
+- **Para invitar:** en **Para usuarios avanzados** de **Chat nuevo**, debajo del **Token**, toca **Invitar al servidor**,
   escribe para quién es y toca **Crear la invitación**. Se abre un código QR: deja que su teléfono lo escanee con la
   cámara y abra el enlace en Erevos, o toca **Compartir la invitación** y envíasela. Vale para un teléfono durante 7
   días, y quien la use primero se la queda, así que muéstrasela solo a esa persona.
-- **Para usar una:** el enlace abre **Invitación a un relay**, con la dirección del relay: toca **Usar este relay**
+- **Para usar una:** el enlace abre **Invitación a un servidor**, con la dirección del servidor: toca **Usar este servidor**
   solo si viene de alguien que conoces. En Erevos, **Tengo su código** en **Chat nuevo** también acepta una
   invitación: con **Escanear su código QR**, **Desde una foto de su código QR**, o su enlace pegado en el campo de
-  ahí. Erevos crea un token para este teléfono, lo guarda con la dirección del relay solo en este espacio y crea tu
-  cola ahí. Si el teléfono usa otro relay, pregunta antes, y los contactos conocen tu nueva cola con tu siguiente
-  mensaje. Erevos acepta una invitación a un relay wss://, o a uno ws:// solo en una red doméstica (como
+  ahí. Erevos crea un token para este teléfono, lo guarda con la dirección del servidor solo en este espacio y crea tu
+  cola ahí. Si el teléfono usa otro servidor, pregunta antes, y los contactos conocen tu nueva cola con tu siguiente
+  mensaje. Erevos acepta una invitación a un servidor wss://, o a uno ws:// solo en una red doméstica (como
   \`ws://192.168.1.10:7879\`). Los chats ocultos no aceptan invitaciones.
 - **Tus invitaciones:** listadas bajo el botón, pendientes o en uso. **Retirar** retira una todavía pendiente, o corta
-  al instante el teléfono que la usó, solo ese: los teléfonos que este invitó a su vez conservan su acceso.
-- **El suyo se queda:** un teléfono que invitaste conserva su línea en el relay aunque la tuya desaparezca, porque el
-  teléfono que te invitó la retiró, la cuenta con la que iniciaste sesión ya no puede usar el relay, o quien lo gestiona
+  al instante el teléfono que la usó, solo ese: los teléfonos que este invitó a su vez conservan su acceso. Una que tu
+  teléfono envió por sí solo a un contacto sin servidor (ver [Sin ningún servidor](#nostr-only)) es una de ellas: una vez que
+  su teléfono ha entrado con ella, el chat con ese contacto lo dice, solo en tu teléfono, con **Retirar** debajo de esa
+  línea mientras siga ahí.
+- **El suyo se queda:** un teléfono que invitaste conserva su línea en el servidor aunque la tuya desaparezca, porque el
+  teléfono que te invitó la retiró, la cuenta con la que iniciaste sesión ya no puede usar el servidor, o quien lo gestiona
   la sacó, y lo mismo los teléfonos que este invitó. Solo tus invitaciones aún pendientes ya no dejan entrar a nadie.
-- **Lo que guarda el relay:** para ese teléfono un nombre de letras y cifras al azar, que no dice nada de quién es (el
-  nombre que escribiste se queda en tu teléfono; un Erevos anterior a 6.0.0 daba al relay ese nombre, en letras
-  latinas), que lo invitaste tú, y una huella de su token, no el token. Quien gestiona el relay ve esto, y puede sacar
-  del relay a cualquier teléfono. Un teléfono puede tener 5 invitaciones pendientes a la vez, y crear 10 al día, y el
-  relay solo deja entrar cierto número de teléfonos por invitación (100, salvo que quien lo gestiona haya elegido otra
+- **Lo que guarda el servidor:** para ese teléfono un nombre de letras y cifras al azar, que no dice nada de quién es (el
+  nombre que escribiste se queda en tu teléfono; un {=Erevos} anterior a 6.0.0 daba al servidor ese nombre, en letras
+  latinas), que lo invitaste tú, y una huella de su token, no el token. Quien gestiona el servidor ve esto, y puede sacar
+  del servidor a cualquier teléfono. Un teléfono puede tener 5 invitaciones pendientes a la vez, y crear 10 al día, y el
+  servidor solo deja entrar cierto número de teléfonos por invitación (100, salvo que quien lo gestiona haya elegido otra
   cosa).
-- **Quién puede invitar:** un teléfono con token propio, en un relay cuyo gestor activó las invitaciones (ver
-  [Tener tu propio relay](#own-relay)). Un teléfono con el token único del relay para todos lo cambia antes por uno
-  propio (ver Formas de entrar al relay más arriba). Con un sitio prestado no hay **Invitar al relay**.
+- **Quién puede invitar:** un teléfono con token propio, en un servidor cuyo gestor activó las invitaciones (ver
+  [Tener tu propio servidor](#own-relay)). Un teléfono con el token único del servidor para todos lo cambia antes por uno
+  propio (ver Formas de entrar al servidor más arriba). Con un sitio prestado no hay **Invitar al servidor**.
 
-**Por qué:** el relay solo guarda una huella de cada token, nunca el token, así que su archivo no le dice a nadie cómo
-conectarse. Y una invitación nombra un relay wss://, o uno ws:// en casa, así que nunca puede enviar las peticiones de
+**Por qué:** el servidor solo guarda una huella de cada token, nunca el token, así que su archivo no le dice a nadie cómo
+conectarse. Y una invitación nombra un servidor wss://, o uno ws:// en casa, así que nunca puede enviar las peticiones de
 tu teléfono por internet sin cifrar.
 
-### Iniciar sesión en el relay
+### Iniciar sesión en el servidor
 
-Un relay puede dejar que los teléfonos inicien sesión con una cuenta en la que confía quien lo gestiona, como LPHL, para
+Un servidor puede dejar que los teléfonos inicien sesión con una cuenta en la que confía quien lo gestiona, como LPHL, para
 obtener un token propio, sin nada que escribir en Erevos.
 
-- **Para iniciar sesión:** escribe la dirección del relay en **Relay**. Cuando el relay lo ofrece, **Iniciar sesión
+- **Para iniciar sesión:** escribe la dirección del servidor en **Servidor**. Cuando el servidor lo ofrece, **Iniciar sesión
   con LPHL** aparece debajo del **Token**. Tócalo: el navegador abre la página de inicio de sesión, donde escribes tu
-  nombre y tu contraseña, que Erevos nunca ve. Luego la página del relay muestra seis dígitos. En Android, toca ahí
+  nombre y tu contraseña, que Erevos nunca ve. Luego la página del servidor muestra seis dígitos. En Android, toca ahí
   **Abrir {=Erevos}** y Erevos termina de iniciar sesión por sí solo; si no, escríbelos como se describe a continuación.
   De vuelta en Erevos, que te deja directamente en **Código de la página**, escríbelos ahí y toca **Terminar de
-  iniciar sesión**: el teléfono guarda su token con la dirección del relay solo en este espacio, y crea tu cola ahí.
+  iniciar sesión**: el teléfono guarda su token con la dirección del servidor solo en este espacio, y crea tu cola ahí.
   Escribe el código solo en Erevos en tu propio teléfono y no se lo des a nadie, aunque te lo pidan: quien lo escriba
-  usa el relay como si fuera tú. Tras 5 códigos incorrectos, el inicio de sesión se acaba: vuelve a iniciar sesión.
-  Erevos solo abre una página de inicio de sesión en la dirección propia del relay, por https.
-- **Volver a iniciar sesión** en el mismo teléfono sustituye su línea en el relay, cuando su token es el que obtuvo de
-  ese relay. Cada teléfono obtiene una línea propia, 10 como mucho para una cuenta.
-- **Lo que ven el relay y LPHL:** el relay nombra la línea del teléfono con tu nombre de usuario (\`lphl:nekten\`), y
+  usa el servidor como si fuera tú. Tras 5 códigos incorrectos, el inicio de sesión se acaba: vuelve a iniciar sesión.
+  Erevos solo abre una página de inicio de sesión en la dirección propia del servidor, por https.
+- **Volver a iniciar sesión** en el mismo teléfono sustituye su línea en el servidor, cuando su token es el que obtuvo de
+  ese servidor. Cada teléfono obtiene una línea propia, 10 como mucho para una cuenta.
+- **Lo que ven el servidor y LPHL:** el servidor nombra la línea del teléfono con tu nombre de usuario (\`lphl:nekten\`), y
   cada hora pregunta a LPHL si la cuenta todavía puede usarlo: en cuanto la cuenta se cierra o se desactiva, o no se
-  puede preguntar a LPHL durante 3 días, la línea desaparece, y el teléfono ya no puede usar el relay; los teléfonos que
+  puede preguntar a LPHL durante 3 días, la línea desaparece, y el teléfono ya no puede usar el servidor; los teléfonos que
   invitó conservan su acceso. LPHL ve cada inicio de sesión y estas comprobaciones, pero nada de tus espacios, chats o
-  contactos. Iniciar sesión desde otro espacio con la misma cuenta muestra al relay que los dos son tuyos.
+  contactos. Iniciar sesión desde otro espacio con la misma cuenta muestra al servidor que los dos son tuyos.
 - **Los chats ocultos** no inician sesión.
 
 **Por qué:** la página muestra el código y tú lo escribes en Erevos, no al revés, así que un enlace de inicio de
 sesión que te envíe otra persona no le sirve de nada: solo quien inició sesión ve el código, y cinco incorrectos lo
-anulan. Erevos solo abre una página de inicio de sesión en la dirección propia del relay, por https, así que nada que
-responda en lugar del relay puede enviarte a una página en otro sitio. Y un proveedor al que no se puede preguntar
+anulan. Erevos solo abre una página de inicio de sesión en la dirección propia del servidor, por https, así que nada que
+responda en lugar del servidor puede enviarte a una página en otro sitio. Y un proveedor al que no se puede preguntar
 durante un tiempo no corta ningún teléfono al instante: solo lo hacen 3 días sin una respuesta válida. Y el botón
 **Abrir Erevos** es igual de seguro: el enlace contiene solo los seis dígitos, que no reclaman nada sin el secreto que
 solo tiene el teléfono que inició el inicio de sesión, así que una aplicación que captara el enlace no obtiene nada.
 
-### La clave propia del relay
+### La clave propia del servidor
 
-En cuanto Erevos conoce la clave de tu relay (se la pide al relay la primera vez, o se la da un enlace de contacto),
-cada conexión a ese relay empieza con una comprobación: el relay debe demostrar que tiene esa clave, y el token y todo lo
+En cuanto Erevos conoce la clave de tu servidor (se la pide al servidor la primera vez, o se la da un enlace de contacto),
+cada conexión a ese servidor empieza con una comprobación: el servidor debe demostrar que tiene esa clave, y el token y todo lo
 que sigue van cifrados con esa clave, dentro del cifrado propio de la conexión (TLS). En **Cómo te conectas ahora**,
-Erevos dice entonces que tu relay demostró su propia clave. A partir de entonces, este espacio nunca contacta con ese
-relay sin la comprobación.
+Erevos dice entonces que tu servidor demostró su propia clave. A partir de entonces, este espacio nunca contacta con ese
+servidor sin la comprobación.
 
-- Un relay más antiguo que esta app no demuestra nada: funciona como antes, y **Cómo te conectas ahora** dice que es
+- Un servidor más antiguo que esta app no demuestra nada: funciona como antes, y **Cómo te conectas ahora** dice que es
   más antiguo. Erevos lo vuelve a intentar cada hora.
-- Un relay que no puede demostrar la clave que Erevos guarda para él no recibe nada, y tus mensajes esperan; **Cómo te
+- Un servidor que no puede demostrar la clave que Erevos guarda para él no recibe nada, y tus mensajes esperan; **Cómo te
   conectas ahora** lo dice en rojo. Solo si quien lo gestiona te dijo que tiene una clave nueva, toca **Tiene una clave
-  nueva**: Erevos toma entonces la clave que dé el relay a continuación.
+  nueva**: Erevos toma entonces la clave que dé el servidor a continuación.
 
-**Por qué:** el certificado de la conexión solo dice que quien responde tiene un certificado para el nombre del relay,
+**Por qué:** el certificado de la conexión solo dice que quien responde tiene un certificado para el nombre del servidor,
 que una empresa que emite certificados también puede darle a otra persona, por error o cuando se la obliga. La clave
-propia del relay solo está en su servidor, así que nadie entre medias puede hacerse pasar por él, y un certificado
+propia del servidor solo está en el propio servidor, así que nadie entre medias puede hacerse pasar por él, y un certificado
 renovado no cambia nada.
 
 ### El número de seguridad
@@ -852,7 +900,7 @@ se hacen contactos: aquel desde cuyo chat hiciste la presentación escribe prime
 instante, con el nombre que tú le diste. Si uno dice que no, no pasa nada, y al otro no se le dice. Una presentación
 espera una semana.
 
-**Por qué:** todo va dentro del cifrado de tus chats con cada uno, así que ningún relay ve a quién se presenta a quién.
+**Por qué:** todo va dentro del cifrado de tus chats con cada uno, así que ningún servidor ve a quién se presenta a quién.
 Solo pasas el enlace de contacto que el segundo eligió dar, después de decir que sí. Como quien presenta podría hacer
 pasar a otra persona, compara el número de seguridad con el nuevo contacto como con cualquier otro.
 
@@ -862,10 +910,10 @@ Encima del primer mensaje de cada día, en todos los chats, también en los grup
 marcado: **Hoy**, **Ayer**, el día de la semana dentro de la última semana y, antes, el día de la semana con la fecha,
 como **Martes, 10 de noviembre**.
 
-Bajo cada uno de tus mensajes a un contacto, **✓** dice que el relay o un teléfono cercano lo recogió, **✓✓** que llegó
+Bajo cada uno de tus mensajes a un contacto, **✓** dice que el servidor o un teléfono cercano lo recogió, **✓✓** que llegó
 a su teléfono, y **✓✓✓** que lo leyó. Su teléfono se lo dice al tuyo, dentro del cifrado, la próxima vez que cada uno
-consulta el relay, o al instante cuando están cerca. Un mensaje cuenta como leído en cuanto su chat se ve en la
-pantalla. **Marcar todo como leído** en el menú ⋮ cuenta igual: sus teléfonos lo saben en la siguiente mirada al relay.
+consulta el servidor, o al instante cuando están cerca. Un mensaje cuenta como leído en cuanto su chat se ve en la
+pantalla. **Marcar todo como leído** en el menú ⋮ cuenta igual: sus teléfonos lo saben en la siguiente mirada al servidor.
 
 En un grupo que no es público, tus mensajes tienen las mismas marcas, para todos los demás miembros a la vez: **✓** al
 enviarse, **✓✓** cuando el mensaje llegó al teléfono de cada miembro que estaba en el grupo cuando lo enviaste, y
@@ -877,49 +925,49 @@ marcas no dice nada, así que se queda en **Todavía no** y el mensaje se queda 
 marcas. Un ordenador vinculado a este teléfono muestra las mismas marcas.
 
 - **Enviando…:** en el momento en que pulsas Enviar, el teléfono da una vibración corta, el campo se vacía y el mensaje
-  aparece, marcado como **Enviando…** hasta que el relay o su teléfono lo recogen. Si no puede salir y no puede esperar,
+  aparece, marcado como **Enviando…** hasta que el servidor o su teléfono lo recogen. Si no puede salir y no puede esperar,
   sus palabras vuelven al campo. Si sales del chat mientras muestra **Enviando…**, no se pierde: sale, o espera
   marcado como **En espera**.
-- **En espera:** un mensaje que nada pudo recoger, porque el relay no está disponible y su teléfono no está cerca, se
-  queda en el chat marcado como **En espera**, y sale solo, en orden, en cuanto el relay o su teléfono cercano pueden
+- **En espera:** un mensaje que nada pudo recoger, porque el servidor no está disponible y su teléfono no está cerca, se
+  queda en el chat marcado como **En espera**, y sale solo, en orden, en cuanto el servidor o su teléfono cercano pueden
   recibirlo, mientras haya un espacio abierto; entonces muestra **✓**. Un texto espera directamente. Un mensaje de voz,
   una foto o un archivo pregunta antes: **Dejar en espera** o **Eliminar**. Un mensaje en espera se elimina solo en este
-  teléfono. En los chats ocultos también espera, pero sale solo por su relay, nunca al teléfono cercano ni por LoRa:
+  teléfono. En los chats ocultos también espera, pero sale solo por su servidor, nunca al teléfono cercano ni por LoRa:
   mientras están abiertos, o, con **Recibir estando cerrados** activado, mientras el espacio está abierto. Cuando la
-  cola del contacto en el relay está llena, un texto, mensaje de voz, foto o archivo sigue yendo a sus dispositivos
+  cola del contacto en el servidor está llena, un texto, mensaje de voz, foto o archivo sigue yendo a sus dispositivos
   vinculados, si tiene alguno, aparece como enviado, y se vuelve a intentar para su teléfono mientras los chats ocultos
   sigan abiertos: si se cierran antes de que salga, su teléfono nunca lo recibe.
 - **Enviar más tarde:** mantén pulsada la flecha de enviar y elige **Más tarde…**, o toca **+** y luego **Enviar más
   tarde**. Elige una hora con un toque (**En 1 hora**, **Esta noche 20:00**, **Mañana 09:00**) o el día, la hora y los
   minutos, hasta un año vista, y luego **Enviar más tarde**. El mensaje se queda en el chat marcado como
-  **Programado** con su hora. Va cifrado al relay, que lo guarda y lo envía a esa hora, aunque este teléfono esté
-  apagado o bloqueado entonces, y su teléfono lo muestra a partir de esa hora, no antes. Sin ningún relay disponible
-  ahora, espera en este teléfono y va al relay en cuanto haya uno disponible. Sin nada escrito, la hora que elijas es
-  para la siguiente foto, archivo o mensaje de voz: una foto o un archivo va a tu relay al instante y se queda ahí hasta
+  **Programado** con su hora. Va cifrado al servidor, que lo guarda y lo envía a esa hora, aunque este teléfono esté
+  apagado o bloqueado entonces, y su teléfono lo muestra a partir de esa hora, no antes. Sin ningún servidor disponible
+  ahora, espera en este teléfono y va al servidor en cuanto haya uno disponible. Sin nada escrito, la hora que elijas es
+  para la siguiente foto, archivo o mensaje de voz: una foto o un archivo va a tu servidor al instante y se queda ahí hasta
   que lo recojan, 14 días después de su hora como mucho. Los chats ocultos también lo tienen, igual, a través de su
-  relay. Hasta su hora, elimínalo para retirarlo del relay, y nunca sale. Si su cola en el relay
-  cambia antes, Erevos lo vuelve a programar para la nueva la próxima vez que contacte con el relay.
-  Con un token propio de este teléfono, solo sale si el teléfono todavía tiene su línea en ese relay entonces. Un
-  mensaje sin sonido sigue sin sonido. Un relay anterior a esto no guarda nada para más tarde: entonces el mensaje
+  servidor. Hasta su hora, elimínalo para retirarlo del servidor, y nunca sale. Si su cola en el servidor
+  cambia antes, Erevos lo vuelve a programar para la nueva la próxima vez que contacte con el servidor.
+  Con un token propio de este teléfono, solo sale si el teléfono todavía tiene su línea en ese servidor entonces. Un
+  mensaje sin sonido sigue sin sonido. Un servidor anterior a esto no guarda nada para más tarde: entonces el mensaje
   espera en este teléfono y sale a su hora mientras Erevos funciona, también en segundo plano mientras **En segundo
   plano** está en **Recibir y sonar** (más abajo), o cuando Erevos se vuelva a abrir.
 - **Mensaje de seguridad:** escríbelo, toca **+** y luego **Mensaje de seguridad**, y elige cuánto tiempo: 6 o 12
-  horas, 1, 2 o 3 días, o una semana. Va al relay al instante, como uno enviado para más tarde, y el relay lo envía por
+  horas, 1, 2 o 3 días, o una semana. Va al servidor al instante, como uno enviado para más tarde, y el servidor lo envía por
   sí solo a esa hora. Cada vez que abres Erevos, pasada su contraseña, se retrasa de nuevo ese tiempo, así que solo sale
   si no abres Erevos a tiempo: si el teléfono se pierde, te lo quitan, se rompe o se queda sin internet, o si te ha
   pasado algo. Erevos en segundo plano no lo retrasa, ni tampoco su pantalla de contraseña, ni una ventana que se deja
   abierta sin que nadie la toque ni escriba en ella durante 10 minutos. En los chats ocultos se retrasa mientras su
   lugar recibe, o cuando lo abres. En el chat aparece marcado como **Mensaje de seguridad** con la hora a la que
   saldría; elimínalo para detenerlo. Escríbelo de modo que diga lo que es: a tu contacto le llega como un mensaje
-  corriente. Si no se puede contactar con el relay cuando abres Erevos, conserva su hora. Se cifra una sola vez y va al
-  relay otra vez tal como está cada vez que se retrasa, así que no le cuesta nada a tu chat.
-  **Por qué:** un mensaje que guarda el relay no necesita nada de este teléfono para salir, así que quien se lleve el
+  corriente. Si no se puede contactar con el servidor cuando abres Erevos, conserva su hora. Se cifra una sola vez y va al
+  servidor otra vez tal como está cada vez que se retrasa, así que no le cuesta nada a tu chat.
+  **Por qué:** un mensaje que guarda el servidor no necesita nada de este teléfono para salir, así que quien se lleve el
   teléfono no puede detenerlo, salvo abriendo Erevos con su contraseña.
 - **Enviar sin sonido:** mantén pulsada la flecha de enviar y elige **Sin sonido**: su teléfono muestra el aviso sin
   sonido ni vibración. Un Erevos anterior no lo sabe y suena como siempre, y lo mismo hace Erevos como app web, cuyo
   aviso viene del navegador. Lo mismo hace el aviso de un lugar de chats ocultos que está cerrado, con **Avisar cuando
   llega un mensaje** activado, y el de un espacio cerrado con **También mientras otro espacio está abierto**: estos
-  solo preguntan al relay cuántos llegaron, y el relay no puede distinguir uno sin sonido de otro, ya que solo lo dice
+  solo preguntan al servidor cuántos llegaron, y el servidor no puede distinguir uno sin sonido de otro, ya que solo lo dice
   el mensaje cifrado.
 - **Enlaces:** una dirección web en un mensaje aparece subrayada, también una sin más, como t.me/name o
   example.org/page, tal como la muestran Telegram y Signal; una dirección de correo o el nombre de un archivo
@@ -936,16 +984,16 @@ marcas. Un ordenador vinculado a este teléfono muestra las mismas marcas.
   sales de **Enviar a**.
 - **Tu contacto ve cuándo lees:** tu teléfono se lo dice al suyo, como el suyo al tuyo, salvo que ese chat aparezca sin
   conexión (más abajo).
-- **Cuando llegan mensajes:** Erevos consulta el relay cada pocos segundos mientras está abierto y desbloqueado, en
+- **Cuando llegan mensajes:** Erevos consulta el servidor cada pocos segundos mientras está abierto y desbloqueado, en
   cualquier pantalla, y la pantalla de inicio sube el chat arriba por sí sola. En Android cada mensaje nuevo suena, con
   un aviso que solo dice cuántos llegaron, también mientras Erevos está a la vista; en el chat o grupo abierto en la
   pantalla solo suena el sonido, y abrir un chat quita del contador lo que llegó ahí. Escribir, y que un mensaje llegó o
   se leyó, no hacen ninguno. En Android también sigue en segundo plano, mientras **En
-  segundo plano** está en **Recibir y sonar** (más abajo): ahí espera en el relay hasta que llega algo, un minuto cada
+  segundo plano** está en **Recibir y sonar** (más abajo): ahí espera en el servidor hasta que llega algo, un minuto cada
   vez, en lugar de preguntar cada pocos segundos, y no pregunta nada más cuando no llegó nada, para que la batería dure,
   y un aviso solo dice cuántos mensajes llegaron. Cerrado, bloqueado, o
-  mucho tiempo en segundo plano en otro caso, no lo hace: los mensajes esperan en el relay, hasta 14 días, y llegan en
-  cuanto Erevos se vuelve a abrir. Una petición al relay sin respuesta a tiempo (una espera ahí, su minuto y medio
+  mucho tiempo en segundo plano en otro caso, no lo hace: los mensajes esperan en el servidor, hasta 14 días, y llegan en
+  cuanto Erevos se vuelve a abrir. Una petición al servidor sin respuesta a tiempo (una espera ahí, su minuto y medio
   minuto más; cualquier otra cosa, 45 segundos; una parte de un archivo, 2 minutos) cuenta como fallida y se vuelve a
   hacer, así que una conexión que murió por el camino, como cuando la red del teléfono se duerme o cambia, no retiene
   nada.
@@ -955,7 +1003,7 @@ marcas. Un ordenador vinculado a este teléfono muestra las mismas marcas.
 Mientras el chat de un contacto está abierto en tu pantalla, Erevos pregunta de vez en cuando a su teléfono si está
 abierto, y dice que el tuyo lo está. Si el suyo lo está, el chat dice **En línea** bajo su nombre con un punto verde, y
 la pantalla de inicio muestra el punto en su imagen. Escribirle a alguien también te muestra en línea para esa persona
-durante dos minutos. Todo va dentro del cifrado, solo entre tú y ese contacto: el relay ve un mensaje de vez en cuando,
+durante dos minutos. Todo va dentro del cifrado, solo entre tú y ese contacto: el servidor ve un mensaje de vez en cuando,
 como con cualquier chat.
 
 Cuando un contacto no está en línea, su chat dice cuándo tuvo Erevos abierto por última vez, al minuto: **última vez
@@ -974,7 +1022,7 @@ contactos también lo saben al momento, sin esperar a un mensaje: solo aquellos 
 días y que también muestran su propia hora, cada uno tras una espera aleatoria de hasta un minuto, como mucho cada 15
 minutos, nunca un chat que aparece desconectado ni una solicitud de mensaje. Al cerrarse Erevos, o sus chats
 ocultos, a quienes se avisó mientras estaba abierto se les dice al momento cuándo se cerró, así que su **Última vez** es
-esa hora. El relay ve entonces que algo va hacia ellos cuando abres y cierras Erevos, así que puede saber cuándo lo haces: apágalo y tu hora irá solo con lo que les llega de todos
+esa hora. El servidor ve entonces que algo va hacia ellos cuando abres y cierras Erevos, así que puede saber cuándo lo haces: apágalo y tu hora irá solo con lo que les llega de todos
 modos.
 
 Mientras escribes a un contacto que aparece en línea, su chat muestra **escribiendo…** bajo tu nombre durante unos
@@ -982,8 +1030,8 @@ segundos, y el tuyo bajo el suyo cuando escribe. Se dice como mucho cada pocos s
 nunca a una solicitud de mensaje, y no en los grupos.
 
 **Por qué:** estar en línea solo se dice entre tú y un contacto cuyo chat está abierto, dentro del cifrado, así que el
-relay no ve más que un mensaje de vez en cuando entre dos personas que hablan. La hora en que estuviste por última vez
-viaja dentro de esos mismos mensajes, cifrada de extremo a extremo: el relay nunca la conoce. Sí les dice a tus
+servidor no ve más que un mensaje de vez en cuando entre dos personas que hablan. La hora en que estuviste por última vez
+viaja dentro de esos mismos mensajes, cifrada de extremo a extremo: el servidor nunca la conoce. Sí les dice a tus
 contactos cuándo duermes o trabajas, y de dos contactos vistos en el mismo minuto se puede suponer que hablan entre
 sí: desactívala si eso te importa. Alguien que solo tiene tu enlace, y te escribe como solicitud de mensaje, no recibe
 nada de vuelta hasta que aceptes: ni que has leído, ni que estás en línea o escribiendo, ni cuándo estuviste por
@@ -1001,7 +1049,7 @@ Para ocultarlo a un contacto, abre su chat, toca su nombre y luego **Aparecer si
   recibe ninguna hora tuya.
 
 Se ajusta para cada chat, solo en este teléfono. Desactívalo de nuevo y verá lo que leíste en tu siguiente consulta al
-relay.
+servidor.
 
 ### Nombres y eliminar
 
@@ -1038,13 +1086,13 @@ nombre y luego **Eliminar mensajes**.
 En ambos casos Erevos pregunta dónde:
 
 - **Este teléfono:** solo aquí. El otro teléfono conserva los suyos.
-- **Los dos teléfonos:** su teléfono también los elimina, la próxima vez que consulte el relay. Su Erevos lo hace, pero
+- **Los dos teléfonos:** su teléfono también los elimina, la próxima vez que consulte el servidor. Su Erevos lo hace, pero
   una app modificada, una captura de pantalla o una copia todavía pueden conservarlos.
 
 ### Eliminar y bloquear un contacto
 
 Toca el nombre de un chat y luego **Eliminar contacto** para olvidarlo: su chat desaparece de este teléfono, y Erevos te
-da al instante una nueva cola en el relay. A tus otros contactos se les dice discretamente, en un mensaje sin nada
+da al instante una nueva cola en el servidor. A tus otros contactos se les dice discretamente, en un mensaje sin nada
 dentro, y otra vez 7, 14 y 21 días después mientras no hayan escrito a la nueva; lo que escribieron a la antigua
 mientras tanto se sigue mostrando durante 14 días. Al contacto eliminado no se le dice, y nada de lo que envíe ahí
 aparece. Tu enlace de contacto sigue como estaba, así que todavía puede pedir volver a hablar con él, como solicitud de
@@ -1054,17 +1102,17 @@ mensaje, como cualquiera que lo tenga.
 cuanto se mueve, ya no puede escribirte ahí, ni tampoco quien envió la basura de más abajo. Tu enlace de contacto nombra
 una cola propia, que una eliminación no toca, así que todos los enlaces y códigos QR que diste siguen funcionando.
 
-**Una cola para cada contacto:** en un relay actualizado para ello, cada contacto escribe en una cola propia, que solo
+**Una cola para cada contacto:** en un servidor actualizado para ello, cada contacto escribe en una cola propia, que solo
 conoce él, dicha dentro de tus mensajes cifrados; la cola de tu enlace de contacto queda entonces solo para los primeros
-mensajes. Así el relay no puede saber, por adónde van los mensajes, que dos contactos escriben al mismo teléfono, y
+mensajes. Así el servidor no puede saber, por adónde van los mensajes, que dos contactos escriben al mismo teléfono, y
 eliminar o bloquear a alguien elimina solo su cola: la tuya solo se mueve si también la conocía, como la conocen los
 contactos de antes de esto, y alguien que llegó por tu enlace de contacto antes de su primer movimiento. Los contactos
 de antes reciben a su vez una propia, unos pocos cada vez, discretamente, y un Erevos suyo de antes también la acepta.
 Estas colas se leen sin token, así que el token, que nombra tu teléfono, no las relaciona; a través de Tor, de ocho en
-ocho, cada ocho por circuitos propios. Aun así se crean y se eliminan con el token, así que un relay que guarde
+ocho, cada ocho por circuitos propios. Aun así se crean y se eliminan con el token, así que un servidor que guarde
 registros puede relacionarlas en ese momento. Los chats ocultos y los ordenadores vinculados mantienen una sola cola
 para todos, por ahora. La app web no tiene Tor, así que mientras está abierta espera en las colas de todos tus
-contactos a la vez, desde una sola dirección; con las notificaciones con la app cerrada activadas, tu relay también
+contactos a la vez, desde una sola dirección; con las notificaciones con la app cerrada activadas, tu servidor también
 tiene una dirección push para las colas de todos tus contactos (ver [En un iPhone](#iphone)).
 
 - **Bloquear contacto**, debajo, hace lo mismo, y además descarta lo que envíe después, también una solicitud.
@@ -1078,22 +1126,22 @@ tiene una dirección push para las colas de todos tus contactos (ver [En un iPho
   **Nuevo enlace de contacto** detiene a quien tenga el enlace antiguo una vez pasados sus 14 días.
 - **Grupos:** alguien de uno de tus grupos todavía puede escribirte ahí. Erevos dice en cuántos estáis juntos: sal de
   ellos, o pide a su admin que lo saque.
-- **Cuando el relay no está disponible**, la cola cambia en cuanto responde, y hasta entonces nada de lo que envíe
+- **Cuando el servidor no está disponible**, la cola cambia en cuanto responde, y hasta entonces nada de lo que envíe
   aparece.
-- **Los mensajes programados** que tenías para esa persona se retiran del relay, al instante o en cuanto responda, así
+- **Los mensajes programados** que tenías para esa persona se retiran del servidor, al instante o en cuanto responda, así
   que nunca salen.
 - **Basura:** cuando tu cola se llena de lo que no es para nadie de aquí, Erevos te da una nueva de la misma manera y lo
   dice, como mucho una vez al día. Cuando la basura llena la cola que nombra tu enlace de contacto, recibes en su lugar
   un enlace nuevo. Una avalancha de solicitudes de mensaje inventadas también cuenta como basura, mientras que un lote de
   solicitudes reales sigue llegando.
 - **Nuevo enlace de contacto**, en **Mi enlace** de **Chat nuevo**, te da un enlace nuevo: los enlaces y códigos QR
-  que diste antes funcionan 14 días más, y luego ya no. Tus contactos no se ven afectados. Si el relay pierde la cola
+  que diste antes funcionan 14 días más, y luego ya no. Tus contactos no se ven afectados. Si el servidor pierde la cola
   que nombra tu enlace, recibes un enlace nuevo de la misma manera, pero los que diste antes dejan de funcionar al
   instante.
 - **Enlace para una web**, a su lado, en los chats del espacio, te da un enlace para poner en una página web, como tu
   página de contacto, con el nombre que elijas. Abre una página que ofrece {=Erevos} a quien aún no lo tiene, en Android,
   un iPhone o un ordenador, y luego te añade. Cualquiera que lo vea puede escribirte, así que lo que envíe llega como
-  solicitud de mensaje, que aceptas, rechazas o bloqueas. No da un lugar en tu relay y vale mientras valga tu enlace de
+  solicitud de mensaje, que aceptas, rechazas o bloqueas. No da un lugar en tu servidor y vale mientras valga tu enlace de
   contacto: **Nuevo enlace de contacto** también lo anula.
 - **En un ordenador vinculado** va al teléfono, que también lo elimina o lo bloquea y mueve sus colas, también las del
   ordenador. El teléfono guarda quién está bloqueado y se lo dice al ordenador: añadirlo ahí desde su enlace también te
@@ -1112,7 +1160,7 @@ Mantén pulsado un mensaje para su menú: las reacciones arriba, y luego lo que 
 
 - **Reacciones:** toca una, o **+** para más. Aparece bajo el mensaje en los dos teléfonos, la tuya resaltada; tócala
   otra vez para retirarla. Cada uno de vosotros tiene una reacción por mensaje. Sale al instante, o no sale: cuando ni
-  el relay ni su teléfono cercano pueden recibirla, no cambia nada.
+  el servidor ni su teléfono cercano pueden recibirla, no cambia nada.
 - **Responder:** tu siguiente mensaje le responde, y lo muestra citado encima de tus palabras, en los dos teléfonos.
   Toca la cita para ir al mensaje al que responde; **✕** la quita. Un Erevos anterior a esto muestra la respuesta sin la
   cita.
@@ -1188,7 +1236,7 @@ siguiente mensaje que envíes: palabras, un mensaje de voz, una foto o un archiv
 ahora o más tarde.{~ Un SMS no puede desaparecer: enviado como SMS, se queda en los dos teléfonos (Erevos lo dice antes),
 y el cronómetro vuelve a desactivarse.} Su tiempo empieza cuando el otro teléfono lo muestra en la pantalla, y tu copia
 empieza cuando su teléfono lo dice (**✓✓✓**). Cada mensaje dice cuándo desaparece. El otro teléfono conoce el ajuste del
-chat la próxima vez que consulta el relay, y cualquiera de los dos teléfonos puede cambiarlo: gana el cambio más
+chat la próxima vez que consulta el servidor, y cualquiera de los dos teléfonos puede cambiarlo: gana el cambio más
 reciente. Los mensajes que ya están en el chat se quedan.
 
 - **Hasta que se lee**, un mensaje temporal se queda en los dos teléfonos, sellado como el resto. Si su {=Erevos} nunca
@@ -1271,8 +1319,8 @@ anteriores, y en Safari antes de iOS 18.4 y macOS 15.4, es AAC a 64 kbit/s, unos
 una voz, pero tardaría más en enviarse, sobre todo por Bluetooth. Todos los Erevos reproducen ambos: Safari antes de
 18.4 reproduce Opus cuando Erevos lo reempaqueta para él, y donde un navegador no puede reproducir uno, Erevos lo dice.
 
-- **Por el relay, o cerca,** cifrados de extremo a extremo como las palabras, en varios trozos. Nadie entre medias puede
-  oírlos, pero por los trozos el relay, o quien escuche cerca, puede saber que se envió algo largo, y más o menos de
+- **Por el servidor, o cerca,** cifrados de extremo a extremo como las palabras, en varios trozos. Nadie entre medias puede
+  oírlos, pero por los trozos el servidor, o quien escuche cerca, puede saber que se envió algo largo, y más o menos de
   qué duración. Cerca solo van al teléfono de un contacto que se sabe que está cerca.
 - **En el teléfono** cada sonido se guarda en un archivo propio, sellado con su propia clave, que solo tiene el
   historial sellado del chat. Cuando el mensaje desaparece, eliminado, temporal o por ser el más antiguo, su archivo
@@ -1306,10 +1354,10 @@ tienen las mismas marcas que el resto, y siguen el ajuste de mensajes temporales
   fuera de Erevos y de su cifrado, y nunca abre así páginas web, dibujos ni paquetes de apps, que podrían conectarse a
   internet fuera de Tor: guárdalos en su lugar.
 - **Cómo viajan:** cada archivo se cifra en el teléfono con una clave propia, en trozos todos del mismo tamaño, y se
-  pone en tu relay. Solo dónde están los trozos y la clave van al contacto, cifrados de extremo a extremo. Su teléfono
-  recoge los trozos a través de su propio relay, así que tu relay nunca ve la dirección de su teléfono, comprueba cada
-  trozo, y luego los elimina del relay. Los trozos que nadie recoge se eliminan a los 14 días.
-- **Lo que ve el relay:** cuántos trozos hay y su tamaño, así que más o menos lo grande que es el archivo, y cuándo. No
+  pone en tu servidor. Solo dónde están los trozos y la clave van al contacto, cifrados de extremo a extremo. Su teléfono
+  recoge los trozos a través de su propio servidor, así que tu servidor nunca ve la dirección de su teléfono, comprueba cada
+  trozo, y luego los elimina del servidor. Los trozos que nadie recoge se eliminan a los 14 días.
+- **Lo que ve el servidor:** cuántos trozos hay y su tamaño, así que más o menos lo grande que es el archivo, y cuándo. No
   lo que es ni para quién.
 - **Un archivo va tal cual,** con lo que diga dentro: el autor de un documento, o el lugar y el teléfono de una foto si
   la envías con **Archivo**. Envía las fotos con **Foto**.
@@ -1319,7 +1367,7 @@ tienen las mismas marcas que el resto, y siguen el ajuste de mensajes temporales
   nunca se escribe sin sellar. El selector de fotos del teléfono entrega una copia en la caché de Erevos, que se
   elimina en cuanto se lee, y una foto hecha aquí no se guarda en las fotos del teléfono.
 - **Las fotos y archivos guardados** están fuera de Erevos, sin sellar: cualquiera con el teléfono puede abrirlos.
-- **Solo por el relay:** los archivos necesitan su almacén de archivos, aunque el contacto esté cerca. Un relay más
+- **Solo por el servidor:** los archivos necesitan su almacén de archivos, aunque el contacto esté cerca. Un servidor más
   antiguo que esta versión no puede recibir archivos: actualízalo.
 
 ### Más bajo +
@@ -1339,8 +1387,8 @@ los stickers):
   uno en cuadrado, lo reduce (512 por 512, unos 100 KB como mucho) y solo conserva su imagen, nada de dónde ni con qué se
   hizo. Se guarda sellado en el espacio, o en los chats ocultos donde se hizo, y solo aparece ahí, hasta 100; mantén
   pulsado uno para eliminarlo. Como el resto, entra en una copia de seguridad, sellado, y nunca va a los otros
-  dispositivos de la cuenta. Va como va una foto, cifrado de extremo a extremo por el relay, marcado como sticker, así
-  que aparece solo, sin burbuja; un Erevos anterior a esto lo muestra como una foto. Mantén pulsado un sticker que te
+  dispositivos de la cuenta. Va como va una foto, cifrado de extremo a extremo por el servidor, marcado como sticker, así
+  que aparece solo, sin burbuja; un {=Erevos} anterior a esto lo muestra como una foto. Mantén pulsado un sticker que te
   hayan enviado y toca **Añadir a mis stickers** para guardarlo.
 - **Ubicación** (en Android): envía dónde estás, una vez, como un lugar. La primera vez, Android pregunta si Erevos
   puede usar la ubicación. El teléfono busca por todas las vías que tiene a la vez: por satélite, cuando permitiste la
@@ -1436,22 +1484,27 @@ de una conversación SMS}. Es {~el **Teléfono** de Erevos cuando Erevos es la a
 teléfono: toca ahí la tecla de llamar. Una llamada así va por la red de la compañía telefónica y no está cifrada{~, igual
 que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
 
-- **Cifrado de extremo a extremo:** la llamada se establece con mensajes por el relay, cifrados como el resto. Estos
-  llevan la clave que cifra la propia llamada, así que nadie entre medias puede escuchar, ni siquiera el relay de
-  llamadas de más abajo.
-- **Por el relay de llamadas:** un relay configurado con el kit de \`deploy/relay\` tiene un relay de llamadas al lado.
-  La llamada va a través de él, así que ningún teléfono conoce la dirección IP del otro. Por Wi-Fi o datos móviles, en
-  cualquier sitio.
-- **Sin relay de llamadas** (un relay en tu propio ordenador, por ejemplo), Erevos pregunta antes: la llamada va
-  entonces directamente entre los teléfonos, solo funciona en la misma Wi-Fi, y cada teléfono ve en ella la dirección
-  del otro.
+- **Cifrado de extremo a extremo:** la llamada se establece con mensajes por el servidor, o por Nostr cuando no hay
+  servidor entre vosotros, cifrados como el resto. Estos llevan la clave que cifra la propia llamada, así que nadie
+  entre medias puede escuchar, ni siquiera el servidor de llamadas de más abajo.
+- **Por el servidor de llamadas:** un servidor configurado con el kit de \`deploy/relay\` tiene un servidor de llamadas
+  al lado. Con **ANONYMOUS**, la llamada va a través de él, así que el teléfono de tu contacto no conoce tu dirección
+  IP. Con **SPEED**, la llamada va directamente de teléfono a teléfono donde puede, la forma más rápida, y por el
+  servidor de llamadas donde no puede; el teléfono de tu contacto ve tu dirección en ambos casos. Por Wi-Fi o datos
+  móviles, en cualquier sitio.
+- **Sin servidor de llamadas** (un servidor en tu propio ordenador, por ejemplo, o sin ningún servidor): con **SPEED**,
+  la llamada va directamente de teléfono a teléfono por internet, sin preguntar antes. Cada teléfono ve entonces la
+  dirección de internet del otro, y un servidor auxiliar le dice a cada uno la suya. Algunas redes, sobre todo las
+  móviles, no dejan entrar nada desde fuera: la pantalla de la llamada dice entonces **La llamada no se pudo conectar
+  directamente**, y otra red, como una Wi-Fi, suele ayudar. Con **ANONYMOUS**, Erevos pregunta antes, y la llamada solo
+  funciona en la misma Wi-Fi. Con **INVISIBLE** no hay llamadas. Ver [¿Cuánto se te ve?](#direct).
 - **Sin internet:** en la misma Wi-Fi, en el punto de acceso de un teléfono, o en la Wi-Fi que crean dos teléfonos
-  (Wi-Fi Direct), con un espacio abierto en los dos, una llamada no necesita ningún relay: se establece por el enlace de
+  (Wi-Fi Direct), con un espacio abierto en los dos, una llamada no necesita ningún servidor: se establece por el enlace de
   cerca y va directamente entre los teléfonos (u ordenadores). Lo mismo vale para los mensajes de grupo
   y las llamadas de grupo.
 - **En segundo plano (Android):** mientras un espacio está abierto, Erevos sigue funcionando cuando sales de él, con
   Inicio, con Atrás en su primera pantalla o quitándolo de las apps recientes, con un aviso discreto, «Erevos – Ready
-  for calls and messages», que no aparece en la pantalla de bloqueo. Espera en el relay y en los enlaces a teléfonos
+  for calls and messages», que no aparece en la pantalla de bloqueo. Espera en el servidor y en los enlaces a teléfonos
   cercanos, así que los mensajes llegan: un aviso solo dice «New message», o cuántos llegaron, y en un teléfono
   bloqueado solo «Erevos». Una solicitud de mensaje, de alguien que solo tiene tu enlace de contacto, hace el mismo
   aviso y sonido, y cuenta en el icono, como cualquier mensaje. Una llamada suena con el tono del teléfono y un aviso,
@@ -1467,9 +1520,9 @@ que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
   funcionando con ahorro de batería** y **Mostrar llamadas sobre la pantalla de bloqueo**. Debajo, **Solo lo que se
   desperdicia** (la opción por defecto), **Y los teléfonos cercanos** y **Y el sueño** deciden cuánta batería ahorra en
   segundo plano: la segunda apaga también las radios para teléfonos cercanos mientras Erevos está en segundo plano, la
-  tercera deja dormir también al teléfono, así que Erevos mira el relay una vez por minuto y un mensaje o una llamada
+  tercera deja dormir también al teléfono, así que Erevos mira el servidor una vez por minuto y un mensaje o una llamada
   puede llegar uno o dos minutos tarde.
-- **Y el sueño ligero:** una cuarta opción allí, entre **Y los teléfonos cercanos** e **Y el sueño**. El teléfono puede dormir, pero Erevos deja abierta su espera en el relay, así que lo que llega despierta al teléfono y un mensaje o una llamada sigue llegando al instante donde la red y Android lo permiten; Erevos también mira por sí mismo cada pocos minutos. Es nueva y aún no se ha probado en muchos teléfonos: si con ella los mensajes llegan tarde, elige otra.
+- **Y el sueño ligero:** una cuarta opción allí, entre **Y los teléfonos cercanos** e **Y el sueño**. El teléfono puede dormir, pero Erevos deja abierta su espera en el servidor, así que lo que llega despierta al teléfono y un mensaje o una llamada sigue llegando al instante donde la red y Android lo permiten; Erevos también mira por sí mismo cada pocos minutos. Es nueva y aún no se ha probado en muchos teléfonos: si con ella los mensajes llegan tarde, elige otra.
 - **El número en el icono:** con **Avisar de mensajes nuevos** activado, cuando sales de Erevos con mensajes sin leer
   en los chats y grupos del espacio abierto, el aviso se queda, sin sonido, y dice cuántos son, con los que avise
   después; se va mientras Erevos está a la vista, y vuelve al salir, hasta que los hayas leído. No cuenta los mensajes
@@ -1482,14 +1535,14 @@ que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
   **Por qué:** en Android solo un aviso puede poner un número en el icono de una app, así que el aviso se queda
   mientras esperan mensajes; no dice más que cuántos son, como siempre.
 - **Un espacio que está cerrado:** no recibe nada, ya que su clave solo está en memoria mientras está abierto: sus
-  mensajes esperan en su relay y llegan cuando lo abres. Salvo que elijas, en ese espacio, **También mientras otro
+  mensajes esperan en su servidor y llegan cuando lo abres. Salvo que elijas, en ese espacio, **También mientras otro
   espacio está abierto** en **Ajustes** → **Notificaciones** → **En segundo plano** (por defecto es **Este espacio solo
   mientras está abierto**): entonces, mientras otro espacio está abierto y recibe, solo dice «New message», o cuántos
   llegaron, con el mismo aviso que ese espacio, nunca qué espacio, y sus chats ocultos no dicen nada. Lo que otros
-  teléfonos llevaron a su relay cuenta como mensaje, también las eliminaciones, y un mensaje que se le envía sin sonido
-  suena como siempre (ver **Enviar sin sonido**). Para ello el teléfono guarda las direcciones de sus colas en su relay
+  teléfonos llevaron a su servidor cuenta como mensaje, también las eliminaciones, y un mensaje que se le envía sin sonido
+  suena como siempre (ver **Enviar sin sonido**). Para ello el teléfono guarda las direcciones de sus colas en su servidor
   fuera de su contraseña, entre ellas la cola en la que escribe cada uno de sus contactos, hasta 64 contactos, nunca sus
-  claves, quiénes son sus contactos ni sus mensajes, y solo pregunta al relay cuántos llegaron, nunca los pide: se
+  claves, quiénes son sus contactos ni sus mensajes, y solo pregunta al servidor cuántos llegaron, nunca los pide: se
   quedan ahí hasta que se abre el espacio. A un espacio que va por Tor (**Mensajes** o **Todo**, en **Qué va
   por Tor**) solo se le pregunta a través de Tor: mientras el espacio abierto tiene Tor desactivado, o su Tor se
   está iniciando o acaba de fallar, el espacio cerrado no dice nada, y lo que llegó se avisa en cuanto Tor está listo
@@ -1497,9 +1550,9 @@ que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
 
   **Por qué:** un espacio tras una segunda contraseña no debe mostrar que existe, así que esto está desactivado salvo
   que lo actives, y entonces no dice más de lo que diría el espacio abierto. Si se le preguntara directamente desde el
-  teléfono mientras otro espacio está abierto, su relay o alguien que vigile la red podría relacionar los dos espacios
+  teléfono mientras otro espacio está abierto, su servidor o alguien que vigile la red podría relacionar los dos espacios
   por la dirección de internet del teléfono. Como cada contacto escribe en una cola propia, el espacio tiene que
-  preguntar también por cada una de ellas, o sus mensajes no dirían nada. El precio es que su relay puede saber que los
+  preguntar también por cada una de ellas, o sus mensajes no dirían nada. El precio es que su servidor puede saber que los
   dos espacios están en un mismo teléfono, y alguien que examine el teléfono con herramientas puede descubrir que un
   segundo espacio guarda direcciones ahí, y cuántos contactos tiene.
 - **Un punto para los otros espacios:** en un espacio con **También mientras otro espacio está abierto**, **Punto en
@@ -1514,7 +1567,7 @@ que un SMS normal}. Los chats ocultos y los ordenadores no la tienen.
   plano**, es lo predeterminado, y **Esperar a que yo lo abra** ahí lo deja cerrado hasta que lo abras. Se inicia sin
   ningún espacio abierto, ya que un espacio con contraseña solo se abre con ella y Erevos no guarda ninguna clave en
   el teléfono. Así que, hasta que abras un espacio, no lee ningún mensaje, no muestra nada de lo que llegó y no suena
-  para ninguna llamada. Solo los espacios con **También mientras otro espacio está abierto** preguntan a su relay si
+  para ninguna llamada. Solo los espacios con **También mientras otro espacio está abierto** preguntan a su servidor si
   llegó algo, sin recogerlo: un aviso discreto dice «Bloqueado: solo avisa de que llegaron mensajes», y cuando llega
   algo se ve «Mensaje nuevo», o cuántos llegaron, nunca qué espacio, ni quién o qué; una llamada cuenta como algo que
   llegó, y no suena. Los espacios que van por Tor no dicen nada hasta que se abre un espacio. Si no hay ningún espacio
@@ -1564,7 +1617,7 @@ hasta que abras Erevos y el espacio una vez; y los chats ocultos, cuya clave sol
 abiertos salvo que **Recibir estando cerrados** la guarde con el espacio, si no solo dicen que llegó un mensaje, o
 suenan sin nombre, si lo permites.
 
-> Los ajustes del relay, tu cola, tus contactos y sus nombres, las claves de tus conversaciones y los mensajes se
+> Los ajustes del servidor, tu cola, tus contactos y sus nombres, las claves de tus conversaciones y los mensajes se
 > guardan en este espacio, sellados. El historial no tiene límite: se guarda en páginas selladas del mismo tamaño,
 > mezcladas con las páginas de los otros espacios y chats ocultos, así que solo se ve cuánto ocupan todas juntas, no de
 > quién son. El resto se guarda con el mismo tamaño para cada espacio y chats ocultos, se use o no; lo que es más grande
@@ -1578,7 +1631,7 @@ Desde el menú de la pantalla de inicio, **Grupo nuevo**: dale un nombre, marca 
 **Crear el grupo**. Eres su admin. El teléfono de cada contacto responde solo la próxima vez que {=Erevos} esté abierto ahí,
 y se une: el grupo aparece entonces en su pantalla de inicio, con una nota de quién lo añadió. Un teléfono solo se une a
 un grupo cuyo admin es el contacto que se lo pidió, y un admin solo deja entrar a un contacto como sí mismo, nunca como
-otra persona. Los grupos van por el relay, así que tiene que estar configurado.
+otra persona. Los grupos van por el servidor, así que tiene que estar configurado.
 
 **Por qué:** solo el teléfono del admin cambia el grupo (quién está en él, su nombre), así que ningún servidor tiene que
 ordenar los cambios: todos los teléfonos los toman de ese. Por eso un miembro sale pidiéndoselo al admin, y solo el admin
@@ -1599,8 +1652,8 @@ añade o saca miembros.
   teléfono que tiene la cuenta; **Nombre** también funciona en un dispositivo vinculado.
 - **Cifrado de extremo a extremo para el grupo:** MLS (RFC 9420). Cada mensaje se cifra una vez para el grupo, y luego
   se sella otra vez para cada miembro, así que lo que llega a la cola de cada miembro no se parece a nada de lo que
-  reciben los demás, y ningún relay puede saber quién está en un grupo. Va directamente a la cola de cada miembro, a
-  través de tu relay. Cada semana las claves de cada teléfono en el grupo se renuevan, las del admin por sí solas y las
+  reciben los demás, y ningún servidor puede saber quién está en un grupo. Va directamente a la cola de cada miembro, a
+  través de tu servidor. Cada semana las claves de cada teléfono en el grupo se renuevan, las del admin por sí solas y las
   de cada miembro a través del admin, así que unas claves sacadas una vez de un teléfono dejan de leer el grupo.
 - **Miembros:** toca el nombre del grupo arriba, o **⋯** a su lado. El admin añade contactos, saca miembros y cambia el
   nombre del grupo. Un miembro sacado no lee nada de lo que diga el grupo a partir de entonces, y el grupo se queda en
@@ -1618,19 +1671,19 @@ añade o saca miembros.
   lado una videollamada (también **Videollamada** bajo **⋯**). Mientras hay una en curso, solo aparece su propio botón,
   para unirse. Suena en los teléfonos de los miembros donde Erevos está abierto, y quien responde entra. Una llamada en
   curso aparece arriba del grupo, para unirse más tarde. Hasta ocho personas: cada teléfono se conecta con cada uno de
-  los otros, a través del relay de llamadas, así que ningún teléfono ve la dirección IP de otro; sin relay de llamadas,
+  los otros, a través del servidor de llamadas, así que ningún teléfono ve la dirección IP de otro; sin servidor de llamadas,
   solo en la misma Wi-Fi. Cifrado de extremo a extremo entre cada dos teléfonos, con sus claves enviadas en el cifrado
   del grupo. En una videollamada cada teléfono envía su imagen a cada uno de los otros, así que las imágenes se ven
   para hasta cuatro personas; con más, se pausan y el sonido sigue, hasta que se monte un servidor para videollamadas
   más grandes. Una llamada que suena ofrece **Unirse** y **Unirse con vídeo**.
 - **Fotos, archivos y mensajes de voz:** **+** junto al campo envía una foto o un archivo, como en el chat de un
   contacto, con la misma **Calidad de la foto**; mantén pulsado el micrófono mientras hablas, y suelta para enviar.
-  Cada uno se cifra con una clave propia y se pone una vez en tu relay, y solo dónde está y su clave van al grupo, en
-  su cifrado. El teléfono de cada miembro lo recoge de ahí a través de su propio relay: hasta 16 MB solo mientras el
+  Cada uno se cifra con una clave propia y se pone una vez en tu servidor, y solo dónde está y su clave van al grupo, en
+  su cifrado. El teléfono de cada miembro lo recoge de ahí a través de su propio servidor: hasta 16 MB solo mientras el
   grupo está abierto, uno más grande al tocarlo. Toca una foto para verla entera, un archivo para guardarlo, un mensaje
   de voz para reproducirlo.
-  - **El relay lo guarda 14 días,** cifrado, ya que no puede saber cuándo lo han recogido todos los miembros.
-  - **Solo por el relay,** aunque los miembros estén cerca.
+  - **El servidor lo guarda 14 días,** cifrado, ya que no puede saber cuándo lo han recogido todos los miembros.
+  - **Solo por el servidor,** aunque los miembros estén cerca.
   - **Un miembro que se une más tarde** no recibe lo que llegó antes, como con las palabras. Un miembro cuyo {=Erevos}
     sea anterior a esta versión no ve nada de ello.
   - **En el teléfono** cada uno se guarda en sus trozos, sellado, como en el chat de un contacto. Eliminar el grupo
@@ -1640,7 +1693,7 @@ añade o saca miembros.
   mensaje, y una encuesta muestra quién eligió qué. Un mensaje fijado es para todos, y cualquier miembro puede **Dejar
   de fijar**. **Editar** da a tus propias palabras otras nuevas para todos los miembros, hasta un día después de que
   salieran, marcadas como **Editado**. **Eliminar** pregunta **Este teléfono** o, para un mensaje tuyo, **Para todos**:
-  el Erevos de los miembros también lo elimina, y una foto, archivo o mensaje de voz tuyo sale de tu relay al instante
+  el Erevos de los miembros también lo elimina, y una foto, archivo o mensaje de voz tuyo sale de tu servidor al instante
   en lugar de a los 14 días. **+** también tiene aquí **Sticker**, **Ubicación** y **Encuesta**. Los enlaces aparecen
   subrayados y se pregunta antes de abrirlos, y las **Vistas previas de enlaces**, cuando están activadas, van con los
   tuyos. En la hoja de miembros, o en la pantalla propia de un grupo público, **Buscar en este chat** recorre los
@@ -1661,7 +1714,7 @@ añade o saca miembros.
 Un grupo público es uno al que cualquiera con su enlace, o su código QR, puede pedir unirse: para un club, una calle o
 una clase, donde no todos son tus contactos. Desde el menú de la pantalla de inicio, **Grupos públicos**: dale un nombre
 y el nombre con el que te presentas en él, elige quién entra, y toca **Crear el grupo público**. Eres su propietario.
-Sus mensajes están cifrados de extremo a extremo con MLS y van a cada miembro como en cualquier grupo, y ningún relay
+Sus mensajes están cifrados de extremo a extremo con MLS y van a cada miembro como en cualquier grupo, y ningún servidor
 sabe quién está en él.
 
 - **El enlace:** toca el nombre del grupo arriba para su enlace y su código QR, y **Compartir el enlace**. Quien lo abre,
@@ -1669,7 +1722,7 @@ sabe quién está en él.
   también se puede pegar en **Unirse con un enlace**. Todos los miembros tienen el enlace, y pueden pasarlo.
 - **Descripción:** el propietario o un admin la escribe en la pantalla propia del grupo, bajo **Descripción**, y toca
   **Guardar**; todos en el grupo la leen.
-- **Unirse mientras no estás:** la petición espera en tu relay, sellada para que solo tu teléfono la abra, hasta que
+- **Unirse mientras no estás:** la petición espera en tu servidor, sellada para que solo tu teléfono la abra, hasta que
   Erevos esté abierto en tu teléfono: mira cada pocos segundos mientras Erevos está a la vista, y más o menos cada
   minuto en segundo plano. Entonces lo deja entrar, y el grupo aparece en su teléfono.
 - **Quién entra:** **Cualquiera con el enlace**, o **Un admin les deja entrar**: entonces quien lo pide espera en
@@ -1683,14 +1736,14 @@ sabe quién está en él.
   - **Expulsar:** no lee nada de lo que diga el grupo a partir de entonces, y puede volver a pedir unirse por el
     enlace.
   - **Vetar:** expulsado, y lo que su teléfono pida después se rechaza. **Levantar el veto**, en **Vetados**, lo
-    deshace. Un veto detiene al mismo teléfono, no a alguien que vuelve con una nueva cola en el relay: contra eso,
+    deshace. Un veto detiene al mismo teléfono, no a alguien que vuelve con una nueva cola en el servidor: contra eso,
     elige **Un admin les deja entrar**, o cambia el enlace.
   - **Eliminar para todos:** los últimos mensajes aparecen listados abajo; **Eliminar** quita uno del teléfono de
     todos los miembros. Quien ya lo haya leído puede haber guardado una copia.
 - **Cambiar el enlace:** el enlace y el código QR compartidos hasta ahora dejan de funcionar al instante, y todos los
   miembros reciben el nuevo. Las peticiones que todavía esperaban en el antiguo se pierden.
 - **Ceder el grupo:** en **Moderar** de un miembro. Su teléfono pasa a ser el propietario y deja entrar a la gente, así
-  que el enlace cambia a uno de su relay; tú sigues siendo admin. Si tu teléfono se pierde antes de cederlo, nadie podrá
+  que el enlace cambia a uno de su servidor; tú sigues siendo admin. Si tu teléfono se pierde antes de cederlo, nadie podrá
   volver a dejar entrar a nadie, aunque el grupo sigue para quienes están en él.
 - **Cerrar el grupo** saca a todos los miembros. **Salir del grupo** de un miembro le pide a tu teléfono que lo saque.
 - **Un grupo de un solo uso,** para una ocasión: antes de crearlo, en **Termina**, elige **Tras un día**, **Tras 3
@@ -1712,167 +1765,167 @@ de cambiar de teléfono.
 > Cualquiera con el enlace puede leer el grupo desde que se le deja entrar, nunca lo que se dijo antes, y el enlace se
 > puede pasar: cámbialo para impedirlo.
 
-- **El enlace** muestra el nombre del grupo y la dirección de tu relay a quien lo vea.
-- **Cada miembro ve de cada miembro** el nombre elegido, una clave hecha solo para este grupo, la dirección de su relay
+- **El enlace** muestra el nombre del grupo y la dirección de tu servidor a quien lo vea.
+- **Cada miembro ve de cada miembro** el nombre elegido, una clave hecha solo para este grupo, la dirección de su servidor
   y el sender id de su cola. La clave no dice nada de quién es en sus chats, ni en qué otros grupos está. La cola es
   una en la que solo leen sus grupos públicos, no la de su enlace de contacto, la misma en cada uno de sus grupos
   públicos (un Erevos anterior a 2.0.0 da la de su enlace de contacto).
 - **Los nombres se eligen, no se demuestran:** cualquiera puede llamarse como quiera. El principio de la clave de cada
   miembro aparece junto al nombre, y el propietario y los admins están marcados.
-- **Lo que se diga se puede copiar** por cualquiera del grupo: el cifrado de extremo a extremo deja fuera a los relays,
+- **Lo que se diga se puede copiar** por cualquiera del grupo: el cifrado de extremo a extremo deja fuera a los servidores,
   no a los miembros.
-- **Los relays** no leen nada ni conocen a nadie del grupo. El tuyo ve llegar peticiones a la puerta del grupo, cuántas
+- **Los servidores** no leen nada ni conocen a nadie del grupo. El tuyo ve llegar peticiones a la puerta del grupo, cuántas
   y cuándo, no de quién. Los miembros pueden llenarse la cola unos a otros con lo que no se puede leer, hasta lo que
-  admita el relay.
+  admita el servidor.
 
 ## Cómo elige Erevos el camino {#paths}
 
 Cuando envías un mensaje, Erevos elige el camino por sí solo:
 
 1. **Su teléfono está cerca** (la parte de arriba del chat dice **Cerca**): va por el enlace de cerca, y también por el
-   relay cuando hay uno.
-2. **Si no, con un relay:** va por el relay, y un mensaje corto también va a los teléfonos con {=Erevos} conectados cerca,
-   para que el suyo pueda responder de cerca si es uno de ellos. Si el relay no está disponible, esa copia es la que
-   cuenta, y esos teléfonos también la llevan al relay de tu contacto, como en
+   servidor cuando hay uno.
+2. **Si no, con un servidor:** va por el servidor, y un mensaje corto también va a los teléfonos con {=Erevos} conectados cerca,
+   para que el suyo pueda responder de cerca si es uno de ellos. Si el servidor no está disponible, esa copia es la que
+   cuenta, y esos teléfonos también la llevan al servidor de tu contacto, como en
    [Chatear con un teléfono cercano](#nearby).
-3. **Si no, sin relay,** va a los teléfonos con {=Erevos} conectados cerca, como en el 2.
-4. **Y por LoRa,** cuando hay una radio configurada y el relay no pudo recibir un texto, como en
+3. **Si no, sin servidor,** va a los teléfonos con {=Erevos} conectados cerca, como en el 2.
+4. **Y por LoRa,** cuando hay una radio configurada y el servidor no pudo recibir un texto, como en
    [Con una radio LoRa](#lora). Sin ningún camino, el mensaje espera, marcado como **En espera**, y sale solo en cuanto
    haya uno, como en [Enviado, llegado y leído](#relay); una línea bajo el chat dice por qué.
 5. [~] **Y por SMS,** lo último de todo, cuando lo activaste para ese contacto y nada más llevó un texto, como en
    [SMS](#sms).
 
-Todos los caminos están cifrados de extremo a extremo: ningún relay ni ningún teléfono entre medias puede leer lo que
+Todos los caminos están cifrados de extremo a extremo: ningún servidor ni ningún teléfono entre medias puede leer lo que
 envías.
 
-**Caminos**, en **Ajustes** → **Relay y redes**, muestra cada camino de un vistazo: una tarjeta para el relay, Nostr, los teléfonos cercanos, LoRa{~, SMS} y Tor, cada una con cómo está ahora y una línea debajo, llena cuando funciona, tenue cuando está activo pero ahora no llega a nadie, y de guiones cuando está apagado. Encima dice cuántos de tus mensajes esperan salir, con un punto naranja por cada uno. Una tarjeta abre los ajustes de su camino. Solo muestra el espacio abierto, nunca los chats ocultos. En el inicio, la línea bajo la barra superior también es **Caminos**, una vez puesto un relay: un punto por cada camino, y cuántos de tus mensajes esperan; un toque lo abre.
+**Caminos**, en **Ajustes** → **Servidor y redes**, muestra cada camino de un vistazo: una tarjeta para el servidor, Nostr, los teléfonos cercanos, LoRa{~, SMS} y Tor, cada una con cómo está ahora y una línea debajo, llena cuando funciona, tenue cuando está activo pero ahora no llega a nadie, y de guiones cuando está apagado. Encima dice cuántos de tus mensajes esperan salir, con un punto naranja por cada uno. Una tarjeta abre los ajustes de su camino. Solo muestra el espacio abierto, nunca los chats ocultos. En el inicio, la línea bajo la barra superior también es **Caminos**, una vez puesto un servidor: un punto por cada camino, y cuántos de tus mensajes esperan; un toque lo abre.
 
 | Línea bajo el chat | Qué hacer |
 | --- | --- |
 | **Enviado cerca, cifrado de extremo a extremo.** | Nada: su teléfono está cerca y lo tiene. |
-| **Enviado por el relay, cifrado de extremo a extremo.** | Nada: está en camino. |
-| **Enviado a los teléfonos con {=Erevos} cercanos, cifrado de extremo a extremo, porque el relay no estaba disponible.** | Solo llega si uno de ellos es el suyo: espera a **✓✓**, o revisa el relay. |
-| **… Si el suyo no está entre ellos, se lo entregan a su relay en cuanto tengan internet, y este teléfono también.** | Nada: llega en cuanto uno de ellos, o este teléfono, tenga internet. Espera a **✓✓**. |
-| **Enviado por LoRa, cifrado de extremo a extremo, porque el relay no estaba disponible.** | Llega si su {=Erevos} tiene una radio en la misma malla, al alcance: espera a **✓✓**, o revisa el relay. |
-[~] | **Enviado por SMS, cifrado de extremo a extremo, porque nada más podía llevarlo.** | Nada: cuesta SMS, y la compañía telefónica ve que escribiste a su número. **✓✓** llega en cuanto se puede llegar al relay o a Nostr. |
-| **En espera. El relay no está disponible (o No hay relay), y su teléfono no está cerca.** | Nada: sale solo en cuanto el relay o su teléfono cercano puedan recibirlo, y entonces muestra **✓**. Sin relay, rellena su dirección, como en [Chatear a través de un relay](#relay), o acércate a su teléfono. |
-| **En espera. Es demasiado largo para LoRa.** | Nada: sale en cuanto el relay o su teléfono cercano puedan recibirlo. O envíalo en partes más cortas. |
-[~] | **En espera. Es demasiado largo para SMS.** | Nada: se envía en cuanto el relay o su teléfono cercano puedan llevarlo. O envíalo en partes más cortas. |
-| **No enviado. El relay ya no tiene la cola de este contacto.** | Pídele que te escriba, o su nuevo enlace de contacto. |
-| **Esta versión no puede cifrar, así que los chats por el relay están desactivados.** | Vuelve a compilar la app: esta compilación es anterior a su cifrado. |
+| **Enviado por el servidor, cifrado de extremo a extremo.** | Nada: está en camino. |
+| **Enviado a los teléfonos con {=Erevos} cercanos, cifrado de extremo a extremo, porque el servidor no estaba disponible.** | Solo llega si uno de ellos es el suyo: espera a **✓✓**, o revisa el servidor. |
+| **… Si el suyo no está entre ellos, se lo entregan a su servidor en cuanto tengan internet, y este teléfono también.** | Nada: llega en cuanto uno de ellos, o este teléfono, tenga internet. Espera a **✓✓**. |
+| **Enviado por LoRa, cifrado de extremo a extremo, porque el servidor no estaba disponible.** | Llega si su {=Erevos} tiene una radio en la misma malla, al alcance: espera a **✓✓**, o revisa el servidor. |
+[~] | **Enviado por SMS, cifrado de extremo a extremo, porque nada más podía llevarlo.** | Nada: cuesta SMS, y la compañía telefónica ve que escribiste a su número. **✓✓** llega en cuanto se puede llegar al servidor o a Nostr. |
+| **En espera. El servidor no está disponible (o No hay servidor), y su teléfono no está cerca.** | Nada: sale solo en cuanto el servidor o su teléfono cercano puedan recibirlo, y entonces muestra **✓**. Sin servidor, rellena su dirección, como en [Chatear a través de un servidor](#relay), o acércate a su teléfono. |
+| **En espera. Es demasiado largo para LoRa.** | Nada: sale en cuanto el servidor o su teléfono cercano puedan recibirlo. O envíalo en partes más cortas. |
+[~] | **En espera. Es demasiado largo para SMS.** | Nada: se envía en cuanto el servidor o su teléfono cercano puedan llevarlo. O envíalo en partes más cortas. |
+| **No enviado. El servidor ya no tiene la cola de este contacto.** | Pídele que te escriba, o su nuevo enlace de contacto. |
+| **Esta versión no puede cifrar, así que los chats por el servidor están desactivados.** | Vuelve a compilar la app: esta compilación es anterior a su cifrado. |
 
 ## Erevos en tus propios servidores {#own-servers}
 
 Erevos no necesita los servidores de quien lo hace. Los de LPHL son solo los que ofrece primero: para cada cosa de abajo puedes usar el tuyo, desde la app, sin instalar nada más en el teléfono.
 
-- **Mensajes, fotos y archivos:** esperan, cifrados de extremo a extremo, en un servidor pequeño llamado relay. Para usar el tuyo, o el de tu grupo: en **Chat nuevo**, **No tengo invitación**, luego **Tengo un servidor propio**, y escribe su dirección y el código que te dieron. Más tarde, esos dos son la dirección del relay y el token en **Para usuarios avanzados**.
-- **Llamadas:** nada más que ajustar. El relay de llamadas viene con tu relay, así que con un relay propio tus llamadas pasan también por tu servidor.
+- **Mensajes, fotos y archivos:** esperan, cifrados de extremo a extremo, en un servidor pequeño. Para usar el tuyo, o el de tu grupo: en **Chat nuevo**, **No tengo invitación**, luego **Tengo un servidor propio**, y escribe su dirección y el código que te dieron. Más tarde, esos dos son la dirección del servidor y el token en **Para usuarios avanzados**.
+- **Llamadas:** nada más que ajustar. El servidor de llamadas viene con tu servidor, así que con un servidor propio una llamada pasa también por tu servidor, donde no va directamente de teléfono a teléfono (ver [¿Cuánto se te ve?](#direct)).
 - **Copias de seguridad:** en **Copias de seguridad**, **También a un servidor** envía cada copia, cifrada, a una carpeta en un servidor que eliges, como tu propio Nextcloud. Ver [Copias de seguridad](#backup).
 - [~] **La Colección:** en sus ajustes, **También en un servidor WebDAV** guarda sus archivos cifrados en un servidor que eliges. Ver [Colección](#collection).
 - **Modelos de voz y de traducción:** donde Erevos pide descargarlos, **Descargar de otro servidor…** toma una carpeta web tuya que tiene los mismos archivos. Erevos comprueba cada archivo y rechaza el que haya cambiado.
-- **Sin ningún servidor:** **Empezar sin servidor**, en la misma pantalla. Los textos van entonces por relays públicos de Nostr, o directamente entre teléfonos que están cerca. Ver [Sin ningún relay](#nostr).
+- **Sin ningún servidor:** **Empezar sin servidor**, en la misma pantalla. Los textos van entonces por servidores públicos de Nostr, o directamente entre teléfonos que están cerca. Ver [Sin ningún servidor](#nostr).
 
-**Qué llega todavía a LPHL:** solo un teléfono cuyo relay es el de LPHL pregunta al servidor web de LPHL, una vez al día, si ha salido una versión nueva (ver [Aviso cuando sale una versión nueva](#updates)); **Buscar actualizaciones** pregunta a GitHub. {~Un enlace de contacto para un sitio web y una invitación por SMS abren|Un enlace de contacto para un sitio web abre} una página en el servidor web de LPHL, que no recibe nada de lo que dice el enlace: esa parte nunca sale del teléfono. Las mismas páginas en otro servidor también se leen, cuando las pegas o las escaneas.
+**Qué llega todavía a LPHL:** solo un teléfono cuyo servidor es el de LPHL pregunta al servidor web de LPHL, una vez al día, si ha salido una versión nueva (ver [Aviso cuando sale una versión nueva](#updates)); **Buscar actualizaciones** pregunta a GitHub. {~Un enlace de contacto para un sitio web y una invitación por SMS abren|Un enlace de contacto para un sitio web abre} una página en el servidor web de LPHL, que no recibe nada de lo que dice el enlace: esa parte nunca sale del teléfono. Las mismas páginas en otro servidor también se leen, cuando las pegas o las escaneas.
 
-**Para montar un relay tú:** ver [Tener tu propio relay](#own-relay), a continuación.
+**Para montar un servidor tú:** ver [Tener tu propio servidor](#own-relay), a continuación.
 
-## Tener tu propio relay {#own-relay}
+## Tener tu propio servidor {#own-relay}
 
-Un relay que gestionas tú es el más seguro, ya que quien gestiona un relay ve quién se conecta a él. El código fuente
+Un servidor que gestionas tú es el más seguro, ya que quien gestiona un servidor ve quién se conecta a él. El código fuente
 lo tiene todo en \`deploy/relay\`.
 
-- **En tu propia red:** ejecuta el relay en un ordenador, abre el puerto 7879 en su cortafuegos, y escribe
+- **En tu propia red:** ejecuta el servidor en un ordenador, abre el puerto 7879 en su cortafuegos, y escribe
   \`ws://<su dirección>:7879\` en cada teléfono. Vuelve a cerrar el puerto cuando acabes.
 - **En internet:** un servidor (VPS) con Debian 12 o Ubuntu 22.04 o posterior, un nombre de dominio (o un nombre
-  gratuito de \`sslip.io\`) y los puertos 80 y 443 abiertos. Un solo comando instala el relay detrás de Caddy, con un
+  gratuito de \`sslip.io\`) y los puertos 80 y 443 abiertos. Un solo comando instala el servidor detrás de Caddy, con un
   certificado de Let's Encrypt y un token aleatorio. Cada teléfono usa entonces \`wss://<tu dominio>\` y ese token. El
-  mismo comando configura el relay de llamadas para las llamadas, que necesita además el puerto 3478 y los puertos UDP
+  mismo comando configura el servidor de llamadas para las llamadas, que necesita además el puerto 3478 y los puertos UDP
   50000 a 50999 abiertos.
 
 Las colas y los mensajes en espera se guardan en el disco del servidor, y también los trozos cifrados de fotos y
 archivos hasta que se recogen (1024 MB en total como mucho), así que un reinicio no pierde nada, y no se registra ninguna
 petición.
-Los mensajes enviados para más tarde también se guardan ahí hasta su hora, 10.000 o 256 MB como mucho: el relay ve
+Los mensajes enviados para más tarde también se guardan ahí hasta su hora, 10.000 o 256 MB como mucho: el servidor ve
 cuándo debe salir cada uno, no lo que dice.
 
-**Por qué:** lo que guarda el relay tiene límites, para que los teléfonos que lo usan no puedan llenar su disco ni su
+**Por qué:** lo que guarda el servidor tiene límites, para que los teléfonos que lo usan no puedan llenar su disco ni su
 memoria.
 
-**Su propia clave:** el archivo de clave del relay (\`EREVOS_RELAY_KEY\`, que configura el único comando) es lo que
+**Su propia clave:** el archivo de clave del servidor (\`EREVOS_RELAY_KEY\`, que configura el único comando) es lo que
 demuestra en cada conexión, así que los teléfonos lo reconocen por esa clave y no por su certificado (ver
-[La clave propia del relay](#relay)). Guarda ese archivo, también en sus copias de seguridad: con uno nuevo, todos los
-teléfonos que conocían la clave antigua rechazan el relay hasta que alguien toca **Tiene una clave nueva** en ellos.
+[La clave propia del servidor](#relay)). Guarda ese archivo, también en sus copias de seguridad: con uno nuevo, todos los
+teléfonos que conocían la clave antigua rechazan el servidor hasta que alguien toca **Tiene una clave nueva** en ellos.
 
-**Invitaciones:** el relay puede dejar que cada teléfono tenga un token propio, en un archivo de tokens, y luego dejar
-que esos teléfonos inviten a más, cada invitación para un teléfono (ver [Invitaciones al relay](#relay)). Actívalo con
-\`EREVOS_RELAY_INVITES=on\` junto a \`EREVOS_RELAY_TOKENS\`; el relay escribe entonces él mismo en ese archivo las
+**Invitaciones:** el servidor puede dejar que cada teléfono tenga un token propio, en un archivo de tokens, y luego dejar
+que esos teléfonos inviten a más, cada invitación para un teléfono (ver [Invitaciones al servidor](#relay)). Actívalo con
+\`EREVOS_RELAY_INVITES=on\` junto a \`EREVOS_RELAY_TOKENS\`; el servidor escribe entonces él mismo en ese archivo las
 líneas de los teléfonos invitados, con quién los invitó y cuándo, y quitar una línea corta ese teléfono, solo ese: los
 teléfonos que invitó conservan las suyas, así que para sacarlos también, borra cada una de sus líneas (cada una dice
 quién lo invitó). Deja entrar 100 teléfonos por invitación como mucho (\`EREVOS_RELAY_MAX_INVITED\`). \`erevos-relay
-free-line NAME\`, ejecutado con el relay parado, hace de una línea una de las tuyas: el teléfono que la invitó ya no
-puede retirarla, y ya no cuenta entre los 100. Un teléfono que llega con el token del relay (\`EREVOS_RELAY_TOKEN\`)
-pide una vez una línea propia, que el relay añade como una de las tuyas, indicando que llegó con el token del relay y
+free-line NAME\`, ejecutado con el servidor parado, hace de una línea una de las tuyas: el teléfono que la invitó ya no
+puede retirarla, y ya no cuenta entre los 100. Un teléfono que llega con el token del servidor (\`EREVOS_RELAY_TOKEN\`)
+pide una vez una línea propia, que el servidor añade como una de las tuyas, indicando que llegó con el token del servidor y
 cuándo, 50 al día como mucho: así puedes repartir ese token, eliminar la línea de un teléfono cualquiera, y luego
 cambiar el token sin cortar a los demás. \`deploy/relay/README.md\` explica cómo.
 
-**Inicio de sesión:** con un archivo de tokens, el relay también puede dejar que los teléfonos inicien sesión con un
+**Inicio de sesión:** con un archivo de tokens, el servidor también puede dejar que los teléfonos inicien sesión con un
 proveedor OpenID Connect, como Authentik, para obtener un token propio, y comprueba cada cuenta cada hora, quitando sus
 teléfonos tras 3 días sin respuesta y otras dos comprobaciones de cada teléfono que fallen con una hora de diferencia
-(ver [Iniciar sesión en el relay](#relay)). Un navegador puede empezar 10 inicios de sesión por minuto. Con
+(ver [Iniciar sesión en el servidor](#relay)). Un navegador puede empezar 10 inicios de sesión por minuto. Con
 \`EREVOS_RELAY_OIDC_GROUP\`, solo pueden las cuentas de ese grupo.
-Necesita un cliente en el proveedor, unos pocos ajustes, y que \`/signin/\` se pase al relay como HTTP simple:
+Necesita un cliente en el proveedor, unos pocos ajustes, y que \`/signin/\` se pase al servidor como HTTP simple:
 \`deploy/relay/README.md\` explica cómo.
 
 > No publiques nunca el token donde otros puedan leerlo. Quien gestiona el servidor ve las direcciones IP que se
 > conectan, los ids de las colas, y cuándo y cuánto llega. No puede leer los mensajes, que están cifrados de extremo a
 > extremo.
 
-## Relay de casa {#home-relay}
+## Servidor de casa {#home-relay}
 
-En **Ajustes** → **Relay y redes** → **Relay de casa**, un espacio puede tener un segundo relay con una cola propia: uno
-en casa, en una Raspberry Pi o en un ordenador viejo, o cualquier otro relay en el que confíes. Es opcional.
+En **Ajustes** → **Servidor y redes** → **Servidor de casa**, un espacio puede tener un segundo servidor con una cola propia: uno
+en casa, en una Raspberry Pi o en un ordenador viejo, o cualquier otro servidor en el que confíes. Es opcional.
 
-- **Lo que hace:** tu enlace de contacto y cada mensaje indican esa cola junto a tu relay. Mientras tu relay no está
+- **Lo que hace:** tu enlace de contacto y cada mensaje indican esa cola junto a tu servidor. Mientras tu servidor no está
   disponible, los contactos escriben ahí, y Erevos recoge lo que llega ahí en cada consulta. Lo que envías va a través
-  de él cuando tu propio relay está caído.
-- **Cómo configurarlo:** ejecuta un relay como en [Tener tu propio relay](#own-relay), escribe su dirección (y su
+  de él cuando tu propio servidor está caído.
+- **Cómo configurarlo:** ejecuta un servidor como en [Tener tu propio servidor](#own-relay), escribe su dirección (y su
   token, si tiene) y elige **Guardar**. Los contactos lo conocen con tu siguiente mensaje, o con tu nuevo enlace de
   contacto.
-- **Lo que ve:** lo que ve tu relay, la dirección de este teléfono cuando recoge mensajes (pero no cuando es solo por
+- **Lo que ve:** lo que ve tu servidor, la dirección de este teléfono cuando recoge mensajes (pero no cuando es solo por
   Tor), y cuándo y cuánto llega. Los chats ocultos no lo usan.
-- **Solo por Tor:** un interruptor para cada relay de casa. Ese relay nunca ve la dirección de este teléfono, sea cual
-  sea el ajuste de Tor para el resto. Sin token escrito, da un token a cambio de un cupón: tu relay, el del propio
-  espacio, firma el cupón a ciegas, así que ninguno de los dos relays puede saber de quién es el token. El cupón se usa
-  hasta una hora después de firmarse, en un momento al azar, de modo que las horas que vieron los dos relays no coinciden, y el
-  token llega del relay de casa en menos de una hora. El token dura 90 días, y Erevos toma un cupón nuevo por sí solo un día al azar entre el día 30 y el día 60. Un límite: con pocos teléfonos en un relay, quien gestione los dos aún podría adivinar solo por las
-  horas. Así, dos espacios (mira [Segunda contraseña](#second)) pueden usar cada uno el relay del otro como relay de
-  casa, y ningún relay los relaciona. Los dos relays deben tener los cupones activados, y hace falta una versión con
+- **Solo por Tor:** un interruptor para cada servidor de casa. Ese servidor nunca ve la dirección de este teléfono, sea cual
+  sea el ajuste de Tor para el resto. Sin token escrito, da un token a cambio de un cupón: tu servidor, el del propio
+  espacio, firma el cupón a ciegas, así que ninguno de los dos servidores puede saber de quién es el token. El cupón se usa
+  hasta una hora después de firmarse, en un momento al azar, de modo que las horas que vieron los dos servidores no coinciden, y el
+  token llega del servidor de casa en menos de una hora. El token dura 90 días, y Erevos toma un cupón nuevo por sí solo un día al azar entre el día 30 y el día 60. Un límite: con pocos teléfonos en un servidor, quien gestione los dos aún podría adivinar solo por las
+  horas. Así, dos espacios (mira [Segunda contraseña](#second)) pueden usar cada uno el servidor del otro como servidor de
+  casa, y ningún servidor los relaciona. Los dos servidores deben tener los cupones activados, y hace falta una versión con
   Tor, en Android (mira [A través de Tor](#tor)).
-- **Automáticamente desde tu relay:** un interruptor, apagado salvo que lo actives, en Android, donde Erevos tiene
-  Tor. Cuando tu relay nombra un relay emparejado con él (lo configura quien lo gestiona), un espacio sin relay de casa
+- **Automáticamente desde tu servidor:** un interruptor, apagado salvo que lo actives, en Android, donde Erevos tiene
+  Tor. Cuando tu servidor nombra un servidor emparejado con él (lo configura quien lo gestiona), un espacio sin servidor de casa
   toma ese por sí solo, solo por Tor, con su token de un cupón como arriba: nada que escribir, y nada que hacer cuando
-  tu relay nombra otro. Al apagarlo suelta el relay de casa que tomó, y quitar a mano el relay de casa lo desactiva para ese espacio; un relay de casa que escribiste
+  tu servidor nombra otro. Al apagarlo suelta el servidor de casa que tomó, y quitar a mano el servidor de casa lo desactiva para ese espacio; un servidor de casa que escribiste
   tú queda como está. Los lugares ocultos nunca toman uno así.
-- **Para los chats ocultos:** cada lugar oculto puede tener un relay de casa propio, en **Para usuarios avanzados** de
+- **Para los chats ocultos:** cada lugar oculto puede tener un servidor de casa propio, en **Para usuarios avanzados** de
   su pantalla sin ningún chat elegido, mientras está abierto. Se guarda solo con ese lugar, sellado con su PIN, así que
-  el espacio no sabe nada de él, y se consulta mientras el lugar está abierto. Usa un relay distinto del del espacio: un
-  relay que viera las dos colas podría relacionarlas.
+  el espacio no sabe nada de él, y se consulta mientras el lugar está abierto. Usa un servidor distinto del del espacio: un
+  servidor que viera las dos colas podría relacionarlas.
 
-**Más de uno:** **Añadir otro relay de casa** da hasta dos más, cada uno con su propia cola, por ejemplo uno en casa y
+**Más de uno:** **Añadir otro servidor de casa** da hasta dos más, cada uno con su propia cola, por ejemplo uno en casa y
 otro en casa de un amigo. Los contactos los prueban en el orden mostrado, y Erevos recoge lo que llega a cada uno. Tu
 enlace de contacto nombra los demás solo mientras sigue siendo lo bastante corto para un código QR; el resto llega a
 tus contactos con tu próximo mensaje. Un contacto con un {=Erevos} más antiguo usa solo el primero.
 
 ## A través de Tor {#tor}
 
-En **Ajustes** → **Relay y redes** → **Tor**, **Qué va por Tor** elige cuáles de las peticiones de este espacio a sus
-relays van por la red Tor. Cada espacio tiene su propia elección:
+En **Ajustes** → **Servidor y redes** → **Tor**, **Qué va por Tor** elige cuáles de las peticiones de este espacio a sus
+servidores van por la red Tor. Cada espacio tiene su propia elección:
 
 | Opción | Qué va por Tor |
 | --- | --- |
-| **Nada** | Salvo que lo cambies. El relay y los relays de Nostr ven la dirección IP de tu teléfono para todo. |
-| **Mensajes** | Lo que escribes, y lo que les dice algo a tus contactos, como que un mensaje se leyó. Las imágenes, los archivos y los mensajes de voz van directos, que es más rápido: para ellos el relay ve la dirección IP de tu teléfono. |
-| **Todo** | También los archivos. Nada va a un relay sin Tor. |
+| **Nada** | Salvo que lo cambies. El servidor y los servidores de Nostr ven la dirección IP de tu teléfono para todo. |
+| **Mensajes** | Lo que escribes, y lo que les dice algo a tus contactos, como que un mensaje se leyó. Las imágenes, los archivos y los mensajes de voz van directos, que es más rápido: para ellos el servidor ve la dirección IP de tu teléfono. |
+| **Todo** | También los archivos. Nada va a un servidor sin Tor. |
 
 **Por qué:** un espacio nuevo empieza con **Nada**, porque Tor hace los mensajes más lentos; un espacio hecho antes
 conserva su elección. Con **Mensajes**, lo que escribes queda oculto por Tor y nunca lo espera, mientras que las
@@ -1883,7 +1936,7 @@ imágenes, los archivos y los mensajes de voz, que son grandes, van directos y p
 
 - **Un solo chat por Tor:** en un chat de Erevos, **Detalles** → **Por Tor** envía los mensajes y archivos de ese chat
   solo por Tor, por circuitos de Tor propios, sea cual sea la elección de este espacio; está desactivado salvo que lo
-  actives. El relay entonces no ve la dirección IP de tu teléfono para ese chat, y ninguna salida de Tor lo lleva
+  actives. El servidor entonces no ve la dirección IP de tu teléfono para ese chat, y ninguna salida de Tor lo lleva
   junto con otro chat. Es más lento, y lo que sale espera mientras Tor arranca. Las llamadas no van por Tor. Los chats
   ocultos también lo tienen, cada uno en sus propios **Detalles**.
   Es igual en tus dispositivos vinculados: activado o desactivado en uno, queda así en todos. En un dispositivo sin
@@ -1893,20 +1946,20 @@ imágenes, los archivos y los mensajes de voz, que son grandes, van directos y p
   por primera vez en la cola propia del chat, sus primeros mensajes llegan a la cola del espacio, que se lee como dice
   el espacio. Mira [Quién ve tu dirección de internet](#ip).
 
-- **Lo que oculta:** el relay ya no ve la dirección IP de tu teléfono, solo una salida de Tor (o nada, para un relay con
-  una dirección \`.onion\`). Tu compañía telefónica o la Wi-Fi solo ven que usas Tor, no qué relay.
+- **Lo que oculta:** el servidor ya no ve la dirección IP de tu teléfono, solo una salida de Tor (o nada, para un servidor con
+  una dirección \`.onion\`). Tu compañía telefónica o la Wi-Fi solo ven que usas Tor, no qué servidor.
 - **Lo que cuesta:** lo que va por Tor llega y sale más despacio, y el primer arranque de Tor tarda un rato. La pantalla
   muestra cuánto le falta a Tor. Para ahorrar batería, Erevos envía el relleno reducido que Tor hizo para los teléfonos:
   el relleno que Tor envía para ocultar cuándo hablas sale cada 9 a 14 segundos, no cada pocos, y no llega ninguno al
   teléfono.
-- **Lo que no cubre:** las llamadas, cuyo sonido e imagen van directamente entre los teléfonos o a través del relay de
+- **Lo que no cubre:** las llamadas, cuyo sonido e imagen van directamente entre los teléfonos o a través del servidor de
   llamadas; los teléfonos cercanos{~ y los SMS}, que no usan internet.
 - **Solo en Android:** {=Erevos} en un ordenador y la app web aún no tienen Tor, así que ahí todo va directo.
 
-> Con **Mensajes**, un mensaje nunca espera a Tor: uno que Tor no pudo llevar al relay sale directo al instante, y lo
-> mismo los mensajes mientras Tor arranca, o durante un minuto después de que no pudiera contactar con el relay; luego
-> se vuelve a probar Tor. Con **Todo**, nada va a un relay sin Tor:
-> cuando Tor no puede contactar con el relay, el mensaje espera y se vuelve a intentar; Erevos nunca vuelve por sí solo
+> Con **Mensajes**, un mensaje nunca espera a Tor: uno que Tor no pudo llevar al servidor sale directo al instante, y lo
+> mismo los mensajes mientras Tor arranca, o durante un minuto después de que no pudiera contactar con el servidor; luego
+> se vuelve a probar Tor. Con **Todo**, nada va a un servidor sin Tor:
+> cuando Tor no puede contactar con el servidor, el mensaje espera y se vuelve a intentar; Erevos nunca vuelve por sí solo
 > a tu propia conexión.
 
 ### Puentes
@@ -1922,7 +1975,7 @@ Donde Tor está bloqueado, **Puentes** en la misma pantalla deja que Tor llegue 
 | **Los míos** | Líneas de puentes de bridges.torproject.org, de bridges@torproject.org por correo, o de @GetBridgesBot en Telegram, pegadas una por línea; luego toca **Usar estos puentes**. Funcionan obfs4, Snowflake, WebTunnel, meek y puentes normales. |
 
 - **Solo a través de ellos:** con puentes, Tor nunca va directamente a sus relays. Cuando ningún puente responde, con
-  **Todo** los mensajes esperan, como cuando Tor no puede contactar con el relay; con **Mensajes** van al relay sin Tor
+  **Todo** los mensajes esperan, como cuando Tor no puede contactar con el servidor; con **Mensajes** van al servidor sin Tor
   hasta que alguno responda. Las líneas que no son puentes no se aceptan, y Tor se queda apagado.
 - **Comprobar mi conexión**, debajo, dice si Tor se conecta, y de qué forma, nunca la dirección del teléfono. Con
   **Automático**, busca de nuevo desde el principio.
@@ -1932,98 +1985,169 @@ Donde Tor está bloqueado, **Puentes** en la misma pantalla deja que Tor llegue 
 
 ## A través de Nostr {#nostr}
 
-En **Ajustes** → **Relay y redes** → **Nostr**, **Textos por Nostr** está **Activado** salvo que lo cambies. Entonces
-lo que escribes a un contacto cuyo {=Erevos} también lee en Nostr va primero por tus relays: tu relay, luego los relays de
-casa de tu contacto, luego tu relay de casa; y por relays públicos de Nostr solo cuando ninguno lo aceptó. Cada espacio
-tiene su propia elección, y sus propios relays de Nostr.
+En **Ajustes** → **Servidor y redes** → **Nostr**, **Textos por Nostr** está **Activado** salvo que lo cambies. Entonces
+lo que escribes a un contacto cuyo {=Erevos} también lee en Nostr va primero por tus servidores: tu servidor, luego los servidores de
+casa de tu contacto, luego tu servidor de casa; y por servidores públicos de Nostr solo cuando ninguno lo aceptó. Cada espacio
+tiene su propia elección, y sus propios servidores de Nostr.
 
 - **Cómo se sella:** cifrado de extremo a extremo como siempre, luego sellado una vez más para una clave que tu contacto
-  dio solo para este chat, y firmado por una clave hecha para ese único texto (un gift wrap NIP-59). Los relays de Nostr
+  dio solo para este chat, y firmado por una clave hecha para ese único texto (un gift wrap NIP-59). Los servidores de Nostr
   ven que alguien escribió a una clave que no nombra a nadie, cuándo, y de qué tamaño; no quién lo escribió, ni a quién.
-  Tu relay no ve lo que fue por ese camino.
-- **Lo que pueden saber los relays de Nostr:** tu teléfono pide a cada uno todas sus claves a la vez:
-  un relay puede saber que esas claves se leen juntas. Por Tor, nunca desde dónde: a cada relay se llega por circuitos
+  Tu servidor no ve lo que fue por ese camino.
+- **Lo que pueden saber los servidores de Nostr:** tu teléfono pide a cada uno todas sus claves a la vez:
+  un servidor puede saber que esas claves se leen juntas. Por Tor, nunca desde dónde: a cada servidor se llega por circuitos
   de Tor propios, así que ninguna salida de Tor lleva lo que va a dos de ellos, y ninguna puede saber que es de un mismo
-  teléfono. Con **Nada** va directo, así que ven la dirección IP de tu teléfono, aunque no quién escribió a quién. Algunos relays rechazan algunas salidas de Tor, y algunas salidas no pueden llegar a un relay: tras un fallo
+  teléfono. Con **Nada** va directo, así que ven la dirección IP de tu teléfono, aunque no quién escribió a quién. Algunos servidores rechazan algunas salidas de Tor, y algunas salidas no pueden llegar a un servidor: tras un fallo
   así, el siguiente intento va por otra salida.
-- **Cómo va:** con **Nada**, los textos van directos a los relays de Nostr. Con **Mensajes**, por Tor cuando Tor está
-  listo, y por tu relay mientras Tor arranca. Con **Todo**, solo por Tor. Cuando cambia la vía, las conexiones de Nostr
+- **Cómo va:** con **Nada**, los textos van directos a los servidores de Nostr. Con **Mensajes**, por Tor cuando Tor está
+  listo, y por tu servidor mientras Tor arranca. Con **Todo**, solo por Tor. Cuando cambia la vía, las conexiones de Nostr
   se cierran y se abren de nuevo por la vía nueva.
 - **Nostr por Tor:** en la pantalla **Nostr**, **Nostr por Tor** está **Desactivado** salvo que lo actives.
-  **Activado**, Erevos llega a los relays de Nostr y a los servidores de archivos de Nostr solo por Tor y arranca Tor
+  **Activado**, Erevos llega a los servidores de Nostr y a los servidores de archivos de Nostr solo por Tor y arranca Tor
   para ello, aunque el Tor del espacio sea **Nada**; un texto que va allí espera mientras Tor arranca. Solo añade Tor:
   con Tor activado para el espacio, Nostr va por Tor diga lo que diga esto, y un chat con **Por Tor** va por Tor diga
   lo que diga esto. Mira [Quién ve tu dirección de internet](#ip).
-- **Los relays:** relay.damus.io, nos.lol y relay.primal.net salvo que los cambies; puedes añadir los tuyos, cinco como
-  mucho. A tus contactos se les dicen los relays en los que lees, y te escriben ahí; basta con uno que acepte un texto.
-- **Lo que se queda en tu relay:** llamadas, reacciones, y las marcas de que un mensaje llegó o se leyó; y lo que escribes a contactos en un iPhone o un ordenador, que no leen en Nostr. Las imágenes, los archivos y los mensajes de voz van por tu relay cuando hay uno entre vosotros; sin relay entre vosotros van también por Nostr (ver Sin ningún relay).
-- **Por dónde fue:** mantén pulsado un mensaje: su menú dice **Enviado por Nostr** o **Llegó por Nostr** cuando un relay
-  de Nostr lo aceptó. Desde ahora también dice **Enviado por el relay**, **Llegó por el relay**, **Enviado a su teléfono
+- **Los servidores:** relay.damus.io, nos.lol y relay.primal.net salvo que los cambies; puedes añadir los tuyos, cinco como
+  mucho. A tus contactos se les dicen los servidores en los que lees, y te escriben ahí; basta con uno que acepte un texto.
+- **Lo que se queda en tu servidor:** llamadas, reacciones, y las marcas de que un mensaje llegó o se leyó; y lo que escribes a contactos cuyo {=Erevos} no lee en Nostr. Las imágenes, los archivos y los mensajes de voz van por tu servidor cuando hay uno entre vosotros; sin servidor entre vosotros van también por Nostr (ver Sin ningún servidor), y también lo que establece una llamada, con **SPEED**.
+- **Por dónde fue:** mantén pulsado un mensaje: su menú dice **Enviado por Nostr** o **Llegó por Nostr** cuando un servidor
+  de Nostr lo aceptó. Desde ahora también dice **Enviado por el servidor**, **Llegó por el servidor**, **Enviado a su teléfono
   cercano**, **Llegó de un teléfono cercano** o **Enviado por LoRa**; un mensaje anterior no dice nada. La nota bajo los
   mensajes también dice **Enviado por Nostr**. Dos teléfonos uno al lado del otro se dan los textos de cerca primero,
-  luego por los relays; Nostr lleva un texto solo cuando los relays no lo aceptaron.
-- **Lo último que hicieron los relays:** la pantalla de **Nostr** muestra, para cada relay, si aceptó el último texto
+  luego por los servidores; Nostr lleva un texto solo cuando los servidores no lo aceptaron.
+- **Lo último que hicieron los servidores:** la pantalla de **Nostr** muestra, para cada servidor, si aceptó el último texto
   que se le dio y cuántos segundos después, o por qué no, y si tu teléfono lee en él. Se guarda solo en este teléfono,
-  hasta que Erevos se cierra. Un texto nunca espera a los relays de Nostr mientras tus relays lo aceptan.
-- **Solo en Android,** como Tor.
+  hasta que Erevos se cierra. Un texto nunca espera a los servidores de Nostr mientras tus servidores lo aceptan.
+- **En un ordenador, en la app web y en Sailfish OS:** ahí no hay Tor, así que Erevos llega a los servidores de Nostr
+  directamente, como llega a tu servidor, y ellos ven la dirección de internet de ese dispositivo; ahí lee mientras
+  Erevos está abierto. Con **Todo** para el espacio, o con **Nostr por Tor** activado, como puede traerlo la copia de
+  seguridad de un teléfono, no llega a ninguno ahí, y la pantalla **Nostr** lo dice.
 
-**Por qué:** los relays de Nostr son públicos, así que, con Tor activado en el espacio, Erevos llega a ellos por Tor, y
+**Por qué:** los servidores de Nostr son públicos, así que, con Tor activado en el espacio, Erevos llega a ellos por Tor, y
 nunca saben dónde está tu teléfono; con **Nada** llega a ellos directo. Solo van ahí los textos, como respaldo de tus
-relays: un texto que fue ahí va otra vez por tu relay por si no llega, mientras que las marcas de que un mensaje llegó o
-se leyó no tendrían ninguno, y un mensaje enviado para más tarde necesita que tu relay lo guarde hasta su hora. Sin
-relay entre vosotros, las imágenes, los archivos y los mensajes de voz van también ahí (ver Sin ningún relay).
+servidores: un texto que fue ahí va otra vez por tu servidor por si no llega, mientras que las marcas de que un mensaje llegó o
+se leyó no tendrían ninguno, y un mensaje enviado para más tarde necesita que tu servidor lo guarde hasta su hora. Sin
+servidor entre vosotros, las imágenes, los archivos y los mensajes de voz van también ahí (ver Sin ningún servidor).
 
-> Un texto que fue por Nostr va otra vez por tu relay si el teléfono de tu contacto no dice en cinco minutos que llegó,
-> y lo ve una vez. Cuando ni tus relays ni ningún relay de Nostr lo aceptan, espera y vuelve a ir, como cualquier
+> Un texto que fue por Nostr va otra vez por tu servidor si el teléfono de tu contacto no dice en cinco minutos que llegó,
+> y lo ve una vez. Cuando ni tus servidores ni ningún servidor de Nostr lo aceptan, espera y vuelve a ir, como cualquier
 > mensaje.
 
 - **Chats ocultos:** también leen en Nostr, mientras están abiertos, y también cerrados mientras **Recibir estando
   cerrados** está activado para ellos y el espacio está abierto (ver [Chats ocultos](#hidden)). Cerrados, siguen
-  mostrando «New message»: con cada texto por Nostr, tu contacto también envía a tu relay una campanita, un mensaje que
-  no dice nada, que tu relay cuenta como uno, como antes. Sin relay, su enlace de contacto y su código QR dicen dónde
+  mostrando «New message»: con cada texto por Nostr, tu contacto también envía a tu servidor una campanita, un mensaje que
+  no dice nada, que tu servidor cuenta como uno, como antes. Sin servidor, su enlace de contacto y su código QR dicen dónde
   leen en Nostr, con una clave solo de ese lugar, y los textos, las reacciones y las marcas de que un mensaje llegó van
-  ahí, como desde un teléfono sin relay.
+  ahí, como desde un teléfono sin servidor.
 
-### Sin ningún relay {#nostr-only}
+### Sin ningún servidor {#nostr-only}
 
-Un teléfono sin relay, sin invitación y sin cuenta LPHL igualmente puede empezar: su enlace de contacto y su código QR
+Un teléfono sin servidor, sin invitación y sin cuenta LPHL igualmente puede empezar: su enlace de contacto y su código QR
 dicen dónde lee en Nostr, y eso basta para hablar.
 
 - **Para empezar:** en **Chat nuevo**, en **Para usuarios avanzados**, toca **Empezar sin servidor**, luego **Mostrar mi
   código QR** o **Compartir mi enlace de contacto**, y dáselo a alguien que use {=Erevos}. Quien lo añada te escribe por
   Nostr, y aparece como solicitud de mensaje, que aceptas. Tú también puedes añadir su enlace o su código QR, de la
   misma manera.
-- **Lo que va:** textos, stickers, reacciones, ediciones, y las marcas de que un mensaje llegó o se leyó, todo por Nostr; y fotos, archivos y mensajes de voz. Un mensaje de voz va en wraps como un texto. Una foto de hasta 3 MB va en trozos de 32 KB, un wrap cada uno, enviados antes del mensaje que la ofrece; el otro teléfono los guarda, cifrados con el resto del espacio o de los chats ocultos para los que llegaron, hasta que lleguen todos, cuatro días como máximo. Una foto mayor, un vídeo o cualquier otro archivo, de hasta 20 MB, va como un solo blob, cifrado en el teléfono, a un servidor de archivos Blossom (blossom.primal.net, blossom.band o nostr.download), por Tor según la elección de Tor del espacio (directo con **Nada**): el servidor guarda solo lo que no puede leer. Las llamadas y los grupos necesitan un relay, o el otro teléfono cerca. Los chats ocultos también funcionan así, solo por Nostr (ver [Chats ocultos](#hidden)).
-- **Cuando no llega:** los relays de Nostr guardan un texto dos días. Hasta que el teléfono de tu contacto diga que
+- **Lo que va:** textos, stickers, reacciones, ediciones, y las marcas de que un mensaje llegó o se leyó, todo por Nostr; y fotos, archivos y mensajes de voz. Un mensaje de voz va en wraps como un texto. Una foto de hasta 3 MB va en trozos de 32 KB, un wrap cada uno, enviados antes del mensaje que la ofrece; el otro teléfono los guarda, cifrados con el resto del espacio o de los chats ocultos para los que llegaron, hasta que lleguen todos, cuatro días como máximo. Una foto mayor, un vídeo o cualquier otro archivo, de hasta 20 MB, va como un solo blob, cifrado en el teléfono, a un servidor de archivos Blossom (blossom.primal.net, blossom.band o nostr.download), por Tor según la elección de Tor del espacio (directo con **Nada**): el servidor guarda solo lo que no puede leer. Los grupos necesitan un servidor, o el otro teléfono cerca. Las llamadas se establecen por Nostr y van directamente de teléfono a teléfono con **SPEED** (ver [¿Cuánto se te ve?](#direct)); con **ANONYMOUS** necesitan un servidor o el otro teléfono cerca, y con **INVISIBLE** no hay ninguna. Los chats ocultos también funcionan así, solo por Nostr, aunque una llamada ahí necesita un servidor o el otro teléfono cerca (ver [Chats ocultos](#hidden)).
+- **Cuando no llega:** los servidores de Nostr guardan un texto dos días. Hasta que el teléfono de tu contacto diga que
   llegó, Erevos se lo vuelve a dar una vez al día, durante dos semanas.
-- **Un relay por sí solo:** cuando tu contacto tiene un relay que le deja invitar, su {=Erevos} le envía al tuyo una
+- **Un servidor por sí solo:** cuando tu contacto tiene un servidor que le deja invitar, su {=Erevos} le envía al tuyo una
   invitación a él por sí solo, una vez, en el chat, tanto si os conocisteis por Nostr como de cerca, por Bluetooth,
-  Wi-Fi o un código QR. Tu teléfono la acepta por sí solo, y a partir de entonces las fotos, los mensajes de voz y las
-  llamadas también funcionan, con todos. Cuenta como una de sus invitaciones. Alguien cuya solicitud de mensaje no has
-  aceptado no elige ningún relay por ti: su invitación espera hasta que lo aceptes, una semana como mucho.
-- **Un Erevos más antiguo** no lee la parte de Nostr de un enlace: solo te contacta de cerca, hasta que tengas un relay.
+  Wi-Fi o un código QR. Tu teléfono la acepta por sí solo (con **ANONYMOUS** o **INVISIBLE** pregunta antes,
+  pues su servidor ve entonces tu dirección de internet), y a partir de entonces los grupos también funcionan, y las
+  llamadas conectan desde cualquier red, con todos. Cuenta como una de sus invitaciones, y cuando ya estás dentro, su
+  chat contigo lo dice, con **Retirar** debajo de esa línea. Alguien cuya solicitud de mensaje no has aceptado no elige
+  ningún servidor por ti: su invitación espera hasta que lo aceptes, una semana como mucho.
+- **Un {=Erevos} más antiguo** no lee la parte de Nostr de un enlace: solo te contacta de cerca, hasta que tengas un servidor.
 
 **Por qué:** Nostr es solo la forma de entrar. Nadie necesita una invitación para empezar, y en cuanto uno de vosotros
-tiene un relay, este lleva lo que es demasiado grande para Nostr.
+tiene un servidor, este lleva lo que es demasiado grande para Nostr.
+
+## ¿Cuánto se te ve? {#direct}
+
+**¿Cuánto se te ve?** está arriba en **Ajustes**, bajo la búsqueda: tres opciones para quién ve la dirección de internet
+(dirección IP) de tu teléfono, que muestra más o menos dónde está el teléfono, y en qué red. Cada espacio tiene la suya,
+y un espacio está en **SPEED** hasta que eliges otra, salvo que tenga Tor activado. **Qué cambia**, debajo, abre su
+pantalla, que dice lo que dice esta sección. Los mensajes están cifrados de extremo a extremo con las tres.
+
+- **SPEED:** los servidores y tus contactos ven tu dirección. Erevos no pregunta antes de lo que sigue: lo hace de
+  inmediato. Las llamadas y videollamadas con un contacto van directamente de teléfono a teléfono donde pueden, la forma
+  más rápida, y por un servidor de llamadas donde no pueden; si no hay servidor entre vosotros dos, la llamada se
+  establece por Nostr. Las llamadas de grupo no van directamente por internet: van por el servidor de llamadas, o entre
+  teléfonos en la misma Wi-Fi.
+- **ANONYMOUS:** solo la ve el servidor, nunca tus contactos. Antes de cada una de las cosas que siguen, Erevos dice una
+  vez quién vería la dirección, y eliges si seguir (ver [Quién ve tu dirección de internet](#ip)). Las llamadas van solo
+  por un servidor de llamadas, que oculta la dirección de cada teléfono al otro, o entre dos teléfonos en la misma
+  Wi-Fi. Una llamada de un contacto sin servidor entre vosotros dos no suena: el chat la muestra como perdida, y dice
+  que **SPEED** deja pasar esas llamadas. Tor solo para los mensajes, o Nostr por Tor, elegidos en sus propias
+  pantallas, mantienen un espacio en ANONYMOUS.
+- **INVISIBLE:** nadie la ve. Todo lo del espacio pasa por Tor, también los archivos y Nostr: los servidores ven una
+  dirección de Tor, nunca la tuya, y tus contactos no ven ninguna. Los mensajes y los archivos van y vienen más
+  despacio, y el primer arranque de Tor tarda un rato. No hay llamadas de voz ni videollamadas, porque las llamadas no
+  pasan por Tor: si intentas una, te dice por qué, la llamada de un contacto no suena (el chat la muestra como perdida,
+  en INVISIBLE), y una llamada en curso termina cuando se elige INVISIBLE. **Todo**, en la pantalla de Tor (**Ajustes**
+  → **Servidor y redes** → **Tor**), también es INVISIBLE. {+ En Erevos+ cada cuenta de las otras redes va también solo por Tor, sea cual sea su propia elección de Tor, y ninguna de sus llamadas sale ni suena.}
+
+**Quién ve tu dirección de internet con SPEED:**
+
+- Los servidores que llevan lo que envías y tus llamadas: el tuyo, el de tu contacto, y uno al que te invita un
+  contacto.
+- El teléfono de tu contacto, en una llamada, y los servidores auxiliares, que dicen a cada teléfono su propia
+  dirección.
+- Un servidor que eligió tu contacto para un archivo.
+- Los servidores públicos de Nostr, cuando dos teléfonos se emparejan con un código de 8 dígitos.
+- [~] Una emisora de radio o un canal de TV de la Colección, mientras se reproduce.
+- [~] El sitio de donde viene la lista de números de spam, en **Teléfono**.
+
+Ninguno de ellos ve lo que escribes o dices: eso sigue cifrado de extremo a extremo.
+
+**Lo que no cambia ninguna de ellas:**
+
+- Los chats ocultos, y los chats puestos en **Por Tor**, nunca se conectan directamente y siguen preguntando.
+- Erevos sigue preguntando antes de abrir un enlace web o de mostrar la vista previa de un enlace, y antes de traer los
+  mensajes de un teléfono a su lado desde un servidor que este teléfono no usa.
+- Tor desactivado en su propia pantalla deja el espacio en **ANONYMOUS**: nada se conecta directamente hasta que eliges
+  **SPEED** otra vez, lo que desactiva Tor, y Nostr por Tor, en ese espacio.
+
+**Conviene saber:**
+
+- **Una llamada no siempre puede ir directa:** algunas redes, sobre todo las móviles, no dejan entrar nada desde fuera.
+  Entonces va por un servidor de llamadas, con el que una llamada conecta desde cualquier red. Cuando ninguno de los dos
+  tiene un servidor de llamadas, la pantalla de la llamada dice **La llamada no se pudo conectar directamente**, y el
+  chat guarda esa línea.
+- **Un {=Erevos} más antiguo** suena con una llamada así, y luego no puede conectar.
+- **Sin servidor,** Erevos oye una llamada así solo mientras lee en Nostr: en Android, si se deja dormir para ahorrar
+  batería, puede perder alguna; en un ordenador, en la app web y en Sailfish OS, ahí lee solo mientras está abierto.
+- **Servidores auxiliares, para usuarios avanzados:** para llamar directamente de teléfono a teléfono, cada teléfono
+  pregunta a un servidor auxiliar cuál es su propia dirección de internet. El servidor auxiliar ve esa dirección, una
+  vez por llamada, y nada de la llamada en sí. Salvo que elijas otra cosa, Erevos pregunta primero al que está junto a
+  tu servidor y al que está junto al servidor de LPHL, y a dos públicos, el de Cloudflare y el de Nextcloud, solo cuando
+  ninguno de esos responde. En su pantalla, con **SPEED**, **Mis propios servidores** admite hasta tres tuyos, y
+  **Ninguno** no pregunta a nadie: una llamada directa conecta entonces solo donde los dos teléfonos se encuentran por
+  sí solos, como en la misma Wi-Fi. **Comprobar ahora** les pregunta como lo hace una llamada, así que ellos también ven
+  tu dirección entonces.
 
 ## Quién ve tu dirección de internet {#ip}
 
 La dirección de internet de tu teléfono, su dirección IP, muestra más o menos dónde estás y qué proveedor usas. No
 muestra lo que escribes. Quien se conecta con tu teléfono la ve, salvo que la conexión pase por Tor.
 
-- **Tu relay y los relays de tus contactos:** la ven. Para ocultarla, activa Tor para el espacio (**Ajustes** →
-  **Relay y redes** → **Tor**) o **Por Tor** en los **Detalles** de un chat. Mira [A través de Tor](#tor).
+- **Tu servidor y los servidores de tus contactos:** la ven. Para ocultarla, elige **INVISIBLE** arriba en **Ajustes**,
+  activa Tor para los mensajes del espacio (**Ajustes** → **Servidor y redes** → **Tor**) o **Por Tor** en los
+  **Detalles** de un chat. Ver [¿Cuánto se te ve?](#direct) y [A través de Tor](#tor).
 
 - [+] **XMPP:** tu servidor de XMPP la ve mientras Erevos está conectado, salvo que la cuenta vaya por Tor; los servidores
   de tus contactos y grupos no, ya que tu servidor les lleva tus mensajes. Erevos avisa antes de que envíes en un chat
   mientras la cuenta no va por Tor (con **Por Tor** para ese chat como solución), antes de cada llamada y antes de
   descargar un archivo de otro servidor que no sea el tuyo. Mira [XMPP](#xmpp).
 
-- **Los relays públicos de Nostr y los servidores de archivos de Nostr:** la ven, salvo que la conexión pase por Tor.
-  Activa **Nostr por Tor** en **Ajustes** → **Relay y redes** → **Nostr**, o **Por Tor** para un chat. Mira [A través
-  de Nostr](#nostr).
+- **Los servidores públicos de Nostr y los servidores de archivos de Nostr:** la ven, salvo que la conexión pase por Tor.
+  Activa **Nostr por Tor** en **Ajustes** → **Servidor y redes** → **Nostr**, o **Por Tor** para un chat. En un
+  ordenador, en la app web y en Sailfish OS no hay Tor: ahí solo **Textos por Nostr** en **Desactivado** se la oculta.
+  Mira [A través de Nostr](#nostr).
 - **Un código de 8 dígitos**, en **A mi lado** y **Tengo su código**: los dos teléfonos se encuentran en esos mismos
-  relays públicos de Nostr, así que sin Nostr a través de Tor ven la dirección, pero no el código ni los enlaces de
+  servidores públicos de Nostr, así que sin Nostr a través de Tor ven la dirección, pero no el código ni los enlaces de
   contacto. Erevos lo avisa antes de la primera vez.
 
 - [+] **Matrix:** solo tu propio servidor de Matrix la ve, no los servidores de tus contactos: las fotos y archivos de
@@ -2032,7 +2156,7 @@ muestra lo que escribes. Quien se conecta con tu teléfono la ve, salvo que la c
 - [+] **Telegram:** los servidores de Telegram la ven, salvo que la cuenta vaya por Tor: elige **Siempre por Tor** en
   **Tor para esta cuenta de Telegram**, en los ajustes de Telegram, o activa **Por Tor** en la información de un chat,
   que lleva toda la cuenta por Tor. Consulta [Telegram](#telegram).
-- [+] **Chats con otras apps de Nostr y el feed Público:** sus relays y servidores de archivos la ven, salvo que la cuenta
+- [+] **Chats con otras apps de Nostr y el feed Público:** sus servidores y servidores de archivos la ven, salvo que la cuenta
   pase por Tor (**Tor** en la pantalla **Chats de Nostr**) o esté activado **Por Tor** del chat. Publicar, dar me gusta
   o votar en el feed Público, y sus fotos y vistas previas de enlaces sin Tor, también la muestran. Mira [Chats con
   otras apps de Nostr](#nostr-chats).
@@ -2042,8 +2166,11 @@ muestra lo que escribes. Quien se conecta con tu teléfono la ve, salvo que la c
   sesión, el captcha de Signal, las fotos de Messenger y **Abrir Facebook** van igual. Erevos avisa antes de que envíes en un chat
   mientras la cuenta no vaya por Tor, y antes de cada llamada. Consulta [Messenger](#messenger), [Signal](#signal) y [Session](#session).
 
-- **Las llamadas:** nunca van por Tor. El relay de llamadas, el tuyo o el de tu contacto, ve la dirección, aunque no
-  lo que se dice. Una llamada entre teléfonos cercanos en la misma red se queda en esa red.
+- **Las llamadas:** nunca van por Tor, así que **INVISIBLE** no tiene ninguna. El servidor de llamadas, el tuyo o el de
+  tu contacto, ve la dirección, aunque no lo que se dice. Una llamada entre teléfonos cercanos en la misma red se queda
+  en esa red. Con **SPEED** elegido, la llamada va directamente de teléfono a teléfono donde puede, y por el servidor de
+  llamadas donde no puede: el teléfono de tu contacto ve la dirección en ambos casos, y también los servidores
+  auxiliares que dicen a cada teléfono la suya.
 
 - **Un archivo en un servidor que eligió tu contacto:** el servidor ve la dirección cuando tu teléfono descarga el
   archivo. Tor la oculta.
@@ -2052,37 +2179,44 @@ muestra lo que escribes. Quien se conecta con tu teléfono la ve, salvo que la c
   Browser. La vista previa de un enlace también se descarga de su sitio, y el sitio ve la dirección igual.
   Con **Por Tor** activado para las vistas previas de enlaces, no la ve.
 
-- **El relay de un contacto:** mientras tu espacio no tenga relay propio, o solo un lugar prestado en uno, un contacto
-  puede darte un lugar en el suyo, y llega con su mensaje. Su relay ve entonces la dirección, así que Erevos pregunta
-  antes de aceptarlo, salvo que el espacio lo envíe todo por Tor. Si no se acepta, la invitación se deja.
+- **El servidor de un contacto:** mientras tu espacio no tenga servidor propio, o solo un lugar prestado en uno, un
+  contacto puede darte un lugar en el suyo, y llega con su mensaje. Su servidor ve entonces la dirección, así que Erevos
+  pregunta antes de aceptarlo, salvo que el espacio esté en **SPEED**, o en **INVISIBLE**, que lo envía todo por Tor. Si
+  no se acepta, la invitación se deja.
 
 - **Los grupos:** un mensaje en un grupo de Erevos pasa por un servidor, que ve la dirección. Tor para el espacio la
   oculta; un grupo no tiene interruptor propio.
 
 - **Copias de seguridad, {~el servidor de la Colección, listas de radio y TV, |}vistas previas de enlaces y
   actualizaciones:** cada una tiene su propio interruptor **Por Tor**, en su propia pantalla, desactivado salvo que lo
-  actives. Mira [Copias de seguridad](#backup), {~[Colección](#collection), |}[Chatear a través de un relay](#relay) y
+  actives. Mira [Copias de seguridad](#backup), {~[Colección](#collection), |}[Chatear a través de un servidor](#relay) y
   [Actualizaciones](#updates).
 
 - [~] **Emisoras de radio y canales de TV:** cada uno ve la dirección mientras se reproduce. **Reproducir por Tor**, en los
   ajustes de la Colección en Android, desactivado salvo que lo actives, los reproduce solo por Tor. Mira
   [Colección](#collection).
 
-Erevos avisa una vez antes de cada uno de ellos, con el título **Tu dirección de internet puede verse**, un botón
-**Guía** que abre esta sección y, donde puede, un botón que lo arregla, como **Por Tor para este chat**. **Seguir**
-continúa. Para lo que envías, se dice una vez para toda la red, no en cada chat: después, un chat o grupo que va sin
-Tor muestra solo una línea discreta encima de donde escribes, **Sin Tor: los relays ven tu dirección de internet.**,
-con **Por Tor para este chat** y **Guía** al lado.
+Con **ANONYMOUS** o **INVISIBLE**, Erevos avisa una vez antes de cada uno de ellos, con el título **Tu
+dirección de internet puede verse**, un botón **Guía** que abre esta sección y, donde puede, un botón que lo arregla,
+como **Por Tor para este chat**. **Seguir** continúa. Para lo que envías, se dice una vez para toda la red, no en cada
+chat: después, un chat o grupo que va sin Tor muestra solo una línea discreta encima de donde escribes, **Sin Tor: los
+servidores ven tu dirección de internet.**, con **Por Tor para este chat** y **Guía** al lado.
 
 Después de la guía vuelve la misma pregunta, y lo que estabas enviando, como un mensaje de voz o un archivo, la
 espera. Una llamada que suena aquí lo dice debajo de la llamada, y contestar sigue adelante. Los chats ocultos guardan
 lo dicho consigo, aparte del espacio.
 
+Con **SPEED**, como viene por defecto, no pregunta antes de ellos: van de inmediato, y no se
+muestra ninguna línea discreta. Sigue preguntando antes de abrir un enlace web o de mostrar la vista previa de un
+enlace{+, antes de lo que va a Matrix, XMPP u otras apps de Nostr}, y antes de traer los mensajes de un teléfono a su
+lado desde un servidor que este teléfono no usa; y los chats ocultos, y los chats puestos en **Por Tor**, siguen
+preguntando. Ver [¿Cuánto se te ve?](#direct).
+
 Los teléfonos cercanos{~, LoRa y los SMS| y LoRa} no usan internet, así que no muestran ninguna dirección de internet.
 
 ## Matrix {#matrix}
 
-En **Ajustes** → **Relay y redes** → **Matrix**, un espacio puede iniciar sesión en una cuenta de Matrix, para chatear
+En **Ajustes** → **Servidor y redes** → **Matrix**, un espacio puede iniciar sesión en una cuenta de Matrix, para chatear
 con personas que usan Element u otra app de Matrix. Erevos habla él mismo con el servidor de Matrix, como Element:
 ningún puente se pone en medio.
 
@@ -2113,13 +2247,9 @@ ningún puente se pone en medio.
   de vodozemac). Un chat sin cifrar lo dice.
 - **No anónimo:** el servidor de Matrix ve tu cuenta, quién habla con quién y cuándo, y, sin Tor, desde dónde. En un
   chat con personas de otros servidores, esos servidores también lo ven.
-- **Por Tor:** en Android, la pantalla de Matrix, también antes de iniciar sesión, tiene la elección de Tor que tiene
-  cada cuenta: **Desactivado** (lo predeterminado) va directo, y el servidor de Matrix ve tu dirección; **Como el
-  espacio** sigue **Ajustes** → **Relay y redes** → **Tor**: con **Mensajes**, por Tor en cuanto está listo y directo
-  mientras arranca, fotos y archivos directos; con **Todo**, todo solo por Tor; **Siempre por Tor** envía esta cuenta
-  solo por Tor, también al iniciar sesión, y nada sin él. Tor usa los puentes del espacio. **Por Tor** de un chat,
-  bajo sus botones, hace que toda la cuenta vaya solo por Tor mientras está activado: Matrix tiene una conexión para
-  todos los chats de una cuenta. Las llamadas nunca van por Tor.
+- **Por Tor:** en Android, Matrix sigue la elección de este espacio en **Ajustes** → **Servidor y redes** → **Tor**. Con
+  **Mensajes**, todo, también las fotos, va por Tor en cuanto Tor está listo, y directo mientras Tor arranca o cuando
+  falla; con **Todo**, solo por Tor; con **Nada**, directo. La pantalla de Matrix dice por dónde va ahora.
 - **Mensajes de antes:** un mensaje enviado antes de que Erevos iniciara sesión, o uno cuya clave aún no llegó, sale
   bloqueado.
 - **Fotos y archivos:** **Foto** y **Archivo** los envían, hasta 50 MB, cifrados en el teléfono antes de ir al servidor
@@ -2127,7 +2257,7 @@ ningún puente se pone en medio.
   **Guardar** deja cualquier archivo en el teléfono.
   Toca una foto que se muestra para verla en toda la pantalla, como en el chat de un contacto: dos dedos o un doble
   toque la amplían, gira con el teléfono, y **Guardar** la conserva (ver Fotos y archivos, en [Chatear a través de un
-  relay](#relay)).
+  servidor](#relay)).
 - **Stickers:** un sticker que envían Element, FluffyChat o Element X se ve en el chat; **Mostrar sticker** lo trae por
   tu servidor Matrix. **Sticker** envía tus propios stickers hechos con fotos (**Míos**) como imágenes, cifradas donde
   el chat lo está. Los grupos que trae Erevos también están: cada sticker va como su imagen, hecha en tu dispositivo,
@@ -2222,8 +2352,8 @@ ningún puente se pone en medio.
   otro espacio está abierto, como hacen sus propios chats con **También mientras otro espacio está abierto** en
   **Ajustes** → **Notificaciones** → **En segundo plano**, que también necesita. Nunca dice qué, de quién ni en qué
   chat, y una llamada no suena entonces: solo la clave del espacio abre lo que llegó. Para ello el servidor de Matrix
-  avisa al relay de este espacio de cada mensaje, sin ninguna palabra de él, así que el servidor de Matrix conoce la
-  dirección del relay, y el relay cuándo llegan mensajes. Apagado hasta que lo enciendas; necesita un relay
+  avisa al servidor propio de este espacio de cada mensaje, sin ninguna palabra de él, así que el servidor de Matrix conoce la
+  dirección de ese servidor, y ese servidor cuándo llegan mensajes. Apagado hasta que lo enciendas; necesita un servidor
   actualizado para ello, al que llegue el servidor de Matrix.
 - **Hilos:** mantén pulsado un mensaje y elige **Responder en el hilo** para responder en un hilo. Un hilo se abre en
   su propia pantalla, y un mensaje con respuestas dice cuántas hay; tócalo para abrir el hilo. Las apps sin hilos
@@ -2257,14 +2387,14 @@ ningún puente se pone en medio.
   contraseña.
 - **Llamadas antiguas:** en un chat con una persona, los iconos de llamada preguntan **Element Call** o **Llamada
   antigua**. La llamada antigua funciona con FluffyChat, Nheko y Element en el ordenador, y suena aquí cuando llaman.
-  Sus señales van como el chat, cifradas en un chat cifrado, por tu relay si el espacio tiene uno, si no por el relay
+  Sus señales van como el chat, cifradas en un chat cifrado, por tu servidor si el espacio tiene uno, si no por el servidor
   de llamadas de tu servidor de Matrix; la llamada en sí va cifrada (DTLS-SRTP).
 
 **Por qué:** los chats propios de Erevos ocultan quién habla con quién; un servidor de Matrix no puede. Por eso los
 chats de Matrix van aparte y marcados, para las personas a las que solo llegarías por Matrix.
 
 - **Lo que lleva un mensaje:** las marcas de cómo se ven las palabras, como negrita y palabras ocultas, se ven como en
-  un chat de Erevos (ver [Chatear a través de un relay](#relay)) y van con el mensaje, así que Element también las
+  un chat de Erevos (ver [Chatear a través de un servidor](#relay)) y van con el mensaje, así que Element también las
   muestra. De lo que envía otra app solo se ven negrita, cursiva, tachado, código y palabras ocultas: nada de ello se
   ejecuta, no se trae ninguna imagen y un enlace muestra adónde lleva de verdad. Las direcciones web se pueden tocar,
   y Erevos pregunta antes de abrir una. Junto a **Foto** y **Archivo** están **Cámara**, **Vídeo**, **Tarjeta de
@@ -2302,7 +2432,7 @@ chats de Matrix van aparte y marcados, para las personas a las que solo llegarí
 
 ## XMPP {#xmpp}
 
-En **Ajustes** → **Relay y redes** → **XMPP**, un espacio puede iniciar sesión en una cuenta de XMPP, para chatear con
+En **Ajustes** → **Servidor y redes** → **XMPP**, un espacio puede iniciar sesión en una cuenta de XMPP, para chatear con
 personas que usan Conversations, Monal, Gajim, Dino u otra app de XMPP. Erevos habla él mismo con el servidor de XMPP,
 como esas apps: ningún puente se pone en medio.
 
@@ -2364,7 +2494,7 @@ como esas apps: ningún puente se pone en medio.
   foto, un sonido o un archivo que llega se descarga solo al tocar **Mostrar foto**, **Reproducir** o **Guardar**. En
   Android, los archivos van por Tor como el chat. Toca una foto que se muestra para verla en toda la pantalla, como en
   el chat de un contacto: dos dedos o un doble toque la amplían, gira con el teléfono, y **Guardar** la conserva (ver
-  Fotos y archivos, en [Chatear a través de un relay](#relay)).
+  Fotos y archivos, en [Chatear a través de un servidor](#relay)).
 - **Stickers:** **Sticker** envía tus propios stickers hechos con fotos (**Míos**) como fotos, cifradas como el chat;
   otras apps XMPP los muestran como fotos. Los grupos que trae Erevos también están: cada sticker va como su imagen,
   hecha en tu dispositivo. Un paquete de stickers que envía otra app (XEP-0449) no se descarga: muestra sus palabras.
@@ -2397,9 +2527,9 @@ como esas apps: ningún puente se pone en medio.
   llamada de alguien que no está en tus contactos solo aparece como perdida. Funciona con apps que llaman como
   Conversations (Jingle, con el timbre de XEP-0353). La llamada en sí está cifrada (DTLS-SRTP), pero la huella de su
   clave pasa por los servidores de XMPP tal cual, sin cifrado de extremo a extremo, así que esos servidores podrían
-  ponerse en medio. Pasa por el relay de llamadas de este espacio cuando lo hay, si no por el servidor TURN del servidor
+  ponerse en medio. Pasa por el servidor de llamadas de este espacio cuando lo hay, si no por el servidor TURN del servidor
   de XMPP, y solo por él, así que la otra persona no conoce tu dirección; sin ninguno de los dos, va directa, y la
-  conoce. Una llamada nunca pasa por Tor: el relay de llamadas o el servidor TURN ve la dirección de este teléfono.
+  conoce. Una llamada nunca pasa por Tor: el servidor de llamadas o el servidor TURN ve la dirección de este teléfono.
   En una llamada de voz, cualquiera de los dos puede activar el video: **Añadir vídeo**, en la pantalla de la llamada,
   enciende tu cámara y pregunta primero a la otra persona, que elige **Ahora no** o **Activar vídeo**. El video empieza
   solo si dice que sí, y un no deja la llamada como estaba. Funciona con apps que añaden video a una llamada como
@@ -2410,7 +2540,7 @@ como esas apps: ningún puente se pone en medio.
   tocar cualquiera de los dos te une a la llamada, hasta que sale su última persona. Funciona con Dino, que llama en
   grupos de la misma manera (MUJI): cada llamada tiene una sala propia en el servicio de grupos, a la que solo pueden
   entrar los miembros del grupo, y cada teléfono de la llamada se conecta directamente con cada uno de los otros, como
-  en las llamadas de grupo propias de Erevos, a través del relay de llamadas de este espacio o del servidor TURN del
+  en las llamadas de grupo propias de Erevos, a través del servidor de llamadas de este espacio o del servidor TURN del
   servidor de XMPP, con ocho personas como máximo. Como en una llamada con una persona, la llamada está cifrada
   (DTLS-SRTP), pero las huellas de sus claves, y las invitaciones, pasan por los servidores de XMPP tal cual, y el
   servicio de grupos ve quién está en la llamada y cuándo. La cuenta de XMPP propia de los chats ocultos llama en sus
@@ -2418,17 +2548,10 @@ como esas apps: ningún puente se pone en medio.
   cerrados** activado, una llamada que llega en uno de sus grupos aparece como perdida.
 - **No anónimo:** el servidor de XMPP ve tu cuenta, tus contactos, quién habla con quién y cuándo, y, sin Tor, desde
   dónde. El servidor de la otra persona ve lo mismo de sus chats contigo.
-- **Por Tor:** en Android, la pantalla de XMPP, y la de antes de iniciar sesión, elige el Tor de la cuenta:
-  **Desactivado** (por defecto: directo, y el servidor ve tu dirección), **Como el espacio** (como dice la elección de este
-  espacio en **Ajustes** → **Relay y redes** → **Tor**: con **Mensajes** por Tor en cuanto Tor está listo, los archivos
-  directos; con **Todo** solo por Tor, también los archivos; con **Nada** directo) o **Siempre por Tor** (solo por Tor,
-  haga lo que haga el espacio, también al iniciar sesión, y nada sale mientras Tor no pueda conectarse). Su conexión, la
-  búsqueda de su servidor y sus archivos siguen la elección; Tor usa los puentes del espacio. Las llamadas nunca van por
-  Tor, y no se hace vista previa de enlaces mientras la cuenta no pueda ir directa. Donde Erevos no puede abrir una
-  conexión propia (la app web, un ordenador), usa el WebSocket del servidor, directo, y un servidor sin él no se alcanza.
-- **Un chat por Tor:** **Por Tor** bajo un chat o grupo, desactivado hasta que lo actives, lo manda solo por Tor. Una
-  conexión con el servidor lleva todos los chats de la cuenta, así que mientras un chat lo tenga activado, toda la
-  cuenta va solo por Tor, se elija lo que se elija para ella, y la pantalla de XMPP lo dice.
+- **Por Tor:** en Android, XMPP sigue la elección de este espacio en **Ajustes** → **Servidor y redes** → **Tor**: con
+  **Mensajes**, va por Tor en cuanto Tor está listo, y directo mientras Tor arranca o cuando falla; con **Todo**, solo
+  por Tor; con **Nada**, directo. La pantalla de XMPP dice por dónde va ahora. Donde Erevos no puede abrir una conexión
+  propia (la app web, un ordenador), usa el WebSocket del servidor, directo, y un servidor sin él no se puede alcanzar.
 - **Notificaciones:** un mensaje que llega muestra un aviso y cuenta en el número del icono de Erevos, como en los chats
   propios de Erevos, mientras este espacio está abierto; en un ordenador, mientras Erevos funciona. En Android,
   **Notificaciones**, al final de un chat, lo silencia o le da un sonido propio; un chat silenciado no cuenta.
@@ -2440,9 +2563,9 @@ como esas apps: ningún puente se pone en medio.
   cerrado** de la pantalla de XMPP, deja que este espacio diga «Mensaje nuevo» cuando llega algo en XMPP mientras otro
   espacio está abierto, como hacen sus propios chats con **También mientras otro espacio está abierto** en **Ajustes** →
   **Notificaciones** → **En segundo plano**, que también necesita. Nunca dice qué, de quién ni en qué chat, y una
-  llamada no suena entonces: solo la clave del espacio abre lo que llegó. Para ello el servidor de XMPP avisa al relay
-  de este espacio de cada mensaje mientras ninguna app de la cuenta está activa, así que el servidor de XMPP conoce el
-  nombre del relay, y el relay cuándo llegan mensajes. Apagado hasta que lo enciendas; necesita un relay actualizado
+  llamada no suena entonces: solo la clave del espacio abre lo que llegó. Para ello el servidor de XMPP avisa al servidor
+  propio de este espacio de cada mensaje mientras ninguna app de la cuenta está activa, así que el servidor de XMPP conoce el
+  nombre de ese servidor, y ese servidor cuándo llegan mensajes. Apagado hasta que lo enciendas; necesita un servidor actualizado
   para ello, al que lleguen los servidores de XMPP (su dueño abre un puerto para ellos), y un servidor XMPP que envíe
   avisos a las apps inactivas, como casi todos.
 - **Una cuenta nueva:** en la pantalla de inicio de sesión, **Crear una cuenta nueva** crea una en un servidor de XMPP
@@ -2498,12 +2621,12 @@ de XMPP van aparte y marcados, para las personas a las que solo llegarías por X
 
 ## Chats con otras apps de Nostr {#nostr-chats}
 
-En **Ajustes** → **Relay y redes** → **Chats de Nostr**, un espacio puede tener una clave de Nostr propia, para chatear
+En **Ajustes** → **Servidor y redes** → **Chats de Nostr**, un espacio puede tener una clave de Nostr propia, para chatear
 de tú a tú o en grupos con personas que usan Damus, Amethyst, Primal, 0xchat u otra app de Nostr que envía mensajes
 privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los chats propios de Erevos.
 
 - **La clave:** **Crear una clave de Nostr** crea una para este espacio; **O traer una clave de otra app de Nostr**
-  toma el nsec de una que ya tienes, y lee lo que sus relays aún guardan. La clave y sus chats se guardan cifrados en
+  toma el nsec de una que ya tienes, y lee lo que sus servidores aún guardan. La clave y sus chats se guardan cifrados en
   este espacio, y están en las copias de seguridad: tras restaurar, vuelven como estaban. Sus chats ocultos pueden tener
   una clave de Nostr propia, ver [Chats ocultos](#hidden). **Mostrar la clave secreta (nsec)** la muestra, para anotarla
   o llevarla a otra app: quien la tenga lee estos chats y escribe como tú.
@@ -2512,9 +2635,9 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   foto o unas palabras que otra app de tu clave puso en tu perfil se quedan.
 - **Chats:** **Chat nuevo** toma su npub (o nprofile), de su perfil en su app, o un nombre como nombre@example.org
   (NIP-05). **Mostrar a las personas que sigues**, debajo, lista las personas que sigue tu clave de Nostr (su lista
-  pública de seguidos, buscada también en relays que reúnen esas listas y en los relays donde escribe tu clave), con
+  pública de seguidos, buscada también en servidores que reúnen esas listas y en los servidores donde escribe tu clave), con
   sus nombres: toca una para escribirle. Cuando no encuentra a nadie, dice por qué, de quién buscó la lista y cómo
-  respondió cada relay. No se carga nada hasta que lo tocas, ni fotos de perfil. Los chats también están en la lista de
+  respondió cada servidor. No se carga nada hasta que lo tocas, ni fotos de perfil. Los chats también están en la lista de
   inicio, cada uno marcado **Nostr**; el botón **Nostr** muestra solo ellos, y allí **Chat nuevo** abre
   esta pantalla. **Ponerle un nombre aquí** da a un chat un nombre que solo ves tú.
 - **Grupos:** **Grupo nuevo** crea uno con dos o más de las personas con quienes chateas, veinte como mucho, con un
@@ -2530,7 +2653,7 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   nostr.download si no los cambias. Una foto o un archivo que llega se trae solo cuando tocas **Mostrar foto** o
   **Guardar**, y se abre solo si es el que se envió. Toca una foto que se muestra para verla en toda la pantalla, como
   en el chat de un contacto: dos dedos o un doble toque la amplían, gira con el teléfono, y **Guardar** la conserva
-  (ver Fotos y archivos, en [Chatear a través de un relay](#relay)).
+  (ver Fotos y archivos, en [Chatear a través de un servidor](#relay)).
 - **Reacciones:** mantén pulsado un mensaje para abrir su menú y reaccionar con 👍, ❤️, 😂, 😮, 😢 o 🙏, o con una de las que
   hay tras **+**; debajo se ven las reacciones, la última de cada persona, como las envían otras apps de Nostr (NIP-25).
   Toca una reacción bajo un mensaje para añadir la misma, o toca la tuya para retirarla; a las apps de los demás se les
@@ -2556,27 +2679,27 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   Nostr los muestran como fotos. Los grupos que trae Erevos también están: cada sticker va como su imagen, hecha en tu
   dispositivo.
 - **Cifrado:** cada mensaje se cifra para la otra persona y lo firmas tú, y luego lo envuelve otra vez una clave creada
-  solo para ese mensaje, con su hora atrasada hasta dos días (NIP-17, con NIP-44 y NIP-59). Los relays ven para quién
-  es, no quién lo escribió, cuándo ni qué dice. Una copia va a tus propios relays, para que tus otras apps de Nostr con
+  solo para ese mensaje, con su hora atrasada hasta dos días (NIP-17, con NIP-44 y NIP-59). Los servidores ven para quién
+  es, no quién lo escribió, cuándo ni qué dice. Una copia va a tus propios servidores, para que tus otras apps de Nostr con
   esta clave lean también. Es código propio de Erevos, sin auditar, comprobado con el ejemplo del propio NIP-17 y frente
   a nostr-tools.
-- **Dónde llegan tus mensajes:** los relays a los que otras apps envían tus mensajes: relay.damus.io, nos.lol y
+- **Dónde llegan tus mensajes:** los servidores a los que otras apps envían tus mensajes: relay.damus.io, nos.lol y
   relay.primal.net si no los cambias, tres como mucho. Erevos se los dice a otras apps (una lista kind 10050) cuando
-  cambian y una vez por semana. Envía a los relays que nombra la app de la otra persona; una app que no nombra ninguno
+  cambian y una vez por semana. Envía a los servidores que nombra la app de la otra persona; una app que no nombra ninguno
   aún no puede recibir un mensaje, y Erevos lo dice. Una clave traída de otra app lee donde esa app indicó que llegan
   tus mensajes (su propia lista kind 10050), salvo que los hayas cambiado aquí, y vuelve a decir esa lista, así que
-  ambas apps reciben los mismos mensajes; lee esos relays desde su principio, y trae una vez lo que los relays nombrados
+  ambas apps reciben los mismos mensajes; lee esos servidores desde su principio, y trae una vez lo que los servidores nombrados
   en listas anteriores de la clave aún guardan.
 - **Mensajes privados antiguos:** muchas apps aún envían y guardan mensajes privados a la manera antigua (NIP-04, kind
   4); Damus y Primal los mostraron durante años. Erevos también los lee, pasados y nuevos, y los muestra en los mismos
-  chats: en los relays donde llegan tus mensajes y en hasta cuatro más, los que lee la otra app de tu clave (su lista
+  chats: en los servidores donde llegan tus mensajes y en hasta cuatro más, los que lee la otra app de tu clave (su lista
   kind 10002, para una clave traída de otra app) y relay.damus.io, nos.lol y relay.primal.net. Estos mensajes también
-  van cifrados, pero los relays ven quién escribió a quién y cuándo. El propio Erevos solo envía a la manera de NIP-17.
+  van cifrados, pero los servidores ven quién escribió a quién y cuándo. El propio Erevos solo envía a la manera de NIP-17.
 - **Publicaciones públicas:** en un chat con una persona, **Publicaciones públicas** muestra lo que publica para todos
   (kind 1) y las publicaciones de otras personas que volvió a compartir, las más recientes primero, de treinta en
   treinta, con **Publicaciones anteriores** para ver más. Es solo de lectura: desde aquí no se puede responder,
-  reaccionar ni publicar nada. Se busca al abrirlo, en los relays que se usan para las búsquedas y en aquellos donde,
-  según su lista de relays (NIP-65), escribe, como indica la elección de Tor de este espacio, y nada de ello se guarda.
+  reaccionar ni publicar nada. Se busca al abrirlo, en los servidores que se usan para las búsquedas y en aquellos donde,
+  según su lista de servidores (NIP-65), escribe, como indica la elección de Tor de este espacio, y nada de ello se guarda.
   No se abren imágenes ni enlaces: se muestran como direcciones, que se pueden copiar. Una publicación con advertencia
   de contenido muestra sus palabras tras tocar **Mostrar**. Una cuenta que solo publica para todos, como la de un
   proyecto, no envía mensajes privados: su chat queda vacío y sus publicaciones están aquí.
@@ -2589,7 +2712,7 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   sala. Vienen más al llegar al final, o con **Publicaciones anteriores**; tira de la lista hacia abajo para las más
   recientes (en un navegador, **Volver a buscar**). Seguir a gente se sigue haciendo en otra app de Nostr con la misma
   clave. Tu lista de seguidos, dónde escriben (sus listas NIP-65) y sus publicaciones se buscan solo mientras el feed se
-  ve, en los relays de las búsquedas, en los que reúnen listas y en los que ellos escriben, como dice la opción de Tor
+  ve, en los servidores de las búsquedas, en los que reúnen listas y en los que ellos escriben, como dice la opción de Tor
   del espacio; los nombres solo para las publicaciones que se ven. No se guarda nada.
   **Fotos**, sobre el feed, es la elección que importa para la privacidad. Una foto o una tarjeta de enlace viene del
   servidor donde la puso quien escribió la publicación, y ese servidor ve la dirección desde la que se trajo, por Tor la
@@ -2615,21 +2738,15 @@ privados como pide NIP-17. No es [A través de Nostr](#nostr), que lleva los cha
   publicación se retira tocándola otra vez.
 - **Emoji personalizados:** en el feed público, los emoji que hacen otras apps se cargan como las fotos de las
   publicaciones, según dicen arriba **Fotos** y Tor. En los chats privados se ven como :nombre: y nunca se cargan.
-- **Marcas:** un ✓ en cuanto uno de sus relays aceptó el mensaje. NIP-17 no devuelve nada: ni cuándo lo tiene su app, ni
+- **Marcas:** un ✓ en cuanto uno de sus servidores aceptó el mensaje. NIP-17 no devuelve nada: ni cuándo lo tiene su app, ni
   cuándo lo leen. Leer un chat aquí no se lo dice a nadie.
 - **No anónimo:** tu clave es la misma para todos a quienes escribes, y cualquiera que tenga un npub puede escribirle.
-  Los relays donde llegan tus mensajes ven a tu clave leerlos y, sin Tor, desde dónde. Solo la conexión que lee tus
-  relays les dice quién lee, cuando un relay lo pide (NIP-42); enviar y buscar personas, nunca.
-- **Por Tor:** en Android, **Tor** en esta pantalla elige cómo esta cuenta de Nostr llega a sus relays y servidores de
-  archivos, como la cuenta de cada red: **Desactivado**, lo predeterminado para una clave nueva, directo; **Como el
-  espacio**, como dice la elección del espacio en **Ajustes** → **Relay y redes** → **Tor** (con **Mensajes** por Tor
-  en cuanto Tor está listo, con **Todo** solo por Tor); **Siempre por Tor**, solo por Tor, iniciado para ella, nunca
-  directo. Una clave de antes de esta elección también empieza en **Desactivado**. La pantalla dice por dónde van ahora. En la app
-  web y en un ordenador van directo.
-  **Por Tor**, al pie de un chat, envía solo ese chat únicamente por Tor, sea cual sea el modo del espacio, en circuitos
-  propios, para que ninguna salida de Tor lleve sus mensajes junto con los de otro chat: lo que envías en él, la
-  búsqueda de dónde leen, y sus fotos y archivos; sin Tor, no sale nada de él. Lo que te llega sigue el modo del
-  espacio, ya que una sola conexión lee tus mensajes para todos los chats. Se guarda solo en este teléfono.
+  Los servidores donde llegan tus mensajes ven a tu clave leerlos y, sin Tor, desde dónde. Solo la conexión que lee tus
+  servidores les dice quién lee, cuando un servidor lo pide (NIP-42); enviar y buscar personas, nunca.
+- **Por Tor:** en Android, los chats de Nostr siguen la elección de este espacio en **Ajustes** → **Servidor y redes** →
+  **Tor**: con **Mensajes**, van por Tor en cuanto Tor está listo, y directo mientras Tor arranca o cuando falla; con
+  **Todo**, solo por Tor; con **Nada**, directo. La pantalla dice por dónde van ahora. En la app web y en un ordenador,
+  van directo.
 - **Notificaciones:** un mensaje que llega muestra un aviso y cuenta en el número del icono de Erevos, como en los chats
   propios de Erevos, mientras este espacio está abierto; en un ordenador, mientras Erevos funciona. En Android,
   **Notificaciones**, al final de un chat, lo silencia o le da un sonido propio; un chat silenciado no cuenta.
@@ -2662,7 +2779,7 @@ quién.
   a **Chat conmigo** y te lo recuerda entonces. Necesita **Erevos** activado en [Módulos](#modules).
 - **Mensajes temporales:** **Mensajes temporales**, en **Opciones del chat**, elimina de este teléfono los mensajes
   nuevos, enviados o recibidos, ese tiempo después de enviarse. Los tuyos llevan ese tiempo (NIP-40), así que su app y
-  los relays que lo respetan los eliminan entonces; los que no, los guardan. **Mensaje temporal**, bajo **+**, lo hace
+  los servidores que lo respetan los eliminan entonces; los que no, los guardan. **Mensaje temporal**, bajo **+**, lo hace
   solo para el siguiente mensaje. Un mensaje que llega con su propio tiempo se va a esa hora.
 - **Bloquear:** **Bloquear**, al pie de un chat, descarta en este teléfono lo que envía esa clave, sin leer; no vuelve
   si la desbloqueas. No se le avisa: Nostr no puede impedir que nadie te escriba. **Contactos bloqueados**, en la
@@ -2673,7 +2790,7 @@ quién.
 
 ## Telegram {#telegram}
 
-Solo en Erevos+, en Android, un espacio puede iniciar sesión en tu cuenta de Telegram y chatear con personas en Telegram, en **Ajustes** → **Relay y redes** → **Telegram**. Erevos no está hecho por Telegram y usa la API de Telegram. Los chats se unen a la lista de la pantalla de inicio, marcados como **Telegram** y con un chip propio.
+Solo en Erevos+, en Android, un espacio puede iniciar sesión en tu cuenta de Telegram y chatear con personas en Telegram, en **Ajustes** → **Servidor y redes** → **Telegram**. Erevos no está hecho por Telegram y usa la API de Telegram. Los chats se unen a la lista de la pantalla de inicio, marcados como **Telegram** y con un chip propio.
 
 - **Iniciar sesión:** toca **Iniciar sesión en Telegram**, escribe tu número de teléfono con el prefijo del país y luego el código que envía Telegram: a su aplicación en tus otros dispositivos, por SMS o por llamada; **Enviar el código otra vez** lo pide de nuevo. Si tu cuenta tiene una contraseña de verificación en dos pasos, Erevos la pide y muestra tu pista. Si Telegram quiere que confirmes en otro dispositivo, Erevos muestra el enlace que abrir allí. Una cuenta nueva de Telegram o entrar con correo electrónico, Erevos aún no lo puede hacer: hazlo una vez en la aplicación oficial de Telegram. Lo que Telegram guarda en este teléfono se guarda cifrado en este espacio.
 - **Chats normales:** Telegram puede leerlos. Un chat normal de Telegram está cifrado solo entre tú y los servidores de Telegram, y los grupos y canales nunca están cifrados de extremo a extremo. Un chat privado lo dice arriba: **Telegram puede leer este chat**.
@@ -2703,7 +2820,7 @@ Solo en Erevos+, en Android, un espacio puede iniciar sesión en tu cuenta de Te
 
 ## Messenger {#messenger}
 
-Solo en Erevos+, en Android, Erevos puede iniciar sesión en tu cuenta de Facebook Messenger y chatear con personas en Messenger, en **Ajustes** → **Relay y redes** → **Messenger**, o desde su tarjeta en la pantalla de inicio. Erevos habla él mismo con los servidores de Meta, sin puente de por medio; no está hecho por Meta. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Messenger** y con una tarjeta propia. Activa o desactiva Messenger en **Ajustes** → **General** → **Módulos**.
+Solo en Erevos+, en Android, Erevos puede iniciar sesión en tu cuenta de Facebook Messenger y chatear con personas en Messenger, en **Ajustes** → **Servidor y redes** → **Messenger**, o desde su tarjeta en la pantalla de inicio. Erevos habla él mismo con los servidores de Meta, sin puente de por medio; no está hecho por Meta. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Messenger** y con una tarjeta propia. Activa o desactiva Messenger en **Ajustes** → **General** → **Módulos**.
 
 - **Iniciar sesión:** **Iniciar sesión en Messenger** abre la propia página de inicio de sesión de Facebook. Entra allí como en facebook.com, con el código o la comprobación que pida Facebook, y Erevos guarda el inicio de sesión, cifrado, en este teléfono. Si Messenger lo termina más tarde, la pantalla de Messenger dice **Messenger te pide que vuelvas a iniciar sesión.**
 - **Lo que Meta puede leer:** bajo el nombre de un chat, Erevos dice si está cifrado de extremo a extremo. Meta no puede leer un chat cifrado de extremo a extremo, pero sabe quién habla con quién y cuándo; cualquier otro chat, Meta puede leerlo.
@@ -2714,12 +2831,12 @@ Solo en Erevos+, en Android, Erevos puede iniciar sesión en tu cuenta de Facebo
 - **Opciones del chat:** el botón de los deslizadores junto a donde escribes, o **⋯** arriba, abre las **Notificaciones** del chat y **Por Tor** en una lista ordenada, a mano por largo que sea el chat.
 - **Adjuntos y más:** **+**, junto a donde escribes, abre como en un chat de Erevos una cuadrícula con iconos: **Foto**, **Cámara** y **Archivo**, y **Sticker** donde el chat tiene stickers. Los chats de Signal y Session también lo tienen.
 - **Notificaciones y lectura:** los mensajes nuevos te notifican y cuentan en el icono de Erevos, como los de otros chats. Abrir un chat lo marca como leído, y sigue leído hasta que alguien escriba de nuevo, incluso antes de que Messenger lo sepa. Cada chat tiene sus propias **Notificaciones** bajo su cuadro de mensaje: silenciado, o con un sonido propio.
-- **Por Tor:** **Tor para esta cuenta de Messenger**, en la pantalla de Messenger y también antes de iniciar sesión, está en **Desactivado** por defecto, y los servidores de Meta ven tu dirección de internet; **Como el espacio** sigue **Ajustes** → **Relay y redes** → **Tor**; **Siempre por Tor** envía la cuenta, su inicio de sesión y sus imágenes solo por Tor. **Por Tor** bajo un chat envía toda la cuenta por Tor, pues Messenger tiene una sola conexión para todos sus chats. Meta puede pedir confirmación, o bloquear un tiempo, una cuenta que inicia sesión por Tor. Consulta [Quién ve tu dirección de internet](#ip).
-- **Cerrar sesión:** **Cerrar sesión de Messenger en este teléfono** saca sus chats de Erevos; puedes iniciar sesión de nuevo. Las copias de seguridad guardan las notificaciones de cada chat y la elección de Tor, no el inicio de sesión: tras restaurar, inicia sesión otra vez.
+- **Por Tor:** **Tor para esta cuenta de Messenger**, en la pantalla de Messenger y también antes de iniciar sesión, está en **Desactivado** por defecto, y los servidores de Meta ven tu dirección de internet; **Como el espacio** sigue **Ajustes** → **Servidor y redes** → **Tor**; **Siempre por Tor** envía la cuenta, su inicio de sesión y sus imágenes solo por Tor. **Por Tor** bajo un chat envía toda la cuenta por Tor, pues Messenger tiene una sola conexión para todos sus chats. Meta puede pedir confirmación, o bloquear un tiempo, una cuenta que inicia sesión por Tor. Consulta [Quién ve tu dirección de internet](#ip).
+- **Cerrar sesión:** **Cerrar sesión de Messenger en este teléfono** saca sus chats de Erevos; puedes iniciar sesión de nuevo. Las copias de seguridad guardan las notificaciones de cada chat, la elección de Tor y el inicio de sesión, cifrados: tras restaurar, Messenger vuelve a tener la sesión iniciada. Úsalo en un solo teléfono: en el antiguo borra Erevos+, pero no cierres la sesión allí, o el nuevo también la pierde. Consulta [Copias de seguridad](#backup).
 
 ## Signal {#signal}
 
-Solo en Erevos+, en Android, Erevos puede tener tu cuenta de Signal y chatear con personas en Signal, en **Ajustes** → **Relay y redes** → **Signal**, o desde su tarjeta en la pantalla de inicio. Erevos habla el propio protocolo de Signal con los servidores de Signal, y todo chat está cifrado de extremo a extremo; no está hecho por Signal. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Signal** y con una tarjeta propia. Activa o desactiva Signal en **Ajustes** → **General** → **Módulos**.
+Solo en Erevos+, en Android, Erevos puede tener tu cuenta de Signal y chatear con personas en Signal, en **Ajustes** → **Servidor y redes** → **Signal**, o desde su tarjeta en la pantalla de inicio. Erevos habla el propio protocolo de Signal con los servidores de Signal, y todo chat está cifrado de extremo a extremo; no está hecho por Signal. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Signal** y con una tarjeta propia. Activa o desactiva Signal en **Ajustes** → **General** → **Módulos**.
 
 - **Dos formas de entrar:** **Cuenta nueva de Signal con mi número** hace de Erevos el Signal de ese número, y la aplicación Signal de otro teléfono con el mismo número deja entonces de funcionar. **Vincular con Signal de otro teléfono** deja tu Signal donde está y añade Erevos como uno de sus dispositivos vinculados.
 - **Una cuenta nueva:** escribe tu número con el prefijo del país, como +34 6…, y elige si el código llega por SMS o, con **El código llega por llamada**, por una llamada. Signal te pide primero resolver un captcha en su propia página. Luego escribe el código que Signal envió y el nombre que otros ven en Signal (el apellido es opcional).
@@ -2734,7 +2851,7 @@ Solo en Erevos+, en Android, Erevos puede tener tu cuenta de Signal y chatear co
 
 ## Session {#session}
 
-Solo en Erevos+, en Android, Erevos puede tener una cuenta de Session y chatear con personas en Session, en **Ajustes** → **Relay y redes** → **Session**, o desde su tarjeta en la pantalla de inicio. Session no pide número de teléfono ni correo: la cuenta son 13 palabras de recuperación, y sus mensajes van cifrados de extremo a extremo por el enrutamiento cebolla de los nodos de Session. Erevos no está hecho por Session. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Session** y con una tarjeta propia. Activa o desactiva Session en **Ajustes** → **General** → **Módulos**.
+Solo en Erevos+, en Android, Erevos puede tener una cuenta de Session y chatear con personas en Session, en **Ajustes** → **Servidor y redes** → **Session**, o desde su tarjeta en la pantalla de inicio. Session no pide número de teléfono ni correo: la cuenta son 13 palabras de recuperación, y sus mensajes van cifrados de extremo a extremo por el enrutamiento cebolla de los nodos de Session. Erevos no está hecho por Session. La cuenta pertenece al teléfono, no a un espacio: sus chats se unen a la lista de inicio del primer espacio, marcados con **Session** y con una tarjeta propia. Activa o desactiva Session en **Ajustes** → **General** → **Módulos**.
 
 - **Una cuenta nueva:** toca **Cuenta nueva de Session**, escribe tu nombre en Session y toca **Crear la cuenta**. Erevos muestra **Tus 13 palabras de recuperación**: anótalas, guárdalas bien y toca **Ya las anoté**. Son la única forma de recuperar la cuenta, y quien las tenga puede leer tus chats.
 - **Una cuenta que ya tienes:** **Recuperar una cuenta con sus 13 palabras** toma las palabras, con espacios entre ellas, y tu nombre; luego toca **Recuperarla**.
@@ -2802,7 +2919,7 @@ Erevos en una sola lista.
   mensaje respondido, Erevos lo dice al preguntar.
 - **Invitaciones ocultas:** con el primer SMS a un número que no es un contacto, Erevos también envía una invitación
   oculta corta. No va ninguna al número de un contacto de Erevos, vinculado o en la ficha de su contacto. Un teléfono
-  sin {=Erevos} no muestra nada; un teléfono con {=Erevos} responde por el relay y los dos se hacen contactos. Responde por
+  sin {=Erevos} no muestra nada; un teléfono con {=Erevos} responde por el servidor y los dos se hacen contactos. Responde por
   sí mismo solo a un número que conoce, en tus contactos o uno al que has escrito por SMS; para cualquier otro
   pregunta primero, **Una invitación por SMS**, porque el remitente de un SMS puede ser inventado. A cada número se le
   pregunta como mucho una vez al mes, y **Desactivar invitaciones**, en **Ajustes** → **Teléfono y SMS** → **SMS** →
@@ -2889,15 +3006,15 @@ que conozca números. La invitación es un SMS de datos, que las apps de mensaje
 
 ### SMS cifrados cuando nada más funciona
 
-Cuando fallan el relay, Nostr, los teléfonos cercanos y LoRa, un texto a un contacto de Erevos con número vinculado
-puede ir por SMS, cifrado de extremo a extremo como cualquier mensaje de Erevos. Está desactivado salvo que lo actives:
+Cuando fallan el servidor, Nostr, los teléfonos cercanos y LoRa, un texto a un contacto de {=Erevos} con número vinculado
+puede ir por SMS, cifrado de extremo a extremo como cualquier mensaje de {=Erevos}. Está desactivado salvo que lo actives:
 para todos esos contactos en **Ajustes** → **Teléfono y SMS** → **SMS** → **SMS cuando nada más funciona** (**Activar
 para todos los contactos**), o para uno en los **Detalles** de su chat → **SMS cuando nada más funciona**.
 
 - **Lo que cuesta:** cada SMS cuesta lo que diga tu tarifa. Un texto corto ocupa 3 SMS y uno más largo hasta 10; en el
   extranjero un SMS puede costar mucho más.
 - **Lo que ve la compañía telefónica:** qué número escribió a cuál, cuándo y cuántos SMS, como con cualquier SMS; nunca
-  lo que se escribió, que va como el mismo mensaje cifrado que habría llevado el relay.
+  lo que se escribió, que va como el mismo mensaje cifrado que habría llevado el servidor.
 - **Lo que va:** solo textos y borrados. No fotos, archivos, mensajes de voz, llamadas, reacciones ni las marcas de que
   un mensaje llegó o se leyó, ni textos de más de unas 800 letras latinas (400 griegas), ni el primer mensaje a un
   contacto nuevo, que lleva las claves. Esos esperan, marcados **En espera**, como en
@@ -2905,7 +3022,7 @@ para todos los contactos**), o para uno en los **Detalles** de su chat → **SMS
 - **Ambos teléfonos** necesitan {=Erevos} como app de SMS, y el número del contacto vinculado a su chat. Los SMS son SMS
   de datos ocultos para Erevos, que ninguna app de SMS muestra, y nada de ellos queda en los SMS del teléfono.
 - **Por dónde fue:** mantén pulsado el mensaje: su menú dice **Enviado por SMS** o **Llegó por SMS**. **✓✓** llega en
-  cuanto se puede llegar de nuevo al relay o a Nostr: ningún SMS vuelve por sí solo.
+  cuanto se puede llegar de nuevo al servidor o a Nostr: ningún SMS vuelve por sí solo.
 
 **Por qué:** los SMS llegan a un teléfono sin nada de internet, donde haya red móvil. Pero cuestan dinero y le dicen a
 la compañía telefónica quién habla con quién, lo que Erevos si no oculta; por eso el SMS es el último camino, y solo
@@ -3312,7 +3429,7 @@ opciones: **Sin bloqueo** y **Contraseña**.
   el tiempo ya esperado. En la app web y en un ordenador va igual mientras Erevos sigue abierto, y empieza de nuevo
   desde el principio cuando Erevos se abre otra vez.
 - **Lo que está sellado:** los contactos de cada espacio, las claves de sus conversaciones, sus mensajes, sus ajustes
-  del relay y su aspecto se guardan en el teléfono sellados con una clave que solo abre su contraseña.
+  del servidor y su aspecto se guardan en el teléfono sellados con una clave que solo abre su contraseña.
 - **La lista al instante:** la pantalla de inicio guarda una copia sellada de sus primeras filas, así que la lista
   aparece en cuanto se abre el espacio y luego se actualiza. Siempre tiene el mismo tamaño, así que no le dice a nadie
   cuántos chats hay ni qué espacios se usan, y nunca contiene lo que decía un mensaje temporal.
@@ -3356,9 +3473,12 @@ abrirse con ella. Está desactivado salvo que lo actives.
   eso puede pasar, déjalo desactivado: así necesitan una contraseña, y puedes darles la segunda.
 - **Cómo se guarda:** la clave del primer espacio está sellada por una clave del hardware seguro del teléfono (el
   Android Keystore) que solo funciona justo después de una comprobación fuerte de huella o cara, una vez por cada uso.
-  Añadir o quitar una huella o una cara hace que Android descarte esa clave: entonces queda desactivado, y lo vuelves
-  a activar. Una clave que deja de funcionar de otro modo también lo desactiva, tras tres intentos seguidos en los que
-  no se pudo usar. Nada sale del teléfono.
+  Esa clave se guarda en el área segura del teléfono, no en su chip de seguridad aparte, si lo tiene, para que Android
+  pida el dedo o la cara al instante: el chip empieza cada uso con un momento de retraso, y el dedo o la cara se
+  comprueba en el área segura de todos modos. Una clave que hizo un Erevos anterior puede seguir en el chip:
+  desactívalo y actívalo una vez para tener una nueva. Añadir o quitar una huella o una cara hace que Android descarte
+  esa clave: entonces queda desactivado, y lo vuelves a activar. Una clave que deja de funcionar de otro modo también
+  lo desactiva, tras tres intentos seguidos en los que no se pudo usar. Nada sale del teléfono.
 - **Qué cara:** una cara solo cuenta donde Android califica su desbloqueo facial como fuerte, como en el Pixel 8 y
   posteriores; en los demás, es la huella.
 - **Las contraseñas incorrectas** se cuentan como antes: una huella no cambia el contador.
@@ -3371,7 +3491,7 @@ una clave que no abre nada, con la misma forma, así que lo que se guarda no mue
 ## Segunda contraseña {#second}
 
 Si alguien te obliga a abrir Erevos, escribe la segunda contraseña en lugar de la tuya. Abre un Erevos aparte y vacío,
-con sus propios contactos, relay y aspecto. Tus chats reales siguen ocultos, y nada en la app muestra que existen.
+con sus propios contactos, servidor y aspecto. Tus chats reales siguen ocultos, y nada en la app muestra que existen.
 
 1. Con el bloqueo con contraseña activado, toca **Poner segunda contraseña**.
 2. Escríbela dos veces y toca **Guardar**. Debe ser distinta de tu propia contraseña.
@@ -3392,8 +3512,8 @@ con sus propios contactos, relay y aspecto. Tus chats reales siguen ocultos, y n
   prueba como en la búsqueda: una equivocada, o la del espacio abierto, no mueve nada. Un chat con alguien con quien el
   otro espacio ya tiene un chat propio se queda donde está. Quien lea el otro espacio con una herramienta forense podría
   ver que el chat vino de otro sitio: su contacto lo sigue conociendo por la clave de este espacio.
-  Si ese espacio aún no tiene relay, Erevos ofrece el de este espacio: **Mover con el relay de este espacio** mueve el
-  chat y le da a ese espacio este relay para quedárselo, y entonces el relay puede saber que ambos espacios están en
+  Si ese espacio aún no tiene servidor, Erevos ofrece el de este espacio: **Mover con el servidor de este espacio** mueve el
+  chat y le da a ese espacio este servidor para quedárselo, y entonces el servidor puede saber que ambos espacios están en
   un mismo teléfono.
 - **Discreción:** por privacidad, la app nunca muestra si hay una segunda contraseña puesta. En la app web con las
   notificaciones con la app cerrada activadas, el número en el icono de Erevos se queda mientras Erevos está cerrado:
@@ -3441,12 +3561,12 @@ lo que contienen los lugares que se quitaran.
    mis chats** y **Mover**. Va con sus mensajes, nombre, imagen, aspecto y chats importados, y a su teléfono se le dice
    dónde escribir.
 
-- **Relay, Nostr y teléfonos cercanos:** los chats ocultos tienen su propia cola en el relay y sus propias claves.
+- **Servidor, Nostr y teléfonos cercanos:** los chats ocultos tienen su propia cola en el servidor y sus propias claves.
   Mientras están abiertos, o reciben cerrados, también llegan al teléfono de un contacto cercano, como tus otros chats
   (ver [Chatear con un teléfono cercano](#nearby)), pero otros teléfonos nunca los llevan, y nunca van por LoRa{~ ni por
-  SMS}. Sin relay, su enlace de contacto dice dónde leen en Nostr, con una clave solo de ese lugar, y los
-  textos van ahí, como desde un teléfono sin relay; las fotos, los mensajes de voz, las llamadas y los grupos necesitan
-  un relay. Mientras están cerrados, sus mensajes esperan en el relay, o en Nostr dos días, salvo que **Recibir estando
+  SMS}. Sin servidor, su enlace de contacto dice dónde leen en Nostr, con una clave solo de ese lugar, y los
+  textos van ahí, como desde un teléfono sin servidor; las fotos, los mensajes de voz, las llamadas y los grupos necesitan
+  un servidor. Mientras están cerrados, sus mensajes esperan en el servidor, o en Nostr dos días, salvo que **Recibir estando
   cerrados** esté activado.
 - **Recibir estando cerrados:** un interruptor arriba de cada lugar. Activado, sus chats ocultos reciben como tus otros
   chats mientras el espacio está abierto, sea cual sea la pantalla que se vea y con Erevos en segundo plano: sus
@@ -3459,7 +3579,7 @@ lo que contienen los lugares que se quitaran.
   entre una clave aleatoria para cada uno de los otros lugares, así que abrir el espacio no muestra qué lugares reciben,
   ni cuáles están configurados. Pero quien abra el espacio y copie lo que guarda el teléfono también podría abrir ese
   lugar, sin PIN: el PIN los mantiene entonces fuera de la vista de quien tenga el teléfono, no de una herramienta
-  forense. Desactivado, su clave solo está tras el PIN, y sus mensajes esperan en el relay hasta que los abras. Las
+  forense. Desactivado, su clave solo está tras el PIN, y sus mensajes esperan en el servidor hasta que los abras. Las
   copias de seguridad conservan el interruptor.
 - **Punto para lo no leído:** con **Recibir estando cerrados** activado, un interruptor debajo (apagado salvo que lo
   actives). Activado, mientras uno de los chats o grupos del lugar tenga un mensaje sin leer{+, o uno de sus propios
@@ -3472,15 +3592,15 @@ lo que contienen los lugares que se quitaran.
 - **Mientras están abiertos,** un mensaje que llega reproduce el sonido de mensajes nuevos, como en tus otros chats.
   Con Erevos en segundo plano antes de que se cierren, un aviso dice «New message» solo si **Recibir estando cerrados**
   o **Avisar cuando llega un mensaje** está activado para ese lugar.
-- **Como tus otros chats:** lo que no puede salir ahora espera, marcado como **En espera**, solo por su relay, o por
-  Nostr sin relay (ver **En espera** en [Chatear a través de un relay](#relay)), **Enviar más tarde** funciona como
+- **Como tus otros chats:** lo que no puede salir ahora espera, marcado como **En espera**, solo por su servidor, o por
+  Nostr sin servidor (ver **En espera** en [Chatear a través de un servidor](#relay)), **Enviar más tarde** funciona como
   ahí, y un chat exportado de otra app se puede importar en los detalles de un chat oculto (ver
   [Chats importados](#import)). Ahí también se puede añadir un contacto a partir de una foto de su código QR, hecha o
   elegida mientras siguen abiertos. Cada lugar tiene su propio **Chat conmigo**, el primero de su lista (ver **Chat
   conmigo y recordatorios** en [Primeros pasos](#start)).
 - **Grupos:** **Grupo nuevo**, bajo su lista, crea un grupo con sus contactos, como en la pantalla de inicio (ver
   [Chats de grupo](#groups)), y aparece en su lista entre sus chats. Sus miembros son solo contactos de ese lugar, y uno
-  que añadas como contacto desde él pasa a ser un contacto de ese lugar. Lo que se escribe en él va solo por el relay
+  que añadas como contacto desde él pasa a ser un contacto de ese lugar. Lo que se escribe en él va solo por el servidor
   del lugar, a una cola propia ahí, nunca a un teléfono cercano; mientras el lugar está cerrado solo se lee con
   **Recibir estando cerrados** activado, y **Avisar cuando llega un mensaje** no lo cuenta. Sus llamadas solo suenan
   mientras los chats ocultos están abiertos: una iniciada mientras están cerrados aparece como perdida. Un grupo ahí no
@@ -3505,24 +3625,24 @@ lo que contienen los lugares que se quitaran.
   segundas contraseñas** en [Dispositivos vinculados](#devices)). Sin vincular, están solo en este teléfono.
 - **Las vistas previas de enlaces** tienen un interruptor propio en los detalles de un chat oculto, para todos los chats
   de ese lugar, desactivado salvo que lo actives (ver **Vistas previas de enlaces** en
-  [Chatear a través de un relay](#relay)).
+  [Chatear a través de un servidor](#relay)).
 - **Avisar cuando llega un mensaje** (Android): arriba de un lugar mientras **Recibir estando cerrados** está
   desactivado. Activado, mientras el lugar está cerrado un aviso solo dice «New message», o cuántos llegaron, como para
   los otros chats, con Erevos en segundo plano o a la vista, cada mensaje una vez, también cuando Erevos estaba cerrado
   y se volvió a iniciar; lo que llegó mientras el lugar estaba abierto no hace ninguno una vez que se cierra. Que un
   mensaje tuyo les llegó o se leyó, escribiendo y las claves nuevas no hacen ninguno, ni una llamada que sonó (ver
   **Sonar las llamadas cuando están cerrados**); una que no sonó cuenta como mensaje. Un mensaje o una eliminación que
-  otros teléfonos con {=Erevos} llevaron al relay (ver **Llevados por otros teléfonos** en
+  otros teléfonos con {=Erevos} llevaron al servidor (ver **Llevados por otros teléfonos** en
   [Chatear con un teléfono cercano](#nearby)) no puede decir lo que lleva, ya que los teléfonos que lo llevan no deben
   saberlo: cuenta como mensaje, así que una eliminación también muestra «New message», y el primer mensaje de un chat
   puede contar como dos; y uno enviado sin sonido suena como siempre (ver **Enviar sin sonido**). Necesita **Recibir y
   sonar** y **Avisar de mensajes nuevos** en **En segundo plano**, cosa que el interruptor dice cuando no están
-  activados, y un relay que espere (del 18 de octubre de 2026 en adelante); uno anterior al 23 de octubre de 2026 solo
+  activados, y un servidor que espere (del 18 de octubre de 2026 en adelante); uno anterior al 23 de octubre de 2026 solo
   puede decir que algo espera, así que entonces también aparece «New message» por eso, una vez hasta que abras ese
-  lugar. Para ello, el espacio guarda una cola en el relay para cada uno de sus 4 lugares, las que no están en uso
-  creadas para nada en el mismo relay, así que abrir el espacio no muestra ni si hay chats ocultos configurados ni
-  cuáles, siempre que usen el relay del espacio; al relay solo se le pregunta cuántos mensajes llegaron, ya que los
-  cuenta por el byte que lleva cada uno (ver lo que ve el relay, más arriba), nunca se le piden. Quien vea el aviso y no
+  lugar. Para ello, el espacio guarda una cola en el servidor para cada uno de sus 4 lugares, las que no están en uso
+  creadas para nada en el mismo servidor, así que abrir el espacio no muestra ni si hay chats ocultos configurados ni
+  cuáles, siempre que usen el servidor del espacio; al servidor solo se le pregunta cuántos mensajes llegaron, ya que los
+  cuenta por el byte que lleva cada uno (ver lo que ve el servidor, más arriba), nunca se le piden. Quien vea el aviso y no
   encuentre nada nuevo en tus chats puede suponer que hay más. Después de borrar o bloquear a alguien en el lugar, el
   primer mensaje de alguien nuevo, por el enlace de contacto o el código QR del lugar, no hace ninguno: se ve al abrir
   el lugar. Las copias de seguridad lo conservan.
@@ -3532,8 +3652,8 @@ lo que contienen los lugares que se quitaran.
   nombre, como una llamada de tus otros chats. En la pantalla de llamada entrante, toca **Responder** o el pequeño
   símbolo, escribe el PIN y toca **Conectar** para responder; **Rechazar** detiene el timbre. Quien toca **Responder**
   sin el PIN no pasa del campo del PIN. El timbre dura unos 45 segundos. Necesita **Recibir y sonar** en **En segundo
-  plano**, cosa que el interruptor dice cuando no está activado, y un relay que espere, y usa una cola en el relay
-  propia para cada uno de los 4 lugares, las que no suenan creadas para nada en el mismo relay, igual que el
+  plano**, cosa que el interruptor dice cuando no está activado, y un servidor que espere, y usa una cola en el servidor
+  propia para cada uno de los 4 lugares, las que no suenan creadas para nada en el mismo servidor, igual que el
   aviso de mensajes de arriba, así que abrir el espacio no delata nada. Quien llama solo hace sonar una cola ahí; la
   llamada en sí espera en la cola propia del chat hasta que el PIN la abre. Un contacto que has eliminado todavía puede
   hacerlo sonar, pero la llamada nunca puede conectarse. Una llamada hecha desde un ordenador vinculado solo suena
@@ -3602,7 +3722,7 @@ La Colección es un lugar cifrado para tus fotos, archivos y carpetas, en cada e
 - **Copias de seguridad:** una copia guarda la Colección con el resto del teléfono. **Ajustes** → **Datos y dispositivos** → **Colección**, o los tres puntos dentro de la Colección, pueden dejar esa Colección fuera de las copias que se hacen mientras está abierta: cada Colección tiene su propia elección.
 - **En un servidor WebDAV:** en los ajustes de la Colección, **También en un servidor WebDAV** copia los archivos de esa Colección tal como están, cifrados, a una carpeta en un servidor que eliges, Nextcloud, ownCloud o cualquiera que hable WebDAV: da la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de aplicación, y toca **Conectar**; **Probar la conexión** los comprueba antes. Cada espacio y cada lugar oculto tiene su propia elección y su propio servidor; primero se propone el servidor de las copias de seguridad. Solo va lo que aún no está allí, una pieza cada vez, mientras el lugar está abierto, y sigue donde se quedó si cae la red; un archivo borrado aquí se borra también allí. Nada más de la carpeta se toca. El servidor solo ve piezas con nombres al azar, en una subcarpeta con un nombre al azar, y no puede abrirlas. Un teléfono al que le falta un archivo, como tras restaurar una copia en un teléfono nuevo, lo trae de allí al abrirlo, y solo guarda piezas que se abren con la clave del archivo. Erevos muestra cuánto ha llegado ya, con **Cancelar**: lo que llegó se queda, y la próxima vez solo llega el resto; la música, los vídeos, los PDF y **Abrir con otra aplicación** también lo traen primero. Mientras todo está copiado, las copias de seguridad hechas con el lugar abierto pueden dejar fuera sus piezas, también después de que Erevos vuelva a arrancar, hasta que se añada o se borre un archivo. Tiene su propio interruptor **Por Tor**, desactivado salvo que lo actives: activado, la copia va solo por Tor, diga lo que diga el ajuste de Tor del espacio, así que el servidor no ve tu dirección IP; es más lento y espera mientras Tor arranca. Donde no hay Tor, en la aplicación de escritorio y en la app web, un servidor con él activado no recibe nada. Bajo el servidor, una línea dice cuánto de los archivos propios de esta Colección, cifrados, está en él, y cuándo empezó y terminó la última copia; las fotos de los chats y las copias de seguridad no están entre ellos. Tras cada copia, Erevos vuelve a listar la carpeta, y una parte que no está entera allí vuelve a ir con la siguiente copia. **Comprobar** mira sin cambiar nada: cada parte está ahí, con su tamaño, y 4 de ellas, elegidas al azar, se descargan y se abren con su clave, así que se nota una que el servidor cambió o sustituyó. **Traer de vuelta los archivos que no están en este teléfono** trae al instante cada archivo que no está entero aquí, como tras restaurar una copia en un teléfono nuevo, con **Cancelar**: lo que llegó se queda, y Erevos dice cuántos volvieron y cuántos tampoco tiene enteros el servidor.
 - **Con Nextcloud, como el de LPHL:** en ese formulario, y en **Añadir un servidor** de las copias de seguridad, escribe la dirección de tu Nextcloud en **Tu Nextcloud** y toca **Iniciar sesión con Nextcloud**: inicia sesión en el navegador, como en Fasouli, con Authentik o como se inicie allí, y elige **Conceder acceso**. Erevos obtiene una contraseña de aplicación propia y rellena el formulario con su propia carpeta en tus archivos, **Erevos/Collection** o **Erevos/Backups**, creada si no existe, junto a la de Fasouli, que nunca lee; luego toca **Conectar**. Esa contraseña se retira en Nextcloud → Configuración → Seguridad. El inicio de sesión sigue el interruptor **Por Tor** del servidor para el que se hace: activado, Erevos pregunta a tu Nextcloud solo por Tor, pero la página del navegador en sí va como siempre.
-- **En tus dispositivos vinculados:** en los ajustes de la Colección, **También en mis dispositivos vinculados** envía esa Colección a los [dispositivos vinculados](#devices) de su espacio o lugar oculto, y el interruptor vale para todos. Un archivo añadido, renombrado, movido o borrado en uno lo está en todos. Las miniaturas llegan enseguida; el archivo en sí llega enseguida en la misma Wi-Fi, si no cuando lo abres, desde el servidor WebDAV si la Colección tiene uno, o por el relay hasta 100 MB. Cada trozo se guarda solo cuando abre con la clave del archivo, y una transferencia cortada sigue desde el trozo que faltaba. Un archivo se borra en otro lugar solo cuando se borra en uno de tus dispositivos, nunca porque falte allí. La Colección de un lugar oculto va solo a los dispositivos vinculados de ese lugar.
+- **En tus dispositivos vinculados:** en los ajustes de la Colección, **También en mis dispositivos vinculados** envía esa Colección a los [dispositivos vinculados](#devices) de su espacio o lugar oculto, y el interruptor vale para todos. Un archivo añadido, renombrado, movido o borrado en uno lo está en todos. Las miniaturas llegan enseguida; el archivo en sí llega enseguida en la misma Wi-Fi, si no cuando lo abres, desde el servidor WebDAV si la Colección tiene uno, o por el servidor hasta 100 MB. Cada trozo se guarda solo cuando abre con la clave del archivo, y una transferencia cortada sigue desde el trozo que faltaba. Un archivo se borra en otro lugar solo cuando se borra en uno de tus dispositivos, nunca porque falte allí. La Colección de un lugar oculto va solo a los dispositivos vinculados de ese lugar.
 - **Música, vídeos y PDF:** un PDF se lee página a página dentro de Erevos (Android 11 y posteriores), descifrado solo en la memoria. La música y los vídeos se reproducen directamente desde sus trozos cifrados, nunca desde una copia: un vídeo a pantalla completa, la música con las siguientes de la carpeta, sin parar con la pantalla apagada, con reproducir, pausa, siguiente y anterior en la notificación y en la pantalla de bloqueo del teléfono, y solo eso allí. La lista sigue después de que el espacio se bloquee, salvo que **Detener la reproducción cuando el espacio se bloquea** esté activado en los ajustes de la Colección; **Detener** y el botón de pánico la terminan. La notificación solo dice **Reproduciendo**, salvo que **Mostrar el título en la notificación** esté activado. **Abrir con otra aplicación** entrega el archivo a medida que se descifra, sin copia en el teléfono, hasta que salgas de la Colección; la otra aplicación puede quedarse con una propia.
 - **Originales de la galería:** con **Borrar el original de la galería tras importarlo** activado, una foto o un vídeo elegido de los archivos del teléfono se borra de la galería en cuanto está en la Colección, después de que Android te pida confirmarlo. Hace falta Android 11 o posterior. Una foto de la cámara nunca va a la galería. Si Android no dice qué foto de la galería es (como desde **Recientes** en el selector de archivos), el original se queda y Erevos lo dice: elígela en **Imágenes** o en el almacenamiento del teléfono.
 - **Fotos y vídeos:** en **+**, **Cámara** es la propia de Erevos: fotos y vídeos uno tras otro, con flash y cámara frontal, directo a la Colección, nunca a la galería, y ninguna otra aplicación los ve; una foto nunca se escribe en ningún sitio, ni por un momento, y no lleva nada más que su imagen. Donde el fabricante del teléfono los ofrece, como en un Pixel, **Noche** y **Retrato** están junto a **Foto**, y arriba **HDR activado**: son del propio teléfono, se hacen en él, y nada sale. Un toque enfoca y ajusta la luz ahí; con dos dedos haces zoom, y los botones sobre el obturador van al gran angular (**0.5×**), a **1×**, **2×** y **5×** donde el teléfono los tiene. **Más** tiene un temporizador de 3 o 10 segundos, una cuadrícula, un obturador silencioso donde la ley lo permite, **Más oscuro** y **Más claro** y, para vídeos, HD, Full HD o 4K, y **Vídeo HDR activado** donde el teléfono lo graba; en vídeo la luz puede quedarse encendida. **De la galería** trae muchas fotos y vídeos a la vez; con **Borrar el original de la galería tras importarlo** activado, Android pregunta una sola vez por todos. Las fotos HEIC y AVIF aparecen en **Fotos** (Android muestra HEIC desde 9 y AVIF desde 12); una que el dispositivo no puede mostrar ofrece **Abrir con otra aplicación**. Bajo una foto, **Editar** la gira un cuarto cada vez y la recorta con un marco que arrastras por las esquinas: se guarda como foto nueva, y la original se queda como estaba. **Información** dice si una foto o un vídeo dice dónde se tomó. Una foto JPEG, PNG, WebP o GIF guardada fuera o abierta con otra aplicación sale sin dónde ni cuándo se tomó ni el teléfono, salvo que **Las fotos salen con lugar y hora** esté activado en los ajustes de la Colección; un vídeo o una foto HEIC sale tal cual, y Erevos avisa antes si nombra un lugar. La cámara, la galería y **Editar** están en Android; en la app de escritorio y en un navegador también se ven las fotos AVIF.
@@ -3659,7 +3779,9 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
    todos los archivos que necesitan, y borra los archivos que ninguna de ellas necesita. Una que falló se vuelve a
    intentar cuando se abre un espacio, o una hora después. Debajo están **Hacer
    copia ahora**, **Cambiar carpeta** y **Cambiar contraseña**; **Desactivado** las detiene, y las ya hechas se quedan
-   en la carpeta.
+   en la carpeta. También pueden ir solo a un servidor, sin carpeta aquí: **WebDAV**, en el primer inicio, las configura
+   así, cada día, y su tarjeta dice entonces **Solo a** y el nombre del servidor, con **Elegir una carpeta** para una
+   copia más a mano. **Dejar de enviar**, para ese servidor, también las detiene.
 3. **También a un servidor:** una copia puede ir también a una carpeta en un servidor que elijas y que hable WebDAV,
    como tu propio Nextcloud. **Añadir un servidor** en **También a un servidor**, o **A un servidor (WebDAV)** en
    **Hacer una copia de seguridad**, pide la dirección de la carpeta, un nombre de usuario y, mejor, una contraseña de
@@ -3676,7 +3798,19 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
    copias que envías; **Dejar de enviar** lo olvida, y las que hay allí se quedan. Cada servidor tiene un interruptor
    **Por Tor**, en su tarjeta y en el formulario que lo añade, desactivado salvo que lo actives (mira **En un
    servidor** más abajo).
-4. **Restaurar:** toca **Restaurar una copia de seguridad**, elige el archivo y escribe su contraseña. Erevos pregunta
+4. **También a Google Drive:** en Android, las copias automáticas pueden ir también a tu Google Drive, a una carpeta
+   llamada {=Erevos} que Erevos crea allí, o solo allí. **Iniciar sesión con Google**, bajo **También a Google Drive**,
+   dice primero lo que Google sabe entonces, como el **Google Drive** del primer inicio: las copias salen cifradas y
+   Google no puede leerlas, pero sabe quién eres, ve cuándo llega una y cuánto pesa, y puede entregarlo si se lo piden;
+   en INVISIBLE dice además que el inicio de sesión ocurre en tu navegador, fuera de Erevos, no por Tor. La página de
+   Google te pide luego, en el navegador, que permitas a Erevos guardar archivos en tu Google Drive: Erevos solo accede
+   a los archivos que creó allí, a nada más de tu Google Drive. Cada copia automática va entonces también allí, enviada
+   y comprobada como en un servidor, y la carpeta guarda las 3 más recientes. Sin carpeta en el teléfono y sin servidor,
+   su tarjeta dice **Solo a Google Drive**. **Dejar de enviar** retira el acceso de Erevos en Google, y las copias que
+   hay allí se quedan. Las peticiones a Google van como dice la elección de Tor del espacio, igual que las copias a un
+   servidor. No está en el Erevos de F-Droid: instalado sobre un Erevos que enviaba copias allí, no envía ninguna, lo
+   dice en **También a Google Drive**, y su **Dejar de enviar** sigue retirando en Google el acceso de Erevos.
+5. **Restaurar:** toca **Restaurar una copia de seguridad**, elige el archivo y escribe su contraseña. Erevos pregunta
    una vez más, encuentra los archivos de la copia junto a ella, o te pide que los elijas a ellos o su carpeta (para
    una copia automática, elige todos los archivos de la carpeta, pues algunos de sus archivos pueden empezar como el
    nombre de una copia anterior), y luego
@@ -3684,7 +3818,8 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
    contraseñas de entonces. Si falta uno de sus archivos, está dañado o es de otra copia, Erevos dice cuál, y no se cambia nada a menos que elijas restaurar el resto sin él: entonces las fotos, los archivos y los mensajes de voz del teléfono quedan como están, y los que contiene no vuelven.
    **Restaurar desde un servidor** mira en la carpeta a la que van las copias automáticas, o en una que des con su
    usuario y contraseña, y muestra las copias que hay allí, las más recientes primero: elige una, escribe su contraseña
-   y se restaura igual, con sus archivos desde allí.
+   y se restaura igual, con sus archivos desde allí. **Restaurar desde Google Drive** hace lo mismo con las copias de su
+   carpeta {=Erevos}, tras iniciar sesión con Google cuando las copias automáticas no van allí.
 
 - **Guarda la contraseña de la copia:** nada abre una copia sin ella, y nadie puede recuperarla. Sin bloqueo con
   contraseña, la contraseña de la copia es lo único que la protege. Quien tenga el archivo puede probar contraseñas en
@@ -3694,7 +3829,7 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
   su carpeta sigue necesitando las contraseñas de los espacios para leer los chats.
 - **Qué ocupa espacio:** en Android, **Medir** en **Qué ocupa espacio** muestra cuánto espacio ocupa Erevos en el teléfono, por tipo: {~la Colección con |}las fotos y archivos de los chats, los mensajes de voz, el historial de chats, Tor y los restos de escrituras que no terminaron. Cada copia automática lo contiene todo, así se ve por qué una es grande. Solo se miran los nombres y tamaños de los archivos, en el teléfono, y no se envía nada.
 - **Restos:** las fotos y archivos que ya ningún chat{~, Colección ni| ni} importación nombra, como los de una importación que se cortó a medias, se quedan en el teléfono y en cada copia. En **Restos**, escribe uno a uno, o varios a la vez separados por comas o espacios, el PIN de cada uno de tus chats ocultos y la contraseña de cualquier otro espacio, y toca **Buscar restos**: Erevos lee qué archivos nombra cada uno y este espacio, y muestra cuánto no nombra ninguno. **Borrarlos** los borra, después de que lo confirmes una vez más. Un lugar que no abriste allí pierde sus fotos y archivos: abre todos primero. Un archivo escrito en el último día nunca se toma{~, ni lo que la cámara tomó con Erevos bloqueado mientras espera a su espacio}, y las copias ya hechas lo conservan todo.
-- **Comprobar las copias:** tras cada copia en una carpeta, automática o hecha a mano, en Android y en la app de escritorio, Erevos la vuelve a leer de la carpeta: se abre con su contraseña, cada parte que nombra está ahí, con su tamaño, y dos partes elegidas al azar se leen enteras. De un servidor solo mira entonces la lista: la copia y cada parte que nombra están ahí, cada una con el tamaño con que se envió, así que no se descarga nada. **Comprobar ahora** además descarga la copia más reciente del servidor y diez de sus partes. Una parte que falta o está dañada se ve en rojo: haz una copia ahora y vuelve a comprobar. **Comprobación completa de la carpeta** lee entera cada parte de ahí y la compara con el SHA-256 que la copia anotó para ella: unos minutos con muchos GB, y nada sale del teléfono.
+- **Comprobar las copias:** tras cada copia en una carpeta, automática o hecha a mano, en Android y en la app de escritorio, Erevos la vuelve a leer de la carpeta: se abre con su contraseña, cada parte que nombra está ahí, con su tamaño, y dos partes elegidas al azar se leen enteras. En la carpeta de una app en la nube, puede que esa app todavía esté enviando la copia a su servidor mientras Erevos la lee: entonces una comprobación que no la encuentra entera vuelve a mirar unas cuantas veces durante unos cuatro minutos. Tras una copia hecha a mano, **Comprobar de nuevo** bajo lo que halló su comprobación vuelve a mirar una vez más, mientras su espacio siga abierto. De un servidor solo mira entonces la lista: la copia y cada parte que nombra están ahí, cada una con el tamaño con que se envió, así que no se descarga nada. **Comprobar ahora** además descarga la copia más reciente del servidor y diez de sus partes. Una parte que falta o está dañada se ve en rojo: haz una copia ahora y vuelve a comprobar. **Comprobación completa de la carpeta** lee entera cada parte de ahí y la compara con el SHA-256 que la copia anotó para ella: unos minutos con muchos GB, y nada sale del teléfono.
 - **En un servidor:** la copia que va allí está sellada con su contraseña como las demás, y esa contraseña nunca sale
   del teléfono, así que el servidor no puede abrirla. Su nombre es aleatorio y el archivo parece bytes aleatorios, de
   uno de pocos tamaños, así que ninguno dice que es de Erevos ni cuánto guarda exactamente. Sus fotos, archivos y
@@ -3703,7 +3838,7 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
   venir de otra copia sin que se note; el servidor guarda cada una mientras la necesite alguna de las copias que
   guarda, y luego la borra. Sus nombres son tan largos como el de la copia, pero su tamaño las distingue de ella, así que el servidor puede contarlas, y saber así más o menos cuánto guarda la copia. Lo que dejó allí una copia cortada a medias se borra antes de que vaya la siguiente, así que un servidor que no tenía sitio vuelve a tenerlo. Aun así el servidor ve
   tu cuenta, cuándo llega una y más o menos cuánto ocupa. En Android, las copias van allí como dice la elección del
-  espacio en **Ajustes** → **Relay y redes** → **Tor**{+, como Matrix}: con **Todo** solo por Tor, así que el servidor no
+  espacio en **Ajustes** → **Servidor y redes** → **Tor**{+, como Matrix}: con **Todo** solo por Tor, así que el servidor no
   ve la dirección del teléfono; con **Mensajes** por Tor en cuanto Tor está listo, y directo mientras Tor arranca o
   cuando falla; con **Nada** directo, y el servidor ve la dirección del teléfono. Una copia espera primero hasta dos
   minutos a que arranque Tor, y **También a un servidor** dice por dónde va ahora. En la app de escritorio las envía
@@ -3715,8 +3850,8 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
   espacio, y no escribe nada allí; una contraseña escrita para ello se usa solo para esa restauración y no se guarda.
   Por Tor no llega ningún archivo de una copia de más de 64 MB, y directamente ninguno de más de 100 MB, lo máximo que
   Erevos acepta en una descarga: entonces descarga la copia y sus archivos del servidor y toca **Restaurar una copia de
-  seguridad**. Un Erevos anterior a esta versión no abre una copia así. Google Drive queda fuera a propósito: Google
-  ata el archivo a tu nombre, y Erevos necesitaría las apps de Google y una sesión de Google en el teléfono.
+  seguridad**. Un Erevos anterior a esta versión no abre una copia así. Google Drive no es uno de estos servidores:
+  tiene un sitio propio, **También a Google Drive** más arriba, ya que Google vincula las copias a tu cuenta.
   El interruptor **Por Tor** de cada servidor, desactivado salvo que lo actives, va antes que la elección del espacio
   para ese servidor: activado, sus copias van solo por Tor, diga lo que diga el ajuste de Tor del espacio, y esperan a
   que Tor arranque, así que el servidor no ve la dirección del teléfono. **Restaurar desde un servidor** y el
@@ -3757,13 +3892,13 @@ mantén junta toda la carpeta. Está en **Ajustes** → **Datos y dispositivos**
   de contactos solo donde este teléfono tiene un grupo con ese nombre en la misma cuenta. Las copias automáticas y su
   servidor vuelven con su contraseña, pero no con su carpeta, en la que Android solo deja escribir al teléfono en el
   que se eligió: en otro teléfono, **Copias de seguridad** dice que elijas una, y hasta entonces solo van al servidor.
-- **Un teléfono a la vez:** una copia restaurada en un segundo teléfono lee las mismas colas del relay que el primero,
+- **Un teléfono a la vez:** una copia restaurada en un segundo teléfono lee las mismas colas del servidor que el primero,
   y cada uno recoge mensajes que entonces el otro nunca recibe. Úsala para pasar a un teléfono nuevo, no para tener dos.
 - **El teléfono anterior se perdió:** un teléfono que se perdió o te robaron y sigue encendido sigue leyendo las colas
-  del relay que conocía, así que los mensajes enviados allí pueden llegarle a él y nunca al teléfono nuevo. Tras
+  del servidor que conocía, así que los mensajes enviados allí pueden llegarle a él y nunca al teléfono nuevo. Tras
   restaurar la copia en el teléfono nuevo, toca **El teléfono anterior se perdió** en **Copias de seguridad** (tras
   restaurar una copia de otro teléfono, Erevos lo señala) y di **Cambiar las colas**. Cada espacio y sus chats ocultos
-  pasan entonces a colas nuevas del relay, cada uno la próxima vez que se abre aquí, y tus contactos y grupos reciben
+  pasan entonces a colas nuevas del servidor, cada uno la próxima vez que se abre aquí, y tus contactos y grupos reciben
   el aviso sin ruido. Las colas antiguas se leen aquí hasta que cada contacto escribe en las nuevas, 14 días como
   máximo, y los enlaces de contacto y los códigos QR que diste antes sirven 14 días, y luego ya no. Lo que llega por
   Nostr{+, XMPP o Matrix} sigue llegando al teléfono anterior. Tras otra restauración, tócalo de nuevo.
@@ -3855,12 +3990,12 @@ es, y su {=Erevos} guarda la pieza aparte del chat, en **Piezas que guardas para
   contigo. Un amigo con un {=Erevos} anterior a esta versión ve el mensaje pero no guarda ninguna pieza.
 
 **Por qué:** una copia de seguridad es tan segura como su contraseña, y una contraseña fuerte se pierde con facilidad.
-Repartida así (el reparto de secretos de Shamir), ningún amigo por sí solo, ni ningún relay, tiene nada que la abra.
+Repartida así (el reparto de secretos de Shamir), ningún amigo por sí solo, ni ningún servidor, tiene nada que la abra.
 
 ## Pasar a un teléfono nuevo {#new-phone}
 
 Todo lo que guarda Erevos pasa a un teléfono nuevo en una sola copia de seguridad: cada espacio con sus chats ocultos,
-contactos, mensajes, fotos{~, archivos y Colección| y archivos}, sus cuentas y relays, el bloqueo, la contraseña de pánico y tus
+contactos, mensajes, fotos{~, archivos y Colección| y archivos}, sus cuentas y servidores, el bloqueo, la contraseña de pánico y tus
 ajustes. Ningún servidor guarda una copia por ti, así que nada pasa solo: lo lleva la copia, sellada con su contraseña.
 
 1. **En el teléfono nuevo, instala {=Erevos}:** la misma versión que en el viejo, o una más nueva, porque un {=Erevos} más
@@ -3872,7 +4007,7 @@ ajustes. Ningún servidor guarda una copia por ti, así que nada pasa solo: lo l
    inicia sesión de nuevo en el teléfono nuevo.}
 3. **En el teléfono viejo, haz la copia:** en **Ajustes** → **Datos y dispositivos** → **Copias de seguridad**, toca
    **Hacer una copia de seguridad**, o **Hacer copia ahora** si usas copias automáticas. Hazla la última, justo antes
-   de mudarte, y desde entonces no abras Erevos en el teléfono viejo: lo que llegue después espera en los relays al
+   de mudarte, y desde entonces no abras Erevos en el teléfono viejo: lo que llegue después espera en los servidores al
    nuevo.
 4. **Pásala:** copia la copia y todos los archivos cuyo nombre empieza como el suyo, todos en una carpeta, al teléfono
    nuevo, con un cable, una tarjeta de memoria o una app en la nube. Una copia en tu servidor no hay que copiarla.
@@ -3887,11 +4022,11 @@ ajustes. Ningún servidor guarda una copia por ti, así que nada pasa solo: lo l
    su clave de seguridad}.
 7. **En el teléfono viejo, borra Erevos:** cuando el teléfono nuevo muestre tus chats y los mensajes nuevos lleguen
    allí, toca **Borrarlo todo ahora** en **Ajustes** → **Privacidad y seguridad** → **Botón de pánico**. No **Borrarme
-   de todas partes**: eso borra las colas de los relays que lee el teléfono nuevo.
+   de todas partes**: eso borra las colas de los servidores que lee el teléfono nuevo.
 
-- **Un teléfono a la vez:** los dos teléfonos leen las mismas colas de los relays, y un mensaje va a quien lo recoge
+- **Un teléfono a la vez:** los dos teléfonos leen las mismas colas de los servidores, y un mensaje va a quien lo recoge
   primero, así que el otro nunca lo recibe. Deja el viejo cerrado desde la copia y bórralo al final.
-- **Tus contactos:** cada espacio conserva su relay, su token y su relay de casa, así que no hay nada que escribir de
+- **Tus contactos:** cada espacio conserva su servidor, su token y su servidor de casa, así que no hay nada que escribir de
   nuevo ni invitación que pedir. Tus contactos te escriben como antes.
 - **Chats ocultos:** cada lugar oculto viene con la copia, cada uno con su PIN, y nada en el teléfono nuevo dice que
   haya alguno, mira [Chats ocultos](#hidden).
@@ -3912,7 +4047,7 @@ ajustes. Ningún servidor guarda una copia por ti, así que nada pasa solo: lo l
   elijas restaurar el resto sin él.
 - **Si el teléfono viejo se pierde:** restaura tu copia más reciente en el teléfono nuevo cuanto antes, también desde
   tu servidor, y luego toca **El teléfono anterior se perdió** en **Copias de seguridad**, para que no lea nada más
-  tuyo en los relays. Si perdiste la contraseña de la copia, los amigos que guardan sus piezas pueden devolvértela, mira
+  tuyo en los servidores. Si perdiste la contraseña de la copia, los amigos que guardan sus piezas pueden devolvértela, mira
   [Piezas de copias con amigos](#backup-pieces).
 
 **Por qué:** Erevos no guarda nada tuyo en un servidor que pudiera devolverlo, así que ninguna cuenta lleva tus chats a
@@ -3928,11 +4063,11 @@ mantener pulsado el candado de arriba de la pantalla de inicio lo abre al instan
 bloqueando; solo mantenerlo pulsado abre el botón de pánico, y allí **Borrarlo todo ahora** vuelve a preguntar una vez.
 
 - **Qué se borra:** cada espacio con sus chats ocultos, con sus contactos, mensajes, fotos, archivos y claves; el
-  bloqueo y sus contraseñas; {+las cuentas de Matrix, XMPP y Nostr y }los tokens del relay; los ajustes y la contraseña de
+  bloqueo y sus contraseñas; {+las cuentas de Matrix, XMPP y Nostr y }los tokens del servidor; los ajustes y la contraseña de
   las copias automáticas, y de su servidor. En Android, Erevos se cierra después y la próxima vez se abre como recién
   instalado. Con **También las copias automáticas de** elegido, primero se borran los archivos de copia de allí.
 - **Qué se queda:** lo que Erevos no alcanza: copias que copiaste a otro sitio o enviaste a un servidor (su contraseña
-  las sigue protegiendo), lo que el relay guarda para ti hasta que caduca, y lo que tienen tus contactos.
+  las sigue protegiendo), lo que el servidor guarda para ti hasta que caduca, y lo que tienen tus contactos.
 
 1. **Desde una app de pánico:** en Android, una app de pánico como Ripple borra las apps que elijas con un solo gesto.
    Instala una y elige Erevos en ella: Erevos abre esta pantalla, tras su contraseña, y pregunta. Toca **Decir que
@@ -3993,26 +4128,26 @@ Cuando quieras que desaparezca lo que los servidores guardan de ti, en **Ajustes
 todas partes**: toca **Borrarme de todas partes** y di que sí dos veces. Tu teléfono conserva todo lo que tiene; esto no es el
 [Botón de pánico](#panic), que borra el teléfono.
 
-- **Qué desaparece:** cada cola que este espacio tiene en los relés, con los mensajes que esperan en ella: la tuya, la que nombra
-  tu enlace de contacto, las de tus grupos, las de tus contactos, la de tu relé de casa, {+las de los avisos de Matrix y XMPP, }las
-  puertas de tus grupos públicos y las de tus dispositivos vinculados. También los mensajes que un relé guarda para enviarlos más
+- **Qué desaparece:** cada cola que este espacio tiene en los servidores, con los mensajes que esperan en ella: la tuya, la que nombra
+  tu enlace de contacto, las de tus grupos, las de tus contactos, la de tu servidor de casa, {+las de los avisos de Matrix y XMPP, }las
+  puertas de tus grupos públicos y las de tus dispositivos vinculados. También los mensajes que un servidor guarda para enviarlos más
   tarde, los archivos que llegaron y esperan en él, y las invitaciones que hiciste y nadie usó. Los chats ocultos que reciben aun
   cerrados se van con el espacio; los demás, cuando los abras con el espacio detenido. Las listas de la pantalla dejan fuera los
-  chats ocultos, para no mostrar nunca que los hay. Erevos también pide a cada relé de Nostr que olvide las claves en
+  chats ocultos, para no mostrar nunca que los hay. Erevos también pide a cada servidor de Nostr que olvide las claves en
   las que leen tus chats (una petición de desaparecer, NIP-62): por Tor si Tor está activado, directo si está desactivado.
   Con Tor activado pero aún no listo, no se pregunta a Nostr; espera a que lo esté y borra otra vez.
 - [+] **Matrix, XMPP, Nostr:** con **También cerrar sesión en Matrix y XMPP y borrar la cuenta de Nostr creada aquí**, esas cuentas
   se cierran aquí. Las cuentas siguen en sus servidores, que son suyos, no de Erevos. Una cuenta de Nostr que trajiste de otra
   aplicación se deja como está.
 - **El espacio se detiene:** no recibe ni envía nada, para que no se vuelva a crear enseguida ninguna cola (Erevos rehace por sí
-  solo una cola perdida). **Iniciar de nuevo** lo termina: se crean colas nuevas, como cuando un relé las perdió, y tus contactos
+  solo una cola perdida). **Iniciar de nuevo** lo termina: se crean colas nuevas, como cuando un servidor las perdió, y tus contactos
   reciben aviso en silencio. Dales también un enlace de contacto nuevo, porque los viejos nombran colas que ya no existen.
-- **Lo que no alcanza:** los teléfonos de tus contactos, los relés de Nostr que no hacen lo pedido{- y}{+,} los archivos que enviaste por
+- **Lo que no alcanza:** los teléfonos de tus contactos, los servidores de Nostr que no hacen lo pedido{- y}{+,} los archivos que enviaste por
   un servidor de archivos{+ y los servidores de Matrix y XMPP}. La pantalla enumera lo borrado, lo que ya no estaba y lo que no se
   pudo alcanzar; **Borrar otra vez** intenta el resto.
 
-**Por qué:** un relé, aunque confíes en él, es un lugar que guarda algo de ti. Este es el único toque que lo recupera todo sin
-borrar el teléfono, para cuando dejas un relé o cierras un capítulo de tu vida.
+**Por qué:** un servidor, aunque confíes en él, es un lugar que guarda algo de ti. Este es el único toque que lo recupera todo sin
+borrar el teléfono, para cuando dejas un servidor o cierras un capítulo de tu vida.
 
 ## Chats importados {#import}
 
@@ -4044,7 +4179,7 @@ Luego:
 
 Para seguir la conversación en Erevos, la otra persona también necesita Erevos:
 
-1. Con **Chat nuevo**, añádela como contacto a través del relay, como en [Chatear a través de un relay](#relay).
+1. Con **Chat nuevo**, añádela como contacto a través del servidor, como en [Chatear a través de un servidor](#relay).
 2. Abre el chat importado, toca **Continuar en Erevos** y elígela.
 3. Su chat muestra ahora los mensajes antiguos antes de los nuevos, como si siempre hubieran estado en Erevos: en
    burbujas, por día, con sus horas, y **Continúa en Erevos** entre ellos y los nuevos. **Abrir el chat** te lleva ahí,
@@ -4092,7 +4227,7 @@ compartas.
 dispositivos** → **Chats importados**, un chat que continúa con alguien tiene el mismo botón, que abre su chat. Erevos
 dice cuántos mensajes y cuántos MB van, y pregunta primero. Luego todos los chats importados con esa persona van juntos,
 sea cual sea su tamaño, cada mensaje con cada foto, vídeo, mensaje de voz y archivo guardado, solo a ella, cifrados de
-extremo a extremo por tu relay, y el chat dice que lo compartiste.
+extremo a extremo por tu servidor, y el chat dice que lo compartiste.
 
 - **Por su lado** no hay nada que hacer: su {=Erevos} guarda los mensajes enseguida, dice en el chat quién los compartió,
   de dónde y cuántos, y los muestra antes de los nuevos, solo para leer, como un chat importado. Las fotos y los
@@ -4106,15 +4241,15 @@ extremo a extremo por tu relay, y el chat dice que lo compartiste.
   puede reenviar. En los chats ocultos funciona igual, y por su lado se queda en el lugar donde está vuestro chat,
   también en los ocultos.
 - **Por rondas:** las fotos y los archivos van después de los mensajes, unas decenas de MB cada vez: cada ronda espera
-  en tu relay hasta que su teléfono la recoge y la borra allí, y entonces va la siguiente. Así va un chat de cualquier
-  tamaño, cada archivo de hasta 4 GB, y necesita poco del espacio del relay, que comparten otros archivos; cuando el
-  relay está lleno, Erevos espera y vuelve a preguntar, un poco más tarde cada vez. Sigue siempre que los dos teléfonos
+  en tu servidor hasta que su teléfono la recoge y la borra allí, y entonces va la siguiente. Así va un chat de cualquier
+  tamaño, cada archivo de hasta 4 GB, y necesita poco del espacio del servidor, que comparten otros archivos; cuando el
+  servidor está lleno, Erevos espera y vuelve a preguntar, un poco más tarde cada vez. Sigue siempre que los dos teléfonos
   tengan Erevos en marcha, también después de que uno estuviera apagado o sin conexión un tiempo; una ronda que no se
-  recoge en 12 días se vuelve a poner en el relay antes de que caduque. Un archivo borrado de este teléfono desde
+  recoge en 12 días se vuelve a poner en el servidor antes de que caduque. Un archivo borrado de este teléfono desde
   entonces se nombra como uno que se quedó atrás.
 - **Hasta dónde va** se ve bajo tu línea en el chat, **Compartiendo, 40 %**. Tócala para **Dejar de compartir**: lo que
-  espera en el relay se quita, y su {=Erevos} borra lo que llegó. Si esa persona borra los chats, se detiene igual.
-- **Desde un relay del que su {=Erevos} no toma por sí solo**, los chats esperan en su lado un toque en su línea; luego
+  espera en el servidor se quita, y su {=Erevos} borra lo que llegó. Si esa persona borra los chats, se detiene igual.
+- **Desde un servidor del que su {=Erevos} no toma por sí solo**, los chats esperan en su lado un toque en su línea; luego
   dice hasta dónde han llegado, **Recibiendo, 40%**, y tu línea dice **Compartiendo · su teléfono lo está recibiendo**. Si
   no se pudieron tomar, lo dicen los dos teléfonos y el suyo vibra dos veces: lo tocan para volver a intentarlo.
   Tomarlos de allí sin Tor muestra a ese servidor su dirección de internet, y {=Erevos} lo dice antes.
@@ -4200,7 +4335,7 @@ para que el texto siempre se lea bien, también sobre cristal.
 
 ## En un ordenador {#desktop}
 
-Erevos también funciona en un ordenador, Linux, macOS o Windows, como app propia. Chatea a través de un relay, cifrado
+Erevos también funciona en un ordenador, Linux, macOS o Windows, como app propia. Chatea a través de un servidor, cifrado
 de extremo a extremo como en el teléfono, y guarda sus contactos, mensajes y ajustes sellados de la misma manera.
 
 1. Instálalo. En Linux: el paquete para sistemas basados en Arch (\`erevos-linux-x86_64.pacman\`, con
@@ -4210,7 +4345,7 @@ de extremo a extremo como en el teléfono, y guarda sus contactos, mensajes y aj
    administrador, y lo pone en el menú Inicio; o deja \`erevos-windows-x64-portable.exe\` donde quieras y ejecútalo, sin
    instalar nada. Ninguno de los dos tiene firma de pago, así que la primera vez Windows dice que protegió tu PC: toca
    **Más información**, y luego **Ejecutar de todas formas**.
-2. Configura el relay y añade contactos como en el teléfono, ver [Chatear a través de un relay](#relay). **Copiar mi
+2. Configura el servidor y añade contactos como en el teléfono, ver [Chatear a través de un servidor](#relay). **Copiar mi
    enlace de contacto** copia tu enlace, para pegarlo donde deba ir.
 
 - **Lo que solo hace el teléfono:** Bluetooth, Wi-Fi Aware y LoRa, y sus pruebas. A los contactos en la misma Wi-Fi
@@ -4229,7 +4364,7 @@ guarda nada ahí salvo que lo elijas con \`--plain-secrets\`: ninguna ranura de 
 sorpresa.
 
 - **El cortafuegos de Windows** pregunta, la primera vez que se abre Erevos, si puede usar la red. Permítelo en las
-  redes privadas, o los teléfonos y ordenadores en la misma Wi-Fi no podrán llegar a él; los relays funcionan en
+  redes privadas, o los teléfonos y ordenadores en la misma Wi-Fi no podrán llegar a él; los servidores funcionan en
   cualquier caso.
 - **Los mensajes de voz** grabados en un ordenador son Opus, en un teléfono AAC. Los dos se reproducen en los dos.
 - **Las fotos** vienen de los archivos del ordenador; no hay cámara. **Guardar** pregunta dónde poner una foto o un
@@ -4239,11 +4374,11 @@ sorpresa.
   otro, ver [Copias de seguridad](#backup), y a partir de entonces usa solo uno.
 - **En segundo plano:** al cerrar su ventana, Erevos sigue funcionando en la bandeja del sistema (en un Mac, en el
   Dock), salvo que lo desactives: **Ajustes** → **Notificaciones** → **En segundo plano** → **Salir al cerrar**. Sigue
-  esperando en el relay: una llamada suena, con un timbre propio, y trae de vuelta la ventana, y una notificación dice
+  esperando en el servidor: una llamada suena, con un timbre propio, y trae de vuelta la ventana, y una notificación dice
   cuántos mensajes no se han leído, nunca de quién ni qué, hasta que Erevos vuelve a verse. Lo abres desde su icono en
   la bandeja, o iniciando Erevos de nuevo, y sales desde el menú de ese icono (en un Mac, desde su menú). Donde el
   escritorio no muestra bandeja, como GNOME sin una extensión para ello, iniciar Erevos de nuevo trae de vuelta la
-  ventana. Cerrado del todo, no recibe nada: los mensajes esperan en el relay, y una llamada aparece como llamada
+  ventana. Cerrado del todo, no recibe nada: los mensajes esperan en el servidor, y una llamada aparece como llamada
   perdida en cuanto se abre.
 - **Las llamadas** suenan mientras Erevos se ve, con un timbre propio: dos toques cortos cada 3 segundos, hasta que se
   contesta la llamada o termina.
@@ -4277,9 +4412,9 @@ Para vincular un ordenador:
    archivos**, y toca **Vincular**. Eso es todo: el teléfono da al ordenador lo que necesita a través de Nostr, cifrado
    de extremo a extremo, el ordenador muestra al teléfono su propio código y los códigos de seguridad se comparan solos,
    así que tú no escribes ni comparas nada.
-3. Si no se llega a Nostr, o el ordenador no puede usar el relay, lo dice. Toca ahí **Vincular de otra forma**: si pide
-   un relay, el de LPHL ya viene rellenado, así que toca **Iniciar sesión con LPHL** para un token propio del
-   ordenador, o escribe otro relay y su token. Ponle nombre al dispositivo y toca **Vincular a mi teléfono**: entonces
+3. Si no se llega a Nostr, o el ordenador no puede usar el servidor, lo dice. Toca ahí **Vincular de otra forma**: si pide
+   un servidor, el de LPHL ya viene rellenado, así que toca **Iniciar sesión con LPHL** para un token propio del
+   ordenador, o escribe otro servidor y su token. Ponle nombre al dispositivo y toca **Vincular a mi teléfono**: entonces
    muestra un código QR más grande. Escanéalo con el teléfono, o copia el código, pégalo en el teléfono en **Código del
    ordenador** y toca **Siguiente**. El teléfono muestra el nombre del ordenador y un código de cuatro grupos de cinco
    dígitos; elige como arriba y toca **Vincular**.
@@ -4302,33 +4437,33 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
   ordenador, se queda ahí.
 - **Con el teléfono apagado**, los contactos con esta versión siguen llegando al ordenador, y el ordenador a ellos: lo
   que escriben, leen y a lo que reaccionan llega, y lo que escribes sale. Si el teléfono sigue apagado tanto tiempo que
-  su cola en el relay se llena (1000 mensajes), lo que escriben y leen sigue llegando al ordenador, un mensaje de voz
+  su cola en el servidor se llena (1000 mensajes), lo que escriben y leen sigue llegando al ordenador, un mensaje de voz
   largo entero; aquello a lo que reaccionan, fijan, votan o eliminan, y sus llamadas, no pasa hasta que el teléfono se
   vuelve a encender. Para los contactos con versiones más antiguas (también añadirlos) y los grupos, **el teléfono tiene que estar encendido** y llegar al
-  relay: lo que el ordenador escribe mientras tanto espera en el relay, y sale en cuanto vuelve el teléfono. A alguien nuevo cuyo enlace de contacto es de esta versión el ordenador lo añade
+  servidor: lo que el ordenador escribe mientras tanto espera en el servidor, y sale en cuanto vuelve el teléfono. A alguien nuevo cuyo enlace de contacto es de esta versión el ordenador lo añade
   también con el teléfono apagado: empieza él mismo el chat, esa persona ve tu cuenta como una solicitud, y el teléfono
   la añade también en cuanto se enciende. Dos o más
   dispositivos vinculados también se comunican directamente: con el teléfono apagado, cada uno sigue mostrando lo que
   los otros escriben, leen y a lo que reaccionan, y los cambios que hacen en los contactos; uno que se perdió el primer
-  mensaje de otro recibe uno nuevo un día o más después. Un ordenador que estuvo apagado más tiempo del que el relay
+  mensaje de otro recibe uno nuevo un día o más después. Un ordenador que estuvo apagado más tiempo del que el servidor
   guarda los mensajes (14 días), o que se perdió el primer mensaje de un contacto para él, sigue recibiendo lo que este
   escriba después: su {=Erevos} vuelve a empezar con él un día o más después, y luego cada vez con menos frecuencia, hasta
   que responde. Después de que un contacto te elimine y te vuelva a añadir, el ordenador también vuelve a empezar con
   sus dispositivos.
-- **Las fotos y los archivos** que llegan se quedan en el relay hasta que tanto el teléfono como el ordenador los han
+- **Las fotos y los archivos** que llegan se quedan en el servidor hasta que tanto el teléfono como el ordenador los han
   recogido; entonces el teléfono los elimina de ahí. Uno que el ordenador nunca recoge desaparece cuando se desvincula,
   o a los 14 días, como cualquiera que no se recoja.
 - **Chat conmigo** es igual en cada dispositivo: una nota, foto, archivo o mensaje de voz escrito en uno va a los
   otros, y también un recordatorio puesto, cambiado o visto y una nota eliminada; de dos cambios en una misma nota,
   queda el más reciente. Lo escrito antes de vincular va una vez, en los dos sentidos, en cuanto los dos tienen esta
   versión. Un recordatorio se muestra en cada dispositivo a su hora, y visto en uno se va de los otros. La foto o el
-  archivo de una nota va como copia en el relay, eliminada de ahí en cuanto se recoge, o, con dos dispositivos o más,
+  archivo de una nota va como copia en el servidor, eliminada de ahí en cuanto se recoge, o, con dos dispositivos o más,
   se deja ahí hasta que caduca (14 días). Las notas de los chats ocultos van solo dentro de su propio vínculo, más
   abajo.
 - **Ajustes:** el idioma, el aspecto (el estilo, los colores, el tamaño del texto) y **Última vez** son los mismos en
   todos los dispositivos del espacio: cambiados en uno, cambian también en los otros. Una foto detrás de las pantallas
   se queda en el dispositivo donde se eligió, igual que todo lo que atañe a un solo dispositivo: contraseñas, PIN y el
-  código de pánico, el tiempo del bloqueo, la vibración, el relay y Tor,{~ los módulos,} el nombre del dispositivo. Un
+  código de pánico, el tiempo del bloqueo, la vibración, el servidor y Tor,{~ los módulos,} el nombre del dispositivo. Un
   dispositivo que deba guardar los suyos: **Ajustes** → **Datos y dispositivos** → **Dispositivos vinculados** → **Los
   mismos ajustes en todos los dispositivos** desactivado. Activado de nuevo, toma enseguida los de los otros. Los
   chats ocultos guardan los suyos.
@@ -4336,22 +4471,22 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
   dispositivo: activado o desactivado en uno, queda así en todos. En un dispositivo sin Tor, como la aplicación web,
   ese chat no envía nada mientras esté activado. Un dispositivo con una versión anterior nunca lo desactiva en los
   demás. Ver [A través de Tor](#tor).
-- **En la misma Wi-Fi:** el teléfono y un ordenador en la misma Wi-Fi o punto de acceso (con **Buscar Erevos en la misma Wi-Fi** activado) se dan lo que cambia directamente allí, también sin internet; el relay recibe igualmente su copia,
-  que entonces ya no cambia nada. Solo los del espacio: los vínculos de los chats ocultos van por el relay.
+- **En la misma Wi-Fi:** el teléfono y un ordenador en la misma Wi-Fi o punto de acceso (con **Buscar Erevos en la misma Wi-Fi** activado) se dan lo que cambia directamente allí, también sin internet; el servidor recibe igualmente su copia,
+  que entonces ya no cambia nada. Solo los del espacio: los vínculos de los chats ocultos van por el servidor.
 - **Las llamadas** suenan en el teléfono y en el ordenador. Responde en cualquiera de los dos: el otro deja de
   sonar, y dice que se respondió en otro dispositivo. Rechazar una llamada en uno la rechaza en los dos. Con un
   contacto con esta versión, el ordenador llama y recibe llamadas por sí mismo, también con el teléfono apagado; con
   uno con una versión más antigua llama a través del teléfono, que solo tiene que seguir encendido para establecerla.
   En los dos casos la llamada en sí va directamente entre el ordenador y el contacto, cifrada entre ellos.
 - **Enviar más tarde** funciona también en el ordenador. A un contacto con esta versión el ordenador lo entrega él
-  mismo al relay, con una copia para cada uno de sus dispositivos, así que sale a su hora con tu teléfono apagado y
+  mismo al servidor, con una copia para cada uno de sus dispositivos, así que sale a su hora con tu teléfono apagado y
   llega a los suyos con su teléfono apagado; a uno con una versión más antigua va a través del teléfono. Cada
   dispositivo tuyo lo muestra como programado, y eliminarlo en cualquiera de ellos antes de su hora lo retira en
   todos.
 - **Los grupos** también están en el ordenador, con sus mensajes, fotos, archivos y mensajes de voz. Escribe en ellos,
   responde, reacciona, vota, fija, elimina los tuyos para todos, añade y saca miembros, cambia el nombre de uno o sal de
   él, ahí como en el teléfono: el teléfono lo hace por el ordenador, como propio. Una foto o un archivo que guarda el
-  teléfono va al ordenador como copia en el relay, eliminada de ahí en cuanto el ordenador la recoge. Lo que los
+  teléfono va al ordenador como copia en el servidor, eliminada de ahí en cuanto el ordenador la recoge. Lo que los
   miembros hacen después con un mensaje (reaccionar, votar, fijarlo, eliminarlo para todos) también aparece en el
   ordenador, igual que una estrella o una eliminación en **Este teléfono** hecha en el teléfono. Un
   mensaje que el teléfono no pudo enviar al grupo (uno cerrado mientras tanto, por ejemplo) aparece en el ordenador
@@ -4362,12 +4497,12 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
   los grupos se mueven entonces allí, nunca copiadas, así que los grupos funcionan allí con el teléfono apagado, y se
   pueden crear grupos nuevos allí; el teléfono y los otros dispositivos escriben en ellos a través de él, así que tiene
   que estar encendido. Los miembros no ven nada nuevo: a ti, como siempre, solo que tus mensajes de grupo llegan a otra
-  cola. Para moverlos hacen falta los dos encendidos y el relay, y los grupos públicos se quedan en el teléfono (sal de
+  cola. Para moverlos hacen falta los dos encendidos y el servidor, y los grupos públicos se quedan en el teléfono (sal de
   ellos primero). Para desvincular ese ordenador, devuelve primero los grupos al teléfono. Si lo perdiste, desvincúlalo de todos modos: los
   grupos aparecen entonces como abandonados en el teléfono. Un ordenador con un {=Erevos} más antiguo no puede guardarlos.
 - **Los chats ocultos y las segundas contraseñas** nunca van con el vínculo del espacio: cada uno se vincula por su
   cuenta, desde dentro. Para un lugar de chats ocultos: en el ordenador, abre ese lugar con su PIN, nuevo y vacío como
-  lo deja un PIN nuevo, y dale una cola propia en el relay en **Para usuarios avanzados** allí; luego toca
+  lo deja un PIN nuevo, y dale una cola propia en el servidor en **Para usuarios avanzados** allí; luego toca
   **Dispositivos vinculados** bajo su lista, y **Vincular a mi teléfono**. En el teléfono, abre el mismo lugar con su
   PIN, toca **Dispositivos vinculados** bajo su lista y escanea el código del ordenador con la cámara mientras el lugar
   sigue abierto, o pégalo allí; luego como arriba. Un código mostrado en un lugar solo vincula un lugar, y el de un
@@ -4379,7 +4514,7 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
   vínculo del espacio nunca lleva nada de un lugar: lo que un lugar guarda de su vínculo va cifrado con su propia clave,
   entre valores hechos para nada para los demás lugares, en un archivo del mismo tamaño se vincule algún lugar o
   ninguno. El vínculo funciona mientras el lugar está abierto, y también cerrado si **Recibir estando cerrados** está
-  activado; cerrado sin eso, nada de él se sincroniza, y lo que llega espera en el relay (14 días) hasta que se abre, en
+  activado; cerrado sin eso, nada de él se sincroniza, y lo que llega espera en el servidor (14 días) hasta que se abre, en
   los dos lados. En el ordenador, los grupos nuevos y las llamadas de grupo se quedan en el teléfono, un chat no puede
   moverse al lugar ni sacarse de él (muévelo en el teléfono), y una llamada respondida allí hace callar al teléfono solo
   mientras el lugar está abierto en el teléfono. Los chats ocultos escriben a los dispositivos de un contacto con esta
@@ -4410,7 +4545,7 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
   cuando lo activas en **Ajustes** → **Teléfono y SMS** → **SMS** → **También en mis dispositivos vinculados**, ver
   [SMS](#sms).
 - **Desvincular**, en el teléfono, corta un dispositivo al instante: no le llega nada más, y no se acepta nada de lo
-  que envíe. A los contactos con esta versión se les dice la próxima vez que el teléfono contacta con el relay: dejan de
+  que envíe. A los contactos con esta versión se les dice la próxima vez que el teléfono contacta con el servidor: dejan de
   escribirle, y no aceptan nada más de él. Así se corta un ordenador perdido. Si está encendido, se le dice, y los chats
   de la cuenta salen de él. En el ordenador, **Desvincular este dispositivo** hace lo mismo desde ahí.
 - **Hasta cuatro** dispositivos se vinculan a un teléfono. Una copia de seguridad no lleva los vínculos, pero después
@@ -4420,7 +4555,7 @@ Los chats llegan entonces al ordenador, y tras ellos los mensajes elegidos.
 ## En un iPhone, desde el navegador {#iphone}
 
 Erevos no tiene app en la App Store. En un iPhone funciona como app web, añadida a la pantalla de inicio desde Safari,
-sin cuenta de Apple. Chatea a través de un relay, cifrado de extremo a extremo como en el teléfono, y guarda sus
+sin cuenta de Apple. Chatea a través de un servidor, cifrado de extremo a extremo como en el teléfono, y guarda sus
 contactos, mensajes y ajustes sellados de la misma manera, en el almacenamiento de Safari para la app.
 
 1. Abre en **Safari** la dirección del servidor de Erevos que te dieron. Erevos muestra cómo añadirlo: toca
@@ -4431,7 +4566,7 @@ contactos, mensajes y ajustes sellados de la misma manera, en el almacenamiento 
    te dio la dirección.
 3. Pon un bloqueo con contraseña (en Erevos, **Ajustes** → **Privacidad y seguridad** → **Bloqueo y segunda
    contraseña**). En la web es lo más importante: ver más abajo.
-4. Configura el relay y añade contactos como en el teléfono, ver [Chatear a través de un relay](#relay).
+4. Configura el servidor y añade contactos como en el teléfono, ver [Chatear a través de un servidor](#relay).
 
 **Cómo se comprueba a sí mismo.** Una app web es código que envía el servidor, así que un servidor que sea atacado, o
 al que se le ordene, podría enviar código modificado. Erevos no se fía de ese código sin más:
@@ -4456,37 +4591,37 @@ al que se le ordene, podría enviar código modificado. Erevos no se fía de ese
   sellados.
 - **Sin Bluetooth ni enlace de cerca**{~, y sin SMS}: Safari no los permite.
 - **Solo mientras está abierto:** iOS detiene las apps web en segundo plano, así que los mensajes llegan cuando abres
-  Erevos; hasta entonces esperan en el relay.
+  Erevos; hasta entonces esperan en el servidor.
 - **Las llamadas** suenan mientras Erevos está abierto, con un timbre propio: dos toques cortos cada 3 segundos. Safari
   lo deja sonar solo después de que hayas tocado Erevos desde que se abrió, y no con el iPhone en silencio. Con Erevos
   cerrado, una llamada no suena: solo aparece la notificación «Llamada», si las notificaciones están activadas. Apple no
   permite nada más a una app web; para sonar como un teléfono haría falta una app de la App Store.
 - **Las notificaciones** con Erevos cerrado están desactivadas salvo que las actives: en Erevos, **Ajustes** →
   **Notificaciones** → **Notificaciones con la app cerrada** → **Activar** (iOS 16.4 o posterior, desde la pantalla de
-  inicio). Cuando llegan mensajes, o entra una llamada, tu relay envía un push a través de Apple, y Erevos muestra
+  inicio). Cuando llegan mensajes, o entra una llamada, tu servidor envía un push a través de Apple, y Erevos muestra
   cuántos mensajes han llegado desde la última vez que lo abriste (**3 mensajes nuevos**), o **Llamada** si solo entró
   una llamada, en el idioma de la app, nada más. El número va cifrado para tu iPhone: Apple ve cuándo llega algo para tu
-  iPhone, y que usa {=Erevos}, nunca qué ni de quién. Con un relay o un {=Erevos} del remitente anterior a 2.0.0, o un mensaje
-  que otros teléfonos llevaron al relay, no hay número: Erevos muestra **Mensaje nuevo**, o **Mensajes nuevos** en
-  cuanto llegan más, hasta que lo abras. Son por espacio, nunca para los chats ocultos, y tu relay debe estar
-  configurado para enviarlas. También llegan para la cola propia de cada contacto: tu relay tiene entonces una dirección
+  iPhone, y que usa {=Erevos}, nunca qué ni de quién. Con un servidor o un {=Erevos} del remitente anterior a 2.0.0, o un mensaje
+  que otros teléfonos llevaron al servidor, no hay número: Erevos muestra **Mensaje nuevo**, o **Mensajes nuevos** en
+  cuanto llegan más, hasta que lo abras. Son por espacio, nunca para los chats ocultos, y tu servidor debe estar
+  configurado para enviarlas. También llegan para la cola propia de cada contacto: tu servidor tiene entonces una dirección
   push para las colas de todos tus contactos, y Apple recibe un push por cada contacto que escribió, con 15 segundos de
   diferencia, así que por una serie así puede suponer cuántos escribieron a la vez, nunca quiénes. El icono de Erevos en
   la pantalla de inicio muestra entonces también un número: los mensajes no leídos del espacio que tenías abierto, que
   se quedan una vez cerrado Erevos, y los que llegaron después (lo que llegó sin número cuenta como uno), nunca los de
   un chat oculto. **Ajustes** → **Notificaciones** → **Número en el icono** lo desactiva. Las notificaciones funcionan a
   través del servicio push de Apple, el de Google (Chrome, y Edge en Android, Brave y Opera), el de Mozilla (Firefox) y
-  el de Microsoft (Edge en Windows): un navegador que use otro no puede activarlas, salvo que quien gestione tu relay
+  el de Microsoft (Edge en Windows): un navegador que use otro no puede activarlas, salvo que quien gestione tu servidor
   permita el servicio push de ese navegador. Cada espacio que las activa tiene su propia dirección push, así que ningún
-  relay recibe nunca la de otro espacio, y la dirección no une tus espacios. Para ello cada uno de esos espacios tiene
+  servidor recibe nunca la de otro espacio, y la dirección no une tus espacios. Para ello cada uno de esos espacios tiene
   su propio service worker en el navegador: quien pueda ver los ajustes del navegador puede contarlos, y así cuántos
   espacios tienen las notificaciones activadas. Una solicitud de mensaje de alguien nuevo, a través de tu enlace de
   contacto, puede que solo aparezca cuando se abra Erevos. El número del icono se muestra también en un Mac con «Añadir
   al Dock» de Safari, y en la app web instalada desde Chrome o Edge en Windows, macOS o ChromeOS. No sale ningún aviso
   **Mensaje nuevo** sobre Erevos mientras está abierto en la pantalla. La pantalla **Notificaciones con la app cerrada**
-  dice cuándo el navegador o el teléfono no las permiten y, después de que las desactives, cuándo tu relay aún no pudo
+  dice cuándo el navegador o el teléfono no las permiten y, después de que las desactives, cuándo tu servidor aún no pudo
   saberlo y puede que envíe alguna más: Erevos se lo dice en cuanto puede llegar a él. Cuando el navegador cambia su
-  dirección de push, o el servicio push la descarta, Erevos da a tu relay la nueva por sí solo cuando vuelve a la
+  dirección de push, o el servicio push la descarta, Erevos da a tu servidor la nueva por sí solo cuando vuelve a la
   pantalla.
 - **Permisos:** en Erevos, **Ajustes** → **General** → **Permisos** muestra lo que el navegador deja hacer a Erevos: si
   funciona desde la pantalla de inicio, las notificaciones con la app cerrada (necesarias en cuanto este espacio las
@@ -4508,7 +4643,7 @@ al que se le ordene, podría enviar código modificado. Erevos no se fía de ese
 
 En un teléfono con Sailfish OS, Erevos es una app propia: la misma app que en el navegador, mostrada por el motor de
 navegador propio de Sailfish dentro de una ventana de Sailfish, con su código instalado con la app y no descargado de un
-servidor. Chatea a través de un relay, cifrado de extremo a extremo como en el teléfono, y guarda sus contactos,
+servidor. Chatea a través de un servidor, cifrado de extremo a extremo como en el teléfono, y guarda sus contactos,
 mensajes y ajustes sellados de la misma manera.
 
 1. Permite las apps de fuera de la Jolla Store: **Ajustes → Software no fiable → Permitir software no fiable**.
@@ -4517,7 +4652,7 @@ mensajes y ajustes sellados de la misma manera.
    en su versión de 64 bits (aarch64).
 3. Pon un bloqueo con contraseña (en Erevos, **Ajustes** → **Privacidad y seguridad** → **Bloqueo y segunda
    contraseña**). Más abajo se explica por qué aquí importa.
-4. Configura el relay y añade contactos como en el teléfono, ver [Chatear a través de un relay](#relay).
+4. Configura el servidor y añade contactos como en el teléfono, ver [Chatear a través de un servidor](#relay).
 
 - **Lo que solo hace Android:** Bluetooth, Wi-Fi Aware, Wi-Fi Direct{~, LoRa y los SMS| y LoRa}. La misma Wi-Fi funciona aquí
   también, como en un ordenador: ver [Chatear con un teléfono cercano](#nearby). El cortafuegos de Sailfish OS ya deja
@@ -4531,14 +4666,14 @@ mensajes y ajustes sellados de la misma manera.
 - **Las llamadas** suenan mientras Erevos se ve, con un timbre propio: dos toques cortos cada 3 segundos, y el
   teléfono vibra donde puede, hasta que se contesta la llamada o termina. Una llamada que entra antes de que hayas
   tocado Erevos desde que se abrió puede mostrarse sin sonido.
-- **Mientras está cerrado:** con un espacio abierto, un pequeño ayudante de Erevos espera en el relay mientras Erevos
+- **Mientras está cerrado:** con un espacio abierto, un pequeño ayudante de Erevos espera en el servidor mientras Erevos
   no se ve o está cerrado, y no toma nada. Un aviso dice solo cuántos mensajes llegaron, nunca de quién ni qué, y una
   llamada suena con el tono del teléfono, como lo pone su perfil, 45 segundos como mucho; un toque en cualquiera de
   los dos abre Erevos. Los chats ocultos no dicen nada entonces. Bloquear el espacio lo detiene, y tras reiniciar el
   teléfono vuelve a esperar solo cuando Erevos abre el espacio. Como el resto de Erevos aquí, va directo, sin Tor.
   Cada espera despierta el teléfono más o menos una vez por minuto, como en Android.
 - **Probado hasta ahora** en el motor de navegador de Sailfish (Gecko 91) en un ordenador, chateando con un navegador a
-  través de un relay. La misma Wi-Fi se probó contra la del ordenador, en un ordenador. Todavía no en un teléfono con
+  través de un servidor. La misma Wi-Fi se probó contra la del ordenador, en un ordenador. Todavía no en un teléfono con
   Sailfish.
 
 ## Actualizaciones {#updates}
@@ -4591,7 +4726,8 @@ En Android, **Actualizaciones** dice también qué versiones se ofrecen a este t
   ofrece **Borrar todo aquí** y **Desinstalar**; un traslado no tomado en un día se borra, y la app antigua se abre
   como antes. Una app nueva ya configurada también pregunta, y lo que trae ocupa el lugar de todo lo que tiene. El
   traslado necesita espacio libre en el teléfono para una copia de todo: Erevos lo dice antes si no alcanza. La
-  versión de F-Droid, firmada con otra clave, no puede trasladarse así: usa las [Copias de seguridad](#backup).
+  versión de F-Droid no tiene **Buscar actualizaciones**, así que no puede empezar un traslado: usa las [Copias de
+  seguridad](#backup).
 - **Versiones beta**: desactivado, solo se ofrecen las versiones normales. Activado, también las betas (como
   **7.0.1-beta.1**): salen antes, para probar, y pueden tener problemas. Una beta lo tiene activado al principio.
   Desactívalo para salir de las betas: la próxima versión normal con un número de compilación mayor que la beta que
@@ -4619,7 +4755,7 @@ Cada versión, allí como aquí, dice primero qué cambia **Para ti**, lo que ve
 
 ### Aviso cuando sale una versión nueva {#release-notice}
 
-En Android, una vez al día, Erevos pregunta al servidor de LPHL, que también gestiona el relay, si ha salido una versión
+En Android, una vez al día, Erevos pregunta al servidor de LPHL si ha salido una versión
 nueva. Cuando la hay, **Erevos** aparece arriba de los chats, fijado, con su icono: **Salió Erevos 3.3.0. Toca para ver
 qué hay de nuevo y actualizar.**, marcado hasta que lo abras, y un aviso dice también **Erevos 3.3.0 is out**. Toca
 cualquiera de los dos para ir a **Actualizaciones**, y luego **Buscar actualizaciones**. Desaparece en cuanto tienes esa
@@ -4628,8 +4764,8 @@ versión.
 - **Solo cuando está firmada:** solo cuenta una vez que el ordenador de versiones ha firmado tanto la compilación como
   su nombre, la misma firma que permite a **Actualizaciones** instalarla. Así que llega en cuanto esa versión se puede
   instalar, y el servidor por sí solo no puede inventarse una.
-- **Solo en el relay de LPHL:** un espacio solo pregunta mientras usa el relay de LPHL y no envía todo por Tor
-  (**Todo** en Tor): el servidor no ve entonces nada que no vea ya. Un espacio en otro relay, o sin relay, no pregunta
+- **Solo en el servidor de LPHL:** un espacio solo pregunta mientras usa el servidor de LPHL y no envía todo por Tor
+  (**Todo** en Tor): el servidor no ve entonces nada que no vea ya. Un espacio en otro servidor, o sin servidor, no pregunta
   nada; ahí te lo dice **Buscar actualizaciones**.
   El interruptor **Por Tor** de **Actualizaciones**, uno para este aviso y para **Buscar actualizaciones**, solo en
   este teléfono, hace que pregunte por Tor: el servidor entonces no ve la dirección del teléfono, y un espacio que
@@ -4674,9 +4810,11 @@ minuto y cubre cualquier sorpresa.
   seguridad, desinstala {=Erevos}, instala el de la página de versiones y restaura la copia. Después de eso, cada
   actualización se instala encima.
 - **{=Erevos} de F-Droid**, cuando esté ahí, lo actualiza F-Droid: sus **Actualizaciones** muestran la versión y lo dicen,
-  sin **Buscar actualizaciones**. F-Droid lo firma con una clave propia, así que Android no instala ni ese encima del
-  Erevos de la página de versiones ni este encima de aquel. Para cambiar: haz una copia de seguridad, desinstala {=Erevos},
-  instala el otro y restaura la copia.
+  sin **Buscar actualizaciones**. Está firmado con la misma clave que el Erevos de la página de versiones: F-Droid
+  compila de nuevo cada versión desde su código y entrega el archivo firmado de la página de versiones solo cuando su
+  propia compilación sale igual. Así cada uno se instala encima del otro y todo se queda: para cambiar, instala el
+  otro, de la misma versión o de una más nueva. El de F-Droid no tiene **Buscar actualizaciones**, ni **Desde un
+  teléfono cercano**, ni copias a Google Drive: al pasar a él, eso se detiene, y vuelve con el otro.
 - **Nunca uno más antiguo:** no instales una versión más antigua encima de una más nueva. Sus datos pueden estar en un
   formato que la más antigua no puede leer. Restaura en su lugar una copia hecha con esa versión más antigua.
 - **Una versión a la que le falta tu sistema** lo dice en sus notas: esa compilación falló, así que usa la versión
@@ -4706,9 +4844,9 @@ o el otro en el punto de acceso de este: activa antes el punto de acceso en los 
   propio certificado, así que cuando tengas internet compara el certificado con el de la web o la página de versiones
   de Erevos. El propio Erevos, en **Actualizaciones**, rechaza un paquete firmado de otro modo.
 - **No desde una tienda:** un {=Erevos} instalado en partes, como instalan algunas tiendas, no puede darse entero y lo
-  dice. El {=Erevos} de F-Droid lo firma F-Droid: puede ir a un teléfono sin {=Erevos}, o sobre el Erevos de F-Droid por el
-  navegador, pero un Erevos de la página de versiones lo rechaza en **Actualizaciones**, como haría Android. El Erevos
-  de F-Droid no toma nada en **Actualizaciones**: lo actualiza F-Droid.
+  dice. El {=Erevos} de F-Droid, firmado con la misma clave, se da como cualquier otro, pero lo dice en su pantalla y en
+  la página: también en el otro teléfono solo F-Droid lo actualizará después, y un Erevos allí que no sea de F-Droid
+  pregunta antes de instalarlo. El Erevos de F-Droid no toma nada en **Actualizaciones**: lo actualiza F-Droid.
 - Solo en Android. Cualquiera en la misma red que vea el código puede descargar Erevos también; no hay nada más que
   tomar.
 
@@ -4722,11 +4860,11 @@ Dos pantallas en **Ajustes** → **Para pruebas** sirven para probar las conexio
 - **Prueba de radio (Android):** **Permisos** pide a Android lo que necesita la radio, **Iniciar** y **Detener**
   encienden y apagan Bluetooth y Wi-Fi Aware, **Enviar hola** envía un mensaje de prueba simple a la Prueba de radio
   del teléfono cercano (un chat no lo muestra), y el **Registro** muestra lo que pasó.
-- **Prueba del relay (Wi-Fi):** **Crear cola** crea una cola en un relay y muestra dos ids. Da el **sender id** al
+- **Prueba del servidor (Wi-Fi):** **Crear cola** crea una cola en un servidor y muestra dos ids. Da el **sender id** al
   teléfono que te escribe, y guarda en privado el **recipient id**. **Enviar** y **Recibir** mueven mensajes a mano.
 
-> Con un solo teléfono igualmente puedes probar un chat por el relay: tus chats y tus **Chats ocultos** tienen cada uno
-> su propia cola en el relay y sus propias claves. Crea las dos colas en el mismo relay, toca **Compartir mi enlace de
+> Con un solo teléfono igualmente puedes probar un chat por el servidor: tus chats y tus **Chats ocultos** tienen cada uno
+> su propia cola en el servidor y sus propias claves. Crea las dos colas en el mismo servidor, toca **Compartir mi enlace de
 > contacto** en uno y cópialo, luego añádelo en el otro, y escribe en los dos sentidos. El propio enlace de un chat se
 > rechaza como contacto.
 
@@ -4736,16 +4874,16 @@ Erevos dice claramente lo que protege y lo que todavía no.
 
 | Qué | Hoy | Por venir |
 | --- | --- | --- |
-| **Cuenta, número de teléfono, email** | No hace falta ninguno. Los contactos son pares de colas de un solo sentido en el relay. | |
-| **Los contactos y sus nombres, claves, ajustes del relay, aspecto** | Sellados en el teléfono con la clave de cada espacio. | |
-| **Mensajes a través de un relay** | Cifrados de extremo a extremo: PQXDH con ML-KEM-768 para empezar, luego el doble ratchet. El relay no puede leerlos, y en cuanto los dos teléfonos han recibido un mensaje el uno del otro tampoco puede distinguirlos por conversación: cada uno se sella una vez más para el teléfono al que va. Ve cuáles son mensajes que alguien lee, cuáles son avisos entre teléfonos, y cuáles son llamadas que suenan, ya que cada uno lo dice. Aún sin auditar. | Una auditoría externa. |
-| **Mensajes a un teléfono cercano** | Cifrados de extremo a extremo, igual que por el relay. Quien escuche cerca puede saber que hay teléfonos con {=Erevos} cerca unos de otros, y cuándo y cuánto envían; en la misma Wi-Fi, también cualquiera que esté en ella, y por Wi-Fi Direct cualquiera que se una a la Wi-Fi propia de los teléfonos. Hasta que se conoce el teléfono de tu contacto, los otros teléfonos con {=Erevos} conectados cerca reciben tus mensajes cortos, sellados. | |
-| **Mensajes llevados por otros teléfonos** | Sellados dos veces: de extremo a extremo para tu contacto, y para su relay. Un teléfono que lleva uno ve a qué relay va, cuándo, y de qué tamaño; no de quién es ni para quién. Su relay ve a qué relay va, y ese relay ve el relay del portador, no su teléfono. Guardados sellados en el teléfono, tres días como mucho: los de otros en un archivo del teléfono, cuyo tamaño muestra más o menos cuántos hay; los tuyos en tu espacio, sellados con su clave. Los chats ocultos nunca se llevan. | |
-| **Mensajes por LoRa** | Cifrados de extremo a extremo, igual que por el relay. Cualquiera con una radio, a kilómetros, puede saber que la tuya transmite, cuándo y cuánto, y su señal se puede rastrear hasta donde está. Erevos impide que tu radio anuncie su nombre y dónde está (rol Client hidden, GPS apagado, sin posición fija) salvo que lo permitas; aun así responde a una radio que le pregunte su nombre. Todos los Erevos de la malla reciben tus mensajes LoRa, sellados. | Poner el nombre de la radio desde Erevos. |
-[~] | **Mensajes por SMS, cuando nada más funciona** | Cifrados de extremo a extremo, igual que por el relay, en SMS de datos ocultos. Desactivado salvo que lo actives. La compañía telefónica ve qué número escribió a cuál, cuándo y cuántos SMS; nunca lo que se escribió. Cada uno cuesta lo que un SMS. | |
-| **Quién habla con quién** | El relay ve direcciones IP, ids de colas, y cuándo y cuánto. Con un segundo relay, tu relay nunca ve tu dirección. Desde un sitio prestado en el relay de un contacto, cada relay al que envías la ve. [A través de Tor](#tor), una vez que lo activas, con **Mensajes** ningún relay la ve para lo que escribes, y con **Todo** tampoco para las imágenes y los archivos; con puentes, para donde Tor está bloqueado, la red solo ve un puente. El broker de Snowflake y los servidores STUN ven tu dirección. | Tor en un ordenador. |
-| **La conexión con el relay** | TLS, y dentro, en cuanto se conoce la clave del relay, un canal hacia esa clave: el relay demuestra que la tiene en cada conexión, y el token y cada petición van cifrados con ella, así que alguien entre medias con un certificado para el nombre del relay no puede hacerse pasar por él. A un relay que demostró su clave una vez nunca se vuelve a llegar sin ella. Un relay más antiguo que esta app funciona como antes, y **Cómo te conectas ahora** lo dice. La primera clave viene del relay la primera vez que se le pregunta, o de un enlace de contacto: quien esté entre medias justo esa primera vez podría dar una propia. [La clave propia del relay](#relay). Sin auditar. | La clave de nuestro relay incluida en la app, y en las invitaciones. |
-| **Textos por Nostr** | Cifrados de extremo a extremo como por un relay, luego envueltos una vez más para una clave que tu contacto dio solo para ese chat, firmados por una clave hecha solo para ese texto. Los relays de Nostr ven cuándo y de qué tamaño, y que una clave que no nombra a nadie recibe un texto; tu teléfono lee todas sus claves en una sola conexión, a través de Tor si Tor está activado, así que un relay puede saber que se leen juntas, y desde dónde solo con Tor desactivado. Tu relay solo los ve como respaldo, y una campanita para los chats ocultos. [A través de Nostr](#nostr). | |
+| **Cuenta, número de teléfono, email** | No hace falta ninguno. Los contactos son pares de colas de un solo sentido en el servidor. | |
+| **Los contactos y sus nombres, claves, ajustes del servidor, aspecto** | Sellados en el teléfono con la clave de cada espacio. | |
+| **Mensajes a través de un servidor** | Cifrados de extremo a extremo: PQXDH con ML-KEM-768 para empezar, luego el doble ratchet. El servidor no puede leerlos, y en cuanto los dos teléfonos han recibido un mensaje el uno del otro tampoco puede distinguirlos por conversación: cada uno se sella una vez más para el teléfono al que va. Ve cuáles son mensajes que alguien lee, cuáles son avisos entre teléfonos, y cuáles son llamadas que suenan, ya que cada uno lo dice. Aún sin auditar. | Una auditoría externa. |
+| **Mensajes a un teléfono cercano** | Cifrados de extremo a extremo, igual que por el servidor. Quien escuche cerca puede saber que hay teléfonos con {=Erevos} cerca unos de otros, y cuándo y cuánto envían; en la misma Wi-Fi, también cualquiera que esté en ella, y por Wi-Fi Direct cualquiera que se una a la Wi-Fi propia de los teléfonos. Hasta que se conoce el teléfono de tu contacto, los otros teléfonos con {=Erevos} conectados cerca reciben tus mensajes cortos, sellados. | |
+| **Mensajes llevados por otros teléfonos** | Sellados dos veces: de extremo a extremo para tu contacto, y para su servidor. Un teléfono que lleva uno ve a qué servidor va, cuándo, y de qué tamaño; no de quién es ni para quién. Su servidor ve a qué servidor va, y ese servidor ve el servidor del portador, no su teléfono. Guardados sellados en el teléfono, tres días como mucho: los de otros en un archivo del teléfono, cuyo tamaño muestra más o menos cuántos hay; los tuyos en tu espacio, sellados con su clave. Los chats ocultos nunca se llevan. | |
+| **Mensajes por LoRa** | Cifrados de extremo a extremo, igual que por el servidor. Cualquiera con una radio, a kilómetros, puede saber que la tuya transmite, cuándo y cuánto, y su señal se puede rastrear hasta donde está. Erevos impide que tu radio anuncie su nombre y dónde está (rol Client hidden, GPS apagado, sin posición fija) salvo que lo permitas; aun así responde a una radio que le pregunte su nombre. Todos los Erevos de la malla reciben tus mensajes LoRa, sellados. | Poner el nombre de la radio desde Erevos. |
+[~] | **Mensajes por SMS, cuando nada más funciona** | Cifrados de extremo a extremo, igual que por el servidor, en SMS de datos ocultos. Desactivado salvo que lo actives. La compañía telefónica ve qué número escribió a cuál, cuándo y cuántos SMS; nunca lo que se escribió. Cada uno cuesta lo que un SMS. | |
+| **Quién habla con quién** | El servidor ve direcciones IP, ids de colas, y cuándo y cuánto. Con un segundo servidor, tu servidor nunca ve tu dirección. Desde un sitio prestado en el servidor de un contacto, cada servidor al que envías la ve. [A través de Tor](#tor), una vez que lo activas, con **Mensajes** ningún servidor la ve para lo que escribes, y con **Todo** tampoco para las imágenes y los archivos; con puentes, para donde Tor está bloqueado, la red solo ve un puente. El broker de Snowflake y los servidores STUN ven tu dirección. | Tor en un ordenador. |
+| **La conexión con el servidor** | TLS, y dentro, en cuanto se conoce la clave del servidor, un canal hacia esa clave: el servidor demuestra que la tiene en cada conexión, y el token y cada petición van cifrados con ella, así que alguien entre medias con un certificado para el nombre del servidor no puede hacerse pasar por él. A un servidor que demostró su clave una vez nunca se vuelve a llegar sin ella. Un servidor más antiguo que esta app funciona como antes, y **Cómo te conectas ahora** lo dice. La primera clave viene del servidor la primera vez que se le pregunta, o de un enlace de contacto: quien esté entre medias justo esa primera vez podría dar una propia. [La clave propia del servidor](#relay). Sin auditar. | La clave de nuestro servidor incluida en la app, y en las invitaciones. |
+| **Textos por Nostr** | Cifrados de extremo a extremo como por un servidor, luego envueltos una vez más para una clave que tu contacto dio solo para ese chat, firmados por una clave hecha solo para ese texto. Los servidores de Nostr ven cuándo y de qué tamaño, y que una clave que no nombra a nadie recibe un texto; tu teléfono lee todas sus claves en una sola conexión, a través de Tor si Tor está activado, así que un servidor puede saber que se leen juntas, y desde dónde solo con Tor desactivado. Tu servidor solo los ve como respaldo, y una campanita para los chats ocultos. [A través de Nostr](#nostr). | |
 [~] | **SMS** | Un SMS normal lo lee la compañía telefónica, como cualquier SMS. A un número vinculado a un contacto de Erevos va en su lugar por Erevos. Una invitación oculta es un SMS corto más que ve la compañía telefónica. | |
 | **Los contactos del teléfono** | En los contactos propios de Android, sin sellar por Erevos, como con cualquier app de contactos: cualquier app con permiso para leerlos los ve, y una cuenta (Google) puede sincronizarlos. Erevos no los envía a ninguna parte. Un archivo .vcf guardado a partir de ellos está fuera de Erevos, sin sellar.{~ Las llamadas y los SMS de un contacto se leen del propio registro de llamadas y de los SMS del teléfono solo para mostrar su historial, y no se guardan en ninguna parte.} | |
 | **Contactos guardados solo en Erevos** | Sellados con la clave del espacio, o con la de los chats ocultos para los suyos, en un archivo para todos los espacios cuyo tamaño muestra más o menos cuántos hay en total, no de quién son; sus fotos, cada una en un archivo propio. Nunca en los contactos de Android. Un archivo .vcf guardado a partir de ellos, también de los chats ocultos, está fuera de Erevos, sin cifrar. Las llamadas{~ y los SMS} a ellos van por el teléfono, y aparecen en su registro de llamadas{~ y en sus SMS}. | |
@@ -4753,18 +4891,18 @@ Erevos dice claramente lo que protege y lo que todavía no.
 | **Chats importados** | Sellados en el espacio al que se trajeron, también sus fotos y archivos, cada uno en sus trozos como el archivo de un chat. El tamaño del archivo, y cuántos trozos hay, dicen más o menos cuánto se importó, no dónde. | Las fotos y los archivos de Viber, y archivos de más de 4 GB. |
 | **Historial de mensajes** | Guardado en el teléfono, sellado en su espacio, sin límite, en páginas del mismo tamaño mezcladas para todos los espacios. Solo se ve cuánto ocupa todo, no a qué espacio pertenece. Eliminar en los dos teléfonos, y los mensajes temporales, dependen del Erevos del otro teléfono. | |
 | **Mensajes de cerca** | Solo se abren en el espacio que tiene el contacto. Uno para otro espacio espera en memoria, seis horas como mucho, hasta que ese espacio se abra. Uno para chats ocultos solo se abre mientras están abiertos, o reciben cerrados, y el espacio nunca sabe que uno de sus contactos está cerca. | |
-| **Mensajes de voz** | Cifrados de extremo a extremo por el relay o de cerca, en trozos: el relay, o quien escuche cerca, puede saber más o menos cuánto dura cada uno. Cada sonido se sella en un archivo propio; cuántos archivos hay, y sus tamaños, muestran más o menos cuántos se guardan, no en qué espacio. Sin sellar en la caché solo mientras se reproduce. | Archivos de sonido todos del mismo tamaño. |
-| **Fotos y archivos** | Cifrados de extremo a extremo, a través del almacén de archivos del relay, en trozos del mismo tamaño: el relay ve cuántos y cuándo, así que más o menos lo grandes que son. Tu relay ve tu dirección, como para los mensajes; el contacto los recoge a través de su propio relay. Las fotos pierden su lugar, su teléfono y su hora, salvo que se envíen como archivo; un archivo conserva lo que dice dentro. Sellados en el teléfono en sus trozos, mostrados desde la memoria. Las copias guardadas están fuera de Erevos. Las copias de seguridad los contienen, sellados con la contraseña de la copia, en archivos propios. | |
+| **Mensajes de voz** | Cifrados de extremo a extremo por el servidor o de cerca, en trozos: el servidor, o quien escuche cerca, puede saber más o menos cuánto dura cada uno. Cada sonido se sella en un archivo propio; cuántos archivos hay, y sus tamaños, muestran más o menos cuántos se guardan, no en qué espacio. Sin sellar en la caché solo mientras se reproduce. | Archivos de sonido todos del mismo tamaño. |
+| **Fotos y archivos** | Cifrados de extremo a extremo, a través del almacén de archivos del servidor, en trozos del mismo tamaño: el servidor ve cuántos y cuándo, así que más o menos lo grandes que son. Tu servidor ve tu dirección, como para los mensajes; el contacto los recoge a través de su propio servidor. Las fotos pierden su lugar, su teléfono y su hora, salvo que se envíen como archivo; un archivo conserva lo que dice dentro. Sellados en el teléfono en sus trozos, mostrados desde la memoria. Las copias guardadas están fuera de Erevos. Las copias de seguridad los contienen, sellados con la contraseña de la copia, en archivos propios. | |
 | **En un ordenador** | Sellado como en el teléfono, en la carpeta propia de la app. Su almacén de claves está sellado con el llavero del sistema (en Windows, la clave de tu cuenta); en un sistema Linux sin llavero, Erevos no guarda nada salvo que se inicie con \`--plain-secrets\`, y entonces lo guarda tal cual. | |
 | **Copias de seguridad** | Selladas con su propia contraseña, contienen cada espacio tal como está sellado en el teléfono, con sus fotos, archivos y mensajes de voz en archivos propios junto a la copia. Sus nombres dicen que son una copia de seguridad de Erevos, y su número y tamaño muestran más o menos cuánto se guarda. Las copias automáticas guardan su contraseña en el teléfono. Van a un servidor solo si añades uno: bytes aleatorios con nombres aleatorios, de tamaños redondeados; el servidor ve tu cuenta y cuándo, y tu dirección salvo que vayan por Tor. | |
-| **Marcas ✓✓ y ✓✓✓** | El teléfono del contacto sabe cuándo el tuyo recibió y leyó sus mensajes, cifrado. En un grupo que no es público, también lo sabe el teléfono de quien envió el mensaje. El relay, o quien escuche cerca, ve un mensaje pequeño más. | Un interruptor para dejar de decir cuándo lees. |
+| **Marcas ✓✓ y ✓✓✓** | El teléfono del contacto sabe cuándo el tuyo recibió y leyó sus mensajes, cifrado. En un grupo que no es público, también lo sabe el teléfono de quien envió el mensaje. El servidor, o quien escuche cerca, ve un mensaje pequeño más. | Un interruptor para dejar de decir cuándo lees. |
 | **Huella o cara (Android)** | Desactivado salvo que se active. Solo abre el espacio de la primera contraseña: su clave sellada en el Android Keystore, utilizable solo justo después de una comprobación fuerte de huella o cara, y descartada cuando estas cambian. Alguien que te retenga puede usar tu dedo. | |
 | **Avisos (Android)** | En segundo plano: «Erevos – Ready for calls and messages» (no en la pantalla de bloqueo), «Incoming call» o «Incoming video call» – «Open Erevos to answer», y «New message» o cuántos llegaron; cuando Android o la contraseña lo detienen, «Closed by Android» o «Locked» – «Open it to receive calls and messages again»; un recordatorio, «Reminder» o cuántos; una versión nueva, «Erevos X is out». Nunca quién ni qué. En un teléfono bloqueado, el de los mensajes solo dice «Erevos». Los chats ocultos que pueden decirlo muestran el mismo aviso, contado con el resto: quien lo vea y no encuentre nada nuevo puede suponer que hay más. Como app de teléfono, el aviso de una llamada telefónica nombra a quien llama, también sobre la pantalla de bloqueo, como el de cualquier app de teléfono, pero nunca con un nombre que solo conozcan los chats ocultos: una llamada de uno de sus contactos muestra el número. | |
 | **Widget{~ y Teléfono} (Android)** | El widget, una vez añadido, muestra {~cuántas llamadas perdidas, SMS sin leer y mensajes nuevos hay|cuántos mensajes nuevos hay}, nunca de quién ni qué.{~ El Teléfono se abre sin la contraseña solo si lo permites: entonces cualquiera que tenga el teléfono desbloqueado ve las llamadas y los favoritos que guarda Android, solo con los nombres de los contactos del teléfono.} | |
-| **Llamadas** | Cifradas de extremo a extremo (DTLS-SRTP, con su clave enviada en el chat cifrado). A través del relay de llamadas, ningún teléfono ve la dirección IP del otro; el servidor que lo ejecuta ve las dos, cuándo y cuánto tiempo, y cuánto pasa. Sin relay de llamadas, solo en la misma Wi-Fi, cada teléfono ve la dirección del otro. Los relays ven cuándo empieza a sonar una llamada. | Que suene en la app web estando cerrada. Llamadas por Bluetooth (ahí funciona el walkie-talkie). |
-| **Chats de grupo** | Cifrados de extremo a extremo con MLS (RFC 9420); los miembros sacados no leen nada después. La copia de cada miembro se sella aparte, así que los relays no pueden saber quién está en un grupo; cada relay sigue viendo que un mensaje llega a una cola. Los miembros ven las claves y las direcciones de relay de los demás. Las fotos, los archivos y los mensajes de voz van por el almacén de archivos del relay de quien los envía, como a un contacto, y se quedan ahí 14 días. Sin auditar. | |
-| **Llamadas de grupo** | Voz y vídeo, cifrados de extremo a extremo entre cada dos teléfonos de la llamada (DTLS-SRTP, con sus claves enviadas en el cifrado del grupo). A través del relay de llamadas, ningún teléfono ve la dirección IP de otro; el servidor que lo ejecuta ve la de cada teléfono, cuándo y cuánto tiempo, y cuánto pasa. Cada miembro, esté en la llamada o no, sabe quién está en ella. Los relays ven cuándo empieza una. | Vídeo con más de cuatro personas, a través de un servidor; más de ocho personas. |
-| **Grupos públicos** | Como los chats de grupo, y cualquiera con el enlace puede pedir unirse y leer desde que se le deja entrar. Las peticiones llegan al relay del propietario selladas para el teléfono del propietario: el relay ve cuántas y cuándo, no de quién. Los miembros ven los nombres elegidos de los demás, claves hechas solo para ese grupo, direcciones de relay y sender ids de las colas. Sin auditar. | |
+| **Llamadas** | Cifradas de extremo a extremo (DTLS-SRTP, con su clave enviada en el chat cifrado). Con **ANONYMOUS**, por el servidor de llamadas: el teléfono de tu contacto no ve tu dirección IP; el servidor que lo ejecuta ve la de los dos teléfonos, cuándo y cuánto tiempo, y cuánto pasa. Con **SPEED**, directamente de teléfono a teléfono donde puede, y si no por el servidor de llamadas: el teléfono de tu contacto ve tu dirección en ambos casos, y también la ven los servidores auxiliares. En la misma Wi-Fi, cada teléfono ve la dirección del otro. Con **INVISIBLE** no hay llamadas. Los servidores ven cuándo empieza a sonar una llamada. | Que suene en la app web estando cerrada. Llamadas por Bluetooth (ahí funciona el walkie-talkie). |
+| **Chats de grupo** | Cifrados de extremo a extremo con MLS (RFC 9420); los miembros sacados no leen nada después. La copia de cada miembro se sella aparte, así que los servidores no pueden saber quién está en un grupo; cada servidor sigue viendo que un mensaje llega a una cola. Los miembros ven las claves y las direcciones de servidor de los demás. Las fotos, los archivos y los mensajes de voz van por el almacén de archivos del servidor de quien los envía, como a un contacto, y se quedan ahí 14 días. Sin auditar. | |
+| **Llamadas de grupo** | Voz y vídeo, cifrados de extremo a extremo entre cada dos teléfonos de la llamada (DTLS-SRTP, con sus claves enviadas en el cifrado del grupo). A través del servidor de llamadas, ningún teléfono ve la dirección IP de otro; el servidor que lo ejecuta ve la de cada teléfono, cuándo y cuánto tiempo, y cuánto pasa. Cada miembro, esté en la llamada o no, sabe quién está en ella. Los servidores ven cuándo empieza una. | Vídeo con más de cuatro personas, a través de un servidor; más de ocho personas. |
+| **Grupos públicos** | Como los chats de grupo, y cualquiera con el enlace puede pedir unirse y leer desde que se le deja entrar. Las peticiones llegan al servidor del propietario selladas para el teléfono del propietario: el servidor ve cuántas y cuándo, no de quién. Los miembros ven los nombres elegidos de los demás, claves hechas solo para ese grupo, direcciones de servidor y sender ids de las colas. Sin auditar. | |
 | **Vistas previas de enlaces** | Desactivadas salvo que se activen. Entonces, al enviar un enlace, tu teléfono descarga su página directamente del sitio, que ve tu dirección IP y cuándo, no para quién es el mensaje. La vista previa va dentro del mensaje cifrado; el teléfono que lo recibe no descarga nada. Con **Por Tor** activado, la página se descarga solo por Tor y el sitio no ve tu dirección IP. Ninguna mientras el espacio envía todo por Tor, salvo que **Por Tor** esté activado; en los chats ocultos solo con el interruptor propio de su lugar. | |
 
 ## Transparencia {#transparency}
@@ -4778,7 +4916,7 @@ desaparece algún día, o deja de decir «ninguna», tómalo como una señal. **
 de guardar silencio no se puede contar, pero una frase que deja de escribirse se puede notar. Eso solo funciona mientras
 se renueve: cada versión lo vuelve a decir.
 
-Lo que guarda el relay, y durante cuánto tiempo:
+Lo que guarda el servidor, y durante cuánto tiempo:
 
 | Qué | Durante cuánto tiempo |
 | --- | --- |
@@ -4791,16 +4929,16 @@ Lo que guarda el relay, y durante cuánto tiempo:
 
 Lo que no guarda:
 
-- **Ninguna lista de conexiones.** El relay no escribe ningún registro de quién se conectó ni cuándo, y el servidor web
-  que está delante del relay y de la app web no guarda ningún registro de accesos desde el 24 de octubre de 2026. Los
+- **Ninguna lista de conexiones.** El servidor no escribe ningún registro de quién se conectó ni cuándo, y el servidor web
+  que está delante de él y de la app web no guarda ningún registro de accesos desde el 24 de octubre de 2026. Los
   errores se registran, y un error puede nombrar una dirección.
 - **Ningún contacto, nombre ni número de teléfono.** No tiene ninguno que guardar.
 
 Lo que sigue viendo mientras funciona: las direcciones IP que se conectan, cuándo llegan y salen los mensajes, y de qué
-tamaño son, como dice [Qué está protegido hoy](#privacy). Durante una llamada por el relay de llamadas, las direcciones
+tamaño son, como dice [Qué está protegido hoy](#privacy). Durante una llamada por el servidor de llamadas, las direcciones
 IP de los teléfonos que están en ella.
 
-**Copias.** De la carpeta del relay se hace una copia cada día, con los mensajes en espera todavía cifrados de extremo a
+**Copias.** De la carpeta del servidor se hace una copia cada día, con los mensajes en espera todavía cifrados de extremo a
 extremo. Las copias contienen lo que lista la tabla de arriba, mientras se conserven.
 
 **Otros que ven algo:** la empresa de alojamiento (Hetzner), que gestiona la máquina y su red; el inicio de sesión de
@@ -4853,7 +4991,7 @@ Esta parte también se abre desde **Ajustes** → **General** → **Licencia**.
 
 ## Lo que viene {#coming}
 
-El cifrado de extremo a extremo ya está aquí, por el relay y por el enlace de cerca, y la mayor parte de lo que sigue se
+El cifrado de extremo a extremo ya está aquí, por el servidor y por el enlace de cerca, y la mayor parte de lo que sigue se
 construye sobre él.
 
 - **Más formas de seguir en contacto:** los puentes de Tor para donde Tor está bloqueado ya están aquí, ver
@@ -4864,7 +5002,7 @@ construye sobre él.
   - [~] **Teléfono:** Erevos como app de teléfono ya está aquí, con su propia pantalla de llamada, ver [Teléfono](#phone).
   - **Email, códigos QR, USB, NFC:** para cuando nada más consigue pasar.
 - **Llamadas:** las llamadas de voz y vídeo ya están aquí, y en Android suenan en segundo plano, ver
-  [Chatear a través de un relay](#relay), y también un walkie-talkie que funciona incluso por Bluetooth.
+  [Chatear a través de un servidor](#relay), y también un walkie-talkie que funciona incluso por Bluetooth.
 - **Grupos:** los chats de grupo, con fotos, archivos y mensajes de voz, y las llamadas de grupo de voz y vídeo ya están
   aquí, ver [Chats de grupo](#groups). Lo siguiente: vídeo con más de cuatro personas, a través de un servidor al que la
   llamada pasa sola, todavía cifrada de extremo a extremo.
@@ -4901,26 +5039,26 @@ No hay forma de recuperarla. Erevos no guarda nada que pudiera abrir tus datos s
 
 - Las dos radios necesitan la misma región y el mismo primer canal (su nombre y su clave) en la app Meshtastic, y estar
   al alcance la una de la otra, o de radios intermedias.
-- **Radio LoRa**, en **Ajustes** → **Relay y redes**, debe decir **Conectado**. Si no lo dice, cierra la app
+- **Radio LoRa**, en **Ajustes** → **Servidor y redes**, debe decir **Conectado**. Si no lo dice, cierra la app
   Meshtastic: una radio se conecta a una sola app a la vez.
-- Solo van textos, y solo cuando el relay no está disponible y no hay ningún teléfono cerca.
+- Solo van textos, y solo cuando el servidor no está disponible y no hay ningún teléfono cerca.
 - En la UE una radio solo puede transmitir cierta cantidad cada hora: tras muchos mensajes, espera.
 
 ### No se añadió un código de contacto.
 
-Un contacto de otro relay necesita un enlace con la clave de ese relay, que tienen los enlaces de un {=Erevos} actualizado:
-la línea bajo el chat nombra ese relay. Un código de un {=Erevos} más antiguo no tiene claves y se rechaza: pide uno nuevo.
+Un contacto de otro servidor necesita un enlace con la clave de ese servidor, que tienen los enlaces de un {=Erevos} actualizado:
+la línea bajo el chat nombra ese servidor. Un código de un {=Erevos} más antiguo no tiene claves y se rechaza: pide uno nuevo.
 
-### ¿Puede el relay leer mis mensajes?
+### ¿Puede el servidor leer mis mensajes?
 
-No. Los mensajes a través de un relay están cifrados de extremo a extremo, y solo los dos teléfonos tienen las claves.
-El relay sigue viendo qué colas se usan, y cuándo y cuánto llega ([Tener tu propio relay](#own-relay)). Comparad el
-número de seguridad, como en [Chatear a través de un relay](#relay), para estar seguros de que no hay nadie en medio.
+No. Los mensajes a través de un servidor están cifrados de extremo a extremo, y solo los dos teléfonos tienen las claves.
+El servidor sigue viendo qué colas se usan, y cuándo y cuánto llega ([Tener tu propio servidor](#own-relay)). Comparad el
+número de seguridad, como en [Chatear a través de un servidor](#relay), para estar seguros de que no hay nadie en medio.
 Todavía no se ha auditado nada.
 
 ### ¿Por qué Erevos no pide mi número de teléfono?
 
-Porque nada lo necesita. Cada contacto es un par de colas de un solo sentido en el relay, así que ningún servidor tiene
+Porque nada lo necesita. Cada contacto es un par de colas de un solo sentido en el servidor, así que ningún servidor tiene
 una lista de quién conoce a quién.
 
 ### ¿Funciona en un iPhone o en un ordenador?

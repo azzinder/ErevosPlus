@@ -33,8 +33,8 @@ export const publicFeed: Record<string, string> = {
     "Να αναδημοσιεύσεις αυτή την ανάρτηση στους ακόλουθούς σου;",
   "Take back this post?":
     "Να ανακληθεί αυτή η ανάρτηση;",
-  "The relays that keep it are asked to drop it. Copies that others made may stay.":
-    "Ζητείται από τα relays που την κρατούν να τη σβήσουν. Αντίγραφα που κράτησαν άλλοι μπορεί να μείνουν.",
+  "The servers that keep it are asked to drop it. Copies that others made may stay.":
+    "Ζητείται από τους servers που την κρατούν να τη σβήσουν. Αντίγραφα που κράτησαν άλλοι μπορεί να μείνουν.",
   "Copy text":
     "Αντιγραφή κειμένου",
   "Open the room":
@@ -91,6 +91,6 @@ export const publicFeed: Record<string, string> = {
     "Εμφάνιση της προεπισκόπησης",
   "Tap to show a preview of {site}":
     "Πάτα για προεπισκόπηση του {site}",
-  "No Nostr relay took it. Try again in a while.":
-    "Κανένα relay Nostr δεν την πήρε. Δοκίμασε ξανά σε λίγο.",
+  "No Nostr server took it. Try again in a while.":
+    "Κανένας server Nostr δεν την πήρε. Δοκίμασε ξανά σε λίγο.",
 };

@@ -324,14 +324,14 @@ export async function takeBackShortInvite(short: ShortInvite): Promise<boolean> 
 
 async function shortInvite(number: string, name: string, days: number): Promise<ShortInvite> {
   const data = await loadCurrentSpaceData();
-  if (!data.url || !data.ownQueue) throw new Error(t('An invite by SMS needs a relay: your phone has none yet.'));
+  if (!data.url || !data.ownQueue) throw new Error(t('An invite by SMS needs a server: your phone has none yet.'));
   const relay: Relay = { url: data.url, token: data.token || undefined };
   // The relay has a name of random letters for them, never their number; the name stays here (lib/e2e.ts lineFor).
   const chats = await spaceChats().catch(() => null);
   const line = chats ? await chats.e2e.lineFor(name.trim() || (number ? plainNumber(number) : '')) : randomLineName();
   const access = relay.token ? await makeInvite(relay, line) : null;
   if (!access) {
-    throw new Error(t('Your relay does not let this phone invite anyone, so an invite by SMS could not let them in. Invite them with a QR code instead, from New chat.'));
+    throw new Error(t('Your server does not let this phone invite anyone, so an invite by SMS could not let them in. Invite them with a QR code instead, from New chat.'));
   }
   let key = '';
   if (canRelaySeal()) {

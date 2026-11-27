@@ -5,8 +5,10 @@
 import { useEffect, useState } from 'react';
 
 import { Button, Card, Chip, Input, Page, Row, SectionTitle, Text } from '../components/ui';
-import { canNostr } from '../lib/core';
+import { canNostr, canNostrTor } from '../lib/core';
+import { setDirect } from '../lib/direct';
 import { t } from '../lib/i18n';
+import { modeSaid } from '../lib/modes';
 import { nostrOf, nostrStates, onNostrStates, setNostr, type NostrRelayState } from '../lib/nostr';
 import type { TorWay } from '../lib/relay';
 import { isNostrRelay, MAX_NOSTR_RELAYS } from '../lock/e2e-data';
@@ -15,7 +17,9 @@ import { loadCurrentSpaceData, NOSTR_RELAYS, updateCurrentSpaceData, type NostrS
 // Whether the space's texts go through Nostr (lib/nostr.ts), on unless changed; whether Nostr goes
 // through Tor by its own switch, off unless turned on, besides the space's Tor way; the Nostr
 // relays it reads on: the first three unless changed, and any of one's own; and what each relay
-// did last since Erevos started, so a test shows where a text went and why.
+// did last since Erevos started, so a test shows where a text went and why. Where there is no Tor
+// (the web app, the computer app, Sailfish OS's), Nostr is reached straight, and the switch shows
+// only while it is on, as a phone's backup may bring it, to turn it off.
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -71,10 +75,14 @@ export default function NostrScreen() {
   async function keep(next: NostrSetting, said = '') {
     setNote('');
     try {
-      await updateCurrentSpaceData({ nostr: next });
+      // Nostr through Tor on: Direct connections goes off with it (SPEED becomes ANONYMOUS), and stays
+      // off until the owner chooses SPEED again (lib/direct.ts), as with the space's Tor way.
+      const direct = next.tor === true && setting?.tor !== true && (await loadCurrentSpaceData()).direct;
+      await updateCurrentSpaceData(direct ? { nostr: next, direct: false } : { nostr: next });
+      if (direct) setDirect(false);
       setSetting(next);
       setNostr(nostrOf(next), next.tor === true);
-      setNote(said || t('Saved.'));
+      setNote(direct ? modeSaid('anonymous') : said || t('Saved.'));
     } catch (error) {
       setNote(error instanceof Error ? error.message : String(error));
     }
@@ -84,15 +92,15 @@ export default function NostrScreen() {
     if (!setting) return;
     const address = draft.trim().replace(/\/+$/, '');
     if (!isNostrRelay(address)) {
-      setNote(t('A Nostr relay address starts with wss://.'));
+      setNote(t('A Nostr server address starts with wss://.'));
       return;
     }
     if (setting.relays.includes(address)) {
-      setNote(t('That relay is on the list already.'));
+      setNote(t('That server is on the list already.'));
       return;
     }
     if (setting.relays.length >= MAX_NOSTR_RELAYS) {
-      setNote(t('Five relays at most: remove one first.'));
+      setNote(t('Five servers at most: remove one first.'));
       return;
     }
     setDraft('');
@@ -101,6 +109,8 @@ export default function NostrScreen() {
 
   const relays = setting?.relays ?? [];
   const firsts = relays.join(' ') === NOSTR_RELAYS.join(' ');
+  // This build reaches Nostr through Tor: on Android. Elsewhere only straight (lib/nostr.ts).
+  const torHere = canNostrTor();
   const shown = [...relays, ...[...states.keys()].filter((url) => !relays.includes(url))];
 
   return (
@@ -110,49 +120,62 @@ export default function NostrScreen() {
         <Text variant="bodyStrong">{t('Texts through Nostr')}</Text>
         <Text tone="muted">
           {t(
-            'What you write to a contact whose Erevos reads on Nostr too goes through your relays first: your relay, then their home relays, then your home relay. Only when none of them takes it does it go through public Nostr relays. There it is end-to-end encrypted as always, and sealed once more for a key your contact gave this chat alone, by a key made for that message alone: the Nostr relays see neither who wrote it nor to whom, and your relay does not see what went that way.',
+            'What you write to a contact whose Erevos reads on Nostr too goes through your servers first: your server, then their home servers, then your home server. Only when none of them takes it does it go through public Nostr servers. There it is end-to-end encrypted as always, and sealed once more for a key your contact gave this chat alone, by a key made for that message alone: the Nostr servers see neither who wrote it nor to whom, and your server does not see what went that way.',
           )}
         </Text>
         <Row wrap>
           <Chip label={t('On')} selected={setting?.on === true} onPress={() => setting && void keep({ ...setting, on: true })} />
           <Chip label={t('Off')} selected={setting?.on === false} onPress={() => setting && void keep({ ...setting, on: false })} />
         </Row>
-        <Text variant="bodyStrong">{t('Nostr through Tor')}</Text>
-        <Row wrap>
-          <Chip label={t('On')} selected={setting?.tor === true} onPress={() => setting && void keep({ ...setting, tor: true })} />
-          <Chip label={t('Off')} selected={setting !== null && setting.tor !== true} onPress={() => setting && void keep(withoutTor(setting))} />
-        </Row>
-        {tor && setting ? (
+        {torHere || setting?.tor === true ? (
+          <>
+            <Text variant="bodyStrong">{t('Nostr through Tor')}</Text>
+            <Row wrap>
+              {torHere ? <Chip label={t('On')} selected={setting?.tor === true} onPress={() => setting && void keep({ ...setting, tor: true })} /> : null}
+              <Chip label={t('Off')} selected={setting !== null && setting.tor !== true} onPress={() => setting && void keep(withoutTor(setting))} />
+            </Row>
+          </>
+        ) : null}
+        {tor && setting && torHere ? (
           <Text tone="muted">
             {tor !== 'off'
-              ? t("Tor is on for this space, so Erevos reaches the Nostr relays through Tor: they do not see this phone's internet address.")
+              ? t("Tor is on for this space, so Erevos reaches the Nostr servers through Tor: they do not see this phone's internet address.")
               : setting.tor === true
-                ? t("Erevos reaches the Nostr relays through Tor, and starts Tor for it: they do not see this phone's internet address. While Tor starts, a text that goes there waits.")
-                : t("Tor is off for this space, so Erevos reaches the Nostr relays straight: they see this phone's internet address, as your relay does, but still neither who wrote a text nor to whom.")}
+                ? t("Erevos reaches the Nostr servers through Tor, and starts Tor for it: they do not see this phone's internet address. While Tor starts, a text that goes there waits.")
+                : t("Tor is off for this space, so Erevos reaches the Nostr servers straight: they see this phone's internet address, as your server does, but still neither who wrote a text nor to whom.")}
           </Text>
         ) : null}
-        <Text tone="muted">{t('A chat set to "Through Tor" reaches the Nostr relays only through Tor, whatever this switch says.')}</Text>
+        {tor && setting && !torHere ? (
+          <Text tone="muted">
+            {setting.tor === true
+              ? t('Nostr through Tor is on, and this device has no Tor: Erevos reaches no Nostr server here. Turn it off to reach them straight.')
+              : tor === 'all'
+                ? t('This space sends everything through Tor, which this device does not have: Erevos reaches no Nostr server here. Choose SPEED or ANONYMOUS at the top of Settings to reach them straight.')
+                : t('This device has no Tor, so Erevos reaches the Nostr servers straight: they see its internet address, as your server does, but still neither who wrote a text nor to whom.')}
+          </Text>
+        ) : null}
+        {torHere ? <Text tone="muted">{t('A chat set to "Through Tor" reaches the Nostr servers only through Tor, whatever this switch says.')}</Text> : null}
         <Text tone="muted">
           {t(
-            "A text that went through Nostr goes through your relay again should your contact's phone not say within five minutes that it came, and they see it once. While Tor starts, or when no Nostr relay takes it either, it waits and goes again, as any message does.",
+            "A text that went through Nostr goes through your server again should your contact's phone not say within five minutes that it came, and they see it once. While Tor starts, or when no Nostr server takes it either, it waits and goes again, as any message does.",
           )}
         </Text>
         <Text tone="muted">
           {t(
-            'Pictures, files, voice messages, calls, reactions, and the marks that a message came or was read go through your relay, as before. So does what you write to contacts on an iPhone or a computer, which do not read on Nostr.',
+            'Pictures, files, voice messages, calls, reactions, and the marks that a message came or was read go through your server, as before.',
           )}
         </Text>
         <Text tone="muted">
           {t(
-            'Hidden chats read on Nostr too, while they are open. Closed, they still show "New message": with each text through Nostr, your contact also sends your relay a bell that says nothing.',
+            'Hidden chats read on Nostr too, while they are open. Closed, they still show "New message": with each text through Nostr, your contact also sends your server a bell that says nothing.',
           )}
         </Text>
       </Card>
 
-      <SectionTitle title={t('Nostr relays')} />
+      <SectionTitle title={t('Nostr servers')} />
       <Card>
         <Text variant="caption" tone="muted">
-          {t('Your contacts are told the relays you read on, and write to you there. One that takes it is enough.')}
+          {t('Your contacts are told the servers you read on, and write to you there. One that takes it is enough.')}
         </Text>
         {relays.map((relay) => (
           <Row key={relay}>
@@ -172,21 +195,21 @@ export default function NostrScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
-          accessibilityLabel={t('Nostr relay address')}
+          accessibilityLabel={t('Nostr server address')}
           placeholder="wss://relay.example.org"
         />
         <Row wrap>
           <Button title={t('Add')} kind="secondary" compact disabled={!draft.trim()} onPress={add} />
           {!firsts ? (
-            <Button title={t('The first relays again')} kind="secondary" compact onPress={() => setting && void keep({ ...setting, relays: NOSTR_RELAYS })} />
+            <Button title={t('The first servers again')} kind="secondary" compact onPress={() => setting && void keep({ ...setting, relays: NOSTR_RELAYS })} />
           ) : null}
         </Row>
       </Card>
 
-      <SectionTitle title={t('What the relays did last')} />
+      <SectionTitle title={t('What the servers did last')} />
       <Card>
         <Text variant="caption" tone="muted">
-          {t("Since Erevos started, kept on this phone only, and only for as long as it runs: whether each relay took the last text it was given, and whether it is read on. Your contacts' relays show here too once a text went to them.")}
+          {t("Since Erevos started, kept on this phone only, and only for as long as it runs: whether each server took the last text it was given, and whether it is read on. Your contacts' servers show here too once a text went to them.")}
         </Text>
         {shown.map((url) => (
           <Text key={url} variant="caption">

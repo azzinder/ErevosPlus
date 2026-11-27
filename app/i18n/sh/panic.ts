@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Sve što Erevos ovdje čuva briše se sada, zauvijek: svaki prostor s njegovim skrivenim razgovorima, kontaktima, porukama i ključevima. Erevos se zatim pokreće kao tek instaliran. To se ne može poništiti.",
   "Wipe": "Obriši",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "U opasnosti odmah obrišite Erevos: svaki prostor s njegovim skrivenim razgovorima, s njihovim kontaktima, porukama, fotografijama, datotekama i ključevima, zaključavanje, Matrix, XMPP i Nostr račune, tokene relaya te postavke i lozinku automatskih rezervnih kopija i njihovog servera.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "Ono do čega ne može doći ostaje: rezervne kopije koje ste kopirali drugdje ili poslali na server (njihova ih lozinka i dalje štiti), ono što relay čuva za vas dok ne istekne, i ono što imaju vaši kontakti.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "U opasnosti odmah obrišite Erevos: svaki prostor s njegovim skrivenim razgovorima, s njihovim kontaktima, porukama, fotografijama, datotekama i ključevima, zaključavanje, Matrix, XMPP i Nostr račune, tokene servera te postavke i lozinku automatskih rezervnih kopija i njihovog servera.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "Ono do čega ne može doći ostaje: rezervne kopije koje ste kopirali drugdje ili poslali na server (njihova ih lozinka i dalje štiti), ono što server čuva za vas dok ne istekne, i ono što imaju vaši kontakti.",
   "Wipe now": "Obriši sada",
   "Wipe everything now": "Obriši sve sada",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Ovdje se Erevos ne može sam obrisati: umjesto toga obrišite njegove podatke s računala.",

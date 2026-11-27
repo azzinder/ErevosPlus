@@ -421,15 +421,15 @@ test('Matrix: a place that receives while closed keeps syncing, and what comes t
   }
 });
 
-test('Nostr: how an account reaches its relays, as its own Tor choice says', () => {
+test('Nostr: how an account reaches its servers, as its own Tor choice says, and only through Tor in INVISIBLE', () => {
   try {
     setThroughTor('off');
     assert.equal(nostrWay('never'), 'straight');
     assert.equal(nostrWay('space'), 'straight');
     assert.equal(nostrWay('always'), 'tor only');
     setThroughTor('all');
-    // Off is off, whatever the space does; As the space never goes straight with Everything.
-    assert.equal(nostrWay('never'), 'straight');
+    // INVISIBLE (Everything): every account goes only through Tor, even one set to Off.
+    assert.equal(nostrWay('never'), 'tor only');
     assert.equal(nostrWay('space'), 'tor only');
     assert.equal(nostrWay('always'), 'tor only');
   } finally {

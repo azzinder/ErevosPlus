@@ -69,6 +69,7 @@ export const QUEUE_MAKERS: Record<string, readonly Source[]> = {
   'app/chat.tsx': ['own', 'place-ring', 'watch', 'ring'],
   'app/devices.tsx': ['own'],
   'components/quick-link.tsx': ['own'],
+  'lib/open-place.ts': ['own'],
   'app/relay.tsx': [],
 };
 

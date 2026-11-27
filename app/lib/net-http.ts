@@ -30,7 +30,7 @@ import { ensureTor } from './tor';
 export const HTTP_MOST = 100 * 1024 * 1024;
 
 export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PROPFIND' | 'MKCOL';
-export type HttpAnswer = { status: number; bytes: Uint8Array; reason?: string };
+export type HttpAnswer = { status: number; bytes: Uint8Array; reason?: string; location?: string };
 export type Http = (method: HttpMethod, url: string, headers: Record<string, string>, body?: Uint8Array, most?: number) => Promise<HttpAnswer>;
 
 const megabytes = (bytes: number) => String(Math.floor(bytes / (1024 * 1024)));
@@ -97,9 +97,11 @@ export async function fetchCapped(url: string, init: RequestInit, most: number =
   return { response, bytes: await readCapped(response, most, () => stop.abort()) };
 }
 
+// Straight, an answer keeps the address it names (Location), as a resumable upload to Google Drive
+// is given its own (lib/google-drive.ts); through Tor the core gives no headers back.
 async function straight(method: HttpMethod, url: string, headers: Record<string, string>, body: Uint8Array | undefined, most: number): Promise<HttpAnswer> {
   const { response, bytes } = await fetchCapped(url, { method, headers, body: body as unknown as BodyInit | undefined }, most);
-  return { status: response.status, bytes, reason: response.headers.get('x-reason') ?? undefined };
+  return { status: response.status, bytes, reason: response.headers.get('x-reason') ?? undefined, location: response.headers.get('location') ?? undefined };
 }
 
 async function viaTor(method: HttpMethod, url: string, headers: Record<string, string>, body: Uint8Array | undefined, most: number): Promise<HttpAnswer> {

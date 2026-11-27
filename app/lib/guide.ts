@@ -7,7 +7,7 @@
  * (guide/*), read here:
  *
  *   ## Section title {#id}     a section, opened on its own screen
- *   ### Heading                a heading inside it
+ *   ### Heading                a heading inside it; "### Heading {#id}" names it, for a link
  *   - item / "  - sub-item"    a list (one level of sub-items)
  *   1. step                    numbered steps
  *   | a | b |                  a table; its first row is the head, `| --- |` rows are skipped
@@ -19,7 +19,7 @@
  * [a section](#id) and [a page](https://…).
  */
 export type GuideBlock =
-  | { kind: 'heading'; text: string }
+  | { kind: 'heading'; text: string; id?: string }
   | { kind: 'paragraph'; text: string }
   | { kind: 'bullets'; items: { text: string; sub: string[] }[] }
   | { kind: 'steps'; items: string[] }
@@ -42,6 +42,7 @@ export interface Span {
 }
 
 const SECTION = /^##\s+(.+?)\s*\{#([a-z0-9-]+)\}\s*$/;
+const HEADING = /^(.+?)\s*\{#([a-z0-9-]+)\}$/;
 
 function cells(line: string): string[] {
   return line
@@ -104,6 +105,13 @@ function marked(text: string, mark: '+' | '~', keep: boolean): string {
   return out.join('\n');
 }
 
+/** Where a link "#id" of the guide opens: the section of that id, or the one that holds the heading
+ *  "### … {#id}"; -1 when there is none. */
+export function sectionAt(sections: readonly GuideSection[], id: string): number {
+  const own = sections.findIndex((section) => section.id === id);
+  return own >= 0 ? own : sections.findIndex((section) => section.blocks.some((block) => block.kind === 'heading' && block.id === id));
+}
+
 export function parseGuide(source: string): GuideSection[] {
   const sections: GuideSection[] = [];
   let section: GuideSection | null = null;
@@ -132,7 +140,8 @@ export function parseGuide(source: string): GuideSection[] {
     }
     const current = open as GuideBlock | null;
     if (line.startsWith('### ')) {
-      add({ kind: 'heading', text: line.slice(4).trim() });
+      const named = HEADING.exec(line.slice(4).trim());
+      add(named ? { kind: 'heading', text: named[1], id: named[2] } : { kind: 'heading', text: line.slice(4).trim() });
       open = null;
     } else if (/^\s*\|/.test(line)) {
       const row = cells(line);

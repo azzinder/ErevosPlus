@@ -225,7 +225,7 @@ function decodeItem(bytes: Uint8Array, now: number): { url: string; sealed: Uint
 /** Neither the relay nor a phone nearby took it. */
 export class NoWayError extends Error {
   constructor() {
-    super(t('There is no relay, and no Erevos phone is linked nearby. Type the relay address in Relay, or come near their phone.'));
+    super(t('There is no server, and no Erevos phone is linked nearby. Type the server address in Server, or come near their phone.'));
   }
 }
 
@@ -242,14 +242,14 @@ export class TooLargeForSlowWayError extends Error {
 /** Only a slow link was up, and it does not take something this large. */
 export class TooLargeForLoraError extends TooLargeForSlowWayError {
   constructor(relayError: unknown = null) {
-    super(t('Too large for LoRa, which takes only text. It can go once the relay can be reached, or near their phone.'), relayError);
+    super(t('Too large for LoRa, which takes only text. It can go once the server can be reached, or near their phone.'), relayError);
   }
 }
 
 /** Only SMS was left, and it does not take something this large. */
 export class TooLargeForSmsError extends TooLargeForSlowWayError {
   constructor(relayError: unknown = null) {
-    super(t('Too long for SMS, which takes only short texts. It can go once the relay can be reached, or near their phone.'), relayError);
+    super(t('Too long for SMS, which takes only short texts. It can go once the server can be reached, or near their phone.'), relayError);
   }
 }
 

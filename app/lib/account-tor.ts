@@ -19,6 +19,10 @@
 // A chat set «Through Tor» (where the network has one connection for the account: Telegram,
 // Signal, XMPP) makes the whole account 'always' while it is on (effectiveTor): a chat's setting
 // overrides the account's, and such a chat never goes straight.
+//
+// INVISIBLE (lib/modes.ts, the space's Tor way 'all'): everything of the space goes through Tor,
+// so every account does too, whatever it chose, and none goes straight (accountThroughTor,
+// accountNeverStraight); and no call of any network rings or goes (callsOff).
 
 import { canTor, canTorHttp } from './core';
 import { throughTor, torFor } from './relay';
@@ -49,14 +53,14 @@ export function canAccountTor(): boolean {
 /** Whether what the account sends goes through Tor now; `files` for files and media. */
 export function accountThroughTor(choice: AccountTor, files = false): boolean {
   if (!canAccountTor()) return false;
-  if (choice === 'always') return true;
+  if (choice === 'always' || throughTor()) return true;
   if (choice === 'never') return false;
   return torFor(files);
 }
 
-/** Whether the account must not go straight now: 'always', or the space's way Everything. */
+/** Whether the account must not go straight now: 'always', or the space's way Everything (INVISIBLE), whatever the choice. */
 export function accountNeverStraight(choice: AccountTor): boolean {
-  return choice === 'always' || (choice === 'space' && throughTor());
+  return choice === 'always' || throughTor();
 }
 
 /** The error an account gives when it must go through Tor and cannot. */

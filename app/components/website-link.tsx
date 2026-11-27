@@ -58,7 +58,7 @@ export function WebsiteLink({ visible, onClose, contactLink, name: given, onNote
         {t('A link to put on a web page, such as your contact page: it opens a page that offers Erevos to whoever has no Erevos yet, then adds you. It works for as long as your contact link does.')}
       </Text>
       <Text variant="caption" tone="muted">
-        {t('Anyone can see it, so anyone can write to you: what they send comes as a message request, which you accept or refuse, and you can block them. It gives no one a place on your relay. New contact link ends it.')}
+        {t('Anyone can see it, so anyone can write to you: what they send comes as a message request, which you accept or refuse, and you can block them. It gives no one a place on your server. New contact link ends it.')}
       </Text>
       <Field label={t('Your name, for them')} hint={t('Shown on the page, and their phone names you with it. Optional.')}>
         <Input value={name} onChangeText={setName} placeholder={t('Your name')} maxLength={40} autoCorrect={false} />

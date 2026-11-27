@@ -15,12 +15,12 @@ export const nostrMore: Record<string, string> = {
   '{n} vote': '{n} voto',
   '{n} votes': '{n} voti',
   'Through Tor: on': 'Tramite Tor: attivo',
-  'What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose relays are read once for all its chats.':
-    'Ciò che invii qui, la ricerca di dove leggono e le foto e i file di questa chat passano solo tramite Tor, su circuiti propri, qualunque sia la modalità Tor dello spazio; mai senza Tor. Ciò che arriva a te segue il tuo account Nostr, i cui relay vengono letti una volta per tutte le sue chat.',
-  'Not through Tor now: the Nostr relays see your address.':
-    'Ora non tramite Tor: i relay Nostr vedono il tuo indirizzo.',
-  'Not through Tor now: the Nostr relays see your address. Tor for this account is under Settings → Relay and networks → Nostr chats.':
-    'Ora non tramite Tor: i relay Nostr vedono il tuo indirizzo. Il Tor di questo account è in Impostazioni → Relay e reti → Chat Nostr.',
+  "What you send here, the look-up of where they read, and the photos and files of this chat go only through Tor, on circuits of their own, whatever the space’s Tor way; never without Tor. What comes to you follows your Nostr account, whose servers are read once for all its chats.":
+    'Ciò che invii qui, la ricerca di dove leggono e le foto e i file di questa chat passano solo tramite Tor, su circuiti propri, qualunque sia la modalità Tor dello spazio; mai senza Tor. Ciò che arriva a te segue il tuo account Nostr, i cui server vengono letti una volta per tutte le sue chat.',
+  "Not through Tor now: the Nostr servers see your address.":
+    'Ora non tramite Tor: i server Nostr vedono il tuo indirizzo.',
+  "Not through Tor now: the Nostr servers see your address. Tor for this account is under Settings → Server and networks → Nostr chats.":
+    'Ora non tramite Tor: i server Nostr vedono il tuo indirizzo. Il Tor di questo account è in Impostazioni → Server e reti → Chat Nostr.',
   'A chat can also go through Tor by itself, on circuits of its own: «Through Tor» at its foot. It does, whatever is chosen here.':
     'Una chat può anche passare da sola tramite Tor, su circuiti propri: «Tramite Tor» in fondo alla chat. Allora passa così, qualunque cosa si scelga qui.',
 };

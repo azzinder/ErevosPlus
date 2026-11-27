@@ -50,7 +50,7 @@ export function invitePieces(invite: SmsInvite, id: Uint8Array): Uint8Array[] {
   body.set(relay, 57 + relayKey.length);
   const room = PIECE - HEAD;
   const count = Math.ceil(body.length / room);
-  if (count > MAX_PIECES) throw new Error(t('The relay address is too long for an SMS invite.'));
+  if (count > MAX_PIECES) throw new Error(t('The server address is too long for an SMS invite.'));
   return Array.from({ length: count }, (_, index) => {
     const part = body.subarray(index * room, (index + 1) * room);
     const piece = new Uint8Array(HEAD + part.length);

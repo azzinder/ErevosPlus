@@ -397,7 +397,7 @@ export default function SmsSettings() {
           {part ? null : <SectionTitle title={t('Find Erevos on a number')} />}
           <Card>
             <Text tone="muted">
-              {t('With the first SMS to a number that is not a contact, Erevos also sends a hidden invite. A phone without Erevos shows nothing. A phone with Erevos answers through the relay, and the two become contacts. The phone company sees one more short SMS. Each number is asked once a month at most. Turned off, Erevos sends no invites and answers none that come: no one becomes a contact from your number alone.')}
+              {t('With the first SMS to a number that is not a contact, Erevos also sends a hidden invite. A phone without Erevos shows nothing. A phone with Erevos answers through the server, and the two become contacts. The phone company sees one more short SMS. Each number is asked once a month at most. Turned off, Erevos sends no invites and answers none that come: no one becomes a contact from your number alone.')}
             </Text>
             <Button title={invites ? t('Turn invites off') : t('Turn invites on')} kind="secondary" onPress={() => void toggleInvites()} />
             <Text variant="caption" tone="faint">
@@ -412,7 +412,7 @@ export default function SmsSettings() {
           {part ? null : <SectionTitle title={t('SMS when nothing else works')} />}
           <Card>
             <Text tone="muted">
-              {t("When the relay, Nostr, the phones nearby and LoRa all fail, a text to an Erevos contact whose number is linked can go by SMS instead, end-to-end encrypted like any Erevos message, as hidden data SMS their SMS app does not show. Off unless you turn it on, here for all such contacts or in a chat's Details for one.")}
+              {t("When the server, Nostr, the phones nearby and LoRa all fail, a text to an Erevos contact whose number is linked can go by SMS instead, end-to-end encrypted like any Erevos message, as hidden data SMS their SMS app does not show. Off unless you turn it on, here for all such contacts or in a chat's Details for one.")}
             </Text>
             <Text tone="muted">
               {t('Mind what it costs: each SMS costs what your plan says, a short text takes 3 SMS and a longer one up to 10. And the phone company sees which number wrote to which, and when, as with any SMS; never what was written.')}

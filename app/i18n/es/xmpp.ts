@@ -133,12 +133,12 @@ export const xmpp: Record<string, string> = {
   "This group server does not let a group be renamed.": "Este servidor de grupos no permite cambiar el nombre de un grupo.",
   "To leave the group, use Leave the group.": "Para salir del grupo, usa «Salir del grupo».",
   "This person is not a member of the group.": "Esta persona no es miembro del grupo.",
-  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's relay of each message while no app of the account is on: the XMPP server learns the relay's name, and the relay when messages come.":
-    "Mientras otro espacio está abierto, este dice «Mensaje nuevo» cuando llega algo en XMPP, nunca qué, de quién ni en qué chat, y una llamada no suena. Para ello el servidor de XMPP avisa al relay de este espacio de cada mensaje mientras ninguna app de la cuenta está activa: el servidor de XMPP conoce el nombre del relay, y el relay cuándo llegan mensajes.",
+  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's own server of each message while no app of the account is on: the XMPP server learns that server's name, and that server when messages come.":
+    "Mientras otro espacio está abierto, este dice «Mensaje nuevo» cuando llega algo en XMPP, nunca qué, de quién ni en qué chat, y una llamada no suena. Para ello el servidor de XMPP avisa al servidor propio de este espacio de cada mensaje mientras ninguna app de la cuenta está activa: el servidor de XMPP conoce el nombre de ese servidor, y ese servidor cuándo llegan mensajes.",
   "Closed, this space hears nothing from XMPP: what came shows when it opens.":
     "Cerrado, este espacio no oye nada de XMPP: lo que llegó se ve cuando se abre.",
-  "Your relay does not take XMPP notices yet: it needs updating.":
-    "Tu relay aún no acepta avisos de XMPP: necesita una actualización.",
+  "Your server does not take XMPP notices yet: it needs updating.":
+    "Tu servidor aún no acepta avisos de XMPP: necesita una actualización.",
   "Your XMPP server does not send notices to apps that are away.":
     "Tu servidor XMPP no envía avisos a las apps que no están activas.",
   "Always through Tor":

@@ -9,7 +9,7 @@ export const more: Record<string, string> = {
   'Automatic': 'Automatski',
   'straight': 'direktno',
   'your own bridges': 'vaši mostovi',
-  'Tor is off for this space: messages go straight to the relay.': 'Tor je isključen za ovaj prostor: poruke idu direktno na relay.',
+  'Tor is off for this space: messages go straight to the server.': 'Tor je isključen za ovaj prostor: poruke idu direktno na server.',
   'Tor is connected, {how}.': 'Tor je povezan, {how}.',
   'Tor is connected.': 'Tor je povezan.',
   'Tor cannot connect from this network. Try Automatic, or bridges of your own.': 'Tor se ne može povezati s ove mreže. Probajte Automatski, ili svoje mostove.',
@@ -42,8 +42,8 @@ export const more: Record<string, string> = {
   'Not in use until you tap Use these bridges.': 'Ne koriste se dok ne dodirnete „Koristi ove mostove“.',
   'With bridges, Tor never goes straight to its relays: when no bridge answers, messages wait. Bridges count only while Tor is on.':
     'S mostovima Tor nikad ne ide direktno na svoje relaye: kad nijedan most ne odgovara, poruke čekaju. Mostovi vrijede samo dok je Tor uključen.',
-  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the relay without Tor until one does.':
-    'S mostovima Tor nikad ne ide direktno na svoje relaye: kad nijedan most ne odgovara, poruke idu relayu bez Tora dok neki ne odgovori.',
+  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the server without Tor until one does.':
+    'S mostovima Tor nikad ne ide direktno na svoje relaye: kad nijedan most ne odgovara, poruke idu serveru bez Tora dok neki ne odgovori.',
 
   // Updates on Windows, and on every computer: the file to take.
   'The download page opens: take {file}, see User guide → Updates.': 'Otvara se stranica za preuzimanje: preuzmite {file}, pogledajte „Korisnički vodič → Updates“.',

@@ -45,7 +45,7 @@ import { space } from '../theme/colors';
 import { useColors } from '../theme/context';
 
 // The space's Telegram account (the ErevosGram build only: lib/telegram-store.ts, docs/erevosgram.md),
-// under Settings → Relay and networks → Telegram: signing in step by step as Telegram asks (the phone
+// under Settings → Server and networks → Telegram: signing in step by step as Telegram asks (the phone
 // number, the code, the two-step password, or a scan from another device), then its chats, its
 // folders and its archive as rows like home's (components/chat-row.tsx), in a list that draws only
 // the rows on the screen and asks Telegram for more as it nears its end, each opening in

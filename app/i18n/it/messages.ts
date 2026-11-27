@@ -677,7 +677,7 @@ export const messages: Record<string, string> = {
     'Gli sticker che crei qui restano solo in queste chat nascoste, sigillati, e vengono inviati crittografati end-to-end come le foto. Tienine premuto uno per eliminarlo.',
   "This sticker's picture is gone.": 'L’immagine di questo sticker non c’è più.',
   'Sending the sticker…': 'Invio dello sticker…',
-  'Sticker sent through the relay, end-to-end encrypted.': 'Sticker inviato tramite il relay, crittografato end-to-end.',
+  'Sticker sent through the server, end-to-end encrypted.': 'Sticker inviato tramite il server, crittografato end-to-end.',
   'Add to my stickers': 'Aggiungi ai miei sticker',
   'Added to your stickers.': 'Aggiunto ai tuoi sticker.',
   // A place sent once (lib/place.ts, components/message-parts.tsx).

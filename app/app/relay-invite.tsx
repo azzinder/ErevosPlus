@@ -21,7 +21,7 @@ export default function RelayInvite() {
     return (
       <Page>
         <Text variant="title">{t('Not an invite')}</Text>
-        <Text tone="muted">{t('This link does not hold an invite to a relay that Erevos can use.')}</Text>
+        <Text tone="muted">{t('This link does not hold an invite to a server that Erevos can use.')}</Text>
         <Button title={t('Close')} onPress={() => router.dismissTo('/')} />
       </Page>
     );
@@ -29,19 +29,19 @@ export default function RelayInvite() {
 
   return (
     <Page>
-      <Text variant="title">{t('Invite to a relay')}</Text>
-      <Field label={t('Relay')}>
+      <Text variant="title">{t('Invite to a server')}</Text>
+      <Field label={t('Server')}>
         <Text selectable variant="mono" style={{ fontSize: 13 }}>
           {invite.relayUrl}
         </Text>
       </Field>
       <Text tone="muted">
         {t(
-          'Whoever made this invite lets this phone use their relay, with a token of its own, for as long as they may use it themselves. Erevos makes the token and keeps it in this space; you type nothing. Take it only if it came from someone you know.',
+          'Whoever made this invite lets this phone use their server, with a token of its own, for as long as they may use it themselves. Erevos makes the token and keeps it in this space; you type nothing. Take it only if it came from someone you know.',
         )}
       </Text>
       <Button
-        title={t('Use this relay')}
+        title={t('Use this server')}
         onPress={() => {
           offerInvite(invite, currentSpace().space);
           router.dismissTo('/chat?setup=1');

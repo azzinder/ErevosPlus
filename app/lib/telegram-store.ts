@@ -16,6 +16,7 @@ import { addNetwork, hearing, placeNetworkRang } from './network-notices';
 import { canTor, canTorSocks } from './core';
 import { accountNeverStraight, accountTorDoor, AccountTorError, accountTorOf, canAccountTor, effectiveTor, type AccountTor } from './account-tor';
 import { onTorReady, onTorWay } from './relay';
+import { callsOff, callsOffNote } from './modes';
 import { actingWhere, type NetworkWhere } from './network-place';
 import { PlaceLives, type PlaceKey } from './place-lives';
 import { addHistory, applyUpdate, freshCounts, freshLeft, freshMessage, heardUnread, readLocally, newTgState, phoneRequest, readMessage, saidError, setLater, tdError, telegramKeys, textRequest, type TgList, type TgMessage, type TgState } from './telegram';
@@ -269,7 +270,7 @@ function start(holder: Holder, space: number, key: Uint8Array, pocket?: number):
     },
     () => t('I use ErevosGram for end-to-end encryption and invited you to an encrypted chat. To accept, get it here: https://lphl.nekten.eu/erevos'),
   );
-  const calls = new TelegramCalls((body) => request(it, body), callSound, told);
+  const calls = new TelegramCalls((body) => request(it, body), callSound, told, Date.now, () => (callsOff() ? callsOffNote() : null));
   // A hidden place's tell only of its place, with no name (hearing).
   const heard = hearing(pocket === undefined ? undefined : { space, pocket }, (where) => chatNotify(it, where));
   Object.assign(it, { holder, space, key: key.slice(), slot, dbKey, data: null, state: newTgState(), seal, calls, pocket, heard, hushUntil: 0, startedAt: Date.now(), lastHeard: null, fresh: new Map(), shown: new Map(), loaded: false, running: false, stopped: false, problem: '', saving: Promise.resolve() });
@@ -1552,9 +1553,13 @@ let torFollowing = false;
 function followTor(): void {
   if (torFollowing) return;
   torFollowing = true;
-  const again = () => {
+  const again = (wayChanged: boolean) => {
     for (const it of every()) {
-      if (!it.running || it.stopped || (accountTorOf(it.data?.tor) !== 'space' && torOf(it) !== 'always')) continue;
+      // INVISIBLE chosen (lib/modes.ts): no call goes on.
+      if (wayChanged && callsOff() && !it.stopped) void it.calls.endAll().catch(() => undefined);
+      // As the space, or Always (waiting for Tor); and, as the way changes, Off too, which goes
+      // through Tor while the space is INVISIBLE (lib/account-tor.ts).
+      if (!it.running || it.stopped || (torOf(it) === 'never' && !wayChanged)) continue;
       void torWay(it)
         .then(() => {
           if (it.problem === t('Tor is not ready.')) it.problem = '';
@@ -1565,8 +1570,8 @@ function followTor(): void {
         .finally(told);
     }
   };
-  onTorWay(again);
-  onTorReady(again);
+  onTorWay(() => again(true));
+  onTorReady(() => again(false));
 }
 
 /** The account's Tor as it counts now (a chat «Through Tor» makes it Always), for the warning before sending (components/telegram-ip.ts). */

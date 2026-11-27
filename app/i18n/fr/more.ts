@@ -9,7 +9,7 @@ export const more: Record<string, string> = {
   'Automatic': 'Automatique',
   'straight': 'en direct',
   'your own bridges': 'tes propres ponts',
-  'Tor is off for this space: messages go straight to the relay.': 'Tor est désactivé pour cet espace : les messages vont directement au relais.',
+  'Tor is off for this space: messages go straight to the server.': 'Tor est désactivé pour cet espace : les messages vont directement au serveur.',
   'Tor is connected, {how}.': 'Tor est connecté, {how}.',
   'Tor is connected.': 'Tor est connecté.',
   'Tor cannot connect from this network. Try Automatic, or bridges of your own.': 'Tor ne peut pas se connecter depuis ce réseau. Essaie Automatique, ou tes propres ponts.',
@@ -42,8 +42,8 @@ export const more: Record<string, string> = {
   'Not in use until you tap Use these bridges.': 'Pas utilisés tant que tu n’appuies pas sur « Utiliser ces ponts ».',
   'With bridges, Tor never goes straight to its relays: when no bridge answers, messages wait. Bridges count only while Tor is on.':
     'Avec des ponts, Tor ne va jamais directement à ses relais : quand aucun pont ne répond, les messages attendent. Les ponts ne comptent que tant que Tor est activé.',
-  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the relay without Tor until one does.':
-    'Avec des ponts, Tor ne va jamais directement à ses relais : quand aucun pont ne répond, les messages vont au relais sans Tor jusqu’à ce qu’un pont réponde.',
+  'With bridges, Tor never goes straight to its relays: when no bridge answers, messages go to the server without Tor until one does.':
+    'Avec des ponts, Tor ne va jamais directement à ses relais : quand aucun pont ne répond, les messages vont au serveur sans Tor jusqu’à ce qu’un pont réponde.',
 
   // Updates on Windows, and on every computer: the file to take.
   'The download page opens: take {file}, see User guide → Updates.': 'La page de téléchargement s’ouvre : prends {file}, voir « Guide d’utilisation → Mises à jour ».',

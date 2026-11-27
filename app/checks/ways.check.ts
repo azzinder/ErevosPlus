@@ -42,7 +42,7 @@ test('each line is full when the way works, faint when it reaches no one, dashed
   assert.deepEqual(looks, { relay: 'up', nostr: 'up', nearby: 'up', lora: 'off', sms: 'up', tor: 'off' });
   const relay = waysNow(ALL, 0).ways[0];
   assert.equal(relay.figure, 'erevos.lphl.nekten.eu');
-  assert.equal(relay.line, 'It answers. Home relay: relay.dojo-thessaloniki.gr.');
+  assert.equal(relay.line, 'It answers. Home server: relay.dojo-thessaloniki.gr.');
   // Not reached at its last try, after it answered once: faint, and it says it tries again.
   const down = waysNow({ ...ALL, relay: { ...ALL.relay, failed: 3000 } }, 0).ways[0];
   assert.equal(down.look, 'trying');
@@ -69,7 +69,7 @@ test('each line is full when the way works, faint when it reaches no one, dashed
 test('the sentence on top names the ways that work, Tor aside, and what waits', async () => {
   await setLang('en');
   const shown = waysNow({ ...ALL, tor: { way: 'messages', ready: true } }, 2);
-  assert.equal(shown.lead, 'Messages go out by Relay, Nostr, Nearby and SMS.');
+  assert.equal(shown.lead, 'Messages go out by Server, Nostr, Nearby and SMS.');
   assert.equal(shown.waiting, '2 of your messages wait to go.');
   assert.equal(waysNow(ALL, 1).waiting, '1 of your messages waits to go.');
   assert.equal(waysNow(ALL, 0).waiting, 'Nothing of yours waits to go.');

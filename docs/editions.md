@@ -104,7 +104,8 @@ edition installed is an update. Another edition's is a move (`app/lib/edition-mo
    phone app again, if wanted. Before anything is written, the free room is checked.
 
 What a module the edition moved to does not have stays in its data, unused, and is there again
-after a move back. A build signed with another key (F-Droid's) cannot take a move: Backups does
+after a move back. A build signed with another key (one built on a computer for testing) cannot
+take a move, and the F-Droid build, which has no Check for updates, cannot make one: Backups does
 the same by hand.
 
 Each edition reads its own releases: Erevos and Erevos+ in `azzinder/erevos-releases` (Erevos+

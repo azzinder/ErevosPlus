@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Tudo o que o Erevos guarda aqui é apagado agora, para sempre: cada espaço com suas conversas ocultas, contatos, mensagens e chaves. Depois o Erevos abre como recém-instalado. Não dá para desfazer.",
   "Wipe": "Apagar",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "Em perigo, apague o Erevos na hora: cada espaço com suas conversas ocultas, com seus contatos, mensagens, fotos, arquivos e chaves, o bloqueio, as contas de Matrix, XMPP e Nostr, os tokens do relay, e as configurações e a senha dos backups automáticos e do servidor deles.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "O que ele não alcança fica: backups que você copiou para outro lugar ou enviou a um servidor (a senha deles ainda os protege), o que o relay guarda para você até expirar, e o que seus contatos têm.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "Em perigo, apague o Erevos na hora: cada espaço com suas conversas ocultas, com seus contatos, mensagens, fotos, arquivos e chaves, o bloqueio, as contas de Matrix, XMPP e Nostr, os tokens do servidor, e as configurações e a senha dos backups automáticos e do servidor deles.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "O que ele não alcança fica: backups que você copiou para outro lugar ou enviou a um servidor (a senha deles ainda os protege), o que o servidor guarda para você até expirar, e o que seus contatos têm.",
   "Wipe now": "Apagar agora",
   "Wipe everything now": "Apagar tudo agora",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Aqui o Erevos não consegue se apagar sozinho: apague os dados dele pelo computador.",

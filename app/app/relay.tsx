@@ -30,7 +30,7 @@ export default function Relay() {
   function target() {
     const relay = url.trim();
     if (!relay) {
-      note(t('Type the relay address first.'));
+      note(t('Type the server address first.'));
       return null;
     }
     return { url: relay, token: token.trim() || undefined };
@@ -82,9 +82,9 @@ export default function Relay() {
 
   return (
     <Page>
-      <Text variant="title">{t('Relay test (Wi-Fi)')}</Text>
+      <Text variant="title">{t('Server test (Wi-Fi)')}</Text>
       <Text tone="muted">
-        {t("Messages wait on the relay running on the computer. Both phones must be on the same Wi-Fi and use that computer's address.")}
+        {t("Messages wait on the server running on the computer. Both phones must be on the same Wi-Fi and use that computer's address.")}
       </Text>
       <Input
         value={url}
@@ -97,7 +97,7 @@ export default function Relay() {
       <Input
         value={token}
         onChangeText={setToken}
-        placeholder={t('Token, if the relay needs one')}
+        placeholder={t('Token, if the server needs one')}
         autoCapitalize="none"
         autoCorrect={false}
         secureTextEntry

@@ -110,7 +110,7 @@ export function useGroupMedia(id: string, messages: GroupMessage[], onError: (te
     try {
       const relay = own ?? (await groupsAt.relay().catch(() => null));
       if (!relay) {
-        onError(t('Type the relay address in Relay first.'));
+        onError(t('Type the server address in Server first.'));
         return;
       }
       setTaking((now) => ({ ...now, [ref.id]: '0%' }));
@@ -372,7 +372,7 @@ export function useGroupMedia(id: string, messages: GroupMessage[], onError: (te
     <ComposerPanel
       tiles={tiles}
       quality={{ value: quality, onChange: chooseQuality }}
-      foot={t('A file goes as it is, up to 100 MB, with whatever it says inside. The relay keeps it, encrypted, 14 days, for each member to take.')}
+      foot={t('A file goes as it is, up to 100 MB, with whatever it says inside. The server keeps it, encrypted, 14 days, for each member to take.')}
     />
   );
 

@@ -3,10 +3,13 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 // Unlocking with a fingerprint or face (lock/biometric.ts), with a stand-in for Android's
-// Keystore and prompt. The phone's own side (modules/erevos-biometric) is tried on the phone.
+// Keystore and prompt. The phone's own side (modules/erevos-biometric) is tried on the phone; how
+// it makes its key is read here from its source.
 // Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { decryptText, encryptText, fromBase64, randomBytes, setHardCost, setPbkdf2, toBase64, toHex, webCryptoPbkdf2 } from '../lib/crypto';
@@ -353,4 +356,28 @@ test('where the setting shows, the Keystore is asked whether its key still works
   phone.dropped = true;
   assert.equal(await biometricOn(phone), false);
   assert.equal(biometricOfferedBefore(), false);
+});
+
+test("the phone's key is made in its secure area, for a strong check before each single use", () => {
+  const source = readFileSync(join(import.meta.dirname, '../modules/erevos-biometric/android/src/main/java/expo/modules/erevosbiometric/ErevosBiometricModule.kt'), 'utf8');
+  const code = source.replace(/\/\/.*$/gm, '');
+  // Not in the separate security chip: each use of a key there began before Android's prompt
+  // could show, a moment or more late (#76), and the chip keeps it no safer, since it takes the
+  // secure area's word for the fingerprint or face check.
+  assert.doesNotMatch(code, /StrongBox/);
+  const start = code.indexOf('private fun newKey()');
+  assert.ok(start >= 0);
+  const made = code.slice(start, code.indexOf('generateKey()', start));
+  for (const rule of [
+    /setKeySize\(256\)/,
+    /setBlockModes\(KeyProperties\.BLOCK_MODE_GCM\)/,
+    /setUserAuthenticationRequired\(true\)/,
+    /setUserAuthenticationParameters\(0, KeyProperties\.AUTH_BIOMETRIC_STRONG\)/,
+    /setInvalidatedByBiometricEnrollment\(true\)/,
+    /setUnlockedDeviceRequired\(true\)/,
+  ]) {
+    assert.match(made, rule);
+  }
+  // Each use waits for the prompt: the cipher goes to Android with it, and is used only after.
+  assert.match(code, /BiometricPrompt\.CryptoObject\(cipher\)/);
 });

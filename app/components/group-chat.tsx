@@ -33,6 +33,7 @@ import { currentCall } from '../lib/call';
 import { sameDay } from '../lib/day-mark';
 import { shownLine } from '../lib/call-lines';
 import { callPermissions } from '../lib/call-permissions';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { currentGroupCall } from '../lib/group-call';
 import { groupCallGoingOn, joinGroupCall, onGroupCallChange, startGroupCall } from '../lib/group-calls';
 import { MAX_GROUP_NAME } from '../lib/group-signal';
@@ -56,11 +57,12 @@ import { bubbleStyles } from '../theme/bubbles';
 import { useStyles, useTheme } from '../theme/context';
 import type { ChatLook } from '../theme/chat-theme';
 import { ContactPicker, groupableContacts } from './contact-picker';
+import { useDirectNow } from './mode-picker';
 import { ChatMedia } from './chat-media';
 import { groupMedia } from '../lib/chat-media';
 import { IpStop } from '../lib/ip-warning';
 import { throughTor } from '../lib/relay';
-import { IpQuiet } from './ip-warning';
+import { IpQuiet, quietLineShows } from './ip-warning';
 
 // A group chat (lib/groups.ts), of the space or of a hidden place (components/groups-at.tsx): its messages, each of others' with the sender's name, notes of who
 // joined and left, and the message bar to write in (components/composer.tsx). Its members sheet,
@@ -107,6 +109,8 @@ const clock = (at: number) => {
 export function GroupChat({ id, at, onBack, onLook }: { id: string; at?: string; onBack: () => void; onLook: (chat: ChatLook | null) => void }) {
   const { at: groupsAt, linked: groupsLinked } = useGroupsWhere();
   const hidden = groupsAt.hidden;
+  // Direct connections (lib/direct.ts), read again as the switch or a Tor setting changes.
+  const directOn = useDirectNow();
   const styles = useStyles(makeStyles);
   const { colors, look } = useTheme();
   const barBlur = useGlassBlur();
@@ -373,6 +377,11 @@ export function GroupChat({ id, at, onBack, onLook }: { id: string; at?: string;
       setNote(t('Group calls ring on the phone that holds this account, for now. Call from there.'));
       return;
     }
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) {
+      setNote(callsOffNote());
+      return;
+    }
     if (currentCall() || currentGroupCall()) {
       setNote(t('There is a call already.'));
       return;
@@ -386,9 +395,9 @@ export function GroupChat({ id, at, onBack, onLook }: { id: string; at?: string;
     try {
       const relay = await groupsAt.calls.callRelay();
       const direct = t(
-        "Your relay has no call relay beside it, so the call would go straight between the phones. That only works on the same Wi-Fi, and each phone in the call sees the others' addresses on it. With a call relay, none does.",
+        "Your server has no call server beside it, so the call would go straight between the phones. That only works on the same Wi-Fi, and each phone in the call sees the others' addresses on it. With a call server, none does.",
       );
-      if (!relay && !(await confirm(t('Call without a call relay?'), direct, t('Call')))) return;
+      if (!relay && !(await confirm(t('Call without a call server?'), direct, t('Call')))) return;
       if (going) await joinGroupCall(groupsAt.calls, id, relay, rtc);
       else await startGroupCall(groupsAt.calls, id, video, relay, rtc);
     } catch (error) {
@@ -637,7 +646,7 @@ export function GroupChat({ id, at, onBack, onLook }: { id: string; at?: string;
           ))}
         </ScrollView>
       )}
-      {out || throughTor() ? null : <IpQuiet />}
+      {out || throughTor() || (directOn && !quietLineShows(hidden)) ? null : <IpQuiet />}
       {out ? null : (
         <DraftComposer
           draft={draft}

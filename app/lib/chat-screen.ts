@@ -92,7 +92,7 @@ export function label(peer: string, contacts: ContactInfo[]): string {
 // The first line only: Android's errors carry their whole stack after it.
 export const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error)).split('\n')[0];
 
-export const NO_CORE = mark('This build cannot encrypt, so chats through the relay are off. Rebuild the app.');
+export const NO_CORE = mark('This build cannot encrypt, so chats through the server are off. Rebuild the app.');
 
 // The times a chat's messages can disappear after, seconds. 0 keeps them.
 export const TIMERS = [0, 5 * 60, 3600, 24 * 3600, 7 * 24 * 3600];

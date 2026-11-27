@@ -1024,8 +1024,9 @@ struct Incoming {
 /// from: `peer`, unless that is this machine, a proxy in front of the relay,
 /// which puts the address it took the request from last in
 /// `X-Forwarded-For` (Apache adds it after any the request came with, Caddy
-/// sets it), so that one is taken.
-fn client(peer: IpAddr, forwarded_for: &str) -> IpAddr {
+/// sets it), so that one is taken. An open place is counted by the same
+/// address (see `open.rs`).
+pub(crate) fn client(peer: IpAddr, forwarded_for: &str) -> IpAddr {
     let forwarded = forwarded_for.rsplit(',').next().and_then(|last| {
         let last = last.trim();
         last.parse::<IpAddr>()
@@ -1039,8 +1040,10 @@ fn client(peer: IpAddr, forwarded_for: &str) -> IpAddr {
 }
 
 /// The address `ip` counts as for `MAX_STARTS`: an IPv6 address as its /64,
-/// which one machine may have whole.
-fn counted_as(ip: IpAddr) -> IpAddr {
+/// which one machine may have whole, and one mapped into IPv6 as that IPv4
+/// address. The open places one address may take count an IPv6 address by
+/// its /48 from here (see `open.rs`).
+pub(crate) fn counted_as(ip: IpAddr) -> IpAddr {
     match ip {
         IpAddr::V6(v6) => match v6.to_ipv4_mapped() {
             Some(v4) => IpAddr::V4(v4),
@@ -2712,7 +2715,7 @@ pub mod tests {
             fake.state.lock().unwrap().groups = groups;
             let page = sign_in_page(&signin, &fake, &[1u8; 32], NOW);
             assert_eq!(page.status, 403);
-            assert!(page.body.contains("this account may not use this relay"));
+            assert!(page.body.contains("this account may not use this server"));
         }
         fake.state.lock().unwrap().groups = Some(vec!["family".into(), "erevos".into()]);
         claimed(&signin, &fake, &tokens, &[2u8; 32], "in", &NONE, NOW).unwrap();

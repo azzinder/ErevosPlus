@@ -217,7 +217,7 @@ export async function holdLater(e2e: E2E, place: SendPlace, identity: string, me
   const sends = place.sends;
   if (!sends || !queue?.sender) throw new NoWayError();
   const to = contactTarget(sends, queue);
-  if (!(await canHoldAt(to.via ?? to))) throw new CannotHoldError(t('the relay at {url} cannot keep messages for later: update it', { url: (to.via ?? to).url }));
+  if (!(await canHoldAt(to.via ?? to))) throw new CannotHoldError(t('the server at {url} cannot keep messages for later: update it', { url: (to.via ?? to).url }));
   const options = { tag: message.tag, lasts: message.lasts ?? 0, due: message.at, re: message.re, forwarded: message.forwarded };
   let sealed: { sender: string; relay: string; relayKey: string; spare: Spare | null; first: Uint8Array | null; timer: number; copies: number; through: boolean };
   let packets: Uint8Array[];
@@ -267,7 +267,7 @@ export async function holdLater(e2e: E2E, place: SendPlace, identity: string, me
  */
 export async function takeBack(sends: Relay | null, held: HeldAt): Promise<boolean> {
   const holder = holderOf(sends, held);
-  if (!holder) throw new RelayError(t('The relay at {url} that keeps it is no longer set here.', { url: held.relay }));
+  if (!holder) throw new RelayError(t('The server at {url} that keeps it is no longer set here.', { url: held.relay }));
   return dropLater({ url: holder.url, token: holder.token }, held.id);
 }
 
@@ -582,7 +582,7 @@ export async function handOverHidden(
   }
   if (!target || !sealed.sender) {
     const nostr = nostrOnlyWay(e2e, identity, sealed, packets);
-    if (!nostr) throw new Error(t('Type the relay address in Relay first.'));
+    if (!nostr) throw new Error(t('Type the server address in Server first.'));
     return e2e.copiesAfter(sealed.copies, nostr(), waits && 'full');
   }
   try {

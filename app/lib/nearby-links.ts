@@ -82,7 +82,7 @@ export function startNearbyLinks(): () => void {
       if (!hidden)
         return choose(
           t('A phone near you has internet. Should it bring your messages?'),
-          t('It would learn which queue on your relay is yours, never what your messages say, which only this phone opens. Knowing the queue, it could take your messages before they reach you, so Erevos gives you a new queue once you have internet again. Say yes only for a phone you know whose it is, even one that seems to be a contact’s.'),
+          t('It would learn which queue on your server is yours, never what your messages say, which only this phone opens. Knowing the queue, it could take your messages before they reach you, so Erevos gives you a new queue once you have internet again. Say yes only for a phone you know whose it is, even one that seems to be a contact’s.'),
           t('No'),
           t('Yes'),
         );
@@ -91,7 +91,7 @@ export function startNearbyLinks(): () => void {
       if (!open || `${open.space}:${open.pocket}` !== hidden) return null;
       return choose(
         t('A phone near you has internet. Should it bring the messages of these hidden chats too?'),
-        t('It would learn that this phone has a second queue on the relay, and so that there may be hidden chats here, though never what they say. Knowing the queue, it could take their messages before they reach you, so they get a new queue once you have internet again. Say yes only for a phone you know whose it is.'),
+        t('It would learn that this phone has a second queue on the server, and so that there may be hidden chats here, though never what they say. Knowing the queue, it could take their messages before they reach you, so they get a new queue once you have internet again. Say yes only for a phone you know whose it is.'),
         t('No'),
         t('Yes'),
       );

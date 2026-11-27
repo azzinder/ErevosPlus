@@ -68,7 +68,7 @@ export function NewGroupForm({ onMade }: { onMade: (id: string) => void }) {
       </Card>
       <Text variant="caption" tone="muted">
         {t(
-          "You are the group's admin: you add and take out members. Each contact's phone joins by itself the next time Erevos is open there. Messages are end-to-end encrypted for the whole group (MLS), and no relay learns who is in it.",
+          "You are the group's admin: you add and take out members. Each contact's phone joins by itself the next time Erevos is open there. Messages are end-to-end encrypted for the whole group (MLS), and no server learns who is in it.",
         )}
       </Text>
       {note ? <Text color={colors.danger}>{note}</Text> : null}

@@ -21,6 +21,15 @@
 //! same time go in the order they came, so the packets of one voice message
 //! stay in order.
 //!
+//! The relay holds at most `MAX_HELD` requests and `HELD_CAP` bytes of them.
+//! An open place (see `open.rs`), which anyone may take with no invite or
+//! account, holds at most so many at once, as the operator sets it, and all
+//! open places together at most half of those requests and bytes
+//! (`MAX_HELD_OPEN`, `HELD_CAP_OPEN`), so that they never take all the relay
+//! holds; a request leaves their count once it went, was dropped or expired.
+//! Which requests are an open place's is kept in memory only, as which phone
+//! held one is: one read back after a restart is anyone's.
+//!
 //! With a folder, each request is a file named by its id in hex: its time
 //! (8-byte Unix seconds), its place in the order (8 bytes), then the request.
 //! It is written as a `.part` file first and renamed once whole, as chunks
@@ -30,7 +39,7 @@
 //!
 //! Not audited.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{hash_map, BTreeMap, HashMap};
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
@@ -46,6 +55,15 @@ pub const MAX_HELD: usize = 10_000;
 /// Bytes all held requests may take together.
 pub const HELD_CAP: u64 = 256 << 20;
 
+/// Requests all open places (see `open.rs`) may hold together: half of what
+/// the relay holds, so the other half is left to the phones with places of
+/// their own.
+pub const MAX_HELD_OPEN: usize = MAX_HELD / 2;
+
+/// Bytes all open places' held requests may take together, half of
+/// `HELD_CAP` for the same reason.
+pub const HELD_CAP_OPEN: u64 = HELD_CAP / 2;
+
 /// How far ahead a request may be held: a year and a little, as a message
 /// can be sent for later up to a year ahead.
 pub const MAX_AHEAD: u64 = 400 * 24 * 60 * 60;
@@ -59,7 +77,8 @@ const PART: &str = ".part";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum HeldError {
-    /// The relay holds `MAX_HELD` requests or `HELD_CAP` bytes already.
+    /// The relay holds `MAX_HELD` requests or `HELD_CAP` bytes already, or,
+    /// for an open place, all it may (see `hold_open`).
     Full,
     /// The request could not be written to the folder, so nothing changed.
     Storage,
@@ -77,6 +96,46 @@ struct Item {
     at: u64,
     request: Vec<u8>,
     tries: u32,
+    /// The open place that held it, by its token's SHA-256, in memory only.
+    open: Option<[u8; 32]>,
+}
+
+/// What the open places hold now, in memory only.
+#[derive(Default)]
+struct OpenHeld {
+    /// Requests each holds, by its token's SHA-256; none for one that holds
+    /// none.
+    by_place: HashMap<[u8; 32], usize>,
+    /// Requests all hold together.
+    len: usize,
+    /// Their bytes.
+    used: u64,
+}
+
+impl OpenHeld {
+    /// Requests the open place `place` holds.
+    fn of(&self, place: &[u8; 32]) -> usize {
+        self.by_place.get(place).copied().unwrap_or(0)
+    }
+
+    /// Counts a request of `size` bytes more for `place`.
+    fn add(&mut self, place: [u8; 32], size: u64) {
+        *self.by_place.entry(place).or_default() += 1;
+        self.len += 1;
+        self.used += size;
+    }
+
+    /// Counts a request of `size` bytes less for `place`, as `add` counted it.
+    fn sub(&mut self, place: [u8; 32], size: u64) {
+        if let hash_map::Entry::Occupied(mut e) = self.by_place.entry(place) {
+            *e.get_mut() -= 1;
+            if *e.get() == 0 {
+                e.remove();
+            }
+        }
+        self.len = self.len.saturating_sub(1);
+        self.used = self.used.saturating_sub(size);
+    }
 }
 
 /// Makes the removal of the file at `path` itself durable, so a request
@@ -97,6 +156,8 @@ pub struct Held {
     running: HashMap<HeldId, Item>,
     order: u64,
     used: u64,
+    /// Of those, what the open places hold.
+    open: OpenHeld,
     ttl: u64,
     clock: fn() -> u64,
 }
@@ -141,6 +202,7 @@ impl Held {
             running: HashMap::new(),
             order: 0,
             used: 0,
+            open: OpenHeld::default(),
             ttl,
             clock: system_now,
         }
@@ -189,7 +251,8 @@ impl Held {
                 continue;
             }
             held.order = held.order.max(order + 1);
-            held.place(at, order, id, bytes[16..].to_vec(), 0);
+            // Whoever held it: which requests are an open place's is not kept on disk.
+            held.place(at, order, id, bytes[16..].to_vec(), 0, None);
         }
         Ok(held)
     }
@@ -202,8 +265,20 @@ impl Held {
         self.dir.as_ref().map(|dir| dir.join(hex(id)))
     }
 
-    fn place(&mut self, next: u64, order: u64, id: HeldId, request: Vec<u8>, tries: u32) {
+    /// Holds a request, counted, the open place `open`'s if it is one.
+    fn place(
+        &mut self,
+        next: u64,
+        order: u64,
+        id: HeldId,
+        request: Vec<u8>,
+        tries: u32,
+        open: Option<[u8; 32]>,
+    ) {
         self.used += request.len() as u64;
+        if let Some(place) = open {
+            self.open.add(place, request.len() as u64);
+        }
         self.by_id.insert(id, (next, order));
         let at = next;
         self.items.insert(
@@ -213,8 +288,18 @@ impl Held {
                 at,
                 request,
                 tries,
+                open,
             },
         );
+    }
+
+    /// Takes what `item` counted off, once it is gone for good.
+    fn uncount(&mut self, item: &Item) {
+        let size = item.request.len() as u64;
+        self.used -= size;
+        if let Some(place) = item.open {
+            self.open.sub(place, size);
+        }
     }
 
     /// How many requests it holds.
@@ -230,6 +315,33 @@ impl Held {
     /// Holds `request` to run at `at` (Unix seconds). One with an id it
     /// holds already is taken as given again, and changes nothing.
     pub fn hold(&mut self, id: HeldId, at: u64, request: Vec<u8>) -> Result<(), HeldError> {
+        self.keep(id, at, request, None)
+    }
+
+    /// Holds `request` as `hold` does, for the open place `place` (its
+    /// token's SHA-256, see `open.rs`), which may hold `most` at once. `Full`
+    /// past that too, or when all open places together hold `MAX_HELD_OPEN`
+    /// requests or `HELD_CAP_OPEN` bytes.
+    pub fn hold_open(
+        &mut self,
+        id: HeldId,
+        at: u64,
+        request: Vec<u8>,
+        place: [u8; 32],
+        most: usize,
+    ) -> Result<(), HeldError> {
+        self.keep(id, at, request, Some((place, most)))
+    }
+
+    /// Holds `request` as `hold` says, for an open place, and the most it may
+    /// hold at once, when `open` names one.
+    fn keep(
+        &mut self,
+        id: HeldId,
+        at: u64,
+        request: Vec<u8>,
+        open: Option<([u8; 32], usize)>,
+    ) -> Result<(), HeldError> {
         if self.by_id.contains_key(&id) || self.running.contains_key(&id) {
             return Ok(());
         }
@@ -237,12 +349,20 @@ impl Held {
         if self.len() >= MAX_HELD || self.used + size > HELD_CAP {
             return Err(HeldError::Full);
         }
+        if let Some((place, most)) = open {
+            if self.open.of(&place) >= most
+                || self.open.len >= MAX_HELD_OPEN
+                || self.open.used + size > HELD_CAP_OPEN
+            {
+                return Err(HeldError::Full);
+            }
+        }
         let order = self.order;
         if let Some(path) = self.path(&id) {
             write_request(&path, at, order, &request).map_err(storage)?;
         }
         self.order += 1;
-        self.place(at, order, id, request, 0);
+        self.place(at, order, id, request, 0, open.map(|(place, _)| place));
         Ok(())
     }
 
@@ -261,7 +381,7 @@ impl Held {
         }
         self.by_id.remove(id);
         if let Some(item) = self.items.remove(&key) {
-            self.used -= item.request.len() as u64;
+            self.uncount(&item);
         }
         Ok(true)
     }
@@ -297,7 +417,7 @@ impl Held {
         let Some(item) = self.running.remove(id) else {
             return;
         };
-        self.used -= item.request.len() as u64;
+        self.uncount(&item);
         if let Some(path) = self.path(id) {
             match fs::remove_file(&path) {
                 Ok(()) => gone_for_good(&path),
@@ -326,7 +446,8 @@ impl Held {
         let next = (self.clock)() + wait;
         let order = self.order;
         self.order += 1;
-        // Its bytes were still counted while it ran: `went` is what takes them off.
+        // Its bytes, and an open place's count of it, stayed counted while it ran: `went` is
+        // what takes them off.
         self.by_id.insert(*id, (next, order));
         self.items.insert((next, order), Item { tries, ..item });
     }
@@ -476,6 +597,131 @@ mod tests {
         let mut held = Held::in_memory(DEFAULT_TTL);
         held.used = HELD_CAP - 1;
         assert_eq!(held.hold(id(1), 1, vec![0; 2]), Err(HeldError::Full));
+    }
+
+    #[test]
+    fn an_open_place_holds_so_many_at_once_until_they_go() {
+        let start = clock();
+        let mut held = Held::in_memory(100);
+        held.clock = clock;
+        let (place, other) = ([1u8; 32], [2u8; 32]);
+        let later = start + 1000;
+        held.hold_open(id(1), start, b"one".to_vec(), place, 2)
+            .unwrap();
+        held.hold_open(id(2), later, b"two".to_vec(), place, 2)
+            .unwrap();
+        assert_eq!(
+            held.hold_open(id(3), later, b"x".to_vec(), place, 2),
+            Err(HeldError::Full)
+        );
+        assert!(!held.holds(&id(3)));
+        // One it holds already, asked for again, is given again, as for any phone.
+        held.hold_open(id(2), later, b"two".to_vec(), place, 2)
+            .unwrap();
+        // Another open place, and a phone with a place of its own, count apart.
+        held.hold_open(id(4), later, b"four".to_vec(), other, 2)
+            .unwrap();
+        held.hold(id(5), later, b"five".to_vec()).unwrap();
+        assert_eq!((held.len(), held.open.len, held.open.used), (4, 3, 10));
+        // Dropped, a request leaves its place's count.
+        assert_eq!(held.drop_held(&id(2)), Ok(true));
+        held.hold_open(id(3), later, b"three".to_vec(), place, 2)
+            .unwrap();
+        // Taken out to run, and to be tried again, it still counts, until it went.
+        assert_eq!(held.take_due().len(), 1);
+        held.failed(&id(1));
+        assert_eq!(
+            held.hold_open(id(6), later, b"x".to_vec(), place, 2),
+            Err(HeldError::Full)
+        );
+        wait(FIRST_RETRY);
+        assert_eq!(held.take_due().len(), 1);
+        held.went(&id(1));
+        held.hold_open(id(6), later, b"six".to_vec(), place, 2)
+            .unwrap();
+        // Past their time and the ttl, those that could not go are forgotten, and leave it too.
+        wait(1000 + 100);
+        let due = held.take_due();
+        assert_eq!(due.len(), 4);
+        for request in &due {
+            held.failed(&request.id);
+        }
+        assert_eq!(
+            (held.len(), held.used, held.open.len, held.open.used),
+            (0, 0, 0, 0)
+        );
+        assert!(held.open.by_place.is_empty());
+    }
+
+    #[test]
+    fn all_open_places_together_hold_half_of_what_the_relay_holds() {
+        let mut held = Held::in_memory(DEFAULT_TTL);
+        let place = [1u8; 32];
+        for n in 0..MAX_HELD_OPEN as u32 {
+            let mut request = [0u8; 16];
+            request[..4].copy_from_slice(&n.to_be_bytes());
+            held.hold_open(request, 1, vec![0], place, usize::MAX)
+                .unwrap();
+        }
+        // Another open place, with nothing held, finds the open places' half taken.
+        assert_eq!(
+            held.hold_open(id(0xff), 1, vec![0], [2u8; 32], 2),
+            Err(HeldError::Full)
+        );
+        // The other half is the phones' with places of their own.
+        held.hold(id(0xfe), 1, vec![0]).unwrap();
+        assert_eq!(held.len(), MAX_HELD_OPEN + 1);
+
+        // So it is with bytes.
+        let mut held = Held::in_memory(DEFAULT_TTL);
+        held.open.used = HELD_CAP_OPEN - 1;
+        assert_eq!(
+            held.hold_open(id(1), 1, vec![0; 2], place, 2),
+            Err(HeldError::Full)
+        );
+        held.hold_open(id(1), 1, vec![0; 1], place, 2).unwrap();
+        held.hold(id(2), 1, vec![0; 2]).unwrap();
+        // And an open place is refused when the relay is full for everyone.
+        let mut held = Held::in_memory(DEFAULT_TTL);
+        held.used = HELD_CAP - 1;
+        assert_eq!(
+            held.hold_open(id(1), 1, vec![0; 2], place, 2),
+            Err(HeldError::Full)
+        );
+    }
+
+    #[test]
+    fn an_open_place_s_requests_are_anyones_after_a_restart() {
+        let dir = folder("open-restart");
+        let start = clock();
+        let place = [1u8; 32];
+        {
+            let mut held = Held::open_clocked(&dir, DEFAULT_TTL, clock).unwrap();
+            held.hold_open(id(1), start + 10, b"first".to_vec(), place, 1)
+                .unwrap();
+            assert_eq!(
+                held.hold_open(id(2), start + 10, b"x".to_vec(), place, 1),
+                Err(HeldError::Full)
+            );
+        }
+        // Which requests are an open place's is not kept: the one read back is anyone's.
+        let mut held = Held::open_clocked(&dir, DEFAULT_TTL, clock).unwrap();
+        assert_eq!((held.len(), held.open.len, held.open.used), (1, 0, 0));
+        held.hold_open(id(2), start + 10, b"second".to_vec(), place, 1)
+            .unwrap();
+        assert_eq!(
+            held.hold_open(id(3), start + 10, b"x".to_vec(), place, 1),
+            Err(HeldError::Full)
+        );
+        // Both go at their time; the place's count goes with the one it held.
+        wait(10);
+        assert_eq!(held.take_due().len(), 2);
+        held.went(&id(1));
+        assert_eq!(held.open.len, 1);
+        held.went(&id(2));
+        assert_eq!((held.len(), held.open.len, held.open.used), (0, 0, 0));
+        drop(held);
+        let _ = fs::remove_dir_all(&dir);
     }
 
     // Regression: acknowledgement of a scheduled SEND and removal of its

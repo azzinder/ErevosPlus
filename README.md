@@ -60,7 +60,7 @@ the move, the other brings it in at its first start ([Moving between them](docs/
 
 | | |
 |---|---|
-| **Erevos, all of it** | Chats and calls with no phone number, email or account, nearby with no internet, hidden spaces, a panic button, your own relay, the encrypted Collection, and the phone, SMS and contacts apps. |
+| **Erevos, all of it** | Chats and calls with no phone number, email or account, nearby with no internet, hidden spaces, a panic button, your own server, the encrypted Collection, and the phone, SMS and contacts apps. |
 | **Telegram** | Your own account, through TDLib, Telegram's own library. |
 | **Messenger** | Your Facebook Messenger chats. |
 | **Signal** | Your Signal account, linked to your phone's Signal or registered in Erevos+, with calls. |
@@ -119,7 +119,7 @@ its files.
   as private in Erevos+ as that network makes it, no more. Erevos+ is not made or approved by any of them.
 - **Not everything has been tried on real phones.** The newest features among them; the changelog and the guide say
   which.
-- **A relay sees some things.** Not what you write, but when messages arrive and, unless you turn Tor on, the address
+- **A server sees some things.** Not what you write, but when messages arrive and, unless you turn Tor on, the address
   your phone connects from.
 - **SMS are not private.** When Erevos+ is your SMS app, your carrier sees SMS as with any app.
 

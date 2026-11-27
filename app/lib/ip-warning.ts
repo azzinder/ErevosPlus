@@ -6,7 +6,9 @@
 // be: by whom, what can be done instead, and the guide's section on it (Who sees your internet
 // address, {#ip}). Each is said once, by what it is of (ipKey; what is sent, once for the network): to go on is to have read it, and
 // it is not said again; turning Tor on instead says nothing is kept, so it is said again should
-// Tor be turned off. They are the same for every network of the app: Erevos says them before its
+// Tor be turned off. With Direct connections on (lib/direct.ts: SPEED, lib/modes.ts, the space's mode
+// unless another is chosen at the top of Settings), those it covers are not said at all, and nothing
+// is kept as said: in ANONYMOUS and INVISIBLE, each is said as before. They are the same for every network of the app: Erevos says them before its
 // chats, calls and files, and any other network says its own, by its name. What asks is
 // components/ip-warning.tsx; what is kept is the space's (SpaceData.ipSeen), each space its own,
 // and a hidden place's in its own data (IpKeep), never the space's: what a warning is of names a
@@ -38,9 +40,10 @@ export type IpKeep = { space: number; pocket: number; key: Uint8Array } | 'memor
  * (a chat, an account, a server), so each is said once; and, for a hidden place's, where it is kept.
  * `own`: only this phone's own server of that network (or the service's) sees the address, never
  * the contact's, as on Matrix, XMPP, Telegram, Signal, Messenger and Session; Erevos's relays
- * carry what goes to the contact's too.
+ * carry what goes to the contact's too. `tor`: of a chat set to go only through Tor, so it is said
+ * whatever Direct connections says (lib/direct.ts).
  */
-export type IpWarning = { network: string; act: IpAct; of: string; keep?: IpKeep; own?: boolean };
+export type IpWarning = { network: string; act: IpAct; of: string; keep?: IpKeep; own?: boolean; tor?: boolean };
 
 /** Thrown where the owner chose not to go on at a warning: nothing failed, so nothing is said of it. */
 export class IpStop extends Error {
@@ -75,7 +78,7 @@ export function ipWarningText(warning: IpWarning): { title: string; message: str
       if (warning.own) return { title, message: t("On {network}, what you send here can go without Tor. Your {network} server then sees this phone's internet address (IP address), though not what you wrote.", { network }) };
       return { title, message: t("On {network}, what you send here can go without Tor. The servers that carry it, yours and your contact's, can then see this phone's internet address (IP address), though not what you wrote.", { network }) };
     case 'call':
-      return { title, message: t("Calls never go through Tor. The call relay that carries the sound and picture, yours or your contact's, sees this phone's internet address (IP address), though not what is said.") };
+      return { title, message: t("Calls never go through Tor. The call server that carries the sound and picture, yours or your contact's, sees this phone's internet address (IP address), though not what is said.") };
     case 'file':
       return { title, message: t("This file is on a server your contact chose. Fetched without Tor, that server sees this phone's internet address (IP address), though not what the file holds.") };
     case 'link':
@@ -85,13 +88,13 @@ export function ipWarningText(warning: IpWarning): { title: string; message: str
     case 'join':
       return { title, message: t("On {network}, joining goes through a server. Without Tor, it sees this phone's internet address (IP address).", { network }) };
     case 'relay':
-      return { title, message: t("A contact invited this phone to a place on their relay. Taken without Tor, that relay sees this phone's internet address (IP address), though not what you send. Not taken, the invite is let go.") };
+      return { title, message: t("A contact invited this phone to a place on their server. Taken without Tor, that server sees this phone's internet address (IP address), though not what you send. Not taken, the invite is let go.") };
     case 'station':
       return { title, message: t("A station plays straight from its server, which then sees this phone's internet address (IP address) for as long as it plays, as any site does.") };
     case 'pair':
-      return { title, message: t("To pair by a code, the two phones meet on public Nostr relays. Without Tor, those relays see this phone's internet address (IP address), though not the code or your contact links, which go encrypted.") };
+      return { title, message: t("To pair by a code, the two phones meet on public Nostr servers. Without Tor, those servers see this phone's internet address (IP address), though not the code or your contact links, which go encrypted.") };
     case 'bridge':
-      return { title, message: t("A phone beside this one has no internet and asks this one to bring its messages from the relay {network}, which this phone does not use. That relay then sees this phone's internet address (IP address), though not what the messages say, which only that phone opens.", { network }) };
+      return { title, message: t("A phone beside this one has no internet and asks this one to bring its messages from the server {network}, which this phone does not use. That server then sees this phone's internet address (IP address), though not what the messages say, which only that phone opens.", { network }) };
     case 'channel':
       return { title, message: t("A TV channel plays straight from its server, which then sees this phone's internet address (IP address) for as long as it plays, as any site does.") };
   }

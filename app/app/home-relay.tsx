@@ -67,7 +67,7 @@ export default function HomeRelay() {
     try {
       await readySpare();
       setReady(true);
-      setNote(t('Your queue on the home relay is ready. Contacts learn it from your next message, or from your contact link.'));
+      setNote(t('Your queue on the home server is ready. Contacts learn it from your next message, or from your contact link.'));
     } catch (error) {
       if (error instanceof CouponWaitError) {
         setLines((now) => now.map((line) => (line.tor && !line.token.trim() ? { ...line, got: 'pending' } : line)));
@@ -75,7 +75,7 @@ export default function HomeRelay() {
         return;
       }
       setNote(
-        t('Saved, but the home relay could not be reached: {reason}. It is tried again with each look.', {
+        t('Saved, but the home server could not be reached: {reason}. It is tried again with each look.', {
           reason: error instanceof Error ? error.message : String(error),
         }),
       );
@@ -105,7 +105,7 @@ export default function HomeRelay() {
     }
     if (!(await takePair(spaceSpare(), true).catch(() => false))) {
       const data = await loadCurrentSpaceData().catch(() => null);
-      if (data && !data.spare.url.trim()) setNote(t('Your relay names no home relay for this phone, or could not be reached.'));
+      if (data && !data.spare.url.trim()) setNote(t('Your server names no home server for this phone, or could not be reached.'));
       return;
     }
     forgetSpare(spaceSpare());
@@ -119,16 +119,16 @@ export default function HomeRelay() {
     const given = lines.map((line) => ({ url: line.url.trim(), token: line.token, tor: line.tor })).filter((line) => line.url);
     for (const { url } of given) {
       if (!/^wss?:\/\/[^\s/?#]+(\/[^\s]*)?$/i.test(url)) {
-        setNote(t('A relay address starts with ws:// or wss://.'));
+        setNote(t('A server address starts with ws:// or wss://.'));
         return;
       }
       if (sameRelay(url, mainUrl)) {
-        setNote(t('That is your relay already. A home relay is another one.'));
+        setNote(t('That is your server already. A home server is another one.'));
         return;
       }
     }
     if (given.some((line, i) => given.findIndex((other) => sameRelay(other.url, line.url)) !== i)) {
-      setNote(t('Each home relay is a different one.'));
+      setNote(t('Each home server is a different one.'));
       return;
     }
     try {
@@ -142,12 +142,12 @@ export default function HomeRelay() {
           await updateCurrentSpaceData({ pairHome: false });
           setPairOn(false);
         }
-        setNote(t('No home relay. Contacts write only to your relay.'));
+        setNote(t('No home server. Contacts write only to your server.'));
         return;
       }
     } catch (error) {
       setNote(
-        t('Saved, but the home relay could not be reached: {reason}. It is tried again with each look.', {
+        t('Saved, but the home server could not be reached: {reason}. It is tried again with each look.', {
           reason: error instanceof Error ? error.message : String(error),
         }),
       );
@@ -158,25 +158,25 @@ export default function HomeRelay() {
 
   return (
     <Page>
-      <Text variant="title">{t('Home relay')}</Text>
+      <Text variant="title">{t('Home server')}</Text>
       <Card>
         <Text tone="muted">
           {t(
-            'A second relay with a queue of its own, for example one at home on a Raspberry Pi or an old computer. Your contact link and every message say it beside your relay, so contacts write there while your relay cannot be reached, and what you send goes through it when yours is down. Erevos takes what comes there with each look.',
+            'A second server with a queue of its own, for example one at home on a Raspberry Pi or an old computer. Your contact link and every message say it beside your server, so contacts write there while your server cannot be reached, and what you send goes through it when yours is down. Erevos takes what comes there with each look.',
           )}
         </Text>
         <Text tone="muted">
           {canTor()
             ? t(
-                "Whoever runs it sees what your relay sees: this phone's address when it takes messages, unless it is set to Only through Tor below, and when and how much comes. Hidden chats do not use it: each hidden place can have its own, set while it is open.",
+                "Whoever runs it sees what your server sees: this phone's address when it takes messages, unless it is set to Only through Tor below, and when and how much comes. Hidden chats do not use it: each hidden place can have its own, set while it is open.",
               )
             : t(
-                "Whoever runs it sees what your relay sees: this phone's address when it takes messages, and when and how much comes. Hidden chats do not use it: each hidden place can have its own, set while it is open.",
+                "Whoever runs it sees what your server sees: this phone's address when it takes messages, and when and how much comes. Hidden chats do not use it: each hidden place can have its own, set while it is open.",
               )}
         </Text>
         {lines.map((line, at) => (
           <View key={at}>
-            <Field label={at === 0 ? t('Home relay address') : t('Another home relay ({n})', { n: at + 1 })}>
+            <Field label={at === 0 ? t('Home server address') : t('Another home server ({n})', { n: at + 1 })}>
               <Input
                 value={line.url}
                 onChangeText={(url) => change(at, { url })}
@@ -190,7 +190,7 @@ export default function HomeRelay() {
               <Input
                 value={line.token}
                 onChangeText={(token) => change(at, { token })}
-                placeholder={line.tor ? t('None: a coupon from your relay') : t('Token, if the relay needs one')}
+                placeholder={line.tor ? t('None: a coupon from your server') : t('Token, if the server needs one')}
                 autoCapitalize="none"
                 autoCorrect={false}
                 secureTextEntry
@@ -207,7 +207,7 @@ export default function HomeRelay() {
                   <Text variant="bodyStrong">{t('Only through Tor')}</Text>
                   <Text variant="caption" tone="muted">
                     {t(
-                      "This relay never sees your phone's address, whatever Tor is set to for the rest. With no token typed, it gives one for a coupon your relay signs blind, if it takes them: then neither relay can tell whose it is.",
+                      "This server never sees your phone's address, whatever Tor is set to for the rest. With no token typed, it gives one for a coupon your server signs blind, if it takes them: then neither server can tell whose it is.",
                     )}
                   </Text>
                 </View>
@@ -216,7 +216,7 @@ export default function HomeRelay() {
             ) : null}
             {line.auto ? (
               <Text variant="caption" tone="faint">
-                {t('Set by itself from your relay.')}
+                {t('Set by itself from your server.')}
               </Text>
             ) : null}
             {line.tor && !line.token.trim() && line.got === 'coupon' ? (
@@ -226,13 +226,13 @@ export default function HomeRelay() {
             ) : null}
             {line.tor && !line.token.trim() && line.got === 'pending' ? (
               <Text variant="caption" tone="faint">
-                {t('A coupon is signed. The token comes from the home relay within the hour.')}
+                {t('A coupon is signed. The token comes from the home server within the hour.')}
               </Text>
             ) : null}
           </View>
         ))}
         {lines.length <= MORE_SPARES && lines[lines.length - 1].url.trim() ? (
-          <Button title={t('Add another home relay')} kind="secondary" compact onPress={() => setLines((now) => [...now, EMPTY])} />
+          <Button title={t('Add another home server')} kind="secondary" compact onPress={() => setLines((now) => [...now, EMPTY])} />
         ) : null}
         <Text variant="caption" tone="muted">
           {t(
@@ -247,10 +247,10 @@ export default function HomeRelay() {
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}
           >
             <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{t('Automatically from your relay')}</Text>
+              <Text variant="bodyStrong">{t('Automatically from your server')}</Text>
               <Text variant="caption" tone="muted">
                 {t(
-                  'When your relay names a relay paired with it, a space with no home relay takes that one by itself, only through Tor, with its token from a coupon. Removing the home relay here turns this off.',
+                  'When your server names a server paired with it, a space with no home server takes that one by itself, only through Tor, with its token from a coupon. Removing the home server here turns this off.',
                 )}
               </Text>
             </View>

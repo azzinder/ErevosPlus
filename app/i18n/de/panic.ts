@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Alles, was Erevos hier aufbewahrt, wird jetzt endgültig gelöscht: jeder Raum mit seinen versteckten Chats, Kontakten, Nachrichten und Schlüsseln. Erevos startet danach wie frisch installiert. Das lässt sich nicht rückgängig machen.",
   "Wipe": "Löschen",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "In Gefahr lösche Erevos sofort: jeden Raum mit seinen versteckten Chats, mit ihren Kontakten, Nachrichten, Fotos, Dateien und Schlüsseln, die Sperre, die Matrix-, XMPP- und Nostr-Konten, die Relay-Tokens sowie Einstellungen und Passwort der automatischen Backups und ihres Servers.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "Was es nicht erreicht, bleibt: Backups, die du anderswohin kopiert oder an einen Server geschickt hast (ihr Passwort schützt sie weiter), was das Relay für dich bereithält, bis es abläuft, und was deine Kontakte haben.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "In Gefahr lösche Erevos sofort: jeden Raum mit seinen versteckten Chats, mit ihren Kontakten, Nachrichten, Fotos, Dateien und Schlüsseln, die Sperre, die Matrix-, XMPP- und Nostr-Konten, die Servertokens sowie Einstellungen und Passwort der automatischen Backups und ihres Servers.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "Was es nicht erreicht, bleibt: Backups, die du anderswohin kopiert oder an einen Server geschickt hast (ihr Passwort schützt sie weiter), was der Server für dich bereithält, bis es abläuft, und was deine Kontakte haben.",
   "Wipe now": "Jetzt löschen",
   "Wipe everything now": "Jetzt alles löschen",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Hier kann Erevos sich nicht selbst löschen: Lösche seine Daten stattdessen auf dem Computer.",

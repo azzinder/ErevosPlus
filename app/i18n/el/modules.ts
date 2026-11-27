@@ -28,8 +28,8 @@ export const modulesText: Record<string, string> = {
   'This part of Erevos is off on this phone, so this screen does not open. Nothing of it is deleted: it is all there again once you turn it on in Settings → General → Modules.':
     'Αυτό το μέρος του Erevos είναι ανενεργό σε αυτό το τηλέφωνο, γι’ αυτό η οθόνη δεν ανοίγει. Τίποτα δικό του δεν σβήνεται: όλα είναι πάλι εκεί μόλις το ενεργοποιήσεις στις Ρυθμίσεις → Γενικά → Ενότητες.',
   'Open Modules': 'Άνοιγμα «Ενότητες»',
-  "Erevos's own chats, groups and calls, end-to-end encrypted, through the relay, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.":
-    'Οι δικές του συνομιλίες, ομάδες και κλήσεις του Erevos, κρυπτογραφημένες από άκρη σε άκρη, μέσω του relay, του Nostr, κοντινών τηλεφώνων ή LoRa. Χωρίς λογαριασμό και χωρίς αριθμό τηλεφώνου. Οι κρυφές συνομιλίες ανήκουν εδώ.',
+  "Erevos's own chats, groups and calls, end-to-end encrypted, through the server, Nostr, phones nearby or LoRa. No account and no phone number. Hidden chats are part of it.":
+    'Οι δικές του συνομιλίες, ομάδες και κλήσεις του Erevos, κρυπτογραφημένες από άκρη σε άκρη, μέσω του server, του Nostr, κοντινών τηλεφώνων ή LoRa. Χωρίς λογαριασμό και χωρίς αριθμό τηλεφώνου. Οι κρυφές συνομιλίες ανήκουν εδώ.',
   'Erevos as the phone app: the keypad, the calls and the favourites, and every call on its own screen.':
     'Το Erevos ως εφαρμογή τηλεφώνου: το πληκτρολόγιο, οι κλήσεις και τα αγαπημένα, και κάθε κλήση στη δική του οθόνη.',
   'Erevos as the SMS app: the SMS in the same list as the chats.': 'Το Erevos ως εφαρμογή SMS: τα SMS στην ίδια λίστα με τις συνομιλίες.',
@@ -42,9 +42,6 @@ export const modulesText: Record<string, string> = {
   'The SMS leave the list, and their icon goes. Nothing is deleted.': 'Τα SMS φεύγουν από τη λίστα, και το εικονίδιό τους φεύγει. Τίποτα δεν σβήνεται.',
   'Its chats leave the list, and their messages do not come while it is off. Nothing is deleted: the account and the chats are there again when you turn it on.':
     'Οι συνομιλίες του φεύγουν από τη λίστα, και τα μηνύματά τους δεν έρχονται όσο είναι ανενεργό. Τίποτα δεν σβήνεται: ο λογαριασμός και οι συνομιλίες είναι πάλι εκεί όταν το ενεργοποιήσεις.',
-  'Setting up Erevos · step {n} of {m}': 'Ρύθμιση του Erevos · βήμα {n} από {m}',
-  'Welcome to Erevos': 'Καλώς ήρθες στο Erevos',
-  'What Android should allow': 'Τι πρέπει να επιτρέψει το Android',
   "A backup was just restored. What Android lets Erevos do, and which apps make calls and send SMS, stay with each phone and come with no backup: this is what the modules on need on this phone.":
     "Μόλις έγινε επαναφορά αντιγράφου. Ό,τι επιτρέπει το Android στο Erevos, και ποιες εφαρμογές κάνουν τις κλήσεις και στέλνουν τα SMS, μένουν σε κάθε τηλέφωνο και δεν έρχονται με κανένα αντίγραφο: αυτά χρειάζονται σε αυτό το τηλέφωνο οι ενότητες που είναι ενεργές.",
 };

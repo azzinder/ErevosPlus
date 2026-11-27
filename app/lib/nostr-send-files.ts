@@ -30,7 +30,7 @@ export const NOSTR_FILE_LIMIT = NOSTR_FILE_MOST;
 export class NostrFileTooLargeError extends FileTooLargeError {
   constructor() {
     super();
-    this.message = t('With no relay, files can be {size} MB at most.', { size: String(NOSTR_FILE_LIMIT / (1000 * 1000)) });
+    this.message = t('With no server, files can be {size} MB at most.', { size: String(NOSTR_FILE_LIMIT / (1000 * 1000)) });
   }
 }
 
@@ -48,7 +48,7 @@ export async function offerOnNostr(source: Source, meta: Omit<FileMeta, 'size'>,
   } catch (error) {
     // Nothing could take it now: it can wait, and go later.
     if (error instanceof FileTooLargeError) throw error;
-    throw new RelayUnreachableError(t('No Nostr relay or file server took it: {reason}', { reason: error instanceof Error ? error.message : String(error) }));
+    throw new RelayUnreachableError(t('No Nostr server or file server took it: {reason}', { reason: error instanceof Error ? error.message : String(error) }));
   }
 }
 

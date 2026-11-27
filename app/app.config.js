@@ -26,6 +26,12 @@ const INSTALL_PACKAGES = 'android.permission.REQUEST_INSTALL_PACKAGES';
 // update and which then moves to app.erevos.plus (lib/update-channel.ts wireOf).
 const PACKAGES = { erevos: 'app.erevos', lite: 'app.erevos.lite', plus: process.env.EREVOS_BRIDGE === '1' ? 'app.erevos' : 'app.erevos.plus' };
 const NAMES = { erevos: 'Erevos', lite: 'Erevos Lite', plus: 'Erevos+' };
+// Where Google's sign-in comes back to (app/lib/google-drive.ts): <package>:/oauth2redirect, as
+// Google wants of an app of the kind Android, so each edition opens with its own package as a
+// scheme. The filter names no path, which Android reads only with a host: any other link of that
+// scheme opens no screen (lib/open-link.ts). Not in the F-Droid build, which has no Google Drive
+// (lib/google-drive-ids.ts).
+const redirectFilter = (pkg) => ({ action: 'VIEW', category: ['BROWSABLE', 'DEFAULT'], data: [{ scheme: pkg }] });
 // EREVOS_WEB_ORIGIN and EREVOS_START_RELAY name a community's own servers instead of LPHL's
 // (lib/servers.ts): the web server with Erevos's pages and models, which Android then opens in
 // Erevos for /c and /i (that server needs its own .well-known/assetlinks.json for this build's
@@ -62,7 +68,7 @@ module.exports = ({ config }) => {
     android: {
       ...config.android,
       package: PACKAGES[edition],
-      intentFilters,
+      intentFilters: fdroid ? intentFilters : [...intentFilters, redirectFilter(PACKAGES[edition])],
       ...(build > 0 ? { versionCode: build } : {}),
       ...(fdroid
         ? {

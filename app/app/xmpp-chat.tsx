@@ -44,6 +44,7 @@ import { ask } from '../lib/alert';
 import { currentCall } from '../lib/call';
 import { shownLine } from '../lib/call-lines';
 import { callPermissions } from '../lib/call-permissions';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { vanishTimer } from '../lib/chat-rules';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { xmppHistory } from '../lib/chat-history-adapters';
@@ -683,6 +684,11 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function call(video: boolean) {
     if (!jid) return;
     setNote('');
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) {
+      setNote(callsOffNote());
+      return;
+    }
     if (currentCall() || currentGroupCall()) {
       setNote(t('There is a call already.'));
       return;
@@ -700,6 +706,11 @@ function XmppChat({ onLook }: { onLook: (chat: ChatLook | null) => void }) {
   async function callGroup(asked: boolean) {
     if (!jid) return;
     setNote('');
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) {
+      setNote(callsOffNote());
+      return;
+    }
     if (currentCall() || currentGroupCall()) {
       setNote(t('There is a call already.'));
       return;

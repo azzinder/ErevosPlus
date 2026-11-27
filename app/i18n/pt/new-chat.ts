@@ -9,7 +9,7 @@ export const newChatText: Record<string, string> = {
   "My link": "Meu link",
   "Blocked contacts · {n}": "Contatos bloqueados · {n}",
   "Send them your contact link with any app. They open it in Erevos, or paste it under I have their code, and you are each other’s contacts.": "Envie seu link de contato com qualquer aplicativo. A pessoa abre no Erevos, ou cola em Tenho o código dele, e vocês viram contatos.",
-  "This small code works only when both phones have a relay. Otherwise use Near me, or an invite from Far away.": "Este código pequeno só funciona se os dois celulares tiverem um relay. Senão, use Ao meu lado, ou um convite de Longe.",
+  "This small code works only when both phones have a server. Otherwise use Near me, or an invite from Far away.": "Este código pequeno só funciona se os dois celulares tiverem um servidor. Senão, use Ao meu lado, ou um convite de Longe.",
   "Where is the other person?": "Onde está a outra pessoa?",
   "Near me": "Ao meu lado",
   "The two phones find each other by themselves, or with a code on the screen.": "Os dois celulares se encontram sozinhos, ou com um código na tela.",
@@ -64,6 +64,6 @@ export const newChatText: Record<string, string> = {
   "The invite is taken back: its link lets no one in any more.": "O convite foi pego de volta: o link dele não deixa mais ninguém entrar.",
   "New invite": "Novo convite",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.": "Um link, para uma pessoa: o celular dela entra no Erevos com ele, sem digitar nada, e vocês viram contatos na hora. Ele só abre num celular que já tem o Erevos.",
-  "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.": "Ela escaneia com a câmera do celular, que já tem o Erevos: ele se prepara sozinho, sem relay nem códigos para digitar, e vocês viram contatos.",
+  "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no server or codes to type, and you are each other’s contacts.": "Ela escaneia com a câmera do celular, que já tem o Erevos: ele se prepara sozinho, sem servidor nem códigos para digitar, e vocês viram contatos.",
   "Their phone’s camera scans it. Tap it to show it large.": "A câmera do outro celular o lê. Toque nele para mostrá-lo grande.",
 };

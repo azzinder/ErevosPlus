@@ -10,7 +10,9 @@ import { lang, t } from './i18n';
 import { randomBytes, toHex } from './crypto';
 import { addMatrixCallLine, sendEvent, setCallHandler, setRoomTap, type CallEvent, type Json, type MatrixState } from './matrix';
 import { CALL_MEMBER, hostWidget, type WidgetHost, type WidgetMessage, type WidgetNews } from './matrix-widget';
+import { callsOff, callsOffNote, CALLS_OFF_LINE } from './modes';
 import { placeNetworkRang } from './network-notices';
+import { onTorWay } from './relay';
 
 // Calls with people on Matrix, as Element X makes them (docs/matrix.md): with Element Call, Element's
 // own call app, which Erevos carries inside it (modules/erevos-webcall) and shows in a window of its
@@ -88,8 +90,9 @@ export type MatrixCall = {
   joinedAt?: number;
   metAt?: number;
   /** How it ended, when not hung up: turned down (by them, or here or on another of our devices),
-   *  answered on another device, not answered, or rung while in another call. */
-  end?: 'declined' | 'elsewhere' | 'missed' | 'busy';
+   *  answered on another device, not answered, rung while in another call, or while calls were off
+   *  (INVISIBLE, lib/modes.ts). */
+  end?: 'declined' | 'elsewhere' | 'missed' | 'busy' | 'off';
   /** A call of the open hidden place's own account, not the space's. */
   place?: true;
   /** It rang with no name while that place was closed, and rings now that its PIN opened it. */
@@ -226,6 +229,7 @@ export function matrixCallLine(call: MatrixCall, now = Date.now()): string {
   if (call.end === 'elsewhere') return `${kind}, answered on another device`;
   if (call.end === 'declined') return `${kind}, turned down`;
   if (call.end === 'busy') return `Missed ${kind.toLowerCase()}, while in another call`;
+  if (call.end === 'off') return `Missed ${kind.toLowerCase()}${CALLS_OFF_LINE}`;
   if (call.outgoing) return `${kind}, not answered`;
   return `Missed ${kind.toLowerCase()}`;
 }
@@ -257,6 +261,22 @@ function finish(call: MatrixCall, state?: MatrixState): void {
   // Nothing of it shows any more: Element Call's window is its screen, and it closed.
   if (shown === call) shown = null;
   changed();
+}
+
+// The rooms whose call did not ring here as calls were off (lib/modes.ts), until when it would have
+// rung: the older ring sent beside the newer one keeps no second line.
+const rangWhileOff = new Map<string, number>();
+
+// A ring while calls are off: a missed call's line that says so, once for the call.
+function rangOff(rung: MatrixCall, until: number, state: MatrixState): boolean {
+  const now = Date.now();
+  for (const [room, end] of rangWhileOff) if (end <= now) rangWhileOff.delete(room);
+  if (rangWhileOff.has(rung.roomId)) return true;
+  rangWhileOff.set(rung.roomId, until);
+  rung.state = 'ended';
+  rung.end = 'off';
+  line(rung, state);
+  return true;
 }
 
 /** Busy with another call: Erevos's own, a group's, or a Matrix one. */
@@ -293,6 +313,8 @@ async function onCallEvent(state: MatrixState, event: CallEvent): Promise<boolea
       }
       return false;
     }
+    // INVISIBLE (lib/modes.ts): no call rings, as a call would show this phone's internet address.
+    if (callsOff()) return rangOff(rung, ring.until, state);
     if (busy()) {
       rung.state = 'ended';
       rung.end = 'busy';
@@ -382,6 +404,8 @@ async function onClosedEvent(state: MatrixState, event: CallEvent): Promise<bool
       line(rung, state);
       return true;
     }
+    // INVISIBLE (lib/modes.ts): it does not ring when the place opens either.
+    if (callsOff()) return rangOff(rung, ring.until, state);
     const next: Held = { call: rung, state, closed, until: ring.until, timer: null };
     held.set(rung.id, next);
     next.timer = setTimeout(() => letGo(next, 'missed'), ring.until - now);
@@ -416,9 +440,9 @@ function promote(): void {
     if (h.timer) clearTimeout(h.timer);
     const call: MatrixCall = { ...h.call, place: true, held: true };
     const left = h.until - Date.now();
-    if (left <= 0 || busy()) {
+    if (left <= 0 || busy() || callsOff()) {
       call.state = 'ended';
-      call.end = left <= 0 ? 'missed' : 'busy';
+      call.end = left <= 0 ? 'missed' : callsOff() ? 'off' : 'busy';
       line(call);
       continue;
     }
@@ -475,6 +499,7 @@ function heard(call: MatrixCall, news: WidgetNews): void {
 /** Calls the people of a Matrix room, of the space's account or (`place`) the open hidden place's:
  *  Element Call opens and rings them. Throws if a call is on. */
 export function startMatrixCall(roomId: string, video: boolean, place = false): MatrixCall {
+  if (callsOff()) throw new Error(callsOffNote());
   if (busy()) throw new Error(t('There is a call already.'));
   const room = accountOf({ place: place || undefined })?.now()?.rooms[roomId];
   if (!room) throw new Error(t('Not signed in to Matrix.'));
@@ -529,6 +554,18 @@ export function hangUpMatrixCall(): void {
     .catch(() => undefined)
     .then(() => finish(call));
 }
+
+// INVISIBLE chosen, or everything of the space sent through Tor on its screen: a call on, or one
+// that rings, ends, as no call goes through Tor (lib/modes.ts). One that rings with no name for a
+// closed place stops, kept as missed at once, its line says why.
+onTorWay(() => {
+  if (!callsOff()) return;
+  hangUpMatrixCall();
+  for (const h of [...held.values()]) {
+    rangWhileOff.set(h.call.roomId, h.until);
+    letGo(h, 'off');
+  }
+});
 
 /** A message from Element Call's window. */
 export function callWindowMessage(message: unknown): void {

@@ -38,7 +38,7 @@ import { secureDelete, secureGet, secureSet } from './secure';
 // there is not known to this phone, as after a restore elsewhere, or once their password changed,
 // no held part goes, until that backup is no longer among the newest.
 //
-// On Android backups go as the open space's Tor way says (Settings → Relay and networks → Tor),
+// On Android backups go as the open space's Tor way says (Settings → Server and networks → Tor),
 // through lib/net-http.ts, as Matrix's and the other networks' files do: with Everything only
 // through Tor, and none when Tor cannot reach the server; with Messages through Tor while it is
 // ready, straight when it is not or fails; with Nothing straight. Just after a space opens Tor is
@@ -61,6 +61,9 @@ import { secureDelete, secureGet, secureSet } from './secure';
 // downloaded and opened with its password as a file is, on the phone, then its parts one at a
 // time (cloudParts). Nothing is written on the server for it.
 //
+// Google Drive takes automatic backups the same way (lib/google-drive.ts): sendBare sends to either
+// place, which only says how a file goes there, is deleted there, and which parts are there.
+//
 // The settings are kept in the keystore entry CLOUD, outside every space, as automatic backups'
 // own are, with the names of the backups sent, oldest first. Backups hold it (lock/backup.ts):
 // restored where the phone sends to the same folder, the phone's own list of what went there stays.
@@ -76,7 +79,10 @@ export type CloudFile = { name: string; size: number; when: number };
 const NAME = /^[0-9a-f]{24}$/;
 const OLD_NAME = /^[0-9a-f]{16}$/;
 const PART_NAME = NAME;
-const isBackupName = (name: string) => NAME.test(name) || OLD_NAME.test(name);
+/** Whether `name` is one Erevos gives a backup on a server, or in Google Drive. */
+export const isBackupName = (name: string) => NAME.test(name) || OLD_NAME.test(name);
+/** Whether `name` is one Erevos gives a backup's part there. */
+export const isPartName = (name: string) => PART_NAME.test(name);
 // A backup's parts' seed.
 const SEED_BYTES = 16;
 const SEED = /^[0-9a-f]{32}$/;
@@ -160,8 +166,9 @@ function heldOf(value: unknown): CloudHeld | null {
 
 const CLOUD = 'erevos.backup-cloud';
 
-/** A server's answer: its status and what it said. */
-export type CloudAnswer = { status: number; bytes: Uint8Array };
+/** A server's answer: its status and what it said; `location`, the address it named, where the way
+ *  it went gives its headers (straight, not through Tor). */
+export type CloudAnswer = { status: number; bytes: Uint8Array; location?: string };
 
 /** How a request goes to the server; with `tor`, only through Tor. The checks put a server of their own here. */
 export type CloudHttp = (method: HttpMethod, url: string, headers: Record<string, string>, body?: Uint8Array, most?: number, tor?: boolean) => Promise<CloudAnswer>;
@@ -200,8 +207,8 @@ export function cloudThroughTor(): boolean {
 
 export class CloudError extends Error {}
 
-// The server could not be reached for this request: it may be, a moment later.
-class Unreached extends CloudError {}
+/** The server could not be reached for this request: it may be, a moment later. */
+export class Unreached extends CloudError {}
 
 /** The folder's address as Erevos uses it: https, ending in /. Throws CloudError with why not. */
 export function cloudFolder(address: string): string {
@@ -265,38 +272,47 @@ export function askServer(server: CloudServer, method: HttpMethod, name: string,
   return ask(method, server.url + name, { ...authorization(server), ...headers }, body, most, server.tor === true);
 }
 
-/** One request to `url` with no user name, as the sign-in with Nextcloud asks (lib/nextcloud-login.ts); as askServer otherwise, with `tor` only through Tor. */
-export function askAddress(method: HttpMethod, url: string, headers: Record<string, string> = {}, body?: Uint8Array, tor = false): Promise<CloudAnswer> {
-  return ask(method, url, headers, body, undefined, tor);
+/** One request to `url` with no user name, as the sign-in with Nextcloud asks (lib/nextcloud-login.ts)
+ *  and Google Drive's (lib/google-drive.ts); as askServer otherwise, with `tor` only through Tor, and
+ *  an answer of `most` bytes at most. */
+export function askAddress(method: HttpMethod, url: string, headers: Record<string, string> = {}, body?: Uint8Array, tor = false, most?: number): Promise<CloudAnswer> {
+  return ask(method, url, headers, body, most, tor);
 }
 
 export async function loadCloudBackup(): Promise<CloudBackup | null> {
   try {
     const value = JSON.parse((await secureGet(CLOUD)) ?? 'null') as Partial<CloudBackup> | null;
     if (!value || typeof value.url !== 'string' || typeof value.user !== 'string' || typeof value.password !== 'string') return null;
-    const names = Array.isArray(value.names) ? value.names.filter((name): name is string => typeof name === 'string' && isBackupName(name)) : [];
-    const parts: Record<string, CloudParts> = {};
-    const listed = typeof value.parts === 'object' && value.parts ? (value.parts as Record<string, unknown>) : {};
-    for (const name of names) {
-      // Names of hex digits only, never one of an object's own.
-      const of = partsOf(listed[name]);
-      if (of) parts[name] = of;
-    }
     return {
       url: value.url,
       user: value.user,
       password: value.password,
       ...(value.tor === true ? { tor: true } : {}),
-      names,
-      parts,
-      held: Array.isArray(value.held) ? value.held.map(heldOf).filter((of): of is CloudHeld => of !== null) : [],
-      unfinished: Array.isArray(value.unfinished) ? value.unfinished.map(partsOf).filter((of): of is CloudParts => of !== null) : [],
-      last: typeof value.last === 'number' ? value.last : 0,
-      error: typeof value.error === 'string' ? value.error : '',
+      ...sentOf(value),
     };
   } catch {
     return null;
   }
+}
+
+/** What settings kept say went to a place (BareSent), as Erevos writes it: anything else is left out. */
+export function sentOf(value: Partial<Record<keyof BareSent, unknown>>): BareSent {
+  const names = Array.isArray(value.names) ? value.names.filter((name): name is string => typeof name === 'string' && isBackupName(name)) : [];
+  const parts: Record<string, CloudParts> = {};
+  const listed = typeof value.parts === 'object' && value.parts ? (value.parts as Record<string, unknown>) : {};
+  for (const name of names) {
+    // Names of hex digits only, never one of an object's own.
+    const of = partsOf(listed[name]);
+    if (of) parts[name] = of;
+  }
+  return {
+    names,
+    parts,
+    held: Array.isArray(value.held) ? value.held.map(heldOf).filter((of): of is CloudHeld => of !== null) : [],
+    unfinished: Array.isArray(value.unfinished) ? value.unfinished.map(partsOf).filter((of): of is CloudParts => of !== null) : [],
+    last: typeof value.last === 'number' ? value.last : 0,
+    error: typeof value.error === 'string' ? value.error : '',
+  };
 }
 
 /**
@@ -373,30 +389,37 @@ export function setCloudRetry(ms: number[]): void {
   retryMs = ms;
 }
 
-// Whether a status says the server may take it if asked again: busy, locked or slow, not a clear no.
-const passing = (status: number) => status === 408 || status === 423 || status === 425 || status === 429 || (status >= 500 && status !== 507);
+/** Whether a status says the server may take it if asked again: busy, locked or slow, not a clear no. */
+export const passing = (status: number) => status === 408 || status === 423 || status === 425 || status === 429 || (status >= 500 && status !== 507);
 
 const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-// Sends `bytes` to the server as `name`, again after a while when the server is busy or cannot be
-// reached for a moment. Throws CloudError with why not.
-async function put(cloud: CloudBackup, name: string, bytes: Uint8Array): Promise<void> {
+/**
+ * Sends something with `send`, again after each of the waits retryMs says while what it says went
+ * wrong (`said`, null when all went well) may go if asked again (`again`). Throws CloudError with
+ * the last why not.
+ */
+export async function tryAgain(send: () => Promise<{ said: string | null; again: boolean }>): Promise<void> {
   for (let attempt = 0; ; attempt++) {
-    let said: string | null;
-    let again: boolean;
-    try {
-      const { status } = await ask('PUT', cloud.url + name, { ...authorization(cloud), 'Content-Type': 'application/octet-stream' }, bytes, undefined, cloud.tor === true);
-      said = cloudStatusText(status);
-      again = passing(status);
-    } catch (error) {
-      if (!(error instanceof Unreached)) throw error;
-      said = error.message;
-      again = true;
-    }
+    const { said, again } = await send();
     if (!said) return;
     if (!again || attempt >= retryMs.length) throw new CloudError(said);
     await pause(retryMs[attempt]);
   }
+}
+
+// Sends `bytes` to the server as `name`, again after a while when the server is busy or cannot be
+// reached for a moment. Throws CloudError with why not.
+function put(cloud: CloudBackup, name: string, bytes: Uint8Array): Promise<void> {
+  return tryAgain(async () => {
+    try {
+      const { status } = await ask('PUT', cloud.url + name, { ...authorization(cloud), 'Content-Type': 'application/octet-stream' }, bytes, undefined, cloud.tor === true);
+      return { said: cloudStatusText(status), again: passing(status) };
+    } catch (error) {
+      if (!(error instanceof Unreached)) throw error;
+      return { said: error.message, again: true };
+    }
+  });
 }
 
 // Deletes `name` on the server: whether it is gone now, as one already gone is.
@@ -408,9 +431,41 @@ async function gone(cloud: CloudBackup, name: string): Promise<boolean> {
   return status === 404 || !cloudStatusText(status);
 }
 
-// Deletes a backup's parts on the server: whether all of them are gone now.
-async function partsGone(cloud: CloudBackup, { seed, count }: CloudParts): Promise<boolean> {
-  for (let n = 0; n < count; n++) if (!(await gone(cloud, partName(seed, n)))) return false;
+/** What a place that takes bare backups keeps of what went there: CloudBackup's, and Google
+ *  Drive's (lib/google-drive.ts), as CloudBackup says them. */
+export type BareSent = {
+  names: string[];
+  parts: Record<string, CloudParts>;
+  held: CloudHeld[];
+  unfinished: CloudParts[];
+  last: number;
+  error: string;
+};
+
+/** A place bare backups go to, as sendBare sends them: a server's folder over WebDAV, or the folder
+ *  Erevos made in Google Drive (lib/google-drive.ts). */
+export type BarePlace = {
+  /** Sends `bytes` there as `name`, again after a while when the place is busy or cannot be
+   *  reached for a moment (tryAgain). Throws CloudError with why not. */
+  put(name: string, bytes: Uint8Array): Promise<void>;
+  /** Deletes `name` there: whether it is gone now, as one already gone is. */
+  gone(name: string): Promise<boolean>;
+  /** The parts there, each with its size, 0 where the place does not say it. Throws CloudError with why not. */
+  parts(): Promise<Map<string, number>>;
+};
+
+// The server's folder, as sendBare sends to it.
+function davPlace(cloud: CloudBackup): BarePlace {
+  return {
+    put: (name, bytes) => put(cloud, name, bytes),
+    gone: (name) => gone(cloud, name),
+    parts: async () => new Map(listed(await listing(cloud), (file) => PART_NAME.test(file)).map((file) => [file.name, file.size])),
+  };
+}
+
+// Deletes a backup's parts there: whether all of them are gone now.
+async function partsGone(place: BarePlace, { seed, count }: CloudParts): Promise<boolean> {
+  for (let n = 0; n < count; n++) if (!(await place.gone(partName(seed, n)))) return false;
   return true;
 }
 
@@ -419,16 +474,16 @@ const AHEAD = 16;
 
 // Deletes there the backups sent but the `keep` newest, with the parts of theirs no backup kept
 // there names, and the parts of those that never ended: the settings as they are after it. One the
-// server would not delete stays, to be tried again next time. `book` (lib/backup-ledger.ts) says
+// place would not delete stays, to be tried again next time. `book` (lib/backup-ledger.ts) says
 // which parts each automatic backup there names, and loses those that go.
-async function tidy(cloud: CloudBackup, next: CloudBackup, keep: number, book?: Map<string, PartMade[]>): Promise<CloudBackup> {
+async function tidy<S extends BareSent>(place: BarePlace, next: S, keep: number, book?: Map<string, PartMade[]>): Promise<S> {
   const old = next.names.slice(0, Math.max(0, next.names.length - keep));
   const left: string[] = [];
   const parts = { ...next.parts };
   const held = [...next.held];
   for (const older of old) {
     // Its parts go once it did.
-    if (!(await gone(cloud, older))) {
+    if (!(await place.gone(older))) {
       left.push(older);
       continue;
     }
@@ -451,11 +506,11 @@ async function tidy(cloud: CloudBackup, next: CloudBackup, keep: number, book?: 
   for (const of of held) {
     const numbers = runsOf(of.left) ?? [];
     const stay = known ? [] : numbers;
-    if (known) for (const n of numbers) if (needed.has(partName(of.seed, n)) || !(await gone(cloud, partName(of.seed, n)))) stay.push(n);
+    if (known) for (const n of numbers) if (needed.has(partName(of.seed, n)) || !(await place.gone(partName(of.seed, n)))) stay.push(n);
     if (stay.length) still.push({ seed: of.seed, left: runsText(stay) });
   }
   const unfinished: CloudParts[] = [];
-  for (const of of next.unfinished) if (!(await partsGone(cloud, of))) unfinished.push(of);
+  for (const of of next.unfinished) if (!(await partsGone(place, of))) unfinished.push(of);
   return { ...next, names, parts, held: still, unfinished };
 }
 
@@ -473,22 +528,39 @@ export type CloudReuse = { earlier: PartMade[]; made: (parts: PartMade[]) => voi
  * backups give it, `make` is given the parts of the backups kept there that the folder lists whole,
  * to name again, and the book is told what it named.
  */
-export async function sendToCloud(
+export function sendToCloud(
   cloud: CloudBackup,
   make: (part: PartSink, reuse?: CloudReuse) => Promise<Uint8Array>,
   keep: number,
   now = Date.now(),
   book?: Map<string, PartMade[]>,
 ): Promise<CloudBackup> {
-  let next = cloud;
-  const save = async (value: CloudBackup) => {
+  return sendBare(cloud, davPlace(cloud), (value) => secureSet(CLOUD, JSON.stringify(value)), make, keep, now, book);
+}
+
+/**
+ * Sends a bare backup to `place` as sendToCloud does to a server, from what went there before
+ * (`start`), which `write` keeps as it changes: before each AHEAD parts, once the backup is there,
+ * and at the end. Returns it as it is after it; one that failed says why in `error`.
+ */
+export async function sendBare<S extends BareSent>(
+  start: S,
+  place: BarePlace,
+  write: (value: S) => Promise<void>,
+  make: (part: PartSink, reuse?: CloudReuse) => Promise<Uint8Array>,
+  keep: number,
+  now = Date.now(),
+  book?: Map<string, PartMade[]>,
+): Promise<S> {
+  let next = start;
+  const save = async (value: S) => {
     next = value;
-    await secureSet(CLOUD, JSON.stringify(value));
+    await write(value);
   };
   const seed = toHex(randomBytes(SEED_BYTES));
   const without = (list: CloudParts[]) => list.filter((of) => of.seed !== seed);
   try {
-    if (next.unfinished.length || next.names.length > keep || next.held.length) await save(await tidy(cloud, next, keep, book));
+    if (next.unfinished.length || next.names.length > keep || next.held.length) await save(await tidy(place, next, keep, book));
     let reuse: CloudReuse | undefined;
     let made: PartMade[] = [];
     if (book) {
@@ -498,8 +570,8 @@ export async function sendToCloud(
       const backups = [...next.names].reverse().map((sent) => book.get(sent) ?? []);
       let earlier: PartMade[] = [];
       if (backups.some((parts) => parts.length > 0)) {
-        // Only those the server lists, of their size: one deleted there, or cut short, goes again.
-        const there = new Map(listed(await listing(cloud), (file) => PART_NAME.test(file)).map((file) => [file.name, file.size]));
+        // Only those the place lists, of their size: one deleted there, or cut short, goes again.
+        const there = await place.parts();
         earlier = earlierParts(backups, (part) => there.has(part.name) && (!there.get(part.name) || there.get(part.name) === part.size));
       }
       reuse = { earlier, made: (parts) => (made = parts) };
@@ -513,13 +585,13 @@ export async function sendToCloud(
         if (count % AHEAD === 0) await save({ ...next, unfinished: [...without(next.unfinished), { seed, count: count + AHEAD }] });
         const at = partName(seed, count);
         count++;
-        await put(cloud, at, part);
+        await place.put(at, part);
         return at;
       }, reuse);
-      await put(cloud, name, bytes);
+      await place.put(name, bytes);
     } catch (error) {
-      // What went of it goes again: now, if the server lets it, else next time.
-      if (count && (await partsGone(cloud, { seed, count })) && (await gone(cloud, name))) next = { ...next, unfinished: without(next.unfinished) };
+      // What went of it goes again: now, if the place lets it, else next time.
+      if (count && (await partsGone(place, { seed, count })) && (await place.gone(name))) next = { ...next, unfinished: without(next.unfinished) };
       throw error;
     }
     // Kept at once, so its parts are never taken for those of one that never ended. One that names
@@ -534,14 +606,14 @@ export async function sendToCloud(
       last: now,
       error: '',
     });
-    next = await tidy(cloud, next, keep, book);
+    next = await tidy(place, next, keep, book);
   } catch (error) {
     next = {
       ...next,
       error: error instanceof Error ? error.message : String(error),
     };
   }
-  await secureSet(CLOUD, JSON.stringify(next));
+  await write(next);
   return next;
 }
 
@@ -637,7 +709,12 @@ function element(xml: string, name: string): string | null {
 /** The backups a WebDAV listing (a PROPFIND's multistatus) names, newest first: only names Erevos
  *  gives, and not their parts, whose size is a whole number of full parts. */
 export function backupsListed(xml: string): CloudFile[] {
-  return listed(xml, isBackupName).filter((file) => OLD_NAME.test(file.name) || file.size === 0 || file.size % BARE_PART !== 0);
+  return backupsAmong(listed(xml, isBackupName));
+}
+
+/** The backups among `files` of the names Erevos gives, as backupsListed: not their parts. */
+export function backupsAmong(files: CloudFile[]): CloudFile[] {
+  return files.filter((file) => OLD_NAME.test(file.name) || file.size === 0 || file.size % BARE_PART !== 0);
 }
 
 // The files a WebDAV listing names whose names are of `kind`, newest first.

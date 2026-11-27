@@ -4,7 +4,7 @@
 
 // The phone's own module (modules/erevos-device) for checks under Node: it keeps the reminders of
 // Chat with myself asked of it, by their ids, until they are forgotten, and those said to be seen.
-import { folders, writes } from './folder-memory';
+import { folders, keep, writes } from './folder-memory';
 import { sha256Bytes, toHex } from '../lib/crypto';
 
 export const reminders = new Map<string, number>();
@@ -41,8 +41,8 @@ const folderWrite = async (folder: string, name: string, bytes: Uint8Array): Pro
   if (!there) throw new Error('That folder is not there any more.');
   let free = name;
   for (let n = 1; there.has(free); n++) free = `${name} (${n})`;
-  if (writes.failAt > 0 && --writes.failAt === 0) throw new Error('No room left.');
-  there.set(free, bytes.slice());
+  if (writes.failAt > 0 && --writes.failAt === 0) throw new Error(writes.said);
+  keep(folder, free, bytes);
   return { name: free, uri: uriOf(folder, free) };
 };
 

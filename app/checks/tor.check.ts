@@ -296,7 +296,7 @@ test("the way 'messages' sends straight at once what Tor could not take to the r
   straight = 0;
   mayGoStraight = false;
   setThroughTor('all');
-  await assert.rejects(createQueue({ url: 'wss://relay.example.org' }), (error: Error) => error.message === 'Through Tor: the relay did not answer in time');
+  await assert.rejects(createQueue({ url: 'wss://relay.example.org' }), (error: Error) => error.message === 'Through Tor: the server did not answer in time');
   assert.equal(straight, 0);
 });
 

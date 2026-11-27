@@ -104,7 +104,7 @@ export class FileDamagedError extends Error {
 /** The file is not on the relay any more: taken already, or expired after 14 days. */
 export class FileGoneError extends Error {
   constructor() {
-    super(t('The file is not on the relay any more. Files wait there 14 days.'));
+    super(t('The file is not on the server any more. Files wait there 14 days.'));
   }
 }
 

@@ -138,6 +138,11 @@ object SessionCalls {
 
     private var callId = ""
     private var pendingOffer: String? = null
+
+    /** Calls off (INVISIBLE, set by the app): a call that comes does not ring. */
+    @Volatile var callsOff = false
+    /** The last call missed so, said once for its preOffer and offer both. */
+    private var missedOff = ""
     private var acceptWhenOffer = false
     private val pendingIn = ArrayList<IceCandidate>()
     private val pendingOut = ArrayList<IceCandidate>()
@@ -342,6 +347,12 @@ object SessionCalls {
     }
 
     private fun ring(e: JSONObject, id: String) {
+        // Calls off (INVISIBLE): it does not ring and nothing is answered, so nothing of this
+        // phone's address goes to the caller; it shows as missed.
+        if (callsOff && state == State.IDLE) {
+            if (id != missedOff) { missedOff = id; missedNote(e.optString("name"), mutedNow(e.optLong("thread"))) }
+            return
+        }
         if (state != State.IDLE) {
             // Already in a call: tell the caller we cannot answer.
             if (id != callId) { val t = e.optLong("thread"); send.execute { runCatching { sendTo(t, id, "end") } } }

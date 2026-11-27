@@ -4,11 +4,13 @@
 
 // Links that open Erevos (erevos://...): its icons in the launcher and its widget, a tel: link
 // through the Phone (modules/erevos-phone), another app's request about a contact
-// (modules/erevos-contacts), an SMS notice, a contact code scanned with the camera. The password
-// screen comes first, and the screens start afresh once a space opens (app/_layout.tsx), so a link
-// is held here (app/+native-intent.ts) and opened once a space is open, if it came in the last few
-// minutes. One opened just before Erevos locked, as it does when it comes back from the background
-// with the link, is held again for after the password.
+// (modules/erevos-contacts), an SMS notice, a contact code scanned with the camera; and the browser
+// coming back from Google's sign-in, <package>:/oauth2redirect (app/oauth2redirect.tsx,
+// lib/google-drive.ts), which opens only that screen. The password screen comes first, and the
+// screens start afresh once a space opens (app/_layout.tsx), so a link is held here
+// (app/+native-intent.ts) and opened once a space is open, if it came in the last few minutes. One
+// opened just before Erevos locked, as it does when it comes back from the background with the
+// link, is held again for after the password.
 // Self-contained on purpose (but for lib/servers.ts), so it can run under plain Node for checks.
 
 import { LPHL_WEB, WEB_ORIGIN } from './servers';
@@ -27,6 +29,8 @@ const listeners = new Set<() => void>();
 export function linkHref(url: string): string {
   const web = webLinkHref(url);
   if (web) return web;
+  const back = OAUTH_REDIRECT.exec(url.trim());
+  if (back) return `/oauth2redirect${back[1] && back[1] !== '?' ? back[1] : ''}`;
   const match = /^erevos:\/*([^?#]*)(\?[^#]*)?/i.exec(url.trim());
   if (!match) return '';
   const path = match[1].replace(/\/+$/, '');
@@ -35,6 +39,10 @@ export function linkHref(url: string): string {
   if (!/^[a-z0-9-]+(\/[a-z0-9-]+)*$/i.test(path)) return '';
   return `/${path}${query}`;
 }
+
+// Where Google's sign-in comes back to: the editions' packages as the scheme (app.config.js), with
+// what follows ? for the screen, or that screen's path alone, as Expo Router may hand it over.
+const OAUTH_REDIRECT = /^(?:app\.erevos(?:\.plus|\.lite)?:\/*|\/)oauth2redirect\/?(\?[^#]*)?(?:#.*)?$/i;
 
 // Erevos's own pages on the web server that Android opens in Erevos (app.json intentFilters, with
 // the server's .well-known/assetlinks.json: LPHL's, or the one the build names, lib/servers.ts): an

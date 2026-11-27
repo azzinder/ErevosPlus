@@ -9,7 +9,7 @@ export const newChatText: Record<string, string> = {
   "My link": "Moj link",
   "Blocked contacts · {n}": "Blokirani kontakti · {n}",
   "Send them your contact link with any app. They open it in Erevos, or paste it under I have their code, and you are each other’s contacts.": "Pošalji mu svoj link za kontakt bilo kojom aplikacijom. Otvori ga u Erevosu, ili ga zalijepi pod Imam njegov kod, i jedno ste drugome kontakti.",
-  "This small code works only when both phones have a relay. Otherwise use Near me, or an invite from Far away.": "Ovaj mali kod radi samo ako oba telefona imaju relay. Inače koristi Pored mene, ili pozivnicu iz Daleko.",
+  "This small code works only when both phones have a server. Otherwise use Near me, or an invite from Far away.": "Ovaj mali kod radi samo ako oba telefona imaju server. Inače koristi Pored mene, ili pozivnicu iz Daleko.",
   "Where is the other person?": "Gdje je druga osoba?",
   "Near me": "Pored mene",
   "The two phones find each other by themselves, or with a code on the screen.": "Dva telefona se nađu sama, ili kodom na ekranu.",
@@ -64,6 +64,6 @@ export const newChatText: Record<string, string> = {
   "The invite is taken back: its link lets no one in any more.": "Pozivnica je povučena: njen link više nikoga ne pušta unutra.",
   "New invite": "Nova pozivnica",
   "One link, for one person: their phone joins Erevos with it, typing nothing, and you are each other’s contacts at once. It opens only on a phone that has Erevos already.": "Jedan link, za jednu osobu: njen telefon se njime pridružuje Erevosu, bez kucanja, i odmah ste kontakti. Otvara se samo na telefonu koji već ima Erevos.",
-  "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no relay or codes to type, and you are each other’s contacts.": "Skenira ga kamerom svog telefona, koji već ima Erevos: sam se podesi, bez relaya i kodova za kucanje, i postajete kontakti.",
+  "They scan it with their phone’s camera, with Erevos on it already: it gets ready by itself, with no server or codes to type, and you are each other’s contacts.": "Skenira ga kamerom svog telefona, koji već ima Erevos: sam se podesi, bez servera i kodova za kucanje, i postajete kontakti.",
   "Their phone’s camera scans it. Tap it to show it large.": "Kamera drugog telefona ga skenira. Dodirnite ga da se prikaže veliko.",
 };

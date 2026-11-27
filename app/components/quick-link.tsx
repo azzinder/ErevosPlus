@@ -116,7 +116,7 @@ export function QuickToPhone({
       setStage('linking');
     } catch (error) {
       channel.current?.close();
-      fallback(t('The phone answered, but this computer could not use its relay: {error}', { error: errorText(error) }), message.relay);
+      fallback(t('The phone answered, but this computer could not use its server: {error}', { error: errorText(error) }), message.relay);
     }
   }
 
@@ -189,7 +189,7 @@ export function QuickFromComputer({
     try {
       const data = await loadCurrentSpaceData();
       const url = data.url.trim();
-      if (!url) throw new Error(t('Type the relay address in Relay first: linked devices reach this phone through it.'));
+      if (!url) throw new Error(t('Type the server address in Server first: linked devices reach this phone through it.'));
       const token = data.token.trim();
       // An invite for a token of the computer's own, where this phone may invite; else the relay's
       // token for all, typed in here, but never one of this phone's own.
@@ -215,7 +215,7 @@ export function QuickFromComputer({
       channel.current = opened;
       await opened.send(code.nostr, { t: 'grant', relay: url, to: opened.key, ...(invite ? { code: invite.code } : shared ? { tk: shared } : {}) });
       setWaiting(true);
-      const timer = setTimeout(() => finish(new Error(t('The computer did not answer. On it, tap Link another way and sign in to the relay there, then scan its code again.'))), ANSWER_WAIT);
+      const timer = setTimeout(() => finish(new Error(t('The computer did not answer. On it, tap Link another way and sign in to the server there, then scan its code again.'))), ANSWER_WAIT);
       try {
         await finished;
       } finally {

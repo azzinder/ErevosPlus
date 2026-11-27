@@ -19,7 +19,7 @@ export function ServerChoice({ none = false }: { none?: boolean }) {
     <>
       <Text variant="bodyStrong">{t('Where your messages wait')}</Text>
       <Text variant="caption" tone="muted">
-        {t('A server (Erevos calls it a relay) keeps your messages, encrypted, until the other phone takes them. It cannot read them. Choose how to start: you can change it any time, here.')}
+        {t('A server keeps your messages, encrypted, until the other phone takes them. It cannot read them. Choose how to start: you can change it any time, here.')}
       </Text>
       {none ? (
         <Text variant="caption" tone="muted">
@@ -70,7 +70,7 @@ export function OwnServerCard({ open, onPress, onUse }: { open: boolean; onPress
       </Row>
       {problem ? <Text color={colors.danger}>{problem}</Text> : null}
       <Text variant="caption" tone="muted">
-        {t('Whoever set up the server gives you both; there they are called the relay address and the token. Calls, photos and files then go through that server too. To set one up yourself, see Running your own relay in the user guide.')}
+        {t('Whoever set up the server gives you both; there they are called the server address and the token. Calls, photos and files then go through that server too. To set one up yourself, see Running your own server in the user guide.')}
       </Text>
     </WayCard>
   );

@@ -143,10 +143,10 @@ export default function Panic() {
     <Page>
       <Text variant="title">{t('Panic button')}</Text>
       <Text variant="caption" tone="muted" style={hint}>
-        {t('In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.')}
+        {t('In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.')}
       </Text>
       <Text variant="caption" tone="muted" style={hint}>
-        {t('What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.')}
+        {t('What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.')}
       </Text>
 
       <SectionTitle title={t('Wipe now')} />

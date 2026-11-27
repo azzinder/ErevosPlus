@@ -22,11 +22,12 @@ export function isTrap(error: unknown): boolean {
   return error instanceof Error && error.name === 'RuntimeError';
 }
 
-/** The core's calls, each returning a promise as Core says, set up again after a trap. */
+/** The core's calls, each returning a promise as Core says, set up again after a trap. It gives and
+ *  takes a Nostr event as its bytes, and says so (Core.eventsAsBytes). */
 export function guardCore(wasm: WebCore): Core {
   const reset = typeof wasm[RESET] === 'function' ? (wasm[RESET] as () => void) : null;
   const calls = Object.entries(wasm).filter(([name, call]) => typeof call === 'function' && name !== 'default' && name !== 'initSync' && !name.startsWith('__'));
-  return Object.fromEntries(
+  const guarded = Object.fromEntries(
     calls.map(([name, call]) => [
       name,
       async (...args: unknown[]) => {
@@ -44,4 +45,5 @@ export function guardCore(wasm: WebCore): Core {
       },
     ]),
   ) as unknown as Core;
+  return { ...guarded, eventsAsBytes: true };
 }

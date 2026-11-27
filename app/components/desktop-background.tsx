@@ -41,9 +41,9 @@ export function DesktopBackground({ titled }: { titled: boolean }) {
           {said ||
             (keep
               ? mac
-                ? t('When you close its window, Erevos keeps running in the Dock: it waits at the relay, a call rings and brings the window back, and a notification says how many messages are not read, never who or what. Click its icon in the Dock to open it again, and quit it from its menu.')
-                : t('When you close its window, Erevos keeps running in the system tray: it waits at the relay, a call rings and brings the window back, and a notification says how many messages are not read, never who or what. Open it again from its icon there, or by starting Erevos, and quit it from that icon\'s menu. Where the desktop shows no tray, as GNOME without an extension for it, starting Erevos again brings the window back.')
-              : t('Closing its window quits Erevos: messages wait at the relay until you open it again, and a call that came meanwhile shows as missed.'))}
+                ? t('When you close its window, Erevos keeps running in the Dock: it waits at the server, a call rings and brings the window back, and a notification says how many messages are not read, never who or what. Click its icon in the Dock to open it again, and quit it from its menu.')
+                : t('When you close its window, Erevos keeps running in the system tray: it waits at the server, a call rings and brings the window back, and a notification says how many messages are not read, never who or what. Open it again from its icon there, or by starting Erevos, and quit it from that icon\'s menu. Where the desktop shows no tray, as GNOME without an extension for it, starting Erevos again brings the window back.')
+              : t('Closing its window quits Erevos: messages wait at the server until you open it again, and a call that came meanwhile shows as missed.'))}
         </Text>
       </Card>
     </>

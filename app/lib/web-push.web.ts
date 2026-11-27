@@ -183,7 +183,7 @@ function taken(queues: string[]): void {
 // The address is the space's own, `mine`'s.
 async function register(own: Relay, queues: string[], mine: Mine, needed = 0): Promise<string | null> {
   const key = await pushKey(own);
-  if (!key) return t('Your relay does not send notifications. It needs a newer version, set up with a push key.');
+  if (!key) return t('Your server does not send notifications. It needs a newer version, set up with a push key.');
   if (await give(own, queues, needed, await subscription(mine, key))) await give(own, queues, needed, await subscription(mine, key, true), true);
   return null;
 }
@@ -232,7 +232,7 @@ export async function turnOnPush(): Promise<string | null> {
   const { space, key } = currentSpace();
   const at = opened();
   const data = await loadSpaceData(space, key);
-  if (!data.url.trim() || !data.ownQueue) return t('Set up the relay first, under Relay.');
+  if (!data.url.trim() || !data.ownQueue) return t('Set up the server first, under Server.');
   const own = spaceRelay(data.url, data.token);
   const queue = data.ownQueue;
   try {

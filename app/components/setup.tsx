@@ -3,36 +3,33 @@
 // Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackHandler, Image, Platform, Pressable, TextInput, View } from 'react-native';
 
 import { tap } from '../lib/haptics';
-import { named } from '../lib/edition';
+import { editionName, EDITION } from '../lib/edition';
 import { findMoves, type FoundMove } from '../lib/edition-move';
+import { startSteps, stepAt, type StartStep } from '../lib/first-start';
 import { updateEditionName } from '../lib/update-channel';
 import { LANG_LABELS, lang, t } from '../lib/i18n';
 import { modulesHere, type Module } from '../lib/modules';
 import { linkParts, peekLink } from '../lib/open-link';
-import { afterSteps } from '../lib/setup-after';
+import { HAS_CHECKS } from '../lib/permissions';
 import { welcomeOf } from '../lib/welcome';
 import { MAX_NAME } from '../lock/e2e-data';
-import { Logo } from '../lock/gate';
-import { space } from '../theme/colors';
-import { useColors } from '../theme/context';
-
-import { KeyboardAwareScrollView } from './keyboard';
+import { useStartLook, Dots, Emblem, FooterLink, Glass, Hero, Icon, L, MainButton, NavRow, noOutline, StartScreen, StartToggle, Tile, type IconName } from './first-start-look';
 import { moduleAbout, moduleName } from './module-texts';
 import { LanguageSheet, languageTitle } from './settings-list';
-import { Button, Card, Chip, Field, Input, Row, SectionTitle, Text, TextButton, Toggle } from './ui';
+import type { Tile as TileColour } from '../lib/first-start';
 
-// Erevos's very first start (app/_layout.tsx), before its first space opens, as an installer is:
-// what Erevos is and is not (no identity to give away), an optional name for the contacts, and its
-// language; then which of its parts to use (lib/modules.ts), any of them, Erevos's own too, at least
-// one for chats. The rest needs the space open, so it follows once it is (app/first-steps.tsx): a
-// screen for each part chosen, with what Android should allow for it, the password lock and the
-// backups. Moving from another phone skips the name and the parts, which come with the backup; on a
-// computer or in a browser, linking it to the phone does too. Nothing is kept until a choice is
-// made, and all of it can be changed later in Settings.
+// Erevos's very first start (app/_layout.tsx), before its first space opens, in the first start's
+// look (components/first-start-look.tsx, lib/first-start.ts): the welcome, with what Erevos is and
+// is not (no identity to give away), an optional name for the contacts, and its language; then
+// What will you use?, the modules (lib/modules.ts), any of them, Erevos's own too, at least one for
+// chats. The rest needs the space open, so it follows once it is (app/first-steps.tsx): how
+// visible you are, every permission, the password lock and the backups. Moving from another phone
+// skips the name and the modules, which come with the backup; on a computer or in a browser,
+// linking it to the phone does too. Nothing is kept until a choice is made, and all of it can be
+// changed later in Settings.
 
 /** What the first start's setup chose. */
 export type SetupChoice = {
@@ -45,7 +42,7 @@ export type SetupChoice = {
   linkPhone: boolean;
 };
 
-type Step = 'welcome' | 'modules';
+type Step = Extract<StartStep, 'welcome' | 'modules'>;
 
 // The screens an invite opens (lib/open-link.ts): Erevos opened with one waits to show it.
 const INVITES = new Set(['/welcome', '/text-invite', '/contact', '/c', '/i', '/join', '/relay-invite']);
@@ -58,12 +55,44 @@ function inviteFrom(href: string | null): string | null {
   return path === '/welcome' ? (welcomeOf(params)?.name ?? '') : '';
 }
 
+// The four main modules start on, with their tiles; any other (Erevos+'s networks) starts off.
+const MAIN: readonly Module[] = ['erevos', 'phone', 'sms', 'collection'];
+const MODULE_TILES: Partial<Record<Module, { tile: TileColour; icon: IconName }>> = {
+  erevos: { tile: 'gold', icon: 'chat' },
+  phone: { tile: 'teal', icon: 'phone' },
+  sms: { tile: 'blue', icon: 'sms' },
+  collection: { tile: 'violet', icon: 'col' },
+};
+
+function moduleLine(module: Module): string {
+  switch (module) {
+    case 'erevos':
+      return t('Messages, groups and calls');
+    case 'phone':
+      return t('Your mobile calls here too');
+    case 'sms':
+      return t('Your SMS with your chats');
+    case 'collection':
+      return t('Encrypted photos and files');
+    default:
+      return moduleAbout(module);
+  }
+}
+
+// A small label over a group.
+function GroupLabel({ children }: { children: string }) {
+  return (
+    <L size={12} weight="800" tone="muted" style={{ letterSpacing: 0.6, textTransform: 'uppercase', marginTop: 2 }}>
+      {children}
+    </L>
+  );
+}
+
 export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const look = useStartLook();
   const here = modulesHere();
   const [step, setStep] = useState<Step>('welcome');
-  const [chosen, setChosen] = useState<ReadonlySet<Module>>(() => new Set(here));
+  const [chosen, setChosen] = useState<ReadonlySet<Module>>(() => new Set(here.filter((m) => MAIN.includes(m))));
   const [name, setName] = useState('');
   const [languages, setLanguages] = useState(false);
   const [invite] = useState(() => inviteFrom(peekLink()));
@@ -76,15 +105,26 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
       active = false;
     };
   }, []);
+  // Android's back key goes back to the welcome from the modules.
+  useEffect(() => {
+    if (step !== 'modules') return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      setStep('welcome');
+      return true;
+    });
+    return () => subscription.remove();
+  }, [step]);
   const list = here.filter((m) => chosen.has(m));
   // The Collection alone leaves no chat to open (lib/modules.ts).
   const nothing = list.every((m) => m === 'collection');
   // With one module only (Erevos Lite, lib/edition.ts, or a device with Erevos's own chats alone)
   // there is nothing to choose: no step for the modules.
   const single = here.length === 1;
-  // These two, then a screen for each module chosen, the lock and the backups, and what is done.
-  const count = (single ? 1 : 2) + afterSteps(list).length;
-  const at = step === 'welcome' ? 0 : 1;
+  // The same steps app/first-steps.tsx counts, for the dots (the welcome has none).
+  const steps = startSteps({ choice: !single, restored: false, checks: HAS_CHECKS });
+  const at = stepAt(steps, 'modules');
+  const mains = here.filter((m) => MAIN.includes(m));
+  const others = here.filter((m) => !MAIN.includes(m));
 
   function toggle(module: Module) {
     tap();
@@ -96,127 +136,179 @@ export function Setup({ onDone }: { onDone: (choice: SetupChoice) => void }) {
     });
   }
 
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.ground }}>
-      <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ width: '100%', maxWidth: 760, alignSelf: 'center', padding: space.xl - 4, paddingTop: insets.top + space.xl, gap: space.md }}
-      >
-        <Text variant="overline" tone="muted">
-          {t('Setting up Erevos · step {n} of {m}', { n: at + 1, m: count })}
-        </Text>
-        {step === 'welcome' ? (
-          <>
-            {invite !== null ? (
-              <Card>
-                <Text variant="bodyStrong">{invite ? t('{name} invites you to Erevos', { name: invite }) : t('An invite to Erevos')}</Text>
-                <Text variant="caption" tone="muted" style={hint}>
-                  {t('It opens after the setup: the invite waits for you.')}
-                </Text>
-              </Card>
-            ) : null}
-            <View style={{ alignItems: 'center', gap: space.md, paddingVertical: space.md }}>
-              <Logo size={72} />
-              <Text variant="title" style={{ textAlign: 'center' }}>
-                {named(t('Welcome to Erevos'))}
-              </Text>
-            </View>
-            {move ? (
-              <Card>
-                <Text variant="bodyStrong">{t('{edition} is on this phone', { edition: updateEditionName(move.from) })}</Text>
-                <Text style={hint}>{t('It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.', { edition: updateEditionName(move.from) })}</Text>
-                <Row wrap>
-                  <Button title={t('Bring everything here')} onPress={() => onDone({ modules: here, name: '', restore: true, linkPhone: false })} />
-                </Row>
-              </Card>
-            ) : null}
-            <Card>
-              <Text variant="bodyStrong">{t('No identity to give away')}</Text>
-              <Text style={hint}>{t('No phone number, email, user name or account.')}</Text>
-              <Text style={hint}>{t('You add people with a QR code or a link, or they invite you.')}</Text>
-              <Text tone="muted" style={hint}>
-                {t('Someone new who writes first waits as a message request, until you accept.')}
-              </Text>
-            </Card>
-            <SectionTitle title={t('A name for your contacts · optional')} />
-            <Field hint={t('Not a user name: no one searches for it, and it need not be unique. It goes, encrypted, only to those you add, and you can change it any time under Settings → Privacy and security → My name.')}>
-              <Input
-                value={name}
-                onChangeText={setName}
-                placeholder={t('Your name')}
-                maxLength={MAX_NAME}
-                autoCapitalize="words"
-                accessibilityLabel={t('A name for your contacts · optional')}
-              />
-            </Field>
-            <SectionTitle title={languageTitle()} />
-            <Row wrap>
-              <Chip label={LANG_LABELS[lang()]} selected onPress={() => setLanguages(true)} />
-            </Row>
-          </>
-        ) : (
-          <>
-            <Text variant="title">{t('What will you use?')}</Text>
-            <Text tone="muted" style={hint}>
-              {t('Choose as many as you like. A short screen for each, with what it needs, follows.')}
-            </Text>
-            {here.map((module) => (
-              <Pressable
-                key={module}
-                onPress={() => toggle(module)}
-                accessibilityRole="switch"
-                accessibilityState={{ checked: chosen.has(module) }}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-              >
-                <Card>
-                  <Row style={{ alignItems: 'center', gap: space.md }}>
-                    <View style={{ flex: 1, gap: 4 }}>
-                      <Text variant="bodyStrong">{moduleName(module)}</Text>
-                      <Text variant="caption" tone="muted" style={hint}>
-                        {moduleAbout(module)}
-                      </Text>
-                    </View>
-                    <Toggle on={chosen.has(module)} />
-                  </Row>
-                </Card>
-              </Pressable>
-            ))}
-            {nothing ? (
-              <Text variant="caption" color={colors.danger}>
-                {t('Choose at least one for chats: the Collection alone has nothing to open.')}
-              </Text>
-            ) : null}
-            <Text variant="caption" tone="muted" style={hint}>
-              {t('Contacts, the password, the spaces and the backups are always there. Those you leave off do not start at all; turn them on any time in Settings → General → Modules.')}
-            </Text>
-          </>
-        )}
-        <Row style={{ justifyContent: 'space-between', marginTop: space.md }}>
-          {at > 0 ? <Button title={t('Back')} kind="ghost" compact onPress={() => setStep('welcome')} /> : <View />}
-          <Button
-            title={t('Next')}
-            disabled={step === 'modules' && nothing}
-            onPress={() => (step === 'welcome' && !single ? setStep('modules') : onDone({ modules: list, name: name.trim(), restore: false, linkPhone: false }))}
-          />
-        </Row>
-        {step === 'welcome' ? (
-          <View style={{ alignItems: 'center', marginTop: space.sm }}>
-            {Platform.OS === 'android' ? (
-              // The name and the modules come with the backup.
-              <TextButton title={t('I already have Erevos on another phone')} onPress={() => onDone({ modules: here, name: '', restore: true, linkPhone: false })} />
-            ) : (
-              // A computer or a browser beside the phone: the phone's modules are the ones that count.
-              <TextButton title={t('Link to my phone')} onPress={() => onDone({ modules: here, name: '', restore: false, linkPhone: true })} />
-            )}
+  const moveHere = () => onDone({ modules: here, name: '', restore: true, linkPhone: false });
+
+  if (step === 'welcome') {
+    return (
+      <>
+        <StartScreen
+          footer={
+            <>
+              <MainButton title={t('Get started')} onPress={() => (single ? onDone({ modules: list, name: name.trim(), restore: false, linkPhone: false }) : setStep('modules'))} />
+              {Platform.OS === 'android' ? (
+                // The name and the modules come with the backup.
+                <FooterLink text={t('I already have Erevos on another phone')} link={t('Move it here')} onPress={moveHere} />
+              ) : (
+                // A computer or a browser beside the phone: the phone's modules are the ones that count.
+                <FooterLink link={t('Link to my phone')} onPress={() => onDone({ modules: here, name: '', restore: false, linkPhone: true })} />
+              )}
+            </>
+          }
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 4 }}>
+            <Pressable
+              onPress={() => setLanguages(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`${languageTitle()}: ${LANG_LABELS[lang()]}`}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                height: 30,
+                paddingHorizontal: 12,
+                borderRadius: 15,
+                backgroundColor: look.glass,
+                borderWidth: 1,
+                borderColor: look.line,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Icon name="globe" size={14} color={look.text} />
+              <L size={12.5} weight="700">
+                {LANG_LABELS[lang()]}
+              </L>
+            </Pressable>
           </View>
-        ) : null}
-        <View style={{ height: insets.bottom + space.lg }} />
-      </KeyboardAwareScrollView>
-      <LanguageSheet visible={languages} onClose={() => setLanguages(false)} />
-    </View>
+          {invite !== null ? (
+            <Glass style={{ padding: 14, gap: 4 }}>
+              <L size={15} weight="700">
+                {invite ? t('{name} invites you to Erevos', { name: invite }) : t('An invite to Erevos')}
+              </L>
+              <L size={12.5} tone="muted" line={17}>
+                {t('It opens after the setup: the invite waits for you.')}
+              </L>
+            </Glass>
+          ) : null}
+          <View style={{ alignItems: 'center', gap: 8, paddingTop: 6 }}>
+            <Image
+              source={require('../assets/icon/icon.png')}
+              style={{ width: 112, height: 112, borderRadius: 28, marginTop: 18, boxShadow: `0px 18px 50px -8px ${look.glow}` }}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
+            <View style={{ marginTop: 14, alignSelf: 'stretch' }}>
+              <Hero title={t('Welcome to {app}', { app: `*${editionName()}*` })} sub={t('You talk with whoever you want. No one else listens.')} />
+            </View>
+          </View>
+          {move ? (
+            <Glass style={{ padding: 14, gap: 8 }}>
+              <L size={15} weight="700">
+                {t('{edition} is on this phone', { edition: updateEditionName(move.from) })}
+              </L>
+              <L size={12.5} tone="muted" line={17}>
+                {t('It made everything ready for this app: every space, with its contacts, messages and settings. Bring it here, then open the spaces with their passwords, as before.', { edition: updateEditionName(move.from) })}
+              </L>
+              <MainButton title={t('Bring everything here')} onPress={moveHere} />
+            </Glass>
+          ) : null}
+          <Glass style={{ paddingVertical: 4 }}>
+            {(
+              [
+                ['slate', 'id', t('No number, email or account'), t('You give nothing to start.')],
+                ['teal', 'shield', t('Everything encrypted'), t('Messages and calls for the two of you alone.')],
+                ['blue', 'qr', t('You add people by QR code or link'), t('No one finds you unless you want.')],
+              ] as const
+            ).map(([tile, icon, title, line]) => (
+              <View key={title} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11, paddingHorizontal: 14 }}>
+                <Tile tile={tile} icon={icon} />
+                <View style={{ flex: 1 }}>
+                  <L size={15} weight="700">
+                    {title}
+                  </L>
+                  <L size={12.5} tone="muted" line={17}>
+                    {line}
+                  </L>
+                </View>
+              </View>
+            ))}
+          </Glass>
+          <View
+            style={{ height: 50, borderRadius: 16, backgroundColor: look.glass, borderWidth: 1, borderColor: look.line, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16 }}
+          >
+            <Icon name="user" size={18} color={look.primary} />
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder={t('Your name (optional)')}
+              placeholderTextColor={look.faint}
+              maxLength={MAX_NAME}
+              autoCapitalize="words"
+              accessibilityLabel={t('Your name (optional)')}
+              style={[{ flex: 1, height: 50, fontSize: 15, color: look.text, paddingVertical: 0 }, noOutline]}
+            />
+          </View>
+        </StartScreen>
+        <LanguageSheet visible={languages} onClose={() => setLanguages(false)} />
+      </>
+    );
+  }
+
+  const row = (module: Module) => {
+    const on = chosen.has(module);
+    const look_ = MODULE_TILES[module] ?? { tile: 'slate' as const, icon: 'globe' as const };
+    // Erevos+'s own chats are called by its name (lib/edition.ts).
+    const title = module === 'erevos' ? t('Erevos chats') : moduleName(module);
+    return (
+      <Pressable
+        key={module}
+        onPress={() => toggle(module)}
+        accessibilityRole="switch"
+        accessibilityLabel={title}
+        accessibilityState={{ checked: on }}
+        style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+      >
+        <Glass style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14 }}>
+          <Tile tile={look_.tile} icon={look_.icon} />
+          <View style={{ flex: 1 }}>
+            <L size={15} weight="700">
+              {title}
+            </L>
+            <L size={12.5} tone="muted" line={17}>
+              {moduleLine(module)}
+            </L>
+          </View>
+          <StartToggle on={on} />
+        </Glass>
+      </Pressable>
+    );
+  };
+
+  return (
+    <StartScreen
+      footer={
+        <NavRow onBack={() => setStep('welcome')}>
+          <MainButton title={t('Continue')} disabled={nothing} onPress={() => onDone({ modules: list, name: name.trim(), restore: false, linkPhone: false })} />
+        </NavRow>
+      }
+    >
+      <Dots n={at.n} of={at.of} />
+      <Hero
+        emblem={<Emblem tile={EDITION === 'plus' ? 'violet' : 'blue'} icon="chat" />}
+        title={t('What will you use?')}
+        sub={t('What you leave off does not run at all. Change them any time.')}
+      />
+      {mains.map(row)}
+      {others.length ? (
+        <>
+          <GroupLabel>{t('Other networks')}</GroupLabel>
+          {others.map(row)}
+        </>
+      ) : null}
+      {nothing ? (
+        <L size={12.5} tone="warn" line={17}>
+          {t('Choose at least one for chats: the Collection alone has nothing to open.')}
+        </L>
+      ) : null}
+    </StartScreen>
   );
 }
-
-// Hints read better a little larger and looser than captions.
-const hint = { fontSize: 14, lineHeight: 20 };

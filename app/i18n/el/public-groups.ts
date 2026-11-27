@@ -36,8 +36,8 @@ export const publicGroups: Record<string, string> = {
   'Make a group anyone with its link can join, or join one by a link': 'Φτιάξε ομάδα όπου μπαίνει όποιος έχει τον σύνδεσμό της, ή μπες σε μία με σύνδεσμο',
   'This build of Erevos has no public groups yet. Update it to make or join one.':
     'Αυτή η έκδοση του Erevos δεν έχει ακόμα δημόσιες ομάδες. Ενημέρωσέ την για να φτιάξεις ή να μπεις σε μία.',
-  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no relay learns who is in it.':
-    'Δημόσια ομάδα είναι μια ομάδα όπου μπορεί να ζητήσει να μπει όποιος έχει τον σύνδεσμο ή τον κωδικό QR της, με ιδιοκτήτη και διαχειριστές που την ελέγχουν. Τα μηνύματά της είναι κρυπτογραφημένα από άκρη σε άκρη όπως σε κάθε ομάδα, και κανένα relay δεν μαθαίνει ποιος είναι μέσα.',
+  'A public group is one anyone with its link or QR code can ask to join, with an owner and admins who moderate it. Its messages are end-to-end encrypted as in any group, and no server learns who is in it.':
+    'Δημόσια ομάδα είναι μια ομάδα όπου μπορεί να ζητήσει να μπει όποιος έχει τον σύνδεσμο ή τον κωδικό QR της, με ιδιοκτήτη και διαχειριστές που την ελέγχουν. Τα μηνύματά της είναι κρυπτογραφημένα από άκρη σε άκρη όπως σε κάθε ομάδα, και κανένας server δεν μαθαίνει ποιος είναι μέσα.',
   'Make a public group': 'Νέα δημόσια ομάδα',
   'Whoever sees the link sees it too.': 'Το βλέπει και όποιος δει τον σύνδεσμο.',
   'Your name in it': 'Το όνομά σου σε αυτήν',
@@ -62,9 +62,9 @@ export const publicGroups: Record<string, string> = {
   'This link does not hold a group Erevos can ask to join.': 'Αυτός ο σύνδεσμος δεν περιέχει ομάδα στην οποία μπορεί να ζητήσει να μπει το Erevos.',
   'Your name in the group': 'Το όνομά σου στην ομάδα',
   'Everyone in the group sees it, beside the start of a key made for this group alone.': 'Το βλέπουν όλοι στην ομάδα, δίπλα στην αρχή ενός κλειδιού φτιαγμένου μόνο για αυτή την ομάδα.',
-  'Its owner’s relay': 'Το relay του ιδιοκτήτη της',
-  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your relay and your queue on it), not who you are in your chats.':
-    'Δημόσια ομάδα: μπαίνει όποιος έχει τον σύνδεσμό της, οπότε όποιος είναι μέσα μπορεί να είναι κάποιος που δεν ξέρεις, και μπορεί να αντιγράψει ό,τι λέγεται. Τα μέλη βλέπουν το όνομα που διαλέγεις και πού σε φτάνουν τα μηνύματά τους (το relay σου και την ουρά σου εκεί), όχι ποιος είσαι στις συνομιλίες σου.',
+  'Its owner’s server': 'Ο server του ιδιοκτήτη της',
+  'A public group: whoever has its link can join it, so anyone in it may be someone you do not know, and can copy what is said. Members see the name you choose, and where their messages reach you (your server and your queue on it), not who you are in your chats.':
+    'Δημόσια ομάδα: μπαίνει όποιος έχει τον σύνδεσμό της, οπότε όποιος είναι μέσα μπορεί να είναι κάποιος που δεν ξέρεις, και μπορεί να αντιγράψει ό,τι λέγεται. Τα μέλη βλέπουν το όνομα που διαλέγεις και πού σε φτάνουν τα μηνύματά τους (τον server σου και την ουρά σου εκεί), όχι ποιος είσαι στις συνομιλίες σου.',
   'Ask to join': 'Ζήτα να μπεις',
   'Asked to join': 'Ζήτησες να μπεις',
   'The group shows in your chats once its owner’s phone lets you in: when Erevos is open on it, and if the group asks for it, once an admin says yes.':
@@ -85,7 +85,7 @@ export const publicGroups: Record<string, string> = {
   'The group has a new link. The old one no longer works.': 'Η ομάδα έχει νέο σύνδεσμο. Ο παλιός δεν λειτουργεί πια.',
   'Whoever has this link can ask to join, and read the group from when they are let in: never what was said before. Share it only where you mean to.':
     'Όποιος έχει αυτόν τον σύνδεσμο μπορεί να ζητήσει να μπει και να διαβάζει την ομάδα από τη στιγμή που μπαίνει: ποτέ όσα ειπώθηκαν πριν. Μοιράσου τον μόνο εκεί που θέλεις.',
-  'The link is made once the owner’s phone has a queue for it on its relay.': 'Ο σύνδεσμος φτιάχνεται μόλις το τηλέφωνο του ιδιοκτήτη έχει ουρά γι’ αυτόν στο relay του.',
+  'The link is made once the owner’s phone has a queue for it on its server.': 'Ο σύνδεσμος φτιάχνεται μόλις το τηλέφωνο του ιδιοκτήτη έχει ουρά γι’ αυτόν στον server του.',
   'Asking to join': 'Ζητούν να μπουν',
   'Let in': 'Αποδοχή',
   'Turn away': 'Απόρριψη',
@@ -106,8 +106,8 @@ export const publicGroups: Record<string, string> = {
   'Make an admin': 'Ορισμός διαχειριστή',
   'No longer an admin': 'Όχι πια διαχειριστής',
   'Hand the group over': 'Παράδοση της ομάδας',
-  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their relay. You stay an admin.':
-    '{name}: γίνεται ιδιοκτήτης της ομάδας. Το τηλέφωνό του βάζει μέσα όσους ζητούν, και ο σύνδεσμος αλλάζει σε έναν στο δικό του relay. Εσύ μένεις διαχειριστής.',
+  '{name} owns the group from then on: their phone lets people in, and the link changes to one on their server. You stay an admin.':
+    '{name}: γίνεται ιδιοκτήτης της ομάδας. Το τηλέφωνό του βάζει μέσα όσους ζητούν, και ο σύνδεσμος αλλάζει σε έναν στον δικό του server. Εσύ μένεις διαχειριστής.',
   'Hand over': 'Παράδοση',
   Banned: 'Αποκλεισμένοι',
   'Lift the ban': 'Άρση αποκλεισμού',

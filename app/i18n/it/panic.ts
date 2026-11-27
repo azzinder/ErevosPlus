@@ -13,10 +13,10 @@ export const panic: Record<string, string> = {
   "Everything Erevos keeps here goes now, for good: every space and its hidden chats, contacts, messages and keys. Erevos then starts as if just installed. This cannot be undone.":
     "Tutto ciò che Erevos tiene qui viene cancellato ora, per sempre: ogni spazio con le sue chat nascoste, contatti, messaggi e chiavi. Poi Erevos si apre come appena installato. Non si può annullare.",
   "Wipe": "Cancella",
-  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the relay tokens, and the settings and password of automatic backups and of their server.":
-    "In pericolo, cancella Erevos all’istante: ogni spazio con le sue chat nascoste, con i loro contatti, messaggi, foto, file e chiavi, il blocco, gli account Matrix, XMPP e Nostr, i token del relay, e le impostazioni e la password dei backup automatici e del loro server.",
-  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the relay holds for you until it expires, and what your contacts have.":
-    "Ciò che non può raggiungere resta: i backup copiati altrove o inviati a un server (la loro password li protegge ancora), ciò che il relay tiene per te finché scade, e ciò che hanno i tuoi contatti.",
+  "In danger, wipe Erevos at once: every space and its hidden chats, with their contacts, messages, photos, files and keys, the lock, the Matrix, XMPP and Nostr accounts, the server tokens, and the settings and password of automatic backups and of their server.":
+    "In pericolo, cancella Erevos all’istante: ogni spazio con le sue chat nascoste, con i loro contatti, messaggi, foto, file e chiavi, il blocco, gli account Matrix, XMPP e Nostr, i token del server, e le impostazioni e la password dei backup automatici e del loro server.",
+  "What it cannot reach stays: backups you copied elsewhere or sent to a server (their password still guards them), what the server holds for you until it expires, and what your contacts have.":
+    "Ciò che non può raggiungere resta: i backup copiati altrove o inviati a un server (la loro password li protegge ancora), ciò che il server tiene per te finché scade, e ciò che hanno i tuoi contatti.",
   "Wipe now": "Cancella ora",
   "Wipe everything now": "Cancella tutto ora",
   "Here Erevos cannot wipe itself: delete its data from the computer instead.": "Qui Erevos non può cancellarsi da solo: elimina invece i suoi dati dal computer.",

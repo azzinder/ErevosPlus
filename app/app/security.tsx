@@ -285,7 +285,7 @@ export default function Security() {
               <Card>
                 <Text variant="bodyStrong">{t('Second password')}</Text>
                 <Text variant="caption" tone="muted" style={hint}>
-                  {t('If someone forces you to open the app, type the second password instead. It opens a separate, empty Erevos with its own contacts and relay. Your real chats stay hidden, and nothing in the app shows that they exist.')}
+                  {t('If someone forces you to open the app, type the second password instead. It opens a separate, empty Erevos with its own contacts and server. Your real chats stay hidden, and nothing in the app shows that they exist.')}
                 </Text>
                 <Text variant="caption" tone="muted" style={hint}>
                   {t('For privacy, the app never shows whether a second password is set. Setting one replaces the one before.')}
@@ -330,7 +330,7 @@ export default function Security() {
               {lastSeen
                 ? t('On: your contacts see the exact time you last had Erevos open, and you see theirs.')
                 : t('Off: no one sees when you last had Erevos open, and you see no one’s either.')}{' '}
-              {t('It goes end-to-end encrypted, inside what goes to your contacts anyway, never to the relay. Only for the chats of this space: hidden chats have their own switch, in a chat’s details there. Whether you are online now has its own switch in each chat: Appear offline.')}
+              {t('It goes end-to-end encrypted, inside what goes to your contacts anyway, never to the server. Only for the chats of this space: hidden chats have their own switch, in a chat’s details there. Whether you are online now has its own switch in each chat: Appear offline.')}
             </Text>
             <Row wrap>
               <Button title={lastSeen ? t('Turn off') : t('Turn on')} kind="secondary" compact onPress={() => void changeLastSeen(!lastSeen).catch((error) => setNote(String(error?.message ?? error)))} />
@@ -341,8 +341,8 @@ export default function Security() {
               <Text variant="label">{t('Say when I open and close Erevos')}</Text>
               <Text variant="caption" tone="muted" style={hint}>
                 {tellOpen
-                  ? t('As Erevos opens, the contacts you talked with in the last 30 days, who show their own time too, are told so at once, each after a random wait of up to a minute, at most every 15 minutes. As it closes, those told while it was open are told when it closed. The relay sees that something goes to them then, so it can tell when you open and close Erevos.')
-                  : t('Your time goes only with what goes to your contacts anyway: a message, a mark that theirs came or was read, or an answer while they have your chat open. The relay learns nothing new.')}
+                  ? t('As Erevos opens, the contacts you talked with in the last 30 days, who show their own time too, are told so at once, each after a random wait of up to a minute, at most every 15 minutes. As it closes, those told while it was open are told when it closed. The server sees that something goes to them then, so it can tell when you open and close Erevos.')
+                  : t('Your time goes only with what goes to your contacts anyway: a message, a mark that theirs came or was read, or an answer while they have your chat open. The server learns nothing new.')}
               </Text>
               <Row wrap>
                 <Button title={tellOpen ? t('Turn off') : t('Turn on')} kind="secondary" compact onPress={() => void changeTellOpen(!tellOpen).catch((error) => setNote(String(error?.message ?? error)))} />
@@ -357,7 +357,7 @@ export default function Security() {
           {part ? null : <SectionTitle title={t('Hidden chats')} />}
           <Card>
             <Text variant="caption" tone="muted" style={hint}>
-              {t('Chats that open only with their own PIN: type it in the search on the home screen and press Enter. A wrong one is just a search. A chat moves into them from its details. They have their own relay queue, so while they are closed their messages wait on the relay and never show among your other chats.')}
+              {t('Chats that open only with their own PIN: type it in the search on the home screen and press Enter. A wrong one is just a search. A chat moves into them from its details. They have their own server queue, so while they are closed their messages wait on the server and never show among your other chats.')}
             </Text>
             <Text variant="caption" tone="muted" style={hint}>
               {t('Every space has {n} places for hidden chats, each with its own PIN. For privacy, the app never shows whether any are set, so remember which places you use. A new PIN for a place starts it empty and replaces what was there. To keep them and change only the PIN, open them and change it there.', { n: POCKETS })}
@@ -504,12 +504,12 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
           </Row>
           <Text variant="caption" tone="muted" style={hint}>
             {battery === 'normal'
-              ? t('Erevos spares the battery only where nothing is lost: it waits at your relay for all its queues at once, asks nothing again after an empty wait, and keeps the links to phones nearby quieter.')
+              ? t('Erevos spares the battery only where nothing is lost: it waits at your server for all its queues at once, asks nothing again after an empty wait, and keeps the links to phones nearby quieter.')
               : battery === 'nearby'
-                ? t('Also, while Erevos is in the background, the radios for phones nearby (Bluetooth, Wi-Fi Aware, Wi-Fi Direct and the same Wi-Fi) are off: a phone nearby reaches you only while Erevos shows. Through your relay all comes as before.')
+                ? t('Also, while Erevos is in the background, the radios for phones nearby (Bluetooth, Wi-Fi Aware, Wi-Fi Direct and the same Wi-Fi) are off: a phone nearby reaches you only while Erevos shows. Through your server all comes as before.')
                 : battery === 'light'
-                  ? t('And the phone may sleep while Erevos is in the background, with its wait at your relay left open: what comes there wakes the phone, so a message or a call still comes at once where the network and Android allow it, and Erevos looks by itself every few minutes besides. New, and not tried on many phones yet: if messages come late, choose another. The radios for phones nearby are off, as with the one before.')
-                  : t('And the phone may sleep while Erevos is in the background: Erevos looks at your relay about once a minute, so a message or a call can be a minute or two late, and later where Android holds back sleeping apps, unless Keep running on battery is allowed. The radios for phones nearby are off, as with the one before.')}
+                  ? t('And the phone may sleep while Erevos is in the background, with its wait at your server left open: what comes there wakes the phone, so a message or a call still comes at once where the network and Android allow it, and Erevos looks by itself every few minutes besides. New, and not tried on many phones yet: if messages come late, choose another. The radios for phones nearby are off, as with the one before.')
+                  : t('And the phone may sleep while Erevos is in the background: Erevos looks at your server about once a minute, so a message or a call can be a minute or two late, and later where Android holds back sleeping apps, unless Keep running on battery is allowed. The radios for phones nearby are off, as with the one before.')}
           </Text>
         </>
       ) : null}
@@ -522,8 +522,8 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
           <Text variant="caption" tone="muted" style={hint}>
             {doorSaid ||
               (door
-                ? t('While another space is open, this one says only "New message", as that one does, never which space; its hidden chats say nothing then. For it the phone keeps the addresses of its queues at its relay outside its password, including the queue each contact writes to, for up to 64 contacts, never its keys, who its contacts are, or its messages, and its relay may tell that the two spaces are on one phone. If this space goes through Tor (Messages or Everything), it is asked about only through Tor: while the open space has Tor off, or its Tor is starting or has just failed, this one says nothing, and what came is told once Tor is ready there.')
-                : t('Closed, this space receives nothing: its messages wait at its relay and come when it opens.'))}
+                ? t('While another space is open, this one says only "New message", as that one does, never which space; its hidden chats say nothing then. For it the phone keeps the addresses of its queues at its server outside its password, including the queue each contact writes to, for up to 64 contacts, never its keys, who its contacts are, or its messages, and its server may tell that the two spaces are on one phone. If this space goes through Tor (Messages or Everything), it is asked about only through Tor: while the open space has Tor off, or its Tor is starting or has just failed, this one says nothing, and what came is told once Tor is ready there.')
+                : t('Closed, this space receives nothing: its messages wait at its server and come when it opens.'))}
           </Text>
           {door ? (
             <>
@@ -559,7 +559,7 @@ function BackgroundCalls({ titled }: { titled: boolean }) {
       <Card>
         <Text variant="caption" tone="muted" style={hint}>
           {on
-            ? t('While a space is open, Erevos keeps running in the background: it waits at the relay and on the links to phones nearby, so messages come and a call rings with the phone\'s ringtone, over the lock screen too. Only that space\'s chats and groups, and hidden chats with Receive while closed on; other hidden chats only say that a message came, or ring with no name, if you let them. The notices never say who or what: "Erevos" while it receives, "Incoming call" or "Incoming video call" when one rings, and "New message" or how many came; on a locked phone the one for messages says only "Erevos". Swiped away from the recent apps, it goes on the same; stopped by Android, it takes nothing and cannot ring.')
+            ? t('While a space is open, Erevos keeps running in the background: it waits at the server and on the links to phones nearby, so messages come and a call rings with the phone\'s ringtone, over the lock screen too. Only that space\'s chats and groups, and hidden chats with Receive while closed on; other hidden chats only say that a message came, or ring with no name, if you let them. The notices never say who or what: "Erevos" while it receives, "Incoming call" or "Incoming video call" when one rings, and "New message" or how many came; on a locked phone the one for messages says only "Erevos". Swiped away from the recent apps, it goes on the same; stopped by Android, it takes nothing and cannot ring.')
             : t('Messages come, and a call rings, only while Erevos shows. A call shows as missed once you open Erevos.')}
         </Text>
         {/* The notice for messages and their sound while Erevos shows need it with the receiving off too. */}

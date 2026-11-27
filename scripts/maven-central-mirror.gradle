@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2026 azzinder
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
+
+// Maven Central from Google's copy of it, for the Android builds on GitHub's machines. Gradle
+// applies this script to every build it runs there, React Native's and Expo's plugins' included:
+// the workflows put it in ~/.gradle/init.d, and deploy/fdroid/buildserver.sh does in F-Droid's
+// image when scripts/fdroid-build.sh is asked to (FDROID_MAVEN_MIRROR=1).
+//
+// On 2026-11-27 a plugin only the Gradle Plugin Portal has (foojay-resolver-convention) was "not
+// found" on some of GitHub's machines, every try for minutes. React Native's list of repositories
+// asks Maven Central first; Maven Central answers machines like these "too many requests" (HTTP
+// 429) at times, as other projects saw that month; and once a repository fails, Gradle looks no
+// further down the list (its guide, "Disabled repositories"). Google's copy holds the same files at
+// the same paths, so it takes Maven Central's place in every list.
+//
+// The Plugin Portal sends what it does not hold itself on to Maven Central (HTTP 303), and that
+// 429 fails the Portal too. A build that names no plugin repositories gets the Portal alone: the
+// app's own (Expo's template) and Expo's plugin for modules, which has no settings file. So such a
+// build gets Maven Central, from Google's copy, before the Portal for its projects' plugins; and
+// every build for its settings' plugins, which Gradle fetches before the settings are done (no
+// settings file here names buildscript repositories of its own, which would come after it). Then
+// Maven Central is not asked at all. The APK does not change: F-Droid, whose own build takes them
+// from Maven Central, must get the same one. checks/gradle-fetch.check.ts holds the workflows and
+// buildserver.sh to it.
+
+def mirror = 'https://maven-central.storage-download.googleapis.com/maven2/'
+def central = ['repo.maven.apache.org', 'repo1.maven.org']
+
+def fromMirror = { repositories ->
+  repositories.configureEach { repository ->
+    if (repository instanceof MavenArtifactRepository && central.contains(repository.url.host)) {
+      repository.url = mirror
+    }
+  }
+}
+
+beforeSettings { settings ->
+  fromMirror(settings.buildscript.repositories)
+  fromMirror(settings.pluginManagement.repositories)
+  fromMirror(settings.dependencyResolutionManagement.repositories)
+  // The settings' plugins: Gradle adds the plugin repositories after this one.
+  settings.buildscript.repositories.mavenCentral()
+}
+
+settingsEvaluated { settings ->
+  // The projects' plugins, in a build that named no plugin repositories.
+  if (settings.pluginManagement.repositories.isEmpty()) {
+    settings.pluginManagement.repositories.mavenCentral()
+    settings.pluginManagement.repositories.gradlePluginPortal()
+  }
+}
+
+beforeProject { project ->
+  fromMirror(project.buildscript.repositories)
+  fromMirror(project.repositories)
+}

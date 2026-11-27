@@ -18,6 +18,9 @@
 // each day until said to have come, and an invite to a relay rides in a message with nothing else.
 // Hidden chats that receive while closed read their texts on Nostr too, as the space's receiver
 // does, but not while their chat screen holds them.
+// A build with no Tor (the web app, the computer app, Sailfish OS's) reaches the relays straight,
+// with the space's way Nothing or Messages, and none with Everything, Nostr's own Tor switch on,
+// or for a chat that goes only through Tor.
 // Run with: npm run check
 /// <reference types="node" />
 import assert from 'node:assert/strict';
@@ -26,10 +29,11 @@ import { createRequire } from 'node:module';
 import { afterEach, test } from 'node:test';
 
 import { contactLink, parseContact } from '../lib/contact-code';
-import { canNostr, setCore, type Core } from '../lib/core';
+import { canNostr, canNostrTor, setCore, setNostrStraight, type Core } from '../lib/core';
+import { guardCore, type WebCore } from '../lib/core-guard';
 import { randomBytes, toHex, utf8Decode, utf8Encode } from '../lib/crypto';
 import { E2E, toBase64Url, type Received } from '../lib/e2e';
-import { NOSTR_AGAIN_MOST, NOSTR_AGAIN_MS, NOSTR_BACKUP_MS, nostrKeysChanged, nostrOf, nostrPacked, nostrReady, nostrRelays, nostrStates, packNostr, readNostr, setNostr, unpackNostr } from '../lib/nostr';
+import { NOSTR_AGAIN_MOST, NOSTR_AGAIN_MS, NOSTR_BACKUP_MS, nostrKeysChanged, nostrOf, nostrPacked, nostrReady, nostrRelays, nostrStates, packNostr, publishNostr, readNostr, setNostr, unpackNostr } from '../lib/nostr';
 import { nostrOnlyWay, nostrReaderOf, orNostr, sendNostrAgain, sendNostrBackups } from '../lib/nostr-chats';
 import { MOST_NOSTR } from '../lib/contact-code';
 import { bytesSource, chunkPlan, FileDamagedError, FileTooLargeError, offerRef, PiecesMissingError, readFile, readOffer, takeFile } from '../lib/attachments';
@@ -295,6 +299,14 @@ function useCore(): void {
     nostrWrap: async (to, bytes, now) => utf8Decode(wrap(to, bytes, now)),
     nostrUnwrap: async (secret, event) => unwrap(secret, utf8Encode(event)),
   } as Core);
+}
+
+// The core as the web app, the computer app and Sailfish OS's have it (lib/crypto-setup.ts): the
+// WebAssembly one, guarded, which gives and takes Nostr's events as their bytes, with no Tor.
+function useCoreWithoutTor(): void {
+  const wasm = createRequire(import.meta.url)(built.pathname) as WebCore;
+  assert.ok(!Object.keys(wasm).some((name) => name.startsWith('tor')), 'the WebAssembly core has no Tor');
+  setCore(guardCore(wasm));
 }
 
 afterEach(() => {
@@ -948,6 +960,90 @@ t("with Tor off, a chat that goes only through Tor sends through Tor alone, its 
     await until(() => asked(true) === keys[0].p && asked(false) === keys[1].p);
   } finally {
     reading();
+  }
+});
+
+test('a build with no Tor reaches the Nostr relays straight with the way Nothing or Messages, and none with Everything, its own Tor switch, or for a chat only through Tor', { skip: !coreReady }, async () => {
+  files.clear();
+  relays = new NostrRelays();
+  useCoreWithoutTor();
+  try {
+    // As the checks' core, which has no Tor either: no Nostr, until the build says it goes straight.
+    assert.equal(canNostrTor(), false);
+    assert.equal(canNostr(), false);
+    setNostr([ONE]);
+    assert.equal(nostrRelays(), null, 'reads nowhere');
+    setNostrStraight(true);
+    assert.equal(canNostr(), true);
+    assert.equal(canNostrTor(), false);
+
+    setNostrOpen(relays.opener());
+    setThroughTor('messages');
+    setTorReady(false);
+    setNostr([ONE]);
+    assert.deepEqual(nostrRelays(), [ONE]);
+    assert.equal(nostrReady(), true, 'with Messages, straight, as its requests to the servers go');
+    assert.equal(nostrReady(true), false, 'never for a chat that goes only through Tor');
+
+    const bob = await chat('space', 1);
+    const alice = await chat('space', 0);
+    const bobsLink = (await bob.e2e.linkNostr())!;
+    assert.ok(bobsLink, 'its link says where it reads on Nostr');
+    const code = parseContact(contactLink({ senderHex: '', relayUrl: '', key: toBase64Url(bob.e2e.bundle), nostr: bobsLink }))!;
+    const { identity: toBob } = await alice.e2e.addContact(code, '');
+    const came: string[] = [];
+    const stop = readNostr(
+      nostrReaderOf(
+        () => bob.e2e,
+        async (packet) => {
+          const received = await bob.e2e.receive(packet);
+          if (received.kind === 'message') came.push(received.text);
+        },
+      ),
+    );
+    const open = () => [...relays.lines.values()].filter((line) => !line.closed).length;
+    const send = async (text: string) => {
+      const sealed = await alice.e2e.seal(toBob, text, '', {});
+      return nostrOnlyWay(alice.e2e, toBob, sealed, [sealed.packet])!();
+    };
+    try {
+      assert.equal(await send('straight'), 'nostr');
+      await until(() => came.includes('straight'));
+      assert.equal(relays.throughTor, 0, 'nothing through Tor');
+      assert.ok(relays.straight >= 2, 'one connection that reads, one that sends');
+
+      // Everything through Tor, as a phone's backup may bring it: none, and what was open closes.
+      setThroughTor('all');
+      assert.equal(nostrReady(), false);
+      await until(() => open() === 0);
+      await assert.rejects(send('waits'), RelayUnreachableError, 'it waits, as with Tor not ready');
+      setThroughTor('messages');
+      await until(() => open() >= 1);
+
+      // Nostr's own Tor switch on: none either.
+      setNostr([ONE], true);
+      assert.equal(nostrReady(), false);
+      await until(() => open() === 0);
+      setNostr([ONE], false);
+      await until(() => open() >= 1);
+
+      // A chat that goes only through Tor: nothing of it goes straight, nor is its key read.
+      await alice.e2e.setTor(toBob, true);
+      await assert.rejects(send('only through Tor'), RelayUnreachableError);
+      const straight = relays.straight;
+      await assert.rejects(publishNostr({ k: bobsLink.k, r: [ONE] }, utf8Encode('x'), true), /no Tor/);
+      assert.equal(relays.straight, straight, 'never straight');
+      await alice.e2e.setTor(toBob, false);
+      assert.equal(await send('straight again'), 'nostr');
+      await until(() => came.includes('straight again'));
+      assert.ok(!came.includes('waits') && !came.includes('only through Tor'));
+      assert.equal(relays.throughTor, 0);
+    } finally {
+      stop();
+    }
+  } finally {
+    setNostrStraight(false);
+    setCore(null);
   }
 });
 

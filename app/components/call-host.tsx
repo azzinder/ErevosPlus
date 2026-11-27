@@ -12,6 +12,7 @@ import { callPermissions } from '../lib/call-permissions';
 import { ringKeeper } from '../lib/call-ringing';
 import { chatNotify } from '../lib/chat-notices';
 import { callSignal, closeCall, CONTACT_PREFIX, endCall, onCallChange, shownCall } from '../lib/calls';
+import { directSaysNothing } from '../lib/direct';
 import { hiddenRinging, setHiddenRinging, takeHiddenAnswer } from '../lib/hidden-ring';
 import { onMessage, setReceiverPace } from '../lib/receiver';
 import { currentGroupCall, type GroupCall } from '../lib/group-call';
@@ -211,10 +212,15 @@ export function CallHost() {
         const ours = shown?.place === spaceCalls || !!shown?.place.ipKeep;
         if (call.state === 'incoming' && call.throughRelay && ours && call.peer.startsWith(CONTACT_PREFIX)) {
           const keep = shown?.place === spaceCalls ? undefined : (shown?.place.ipKeep?.() ?? 'memory');
-          const warning = callIpWarning(call.peer.slice(CONTACT_PREFIX.length), keep);
-          void ipSaid(warning).then((said) => {
-            if (!said && known.current === call) setRingWarning({ call, warning });
-          });
+          const identity = call.peer.slice(CONTACT_PREFIX.length);
+          // Not said while Direct connections cover it (lib/direct.ts): never for hidden chats, nor for a chat set to go only through Tor.
+          void (shown?.place.torChat?.(identity) ?? Promise.resolve(false))
+            .catch(() => false)
+            .then(async (tor) => {
+              const warning = callIpWarning(identity, keep, tor);
+              if (directSaysNothing(warning) || (await ipSaid(warning))) return;
+              if (known.current === call) setRingWarning({ call, warning });
+            });
         }
         if (shown?.place === spaceCalls) void learnSpaceNames().then(() => setShown((n) => n + 1), () => undefined);
         // A hidden call just opened by its PIN on the ring screen (lib/hidden-ring.ts): the owner
@@ -350,8 +356,19 @@ export function CallHost() {
         speaker={speaker}
         onSpeaker={changeSpeaker}
         onAnswer={answer}
-        onClose={() => closeCall(call)}
+        onClose={() => {
+          closeCall(call);
+          // A call straight between the two phones that never connected: why, and what helps, said once its screen is gone.
+          if (call.failedDirect) ask(t('The call could not connect directly'), directFailedText(), [{ text: t('OK') }]);
+        }}
       />
     </Modal>
+  );
+}
+
+/** Why a call straight between the two phones could not connect, and what helps, in plain words (lib/direct.ts). */
+export function directFailedText(): string {
+  return t(
+    'With no call server between you two, the call goes straight from phone to phone, and one of the two networks let nothing in from outside, as mobile networks often do. Try again from another network, such as a Wi-Fi. Through a call server, a call connects from any network: see Server, under Settings, Server and networks.',
   );
 }

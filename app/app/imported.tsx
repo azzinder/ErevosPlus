@@ -280,7 +280,7 @@ function ChatView({ archive, chat, contacts, onLink, onBack, onDelete }: {
         <View style={styles.section}>
           <Text variant="caption" tone="muted">
             {contacts.length === 0
-              ? t("There are no Erevos contacts in this space yet. In Chat, open Relay and add {name}'s contact link, then come back here.", { name: title })
+              ? t("There are no Erevos contacts in this space yet. In Chat, open Server and add {name}'s contact link, then come back here.", { name: title })
               : t('Which Erevos contact is {name}? These messages then show in the chat with them, ahead of the new ones, only on this phone.', { name: title })}
           </Text>
           <Row wrap>

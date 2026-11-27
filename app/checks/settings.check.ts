@@ -73,7 +73,9 @@ test('a phone shows every group; elsewhere, what needs a phone does not show', (
   );
   const ids = (place: SettingsPlace) => groupsHere(place).flatMap((group) => itemsHere(group, place).map((item) => item.id));
   const desktop = ids(DESKTOP);
-  for (const gone of ['tor', 'nostr', 'lora', 'radio-test', 'permissions', 'browser-permissions', 'icons', 'widget', 'phone', 'sms', 'web-app', 'screenshots']) assert.ok(!desktop.includes(gone), gone);
+  for (const gone of ['tor', 'lora', 'radio-test', 'permissions', 'browser-permissions', 'icons', 'widget', 'phone', 'sms', 'web-app', 'screenshots']) assert.ok(!desktop.includes(gone), gone);
+  // Nostr, reached straight where there is no Tor (lib/nostr.ts): on a computer, Sailfish OS and the web app too.
+  for (const [where, place] of [['desktop', DESKTOP], ['Sailfish OS', SAILFISH], ['web app', WEB_APP]] as const) assert.ok(ids(place).includes('nostr'), where);
   // The desktop app sets only whether it keeps running with its window closed; Sailfish OS's app has
   // no notices of its own to set: the group goes.
   assert.ok(!groupsHere(DESKTOP).some((group) => group.id === 'phone'));

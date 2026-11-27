@@ -43,10 +43,15 @@
 //! Each message counts its length and `KEEPING` bytes against what the store
 //! holds: at most `max_bytes` in all (1 GiB unless set), and of that at most
 //! `share` (64 MiB unless set) in the queues one phone made with a token of its
-//! own or a lent one, so one phone cannot fill the relay for everyone. Past
-//! either, a send is refused with `Full`, as for a full queue. Which phone made
-//! a queue is kept in memory only, as which phone held a request for later
-//! is: a queue read back from the journal, or made with the relay's own
+//! own or a lent one, so one phone cannot fill the relay for everyone. The
+//! queues an open place made (see `open.rs`), which anyone may take with no
+//! invite or account, hold less: at most `open_share` (8 MiB unless set) in
+//! the queues of one, and at most half of `max_bytes` in the queues of all
+//! open places together, so that even many of them leave the other half to
+//! the phones with places of their own. Past any of these, a send is refused
+//! with `Full`, as for a full queue. Which phone made a queue, and whether it
+//! is an open place, is kept in memory only, as which phone held a request for
+//! later is: a queue read back from the journal, or made with the relay's own
 //! token, counts in the whole only. A journal that holds more than
 //! `max_bytes`, from before the cap or from a time it was set higher, is read
 //! back without the oldest messages past it, so the relay starts rather than
@@ -81,6 +86,9 @@ pub const DEFAULT_MAX_BYTES: usize = 1024 << 20;
 /// Bytes the queues one phone made hold unless set
 /// (`EREVOS_RELAY_QUEUED_PER_PHONE_MB`).
 pub const DEFAULT_SHARE: usize = 64 << 20;
+/// Bytes the queues one open place made hold unless set
+/// (`EREVOS_RELAY_OPEN_QUEUED_MB`, see `open.rs`).
+pub const DEFAULT_OPEN_SHARE: usize = 8 << 20;
 /// Bytes each message counts beyond its length: what keeping it costs, so
 /// that a flood of empty messages counts too.
 pub const KEEPING: usize = 64;
@@ -135,6 +143,9 @@ struct Queue {
     /// Who made it, in memory only: none for a queue read back from the
     /// journal, or made with the relay's own token.
     owner: Option<Owner>,
+    /// Whether that is an open place (see `open.rs`), in memory only as
+    /// `owner` is.
+    open: bool,
     /// While the journal is read back only: how many of the messages at its
     /// front were emptied to keep under `max_bytes`. They keep their places,
     /// so the records that take them later take the right ones.
@@ -142,7 +153,7 @@ struct Queue {
 }
 
 impl Queue {
-    fn new(sender_id: QueueId, used: u64, owner: Option<Owner>) -> Queue {
+    fn new(sender_id: QueueId, used: u64, owner: Option<Owner>, open: bool) -> Queue {
         Queue {
             sender_id,
             messages: VecDeque::new(),
@@ -150,6 +161,7 @@ impl Queue {
             news: News::default(),
             first: rand::rngs::OsRng.next_u64(),
             owner,
+            open,
             dropped: 0,
         }
     }
@@ -164,23 +176,34 @@ impl Queue {
     }
 }
 
-/// Bytes held in all, and in the queues of each phone that made some.
+/// Bytes held in all, in the queues of each phone that made some, and in the
+/// queues of all open places together.
 #[derive(Default)]
 struct Usage {
     total: usize,
     by_owner: HashMap<Owner, usize>,
+    open: usize,
 }
 
 impl Usage {
-    fn add(&mut self, owner: Option<Owner>, n: usize) {
+    /// Counts `n` bytes more in a queue made by `owner`, an open place if
+    /// `open`.
+    fn add(&mut self, owner: Option<Owner>, open: bool, n: usize) {
         self.total += n;
+        if open {
+            self.open += n;
+        }
         if let Some(owner) = owner {
             *self.by_owner.entry(owner).or_default() += n;
         }
     }
 
-    fn sub(&mut self, owner: Option<Owner>, n: usize) {
+    /// Counts `n` bytes less, as `add` counted them.
+    fn sub(&mut self, owner: Option<Owner>, open: bool, n: usize) {
         self.total = self.total.saturating_sub(n);
+        if open {
+            self.open = self.open.saturating_sub(n);
+        }
         if let Some(hash_map::Entry::Occupied(mut e)) = owner.map(|o| self.by_owner.entry(o)) {
             let left = e.get().saturating_sub(n);
             if left == 0 {
@@ -203,7 +226,7 @@ fn pop(usage: &mut Usage, q: &mut Queue) -> Option<Vec<u8>> {
     if q.dropped > 0 {
         q.dropped -= 1;
     } else {
-        usage.sub(q.owner, cost(msg.len()));
+        usage.sub(q.owner, q.open, cost(msg.len()));
     }
     Some(msg)
 }
@@ -364,6 +387,7 @@ pub struct Store {
     queue_ttl: u64,
     max_bytes: usize,
     share: usize,
+    open_share: usize,
     usage: Usage,
     /// While the journal is read back past `max_bytes` only: the messages by
     /// the hour they came, and how many were emptied.
@@ -383,6 +407,7 @@ impl Default for Store {
             queue_ttl: DEFAULT_QUEUE_TTL,
             max_bytes: DEFAULT_MAX_BYTES,
             share: DEFAULT_SHARE,
+            open_share: DEFAULT_OPEN_SHARE,
             usage: Usage::default(),
             oldest: None,
             dropped: 0,
@@ -530,6 +555,16 @@ impl Store {
         }
     }
 
+    /// The same store, holding at most `share` bytes of messages in the
+    /// queues one open place made (see `open.rs`), and never more than a
+    /// phone's share.
+    pub fn with_open_share(self, share: usize) -> Store {
+        Store {
+            open_share: share,
+            ..self
+        }
+    }
+
     /// The hour that holds now, the time noted for a message that comes now.
     fn hour(&self) -> u64 {
         ((self.clock)() / HOUR * HOUR).max(1)
@@ -597,12 +632,12 @@ impl Store {
     fn drop_expired(&mut self) {
         let (now, ttl) = ((self.clock)(), self.ttl);
         for q in self.queues.values_mut() {
-            let owner = q.owner;
+            let (owner, open) = (q.owner, q.open);
             let usage = &mut self.usage;
             q.messages.retain(|(at, msg)| {
                 let keep = at.saturating_add(ttl) > now;
                 if !keep {
-                    usage.sub(owner, cost(msg.len()));
+                    usage.sub(owner, open, cost(msg.len()));
                 }
                 keep
             });
@@ -657,8 +692,11 @@ impl Store {
             } => {
                 // A record from before relays noted the day counts from now.
                 let used = if used == 0 { self.today() } else { used };
-                if let Some(old) = self.queues.insert(recipient_id, Queue::new(sender_id, used, None)) {
-                    self.usage.sub(old.owner, old.bytes());
+                if let Some(old) = self
+                    .queues
+                    .insert(recipient_id, Queue::new(sender_id, used, None, false))
+                {
+                    self.usage.sub(old.owner, old.open, old.bytes());
                 }
                 self.by_sender.insert(sender_id, recipient_id);
             }
@@ -676,7 +714,7 @@ impl Store {
                 let at = if at == 0 { self.hour() } else { at };
                 if let Some(q) = self.queues.get_mut(&recipient_id) {
                     q.messages.push_back((at, message.to_vec()));
-                    self.usage.add(q.owner, cost(message.len()));
+                    self.usage.add(q.owner, q.open, cost(message.len()));
                     if let Some(hours) = &mut self.oldest {
                         hours.entry(at).or_default().push(recipient_id);
                     }
@@ -692,7 +730,7 @@ impl Store {
             }
             Record::Delete { recipient_id } => {
                 if let Some(q) = self.queues.remove(&recipient_id) {
-                    self.usage.sub(q.owner, q.bytes());
+                    self.usage.sub(q.owner, q.open, q.bytes());
                     self.by_sender.remove(&q.sender_id);
                 }
             }
@@ -727,7 +765,7 @@ impl Store {
             if let Some((at, msg)) = q.messages.get_mut(q.dropped) {
                 if *at <= hour {
                     let msg = std::mem::take(msg);
-                    self.usage.sub(q.owner, cost(msg.len()));
+                    self.usage.sub(q.owner, q.open, cost(msg.len()));
                     q.dropped += 1;
                     self.dropped += 1;
                 }
@@ -744,6 +782,18 @@ impl Store {
     /// A new queue made by `owner`, whose share of the bytes queued it counts
     /// in, or `Full` when the store holds `max_queues` already.
     pub fn create_for(&mut self, owner: Option<Owner>) -> Result<NewQueue, QueueError> {
+        self.make(owner, false)
+    }
+
+    /// A new queue made by the open place `owner` (see `open.rs`), whose
+    /// bytes queued count in that place's share, `open_share`, and with all
+    /// open places' in half of `max_bytes`; `Full` as for `create_for`.
+    pub fn create_open(&mut self, owner: Owner) -> Result<NewQueue, QueueError> {
+        self.make(Some(owner), true)
+    }
+
+    /// A new queue made by `owner`, an open place if `open`.
+    fn make(&mut self, owner: Option<Owner>, open: bool) -> Result<NewQueue, QueueError> {
         if !self.has_room() {
             return Err(QueueError::Full);
         }
@@ -759,7 +809,7 @@ impl Store {
             },
         )?;
         self.queues
-            .insert(recipient_id, Queue::new(sender_id, used, owner));
+            .insert(recipient_id, Queue::new(sender_id, used, owner, open));
         self.by_sender.insert(sender_id, recipient_id);
         self.tidy();
         Ok(NewQueue {
@@ -794,6 +844,10 @@ impl Store {
         if q.messages.len() >= MAX_QUEUED
             || self.usage.total + cost > self.max_bytes
             || q.owner.is_some_and(|owner| self.usage.of(&owner) + cost > self.share)
+            // An open place's: its own smaller share, and half the store for all open places'.
+            || (q.open
+                && (self.usage.open + cost > self.max_bytes / 2
+                    || q.owner.is_some_and(|owner| self.usage.of(&owner) + cost > self.open_share)))
         {
             return Err(QueueError::Full);
         }
@@ -806,7 +860,7 @@ impl Store {
             },
         )?;
         q.messages.push_back((at, msg));
-        self.usage.add(q.owner, cost);
+        self.usage.add(q.owner, q.open, cost);
         q.news.came(said);
         self.tidy();
         Ok(())
@@ -967,7 +1021,7 @@ impl Store {
             },
         )?;
         if let Some(q) = self.queues.remove(recipient_id) {
-            self.usage.sub(q.owner, q.bytes());
+            self.usage.sub(q.owner, q.open, q.bytes());
             self.by_sender.remove(&q.sender_id);
         }
         self.tidy();
@@ -1751,6 +1805,94 @@ mod tests {
         s.send(&first.sender_id, vec![0; 100]).unwrap();
         assert_eq!(s.usage.of(&greedy), 2 * cost(100));
         assert_eq!(s.usage.total, 8 * cost(100));
+    }
+
+    #[test]
+    fn an_open_place_fills_only_its_share_and_open_places_half_the_store() {
+        let (first, second, third, phone) = ([1u8; 32], [2u8; 32], [3u8; 32], [4u8; 32]);
+        // Room for ten in all, four in the queues of one phone, two in those of one open place.
+        let mut s = Store::default()
+            .with_byte_limits(10 * cost(100), 4 * cost(100))
+            .with_open_share(2 * cost(100));
+        let (a, b) = (s.create_open(first).unwrap(), s.create_open(first).unwrap());
+        s.send(&a.sender_id, vec![0; 100]).unwrap();
+        s.send(&b.sender_id, vec![0; 100]).unwrap();
+        // Its queues together hold its share: each is full now, an empty message too.
+        assert_eq!(s.send(&a.sender_id, vec![0; 1]), Err(QueueError::Full));
+        assert_eq!(s.send(&b.sender_id, Vec::new()), Err(QueueError::Full));
+        let c = s.create_open(second).unwrap();
+        s.send(&c.sender_id, vec![0; 100]).unwrap();
+        s.send(&c.sender_id, vec![0; 100]).unwrap();
+        // A third has room in its own share, but all open places' together hold half the store.
+        let d = s.create_open(third).unwrap();
+        s.send(&d.sender_id, vec![0; 100]).unwrap();
+        assert_eq!(s.usage.open, 5 * cost(100));
+        assert_eq!(s.send(&d.sender_id, vec![0; 1]), Err(QueueError::Full));
+        // The other half is the phones': one with a token of its own still takes its whole
+        // share, and the relay's own token the rest.
+        let theirs = s.create_for(Some(phone)).unwrap();
+        let shared = s.create().unwrap();
+        for _ in 0..4 {
+            s.send(&theirs.sender_id, vec![0; 100]).unwrap();
+        }
+        assert_eq!(s.send(&theirs.sender_id, vec![0; 1]), Err(QueueError::Full));
+        s.send(&shared.sender_id, vec![0; 100]).unwrap();
+        assert_eq!(s.send(&shared.sender_id, vec![0; 1]), Err(QueueError::Full));
+        // Taken, or deleted, the room comes back.
+        s.receive(&c.recipient_id).unwrap().unwrap();
+        s.send(&d.sender_id, vec![0; 100]).unwrap();
+        s.delete(&a.recipient_id).unwrap();
+        s.send(&b.sender_id, vec![0; 100]).unwrap();
+        assert_eq!(s.usage.open, 5 * cost(100));
+        assert_eq!(s.usage.total, 10 * cost(100));
+        assert_eq!(
+            (s.usage.of(&first), s.usage.of(&second), s.usage.of(&third)),
+            (2 * cost(100), cost(100), 2 * cost(100))
+        );
+
+        // An open place never holds more than a phone's share, however its own is set.
+        let mut s = Store::default()
+            .with_byte_limits(10 * cost(100), 2 * cost(100))
+            .with_open_share(5 * cost(100));
+        let q = s.create_open(first).unwrap();
+        s.send(&q.sender_id, vec![0; 100]).unwrap();
+        s.send(&q.sender_id, vec![0; 100]).unwrap();
+        assert_eq!(s.send(&q.sender_id, vec![0; 1]), Err(QueueError::Full));
+    }
+
+    #[test]
+    fn an_open_place_s_queue_counts_in_the_whole_only_after_a_restart() {
+        let path = TempPath::new();
+        let place = [7u8; 32];
+        let limits = |s: Store| {
+            s.with_byte_limits(20 * cost(100), 20 * cost(100))
+                .with_open_share(cost(100))
+        };
+        let q = {
+            let mut s = limits(Store::open(&path.0).unwrap());
+            let q = s.create_open(place).unwrap();
+            s.send(&q.sender_id, vec![1; 100]).unwrap();
+            assert_eq!(s.send(&q.sender_id, vec![2; 100]), Err(QueueError::Full));
+            assert_eq!(s.usage.open, cost(100));
+            q
+        };
+        // Which queues are an open place's is not in the journal: read back, it is anyone's.
+        let mut s = limits(Store::open(&path.0).unwrap());
+        assert!(!s.queues[&q.recipient_id].open);
+        assert_eq!(s.queues[&q.recipient_id].owner, None);
+        assert_eq!(
+            (s.usage.open, s.usage.of(&place), s.usage.total),
+            (0, 0, cost(100))
+        );
+        for _ in 0..3 {
+            s.send(&q.sender_id, vec![3; 100]).unwrap();
+        }
+        assert_eq!(s.usage.open, 0);
+        // One the place makes after the restart has its share again.
+        let fresh = s.create_open(place).unwrap();
+        s.send(&fresh.sender_id, vec![4; 100]).unwrap();
+        assert_eq!(s.send(&fresh.sender_id, vec![5; 1]), Err(QueueError::Full));
+        assert_eq!(s.usage.open, cost(100));
     }
 
     static FULL_NOW: AtomicU64 = AtomicU64::new(1_800_000_000);

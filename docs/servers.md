@@ -17,19 +17,19 @@ phones. What a server can see is **who connects, when, and how much**.
 
 | Server | When it is used | Sees | Does not see |
 |---|---|---|---|
-| [Your relay](#your-relay) | Always, unless you use none | IP addresses, when, sizes, how much each contact writes | What you write, names, numbers, who your contacts are |
-| [Your contact's relay](#your-contacts-relay) | When they use another relay | Your relay, or your address when you write to them directly | What you write |
-| [Call relay](#call-relay) | Calls, when your relay has one | Both phones' IP addresses during a call, how long, how much | The call itself |
-| [Nostr relays](#nostr-relays) | Texts, on Android, unless turned off | Your IP address (or a Tor exit), padded sizes, which messages belong to one chat | Who is in the chat, what it says |
+| [Your server](#your-server) | Always, unless you use none | IP addresses, when, sizes, how much each contact writes | What you write, names, numbers, who your contacts are |
+| [Your contact's server](#your-contacts-server) | When they use another server | Your server, or your address when you write to them directly | What you write |
+| [Call server](#call-server) | Calls, when your server has one | Both phones' IP addresses during a call, how long, how much | The call itself |
+| [Nostr servers](#nostr-servers) | Texts, on Android, unless turned off | Your IP address (or a Tor exit), padded sizes, which messages belong to one chat | Who is in the chat, what it says |
 | [The web app's server](#the-web-apps-server) | Loading the web app, Check for updates | The IP address that loads it | Anything you do in it |
 | [Push services](#push-services) | Web app only, notices while closed | That a notice came, and when | What, or from whom |
 | [GitHub](#github) | Only when you tap Check for updates | Your IP address, that a device checks | Anything else |
 | [Websites, for link previews](#websites-for-link-previews) | Only with previews on, as you send | Your IP address (or Tor's), when | Who the message is for |
 | [Others](#others) | Tor, backups, the radio, LPHL sign-in | See below | |
 
-## Your relay
+## Your server
 
-The relay holds messages until the other phone takes them. You choose it: LPHL's (`erevos.lphl.nekten.eu`), your
+The server holds messages until the other phone takes them. You choose it: LPHL's (`erevos.lphl.nekten.eu`), your
 community's, one you run yourself (the program comes with Erevos), or none at all for phones that only meet nearby.
 
 **It sees:**
@@ -44,7 +44,7 @@ community's, one you run yourself (the program comes with Erevos), or none at al
 
 **It does not see** what you write, your name, your phone number, your contacts' names, or your list of contacts.
 
-**What LPHL's relay keeps, and for how long** (the same table is in the app's guide, under *Transparency*):
+**What LPHL's server keeps, and for how long** (the same table is in the app's guide, under *Transparency*):
 
 | What | For how long |
 |---|---|
@@ -56,50 +56,50 @@ community's, one you run yourself (the program comes with Erevos), or none at al
 | Web app push addresses | Until notices are turned off in the web app |
 
 It writes **no log of connections**, and the web server in front of it keeps no access log since 24 October 2026.
-Errors are logged, and an error can name an address. The relay's folder is **backed up every day**, with the waiting
+Errors are logged, and an error can name an address. The server's folder is **backed up every day**, with the waiting
 messages still encrypted. The machine is hosted by **Hetzner**, which runs its network.
 
-A relay someone else runs keeps what its operator chooses: the program is the same, its settings and logs are theirs.
-A **home relay** (Settings → Relay and networks → Home relay), which contacts write to while yours is down, sees the
-same as your relay, for what goes through it.
+A server someone else runs keeps what its operator chooses: the program is the same, its settings and logs are theirs.
+A **home server** (Settings → Server and networks → Home server), which contacts write to while yours is down, sees the
+same as your server, for what goes through it.
 
 **Delete me from everywhere** (Settings → Privacy and security) deletes what the servers keep for a space, and stops
 it.
 
-**Someone between your phone and the relay** (your network, or whoever gets a certificate for the relay's name): once
-the relay has proved its own key to your phone, they see only that you connect, when, and how much.
+**Someone between your phone and the server** (your network, or whoever gets a certificate for the server's name): once
+the server has proved its own key to your phone, they see only that you connect, when, and how much.
 
-## Your contact's relay
+## Your contact's server
 
-When your contact uses another relay, your relay passes your messages on to theirs. Their relay sees your relay, not
-your address; yours sees which relay you send to, not the queue. Two operators who compare their logs can still match
+When your contact uses another server, your server passes your messages on to theirs. Their server sees your server, not
+your address; yours sees which server you send to, not the queue. Two operators who compare their logs can still match
 messages by time.
 
-## Call relay
+## Call server
 
-A relay can have a **call relay** beside it (a TURN server, LPHL's has one). Calls then go through it, so neither phone
+A server can have a **call server** beside it (a TURN server, LPHL's has one). Calls then go through it, so neither phone
 learns the other's IP address.
 
 - **It sees** both phones' IP addresses during a call, when the call starts, how long it lasts and how much passes.
 - **It does not see** the call: voice and video are encrypted end to end between the phones (DTLS-SRTP), with keys
   checked through the encrypted chat.
-- It serves only phones the relay lets in.
+- It serves only phones the server lets in.
 - Calls **never go through Tor**.
 
-Without a call relay, a call connects only directly, and then **the other phone sees your IP address**.
+Without a call server, a call connects only directly, and then **the other phone sees your IP address**.
 
-## Nostr relays
+## Nostr servers
 
-On Android, texts also go through public Nostr relays (**on, unless turned off**, under **Settings → Relay and networks → Nostr**), so a message
-still arrives when the relay is down. The first ones are `relay.damus.io`, `nos.lol` and `relay.primal.net`; you can
+On Android, texts also go through public Nostr servers (**on, unless turned off**, under **Settings → Server and networks → Nostr**), so a message
+still arrives when the server is down. The first ones are `relay.damus.io`, `nos.lol` and `relay.primal.net`; you can
 change them. They are **not ours**: they keep what they choose, for as long as they choose.
 
 - Each text is wrapped (NIP-59) by a key made for that message alone, for a key your contact made for that chat
   alone.
-- **A Nostr relay sees** your IP address (a Tor exit, with Tor on), a padded size, a time moved back by up to an hour,
+- **A Nostr server sees** your IP address (a Tor exit, with Tor on), a padded size, a time moved back by up to an hour,
   and the chat's key: so it can tell which messages go to the same chat, **not who is in it**. It also sees that one
   phone reads several chats' keys together.
-- A text not marked as arrived within five minutes also goes through your relay.
+- A text not marked as arrived within five minutes also goes through your server.
 
 ## The web app's server
 
@@ -115,7 +115,7 @@ Mozilla or Microsoft) gets a push of always the same size, encrypted for your br
 - **It sees** that a notice came, or a call rang, and when: at most one push every 15 seconds.
 - **It does not see** what came or from whom.
 
-The Android app uses **no push service**: it waits at the relay itself.
+The Android app uses **no push service**: it waits at the server itself.
 
 ## GitHub
 
@@ -133,12 +133,12 @@ While the space sends everything through Tor, no preview is made at all.
 ## Others
 
 - **Tor** (Android, off unless turned on): the first Tor node sees your IP address, not where you go; the exit sees
-  where you go, not who you are. Only relay and Nostr connections use it.
+  where you go, not who you are. Only server and Nostr connections use it.
 - **Your backup server**, if you set up automatic backups: it gets encrypted files with random names. It can tell them
   apart by size, count them, and see roughly how much each backup holds.
 - **Internet radio** in the Collection: the station you play sees your IP address, as would any player. Searching for
   stations asks Radio Browser.
-- **LPHL sign-in** (Authentik): sees each sign-in with LPHL, which gives your phone a relay token.
+- **LPHL sign-in** (Authentik): sees each sign-in with LPHL, which gives your phone a server token.
 - **SMS when nothing else works** (Android, off unless turned on): your phone company sees which number wrote to
   which, when, and how many SMS, never the words.
 
@@ -148,15 +148,15 @@ While the space sends everything through Tor, no preview is made at all.
 
 ## Your own servers instead of LPHL's
 
-Nothing above needs LPHL. In the app: a relay of your own or your group's (**New chat** → **I have no invite** → **I
+Nothing above needs LPHL. In the app: a server of your own or your group's (**New chat** → **I have no invite** → **I
 have a server of my own**; calls come with it), a WebDAV server for backups and the Collection, a web folder for the
 models, or no server at all (**Start without a server**). A contact page or an invite by SMS served from another web
 server is read when pasted or scanned; only the build's own server and LPHL's open in Erevos by themselves.
 
 Whoever builds Erevos for a community can also change what the app offers first, with two settings of the build
 (`app/lib/servers.ts`): `EREVOS_WEB_ORIGIN` (the web server with the contact and invite pages and the models) and
-`EREVOS_START_RELAY` (the relay a phone with no relay yet is offered to sign in at). Erevos's own release notices stay
-on LPHL's server, as they go with its release key, and are asked only by phones whose relay is LPHL's.
+`EREVOS_START_RELAY` (the server a phone with no server yet is offered to sign in at). Erevos's own release notices stay
+on LPHL's server, as they go with its release key, and are asked only by phones whose server is LPHL's.
 
 ## Out of reach for any server
 

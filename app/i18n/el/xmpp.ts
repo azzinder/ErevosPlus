@@ -133,12 +133,12 @@ export const xmpp: Record<string, string> = {
   "This group server does not let a group be renamed.": "Ο server ομάδων δεν αφήνει να μετονομαστεί μια ομάδα.",
   "To leave the group, use Leave the group.": "Για να φύγεις από την ομάδα, χρησιμοποίησε το «Αποχώρηση από την ομάδα».",
   "This person is not a member of the group.": "Αυτό το άτομο δεν είναι μέλος της ομάδας.",
-  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's relay of each message while no app of the account is on: the XMPP server learns the relay's name, and the relay when messages come.":
-    "Όσο είναι ανοιχτός άλλος χώρος, αυτός λέει «Νέο μήνυμα» όταν έρχεται κάτι στο XMPP, ποτέ τι, από ποιον ή σε ποια συνομιλία, και μια κλήση δεν χτυπά. Γι’ αυτό ο server του XMPP ειδοποιεί το relay αυτού του χώρου για κάθε μήνυμα, όσο καμία εφαρμογή του λογαριασμού δεν είναι ανοιχτή: ο server του XMPP μαθαίνει το όνομα του relay, και το relay πότε έρχονται μηνύματα.",
+  "While another space is open, this one says \"New message\" when something comes on XMPP, never what, from whom or in which chat, and a call does not ring. For it the XMPP server tells this space's own server of each message while no app of the account is on: the XMPP server learns that server's name, and that server when messages come.":
+    "Όσο είναι ανοιχτός άλλος χώρος, αυτός λέει «Νέο μήνυμα» όταν έρχεται κάτι στο XMPP, ποτέ τι, από ποιον ή σε ποια συνομιλία, και μια κλήση δεν χτυπά. Γι’ αυτό ο server του XMPP ειδοποιεί τον server που έχει αυτός ο χώρος για κάθε μήνυμα, όσο καμία εφαρμογή του λογαριασμού δεν είναι ανοιχτή: ο server του XMPP μαθαίνει το όνομα εκείνου του server, κι εκείνος πότε έρχονται μηνύματα.",
   "Closed, this space hears nothing from XMPP: what came shows when it opens.":
     "Κλειστός, αυτός ο χώρος δεν ακούει τίποτα από το XMPP: όσα ήρθαν φαίνονται όταν ανοίξει.",
-  "Your relay does not take XMPP notices yet: it needs updating.":
-    "Το relay σου δεν δέχεται ακόμα ειδοποιήσεις του XMPP: χρειάζεται ενημέρωση.",
+  "Your server does not take XMPP notices yet: it needs updating.":
+    "Ο server σου δεν δέχεται ακόμα ειδοποιήσεις του XMPP: χρειάζεται ενημέρωση.",
   "Your XMPP server does not send notices to apps that are away.":
     "Ο server του XMPP δεν στέλνει ειδοποιήσεις σε εφαρμογές που λείπουν.",
   "Always through Tor":

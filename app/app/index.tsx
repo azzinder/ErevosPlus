@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatActions, useArrangedChats } from '../components/chat-actions';
 import { ChatRow, MyselfRow } from '../components/chat-row';
 import { NewSmsSheet } from '../components/new-sms-sheet';
+import { FirstHome, NoPlaceCard } from '../components/first-home';
+import { firstServer, onFirstServer } from '../lib/open-place';
 import { FoundRow } from '../components/found-row';
 import { gradientStyle } from '../components/glass';
 import { BellIcon, ChevronIcon, GearIcon, MoreIcon, PencilIcon, PinIcon, PlusIcon, SearchIcon } from '../components/icons';
@@ -165,6 +167,10 @@ function Home() {
   const styles = useStyles(makeStyles);
   const { colors, scheme } = useTheme();
   const insets = useSafeAreaInsets();
+  // LPHL's server for this space, as lib/open-place.ts knows it, followed without reading it again:
+  // a free place it let go and cannot give again now shows above the chats.
+  const [server, setServer] = useState(firstServer);
+  useEffect(() => onFirstServer(() => setServer(firstServer())), []);
   const lock = useLock();
   // Only the modules on show (lib/modules.ts): their chats, tiles, menu and buttons.
   const modules = useModules();
@@ -566,6 +572,10 @@ function Home() {
         load();
         lookOnline();
       });
+      // And the server, once the place on LPHL's open server is taken (lib/open-place.ts).
+      const stopServer = onFirstServer(() => {
+        if (firstServer().kind === 'ready') load();
+      });
       // And an SMS, as Erevos is the SMS app, and a change of the space's order of its SMS.
       const sms = onSmsEvent('onSms', load);
       const stopOrder = onSmsOrderChanged(load);
@@ -586,6 +596,7 @@ function Home() {
         stopOrder();
         stopGroups();
         stopAsk();
+        stopServer();
       };
     }, [again]),
   );
@@ -795,7 +806,7 @@ function Home() {
   const hits = useMemo(() => (query.trim().length >= 2 ? searchMessages(searched.messages, query, 50) : []), [searched, query]);
   const nameOf = (peer: string) => searched.names.get(peer) ?? shownName({ identity: peer.replace(/^contact:/, ''), name: '' });
 
-  const relayText = relay === 'no-queue' ? t('Relay set · no queue yet') : t('No relay yet · tap to set one');
+  const relayText = relay === 'no-queue' ? t('Server set · no queue yet') : t('No server yet · tap to set one');
   // The ways out of the space, for the line under the top bar (lib/ways-read.ts); Tor covers others and has no dot.
   const waysRead = useWays(WAYS_EVERY);
   const waysWaiting = waysRead?.waiting ?? 0;
@@ -973,6 +984,8 @@ function Home() {
 
   const header = (
     <View style={styles.headerBlock}>
+      {/* A free place LPHL's server let go and cannot give again now: why, above the chats (the first home says it with none). */}
+      {erevosOn && listed.length > 0 && (server.kind === 'refused' || server.kind === 'failed') ? <NoPlaceCard server={server} /> : null}
       {hasSmsRows && !smsMirrored() && show === 'sms' ? (
         <Row wrap>
           <Chip label={t('Names')} selected={smsShown.current.names} onPress={() => void toggleNames()} />
@@ -1120,20 +1133,22 @@ function Home() {
                 </Row>
               </View>
             ) : (
-              <View style={styles.empty}>
-                <Logo size={64} />
-                <Text variant="heading" style={styles.emptyText}>
-                  {t('No chats yet')}
-                </Text>
-                {erevosOn ? (
-                  <Text tone="muted" style={styles.emptyText}>
-                    {t("No account and no phone number. Share your contact link or QR code, or add someone else's, to start a chat.")}
+              erevosOn && linkedRole() !== 'linked' ? (
+                // Ready, with the first person to add (components/first-home.tsx).
+                <FirstHome />
+              ) : (
+                <View style={styles.empty}>
+                  <Logo size={64} />
+                  <Text variant="heading" style={styles.emptyText}>
+                    {t('No chats yet')}
                   </Text>
-                ) : null}
-                {erevosOn && relay === 'ready' && linkedRole() !== 'linked' ? (
-                  <Button title={t('Invite someone')} onPress={() => router.push('/chat?setup=invite')} />
-                ) : null}
-              </View>
+                  {erevosOn ? (
+                    <Text tone="muted" style={styles.emptyText}>
+                      {t("No account and no phone number. Share your contact link or QR code, or add someone else's, to start a chat.")}
+                    </Text>
+                  ) : null}
+                </View>
+              )
             )
           }
           ListFooterComponent={
@@ -1325,7 +1340,7 @@ function Home() {
           <View style={styles.settingsText}>
             <Text variant="bodyStrong">{lang() === 'en' ? 'Settings' : `${t('Settings')} · Settings`}</Text>
             <Text variant="caption" tone="muted">
-              {t('Language, appearance, privacy, the relay and more')}
+              {t('Language, appearance, privacy, the server and more')}
             </Text>
           </View>
         </Pressable>

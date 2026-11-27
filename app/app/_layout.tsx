@@ -26,6 +26,7 @@ import { forgetOffered } from '../lib/contact-code';
 import { armCurtain, awayClock, awayLong, CURTAIN_END, curtainBack, curtainDown, liftCurtain, lowerCurtain, type CurtainBack } from '../lib/curtain';
 import { cryptoReady, setupCrypto } from '../lib/crypto-setup';
 import { forgetLinks } from '../lib/devices';
+import { directOf, setDirect } from '../lib/direct';
 import { endGroupCall } from '../lib/group-calls';
 import { hiddenAnswerEndsAt, hiddenRingHoldsLock, onHiddenRingingChange } from '../lib/hidden-ring';
 import { tellShareTexts } from '../lib/share-texts';
@@ -86,6 +87,8 @@ import '../lib/sms-share';
 import { startChunkChannel } from '../lib/chunk-channel';
 import { followModuleIcons } from '../lib/module-icons';
 import { loadModules, moduleOn, MSG_MODULES, modulesChosen, onModulesChange, screenModule, setModules, useModules } from '../lib/modules';
+import { bringsServer } from '../lib/invite-server';
+import { retryFirstServer, wantFirstServer } from '../lib/open-place';
 import { keepSetupAfter } from '../lib/setup-after';
 import { watchPlaceNetworks } from '../lib/place-networks';
 import { forgetTextInvite } from '../lib/text-invite';
@@ -252,6 +255,11 @@ export default function RootLayout() {
         () => callAudio?.networkKind?.() ?? 'other',
         (bridges) => updateSpaceData(space, spaceKey, { bridges }).then(() => undefined),
       );
+      // Direct connections (lib/direct.ts), on unless turned off: off, and kept off, in a space where
+      // anything goes through Tor, so that turning Tor off later connects nothing directly unasked.
+      const direct = directOf(data);
+      setDirect(direct);
+      if (direct !== data.direct) updateSpaceData(space, spaceKey, { direct }).catch(() => undefined);
       applyTor(data.tor, data.bridges).catch(() => undefined);
       // Its texts go through Nostr unless it says not, the way its Tor way says (lib/nostr.ts).
       setNostr(nostrOf(data.nostr), data.nostr.tor === true);
@@ -262,6 +270,8 @@ export default function RootLayout() {
       setTimeout(() => void runAutoBackup().catch(() => undefined), BACKUP_AFTER_MS);
       // The Collection copied to its server, when it has one (lib/collection-webdav.ts).
       collectionServerOpened();
+      // A place on LPHL's open server the first start still wants is taken now (lib/open-place.ts).
+      void retryFirstServer().catch(() => undefined);
       // What the camera took for this space while Erevos was locked comes in, and it takes for
       // this space from now on (lock/camera-drop.ts).
       cameraFollows(passwordLock);
@@ -351,6 +361,9 @@ export default function RootLayout() {
     async ({ modules, name, restore, linkPhone }: SetupChoice) => {
       await setModules(modules);
       const invite = peekLink() ?? undefined;
+      // Erevos's own chats, for a new start: the first space takes a place on LPHL's open server
+      // once its mode is chosen (lib/open-place.ts), unless the invite it opened with brings a server.
+      if (modules.includes('erevos') && !restore && !linkPhone && !bringsServer(invite)) await wantFirstServer(0).catch(() => undefined);
       const kept = await keepSetupAfter({ name, modules, ...(restore ? { restore: 'wanted' as const } : {}), ...(linkPhone ? { linkPhone } : {}), ...(invite ? { invite } : {}) }).then(
         () => true,
         () => false,
@@ -1335,6 +1348,8 @@ function closeSpace(): void {
   forgetBackupMaking();
   leaveTor();
   setNostr(null);
+  // With no space open nothing connects directly unasked (lib/direct.ts).
+  setDirect(false);
   setRelayStopped(false);
   stopReleases();
   forgetRelayLine();

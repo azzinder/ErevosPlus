@@ -22,11 +22,11 @@ export type { PanicResponder, PanicState };
 // On Android, Android itself clears Erevos's data, as Settings → Apps → Erevos → Clear storage
 // does: every space and hidden chats, with their keys, contacts, messages, photos, files and voice
 // messages, the lock, the Matrix, XMPP and Nostr accounts, the relay's tokens, automatic backups'
-// key and settings, the backup server's address and password, and the keys Erevos keeps in the
-// Android Keystore; then Android stops Erevos, with its notices. When the owner chose it, the
-// automatic backups in their folder are deleted first. Before that, what the Collection has open
-// (modules/erevos-collection) stops at once and its keys go: the music or video playing, the links
-// other apps read files by, the PDFs shown.
+// key and settings, the backup server's address and password, the sign-in with Google Drive, and
+// the keys Erevos keeps in the Android Keystore; then Android stops Erevos, with its notices. When
+// the owner chose it, the automatic backups in their folder are deleted first. Before that, what
+// the Collection has open (modules/erevos-collection) stops at once and its keys go: the music or
+// video playing, the links other apps read files by, the PDFs shown.
 //
 // In the web app, the browser's whole Erevos database goes, with the key that sealed its secrets,
 // and its Web Push subscription; the page then starts as new.

@@ -7,6 +7,8 @@ import { startActivityAsync } from 'expo-intent-launcher';
 import { Platform } from 'react-native';
 
 import { device, type GivingApp } from '../modules/erevos-device';
+import { choose } from './alert';
+import { FDROID } from './distribution';
 import { lang, t } from './i18n';
 import { canInstall } from './install-update';
 import type { NearbyLink } from './nearby-link';
@@ -18,6 +20,11 @@ export type { GivingApp };
 // ten minutes at most (NearbyApk.kt, ApkServer.kt). A phone with Erevos takes it in Updates and
 // installs it only when its SHA-256 is the one in the QR code and it is Erevos signed as this one
 // is; a phone without opens the page in its browser, which shows both to compare by eye.
+//
+// The F-Droid build is signed with the same key, so it installs over any other Erevos and keeps
+// everything, but from then on only the F-Droid app updates it (lib/distribution.ts). So it says
+// so where it is given, on this screen and on the page, and an Erevos not from F-Droid asks before
+// it installs it.
 
 /** Whether this phone can give the Erevos it runs. */
 export const CAN_GIVE = Platform.OS === 'android' && !!device?.giveAppStart;
@@ -37,6 +44,7 @@ export async function startGiving(): Promise<GivingApp> {
     hash: t('SHA-256 of the package:'),
     cert: t('SHA-256 of the certificate it is signed with:'),
     after: t('Both must be the ones the phone giving it shows. Once you have internet, compare the certificate with the one on the Erevos website too.'),
+    ...(FDROID ? { note: t('This is the Erevos from F-Droid: only the F-Droid app updates it. Once this phone has internet, install F-Droid on it too.') } : {}),
   };
   const given = await device.giveAppStart(words);
   if ('error' in given) {
@@ -70,10 +78,21 @@ const TAKE_ERRORS: Record<string, () => string> = {
   same: () => t('The other phone has this same version of Erevos.'),
 };
 
+/** Whether to install F-Droid's Erevos, given nearby, over this one, which is not F-Droid's. */
+export function askTakeFdroid(): Promise<boolean> {
+  return choose(
+    t('Erevos from F-Droid'),
+    t('The other phone gives the Erevos from F-Droid. Installed over this one, it keeps everything, but from then on only the F-Droid app updates it: it has no Check for updates and no From a phone nearby, and sends no backups to Google Drive.'),
+    t('Cancel'),
+    t('Install'),
+  );
+}
+
 /**
  * Takes Erevos from the phone `link` names, checks it, and opens Android's installer with it.
  * Says the version installed; throws, in words, when it is not taken. `onProgress` is told how
- * much came, while it comes.
+ * much came, while it comes. F-Droid's build is installed only when the owner says so to
+ * askTakeFdroid.
  */
 export async function takeFromNearby(link: NearbyLink, onProgress: (received: number, total: number) => void, signal: AbortSignal): Promise<string> {
   if (!CAN_TAKE || !device?.takeNearbyApp) throw new Error(t('This build of Erevos cannot take itself from a phone nearby. Update Erevos for it.'));
@@ -95,6 +114,14 @@ export async function takeFromNearby(link: NearbyLink, onProgress: (received: nu
     throw new Error((TAKE_ERRORS[taken.error] ?? TAKE_ERRORS.network)());
   }
   const apk = new File(Paths.cache, 'updates', 'nearby.apk');
+  if (taken.fdroid && !FDROID && !(await askTakeFdroid())) {
+    try {
+      apk.delete();
+    } catch {
+      // Gone already; the next one taken replaces it anyway.
+    }
+    throw new Error(t('Nothing was installed.'));
+  }
   await startActivityAsync('android.intent.action.VIEW', {
     data: apk.contentUri,
     type: 'application/vnd.android.package-archive',

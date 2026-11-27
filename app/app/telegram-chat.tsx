@@ -34,6 +34,7 @@ import { ask, confirm } from '../lib/alert';
 import { callPermissions } from '../lib/call-permissions';
 import { CAN_COPY, copyText } from '../lib/clipboard';
 import { plural, t } from '../lib/i18n';
+import { callsOff, callsOffNote } from '../lib/modes';
 import { laterLabel } from '../lib/later';
 import { LaterPicker } from '../components/later-picker';
 import { DayCalendar } from '../components/chat-media';
@@ -861,6 +862,8 @@ function TelegramChat() {
   const callTo = isPrivate && chat.userId !== undefined && telegramCanCall() ? chat.userId : undefined;
   // A video call asks for the camera too, and starts with it on.
   async function startCall(userId: number, video = false) {
+    // INVISIBLE (lib/modes.ts): no calls, and it is said before anything is asked.
+    if (callsOff()) throw new Error(callsOffNote());
     if (!(await telegramCallGate(userId, where))) return;
     if (!(await callPermissions(video))) throw new Error(video ? t('Allow the microphone and the camera for a video call.') : t('Allow the microphone to call.'));
     await telegramCall(userId, where, video);

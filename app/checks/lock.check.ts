@@ -427,7 +427,7 @@ t('a first start moves the chat settings kept before spaces into the first space
   store.set('erevos.relay', JSON.stringify(older));
   const key = await firstSpaceKey();
   assert.equal(store.has('erevos.relay'), false);
-  assert.deepEqual(await loadSpaceData(0, key), { ...older, via: '', viaToken: '', look: null, tor: 'off', bridges: { use: 'none', own: '', watched: false, learned: {} }, spare: { url: '', token: '', queue: null }, pairHome: false, push: false, pushLeft: false, pushScope: '', previews: false, lend: { relay: '', ticket: '' }, offered: { relay: '', code: '', until: 0, from: '' }, ringQueue: null, ownToken: { relay: '', hash: '' }, nostr: NOSTR_DEFAULT, relayKeys: {}, stopped: 0, sign: false, lastSeen: true, tellOpen: true, publicImages: 'always', publicCards: true });
+  assert.deepEqual(await loadSpaceData(0, key), { ...older, via: '', viaToken: '', look: null, tor: 'off', bridges: { use: 'none', own: '', watched: false, learned: {} }, spare: { url: '', token: '', queue: null }, pairHome: false, push: false, pushLeft: false, pushScope: '', previews: false, lend: { relay: '', ticket: '' }, offered: { relay: '', code: '', until: 0, from: '' }, ringQueue: null, ownToken: { relay: '', hash: '' }, nostr: NOSTR_DEFAULT, relayKeys: {}, stopped: 0, sign: false, lastSeen: true, tellOpen: true, publicImages: 'always', publicCards: true, direct: true });
   assert.ok(!store.get('erevos.space.0')!.includes('t0ken'));
   // The next start finds the same key.
   assert.deepEqual(await firstSpaceKey(), key);
@@ -440,6 +440,11 @@ t('a space keeps which token it got as its own from which relay, and nothing of 
   assert.deepEqual((await loadSpaceData(0, key)).ownToken, own);
   await saveSpaceData(0, key, { ...EMPTY_SPACE, ownToken: { relay: own.relay, hash: 'mine' } });
   assert.deepEqual((await loadSpaceData(0, key)).ownToken, { relay: '', hash: '' });
+  // One that is a free place its relay gave by itself (lib/open-place.ts) says so, and only with `true`.
+  await saveSpaceData(0, key, { ...EMPTY_SPACE, url: own.relay, token: 'mine', ownToken: { ...own, open: true } });
+  assert.deepEqual((await loadSpaceData(0, key)).ownToken, { ...own, open: true });
+  await saveSpaceData(0, key, { ...EMPTY_SPACE, url: own.relay, token: 'mine', ownToken: { ...own, open: 'yes' } as never });
+  assert.deepEqual((await loadSpaceData(0, key)).ownToken, own);
   // The keys its relays proved (lib/relay.ts, pinRelay): whole ones only, and only for the relays it uses.
   const proven = 'ab'.repeat(32);
   await saveSpaceData(0, key, { ...EMPTY_SPACE, url: 'wss://Relay.example.org/', relayKeys: { 'wss://relay.example.org': proven, 'wss://other.example.org': proven } });

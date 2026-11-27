@@ -75,7 +75,7 @@ export default function LoraScreen() {
           'Meshtastic radios also say their name to every radio in reach now and then, and where they are if they have GPS or a fixed position. Erevos keeps yours from doing so: it sets its role to Client hidden, turns its GPS off and removes a fixed position, and puts the role and GPS back when you turn LoRa off while it is linked. It still answers a radio that asks its name, so give it a name that says nothing of you, in the Meshtastic app.',
         ),
         t(
-          'LoRa takes only text. Photos, voice messages and files do not go over it: they wait in the chat, marked Waiting, and go by themselves once the relay or the phone nearby can take them.',
+          'LoRa takes only text. Photos, voice messages and files do not go over it: they wait in the chat, marked Waiting, and go by themselves once the server or the phone nearby can take them.',
         ),
       ].join('\n\n'),
       [
@@ -161,7 +161,7 @@ export default function LoraScreen() {
         </Text>
         <Text tone="muted">
           {t(
-            'It is slow: a message takes seconds on the air, and the law allows a radio only so much air time. So LoRa takes a message only when the relay and the phones nearby cannot, and only text and deletes: not voice messages, photos, files, read marks or calls. Voice messages, photos and files wait in the chat, marked Waiting, until the relay or a phone nearby can take them. Hidden chats never go over it.',
+            'It is slow: a message takes seconds on the air, and the law allows a radio only so much air time. So LoRa takes a message only when the server and the phones nearby cannot, and only text and deletes: not voice messages, photos, files, read marks or calls. Voice messages, photos and files wait in the chat, marked Waiting, until the server or a phone nearby can take them. Hidden chats never go over it.',
           )}
         </Text>
         <Text tone="muted">

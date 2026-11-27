@@ -157,6 +157,14 @@ export const SETTINGS: SettingsGroup[] = [
     title: mark('Privacy and security'),
     icon: 'lock',
     items: [
+      // The three modes at the top of Settings (lib/modes.ts), in the list too, so that the search finds them.
+      {
+        id: 'direct',
+        title: mark('How visible are you?'),
+        detail: mark('SPEED, ANONYMOUS or INVISIBLE: who sees your internet address, and how calls go'),
+        href: '/direct',
+        when: uses('erevos', 'phone', 'collection'),
+      },
       // The name the space's contacts and private groups see in place of a code (lib/my-name.ts).
       { id: 'my-name', title: mark('My name'), detail: mark('The name your contacts see in place of a code'), href: '/security?part=myname', when: uses('erevos') },
       // A fingerprint or face unlocks Erevos only on Android (modules/erevos-biometric), so the web,
@@ -174,15 +182,16 @@ export const SETTINGS: SettingsGroup[] = [
   },
   {
     id: 'ways',
-    title: mark('Relay and networks'),
+    title: mark('Server and networks'),
     icon: 'signal',
     items: [
       // Every way out at a glance, how each is now, and what of the space's own waits to go (app/ways.tsx).
       { id: 'ways-now', title: mark('Ways'), detail: mark('How your messages go out now, and what waits'), href: '/ways', when: uses('erevos') },
-      { id: 'relay', title: mark('Relay'), detail: mark('Your relay: its address, its token and invites'), href: '/chat?setup=relay', when: uses('erevos') },
-      { id: 'home-relay', title: mark('Home relay'), detail: mark('A second relay contacts write to while yours is down'), href: '/home-relay', when: uses('erevos') },
-      { id: 'tor', title: mark('Tor'), detail: mark('Reach the relays through Tor: off, unless changed'), href: '/tor', when: phoneUses('erevos', 'nostr') },
-      { id: 'nostr', title: mark('Nostr'), detail: mark('Texts through public Nostr relays: on, unless changed'), href: '/nostr', when: phoneUses('erevos') },
+      { id: 'relay', title: mark('Server'), detail: mark('Your server: its address, its token and invites'), href: '/chat?setup=relay', when: uses('erevos') },
+      { id: 'home-relay', title: mark('Home server'), detail: mark('A second server contacts write to while yours is down'), href: '/home-relay', when: uses('erevos') },
+      { id: 'tor', title: mark('Tor'), detail: mark('Reach the servers through Tor: off, unless changed'), href: '/tor', when: phoneUses('erevos', 'nostr') },
+      // Also where there is no Tor: Nostr is reached straight there (lib/nostr.ts).
+      { id: 'nostr', title: mark('Nostr'), detail: mark('Texts through public Nostr servers: on, unless changed'), href: '/nostr', when: uses('erevos') },
       { id: 'matrix', title: mark('Matrix'), detail: mark('Chats with people on Matrix: encrypted, not anonymous'), href: '/matrix', when: uses('matrix') },
       { id: 'xmpp', title: mark('XMPP'), detail: mark('Chats with people on XMPP: encrypted, not anonymous'), href: '/xmpp', when: uses('xmpp') },
       { id: 'telegram', title: mark('Telegram'), detail: mark('Chats with people on Telegram: Telegram can read them, unless both use ErevosGram encryption'), href: '/telegram', when: uses('telegram') },
@@ -240,7 +249,7 @@ export const SETTINGS: SettingsGroup[] = [
     title: mark('For testing'),
     icon: 'stopwatch',
     items: [
-      { id: 'relay-test', title: mark('Relay test'), detail: mark('For testing a relay'), href: '/relay', when: uses('erevos') },
+      { id: 'relay-test', title: mark('Server test'), detail: mark('For testing a server'), href: '/relay', when: uses('erevos') },
       { id: 'radio-test', title: mark('Radio test'), detail: mark('For testing the nearby link'), href: '/radio', when: phoneUses('erevos') },
     ],
   },
@@ -264,6 +273,12 @@ export const groupsHere = (place: SettingsPlace): SettingsGroup[] =>
 export const findGroup = (id: string | undefined): SettingsGroup | undefined => SETTINGS.find((group) => group.id === id);
 
 export const findItem = (group: SettingsGroup | undefined, id: string | undefined): SettingsItem | undefined => group?.items.find((item) => item.id === id);
+
+/** Whether the three modes (lib/modes.ts) show here: they stand at the top of Settings while a module they are of is on. */
+export const directHere = (place: SettingsPlace): boolean => {
+  const group = findGroup('privacy');
+  return !!group && itemsHere(group, place).some((item) => item.id === 'direct');
+};
 
 /** A setting found by a search: the setting, and the titles of where it is, shown before it. */
 export type SettingsHit = { leaf: SettingsLeaf; path: string[] };
