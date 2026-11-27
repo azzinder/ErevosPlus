@@ -6,9 +6,10 @@ import { currentSpace } from '../lock/keys';
 import { loadNetworksBackup, saveNetworksBackup } from '../lock/networks-backup-data';
 import { lastRestore } from '../lock/restored';
 
-import { checkedSignalHistory } from './backup-networks-data';
+import { checkedMessengerSignIn, checkedSignalHistory } from './backup-networks-data';
 import { msgCall, msgEnginesHere } from './messenger-store';
 import { secureGet, secureSet } from './secure';
+import { keepTelegramForBackup, telegramRestored } from './telegram-store';
 
 // Erevos+'s other networks in backups (#67): Session's account, as its engine keeps it (seed,
 // names, chats with their messages, groups with their keys: Session.kt backupState), kept sealed
@@ -22,14 +23,24 @@ import { secureGet, secureSet } from './secure';
 // out: Session gives them again while it keeps them. Signal's history goes in beside it (#68): its
 // chats and messages as the engine reads them (messenger/signal/src/history.rs), without its keys,
 // its identity, its sessions with others or its files; restored, it is added to what the engine
-// keeps and shows in its chats, to read only, once Signal is registered or linked again. Telegram,
-// Signal's account and Messenger stay out: their sign-ins are each phone's own.
+// keeps and shows in its chats, to read only, once Signal is registered or linked again. Messenger's
+// sign-in goes in too (#68), the cookies of its facebook.com sign-in as its engine keeps them, never
+// a password: restored, the engine is signed in with them before it starts, where this phone is not
+// signed in to another account. And each space's Telegram sign-in, TDLib's own, sealed with that
+// space's key (lock/telegram-sign-in.ts, lib/telegram-store.ts). An account so restored is the same
+// sign-in as the old phone's: one phone only uses it. Signal's account stays out: its keys are
+// each phone's own.
 
 export { checkedNetworks, type Networks } from './backup-networks-data';
 
-/** How Session's account went into a backup about to be made, and why Signal's history did not,
- *  where it could not be read (`signalFailed`). */
-export type NetworksKept = ({ kind: 'none' } | { kind: 'in' } | { kind: 'failed'; error: string }) & { signalFailed?: string };
+/** How Session's account went into a backup about to be made, and why Signal's history
+ *  (`signalFailed`), Messenger's sign-in (`messengerFailed`) or Telegram's (`telegramFailed`) did not,
+ *  where it could not be read. */
+export type NetworksKept = ({ kind: 'none' } | { kind: 'in' } | { kind: 'failed'; error: string }) & {
+  signalFailed?: string;
+  messengerFailed?: string;
+  telegramFailed?: string;
+};
 
 // The engine's answer when there is no Session in this build: nothing to keep, not an error.
 const NOT_HERE = /not available|not here/;
@@ -49,9 +60,31 @@ async function signalHistory(): Promise<string> {
   }
 }
 
-/** Keeps Session's account and Signal's history for the backup about to be made, as they are now,
- *  where the first space is open. Each on its own: one that cannot be read leaves the other in. */
+// Messenger's sign-in as its engine keeps it: '' where it is not signed in.
+async function messengerSignIn(): Promise<string> {
+  try {
+    if ((await msgCall<boolean>('messenger', 'loggedIn')) !== true) return '';
+    const cookies = await msgCall<Record<string, string>>('messenger', 'webCookies');
+    const checked = checkedMessengerSignIn(JSON.stringify(cookies ?? {}));
+    if (!checked) throw new Error('not as Messenger signs in');
+    return checked;
+  } catch (error) {
+    if (NOT_HERE.test(errorOf(error))) return '';
+    throw error;
+  }
+}
+
+/** Keeps the other networks for the backup about to be made: Telegram's sign-in where the open
+ *  space has one, then the first space's own (keepFirstSpace). Each on its own: one that cannot be
+ *  read leaves the others in. */
 export async function keepNetworksForBackup(now = Date.now()): Promise<NetworksKept> {
+  const telegram = await keepTelegramForBackup(now);
+  const kept = await keepFirstSpace(now);
+  return telegram.kind === 'failed' ? { ...kept, telegramFailed: telegram.error } : kept;
+}
+
+/** Session's account, Signal's history and Messenger's sign-in, as they are now, where the first space is open. */
+async function keepFirstSpace(now: number): Promise<NetworksKept> {
   if (!msgEnginesHere()) return { kind: 'none' };
   let open: { space: number; key: Uint8Array } | null = null;
   try {
@@ -83,24 +116,40 @@ export async function keepNetworksForBackup(now = Date.now()): Promise<NetworksK
   } catch (error) {
     signalFailed = errorOf(error);
   }
+  let messenger: string | null = null;
+  let messengerFailed: string | undefined;
   try {
-    // Session's account or Signal's history that could not be read now stays as it was last kept.
-    const before = session === null || signal === null ? await loadNetworksBackup(open.key) : null;
+    messenger = await messengerSignIn();
+  } catch (error) {
+    messengerFailed = errorOf(error);
+  }
+  try {
+    // What could not be read now stays as it was last kept.
+    const before = session === null || signal === null || messenger === null ? await loadNetworksBackup(open.key) : null;
     const held = session ?? before?.session ?? '';
     const history = signal ?? before?.signal ?? '';
+    const signIn = messenger ?? before?.messenger ?? '';
     // None here: none kept either, so an account signed out does not stay in backups.
-    await saveNetworksBackup(open.key, { session: held, signal: history, at: held || history ? now : 0 });
+    await saveNetworksBackup(open.key, { session: held, signal: history, messenger: signIn, at: held || history || signIn ? now : 0 });
   } catch (error) {
     const said = errorOf(error);
-    return { kind: 'failed', error: said, ...(signal || signalFailed ? { signalFailed: signalFailed ?? said } : {}) };
+    return {
+      kind: 'failed',
+      error: said,
+      ...(signal || signalFailed ? { signalFailed: signalFailed ?? said } : {}),
+      ...(messenger || messengerFailed ? { messengerFailed: messengerFailed ?? said } : {}),
+    };
   }
-  return signalFailed ? { ...kept, signalFailed } : kept;
+  return { ...kept, ...(signalFailed ? { signalFailed } : {}), ...(messengerFailed ? { messengerFailed } : {}) };
 }
 
-/** Marks the restore just made from Backups: its Session account goes back as the first space next opens. */
+/** Marks the restore just made from Backups: its Session account, Signal's history and Messenger's
+ *  sign-in go back as the first space next opens, and each space's Telegram sign-in as it opens. */
 export async function networksRestored(): Promise<void> {
   const id = await lastRestore();
-  if (id) await secureSet(RESTORE_PENDING, id);
+  if (!id) return;
+  await secureSet(RESTORE_PENDING, id);
+  await telegramRestored(id);
 }
 
 /** Where the restore whose Session account waits for the first space is kept (its id, lock/restored.ts). */

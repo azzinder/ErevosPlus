@@ -4,6 +4,16 @@
 
 // Italian for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Messenger's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "L’accesso di Messenger non si è potuto leggere ora, quindi questo backup lo contiene com’era l’ultima volta che è stato conservato, se c’era: {error}",
+  "Telegram's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "L’accesso di Telegram non si è potuto leggere ora, quindi questo backup lo contiene com’era l’ultima volta che è stato conservato, se c’era: {error}",
+  "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
+    "Questo telefono ha l’accesso a un altro account Messenger, quindi quello del backup non è stato messo al suo posto. Per riportare quello del backup, esci da Messenger qui e ripristina di nuovo il backup.",
+  "Messenger's sign-in could not go back: {error}":
+    "L’accesso di Messenger non è potuto tornare: {error}",
+  "Telegram's sign-in from the backup could not go back: {error}":
+    "L’accesso di Telegram dal backup non è potuto tornare: {error}",
   "Session's account is not in this backup: {error}":
     "L’account Session non è in questo backup: {error}",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
@@ -14,8 +24,8 @@ export const settings: Record<string, string> = {
     "La cronologia di Signal non è potuta tornare: {error}",
   "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
     "La cronologia di Signal non si è potuta leggere ora, quindi questo backup la tiene com’era l’ultima volta, se c’è: {error}",
-  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
-    "L’account e le chat di Session entrano in un backup, cifrati con la sua password e con quella del primo spazio; un ripristino li riporta appena si apre il primo spazio, se il telefono non ha un altro account Session. Le sue foto e i suoi file non entrano: Session li ridà finché li conserva. Entra anche la cronologia di Signal, le sue chat e i messaggi senza le loro foto e i loro file, ma non il suo collegamento all’account: dopo un ripristino, registra o collega di nuovo Signal, e i vecchi messaggi si vedono accanto ai nuovi, in sola lettura. Telegram e Messenger non sono in un backup: dopo un ripristino, accedi di nuovo a loro. I loro messaggi tornano solo per quanto ciascuna rete li conserva.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Messenger's sign-in goes in, sealed the same way, and Telegram's, sealed with its space's: after a restore they are signed in again, and their chats come back as far as each network keeps them. A sign-in so restored is the old phone's own: use it on one phone only. On the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too.":
+    "L’account e le chat di Session entrano in un backup, cifrati con la sua password e con quella del primo spazio; un ripristino li riporta appena si apre il primo spazio, se il telefono non ha un altro account Session. Le sue foto e i suoi file non entrano: Session li ridà finché li conserva. Entra anche la cronologia di Signal, le sue chat e i messaggi senza le loro foto e i loro file, ma non il suo collegamento all’account: dopo un ripristino, registra o collega di nuovo Signal, e i vecchi messaggi si vedono accanto ai nuovi, in sola lettura. Entra l’accesso di Messenger, cifrato allo stesso modo, e quello di Telegram, cifrato con quella del suo spazio: dopo un ripristino hanno di nuovo l’accesso, e le loro chat tornano per quanto ciascuna rete le conserva. Un accesso ripristinato così è quello del vecchio telefono: usalo su un solo telefono. Sul vecchio telefono elimina Erevos+, ma non uscire dall’account lì, o esce anche il nuovo telefono.",
   'Turn off the lock': 'Disattiva il blocco',
   'Erevos will open without a password. The second password stops working too.': 'Erevos si aprirà senza password. Anche la seconda password smetterà di funzionare.',
   'The lock is off.': 'Il blocco è disattivato.',

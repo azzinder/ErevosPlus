@@ -8,6 +8,9 @@ import { hiddenHolder, type Holder } from '../lock/sealed-file';
 import { mutedNow, type ChatNotify } from '../lock/chat-notify';
 import type { ChatPin } from '../lock/chat-pin';
 import { loadTelegram, saveTelegram, type TelegramData } from '../lock/telegram-data';
+import { checkedTelegramRestore, loadTelegramSignIn, RESTORE_PENDING, saveTelegramSignIn } from '../lock/telegram-sign-in';
+import { lastRestore } from '../lock/restored';
+import { secureDelete, secureGet, secureSet } from './secure';
 import { t } from './i18n';
 import { addNetwork, hearing, placeNetworkRang } from './network-notices';
 import { canTor, canTorSocks } from './core';
@@ -37,6 +40,10 @@ export type TelegramNativeLike = {
   send(slot: string, request: string): Promise<string>;
   close(slot: string): Promise<void>;
   wipe(slot: string): Promise<void>;
+  /** The slot's sign-in as TDLib keeps it, base64, for a backup; null where it has none. Missing in a build from before it. */
+  signIn?(slot: string): Promise<string | null>;
+  /** Puts a backup's sign-in in place before the slot's client first opens; false where it has one, or is open. */
+  putSignIn?(slot: string, signIn: string): Promise<boolean>;
   addListener(event: 'onUpdates', listener: (event: { slot: string; updates: string[] }) => void): { remove(): void };
 } & Partial<CallsNativeLike> & {
   /** The sound of a call (modules/erevos-telegram Calls.kt): signaling to pass on, or how it connects. */
@@ -291,6 +298,9 @@ async function run(it: Live): Promise<void> {
     followTor();
     // The proxy goes with the opening, so that TDLib has it before it first connects, and never goes straight when it must not.
     const proxy = await proxyOf(it);
+    // After a restore, the backup's sign-in goes in place first, so TDLib opens signed in.
+    await restoredSignIn(it);
+    if (it.stopped) return;
     await native.open(it.slot, it.dbKey, lang(), proxy ? JSON.stringify(proxy) : '');
     await torWay(it, proxy).catch((error: unknown) => {
       it.problem = reason(error);
@@ -302,6 +312,66 @@ async function run(it: Live): Promise<void> {
     it.problem = reason(error);
   }
   told();
+}
+
+/**
+ * For a backup about to be made: each Telegram of the open space and its hidden places keeps its
+ * sign-in as TDLib has it now (lock/telegram-sign-in.ts), signed in; one signed out keeps none, so
+ * it does not stay in backups. Another space's stays as that space last kept it. Never throws.
+ */
+export async function keepTelegramForBackup(now = Date.now()): Promise<{ kind: 'none' | 'in' } | { kind: 'failed'; error: string }> {
+  const n = native;
+  if (!n?.signIn) return { kind: 'none' };
+  let any = false;
+  let failed: string | null = null;
+  for (const it of every()) {
+    if (it.stopped || !it.loaded) continue;
+    try {
+      // Signed in now: its sign-in as it is. Not signed in, nor signing in: none. Starting or
+      // connecting: as last kept, as TDLib has not said yet.
+      const ready = it.running && it.state.auth.kind === 'ready';
+      const asks = ['phone', 'code', 'password', 'other-device'].includes(it.state.auth.kind);
+      const out = !it.data?.account || (it.running && asks);
+      if (ready) {
+        const signIn = await n.signIn(it.slot);
+        await saveTelegramSignIn(it.space, it.key, { signIn: signIn ?? '', at: signIn ? now : 0 }, it.holder);
+        any ||= !!signIn;
+      } else if (out) {
+        await saveTelegramSignIn(it.space, it.key, { signIn: '', at: 0 }, it.holder);
+      }
+    } catch (error) {
+      failed = reason(error);
+    }
+  }
+  if (failed !== null) return { kind: 'failed', error: failed };
+  return { kind: any ? 'in' : 'none' };
+}
+
+/** Marks the restore `id` just made: each space's Telegram sign-in goes back as its Telegram first opens. */
+export async function telegramRestored(id: string): Promise<void> {
+  await secureSet(RESTORE_PENDING, JSON.stringify({ id, done: [] }));
+}
+
+// The backup's sign-in of `it`, put in place before its Telegram first opens after a restore,
+// once; where this phone has a sign-in for it already, that stays.
+async function restoredSignIn(it: Live): Promise<void> {
+  const n = native;
+  if (!n?.putSignIn) return;
+  try {
+    const pending = checkedTelegramRestore(await secureGet(RESTORE_PENDING));
+    if (!pending) return;
+    if (pending.id !== (await lastRestore())) {
+      await secureDelete(RESTORE_PENDING);
+      return;
+    }
+    if (pending.done.includes(it.slot)) return;
+    const { signIn } = await loadTelegramSignIn(it.space, it.key, it.holder);
+    if (signIn) await n.putSignIn(it.slot, signIn);
+    await secureSet(RESTORE_PENDING, JSON.stringify({ id: pending.id, done: [...pending.done, it.slot] }));
+  } catch (error) {
+    // TDLib opens without it: Telegram asks to sign in, as before backups held it.
+    it.problem = t("Telegram's sign-in from the backup could not go back: {error}", { error: reason(error) });
+  }
 }
 
 // The sound of calls, where this build has it.

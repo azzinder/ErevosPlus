@@ -22,6 +22,10 @@ export type TelegramNative = {
   close(slot: string): Promise<void>;
   /** Deletes the space's Telegram from the phone, without logging out. */
   wipe(slot: string): Promise<void>;
+  /** The space's sign-in as TDLib keeps it (encrypted with `open`'s key), base64, for a backup; null where it has none. Missing in a build from before it. */
+  signIn?(slot: string): Promise<string | null>;
+  /** Puts a backup's sign-in in place before the space's client first opens; false where it has one, or is open. Missing in a build from before it. */
+  putSignIn?(slot: string, signIn: string): Promise<boolean>;
   addListener(event: 'onUpdates', listener: (event: { slot: string; updates: string[] }) => void): EventSubscription;
   /** Starts recording a voice message in Telegram's Ogg/Opus; false when the microphone could not start. */
   voiceStart(): Promise<boolean>;

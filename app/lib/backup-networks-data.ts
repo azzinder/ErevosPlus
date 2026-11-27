@@ -34,3 +34,27 @@ export function checkedSignalHistory(value: unknown): string | null {
   }
   return value;
 }
+
+/**
+ * Messenger's sign-in as its engine keeps it (messenger/core engine.go webCookies: the cookies of
+ * the facebook.com sign-in, never a password), as JSON, checked: null for anything else, or one
+ * without the account (`c_user`) and its session (`xs`).
+ */
+export function checkedMessengerSignIn(value: unknown): string | null {
+  if (typeof value !== 'string' || !value) return null;
+  try {
+    const c = JSON.parse(value) as Record<string, unknown>;
+    if (!c || typeof c !== 'object' || Array.isArray(c)) return null;
+    if (Object.values(c).some((v) => typeof v !== 'string')) return null;
+    if (typeof c.c_user !== 'string' || !/^[0-9]{1,20}$/.test(c.c_user) || typeof c.xs !== 'string' || !c.xs) return null;
+  } catch {
+    return null;
+  }
+  return value;
+}
+
+/** The Messenger account a sign-in is of (its `c_user`), or null. */
+export function messengerAccountOf(signIn: string | null): string | null {
+  const checked = checkedMessengerSignIn(signIn);
+  return checked ? (JSON.parse(checked) as { c_user: string }).c_user : null;
+}

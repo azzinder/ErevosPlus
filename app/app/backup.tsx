@@ -176,7 +176,7 @@ type Asking =
 // from a server comes up to 100 MB only (CLOUD_RESTORE_MOST), as any download (lib/net-http.ts).
 // What Erevos+ says of the networks in a backup (#67, #68): what goes in, what does not, and how they come back.
 const NETWORKS_LEFT = mark(
-  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Messenger's sign-in goes in, sealed the same way, and Telegram's, sealed with its space's: after a restore they are signed in again, and their chats come back as far as each network keeps them. A sign-in so restored is the old phone's own: use it on one phone only. On the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too.",
 );
 const MAX_BYTES = 200 * 1024 * 1024;
 
@@ -858,7 +858,14 @@ export default function Backups() {
     const signal = kept.signalFailed
       ? ` ${t("Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}", { error: kept.signalFailed })}`
       : "";
-    return ` ${t(NETWORKS_LEFT)}${session}${signal}`;
+    // Messenger's and Telegram's sign-ins, where they could not be read now: as last kept (#68).
+    const messenger = kept.messengerFailed
+      ? ` ${t("Messenger's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}", { error: kept.messengerFailed })}`
+      : "";
+    const telegram = kept.telegramFailed
+      ? ` ${t("Telegram's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}", { error: kept.telegramFailed })}`
+      : "";
+    return ` ${t(NETWORKS_LEFT)}${session}${signal}${messenger}${telegram}`;
   }
 
   function smsText(sms: Uint8Array | null): string {

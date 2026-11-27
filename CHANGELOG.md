@@ -17,6 +17,12 @@ and 0.1.15 never came out.
   Erevos+ locked as if left and closed the page. Now a page of its own in front counts as Erevos+ in front: the time
   away counts from when the last page left (`WebPages.kt` follows them, `lib/web-pages.ts`, `app/_layout.tsx`).
   Requested by the maintainer.
+- Erevos+: Telegram and Messenger sign-ins in backups (rest of #68). Each space's Telegram sign-in (TDLib's
+  `td.binlog`, already encrypted with the space's key) is kept, encrypted again, in its own file per space and hidden
+  place (`lock/telegram-sign-in.ts`), and put back before that space's Telegram first opens after a restore. Messenger's
+  sign-in (its cookies, never a password) goes in the first space's networks file and signs in again after a restore,
+  never over another account. Chats and files stay out: each network sends them again. Backups, the guide and What's
+  new say to use a restored sign-in on one phone only. Requested by the maintainer.
 
 ## 3.1.0-rc.3 (2026-11-25)
 

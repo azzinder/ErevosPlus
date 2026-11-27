@@ -4,6 +4,16 @@
 
 // Serbo-Croatian for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Messenger's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Prijava Messengera sada nije mogla da se pročita, pa je ova kopija ima kakva je poslednji put sačuvana, ako je ima: {error}",
+  "Telegram's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Prijava Telegrama sada nije mogla da se pročita, pa je ova kopija ima kakva je poslednji put sačuvana, ako je ima: {error}",
+  "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
+    "Ovaj telefon je prijavljen na drugi Messenger nalog, pa prijava iz kopije nije stavljena na njegovo mesto. Da vratiš onu iz kopije, odjavi se ovde sa Messengera i ponovo vrati kopiju.",
+  "Messenger's sign-in could not go back: {error}":
+    "Prijava Messengera nije mogla da se vrati: {error}",
+  "Telegram's sign-in from the backup could not go back: {error}":
+    "Prijava Telegrama iz kopije nije mogla da se vrati: {error}",
   "Session's account is not in this backup: {error}":
     "Session nalog nije u ovoj kopiji: {error}",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
@@ -14,8 +24,8 @@ export const settings: Record<string, string> = {
     "Istorija Signala nije mogla da se vrati: {error}",
   "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
     "Istorija Signala sada nije mogla da se pročita, pa je ova kopija ima kakva je zadnji put sačuvana, ako je ima: {error}",
-  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
-    "Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom i lozinkom prvog prostora; vraćanje ih donosi nazad čim se otvori prvi prostor, ako telefon nema drugi Session nalog. Njegove fotografije i datoteke ne ulaze: Session ih ponovo daje dok ih čuva. Ulazi i istorija Signala, razgovori i poruke bez svojih fotografija i datoteka, ali ne i njegova veza s nalogom: nakon vraćanja ponovo registruj ili poveži Signal, i stare poruke se vide pored novih, samo za čitanje. Telegram i Messenger nisu u kopiji: nakon vraćanja ponovo se prijavi na njih. Njihove poruke se vraćaju samo onoliko koliko ih svaka mreža čuva.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Messenger's sign-in goes in, sealed the same way, and Telegram's, sealed with its space's: after a restore they are signed in again, and their chats come back as far as each network keeps them. A sign-in so restored is the old phone's own: use it on one phone only. On the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too.":
+    "Nalog i razgovori Sessiona ulaze u sigurnosnu kopiju, šifrovani njenom lozinkom i lozinkom prvog prostora; vraćanje ih donosi nazad čim se otvori prvi prostor, ako telefon nema drugi Session nalog. Njegove fotografije i datoteke ne ulaze: Session ih ponovo daje dok ih čuva. Ulazi i istorija Signala, razgovori i poruke bez svojih fotografija i datoteka, ali ne i njegova veza s nalogom: nakon vraćanja ponovo registruj ili poveži Signal, i stare poruke se vide pored novih, samo za čitanje. Ulazi i prijava Messengera, šifrovana na isti način, i prijava Telegrama, šifrovana lozinkom njegovog prostora: nakon vraćanja ponovo su prijavljeni, a njihovi razgovori se vraćaju onoliko koliko ih svaka mreža čuva. Ovako vraćena prijava je prijava starog telefona: koristi je samo na jednom telefonu. Na starom telefonu obriši Erevos+, ali se tamo ne odjavljuj, inače se odjavljuje i novi telefon.",
   'Turn off the lock': 'Isključi zaključavanje',
   'Erevos will open without a password. The second password stops working too.': 'Erevos će se otvarati bez lozinke. Prestaje raditi i druga lozinka.',
   'The lock is off.': 'Zaključavanje je isključeno.',

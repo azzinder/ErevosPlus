@@ -4,6 +4,8 @@
 
 // The Serbo-Croatian of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/sh/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Telegram and Messenger in backups**: in Erevos+, a backup now holds Messenger's sign-in and each space's Telegram sign-in, encrypted, and after a restore they are signed in again; their chats come back as far as each network keeps them. Use such a sign-in on one phone only: on the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too. See [Backups](#backup).":
+    "**Telegram i Messenger u kopijama**: u Erevos+, sigurnosna kopija sada čuva prijavu Messengera i prijavu Telegrama svakog prostora, šifrirano, i nakon vraćanja ponovo si prijavljen; razgovori se vraćaju koliko ih svaka mreža čuva. Takvu prijavu koristi samo na jednom telefonu: na starom telefonu obriši Erevos+, ali se tamo ne odjavljuj, inače se odjavljuje i novi. Vidi [Sigurnosne kopije](#backup).",
   "**Messenger's case no longer locks you out**: in Erevos+, after half a minute in Messenger **In its case**, or on Facebook, Erevos+ no longer locks as if you had left it, nor closes the page. The lock's time now counts only from when you leave Erevos+ itself.":
     "**Messengerova futrola te više ne zaključava napolju**: u Erevos+, nakon pola minute u Messengeru **U svojoj futroli**, ili na Facebooku, Erevos+ se više ne zaključava kao da ste ga napustili niti zatvara stranicu. Vrijeme zaključavanja sada se računa tek od kada napustite sam Erevos+.",
   "**Release candidate 3**: Erevos+ with everything Erevos 3.0.0-rc.3 brought, and what is below.":

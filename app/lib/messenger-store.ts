@@ -16,6 +16,7 @@ import { onTorReady, onTorWay } from './relay';
 import { t } from './i18n';
 import { currentSpace } from '../lock/keys';
 import { loadNetworksBackup } from '../lock/networks-backup-data';
+import { messengerAccountOf } from './backup-networks-data';
 import { lastRestore } from '../lock/restored';
 import { secureDelete, secureGet } from './secure';
 import type { ChatNotify } from '../lock/chat-notify';
@@ -500,7 +501,8 @@ let restoring = false;
  * (lock/networks-backup-data.ts) goes back to the engine, sealed anew with this phone's Keystore,
  * and Session starts again with it. Only where there is no Session account, or the same one:
  * another account here is never replaced, and that is said. Signal's history it held (#68) is
- * added to what Signal's engine keeps, on its own. Once, for that restore.
+ * added to what Signal's engine keeps, on its own, and Messenger's sign-in signs its engine in before
+ * it starts (putMessenger). Once, for that restore.
  */
 async function restoredSession(key: Uint8Array): Promise<void> {
   if (restoring || !native) return;
@@ -512,10 +514,11 @@ async function restoredSession(key: Uint8Array): Promise<void> {
       await secureDelete(RESTORE_PENDING);
       return;
     }
-    const { session, signal } = await loadNetworksBackup(key);
+    const { session, signal, messenger } = await loadNetworksBackup(key);
     await secureDelete(RESTORE_PENDING);
     if (session) await putSession(session);
     if (signal) await putSignalHistory(signal);
+    if (messenger) await putMessenger(messenger);
   } catch {
     // Tried again as the first space next opens, while the mark stays.
   } finally {
@@ -527,6 +530,27 @@ async function restoredSession(key: Uint8Array): Promise<void> {
 async function sayNotBack(service: MsgService, text: string): Promise<void> {
   const { ask } = await import('./alert');
   ask(SERVICE_NAMES[service], text, [{ text: t('OK') }]);
+}
+
+// Messenger's sign-in from the backup (#68): the engine signs in with it before it starts, where
+// this phone is not signed in to Messenger; signed in to the same account, it stays as it is; to
+// another, that stays, and that is said.
+async function putMessenger(signIn: string): Promise<void> {
+  try {
+    const account = messengerAccountOf(signIn);
+    if (!account) return;
+    if ((await msgCall<boolean>('messenger', 'loggedIn')) === true) {
+      const here = await msgCall<Record<string, string>>('messenger', 'webCookies').catch(() => null);
+      if (here?.c_user && here.c_user !== account) {
+        await sayNotBack('messenger', t("This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again."));
+      }
+      return;
+    }
+    await msgCall('messenger', 'login', { cookies: JSON.parse(signIn) as Record<string, string> });
+  } catch (error) {
+    const said = error instanceof Error ? error.message : String(error);
+    await sayNotBack('messenger', t("Messenger's sign-in could not go back: {error}", { error: said }));
+  }
 }
 
 async function putSession(session: string): Promise<void> {

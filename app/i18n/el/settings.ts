@@ -4,6 +4,16 @@
 
 // Greek for settings (lib/i18n.ts).
 export const settings: Record<string, string> = {
+  "Messenger's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Η σύνδεση του Messenger δεν διαβάστηκε τώρα, οπότε το αντίγραφο την έχει όπως κρατήθηκε τελευταία φορά, αν υπάρχει: {error}",
+  "Telegram's sign-in could not be read now, so this backup holds it as it was last kept, if at all: {error}":
+    "Η σύνδεση του Telegram δεν διαβάστηκε τώρα, οπότε το αντίγραφο την έχει όπως κρατήθηκε τελευταία φορά, αν υπάρχει: {error}",
+  "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
+    "Αυτό το κινητό είναι συνδεδεμένο σε άλλον λογαριασμό Messenger, γι' αυτό η σύνδεση του αντιγράφου δεν μπήκε στη θέση του. Για να επιστρέψει του αντιγράφου, αποσυνδέσου από το Messenger εδώ και κάνε ξανά την επαναφορά.",
+  "Messenger's sign-in could not go back: {error}":
+    "Η σύνδεση του Messenger δεν μπόρεσε να επιστρέψει: {error}",
+  "Telegram's sign-in from the backup could not go back: {error}":
+    "Η σύνδεση του Telegram από το αντίγραφο δεν μπόρεσε να επιστρέψει: {error}",
   "Session's account is not in this backup: {error}":
     "Ο λογαριασμός Session δεν είναι σε αυτό το αντίγραφο: {error}",
   "This phone has another Session account, so the backup's was not put in its place. To bring the backup's back, sign out of Session here and restore the backup again.":
@@ -14,8 +24,8 @@ export const settings: Record<string, string> = {
     "Το ιστορικό του Signal δεν μπόρεσε να επιστρέψει: {error}",
   "Signal's history could not be read now, so this backup holds it as it was last kept, if at all: {error}":
     "Το ιστορικό του Signal δεν διαβάστηκε τώρα, οπότε το αντίγραφο το έχει όπως κρατήθηκε τελευταία φορά, αν υπάρχει: {error}",
-  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Telegram and Messenger are not in a backup: after a restore, sign in to them again. Their messages come back only as far as each network keeps them.":
-    "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του και του πρώτου χώρου· η επαναφορά τα φέρνει πίσω μόλις ανοίξει ο πρώτος χώρος, αν το κινητό δεν έχει άλλον λογαριασμό Session. Οι φωτογραφίες και τα αρχεία του δεν μπαίνουν: ξανάρχονται από το Session όσο τα κρατά. Μπαίνει και το ιστορικό του Signal, οι συνομιλίες και τα μηνύματα χωρίς τις φωτογραφίες και τα αρχεία τους, όχι όμως η σύνδεση με τον λογαριασμό: μετά την επαναφορά, κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal, και τα παλιά μηνύματα φαίνονται δίπλα στα νέα, μόνο για ανάγνωση. Τα Telegram και Messenger δεν μπαίνουν: μετά την επαναφορά, συνδέσου ξανά σε αυτά. Τα μηνύματά τους επιστρέφουν μόνο όσο τα κρατά το κάθε δίκτυο.",
+  "Session's account and chats go into a backup, sealed with its password and the first space's; a restore puts them back once the first space opens, where this phone has no other Session account. Its photos and files do not go in: Session gives them again while it keeps them. Signal's history goes in too, its chats and messages without their photos and files, but not its link to the account: after a restore, register or link Signal again, and the old messages show beside the new ones, to read only. Messenger's sign-in goes in, sealed the same way, and Telegram's, sealed with its space's: after a restore they are signed in again, and their chats come back as far as each network keeps them. A sign-in so restored is the old phone's own: use it on one phone only. On the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too.":
+    "Ο λογαριασμός και οι συνομιλίες του Session μπαίνουν στο αντίγραφο ασφαλείας, κρυπτογραφημένα με τον κωδικό του και του πρώτου χώρου· η επαναφορά τα φέρνει πίσω μόλις ανοίξει ο πρώτος χώρος, αν το κινητό δεν έχει άλλον λογαριασμό Session. Οι φωτογραφίες και τα αρχεία του δεν μπαίνουν: ξανάρχονται από το Session όσο τα κρατά. Μπαίνει και το ιστορικό του Signal, οι συνομιλίες και τα μηνύματα χωρίς τις φωτογραφίες και τα αρχεία τους, όχι όμως η σύνδεση με τον λογαριασμό: μετά την επαναφορά, κάνε ξανά εγγραφή ή σύνδεση συσκευής στο Signal, και τα παλιά μηνύματα φαίνονται δίπλα στα νέα, μόνο για ανάγνωση. Μπαίνει και η σύνδεση του Messenger, κρυπτογραφημένη με τον ίδιο τρόπο, και του Telegram, κρυπτογραφημένη με τον κωδικό του χώρου του: μετά την επαναφορά είναι ξανά συνδεδεμένα, και οι συνομιλίες τους επιστρέφουν όσο τις κρατά το κάθε δίκτυο. Μια σύνδεση που επανήλθε έτσι είναι η ίδια με του παλιού κινητού: χρησιμοποίησέ τη σε ένα κινητό μόνο. Στο παλιό κινητό σβήσε το Erevos+, αλλά μην αποσυνδεθείς εκεί, γιατί τότε αποσυνδέεται και το νέο.",
   'Turn off the lock': 'Απενεργοποίηση κλειδώματος',
   'Erevos will open without a password. The second password stops working too.': 'Το Erevos θα ανοίγει χωρίς κωδικό. Θα σταματήσει να λειτουργεί και ο δεύτερος κωδικός.',
   'The lock is off.': 'Το κλείδωμα απενεργοποιήθηκε.',

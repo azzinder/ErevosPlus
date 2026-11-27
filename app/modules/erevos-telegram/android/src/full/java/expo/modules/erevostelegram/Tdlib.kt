@@ -34,6 +34,8 @@ internal object Tdlib {
   private const val TAG = "ErevosTelegram"
   private const val BATCH_MS = 50L
   private const val FILE_PROGRESS_MS = 500L
+  /** The most of a slot's sign-in (td.binlog) a backup takes, bytes. */
+  private const val MOST_SIGN_IN = 32L * 1024 * 1024
 
   /** Updates the app does not use: not worth crossing to JavaScript. */
   private val QUIET = setOf(
@@ -190,6 +192,44 @@ internal object Tdlib {
     if (client.closing) return
     client.closing = true
     JsonClient.send(client.id, """{"@type":"destroy"}""")
+  }
+
+  /**
+   * The slot's sign-in as TDLib keeps it, for a backup (db/td.binlog: the account's keys and
+   * settings, already encrypted with the key from the space): base64, or null where it has none.
+   * Read as it lies, also while the client runs: TDLib only adds to it, or puts a new one in its
+   * place in one rename, and reads past an end cut short. Its chats and files stay out: TDLib
+   * fetches them again.
+   */
+  fun signIn(slot: String): String? {
+    val f = File(dirOf(slot), "db/td.binlog")
+    if (!f.isFile) return null
+    check(f.length() <= MOST_SIGN_IN) { "Telegram's sign-in is too large for a backup" }
+    return Base64.encodeToString(f.readBytes(), Base64.NO_WRAP)
+  }
+
+  /**
+   * Puts a backup's sign-in in place (base64, as [signIn] gave it), before the slot's client first
+   * opens here: what TDLib kept without one (its chats, never its files) goes, as it no longer
+   * matches. False where the slot has a sign-in already, or its client is open: that is kept.
+   */
+  @Synchronized
+  fun putSignIn(slot: String, sealed: String): Boolean {
+    if (bySlot.containsKey(slot)) return false
+    val db = File(dirOf(slot), "db")
+    val binlog = File(db, "td.binlog")
+    if (binlog.exists()) return false
+    val bytes = Base64.decode(sealed, Base64.NO_WRAP)
+    check(bytes.isNotEmpty() && bytes.size <= MOST_SIGN_IN) { "not a sign-in" }
+    db.listFiles()?.forEach { it.deleteRecursively() }
+    db.mkdirs()
+    val next = File(db, "td.binlog.restore")
+    next.writeBytes(bytes)
+    if (!next.renameTo(binlog)) {
+      next.delete()
+      error("Telegram's sign-in could not be put in place")
+    }
+    return true
   }
 
   /** The slots that have a folder on the phone (their names say nothing of their spaces). */

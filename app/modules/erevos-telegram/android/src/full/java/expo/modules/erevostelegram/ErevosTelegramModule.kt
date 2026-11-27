@@ -49,6 +49,8 @@ class ErevosTelegramModule : Module() {
     AsyncFunction("send") { slot: String, request: String, promise: Promise -> Tdlib.send(slot, request) { promise.resolve(it) } }
     AsyncFunction("close") { slot: String -> Tdlib.close(slot) }
     AsyncFunction("wipe") { slot: String -> Tdlib.wipe(slot) }
+    AsyncFunction("signIn") { slot: String -> Tdlib.signIn(slot) }
+    AsyncFunction("putSignIn") { slot: String, sealed: String -> Tdlib.putSignIn(slot, sealed) }
 
     // The sound of a call (Calls.kt); TDLib does the calling itself.
     AsyncFunction("callProtocol") { Calls.protocol(context()) }
