@@ -10,6 +10,10 @@ export const settings: Record<string, string> = {
     "Die Anmeldung von Telegram konnte jetzt nicht gelesen werden, daher enthält diese Sicherung sie so, wie sie zuletzt aufbewahrt wurde, falls überhaupt: {error}",
   "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
     "Dieses Telefon ist bei einem anderen Messenger-Konto angemeldet, daher wurde die Anmeldung der Sicherung nicht an seine Stelle gesetzt. Um die der Sicherung zurückzubringen, melde dich hier von Messenger ab und stelle die Sicherung erneut wieder her.",
+  "Messenger is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Messenger ist aus der Sicherung angemeldet. Lösche Erevos+ auf dem alten Handy, ohne dich abzumelden: Eine Abmeldung dort meldet auch dieses Handy ab.",
+  "Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Telegram ist aus der Sicherung angemeldet. Lösche Erevos+ auf dem alten Handy, ohne dich abzumelden: Eine Abmeldung dort meldet auch dieses Handy ab.",
   "Messenger's sign-in could not go back: {error}":
     "Die Anmeldung von Messenger konnte nicht zurückkommen: {error}",
   "Telegram's sign-in from the backup could not go back: {error}":

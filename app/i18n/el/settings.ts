@@ -10,6 +10,10 @@ export const settings: Record<string, string> = {
     "Η σύνδεση του Telegram δεν διαβάστηκε τώρα, οπότε το αντίγραφο την έχει όπως κρατήθηκε τελευταία φορά, αν υπάρχει: {error}",
   "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
     "Αυτό το κινητό είναι συνδεδεμένο σε άλλον λογαριασμό Messenger, γι' αυτό η σύνδεση του αντιγράφου δεν μπήκε στη θέση του. Για να επιστρέψει του αντιγράφου, αποσυνδέσου από το Messenger εδώ και κάνε ξανά την επαναφορά.",
+  "Messenger is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Το Messenger συνδέθηκε από το αντίγραφο. Στο παλιό κινητό σβήσε το Erevos+ χωρίς αποσύνδεση: αν αποσυνδεθείς εκεί, αποσυνδέεται και αυτό το κινητό.",
+  "Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Το Telegram συνδέθηκε από το αντίγραφο. Στο παλιό κινητό σβήσε το Erevos+ χωρίς αποσύνδεση: αν αποσυνδεθείς εκεί, αποσυνδέεται και αυτό το κινητό.",
   "Messenger's sign-in could not go back: {error}":
     "Η σύνδεση του Messenger δεν μπόρεσε να επιστρέψει: {error}",
   "Telegram's sign-in from the backup could not go back: {error}":

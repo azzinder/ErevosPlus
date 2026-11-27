@@ -554,7 +554,7 @@ async function restoredSession(key: Uint8Array): Promise<void> {
   }
 }
 
-// What a restore could not put back, said once (loaded here, not with this file: it needs the app around it).
+// What a restore put back, or could not, said once (loaded here, not with this file: it needs the app around it).
 async function sayNotBack(service: MsgService, text: string): Promise<void> {
   const { ask } = await import('./alert');
   ask(SERVICE_NAMES[service], text, [{ text: t('OK') }]);
@@ -575,6 +575,8 @@ async function putMessenger(signIn: string): Promise<void> {
       return;
     }
     await msgCall('messenger', 'login', { cookies: JSON.parse(signIn) as Record<string, string> });
+    // Said once, as it went back: the same sign-in on two phones signs both out from either.
+    await sayNotBack('messenger', t("Messenger is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too."));
   } catch (error) {
     const said = error instanceof Error ? error.message : String(error);
     await sayNotBack('messenger', t("Messenger's sign-in could not go back: {error}", { error: said }));

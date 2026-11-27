@@ -40,7 +40,8 @@ The fourth release candidate of Erevos+: Erevos 3.0.0-rc.4 with every network, w
   place (`lock/telegram-sign-in.ts`), and put back before that space's Telegram first opens after a restore. Messenger's
   sign-in (its cookies, never a password) goes in the first space's networks file and signs in again after a restore,
   never over another account. Chats and files stay out: each network sends them again. Backups, the guide and What's
-  new say to use a restored sign-in on one phone only. Requested by the maintainer.
+  new say to use a restored sign-in on one phone only, and after a restore Erevos+ says it once as each sign-in goes
+  back (`putMessenger`, `restoredSignIn`). Requested by the maintainer.
 
 ### Under the hood
 

@@ -10,6 +10,10 @@ export const settings: Record<string, string> = {
     "Prijava Telegrama sada nije mogla da se pročita, pa je ova kopija ima kakva je poslednji put sačuvana, ako je ima: {error}",
   "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
     "Ovaj telefon je prijavljen na drugi Messenger nalog, pa prijava iz kopije nije stavljena na njegovo mesto. Da vratiš onu iz kopije, odjavi se ovde sa Messengera i ponovo vrati kopiju.",
+  "Messenger is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Messenger je prijavljen iz kopije. Na starom telefonu obriši Erevos+ bez odjave: odjava tamo odjavljuje i ovaj telefon.",
+  "Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "Telegram je prijavljen iz kopije. Na starom telefonu obriši Erevos+ bez odjave: odjava tamo odjavljuje i ovaj telefon.",
   "Messenger's sign-in could not go back: {error}":
     "Prijava Messengera nije mogla da se vrati: {error}",
   "Telegram's sign-in from the backup could not go back: {error}":

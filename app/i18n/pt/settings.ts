@@ -10,6 +10,10 @@ export const settings: Record<string, string> = {
     "A sessão do Telegram não pôde ser lida agora, por isso esta cópia tem-na como foi guardada da última vez, se a tiver: {error}",
   "This phone is signed in to another Messenger account, so the backup's was not put in its place. To bring the backup's back, sign out of Messenger here and restore the backup again.":
     "Este telemóvel tem sessão iniciada noutra conta do Messenger, por isso a da cópia não foi posta no seu lugar. Para trazer de volta a da cópia, termina a sessão do Messenger aqui e restaura a cópia de novo.",
+  "Messenger is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "O Messenger tem sessão iniciada a partir da cópia. No telemóvel antigo apaga o Erevos+ sem terminar a sessão: terminá-la lá termina-a também neste telemóvel.",
+  "Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too.":
+    "O Telegram tem sessão iniciada a partir da cópia. No telemóvel antigo apaga o Erevos+ sem terminar a sessão: terminá-la lá termina-a também neste telemóvel.",
   "Messenger's sign-in could not go back: {error}":
     "A sessão do Messenger não pôde voltar: {error}",
   "Telegram's sign-in from the backup could not go back: {error}":

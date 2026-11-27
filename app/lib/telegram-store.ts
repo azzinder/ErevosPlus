@@ -369,6 +369,8 @@ async function restoredSignIn(it: Live): Promise<void> {
     const { signIn } = await loadTelegramSignIn(it.space, it.key, it.holder);
     if (signIn) await n.putSignIn(it.slot, signIn);
     await secureSet(RESTORE_PENDING, JSON.stringify({ id: pending.id, done: [...pending.done, it.slot] }));
+    // Said once, as it went back: the same sign-in on two phones signs both out from either.
+    if (signIn) void import('./alert').then(({ ask }) => ask('Telegram', t("Telegram is signed in from the backup. On the old phone delete Erevos+ without signing out: signing out there signs this phone out too."), [{ text: t('OK') }])).catch(() => undefined);
   } catch (error) {
     // TDLib opens without it: Telegram asks to sign in, as before backups held it.
     it.problem = t("Telegram's sign-in from the backup could not go back: {error}", { error: reason(error) });
