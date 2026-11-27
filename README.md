@@ -53,9 +53,10 @@ Additional terms under AGPL-3.0 section 7 apply: see AUTHORS.md.
 
 ## What Erevos+ is
 
-Erevos+ is [Erevos](https://github.com/azzinder/Erevos) with more networks in it. It is the same app, built from the
-same code with more modules: the same package (`app.erevos`), the same release key and the same data. A phone goes
-from one to the other as an ordinary update, and keeps everything.
+Erevos+ is [Erevos](https://github.com/azzinder/Erevos) with more networks in it. It is built from the
+same code with more modules and the same release key, as an app of its own (`app.erevos.plus`, from 3.1.0), so the two
+can sit side by side on one phone. Moving from one to the other takes everything along: the one left makes a backup for
+the move, the other brings it in at its first start ([Moving between them](docs/editions.md#moving-between-them)).
 
 | | |
 |---|---|
@@ -85,7 +86,7 @@ less, on more platforms.
 | Where | How |
 |---|---|
 | **Android 8 or later, 64-bit** | `erevos-plus-android.apk` from the [Erevos+ releases](https://github.com/azzinder/erevos-releases/releases?q=Erevos%2B&expanded=true). |
-| **From Erevos** | In the app: **Settings → General → Updates → Next update: Erevos+ → Check for updates**. Going back works the same way, with **Next update: Erevos**. |
+| **From Erevos** | In the app: **Settings → General → Updates → Next update: Erevos+ → Check for updates**. Erevos+ installs beside Erevos and, once opened, brings your chats along. Going back works the same way, with **Next update: Erevos**. |
 | **Any browser** | The [Erevos+ web app](https://erevosplus-web.lphl.nekten.eu): Erevos, Matrix with calls, XMPP, Nostr and the Collection. Telegram, Messenger, Signal, Session, the phone and SMS need Android. |
 
 Erevos+ is for Android only. For iPhone, Linux, Windows, macOS and Sailfish OS there is the plain Erevos.
