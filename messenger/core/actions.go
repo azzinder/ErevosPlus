@@ -222,6 +222,10 @@ func (e *Engine) readUpTo(key, ms int64) {
 		th.Unread = unread
 		e.emit(map[string]any{"type": "thread", "thread": th})
 	}
+	// Meta's read mark, from here or another device (Messenger's case, the
+	// app): the screens count what came on their own, and this is what tells
+	// them it was read, even when the chat here was never unread.
+	e.emit(map[string]any{"type": "read", "thread": key, "upTo": ms})
 }
 
 // takePolls sends what a table says about polls: a new poll with its

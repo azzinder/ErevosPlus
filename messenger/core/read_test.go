@@ -131,3 +131,33 @@ func TestReadAllFloor(t *testing.T) {
 		}
 	}
 }
+
+// Read elsewhere, the screens are told how far, also when the chat here was
+// never unread (a message the screens counted on their own): never past what
+// a receipt names while some here are still unread.
+func TestReadElsewhereTold(t *testing.T) {
+	q := &quiet{}
+	e := NewEngine(t.TempDir(), q)
+	e.mu.Lock()
+	e.threads[7] = &Thread{Key: 7, LastMs: 900}
+	e.readUpTo(7, 900)
+	e.mu.Unlock()
+	if n := len(q.events); n == 0 || q.events[n-1] != `{"thread":7,"type":"read","upTo":900}` {
+		t.Fatalf("Meta's read mark not told: %v", q.events)
+	}
+	e.mu.Lock()
+	e.threads[8] = &Thread{Key: 8, LastMs: 900, Unread: true}
+	e.unreadWA[8] = []string{"a", "b"}
+	e.sent["a"] = &Message{ID: "a", Ms: 800}
+	e.sent["b"] = &Message{ID: "b", Ms: 900}
+	e.mu.Unlock()
+	chat := waTypes.JID{User: "8", Server: waTypes.MessengerServer}
+	e.onReceipt(&events.Receipt{MessageSource: waTypes.MessageSource{Chat: chat, IsFromMe: true}, MessageIDs: []string{"a"}, Type: waTypes.ReceiptTypeReadSelf, Timestamp: time.UnixMilli(950)})
+	if n := len(q.events); q.events[n-1] != `{"thread":8,"type":"read","upTo":800}` {
+		t.Fatalf("one of two read: only up to it: %v", q.events[n-1])
+	}
+	e.onReceipt(&events.Receipt{MessageSource: waTypes.MessageSource{Chat: chat, IsFromMe: true}, MessageIDs: []string{"b"}, Type: waTypes.ReceiptTypeRead, Timestamp: time.UnixMilli(960)})
+	if n := len(q.events); q.events[n-1] != `{"thread":8,"type":"read","upTo":960}` {
+		t.Fatalf("all read: up to the receipt: %v", q.events[n-1])
+	}
+}

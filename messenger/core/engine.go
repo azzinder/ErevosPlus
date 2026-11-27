@@ -876,6 +876,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 		}
 		if w := th.LastReadWatermarkTimestampMs; w > 0 {
 			cur.Unread = inboxFolder(th.FolderName) && e.unreadAfter(key, w, last)
+			e.emit(map[string]any{"type": "read", "thread": key, "upTo": w})
 		}
 		if e.lastIsMine(th.SnippetSenderContactId) && last >= cur.LastMs {
 			// The last word in it is ours (from here or another device): read.
@@ -909,6 +910,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 		}
 		if w := th.LastReadWatermarkTimestampMs; w > 0 {
 			cur.Unread = inboxFolder(th.FolderName) && e.unreadAfter(th.ThreadKey, w, th.LastActivityTimestampMs)
+			e.emit(map[string]any{"type": "read", "thread": th.ThreadKey, "upTo": w})
 		}
 		if e.lastIsMine(th.SnippetSenderContactId) {
 			e.readHere(th.LastActivityTimestampMs, th.ThreadKey)
@@ -930,6 +932,7 @@ func (e *Engine) takeTable(t *table.LSTable) {
 					}
 					if w := th.LastReadWatermarkTimestampMs; w > 0 {
 						o.Unread = inboxFolder(th.FolderName) && e.unreadAfter(open, w, th.LastActivityTimestampMs)
+						e.emit(map[string]any{"type": "read", "thread": open, "upTo": w})
 					}
 					if e.lastIsMine(th.SnippetSenderContactId) {
 						e.readHere(th.LastActivityTimestampMs, open, th.ThreadKey)
@@ -1522,6 +1525,9 @@ func (e *Engine) onReceipt(evt *events.Receipt) {
 			upTo = m.Ms
 		}
 	}
+	// What the receipt names is read; the receipt's own time counts only once
+	// none here is left unread, or a later message would pass for read too.
+	named := upTo
 	if ts := evt.Timestamp.UnixMilli(); ts > upTo {
 		upTo = ts
 	}
@@ -1540,6 +1546,13 @@ func (e *Engine) onReceipt(evt *events.Receipt) {
 	if th := e.threads[key]; th != nil && th.Unread && len(left) == 0 && e.readMark(key) >= th.LastMs {
 		th.Unread = false
 		e.emit(map[string]any{"type": "thread", "thread": th})
+	}
+	// Read elsewhere: the screens count what came on their own (see readUpTo).
+	if len(left) > 0 {
+		upTo = named
+	}
+	if upTo > 0 {
+		e.emit(map[string]any{"type": "read", "thread": key, "upTo": upTo})
 	}
 }
 

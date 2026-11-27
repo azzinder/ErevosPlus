@@ -12,6 +12,11 @@ and 0.1.15 never came out.
 
 ### For you
 
+- Erevos+: Messenger's chats read elsewhere are read here too (#78). A message counted here, in a chat its engine
+  never had unread, stayed unread when read in Messenger's case, on Facebook or in Messenger's app: only a change of
+  the chat's own word cleared it. The engine now tells how far a chat was read, from Meta's read marks and our own
+  read receipts (`messenger/core` readUpTo, onReceipt), and what was counted up to it is read
+  (`lib/messenger-store.ts` readElsewhere). Requested by the maintainer.
 - Erevos+: Messenger's case no longer locks you out (#77). Messenger **In its case**, Facebook and a sign-in page are
   screens of their own: with one in front, Erevos's own screen was out of sight, and after the lock's 30 seconds
   Erevos+ locked as if left and closed the page. Now a page of its own in front counts as Erevos+ in front: the time

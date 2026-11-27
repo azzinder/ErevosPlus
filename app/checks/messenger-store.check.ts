@@ -89,6 +89,23 @@ test("after a fresh start, the chats the engine sends again with their last mess
     ]);
     assert.equal(messengerNow('messenger').threads['12'].unread, true);
     assert.equal(messengerNow('messenger').threads['11'].unread, false);
+
+    // Read on another device (Messenger's case, its app), in a chat its engine never had unread: its
+    // engine sends only how far it was read (#78). Not up to what came: still unread.
+    fake.emit({ type: 'read', thread: '12', upTo: now - 1 });
+    await settle();
+    assert.equal(messengerNow('messenger').threads['12'].unread, true);
+    assert.deepEqual([...msgUnreadOf('messenger')].sort().map(([k]) => k), ['messenger:12', 'messenger:14']);
+    // Up to it: read here too, and what comes again of it is not new.
+    fake.emit({ type: 'read', thread: '12', upTo: now });
+    fake.emit({ type: 'message', message: { thread: '12', id: 'fresh', sender: '7', text: 'hi', ms: now, mine: false } });
+    await settle();
+    assert.equal(messengerNow('messenger').threads['12'].unread, false);
+    assert.deepEqual([...msgUnreadOf('messenger')], [['messenger:14', 1]]);
+    // Something after it is unread again.
+    fake.emit({ type: 'message', message: { thread: '12', id: 'later', sender: '7', text: 'and', ms: now + 5, mine: false } });
+    await settle();
+    assert.equal(messengerNow('messenger').threads['12'].unread, true);
   } finally {
     await stopMessenger();
     setMessengerNative(null);

@@ -4,6 +4,8 @@
 
 // The German of What's new, what each version changed (lib/whats-new.ts, app/whats-new.tsx) (i18n/de/index.ts).
 export const whatsNew: Record<string, string> = {
+  "**Messenger's chats read elsewhere are read here too**: in Erevos+, a Messenger message you read in **In its case**, on Facebook or in Messenger's own app no longer stays unread in Erevos+.":
+    "**Anderswo gelesene Messenger-Chats sind auch hier gelesen**: In Erevos+ bleibt eine Messenger-Nachricht, die du **In seiner Hülle**, auf Facebook oder in der Messenger-App gelesen hast, in Erevos+ nicht mehr ungelesen.",
   "**Telegram and Messenger in backups**: in Erevos+, a backup now holds Messenger's sign-in and each space's Telegram sign-in, encrypted, and after a restore they are signed in again; their chats come back as far as each network keeps them. Use such a sign-in on one phone only: on the old phone delete Erevos+, but do not sign out there, or the new phone is signed out too. See [Backups](#backup).":
     "**Telegram und Messenger in Sicherungen**: In Erevos+ enthält eine Sicherung jetzt die Anmeldung von Messenger und die Telegram-Anmeldung jedes Bereichs, verschlüsselt, und nach einer Wiederherstellung bist du wieder angemeldet; die Chats kommen zurück, soweit jedes Netz sie aufbewahrt. Nutze eine solche Anmeldung nur auf einem Telefon: Lösche Erevos+ auf dem alten Telefon, melde dich dort aber nicht ab, sonst wird auch das neue abgemeldet. Siehe [Sicherungen](#backup).",
   "**Messenger's case no longer locks you out**: in Erevos+, after half a minute in Messenger **In its case**, or on Facebook, Erevos+ no longer locks as if you had left it, nor closes the page. The lock's time now counts only from when you leave Erevos+ itself.":

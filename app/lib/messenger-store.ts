@@ -168,6 +168,28 @@ function readHere(service: MsgService, key: string): void {
   cameSince[service].delete(key);
 }
 
+/**
+ * Messenger's read mark, from here or another device (its case, its app): `{type: 'read', thread,
+ * upTo}` (messenger/core readUpTo, onReceipt). What was counted here up to it is read: the chat's
+ * own word alone would leave a message counted here, in a chat its engine never had unread, unread
+ * for ever (#78). Whether it was the event.
+ */
+function readElsewhere(service: MsgService, event: unknown): boolean {
+  const e = (event ?? {}) as Record<string, unknown>;
+  if (e.type !== 'read') return false;
+  const key = String(e.thread ?? '');
+  const upTo = typeof e.upTo === 'number' && Number.isFinite(e.upTo) ? e.upTo : 0;
+  if (!key || upTo <= 0) return true;
+  const newest = countedTo[service].get(key);
+  if (newest !== undefined && upTo < newest) return true;
+  readTo[service].set(key, Math.max(upTo, readTo[service].get(key) ?? 0));
+  readHere(service, key);
+  const t = states[service].threads[key];
+  if (t?.unread && upTo >= t.lastMs) set(service, { ...states[service], threads: { ...states[service].threads, [key]: { ...t, unread: false } } });
+  hearNow(service);
+  return true;
+}
+
 /** The engines of this build (app/_layout.tsx), or null. */
 export function setMessengerNative(next: MessengerNative | null): void {
   native = next;
@@ -211,6 +233,7 @@ function open(): Promise<void> {
       try {
         const event = readJson(json);
         if (service === 'signal' && takeSignalCall(event)) return;
+        if (readElsewhere(service, event)) return;
         counted(service, event);
         const next = keepRead(states[service], applyEvent(states[service], event, (key, ms) => newHere(service, key, ms)), readTo[service]);
         // Read on another device: no longer counted here.
